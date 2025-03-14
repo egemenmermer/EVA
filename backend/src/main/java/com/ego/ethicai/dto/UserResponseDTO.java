@@ -2,6 +2,7 @@ package com.ego.ethicai.dto;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public class UserResponseDTO {
     private String fullName;
     private LocalDateTime lastLogin;
     private LocalDateTime updatedAt;
+
+
 }

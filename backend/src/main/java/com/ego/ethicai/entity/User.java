@@ -42,17 +42,17 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(name = "last_login", nullable = true)
-    private Instant lastLogin;
+    private LocalDateTime lastLogin;
 
     @Column(name = "activated_at", nullable = true)
-    private Instant activatedAt;
+    private LocalDateTime activatedAt;
 
 }
 
