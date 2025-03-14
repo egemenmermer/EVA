@@ -1,43 +1,41 @@
--- Users Table
+-- Users table for authentication & profile management
 CREATE TABLE users (
-                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                       full_name VARCHAR(255),
                        email VARCHAR(255) UNIQUE NOT NULL,
-                       password VARCHAR(255) NOT NULL,
-                       role VARCHAR(50) NOT NULL,
+                       password_hash VARCHAR(255),
+                       provider VARCHAR(50), -- OAuth provider ("google", "github") or NULL if email/password
+                       provider_id VARCHAR(255),
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        activated_at TIMESTAMP DEFAULT NULL
 );
 
--- Queries Table
-CREATE TABLE queries (
-                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-                         query_text TEXT NOT NULL,
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+-- Conversations table
+CREATE TABLE conversations (
+                               conversation_id UUID PRIMARY KEY,
+                               user_id UUID REFERENCES users(id),
+                               manager_type VARCHAR(100),
+                               created_at TIMESTAMP DEFAULT NOW(),
+                               updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- AI Responses Table
-CREATE TABLE ai_responses (
-                              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                              query_id UUID REFERENCES queries(id) ON DELETE CASCADE,
-                              response_text TEXT NOT NULL,
-                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- Conversation Contents table
+CREATE TABLE conversation_contents (
+                                       message_id UUID PRIMARY KEY,
+                                       conversation_id UUID REFERENCES conversations(id),
+                                       user_query TEXT NOT NULL,
+                                       agent_response TEXT NOT NULL,
+                                       created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Vector Data Table for FAISS Indexing
-CREATE TABLE vector_data (
-                             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                             query_id UUID REFERENCES queries(id) ON DELETE CASCADE,
-                             embedding VECTOR(768), -- FAISS stores vectors for fast retrieval
-                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Feedback Table
+-- Feedback table
 CREATE TABLE feedback (
-                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                          query_id UUID REFERENCES queries(id) ON DELETE CASCADE,
-                          user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                          id SERIAL PRIMARY KEY,
+                          conversation_id UUID REFERENCES conversations(id),
+                          user_feedback TEXT,
                           rating INT CHECK (rating BETWEEN 1 AND 5),
-                          comments TEXT,
-                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                          submitted_at TIMESTAMP DEFAULT NOW()
 );
