@@ -3,6 +3,7 @@ package com.ego.ethicai.service.Impl;
 import com.ego.ethicai.dto.UserResponseDTO;
 import com.ego.ethicai.entity.ActivationToken;
 import com.ego.ethicai.entity.User;
+import com.ego.ethicai.enums.AuthProvider;
 import com.ego.ethicai.exception.UserNotFoundException;
 import com.ego.ethicai.repository.UserRepository;
 import com.ego.ethicai.security.CustomUserDetails;
@@ -94,6 +95,20 @@ public class UserServiceImpl implements UserService {
         return new HashSet<>(userRepository.findAllById(userIds));
     }
 
+    @Override
+    public void processOAuthPostLogin(String email, String name, String provider) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+
+        if (existingUser.isEmpty()) {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setFullName(name);
+            newUser.setAuthProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            newUser.setActivatedAt(LocalDateTime.now());
+
+            userRepository.save(newUser);
+        }
+    }
 
 
 }

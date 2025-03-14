@@ -20,4 +20,5 @@ public interface UserService {
     CustomUserDetails getUserDetailsByEmail(String email);
     Optional<User> findByEmail(String email);
     Set<User> findAllById(List<UUID> userIds);
+    void processOAuthPostLogin(String email, String name, String provider);
 }
