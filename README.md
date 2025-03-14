@@ -99,7 +99,7 @@ Technologies used:
 
 ### Prerequisites
 
-- Java 23 or higher
+- Java 23
 - Python 3.8 or higher
 - Node.js 18 or higher
 - PostgreSQL 12 or higher
