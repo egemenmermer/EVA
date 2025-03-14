@@ -39,3 +39,11 @@ CREATE TABLE feedback (
                           rating INT CHECK (rating BETWEEN 1 AND 5),
                           submitted_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE activation_tokens (
+                                   id BIGSERIAL PRIMARY KEY,
+                                   user_id BIGINT NOT NULL,
+                                   token VARCHAR(6) NOT NULL,
+                                   expires_at TIMESTAMP NOT NULL,
+                                   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
