@@ -1,0 +1,32 @@
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+
+# Build outputs
+dist/
+build/
+target/
+
+# Environment files
+.env
+*.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
