@@ -20,5 +20,4 @@ public interface UserService {
     CustomUserDetails getUserDetailsByEmail(String email);
     Optional<User> findByEmail(String email);
     Set<User> findAllById(List<UUID> userIds);
-    Optional<ActivationToken> findByToken(String token);
 }

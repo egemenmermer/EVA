@@ -11,12 +11,6 @@ public class LoginResponseDTO {
 
     private String accessToken;
     private UserResponseDTO userDetails;
-    private String message;
 
-
-    public LoginResponseDTO(String accessToken, String message) {
-        this.accessToken = accessToken;
-        this.message = message;
-    }
 
 }

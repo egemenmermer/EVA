@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -48,9 +49,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/api/v1/index", "/success", "/login"
-                                , "/activate", "/api/v1/activate", "/api/v1/login",
-                                "/authenticate", "/register", "/api/v1/register")
+                                "/", "/api/v1/index", "/success", "/login",
+                                "/activate", "/api/v1/activate", "/api/v1/login",
+                                "/authenticate", "/register", "/api/v1/register",
+                                "/oauth2/**", "/api/v1/oauth2/**") // Allow OAuth2 routes
                         .permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**", "/v3/api-docs/**", "/asm-swagger.html",
@@ -58,6 +60,10 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest()
                         .authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(new OidcUserService())) // Handle Google OIDC login
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)

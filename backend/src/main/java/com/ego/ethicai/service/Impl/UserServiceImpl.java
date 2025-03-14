@@ -94,12 +94,6 @@ public class UserServiceImpl implements UserService {
         return new HashSet<>(userRepository.findAllById(userIds));
     }
 
-    @Override
-    public Optional<ActivationToken> findByToken(String token) {
-        ActivationToken activationToken = activationTokenService.findByToken(token).orElseThrow(
-                () -> new RuntimeException("Invalid activation token"));
-        return activationTokenService.findByToken(activationToken.getToken());
-    }
 
 
 }

@@ -6,6 +6,7 @@ target/
 
 #Environment Variables
 .env
+keystore.p12
 
 ### STS ###
 .apt_generated

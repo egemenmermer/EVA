@@ -1,10 +1,7 @@
 package com.ego.ethicai.service.Impl;
 
 import com.ego.ethicai.config.PasswordEncoder;
-import com.ego.ethicai.dto.ActivationRequestDTO;
-import com.ego.ethicai.dto.ActivationResponseDTO;
-import com.ego.ethicai.dto.LoginRequestDTO;
-import com.ego.ethicai.dto.LoginResponseDTO;
+import com.ego.ethicai.dto.*;
 import com.ego.ethicai.entity.ActivationToken;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.exception.UserNotFoundException;
@@ -47,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
                 () -> new UserNotFoundException("User not found for this email: " + email));
 
         if (!passwordEncoder.passwordEncoderBean().matches(password, user.getPasswordHash())) {
-            throw new RuntimeException("Invalid mail or password");
+            throw new RuntimeException("Invalid email or password");
         }
 
         if (user.getActivatedAt() == null) {
@@ -56,7 +53,13 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtUtil.generateToken(new CustomUserDetails(user));
 
-        return new LoginResponseDTO(token, "Login successful");
+        return new LoginResponseDTO(token, new UserResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getLastLogin(),
+                user.getUpdatedAt()
+        ));
 
     }
 
