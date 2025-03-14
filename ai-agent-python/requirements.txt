@@ -1,0 +1,65 @@
+# Core dependencies
+fastapi==0.68.1
+uvicorn==0.15.0
+python-dotenv==0.20.0
+
+# Database
+psycopg2-binary==2.8.6
+SQLAlchemy==1.4.54
+alembic==1.7.7
+
+# Model and ML libraries
+torch==1.10.1
+torchvision==0.11.2
+torchaudio==0.10.1
+transformers==4.18.0
+sentence-transformers==2.2.2
+datasets==2.4.0
+faiss-cpu==1.7.2
+rank-bm25==0.2.2
+bert-score==0.3.13
+rouge-score==0.1.1
+
+# Data processing
+numpy==1.19.5
+pandas==1.1.5
+PyPDF2==3.0.1
+nltk==3.6.7
+tqdm==4.64.1
+
+# ML Dependencies
+scikit-learn==0.24.2
+scipy==1.5.4
+
+# Hugging Face Dependencies
+tokenizers==0.12.1
+huggingface-hub==0.4.0
+accelerate==0.9.0
+
+# Integrations
+slack-sdk==3.19.5
+
+# Visualization
+matplotlib==3.3.4
+seaborn==0.11.2
+
+# Testing
+pytest==7.0.1
+pytest-cov==3.0.0
+pytest-mock==3.6.1
+pytest-env==0.6.2
+pytest-xdist==2.5.0
+coverage==6.2
+
+# Utilities
+python-json-logger==2.0.7
+
+# Additional dependencies
+pydantic==1.9.2
+typing-extensions==4.1.1
+aiohttp==3.8.6
+requests==2.27.1
+PyYAML==6.0.1
+
+# New requirement
+psutil==5.9.5
