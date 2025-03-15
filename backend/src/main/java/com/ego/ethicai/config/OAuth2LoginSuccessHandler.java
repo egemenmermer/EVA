@@ -31,16 +31,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String email = oauthUser.getAttribute("email");
         String name = oauthUser.getAttribute("name");
 
-        // Ensure the user exists in the database
         User user = userService.processOAuthPostLogin(email, name, "GOOGLE"); // Change provider if needed
 
-        // Create CustomUserDetails from User
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
-        // Generate JWT token
         String token = jwtUtil.generateToken(userDetails);
 
-        // Redirect with token
         response.sendRedirect("http://localhost:3000/oauth/success?token=" + token);
     }
 }
