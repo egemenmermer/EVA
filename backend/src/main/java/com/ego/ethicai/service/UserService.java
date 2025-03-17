@@ -21,4 +21,5 @@ public interface UserService {
     Optional<User> findByEmail(String email);
     Set<User> findAllById(List<UUID> userIds);
     User processOAuthPostLogin(String email, String name, String provider);
+    Optional<User> findById(UUID id);
 }
