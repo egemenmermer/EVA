@@ -7,10 +7,9 @@ import com.ego.ethicai.service.AuthService;
 import com.ego.ethicai.util.EmailUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -48,6 +47,11 @@ public class AuthenticationController {
             @RequestBody LoginRequestDTO loginRequestDto) {
         LoginResponseDTO loginResponseDto = authService.login(loginRequestDto);
         return ResponseEntity.ok(loginResponseDto);
+    }
+
+    @GetMapping("/oauth2/redirect")
+    public ResponseEntity<?> oauthRedirect(@RequestParam String token) {
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
     @PostMapping("/activate")

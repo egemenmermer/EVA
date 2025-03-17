@@ -1,6 +1,7 @@
 package com.ego.ethicai.config;
 
 import com.ego.ethicai.entity.User;
+import com.ego.ethicai.exception.UserNotFoundException;
 import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.security.jwt.JwtUtil;
 import com.ego.ethicai.service.UserService;
@@ -26,16 +27,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws ServletException, IOException {
+                                        Authentication authentication) throws IOException, ServletException {
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
-        String name = oauthUser.getAttribute("name");
+        User user = userService.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("User not found for this email: " + email));
 
-        User user = userService.processOAuthPostLogin(email, name, "GOOGLE"); // Change provider if needed
-
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-
-        String token = jwtUtil.generateToken(userDetails);
+        String token = jwtUtil.generateToken(new CustomUserDetails(user));
 
         response.sendRedirect("http://localhost:3000/oauth/success?token=" + token);
     }
