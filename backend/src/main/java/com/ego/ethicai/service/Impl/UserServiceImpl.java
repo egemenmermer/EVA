@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void processOAuthPostLogin(String email, String name, String provider) {
+    public User processOAuthPostLogin(String email, String name, String provider) {
         Optional<User> existingUser = userRepository.findByEmail(email);
 
         if (existingUser.isEmpty()) {
@@ -106,8 +106,10 @@ public class UserServiceImpl implements UserService {
             newUser.setAuthProvider(AuthProvider.valueOf(provider.toUpperCase()));
             newUser.setActivatedAt(LocalDateTime.now());
 
-            userRepository.save(newUser);
+            return userRepository.save(newUser);
         }
+
+        return existingUser.get();
     }
 
 
