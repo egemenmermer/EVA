@@ -13,6 +13,5 @@ import java.time.LocalDateTime;
 public class ConversationRequestDTO {
 
     private ManagerTypes managerType;
-    private String initialQuery; // First user message
 
 }

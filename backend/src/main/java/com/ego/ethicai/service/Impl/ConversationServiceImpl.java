@@ -1,5 +1,6 @@
 package com.ego.ethicai.service.Impl;
 
+import com.ego.ethicai.dto.ConversationResponseDTO;
 import com.ego.ethicai.entity.Conversation;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.enums.ManagerTypes;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,7 +26,7 @@ public class ConversationServiceImpl implements ConversationService {
 
 
     @Override
-    public Conversation startConversation(UUID userId, ManagerTypes managerType) {
+    public ConversationResponseDTO startConversation(UUID userId, ManagerTypes managerType) {
         User user = userService.findById(userId).orElseThrow(
                 () -> new RuntimeException("User not found"));
 
@@ -34,31 +34,49 @@ public class ConversationServiceImpl implements ConversationService {
             throw new RuntimeException("Manager type is required");
         }
 
-        if (initialQuery == null) {
-            throw new RuntimeException("Initial query is required");
-        }
-
         Conversation conversation = new Conversation();
         conversation.setUser(user);
         conversation.setManagerType(managerType);
         conversation.setCreatedAt(LocalDateTime.now());
 
-        return conversationRepository.save(conversation);
+        Conversation savedConversation = conversationRepository.save(conversation);
+
+        return new ConversationResponseDTO(
+                savedConversation.getId(),
+                savedConversation.getUser().getId(),
+                savedConversation.getManagerType(),
+                savedConversation.getCreatedAt()
+        );
     }
 
     @Override
-    public Optional<Conversation> getConversationById(UUID conversationId) {
+    public ConversationResponseDTO getConversationById(UUID conversationId) {
         Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(
                 () -> new RuntimeException("Conversation not found"));
-        return Optional.of(conversation);
+
+        return new ConversationResponseDTO(
+                conversation.getId(),
+                conversation.getUser().getId(),
+                conversation.getManagerType(),
+                conversation.getCreatedAt()
+        );
     }
 
     @Override
-    public List<Conversation> getUserConversations(UUID userId) {
-        User user = userService.findById(userId).orElseThrow(
-                () -> new RuntimeException("User not found"));
+    public List<ConversationResponseDTO> getUserConversations(UUID userId) {
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return conversationRepository.getUserConversations(user);
+        List<Conversation> conversations = conversationRepository.getUserConversations(user);
+
+        return conversations.stream()
+                .map(conversation -> new ConversationResponseDTO(
+                        conversation.getId(),
+                        conversation.getUser().getId(),
+                        conversation.getManagerType(),
+                        conversation.getCreatedAt()
+                ))
+                .toList();
     }
 
     @Override
