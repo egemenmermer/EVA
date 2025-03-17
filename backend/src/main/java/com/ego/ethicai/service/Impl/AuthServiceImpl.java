@@ -65,9 +65,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User register(LoginRequestDTO loginRequestDto) {
-        String email = loginRequestDto.getEmail();
-        String password = loginRequestDto.getPassword();
+    public User register(RegisterRequestDTO registerRequestDTO) {
+        String email = registerRequestDTO.getEmail();
+        String password = registerRequestDTO.getPassword();
 
         if (password.length() < 8) {
             throw new RuntimeException("Password must be at least 8 characters long");

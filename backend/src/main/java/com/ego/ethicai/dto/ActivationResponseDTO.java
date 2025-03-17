@@ -12,4 +12,8 @@ public class ActivationResponseDTO {
 
     private String message;
     private LocalDateTime activatedAt;
+
+    public ActivationResponseDTO(String message) {
+        this.message = message;
+    }
 }
