@@ -13,5 +13,5 @@ import org.springframework.context.annotation.Configuration;
                 description = "API documentation for File Sharing Collaboration System"
         )
 )
-public class SwaggerConfig {
-}
+        public class SwaggerConfig {
+        }

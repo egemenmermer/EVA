@@ -26,6 +26,10 @@ public class Feedback {
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "user_feedback", columnDefinition = "TEXT")
     private String userFeedback;
 

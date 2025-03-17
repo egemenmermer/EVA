@@ -12,5 +12,6 @@ import java.util.UUID;
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     Optional<Feedback> findByConversationId(UUID conversationId);
+    Feedback findByConversationIdAndUserId(UUID conversationId, UUID userId);
     List<Feedback> findAllByUserId(UUID userId);
 }
