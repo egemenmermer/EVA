@@ -10,4 +10,5 @@ public interface AuthService {
     LoginResponseDTO login (LoginRequestDTO loginRequestDto);
     User register(LoginRequestDTO loginRequestDto);
     ActivationResponseDTO activate(ActivationRequestDTO activationRequestDto);
+    boolean isUserActivated(String email);
 }

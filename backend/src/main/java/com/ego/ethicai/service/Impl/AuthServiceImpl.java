@@ -108,4 +108,17 @@ public class AuthServiceImpl implements AuthService {
         return new ActivationResponseDTO("Activation successful", LocalDateTime.now());
 
     }
+
+    @Override
+    public boolean isUserActivated(String email) {
+        User user = userService.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("User not found for this email: " + email));
+
+        if (user.getActivatedAt() == null) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

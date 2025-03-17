@@ -22,4 +22,5 @@ public interface UserService {
     Set<User> findAllById(List<UUID> userIds);
     User processOAuthPostLogin(String email, String name, String provider);
     Optional<User> findById(UUID id);
+    void deleteUser(UUID id);
 }
