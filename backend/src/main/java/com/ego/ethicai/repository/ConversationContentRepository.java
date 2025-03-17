@@ -1,5 +1,6 @@
 package com.ego.ethicai.repository;
 
+import com.ego.ethicai.entity.Conversation;
 import com.ego.ethicai.entity.ConversationContent;
 import com.ego.ethicai.entity.Feedback;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,5 @@ import java.util.UUID;
 public interface ConversationContentRepository extends JpaRepository<ConversationContent, UUID> {
     List<ConversationContent> findAllByUserId(UUID userId);
     Optional<Feedback> findByConversationId(UUID conversationId);
+    List<ConversationContent> findByConversationAndUserId(Conversation conversation, UUID userId);
 }
