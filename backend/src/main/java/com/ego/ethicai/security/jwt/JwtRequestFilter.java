@@ -28,33 +28,73 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final String requestTokenHeader = request.getHeader("Authorization");
+        try {
+            final String requestTokenHeader = request.getHeader("Authorization");
+            String email = null;
+            String jwtToken = null;
 
-        String email = null;
-        String jwtToken = null;
-
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7);
-            try {
-                email = jwtTokenUtil.getEmailFromToken(jwtToken);
-            } catch (IllegalArgumentException e) {
-                logger.error("Unable to get JWT Token");
-            } catch (ExpiredJwtException e) {
-                logger.error("JWT Token has expired");
+            // Extract and validate JWT Token
+            if (requestTokenHeader != null) {
+                if (requestTokenHeader.startsWith("Bearer ")) {
+                    jwtToken = requestTokenHeader.substring(7);
+                    try {
+                        email = jwtTokenUtil.getEmailFromToken(jwtToken);
+                        logger.debug("Processing token for user: " + email);
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Unable to get JWT Token", e);
+                    } catch (ExpiredJwtException e) {
+                        logger.error("JWT Token has expired", e);
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"JWT token expired\"}");
+                        return;
+                    }
+                } else {
+                    logger.warn("JWT Token does not begin with Bearer String: " + requestTokenHeader);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Invalid token format\", \"message\": \"Token must start with 'Bearer '\"}");
+                    return;
+                }
             }
-        } else {
-            logger.warn("JWT Token does not begin with Bearer String");
+
+            // Validate token and set authentication
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                CustomUserDetails userDetails = this.userService.getUserDetailsByEmail(email);
+
+                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    logger.debug("Authentication successful for user: " + email);
+                } else {
+                    logger.warn("Invalid JWT token for user: " + email);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Invalid token\"}");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Cannot set user authentication", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Internal server error during authentication\"}");
+            return;
         }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            CustomUserDetails userDetails = this.userService.getUserDetailsByEmail(email);
+        filterChain.doFilter(request, response);
+    }
 
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-        }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/login") || 
+               path.startsWith("/api/v1/auth/register") || 
+               path.startsWith("/api/v1/auth/oauth2") ||
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/v3/api-docs") ||
+               path.startsWith("/api-docs");
     }
 }

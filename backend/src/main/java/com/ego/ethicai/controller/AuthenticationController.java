@@ -5,6 +5,8 @@ import com.ego.ethicai.entity.User;
 import com.ego.ethicai.service.ActivationTokenService;
 import com.ego.ethicai.service.AuthService;
 import com.ego.ethicai.util.EmailUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,8 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
+
     @Autowired
     private EmailUtil emailUtil;
 
@@ -24,22 +28,28 @@ public class AuthenticationController {
     @Autowired
     private ActivationTokenService activationTokenService;
 
-
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> register(
             @RequestBody RegisterRequestDTO registerRequestDto) {
 
         User user = authService.register(registerRequestDto);
         String token = activationTokenService.generateToken(user).getToken();
+        
         try {
+            logger.debug("Attempting to send activation email to: {}", user.getEmail());
             emailUtil.sendActivationEmail(user.getEmail(), token);
-        } catch (Exception e) {
+            logger.info("Activation email sent successfully to: {}", user.getEmail());
+            
             return ResponseEntity.ok(new RegisterResponseDTO(
-                    "Registration successful, but activation email could not be sent."
+                "Registration successful! Please check your email to activate your account."
+            ));
+        } catch (Exception e) {
+            logger.error("Failed to send activation email to: {}", user.getEmail(), e);
+            return ResponseEntity.ok(new RegisterResponseDTO(
+                "Registration successful, but we couldn't send the activation email. " +
+                "Please contact support to activate your account."
             ));
         }
-
-        return ResponseEntity.ok(new RegisterResponseDTO("Registration successful!"));
     }
 
     @PostMapping("/login")
@@ -57,8 +67,14 @@ public class AuthenticationController {
     @PostMapping("/activate")
     public ResponseEntity<ActivationResponseDTO> activate(
             @RequestBody ActivationRequestDTO activationRequestDto) {
-        authService.activate(activationRequestDto);
-        return ResponseEntity.ok(new ActivationResponseDTO("Account Activated!"));
+        try {
+            ActivationResponseDTO response = authService.activate(activationRequestDto);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Account activation failed", e);
+            return ResponseEntity.badRequest().body(
+                new ActivationResponseDTO("Activation failed: " + e.getMessage())
+            );
+        }
     }
-
 }

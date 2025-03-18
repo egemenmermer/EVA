@@ -4,6 +4,7 @@ import com.ego.ethicai.config.PasswordEncoder;
 import com.ego.ethicai.dto.*;
 import com.ego.ethicai.entity.ActivationToken;
 import com.ego.ethicai.entity.User;
+import com.ego.ethicai.enums.AuthProvider;
 import com.ego.ethicai.exception.UserNotFoundException;
 import com.ego.ethicai.repository.ActivationTokenRepository;
 import com.ego.ethicai.security.CustomUserDetails;
@@ -68,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
     public User register(RegisterRequestDTO registerRequestDTO) {
         String email = registerRequestDTO.getEmail();
         String password = registerRequestDTO.getPassword();
+        String fullName = registerRequestDTO.getFullName();
 
         if (password.length() < 8) {
             throw new RuntimeException("Password must be at least 8 characters long");
@@ -80,9 +82,10 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.passwordEncoderBean().encode(password));
+        user.setFullName(fullName);
+        user.setAuthProvider(AuthProvider.LOCAL);  // Set default auth provider for email/password registration
 
         return userService.createUser(user);
-
     }
 
     @Override

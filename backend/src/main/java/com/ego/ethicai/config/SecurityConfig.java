@@ -24,6 +24,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -35,6 +37,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     public SecurityConfig(
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
@@ -62,14 +65,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/api/v1/index", "/success", "/login",
-                                "/activate", "/api/v1/activate", "/api/v1/login",
-                                "/authenticate", "/register", "/api/v1/register",
-                                "/oauth2/**", "/api/v1/oauth2/**") // Allow OAuth2 routes
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/activate",
+                                "/api/v1/auth/oauth2/**"
+                        )
                         .permitAll()
                         .requestMatchers(
-                                "/swagger-ui/**", "/v3/api-docs/**", "/asm-swagger.html",
-                                "/api-docs/**", "/api-docs/swagger-config", "/asm-swagger")
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**"
+                        )
                         .permitAll()
                         .anyRequest()
                         .authenticated()
@@ -83,7 +89,9 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Access denied\", \"message\": \"" + accessDeniedException.getMessage() + "\"}");
                         })
                 )
                 .sessionManagement(session -> session
@@ -98,10 +106,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -113,14 +123,32 @@ public class SecurityConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        mailSender.setUsername(System.getenv("MAIL_USERNAME"));
-        mailSender.setPassword(System.getenv("MAIL_PASSWORD"));
+        
+        String username = System.getenv("MAIL_USERNAME");
+        String password = System.getenv("MAIL_PASSWORD");
+        
+        if (username == null || password == null) {
+            throw new RuntimeException("Mail configuration error: MAIL_USERNAME or MAIL_PASSWORD not set in environment");
+        }
+        
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
         props.put("mail.debug", "true");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        
+        // Test the configuration
+        try {
+            mailSender.testConnection();
+            logger.info("Mail server connection test successful");
+        } catch (Exception e) {
+            logger.error("Mail server connection test failed: {}", e.getMessage(), e);
+        }
 
         return mailSender;
     }

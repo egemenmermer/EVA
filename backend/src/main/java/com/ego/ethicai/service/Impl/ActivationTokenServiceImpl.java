@@ -19,6 +19,10 @@ public class ActivationTokenServiceImpl implements ActivationTokenService {
 
     @Override
     public ActivationToken generateToken(User user) {
+        // Delete any existing tokens for this user
+        activationTokenRepository.findByUserEmail(user.getEmail())
+                .ifPresent(activationTokenRepository::delete);
+
         // Generate a unique token
         String token = UUID.randomUUID().toString();
 
@@ -26,7 +30,7 @@ public class ActivationTokenServiceImpl implements ActivationTokenService {
         ActivationToken activationToken = new ActivationToken();
         activationToken.setUser(user);
         activationToken.setToken(token);
-        activationToken.setExpiresAt(LocalDateTime.now().plusDays(1));
+        activationToken.setExpiresAt(LocalDateTime.now().plusHours(24));
 
         // Save to DB
         return activationTokenRepository.save(activationToken);
@@ -36,7 +40,15 @@ public class ActivationTokenServiceImpl implements ActivationTokenService {
     public boolean validateToken(String token, User user) {
         Optional<ActivationToken> storedToken = activationTokenRepository.findByUserEmail(user.getEmail());
 
-        return storedToken.isPresent() && storedToken.get().getToken().equals(token);
+        if (storedToken.isEmpty()) {
+            return false;
+        }
+
+        ActivationToken activationToken = storedToken.get();
+
+        // Check if token matches and is not expired
+        return activationToken.getToken().equals(token) && 
+               !activationToken.getExpiresAt().isBefore(LocalDateTime.now());
     }
 
     @Override
@@ -47,6 +59,6 @@ public class ActivationTokenServiceImpl implements ActivationTokenService {
 
     @Override
     public Optional<ActivationToken> findByToken(String token) {
-        return activationTokenRepository.findById(UUID.fromString(token));
+        return activationTokenRepository.findByToken(token);
     }
 }

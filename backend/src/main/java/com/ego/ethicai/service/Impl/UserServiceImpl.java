@@ -50,6 +50,12 @@ public class UserServiceImpl implements UserService {
         if (user.getId() != null) {
             throw new RuntimeException("User already exists!");
         }
+        
+        // Ensure authProvider is set
+        if (user.getAuthProvider() == null) {
+            user.setAuthProvider(AuthProvider.LOCAL);
+        }
+        
         return userRepository.save(user);
     }
 
