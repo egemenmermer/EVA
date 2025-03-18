@@ -27,11 +27,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     private UserService userService;
 
     @Override
-    public void submitFeedback(UUID conversationID, UUID userID, String feedback, int rating) {
+    public Feedback submitFeedback(UUID conversationID, UUID userID, String feedback, int rating) {
         User user = userService.findById(userID).orElseThrow(
                 () -> new RuntimeException("User not found"));
 
-        Conversation conversation = conversationService.getConversationById(conversationID)
+        Conversation conversation = conversationService.getConversationEntityById(conversationID)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
         if (!conversation.getUser().getId().equals(user.getId())) {
@@ -46,7 +46,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackEntity.setRating(rating);
         feedbackEntity.setSubmittedAt(LocalDateTime.now());
 
-        feedbackRepository.save(feedbackEntity);
+        return feedbackRepository.save(feedbackEntity);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         User user = userService.findById(userID).orElseThrow(
                 () -> new RuntimeException("User not found"));
 
-        Conversation conversation = conversationService.getConversationById(conversationID)
+        Conversation conversation = conversationService.getConversationEntityById(conversationID)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
         return feedbackRepository.findByConversationIdAndUserId(conversationID, userID);

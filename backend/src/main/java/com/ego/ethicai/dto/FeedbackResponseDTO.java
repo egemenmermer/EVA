@@ -9,6 +9,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class FeedbackResponseDTO {
 
     private Long id;
@@ -16,4 +17,6 @@ public class FeedbackResponseDTO {
     private String userFeedback;
     private Integer rating;
     private LocalDateTime submittedAt;
+
+
 }

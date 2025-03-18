@@ -74,6 +74,7 @@ public class ConversationContentController {
 
     // Placeholder method for AI integration (replace with real AI call)
     private String getAIResponse(String userQuery, Conversation conversation) {
-        return "AI Response for: " + userQuery;  // Replace this with FAISS retrieval or LLM API call
+        return "AI Response for: " + userQuery;
+
     }
 }

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface FeedbackService {
 
-    void submitFeedback(UUID conversationID, UUID userID, String feedback, int rating);
+    Feedback submitFeedback(UUID conversationID, UUID userID, String feedback, int rating);
     Feedback getFeedback(UUID conversationID, UUID userID);
     List<Feedback> getAllFeedback();
 }
