@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Github, Chrome } from 'lucide-react';
+import { Github, Chrome, Loader2 } from 'lucide-react';
+import { useStore } from '@/store/useStore';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loginWithGoogle, isLoading, error } = useAuth();
+  const { user } = useStore();
+
+  // If user is already logged in, redirect to dashboard
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    try {
+      await login({ email, password });
+    } catch (err) {
+      console.error('Login submission error:', err);
+    }
   };
 
   const handleGoogleLogin = () => {
-    loginWithGoogle();
+    try {
+      loginWithGoogle();
+    } catch (err) {
+      console.error('Google login error:', err);
+    }
   };
 
   return (
@@ -41,10 +56,12 @@ export const LoginPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           dark:bg-gray-700 dark:text-gray-100"
+                           dark:bg-gray-700 dark:text-gray-100
+                           disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -62,17 +79,19 @@ export const LoginPage: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           dark:bg-gray-700 dark:text-gray-100"
+                           dark:bg-gray-700 dark:text-gray-100
+                           disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-red-500 text-sm">
-                {error instanceof Error ? error.message : 'An error occurred'}
+              <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-md">
+                {error.message}
               </div>
             )}
 
@@ -85,7 +104,14 @@ export const LoginPage: React.FC = () => {
                          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </div>
           </form>
@@ -106,9 +132,11 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
+                disabled={isLoading}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600
                          rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200
-                         hover:bg-gray-50 dark:hover:bg-gray-600"
+                         hover:bg-gray-50 dark:hover:bg-gray-600
+                         disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Chrome className="h-5 w-5 text-gray-700 dark:text-gray-200" />
                 <span className="ml-2">Google</span>
@@ -116,9 +144,11 @@ export const LoginPage: React.FC = () => {
 
               <button
                 type="button"
+                disabled={isLoading}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600
                          rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200
-                         hover:bg-gray-50 dark:hover:bg-gray-600"
+                         hover:bg-gray-50 dark:hover:bg-gray-600
+                         disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Github className="h-5 w-5 text-gray-700 dark:text-gray-200" />
                 <span className="ml-2">GitHub</span>

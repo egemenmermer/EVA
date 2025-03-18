@@ -10,44 +10,48 @@ import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { useStore } from '@/store/useStore';
 
-// Create a client
 const queryClient = new QueryClient();
 
-// Create a theme
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
-
 export const App: React.FC = () => {
-  const { user } = useStore();
+  const { user, darkMode } = useStore();
+
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: '#1976d2',
+      },
+      secondary: {
+        main: '#dc004e',
+      },
+    },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                user ? <MainLayout /> : <Navigate to="/login" replace />
-              } 
-            />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/auth/google/callback" element={<OAuthCallback />} />
-            <Route path="/auth/github/callback" element={<OAuthCallback />} />
-          </Routes>
-        </Router>
+        <div className={darkMode ? 'dark' : ''}>
+          <div className="min-h-screen bg-white dark:bg-gray-900">
+            <Router>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    user ? <MainLayout /> : <Navigate to="/login" replace />
+                  } 
+                />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/auth/google/callback" element={<OAuthCallback />} />
+                <Route path="/auth/github/callback" element={<OAuthCallback />} />
+                {/* Catch all route - redirect to landing page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Router>
+          </div>
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );

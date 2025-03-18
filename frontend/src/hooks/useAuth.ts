@@ -1,36 +1,55 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/services/api';
 import { useStore } from '@/store/useStore';
-import { useNavigate } from 'react-router-dom';
-import type { LoginResponseDTO } from '@/types/api';
 
 export const useAuth = () => {
-  const { setUser } = useStore();
   const navigate = useNavigate();
+  const { setUser } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const loginMutation = useMutation({
-    mutationFn: (credentials: { email: string; password: string }) =>
-      authApi.login(credentials.email, credentials.password),
-    onSuccess: (data: LoginResponseDTO) => {
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+  const login = async ({ email, password }: { email: string; password: string }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await authApi.login(email, password);
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
       navigate('/dashboard');
-    },
-  });
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to login'));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const registerMutation = useMutation({
-    mutationFn: (data: { email: string; password: string; fullName: string }) =>
-      authApi.register(data.email, data.password, data.fullName),
-  });
+  const register = async ({ email, password, fullName }: { email: string; password: string; fullName: string }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await authApi.register(email, password, fullName);
+      // After successful registration, automatically log in
+      const loginResponse = await authApi.login(email, password);
+      localStorage.setItem('token', loginResponse.token);
+      setUser(loginResponse.user);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to register'));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const loginWithGoogle = () => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     const redirectUri = `${window.location.origin}/auth/google/callback`;
     const scope = 'email profile';
     
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-    
-    window.location.href = authUrl;
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    window.location.href = url;
   };
 
   const logout = () => {
@@ -40,11 +59,11 @@ export const useAuth = () => {
   };
 
   return {
-    login: loginMutation.mutate,
-    register: registerMutation.mutate,
+    login,
+    register,
     loginWithGoogle,
     logout,
-    isLoading: loginMutation.isLoading || registerMutation.isLoading,
-    error: loginMutation.error || registerMutation.error,
+    isLoading,
+    error
   };
 }; 
