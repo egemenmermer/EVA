@@ -12,6 +12,14 @@ interface MessageItemProps {
   isLast: boolean;
 }
 
+interface CustomCodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
+}
+
 const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
   const isUser = !!message.userQuery;
   const messageRef = useRef<HTMLDivElement>(null);
@@ -25,7 +33,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
   return (
     <div
       ref={messageRef}
-      className={`flex gap-4 p-4 ${isUser ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}
+      className={`flex gap-4 p-4 ${isUser ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}
+                animate-in fade-in slide-in-from-bottom-4 duration-300`}
     >
       <div className="flex-shrink-0">
         {isUser ? (
@@ -50,14 +59,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
         <div className="prose dark:prose-invert max-w-none">
           <ReactMarkdown
             components={{
-              code({ node, inline, className, children, ...props }) {
+              code: ({ inline, className, children, ...props }: CustomCodeProps) => {
                 const match = /language-(\w+)/.exec(className || '');
                 return !inline && match ? (
                   <SyntaxHighlighter
-                    style={vscDarkPlus}
+                    {...props}
+                    style={vscDarkPlus as any}
                     language={match[1]}
                     PreTag="div"
-                    {...props}
                   >
                     {String(children).replace(/\n$/, '')}
                   </SyntaxHighlighter>
