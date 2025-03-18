@@ -6,6 +6,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
+import { LandingPage } from '@/pages/LandingPage';
+import { OAuthCallback } from '@/pages/OAuthCallback';
 import { useStore } from '@/store/useStore';
 
 // Create a client
@@ -33,14 +35,17 @@ export const App: React.FC = () => {
         <CssBaseline />
         <Router>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route 
-              path="/" 
+              path="/dashboard" 
               element={
                 user ? <MainLayout /> : <Navigate to="/login" replace />
               } 
             />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/google/callback" element={<OAuthCallback />} />
+            <Route path="/auth/github/callback" element={<OAuthCallback />} />
           </Routes>
         </Router>
       </ThemeProvider>

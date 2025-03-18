@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Github } from 'lucide-react';
+import { Github, Chrome } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error } = useAuth();
-  const navigate = useNavigate();
+  const { login, loginWithGoogle, isLoading, error } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login({ email, password });
+  };
+
+  const handleGoogleLogin = () => {
+    loginWithGoogle();
   };
 
   return (
@@ -99,7 +102,18 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600
+                         rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200
+                         hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                <Chrome className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+                <span className="ml-2">Google</span>
+              </button>
+
               <button
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600
@@ -107,7 +121,7 @@ export const LoginPage: React.FC = () => {
                          hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 <Github className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-                <span className="ml-2">Continue with GitHub</span>
+                <span className="ml-2">GitHub</span>
               </button>
             </div>
           </div>
