@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,16 +51,20 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponseDTO getConversationById(UUID conversationId) {
-        Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(
-                () -> new RuntimeException("Conversation not found"));
+    public Optional<ConversationResponseDTO> getConversationById(UUID conversationId) {
+        return conversationRepository.findById(conversationId).map(conversation -> {
+            return new ConversationResponseDTO(
+                    conversation.getId(),
+                    conversation.getUser().getId(),
+                    conversation.getManagerType(),
+                    conversation.getCreatedAt()
+            );
+        });
+    }
 
-        return new ConversationResponseDTO(
-                conversation.getId(),
-                conversation.getUser().getId(),
-                conversation.getManagerType(),
-                conversation.getCreatedAt()
-        );
+    @Override
+    public Optional<Conversation> getConversationEntityById(UUID conversationId) {
+        return conversationRepository.findById(conversationId);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.ego.ethicai.repository.ConversationContentRepository;
 import com.ego.ethicai.service.ConversationContentService;
 import com.ego.ethicai.service.ConversationService;
 import com.ego.ethicai.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +28,17 @@ public class ConversationContentServiceImpl implements ConversationContentServic
     private UserService userService;
 
     @Override
+    @Transactional
     public void saveMessage(UUID conversationId, String userQuery, String agentResponse) {
-        Conversation conversation = conversationService.getConversationById(conversationId)
+        Conversation conversation = conversationService.getConversationEntityById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
-        ConversationContent conversationContent = new ConversationContent();
-
-        conversationContent.setConversation(conversation);
-        conversationContent.setUserQuery(userQuery);
-        conversationContent.setAgentResponse(agentResponse);
-        conversationContent.setCreatedAt(LocalDateTime.now());
+        ConversationContent conversationContent = ConversationContent.builder()
+                .conversation(conversation)
+                .userQuery(userQuery)
+                .agentResponse(agentResponse)
+                .createdAt(LocalDateTime.now())
+                .build();
 
         conversationContentRepository.save(conversationContent);
     }
@@ -47,7 +49,7 @@ public class ConversationContentServiceImpl implements ConversationContentServic
         User user = userService.findById(userId).orElseThrow(
                 () -> new RuntimeException("User not found"));
 
-        Conversation conversation = conversationService.getConversationById(conversationId)
+        Conversation conversation = conversationService.getConversationEntityById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
         if(!conversation.getUser().getId().equals(user.getId())) {

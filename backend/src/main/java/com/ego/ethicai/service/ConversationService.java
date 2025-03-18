@@ -5,11 +5,13 @@ import com.ego.ethicai.entity.Conversation;
 import com.ego.ethicai.enums.ManagerTypes;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ConversationService {
     ConversationResponseDTO startConversation(UUID userId, ManagerTypes managerType);
-    ConversationResponseDTO getConversationById(UUID conversationId);
+    Optional<ConversationResponseDTO> getConversationById(UUID conversationId);
     List<ConversationResponseDTO> getUserConversations(UUID userId);
     void deleteConversation(UUID conversationId);
+    Optional<Conversation> getConversationEntityById(UUID conversationId);
 }

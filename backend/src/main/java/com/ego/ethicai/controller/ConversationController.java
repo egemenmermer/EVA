@@ -29,7 +29,7 @@ public class ConversationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ConversationResponseDTO> getConversationById(@PathVariable UUID id) {
-        ConversationResponseDTO response = conversationService.getConversationById(id);
+        ConversationResponseDTO response = conversationService.getConversationById(id).orElseThrow(() -> new RuntimeException("Conversation not found"));
         return ResponseEntity.ok(response);
     }
 

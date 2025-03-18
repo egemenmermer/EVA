@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,5 +18,5 @@ public class ConversationContentResponseDTO {
     private UUID conversationId;
     private String userQuery;
     private String agentResponse;
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 }
