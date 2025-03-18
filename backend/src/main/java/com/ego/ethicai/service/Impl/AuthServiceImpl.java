@@ -11,16 +11,19 @@ import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.security.jwt.JwtUtil;
 import com.ego.ethicai.service.AuthService;
 import com.ego.ethicai.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -37,12 +40,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO loginRequestDto) {
+        if (loginRequestDto == null || loginRequestDto.getEmail() == null || loginRequestDto.getPassword() == null) {
+            throw new IllegalArgumentException("Email and password are required");
+        }
 
-        String email = loginRequestDto.getEmail();
+        String email = loginRequestDto.getEmail().trim();
         String password = loginRequestDto.getPassword();
 
         User user = userService.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException("User not found for this email: " + email));
+                () -> new UserNotFoundException("User not found for email: " + email));
 
         if (!passwordEncoder.passwordEncoderBean().matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
@@ -54,9 +60,13 @@ public class AuthServiceImpl implements AuthService {
 
         // Update last login timestamp
         user.setLastLogin(LocalDateTime.now());
-        userService.saveUser(user);
+        user = userService.saveUser(user);
 
-        String token = jwtUtil.generateToken(new CustomUserDetails(user));
+        // Create CustomUserDetails with the updated user
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        String token = jwtUtil.generateToken(userDetails);
+
+        logger.debug("Generated token for user: {} with ID: {}", email, user.getId());
 
         return new LoginResponseDTO(token, new UserResponseDTO(
                 user.getId(),
@@ -70,9 +80,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public User register(RegisterRequestDTO registerRequestDTO) {
-        String email = registerRequestDTO.getEmail();
+        if (registerRequestDTO == null || 
+            registerRequestDTO.getEmail() == null || 
+            registerRequestDTO.getPassword() == null ||
+            registerRequestDTO.getFullName() == null) {
+            throw new IllegalArgumentException("Email, password, and full name are required");
+        }
+
+        String email = registerRequestDTO.getEmail().trim();
         String password = registerRequestDTO.getPassword();
-        String fullName = registerRequestDTO.getFullName();
+        String fullName = registerRequestDTO.getFullName().trim();
 
         if (password.length() < 8) {
             throw new RuntimeException("Password must be at least 8 characters long");
@@ -82,18 +99,26 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email already exists");
         }
 
-        User user = new User();
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.passwordEncoderBean().encode(password));
-        user.setFullName(fullName);
-        user.setAuthProvider(AuthProvider.LOCAL);  // Set default auth provider for email/password registration
+        User user = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.passwordEncoderBean().encode(password))
+                .fullName(fullName)
+                .authProvider(AuthProvider.LOCAL)
+                .build();
 
-        return userService.createUser(user);
+        user = userService.createUser(user);
+        logger.debug("Created new user: {} with ID: {}", email, user.getId());
+
+        return user;
     }
 
     @Override
     @Transactional
     public ActivationResponseDTO activate(ActivationRequestDTO activationRequestDto) {
+        if (activationRequestDto == null || activationRequestDto.getToken() == null) {
+            throw new IllegalArgumentException("Activation token is required");
+        }
+
         Optional<ActivationToken> activationToken = activationTokenRepository.findByToken(activationRequestDto.getToken());
         if (activationToken.isEmpty()) {
             throw new RuntimeException("Invalid activation token");
@@ -110,20 +135,20 @@ public class AuthServiceImpl implements AuthService {
         userService.saveUser(user);
 
         activationTokenRepository.deleteById(activationTokenEntity.getId());
+        logger.debug("Activated user: {} with ID: {}", user.getEmail(), user.getId());
 
         return new ActivationResponseDTO("Activation successful", LocalDateTime.now());
     }
 
     @Override
     public boolean isUserActivated(String email) {
-        User user = userService.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException("User not found for this email: " + email));
-
-        if (user.getActivatedAt() == null) {
-            return false;
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
         }
-        return true;
+
+        User user = userService.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("User not found for email: " + email));
+
+        return user.getActivatedAt() != null;
     }
-
-
 }
