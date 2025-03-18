@@ -27,4 +27,4 @@ export interface Feedback {
   userFeedback: string;
   rating: number;
   submittedAt: string;
-} 
+}

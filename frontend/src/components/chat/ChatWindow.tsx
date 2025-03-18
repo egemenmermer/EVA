@@ -23,7 +23,7 @@ export const ChatWindow: React.FC = () => {
       <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Welcome to the {managerType.toLowerCase()} Assistant
+            Welcome to EthicAI
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
             Start a new conversation by clicking the "New Chat" button

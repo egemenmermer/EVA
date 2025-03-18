@@ -15,9 +15,9 @@ import {
 import type { ManagerType } from '@/types';
 
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
-  { type: 'ETHICAL', icon: <Scale className="h-5 w-5" />, label: 'Ethical Assistant' },
-  { type: 'TECHNICAL', icon: <Code2 className="h-5 w-5" />, label: 'Technical Assistant' },
-  { type: 'SECURITY', icon: <Shield className="h-5 w-5" />, label: 'Security Assistant' },
+  { type: 'PUPPETEER', icon: <Scale className="h-5 w-5" />, label: 'Puppeteer' },
+  { type: 'DILUTER', icon: <Code2 className="h-5 w-5" />, label: 'Diluter' },
+  { type: 'CAMOUFLAGER', icon: <Shield className="h-5 w-5" />, label: 'Camouflager' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -61,7 +61,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Manager Type Selection */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Assistant Type</h3>
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Manager Type</h3>
         <div className="space-y-1">
           {managerTypes.map(({ type, icon, label }) => (
             <button

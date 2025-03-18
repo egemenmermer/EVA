@@ -32,6 +32,10 @@ export const useStore = create<Store>()(
       setUser: (user: User | null) => {
         console.log('Setting user in store:', user);
         set({ user });
+        if (!user) {
+          // Clear related state when user is logged out
+          set({ currentConversation: null, messages: [] });
+        }
         console.log('User set in store. Current state:', useStore.getState());
       },
       setCurrentConversation: (conversation: Conversation | null) => 
@@ -44,18 +48,19 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'app-storage',
-      partialize: (state) => {
-        console.log('Persisting state:', {
-          darkMode: state.darkMode,
-          managerType: state.managerType,
-          user: state.user
-        });
-        return {
-          darkMode: state.darkMode,
-          managerType: state.managerType,
-          user: state.user
-        };
-      },
+      partialize: (state) => ({
+        user: state.user,
+        darkMode: state.darkMode,
+        managerType: state.managerType
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Check if there's a token but no user
+        const token = localStorage.getItem('token');
+        if (!token && state?.user) {
+          state.setUser(null);
+        }
+        console.log('Store rehydrated:', state);
+      }
     }
   )
 ); 
