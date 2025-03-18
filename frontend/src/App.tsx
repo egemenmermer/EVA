@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
+import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore } from '@/store/useStore';
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ export const App: React.FC = () => {
                 />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/auth/activate" element={<ActivationPage />} />
                 <Route path="/auth/google/callback" element={<OAuthCallback />} />
                 <Route path="/auth/github/callback" element={<OAuthCallback />} />
                 {/* Catch all route - redirect to landing page */}
