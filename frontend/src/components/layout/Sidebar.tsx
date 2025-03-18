@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { useConversation } from '@/hooks/useConversation';
+import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { 
   MessageSquare, 
@@ -10,7 +11,8 @@ import {
   Shield, 
   Moon, 
   Sun,
-  Loader2 
+  Loader2,
+  LogOut
 } from 'lucide-react';
 import type { ManagerType } from '@/types';
 
@@ -21,6 +23,8 @@ const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[
 ];
 
 export const Sidebar: React.FC = () => {
+  const [showLogout, setShowLogout] = useState(false);
+  const { logout } = useAuth();
   const { 
     user, 
     currentConversation, 
@@ -35,6 +39,11 @@ export const Sidebar: React.FC = () => {
 
   const handleNewChat = async () => {
     await startConversation(managerType);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setShowLogout(false);
   };
 
   return (
@@ -106,9 +115,27 @@ export const Sidebar: React.FC = () => {
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {user?.fullName}
-          </span>
+          <div className="relative">
+            <button
+              onClick={() => setShowLogout(!showLogout)}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-2"
+            >
+              {user?.fullName}
+            </button>
+            
+            {showLogout && (
+              <div className="absolute bottom-full left-0 mb-2 w-48 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            )}
+          </div>
+          
           <button
             onClick={toggleDarkMode}
             className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200

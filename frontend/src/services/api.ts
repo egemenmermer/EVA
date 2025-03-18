@@ -16,6 +16,18 @@ const api = axios.create({
   withCredentials: true // Enable sending cookies
 });
 
+// Add request interceptor to include authorization token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    if (!config.headers) {
+      config.headers = {};
+    }
+    config.headers.Authorization = token;
+  }
+  return config;
+});
+
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
