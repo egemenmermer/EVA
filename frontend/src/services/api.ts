@@ -45,7 +45,13 @@ api.interceptors.response.use(
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // Check if token already has 'Bearer ' prefix
+    const tokenValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    config.headers.Authorization = tokenValue;
+    console.log('Request headers:', {
+      url: config.url,
+      Authorization: config.headers.Authorization
+    });
   }
   return config;
 }, (error) => {
@@ -59,6 +65,15 @@ export const authApi = {
       console.log('Attempting login with:', { email });
       const response = await api.post<LoginResponseDTO>('/auth/login', { email, password });
       console.log('Login response:', response.data);
+      
+      // Store the token with 'Bearer ' prefix if it doesn't have it
+      if (response.data.token) {
+        const token = response.data.token.startsWith('Bearer ') 
+          ? response.data.token 
+          : `Bearer ${response.data.token}`;
+        localStorage.setItem('token', token);
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Login error:', error);

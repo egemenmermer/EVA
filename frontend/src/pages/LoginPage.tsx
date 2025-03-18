@@ -32,6 +32,24 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const getErrorMessage = (error: Error | null) => {
+    if (!error) return null;
+    if (error.message === 'User not activated') {
+      return (
+        <div className="text-amber-500 text-sm bg-amber-50 dark:bg-amber-900/10 p-3 rounded-md">
+          Please check your email to activate your account before logging in.
+          <br />
+          The activation link was sent to your email address.
+        </div>
+      );
+    }
+    return (
+      <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-md">
+        {error.message}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -89,11 +107,7 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-md">
-                {error.message}
-              </div>
-            )}
+            {error && getErrorMessage(error)}
 
             <div>
               <button

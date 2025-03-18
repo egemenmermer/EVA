@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Github, Chrome } from 'lucide-react';
+import { Github, Chrome, AlertCircle } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [validationError, setValidationError] = useState('');
   const { register, isLoading, error } = useAuth();
+
+  const validateForm = () => {
+    if (password.length < 8) {
+      setValidationError('Password must be at least 8 characters long');
+      return false;
+    }
+    if (!email.includes('@')) {
+      setValidationError('Please enter a valid email address');
+      return false;
+    }
+    if (fullName.trim().length < 2) {
+      setValidationError('Full name is required');
+      return false;
+    }
+    setValidationError('');
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
     try {
       await register({ email, password, fullName });
     } catch (err) {
@@ -19,6 +39,7 @@ export const RegisterPage: React.FC = () => {
   };
 
   const getErrorMessage = (error: unknown) => {
+    if (validationError) return validationError;
     if (error instanceof Error) return error.message;
     if (typeof error === 'string') return error;
     if (error && typeof error === 'object' && 'message' in error) 
@@ -54,6 +75,7 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -75,6 +97,7 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -96,13 +119,20 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
+                  disabled={isLoading}
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  Password must be at least 8 characters long
+                </p>
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-500 text-sm">
-                {getErrorMessage(error)}
+            {(error || validationError) && (
+              <div className="bg-red-50 dark:bg-red-900/10 p-3 rounded-md flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <p className="text-sm text-red-500">
+                  {getErrorMessage(error)}
+                </p>
               </div>
             )}
 
