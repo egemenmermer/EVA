@@ -52,6 +52,10 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("User not activated");
         }
 
+        // Update last login timestamp
+        user.setLastLogin(LocalDateTime.now());
+        userService.saveUser(user);
+
         String token = jwtUtil.generateToken(new CustomUserDetails(user));
 
         return new LoginResponseDTO(token, new UserResponseDTO(
@@ -61,7 +65,6 @@ public class AuthServiceImpl implements AuthService {
                 user.getLastLogin(),
                 user.getUpdatedAt()
         ));
-
     }
 
     @Override

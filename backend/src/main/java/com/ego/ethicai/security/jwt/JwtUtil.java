@@ -5,9 +5,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -16,7 +20,21 @@ public class JwtUtil {
 
     private static final long TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7; // 7 days
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
-    private final SecretKey secretKey = Keys.secretKeyFor(SIGNATURE_ALGORITHM);
+    
+    @Value("${jwt.secret}")
+    private String secret;
+    
+    private Key getSigningKey() {
+        try {
+            // Decode the Base64 encoded secret
+            byte[] decodedKey = Base64.getDecoder().decode(secret);
+            // Create a key that's suitable for HS512
+            return Keys.hmacShaKeyFor(decodedKey);
+        } catch (IllegalArgumentException e) {
+            // If the secret is not Base64 encoded, use it directly
+            return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        }
+    }
 
     public String getEmailFromToken(String token) {
         try {
@@ -38,7 +56,7 @@ public class JwtUtil {
     public Claims getAllClaimFromToken(String token) {
         try {
             return Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(getSigningKey())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -63,9 +81,10 @@ public class JwtUtil {
         try {
             return Jwts.builder()
                     .setSubject(userDetails.getEmail())
+                    .claim("userId", userDetails.getId().toString())
                     .setIssuedAt(currentDate())
                     .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY))
-                    .signWith(SIGNATURE_ALGORITHM, secretKey)
+                    .signWith(SIGNATURE_ALGORITHM, getSigningKey())
                     .compact();
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate JWT token: " + e.getMessage());
@@ -89,5 +108,13 @@ public class JwtUtil {
 
     public String extractEmail(String token) {
         return getEmailFromToken(token);
+    }
+
+    public String getUserIdFromToken(String token) {
+        try {
+            return getClaimFromToken(token, claims -> claims.get("userId", String.class));
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid token: " + e.getMessage());
+        }
     }
 }

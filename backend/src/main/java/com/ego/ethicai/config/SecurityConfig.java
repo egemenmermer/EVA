@@ -21,11 +21,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -38,6 +39,18 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+    @Value("${spring.mail.host}")
+    private String mailHost;
+
+    @Value("${spring.mail.port}")
+    private Integer mailPort;
+
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
+    @Value("${spring.mail.password}")
+    private String mailPassword;
 
     public SecurityConfig(
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
@@ -121,35 +134,19 @@ public class SecurityConfig {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+        mailSender.setHost(mailHost);
+        mailSender.setPort(mailPort);
+        mailSender.setUsername(mailUsername);
+        mailSender.setPassword(mailPassword);
         
-        String username = System.getenv("MAIL_USERNAME");
-        String password = System.getenv("MAIL_PASSWORD");
-        
-        if (username == null || password == null) {
-            throw new RuntimeException("Mail configuration error: MAIL_USERNAME or MAIL_PASSWORD not set in environment");
-        }
-        
-        mailSender.setUsername(username);
-        mailSender.setPassword(password);
-
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
         props.put("mail.debug", "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
         
-        // Test the configuration
-        try {
-            mailSender.testConnection();
-            logger.info("Mail server connection test successful");
-        } catch (Exception e) {
-            logger.error("Mail server connection test failed: {}", e.getMessage(), e);
-        }
-
         return mailSender;
     }
 }

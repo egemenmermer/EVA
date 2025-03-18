@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -33,7 +34,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             String email = null;
             String jwtToken = null;
 
-            // Extract and validate JWT Token
             if (requestTokenHeader != null) {
                 if (requestTokenHeader.startsWith("Bearer ")) {
                     jwtToken = requestTokenHeader.substring(7);
@@ -50,32 +50,43 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         return;
                     }
                 } else {
-                    logger.warn("JWT Token does not begin with Bearer String: " + requestTokenHeader);
+                    logger.warn("JWT Token does not begin with Bearer String");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Invalid token format\", \"message\": \"Token must start with 'Bearer '\"}");
+                    response.getWriter().write("{\"error\": \"Invalid token format\"}");
                     return;
                 }
             }
 
-            // Validate token and set authentication
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                CustomUserDetails userDetails = this.userService.getUserDetailsByEmail(email);
-
-                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                try {
+                    CustomUserDetails userDetails = userService.getUserDetailsByEmail(email);
+                    String userId = jwtTokenUtil.getUserIdFromToken(jwtToken);
+                    userDetails.setId(UUID.fromString(userId));
+                    
+                    if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    logger.debug("Authentication successful for user: " + email);
-                } else {
-                    logger.warn("Invalid JWT token for user: " + email);
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        logger.debug("Authentication successful for user: " + email);
+                    } else {
+                        logger.warn("Invalid JWT token for user: " + email);
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Invalid token\"}");
+                        return;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error processing user authentication", e);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Invalid token\"}");
+                    response.getWriter().write("{\"error\": \"Authentication failed\"}");
                     return;
                 }
             }
+
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
             logger.error("Cannot set user authentication", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -83,8 +94,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             response.getWriter().write("{\"error\": \"Internal server error during authentication\"}");
             return;
         }
-
-        filterChain.doFilter(request, response);
     }
 
     @Override

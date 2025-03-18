@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email).orElseThrow(()
                 -> new UserNotFoundException("User not found for this email: " + email));
 
-        return new CustomUserDetails(user.getEmail(), user.getPasswordHash(), new ArrayList<>());
+        return new CustomUserDetails(user);
     }
 
     @Override

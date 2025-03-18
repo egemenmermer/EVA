@@ -16,7 +16,7 @@ public class EmailUtil {
 
     private final JavaMailSender mailSender;
 
-    @Value("${MAIL_FROM}")
+    @Value("${spring.mail.username}")
     private String fromEmail;
 
     @Value("${frontend.url}")
