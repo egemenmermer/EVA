@@ -1,6 +1,5 @@
 package com.ego.ethicai.controller;
 
-
 import com.ego.ethicai.dto.ConversationContentRequestDTO;
 import com.ego.ethicai.dto.ConversationContentResponseDTO;
 import com.ego.ethicai.entity.Conversation;
@@ -29,17 +28,32 @@ public class ConversationContentController {
 
     @PostMapping("/message")
     public ResponseEntity<ConversationContentResponseDTO> createMessage(
+            @CurrentUser CustomUserDetails currentUser,
             @RequestBody ConversationContentRequestDTO request) {
 
+        // Verify conversation exists and belongs to the current user
         Conversation conversation = conversationService.getConversationEntityById(request.getConversationId())
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
+        if (!conversation.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized access to conversation");
+        }
+
+        // Get AI response (this will be replaced with actual AI integration)
         String agentResponse = getAIResponse(request.getUserQuery(), conversation);
 
+        // Save the message
+        conversationContentService.saveMessage(
+            conversation.getId(),
+            request.getUserQuery(),
+            agentResponse
+        );
+
+        // Return the response
         ConversationContentResponseDTO responseDTO = new ConversationContentResponseDTO(
                 conversation.getId(),
                 request.getUserQuery(),
-                "Agent response placeholder",
+                agentResponse,
                 LocalDateTime.now()
         );
 
@@ -53,6 +67,10 @@ public class ConversationContentController {
 
         Conversation conversation = conversationService.getConversationEntityById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+        if (!conversation.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized access to conversation");
+        }
 
         List<ConversationContent> conversationContents = conversationContentService.getMessages(conversation.getId(), currentUser.getId());
 
@@ -74,7 +92,7 @@ public class ConversationContentController {
 
     // Placeholder method for AI integration (replace with real AI call)
     private String getAIResponse(String userQuery, Conversation conversation) {
-        return "AI Response for: " + userQuery;
-
+        // TODO: Integrate with actual AI service
+        return "This is a placeholder response for: " + userQuery;
     }
 }

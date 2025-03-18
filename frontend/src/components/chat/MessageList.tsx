@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
-import { Message } from '@/types';
 import { format } from 'date-fns';
 import { Bot, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import type { ConversationContentResponseDTO } from '@/types/api';
 
 interface MessageItemProps {
-  message: Message;
+  message: ConversationContentResponseDTO;
   isLast: boolean;
 }
 
@@ -94,7 +94,7 @@ export const MessageList: React.FC = () => {
     <div ref={containerRef} className="flex-1 overflow-y-auto">
       {messages.map((message, index) => (
         <MessageItem
-          key={message.id}
+          key={`${message.conversationId}-${index}`}
           message={message}
           isLast={index === messages.length - 1}
         />

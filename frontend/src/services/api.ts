@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ManagerType } from '@/types';
 import type { 
   LoginResponseDTO, 
   RegisterResponseDTO,
@@ -153,9 +154,11 @@ export const authApi = {
 };
 
 export const conversationApi = {
-  start: async (managerType: string): Promise<ConversationResponseDTO> => {
+  start: async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
     try {
-      const response = await api.post<ConversationResponseDTO>('/conversation/start', { managerType });
+      const response = await api.post<ConversationResponseDTO>('/conversation/start', { 
+        managerType: managerType.toUpperCase() 
+      });
       return response.data;
     } catch (error) {
       console.error('Start conversation error:', error);

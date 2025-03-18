@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import { useStore } from '@/store/useStore';
-import type { ConversationResponseDTO } from '@/types/api';
+import type { ConversationResponseDTO, ConversationContentResponseDTO } from '@/types/api';
+import type { ManagerType } from '@/types';
 
 export const useConversation = (conversationId?: string) => {
   const queryClient = useQueryClient();
-  const { user, setUser, setCurrentConversation } = useStore();
+  const { user, setUser, setCurrentConversation, setMessages, addMessage } = useStore();
 
   const { data: conversations, isError: isConversationsError } = useQuery({
     queryKey: ['conversations', user?.id],
@@ -25,6 +26,9 @@ export const useConversation = (conversationId?: string) => {
     queryFn: () => conversationId ? conversationApi.getConversationMessages(conversationId) : Promise.resolve([]),
     enabled: !!conversationId && !!user,
     retry: false,
+    onSuccess: (data) => {
+      setMessages(data);
+    },
     onError: (error: Error) => {
       if (error.message.includes('401')) {
         setUser(null);
@@ -33,7 +37,7 @@ export const useConversation = (conversationId?: string) => {
   });
 
   const startConversationMutation = useMutation({
-    mutationFn: (managerType: string) => conversationApi.start(managerType),
+    mutationFn: (managerType: ManagerType) => conversationApi.start(managerType),
     onSuccess: (data: ConversationResponseDTO) => {
       setCurrentConversation(data);
       queryClient.invalidateQueries(['conversations']);
@@ -48,7 +52,8 @@ export const useConversation = (conversationId?: string) => {
   const sendMessageMutation = useMutation({
     mutationFn: (data: { conversationId: string; userQuery: string }) =>
       conversationApi.sendMessage(data.conversationId, data.userQuery),
-    onSuccess: () => {
+    onSuccess: (data: ConversationContentResponseDTO) => {
+      addMessage(data);
       queryClient.invalidateQueries(['messages', conversationId]);
     },
     onError: (error: Error) => {

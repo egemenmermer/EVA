@@ -1,16 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User, Conversation, Message, ManagerType } from '@/types';
+import type { User, Conversation, ManagerType } from '@/types';
+import type { ConversationContentResponseDTO } from '@/types/api';
 
 interface Store {
   user: User | null;
   currentConversation: Conversation | null;
-  messages: Message[];
+  messages: ConversationContentResponseDTO[];
   managerType: ManagerType;
   darkMode: boolean;
   setUser: (user: User | null) => void;
   setCurrentConversation: (conversation: Conversation | null) => void;
-  addMessage: (message: Message) => void;
+  setMessages: (messages: ConversationContentResponseDTO[]) => void;
+  addMessage: (message: ConversationContentResponseDTO) => void;
   setManagerType: (type: ManagerType) => void;
   toggleDarkMode: () => void;
 }
@@ -39,8 +41,10 @@ export const useStore = create<Store>()(
         console.log('User set in store. Current state:', useStore.getState());
       },
       setCurrentConversation: (conversation: Conversation | null) => 
-        set({ currentConversation: conversation }),
-      addMessage: (message: Message) => 
+        set({ currentConversation: conversation, messages: [] }),
+      setMessages: (messages: ConversationContentResponseDTO[]) =>
+        set({ messages }),
+      addMessage: (message: ConversationContentResponseDTO) => 
         set((state) => ({ messages: [...state.messages, message] })),
       setManagerType: (type: ManagerType) => set({ managerType: type }),
       toggleDarkMode: () => 
