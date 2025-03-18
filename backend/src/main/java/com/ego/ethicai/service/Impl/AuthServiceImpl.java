@@ -88,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public ActivationResponseDTO activate(ActivationRequestDTO activationRequestDto) {
-        Optional<ActivationToken> activationToken = activationTokenRepository.findById(UUID.fromString(activationRequestDto.getToken()));
+        Optional<ActivationToken> activationToken = activationTokenRepository.findByToken(activationRequestDto.getToken());
         if (activationToken.isEmpty()) {
             throw new RuntimeException("Invalid activation token");
         }
@@ -106,7 +106,6 @@ public class AuthServiceImpl implements AuthService {
         activationTokenRepository.deleteById(activationTokenEntity.getId());
 
         return new ActivationResponseDTO("Activation successful", LocalDateTime.now());
-
     }
 
     @Override

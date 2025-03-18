@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class FeedbackResponseDTO {
 
     private Long id;

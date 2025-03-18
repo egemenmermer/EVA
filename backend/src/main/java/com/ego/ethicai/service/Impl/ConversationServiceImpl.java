@@ -72,7 +72,7 @@ public class ConversationServiceImpl implements ConversationService {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Conversation> conversations = conversationRepository.getUserConversations(user);
+        List<Conversation> conversations = conversationRepository.findByUser(user);
 
         return conversations.stream()
                 .map(conversation -> new ConversationResponseDTO(

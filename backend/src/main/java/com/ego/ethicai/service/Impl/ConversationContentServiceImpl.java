@@ -45,7 +45,6 @@ public class ConversationContentServiceImpl implements ConversationContentServic
 
     @Override
     public List<ConversationContent> getMessages(UUID conversationId, UUID userId) {
-
         User user = userService.findById(userId).orElseThrow(
                 () -> new RuntimeException("User not found"));
 
@@ -56,7 +55,6 @@ public class ConversationContentServiceImpl implements ConversationContentServic
             throw new RuntimeException("Unauthorized access to conversation");
         }
 
-        return conversationContentRepository.findByConversationAndUserId(conversation, userId);
-
+        return conversationContentRepository.findByConversation(conversation);
     }
 }

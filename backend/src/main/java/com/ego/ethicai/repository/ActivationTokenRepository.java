@@ -12,5 +12,5 @@ import java.util.UUID;
 public interface ActivationTokenRepository extends JpaRepository<ActivationToken, UUID> {
 
     Optional<ActivationToken> findByUserEmail(String email);
-    void deleteActivationToken(ActivationToken activationToken);
+    Optional<ActivationToken> findByToken(String token);
 }

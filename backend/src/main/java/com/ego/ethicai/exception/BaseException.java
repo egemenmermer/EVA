@@ -1,12 +1,12 @@
 package com.ego.ethicai.exception;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class BaseException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-export type ManagerType = 'ETHICAL' | 'TECHNICAL' | 'SECURITY';
+export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER';
 
 export interface User {
   id: string;

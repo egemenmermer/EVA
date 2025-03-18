@@ -23,6 +23,16 @@ export const useAuth = () => {
       authApi.register(data.email, data.password, data.fullName),
   });
 
+  const loginWithGoogle = () => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const scope = 'email profile';
+    
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    
+    window.location.href = authUrl;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -32,6 +42,7 @@ export const useAuth = () => {
   return {
     login: loginMutation.mutate,
     register: registerMutation.mutate,
+    loginWithGoogle,
     logout,
     isLoading: loginMutation.isLoading || registerMutation.isLoading,
     error: loginMutation.error || registerMutation.error,

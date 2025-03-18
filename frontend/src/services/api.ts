@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { 
   LoginResponseDTO, 
   RegisterResponseDTO,
@@ -60,8 +61,8 @@ export const authApi = {
     return response.data;
   },
 
-  oauth2Redirect: async (token: string): Promise<{ token: string }> => {
-    const response = await api.get<{ token: string }>(`/auth/oauth2/redirect?token=${token}`);
+  oauth2Callback: async (provider: string, code: string): Promise<LoginResponseDTO> => {
+    const response = await api.get<LoginResponseDTO>(`/auth/oauth2/${provider}/callback?code=${code}`);
     return response.data;
   }
 };

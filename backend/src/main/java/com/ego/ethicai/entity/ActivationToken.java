@@ -18,14 +18,14 @@ import java.util.UUID;
 public class ActivationToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false)
     private String token;
 
     @Column(nullable = false)
