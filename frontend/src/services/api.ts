@@ -32,7 +32,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Only redirect to login if we're not already on the login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
 
     // Transform error message
@@ -44,13 +47,24 @@ api.interceptors.response.use(
 // Add request interceptor for authentication
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  console.log('Retrieved token from localStorage:', token);
+  
   if (token && config.headers) {
     // Check if token already has 'Bearer ' prefix
     const tokenValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     config.headers.Authorization = tokenValue;
-    console.log('Request headers:', {
+    console.log('Request details:', {
       url: config.url,
-      Authorization: config.headers.Authorization
+      method: config.method,
+      headers: {
+        Authorization: config.headers.Authorization,
+        'Content-Type': config.headers['Content-Type']
+      }
+    });
+  } else {
+    console.log('No token found in localStorage for request:', {
+      url: config.url,
+      method: config.method
     });
   }
   return config;
@@ -64,19 +78,31 @@ export const authApi = {
     try {
       console.log('Attempting login with:', { email });
       const response = await api.post<LoginResponseDTO>('/auth/login', { email, password });
-      console.log('Login response:', response.data);
+      console.log('Raw login response:', response);
+      console.log('Login response data:', JSON.stringify(response.data, null, 2));
       
       // Store the token with 'Bearer ' prefix if it doesn't have it
-      if (response.data.token) {
-        const token = response.data.token.startsWith('Bearer ') 
-          ? response.data.token 
-          : `Bearer ${response.data.token}`;
+      if (response.data.accessToken) {
+        const token = response.data.accessToken.startsWith('Bearer ') 
+          ? response.data.accessToken 
+          : `Bearer ${response.data.accessToken}`;
         localStorage.setItem('token', token);
+        console.log('Stored token in localStorage:', token);
+      } else {
+        console.error('No accessToken found in response data:', response.data);
       }
       
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data: unknown, status: number, headers: unknown } };
+        console.error('Error response:', {
+          data: axiosError.response?.data,
+          status: axiosError.response?.status,
+          headers: axiosError.response?.headers
+        });
+      }
       throw error;
     }
   },

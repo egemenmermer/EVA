@@ -29,7 +29,11 @@ export const useStore = create<Store>()(
       managerType: 'PUPPETEER',
       darkMode: getInitialDarkMode(),
       
-      setUser: (user: User | null) => set({ user }),
+      setUser: (user: User | null) => {
+        console.log('Setting user in store:', user);
+        set({ user });
+        console.log('User set in store. Current state:', useStore.getState());
+      },
       setCurrentConversation: (conversation: Conversation | null) => 
         set({ currentConversation: conversation }),
       addMessage: (message: Message) => 
@@ -40,10 +44,18 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'app-storage',
-      partialize: (state) => ({ 
-        darkMode: state.darkMode,
-        managerType: state.managerType 
-      }),
+      partialize: (state) => {
+        console.log('Persisting state:', {
+          darkMode: state.darkMode,
+          managerType: state.managerType,
+          user: state.user
+        });
+        return {
+          darkMode: state.darkMode,
+          managerType: state.managerType,
+          user: state.user
+        };
+      },
     }
   )
 ); 

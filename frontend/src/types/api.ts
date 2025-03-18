@@ -2,11 +2,13 @@ import { ManagerType } from './index';
 
 // Response types matching our backend DTOs
 export interface LoginResponseDTO {
-  token: string;
-  user: {
+  accessToken: string;
+  userDetails: {
     id: string;
     email: string;
     fullName: string;
+    lastLogin: string;
+    updatedAt: string;
   };
 }
 
