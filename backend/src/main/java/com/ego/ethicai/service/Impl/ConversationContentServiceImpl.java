@@ -8,6 +8,8 @@ import com.ego.ethicai.service.ConversationContentService;
 import com.ego.ethicai.service.ConversationService;
 import com.ego.ethicai.service.UserService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Service
 public class ConversationContentServiceImpl implements ConversationContentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConversationContentServiceImpl.class);
 
     @Autowired
     private ConversationContentRepository conversationContentRepository;
@@ -30,6 +34,8 @@ public class ConversationContentServiceImpl implements ConversationContentServic
     @Override
     @Transactional
     public void saveMessage(UUID conversationId, String userQuery, String agentResponse) {
+        logger.debug("Saving message for conversation: {}", conversationId);
+        
         Conversation conversation = conversationService.getConversationEntityById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -41,6 +47,7 @@ public class ConversationContentServiceImpl implements ConversationContentServic
                 .build();
 
         conversationContentRepository.save(conversationContent);
+        logger.debug("Message saved successfully for conversation: {}", conversationId);
     }
 
     @Override

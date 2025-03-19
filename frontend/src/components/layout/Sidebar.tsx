@@ -118,7 +118,7 @@ export const Sidebar: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowLogout(!showLogout)}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-2"
+              className="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2"
             >
               {user?.fullName}
             </button>

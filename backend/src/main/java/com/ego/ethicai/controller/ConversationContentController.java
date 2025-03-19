@@ -1,13 +1,18 @@
 package com.ego.ethicai.controller;
 
+import com.ego.ethicai.dto.AIRequestDTO;
+import com.ego.ethicai.dto.AIResponseDTO;
 import com.ego.ethicai.dto.ConversationContentRequestDTO;
 import com.ego.ethicai.dto.ConversationContentResponseDTO;
 import com.ego.ethicai.entity.Conversation;
 import com.ego.ethicai.entity.ConversationContent;
 import com.ego.ethicai.security.CurrentUser;
 import com.ego.ethicai.security.CustomUserDetails;
+import com.ego.ethicai.service.AIService;
 import com.ego.ethicai.service.ConversationContentService;
 import com.ego.ethicai.service.ConversationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +24,17 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/conversation")
 public class ConversationContentController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ConversationContentController.class);
 
     @Autowired
     private ConversationContentService conversationContentService;
 
     @Autowired
     private ConversationService conversationService;
+
+    @Autowired
+    private AIService aiService;
 
     @PostMapping("/message")
     public ResponseEntity<ConversationContentResponseDTO> createMessage(
@@ -39,25 +49,37 @@ public class ConversationContentController {
             throw new RuntimeException("Unauthorized access to conversation");
         }
 
-        // Get AI response (this will be replaced with actual AI integration)
-        String agentResponse = getAIResponse(request.getUserQuery(), conversation);
+        try {
+            // Get AI response using AIService
+            AIRequestDTO aiRequest = new AIRequestDTO(
+                conversation.getManagerType(),
+                request.getUserQuery()
+            );
+            
+            logger.debug("Requesting AI response for query: {} with manager type: {}", 
+                request.getUserQuery(), conversation.getManagerType());
+            
+            AIResponseDTO aiResponse = aiService.getAIResponse(aiRequest);
 
-        // Save the message
-        conversationContentService.saveMessage(
-            conversation.getId(),
-            request.getUserQuery(),
-            agentResponse
-        );
-
-        // Return the response
-        ConversationContentResponseDTO responseDTO = new ConversationContentResponseDTO(
+            // Save both user query and AI response
+            conversationContentService.saveMessage(
                 conversation.getId(),
                 request.getUserQuery(),
-                agentResponse,
-                LocalDateTime.now()
-        );
+                aiResponse.getAgentResponse()
+            );
 
-        return ResponseEntity.ok(responseDTO);
+            // Return the response
+            return ResponseEntity.ok(new ConversationContentResponseDTO(
+                conversation.getId(),
+                request.getUserQuery(),
+                aiResponse.getAgentResponse(),
+                LocalDateTime.now()
+            ));
+
+        } catch (Exception e) {
+            logger.error("Error processing message: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process message: " + e.getMessage());
+        }
     }
 
     @GetMapping("/message/{conversationId}")
@@ -88,11 +110,5 @@ public class ConversationContentController {
                 conversationContent.getAgentResponse(),
                 conversationContent.getCreatedAt()
         );
-    }
-
-    // Placeholder method for AI integration (replace with real AI call)
-    private String getAIResponse(String userQuery, Conversation conversation) {
-        // TODO: Integrate with actual AI service
-        return "This is a placeholder response for: " + userQuery;
     }
 }

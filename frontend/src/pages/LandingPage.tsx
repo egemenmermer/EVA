@@ -29,7 +29,7 @@ export const LandingPage: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Managet Types
+            Manager Types
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Puppeteer */}
