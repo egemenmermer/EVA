@@ -6,6 +6,7 @@ import com.ego.ethicai.service.AIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +15,8 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AIServiceImpl implements AIService {
@@ -24,7 +27,7 @@ public class AIServiceImpl implements AIService {
     private static final int TIMEOUT_SECONDS = 30;
 
     public AIServiceImpl(WebClient.Builder webClientBuilder, 
-                        @Value("${ai.agent.url:http://localhost:5000}") String baseUrl) {
+                        @Value("${ai.agent.url:http://localhost:5001}") String baseUrl) {
         this.webClient = webClientBuilder
             .baseUrl(baseUrl)
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -37,26 +40,34 @@ public class AIServiceImpl implements AIService {
         logger.debug("Requesting AI response for query with manager type: {}", request.getManagerType());
         
         try {
-            return webClient.post()
+            // Create request body matching the agent's expected format
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userQuery", request.getUserQuery());
+            requestBody.put("managerType", request.getManagerType().toString());
+            
+            // Make request to agent
+            Map<String, Object> response = webClient.post()
                     .uri("/generate-response")
-                    .bodyValue(request)
+                    .bodyValue(requestBody)
                     .retrieve()
-                    .bodyToMono(AIResponseDTO.class)
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                     .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                     .retryWhen(Retry.backoff(MAX_RETRIES, Duration.ofSeconds(1))
                         .filter(throwable -> shouldRetry(throwable))
                         .doBeforeRetry(retrySignal -> 
                             logger.warn("Retrying AI request after error. Attempt: {}", 
                                 retrySignal.totalRetries() + 1)))
-                    .onErrorResume(WebClientResponseException.class, ex -> {
-                        logger.error("AI service error: {} - {}", ex.getStatusCode(), ex.getResponseBodyAsString());
-                        return Mono.error(new RuntimeException("AI service error: " + ex.getMessage()));
-                    })
-                    .onErrorResume(Exception.class, ex -> {
-                        logger.error("Unexpected error calling AI service", ex);
-                        return Mono.error(new RuntimeException("Failed to get AI response: " + ex.getMessage()));
-                    })
-                    .block(); // Blocking call for synchronous response
+                    .block();
+
+            if (response != null && response.containsKey("response")) {
+                return new AIResponseDTO((String) response.get("response"));
+            } else {
+                throw new RuntimeException("Invalid response format from AI agent");
+            }
+            
+        } catch (WebClientResponseException ex) {
+            logger.error("AI service error: {} - {}", ex.getStatusCode(), ex.getResponseBodyAsString());
+            throw new RuntimeException("AI service error: " + ex.getMessage());
         } catch (Exception e) {
             logger.error("Failed to get AI response", e);
             throw new RuntimeException("Failed to get AI response: " + e.getMessage());

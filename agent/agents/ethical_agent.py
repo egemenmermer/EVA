@@ -23,46 +23,21 @@ logger = logging.getLogger(__name__)
 class EthicalAgent(BaseAgent):
     """Core Ethical Decision-Making Agent."""
     
-    VALID_ROLES = {
-        "software_engineer": {
-            "description": "Technical implementation and code-level decisions",
-            "focus": ["technical feasibility", "code quality", "security practices"],
-            "perspective": "engineering"
+    MANAGER_TYPES = {
+        "PUPPETEER": {
+            "description": "Controls project flow to nudge developers into unethical decisions",
+            "style": "manipulative",
+            "focus": ["control", "influence", "pressure"]
         },
-        "project_manager": {
-            "description": "Project planning and team coordination",
-            "focus": ["timeline impact", "resource allocation", "risk management"],
-            "perspective": "management"
+        "DILUTER": {
+            "description": "Weakens ethical concerns by making them seem less important",
+            "style": "dismissive",
+            "focus": ["minimize", "downplay", "rationalize"]
         },
-        "product_owner": {
-            "description": "Product vision and user value",
-            "focus": ["user impact", "business value", "feature prioritization"],
-            "perspective": "business"
-        },
-        "security_engineer": {
-            "description": "Security and risk assessment",
-            "focus": ["security implications", "data protection", "compliance"],
-            "perspective": "security"
-        },
-        "data_scientist": {
-            "description": "Data and algorithm ethics",
-            "focus": ["algorithmic fairness", "bias mitigation", "model transparency"],
-            "perspective": "data"
-        },
-        "ux_designer": {
-            "description": "User experience and interface design",
-            "focus": ["user accessibility", "interface transparency", "dark patterns"],
-            "perspective": "user"
-        },
-        "legal_counsel": {
-            "description": "Legal compliance and risk",
-            "focus": ["regulatory compliance", "legal risks", "liability"],
-            "perspective": "legal"
-        },
-        "ethics_officer": {
-            "description": "Organizational ethics oversight",
-            "focus": ["ethical guidelines", "company values", "social impact"],
-            "perspective": "ethics"
+        "CAMOUFLAGER": {
+            "description": "Hides ethical concerns in bureaucracy or misleading language",
+            "style": "deceptive",
+            "focus": ["obscure", "confuse", "misdirect"]
         }
     }
 
@@ -71,68 +46,109 @@ class EthicalAgent(BaseAgent):
         try:
             super().__init__(config)
             
+            # Initialize user-related attributes
+            self.user_role = None
+            self.user_responses = {}
+            self.conversation_id = str(uuid.uuid4())
+            self.manager_type = None
+            
             # Set up cache and data directories
             self.cache_dir = Path(config.get('cache_dir', 'cache'))
             self.index_dir = Path(config.get('index_dir', 'ethics_index'))
             
-            # Create necessary directories
-            self.cache_dir.mkdir(parents=True, exist_ok=True)
-            self.index_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Initialize components with caching
-            self.retriever = HybridRetriever(
-                embedding_model=EmbeddingModel(cache_dir=str(self.cache_dir / "embeddings")),
-                cache_dir=str(self.cache_dir / "retriever")
-            )
-            
-            # Generate conversation ID
-            self.conversation_id = str(uuid.uuid4())
-            
             # Initialize database connection
             self.db = DatabaseConnector()
             
-            # Initialize chunker
-            self.chunker = TextChunker()
+            # Initialize components (embedding model, retriever, etc.)
+            self._initialize_components()
             
-            # Check if we have cached index
-            if not self._load_cached_index():
-                logger.info("No cached index found. Will create on first query.")
+            # Initialize the LLM model
+            self.model = LlamaModel(
+                model_name="meta-llama/Llama-2-7b-chat-hf",
+                api_token=config.get('api_token'),
+                use_api=True
+            )
             
-            # Initialize LlamaModel with better error handling
-            try:
-                model_name = self.config.get('model_name', 'meta-llama/Llama-2-7b-chat-hf')
-                logger.info(f"Initializing LlamaModel with model: {model_name}")
-                self.model = LlamaModel(
-                    model_name=model_name,
-                    api_token=self.config.get('api_token'),
-                    use_api=True  # Force API usage instead of downloading
-                )
-            except Exception as e:
-                logger.error(f"Error initializing LlamaModel: {str(e)}")
-                if 'api_token' not in self.config or not self.config['api_token']:
-                    raise ValueError("Missing Hugging Face API token. Please set HUGGINGFACE_TOKEN environment variable.")
-                else:
-                    raise RuntimeError(f"Failed to initialize LlamaModel: {str(e)}")
+            # Ensure index is created
+            self._ensure_index()
             
             logger.info("Ethical Agent initialized successfully")
             
         except Exception as e:
-            logger.error(f"Error initializing EthicalAgent: {str(e)}")
-            if isinstance(e, (ValueError, ConnectionError)):
-                raise  # Re-raise these specific errors
-            raise RuntimeError(f"Failed to initialize EthicalAgent: {str(e)}")
+            logger.error(f"Failed to initialize EthicalAgent: {str(e)}")
+            raise
+
+    def process_query(self, query: str, manager_type: str = None) -> str:
+        """Process a user query and generate an ethical response."""
+        try:
+            # Set manager type if provided
+            if manager_type:
+                self.manager_type = manager_type
+
+            if not self.manager_type:
+                raise ValueError("Manager type not set")
+
+            # Get relevant context
+            relevant_context = self._get_relevant_context(query)
+            if not relevant_context:
+                relevant_context = []  # Ensure we have an empty list if no context
+            
+            # Generate response using LLM
+            response = self.model.generate_ethical_response(
+                query=query,
+                context=relevant_context,
+                manager_type=self.manager_type
+            )
+            
+            # Save conversation
+            try:
+                self._save_conversation(query, response, relevant_context)
+            except Exception as e:
+                logger.error(f"Error saving conversation: {str(e)}")
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error processing query: {str(e)}")
+            raise  # Re-raise the exception to be handled by FastAPI
+
+    def _save_conversation(self, query: str, response: str, context: List[Dict]) -> None:
+        """Save the conversation to the database."""
+        try:
+            # Ensure we have a user role
+            if not self.user_role:
+                self.user_role = "default_user"  # Fallback role
+                
+            self.db.save_conversation(
+                conversation_id=self.conversation_id,
+                role=self.user_role,
+                query=query,
+                response=response,
+                context=context
+            )
+        except Exception as e:
+            logger.error(f"Error saving conversation: {str(e)}")
+            # Don't raise the exception to prevent breaking the response flow
+
+    def _get_relevant_context(self, query: str) -> List[Dict]:
+        """Retrieve relevant context for the query."""
+        try:
+            return self.retriever.hybrid_search(query, top_k=5)
+        except Exception as e:
+            logger.error(f"Error retrieving context: {str(e)}")
+            return []
 
     def _initialize_components(self):
         """Initialize all component models."""
         try:
             # Initialize embedding model
-            self.embedding_model = EmbeddingModel(cache_dir=self.cache_dir)
+            self.embedding_model = EmbeddingModel(cache_dir=str(self.cache_dir))
             
             # Initialize retriever
-            self.retriever = HybridRetriever(self.embedding_model, self.cache_dir)
+            self.retriever = HybridRetriever(self.embedding_model, str(self.cache_dir))
             
             # Initialize re-ranker
-            self.reranker = ReRanker(cache_dir=self.cache_dir)
+            self.reranker = ReRanker(cache_dir=str(self.cache_dir))
             
         except Exception as e:
             logger.error(f"Error initializing components: {str(e)}")
@@ -205,115 +221,22 @@ class EthicalAgent(BaseAgent):
     def start_conversation(self) -> str:
         """Start a new conversation and return a welcome message."""
         self.conversation_id = str(uuid.uuid4())
-        self.current_user_role = None
         self.user_responses = {}
         
         return """Welcome to the Ethical AI Decision-Making Assistant. I'm here to help you navigate ethical challenges in software development and management.
 
 To provide the most relevant guidance, I'll need to understand:
-1. Your role in the organization
-2. The specific ethical dilemma you're facing
-3. The context and stakeholders involved
+1. The specific ethical dilemma you're facing
+2. The context and stakeholders involved
 
-Please start by describing your role (e.g., developer, manager, researcher) and the ethical concern you'd like to discuss."""
+Please describe the ethical concern you'd like to discuss."""
 
-    def process_query(self, query: str, role: str = None) -> Dict[str, Any]:
-        """Process a user query and generate a response."""
-        try:
-            # Set or update user role
-            if role:
-                self.current_user_role = role
-            
-            if not self.current_user_role:
-                return {
-                    "response": "Before we proceed, please specify your role (e.g., developer, manager, researcher).",
-                    "needs_role": True
-                }
-
-            # If we don't have all necessary information, generate clarifying questions
-            if not self._has_complete_context():
-                questions = self.model.generate_clarifying_questions(query)
-                remaining_questions = self._filter_answered_questions(questions)
-                
-                if remaining_questions:
-                    question_text = "\n".join([
-                        f"- {q[0]}" for q in remaining_questions.values()
-                    ])
-                    return {
-                        "response": f"To better assist you, I need some additional information:\n{question_text}",
-                        "questions": remaining_questions,
-                        "needs_clarification": True
-                    }
-
-            # Ensure index exists
-            self._ensure_index()
-
-            # Retrieve relevant context using hybrid search
-            focus_areas = self._determine_focus_areas()
-            context = self.retriever.hybrid_search(query, top_k=5)
-            
-            # Generate response
-            response = self.model.generate_ethical_response(
-                query=query,
-                context=context,
-                role=self.current_user_role,
-                focus_areas=focus_areas,
-                issue_type=self.user_responses.get('issue_type'),
-                severity=self.user_responses.get('severity'),
-                manager_attitude=self.user_responses.get('manager_attitude')
-            )
-            
-            # Save conversation
-            self._save_conversation(query, response)
-            
-            # Clear cache after processing
-            if hasattr(torch, 'cuda') and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            gc.collect()
-            
-            return {
-                "response": response,
-                "context": context,
-                "focus_areas": focus_areas
-            }
-            
-        except Exception as e:
-            logger.error(f"Error processing query: {str(e)}")
-            return {
-                "response": "I apologize, but I encountered an error while processing your request. Please try again.",
-                "error": str(e)
-            }
-
-    def set_user_role(self, role: str) -> None:
+    def set_user_role(self, role: str) -> Tuple[bool, str]:
         """Set the user's role."""
-        # Clean up the role input
-        role = role.lower().strip()
-        
-        # Map common role names to valid roles
-        role_mapping = {
-            'developer': 'software_engineer',
-            'engineer': 'software_engineer',
-            'dev': 'software_engineer',
-            'manager': 'project_manager',
-            'pm': 'project_manager',
-            'owner': 'product_owner',
-            'po': 'product_owner',
-            'security': 'security_engineer',
-            'data': 'data_scientist',
-            'designer': 'ux_designer',
-            'legal': 'legal_counsel',
-            'ethics': 'ethics_officer'
-        }
-        
-        # Try to map the role to a valid one
-        mapped_role = role_mapping.get(role, role)
-        
-        if mapped_role in self.VALID_ROLES:
-            self.current_user_role = mapped_role
-            logger.info(f"Set user role to: {self.current_user_role}")
-        else:
-            logger.warning(f"Invalid role attempted: {role}")
-            self.current_user_role = None
+        if role.lower() in self.VALID_ROLES:
+            self.user_role = role.lower()
+            return True, f"Role set to: {role}"
+        return False, f"Invalid role. Valid roles are: {', '.join(self.VALID_ROLES.keys())}"
 
     def add_user_response(self, question_type: str, response: str) -> None:
         """Add a user's response to a clarifying question."""
@@ -344,8 +267,8 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
             'researcher': ['Research Ethics', 'Data Handling', 'Methodology']
         }
         
-        if self.current_user_role in role_focus:
-            focus_areas.extend(role_focus[self.current_user_role])
+        if self.user_role in role_focus:
+            focus_areas.extend(role_focus[self.user_role])
         
         # Issue-based focus areas
         if self.user_responses.get('issue_type') == 'Privacy':
@@ -358,29 +281,6 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
             focus_areas.append('Risk Management')
         
         return list(set(focus_areas))  # Remove duplicates
-
-    def _save_conversation(self, query: str, response: str) -> None:
-        """Save the conversation to the database."""
-        if not self.conversation_id:
-            self.conversation_id = str(uuid.uuid4())
-        
-        try:
-            # Create metadata dictionary with all relevant information
-            metadata = {
-                'role': self.current_user_role,
-                'issue_type': self.user_responses.get('issue_type'),
-                'severity': self.user_responses.get('severity'),
-                'manager_attitude': self.user_responses.get('manager_attitude')
-            }
-            
-            self.db.save_conversation(
-                conversation_id=self.conversation_id,
-                query=query,
-                response=response,
-                metadata=metadata  # Pass role info in metadata instead of as separate argument
-            )
-        except Exception as e:
-            logger.error(f"Error saving conversation: {str(e)}")
 
     def save_feedback(self, feedback: str, rating: int) -> None:
         """Save user feedback for the conversation."""
@@ -441,7 +341,7 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
                     response = self.model.generate_ethical_response(
                         query=query,
                         context=context,
-                        role=self.current_user_role,
+                        role=self.user_role,
                         focus_areas=focus_areas,
                         issue_type=self.user_responses.get('issue_type'),
                         severity=self.user_responses.get('severity'),
@@ -455,7 +355,7 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
                     
                     # Save the conversation
                     try:
-                        self._save_conversation(query, response)
+                        self._save_conversation(query, response, context)
                     except Exception as e:
                         logger.error(f"Failed to save conversation: {e}")
                     
@@ -486,7 +386,7 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
                         counter_response = self.model.generate_ethical_response(
                             query=f"Stakeholder says: {stakeholder_response}",
                             context=counter_context,
-                            role=self.current_user_role,
+                            role=self.user_role,
                             focus_areas=focus_areas,
                             issue_type=self.user_responses.get('issue_type'),
                             severity=self.user_responses.get('severity'),
@@ -539,25 +439,9 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
             logger.error(f"Error in conversation: {str(e)}")
             print("\nI apologize, but I encountered an error. Please try again.")
 
-    def _get_user_role(self) -> None:
-        """Get the user's role."""
-        print("\nWhat is your role? (developer, manager, researcher)")
-        while True:
-            role = input("You: ").strip().lower()
-            
-            role_mapping = {
-                'developer': 'software_engineer',
-                'engineer': 'software_engineer',
-                'manager': 'manager',
-                'researcher': 'researcher'
-            }
-            
-            if role in role_mapping:
-                self.current_user_role = role_mapping[role]
-                logger.info(f"Set user role to: {self.current_user_role}")
-                break
-            else:
-                print("Please specify your role (developer, manager, or researcher):")
+    def _get_user_role(self) -> str:
+        """Get the current user role."""
+        return self.user_role
 
     def _get_issue_context(self) -> None:
         """Get context about the ethical issue."""
@@ -611,3 +495,23 @@ Please start by describing your role (e.g., developer, manager, researcher) and 
             logger.info(f"Added user response for {question_type}: {self.user_responses[question_type]}")
         
         print("\nThank you for providing these details. This will help me give you more targeted guidance.") 
+
+    def save_conversation(self, query: str, response: str, metadata: Dict = None) -> bool:
+        """Save conversation to database."""
+        try:
+            conversation_data = {
+                "conversation_id": self.conversation_id,
+                "user_role": self.user_role,
+                "query": query,
+                "response": response,
+                "timestamp": datetime.now(),
+                "user_responses": self.user_responses
+            }
+            if metadata:
+                conversation_data.update(metadata)
+            
+            self.db.save_conversation(conversation_data)
+            return True
+        except Exception as e:
+            logger.error(f"Error saving conversation: {str(e)}")
+            return False 

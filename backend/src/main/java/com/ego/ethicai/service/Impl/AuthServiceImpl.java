@@ -58,11 +58,9 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("User not activated");
         }
 
-        // Update last login timestamp
         user.setLastLogin(LocalDateTime.now());
         user = userService.saveUser(user);
 
-        // Create CustomUserDetails with the updated user
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String token = jwtUtil.generateToken(userDetails);
 
