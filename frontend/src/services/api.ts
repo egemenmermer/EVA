@@ -1,243 +1,218 @@
 import axios from 'axios';
-import { ManagerType } from '@/types';
-import type { 
+import { 
   LoginResponseDTO, 
-  RegisterResponseDTO,
-  ConversationResponseDTO,
+  RegisterResponseDTO, 
+  ConversationResponseDTO, 
   ConversationContentResponseDTO,
-  FeedbackResponseDTO 
+  FeedbackResponseDTO
 } from '@/types/api';
+import { ManagerType } from '@/types';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8443/api/v1',
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173/api/v1';
+
+// Get token from localStorage
+const getToken = () => localStorage.getItem('token');
+
+// Axios instance with authorization header
+const apiClient = axios.create({
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
-  withCredentials: true // Enable sending cookies
+  // Set a very long timeout to prevent quick failures
+  timeout: 60000, // 60 seconds
 });
 
-// Add request interceptor to include authorization token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    if (!config.headers) {
-      config.headers = {};
+// Add interceptor to add auth token to requests
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token && config.headers) {
+      // Make sure token has Bearer prefix
+      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      config.headers.Authorization = formattedToken;
     }
-    config.headers.Authorization = token;
-  }
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Add response interceptor for error handling
-api.interceptors.response.use(
+// Add response interceptor to handle token errors - NEVER log out automatically
+apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log the error for debugging
-    console.error('API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
-
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token');
-      // Only redirect to login if we're not already on the login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-    }
-
-    // Transform error message
-    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
-    return Promise.reject(new Error(message));
+    console.error('API Error:', error?.response?.status, error?.response?.data);
+    // Never log out automatically
+    return Promise.reject(error);
   }
 );
 
-// Add request interceptor for authentication
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  console.log('Retrieved token from localStorage:', token);
-  
-  if (token && config.headers) {
-    // Check if token already has 'Bearer ' prefix
-    const tokenValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-    config.headers.Authorization = tokenValue;
-    console.log('Request details:', {
-      url: config.url,
-      method: config.method,
-      headers: {
-        Authorization: config.headers.Authorization,
-        'Content-Type': config.headers['Content-Type']
-      }
-    });
-  } else {
-    console.log('No token found in localStorage for request:', {
-      url: config.url,
-      method: config.method
-    });
-  }
-  return config;
-}, (error) => {
-  console.error('Request Error:', error);
-  return Promise.reject(error);
-});
-
+// Authentication API
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponseDTO> => {
     try {
-      console.log('Attempting login with:', { email });
-      const response = await api.post<LoginResponseDTO>('/auth/login', { email, password });
-      console.log('Raw login response:', response);
-      console.log('Login response data:', JSON.stringify(response.data, null, 2));
-      
-      // Store the token with 'Bearer ' prefix if it doesn't have it
-      if (response.data.accessToken) {
-        const token = response.data.accessToken.startsWith('Bearer ') 
-          ? response.data.accessToken 
-          : `Bearer ${response.data.accessToken}`;
-        localStorage.setItem('token', token);
-        console.log('Stored token in localStorage:', token);
-      } else {
-        console.error('No accessToken found in response data:', response.data);
-      }
-      
+      const response = await apiClient.post<LoginResponseDTO>('/auth/login', { email, password });
+      // Store token directly here as well
+      const token = response.data.accessToken.startsWith('Bearer ') 
+        ? response.data.accessToken 
+        : `Bearer ${response.data.accessToken}`;
+      localStorage.setItem('token', token);
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data: unknown, status: number, headers: unknown } };
-        console.error('Error response:', {
-          data: axiosError.response?.data,
-          status: axiosError.response?.status,
-          headers: axiosError.response?.headers
-        });
-      }
-      throw error;
-    }
-  },
-  
-  register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
-    try {
-      console.log('Attempting registration with:', { email, fullName });
-      const response = await api.post<RegisterResponseDTO>('/auth/register', { email, password, fullName });
-      console.log('Registration response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    }
-  },
-  
-  activate: async (token: string): Promise<{ message: string }> => {
-    try {
-      const response = await api.post<{ message: string }>('/auth/activate', { token });
-      return response.data;
-    } catch (error) {
-      console.error('Activation error:', error);
       throw error;
     }
   },
 
-  oauth2Callback: async (provider: string, code: string): Promise<LoginResponseDTO> => {
+  register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
     try {
-      const response = await api.get<LoginResponseDTO>(`/auth/oauth2/${provider}/callback?code=${code}`);
+      const response = await apiClient.post<RegisterResponseDTO>('/auth/register', { email, password, fullName });
+      return response.data;
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
+  },
+
+  oauth2Callback: async (provider: string, code: string) => {
+    try {
+      const response = await apiClient.post<{ token: string; user: any }>(`/auth/oauth2/${provider}/callback`, { code });
+      // Store token directly here as well
+      const token = response.data.token.startsWith('Bearer ') 
+        ? response.data.token 
+        : `Bearer ${response.data.token}`;
+      localStorage.setItem('token', token);
       return response.data;
     } catch (error) {
       console.error('OAuth callback error:', error);
       throw error;
     }
+  },
+
+  activate: async (token: string) => {
+    try {
+      const response = await apiClient.post<{ message: string }>('/auth/activate', { token });
+      return response.data;
+    } catch (error) {
+      console.error('Activation error:', error);
+      throw error;
+    }
   }
 };
 
+// Conversation API
 export const conversationApi = {
-  start: async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
+  createConversation: async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
     try {
-      const response = await api.post<ConversationResponseDTO>('/conversation/start', { 
-        managerType: managerType.toUpperCase() 
-      });
+      const response = await apiClient.post<ConversationResponseDTO>('/conversation', { managerType });
       return response.data;
     } catch (error) {
-      console.error('Start conversation error:', error);
+      console.error('Create conversation error:', error);
       throw error;
     }
   },
-  
+
+  getConversations: async () => {
+    try {
+      const response = await apiClient.get<ConversationResponseDTO[]>('/conversation');
+      return response.data;
+    } catch (error) {
+      console.error('Get conversations error:', error);
+      throw error;
+    }
+  },
+
+  deleteConversation: async (conversationId: string) => {
+    try {
+      const response = await apiClient.delete<{ message: string }>(`/conversation/${conversationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete conversation error:', error);
+      throw error;
+    }
+  },
+
   sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationContentResponseDTO> => {
     try {
-      const response = await api.post<ConversationContentResponseDTO>('/conversation/message', { 
-        conversationId, 
-        userQuery 
+      interface MessageResponse {
+        conversationId: string;
+        userQuery: string;
+        agentResponse: string;
+        createdAt: string;
+      }
+      
+      const response = await apiClient.post<MessageResponse>('/conversation/message', {
+        conversationId,
+        userQuery
       });
+      
+      // Map the response to the expected DTO format
       return {
-        ...response.data,
+        conversationId: response.data.conversationId,
+        content: response.data.agentResponse,
         role: 'assistant',
-        content: response.data.agentResponse
+        createdAt: response.data.createdAt,
+        userQuery: response.data.userQuery,
+        agentResponse: response.data.agentResponse
       };
     } catch (error) {
       console.error('Send message error:', error);
       throw error;
     }
   },
-  
-  getConversation: async (id: string): Promise<ConversationResponseDTO> => {
-    try {
-      const response = await api.get<ConversationResponseDTO>(`/conversation/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Get conversation error:', error);
-      throw error;
-    }
-  },
-  
+
   getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
     try {
-      const response = await api.get<ConversationContentResponseDTO[]>(`/conversation/message/${conversationId}`);
-      return response.data.map(msg => ({
-        ...msg,
-        role: msg.userQuery ? 'user' : 'assistant',
-        content: msg.userQuery || msg.agentResponse
-      }));
+      interface MessageDTO {
+        conversationId: string;
+        userQuery: string;
+        agentResponse: string;
+        createdAt: string;
+      }
+      
+      const response = await apiClient.get<MessageDTO[]>(`/conversation/message/${conversationId}`);
+      
+      // Create two messages from each response - one for user and one for assistant
+      const messages: ConversationContentResponseDTO[] = [];
+      
+      response.data.forEach((msg: MessageDTO) => {
+        // Add user message
+        messages.push({
+          conversationId: msg.conversationId,
+          role: 'user',
+          content: msg.userQuery,
+          createdAt: msg.createdAt
+        });
+        
+        // Add assistant response
+        messages.push({
+          conversationId: msg.conversationId,
+          role: 'assistant',
+          content: msg.agentResponse,
+          createdAt: msg.createdAt
+        });
+      });
+      
+      return messages;
     } catch (error) {
       console.error('Get conversation messages error:', error);
-      throw error;
-    }
-  },
-  
-  getUserConversations: async (userId: string): Promise<ConversationResponseDTO[]> => {
-    try {
-      const response = await api.get<ConversationResponseDTO[]>(`/conversation/user/${userId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Get user conversations error:', error);
-      throw error;
-    }
-  },
-
-  deleteConversation: async (conversationId: string): Promise<void> => {
-    try {
-      await api.delete(`/conversation/${conversationId}`);
-    } catch (error) {
-      console.error('Delete conversation error:', error);
       throw error;
     }
   }
 };
 
+// Feedback API
 export const feedbackApi = {
-  submit: async (
-    conversationId: string, 
-    rating: number, 
-    userFeedback?: string
+  submitFeedback: async (
+    conversationId: string,
+    userFeedback: string,
+    rating: number
   ): Promise<FeedbackResponseDTO> => {
     try {
-      const response = await api.post<FeedbackResponseDTO>('/feedback/submit', {
+      const response = await apiClient.post<FeedbackResponseDTO>('/feedback', {
         conversationId,
-        rating,
-        userFeedback
+        userFeedback,
+        rating
       });
       return response.data;
     } catch (error) {
@@ -245,10 +220,10 @@ export const feedbackApi = {
       throw error;
     }
   },
-  
-  getByConversation: async (conversationId: string): Promise<FeedbackResponseDTO> => {
+
+  getFeedback: async (conversationId: string): Promise<FeedbackResponseDTO> => {
     try {
-      const response = await api.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
+      const response = await apiClient.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
       return response.data;
     } catch (error) {
       console.error('Get feedback error:', error);

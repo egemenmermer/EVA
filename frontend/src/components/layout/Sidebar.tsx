@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { useConversation } from '@/hooks/useConversation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { conversationApi } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { 
@@ -35,6 +36,7 @@ export const Sidebar: React.FC = () => {
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
   const { logout } = useAuth();
   const { 
     user, 
@@ -46,10 +48,38 @@ export const Sidebar: React.FC = () => {
     toggleDarkMode 
   } = useStore();
   
-  const { conversations, startConversation, isLoading, deleteConversation } = useConversation();
+  // Fetch conversations
+  const { data: conversations = [], isLoading: isLoadingConversations } = useQuery(
+    ['conversations'],
+    () => conversationApi.getConversations(),
+    {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false
+    }
+  );
+
+  // Start a new conversation
+  const startConversationMutation = useMutation({
+    mutationFn: (managerType: ManagerType) => conversationApi.createConversation(managerType),
+    onSuccess: (data) => {
+      setCurrentConversation(data);
+      queryClient.invalidateQueries(['conversations']);
+    }
+  });
+
+  // Delete a conversation
+  const deleteConversationMutation = useMutation({
+    mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
+    onSuccess: () => {
+      if (currentConversation?.conversationId === selectedConversationId) {
+        setCurrentConversation(null);
+      }
+      queryClient.invalidateQueries(['conversations']);
+    }
+  });
 
   const handleNewChat = async () => {
-    await startConversation(managerType);
+    startConversationMutation.mutate(managerType);
   };
 
   const handleLogout = () => {
@@ -86,18 +116,13 @@ export const Sidebar: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     if (selectedConversationId) {
-      try {
-        await deleteConversation(selectedConversationId);
-        // The rest of the cleanup is handled in the mutation
-      } catch (error) {
-        console.error('Failed to delete conversation:', error);
-      }
+      deleteConversationMutation.mutate(selectedConversationId);
     }
     setShowContextMenu(false);
   };
 
   // Add click outside handler
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
         setShowContextMenu(false);
@@ -168,52 +193,70 @@ export const Sidebar: React.FC = () => {
         <div className="space-y-0.5">
           <button
             onClick={handleNewChat}
+            disabled={startConversationMutation.isLoading}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-900 dark:text-gray-100"
           >
-            <Plus className="h-4 w-4" />
+            {startConversationMutation.isLoading ? 
+              <Loader2 className="h-4 w-4 animate-spin" /> : 
+              <Plus className="h-4 w-4" />
+            }
             New Chat
           </button>
 
-          {conversations?.map((conversation) => (
-            <button
-              key={conversation.conversationId}
-              onClick={() => setCurrentConversation(conversation)}
-              onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
-              className={cn(
-                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors duration-200",
-                currentConversation?.conversationId === conversation.conversationId
-                  ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-              )}
-            >
-              <MessageSquare className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate flex-1 text-left">New conversation</span>
-              <span className="flex-shrink-0 text-xs text-gray-400">
-                {format(new Date(conversation.createdAt), 'MMM d')}
-              </span>
-            </button>
-          ))}
+          {isLoadingConversations ? (
+            <div className="py-4 flex justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              No conversations yet
+            </div>
+          ) : (
+            conversations.map((conversation) => (
+              <button
+                key={conversation.conversationId}
+                onClick={() => setCurrentConversation(conversation)}
+                onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors duration-200",
+                  currentConversation?.conversationId === conversation.conversationId
+                    ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                )}
+              >
+                <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate flex-1 text-left">Chat {format(new Date(conversation.createdAt), 'MMM d')}</span>
+                <span className="flex-shrink-0 text-xs text-gray-400">
+                  {format(new Date(conversation.createdAt), 'h:mm a')}
+                </span>
+              </button>
+            ))
+          )}
         </div>
       </div>
 
       {/* User section */}
-      <div className="mt-auto border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-auto px-2 py-2 border-t border-gray-200 dark:border-gray-700">
         <div className="relative">
-          <div className="flex items-center p-2">
+          <div className="flex items-center">
             <button
               onClick={() => setShowLogout(!showLogout)}
-              className="flex items-center gap-2 flex-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors rounded p-1"
+              className="flex items-center gap-2 flex-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors rounded p-2 cursor-pointer z-10"
+              style={{ userSelect: 'none' }}
             >
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-blue-600 text-white text-sm">
-                  {user?.fullName?.[0]?.toUpperCase()}
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                <AvatarFallback className="bg-blue-600 text-white font-medium">
+                  {user?.fullName?.[0]?.toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm truncate">{user?.fullName}</span>
+              <span className="text-sm truncate text-gray-900 dark:text-gray-100 ml-2">
+                {user?.fullName || 'User'}
+              </span>
             </button>
             <button
               onClick={toggleDarkMode}
-              className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded"
+              className="p-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-full z-10"
+              aria-label="Toggle dark mode"
             >
               {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -222,12 +265,12 @@ export const Sidebar: React.FC = () => {
           {showLogout && (
             <>
               <div 
-                className="fixed inset-0 z-10" 
+                className="fixed inset-0 z-20" 
                 onClick={() => setShowLogout(false)}
               />
-              <div className="absolute bottom-full left-0 w-full mb-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden z-20">
+              <div className="absolute bottom-full left-0 w-full mb-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden z-30">
                 <div className="p-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                  {user?.email}
+                  {user?.email || 'user@example.com'}
                 </div>
                 <div className="p-1">
                   <a
@@ -264,7 +307,7 @@ export const Sidebar: React.FC = () => {
       {showContextMenu && (
         <>
           <div
-            className="fixed inset-0"
+            className="fixed inset-0 z-40"
             onClick={() => setShowContextMenu(false)}
           />
           <div

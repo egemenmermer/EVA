@@ -28,6 +28,9 @@ export interface ConversationContentResponseDTO {
   content: string;
   role: 'user' | 'assistant';
   createdAt: string;
+  // Backend specific fields
+  userQuery?: string;
+  agentResponse?: string;
 }
 
 export interface FeedbackResponseDTO {

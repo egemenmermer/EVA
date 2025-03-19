@@ -3,10 +3,9 @@ import { useStore } from '@/store/useStore';
 import { useConversation } from '@/hooks/useConversation';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
-import { Loader2 } from 'lucide-react';
 
 export const ChatWindow: React.FC = () => {
-  const { currentConversation, managerType } = useStore();
+  const { currentConversation, managerType, messages } = useStore();
   const { sendMessage, startConversation, isLoading } = useConversation(currentConversation?.conversationId);
 
   const handleSendMessage = async (message: string) => {
@@ -34,7 +33,7 @@ export const ChatWindow: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       <div className="flex-1 overflow-hidden relative">
         {!currentConversation ? (
           <div className="h-full flex items-center justify-center p-4">
@@ -48,18 +47,11 @@ export const ChatWindow: React.FC = () => {
             </div>
           </div>
         ) : (
-          <>
-            <MessageList isLoading={false} />
-            {isLoading && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-              </div>
-            )}
-          </>
+          <MessageList messages={messages} loading={isLoading} />
         )}
       </div>
-      <div className="flex-none">
-        <ChatInput onSendMessage={handleSendMessage} isLoading={false} />
+      <div className="flex-none mb-16">
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
     </div>
   );

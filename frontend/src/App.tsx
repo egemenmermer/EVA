@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -11,10 +11,41 @@ import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore } from '@/store/useStore';
 
-const queryClient = new QueryClient();
+// Configure the query client with better defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: 1000,
+      staleTime: 0,
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+    },
+  },
+});
 
 export const App: React.FC = () => {
-  const { user, darkMode } = useStore();
+  const { user, darkMode, setToken, setUser } = useStore();
+
+  // Check for token on app startup
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && !user) {
+      console.log('Found token, restoring session');
+      // Format token properly
+      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      setToken(formattedToken);
+      
+      // Set a placeholder user if we don't have user data
+      if (!user) {
+        setUser({
+          id: 'restored-session',
+          email: 'user@example.com',
+          fullName: 'User'
+        });
+      }
+    }
+  }, [setToken, setUser, user]);
 
   const theme = createTheme({
     palette: {
@@ -28,6 +59,9 @@ export const App: React.FC = () => {
     },
   });
 
+  // Check if we have a token, regardless of user state
+  const hasToken = Boolean(localStorage.getItem('token'));
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
@@ -40,16 +74,24 @@ export const App: React.FC = () => {
                 <Route 
                   path="/dashboard" 
                   element={
-                    user ? <MainLayout /> : <Navigate to="/login" replace />
+                    user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
                   } 
                 />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route 
+                  path="/login" 
+                  element={user || hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
+                />
+                <Route 
+                  path="/register" 
+                  element={user || hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />} 
+                />
                 <Route path="/auth/activate" element={<ActivationPage />} />
                 <Route path="/auth/google/callback" element={<OAuthCallback />} />
                 <Route path="/auth/github/callback" element={<OAuthCallback />} />
-                {/* Catch all route - redirect to landing page */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
+                <Route path="*" element={
+                  user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
+                } />
               </Routes>
             </Router>
           </div>

@@ -1,45 +1,75 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
+import { ManagerType } from '@/types';
 import { useStore } from '@/store/useStore';
-import type { ConversationResponseDTO, ConversationContentResponseDTO } from '@/types/api';
-import type { ManagerType } from '@/types';
+import { ConversationContentResponseDTO } from '@/types/api';
 
+/**
+ * Hook for handling conversation operations
+ */
 export const useConversation = (conversationId?: string) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, setCurrentConversation, messages, setMessages, addMessage } = useStore();
   const queryClient = useQueryClient();
-  const { user, setUser, setCurrentConversation, setMessages, addMessage, currentConversation } = useStore();
 
-  const { data: conversations, isError: isConversationsError } = useQuery({
-    queryKey: ['conversations', user?.id],
-    queryFn: () => user ? conversationApi.getUserConversations(user.id) : Promise.resolve([]),
-    enabled: !!user,
-    retry: false,
+  // Get conversation list
+  const { data: conversations = [], refetch: refetchConversations } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => conversationApi.getConversations(),
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     onError: (error: Error) => {
-      if (error.message.includes('401')) {
-        setUser(null);
-      }
+      console.error('Error fetching conversations:', error);
+      // Never log out automatically
     }
   });
 
-  const { data: messages, isLoading: isMessagesLoading, isError: isMessagesError } = useQuery({
+  // Periodically refresh conversations
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      refetchConversations();
+    }, 5000); // Refresh every 5 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [refetchConversations]);
+
+  // Get messages for current conversation
+  const { data: fetchedMessages = [], refetch: refetchMessages } = useQuery({
     queryKey: ['messages', conversationId],
     queryFn: () => conversationId ? conversationApi.getConversationMessages(conversationId) : Promise.resolve([]),
-    enabled: !!conversationId && !!user,
-    retry: false,
+    enabled: !!conversationId,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     onSuccess: (data) => {
-      console.log('Fetched messages:', data);
-      setMessages(data);
+      if (data && Array.isArray(data)) {
+        console.log('Fetched messages:', data.length);
+        setMessages(data);
+      }
     },
     onError: (error: Error) => {
       console.error('Error fetching messages:', error);
-      if (error.message.includes('401')) {
-        setUser(null);
-      }
+      // Never log out automatically
     }
   });
 
+  // Set messages in store when fetchedMessages changes
+  useEffect(() => {
+    if (fetchedMessages && fetchedMessages.length > 0) {
+      setMessages(fetchedMessages);
+    }
+  }, [fetchedMessages, setMessages]);
+
+  // Start a new conversation
   const startConversationMutation = useMutation({
-    mutationFn: (managerType: ManagerType) => conversationApi.start(managerType),
-    onSuccess: (data: ConversationResponseDTO) => {
+    mutationFn: (managerType: ManagerType) => conversationApi.createConversation(managerType),
+    onSuccess: (data) => {
       console.log('Started new conversation:', data);
       setCurrentConversation(data);
       // Clear messages when starting new conversation
@@ -48,9 +78,7 @@ export const useConversation = (conversationId?: string) => {
     },
     onError: (error: Error) => {
       console.error('Error starting conversation:', error);
-      if (error.message.includes('401')) {
-        setUser(null);
-      }
+      // Never log out automatically
     }
   });
 
@@ -87,38 +115,53 @@ export const useConversation = (conversationId?: string) => {
         throw error;
       }
     },
-    onError: (error: Error) => {
-      console.error('Message mutation error:', error);
-      if (error.message.includes('401')) {
-        setUser(null);
+    onMutate: () => {
+      setIsLoading(true);
+    },
+    onSettled: () => {
+      setIsLoading(false);
+      // Refresh the message list
+      if (conversationId) {
+        refetchMessages();
       }
+      // Refresh conversation list to update timestamps
+      queryClient.invalidateQueries(['conversations']);
+    },
+    onError: (error: Error) => {
+      console.error('Error in message mutation:', error);
+      // Never log out automatically
     }
   });
+
+  const sendMessage = (data: { conversationId: string; userQuery: string }) => 
+    sendMessageMutation.mutate(data);
+
+  const startConversation = (
+    managerType: ManagerType, 
+    callbacks?: { onSuccess?: (data: any) => void }
+  ) => {
+    return startConversationMutation.mutate(managerType, {
+      onSuccess: (data) => {
+        if (callbacks?.onSuccess) {
+          callbacks.onSuccess(data);
+        }
+      }
+    });
+  };
 
   const deleteConversationMutation = useMutation({
     mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
     onSuccess: () => {
       queryClient.invalidateQueries(['conversations']);
-      // Clear current conversation if it was deleted
-      if (currentConversation?.conversationId === conversationId) {
-        setCurrentConversation(null);
-      }
-    },
-    onError: (error: Error) => {
-      if (error.message.includes('401')) {
-        setUser(null);
-      }
-      console.error('Failed to delete conversation:', error);
     }
   });
 
   return {
     conversations,
     messages,
-    startConversation: startConversationMutation.mutate,
-    sendMessage: sendMessageMutation.mutate,
-    deleteConversation: deleteConversationMutation.mutate,
-    isLoading: startConversationMutation.isLoading || sendMessageMutation.isLoading || isMessagesLoading,
-    isError: isConversationsError || isMessagesError
+    isLoading,
+    sendMessage,
+    startConversation,
+    deleteConversation: deleteConversationMutation.mutate
   };
 }; 
