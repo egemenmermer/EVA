@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { EthicalGuidelines } from '../guidelines/EthicalGuidelines';
 import { useStore } from '@/store/useStore';
 import logo from '@/assets/logo.svg';
+import { useNavigate } from 'react-router-dom';
 
 export const MainLayout: React.FC = () => {
-  const { darkMode } = useStore();
+  const { darkMode, user, token } = useStore();
+  const navigate = useNavigate();
+
+  // Double-check that we have a token - if not, redirect to login
+  useEffect(() => {
+    const hasToken = Boolean(localStorage.getItem('token'));
+    if (!hasToken && !token) {
+      navigate('/login');
+    }
+  }, [navigate, token]);
 
   return (
     <div className={`${darkMode ? 'dark' : ''}`}>
