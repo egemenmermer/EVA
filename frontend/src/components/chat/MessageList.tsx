@@ -1,153 +1,133 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { useStore } from '@/store/useStore';
-import { format } from 'date-fns';
-import { Bot, User, Trash2 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Message } from '@/types/chat';
+import { BotIcon, UserIcon } from '@/components/icons';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import type { ConversationContentResponseDTO } from '@/types/api';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import type { Components } from 'react-markdown';
+import type { NormalComponents } from 'react-markdown/lib/complex-types';
 
-interface MessageItemProps {
-  message: ConversationContentResponseDTO;
-  index: number;
+interface Props {
+  messages: Message[];
+  loading?: boolean;
 }
 
-interface CustomCodeProps {
-  node?: any;
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-  [key: string]: any;
-}
+export const MessageList: React.FC<Props> = ({ messages, loading }) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-const TypingIndicator: React.FC = () => (
-  <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-900 animate-in fade-in slide-in-from-bottom-4 duration-300">
-    <div className="flex-shrink-0">
-      <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-        <Bot className="h-5 w-5 text-white" />
-      </div>
-    </div>
-    <div className="flex items-center">
-      <div className="flex space-x-1">
-        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-      </div>
-    </div>
-  </div>
-);
-
-const TypeWriter = ({ text, onComplete }: { text: string; onComplete: () => void }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const words = useMemo(() => text.split(/(\s+)/), [text]); // Split by whitespace but keep separators
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
-    if (currentIndex < words.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + words[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, 30); // Faster speed for word-by-word
-      return () => clearTimeout(timeout);
-    } else {
-      onComplete();
-    }
-  }, [currentIndex, words, onComplete]);
+    scrollToBottom();
+  }, [messages]);
 
-  return <ReactMarkdown>{displayText}</ReactMarkdown>;
-};
-
-const MessageItem = ({ message, index }: MessageItemProps) => {
-  const [isTyping, setIsTyping] = useState(true);
-  const messageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (messageRef.current) {
-      messageRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [message]);
-
-  const isUser = message.role === 'user';
-
-  return (
-    <div
-      ref={messageRef}
-      className={cn(
-        'flex w-full mb-4 animate-fade-in',
-        isUser ? 'justify-end' : 'justify-start'
-      )}
-    >
-      <div
-        className={cn(
-          'flex gap-3 max-w-[80%]',
-          isUser ? 'flex-row-reverse' : 'flex-row'
-        )}
-      >
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={isUser ? '/user-avatar.png' : '/ai-avatar.png'} />
-          <AvatarFallback>{isUser ? 'U' : 'AI'}</AvatarFallback>
-        </Avatar>
-
-        <div
-          className={cn(
-            'flex flex-col rounded-lg p-4',
-            isUser
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-          )}
+  const components: Partial<NormalComponents> = {
+    p: ({ children }) => (
+      <p className="whitespace-pre-wrap mb-2 last:mb-0">{children}</p>
+    ),
+    code: ({ node, inline, className, children, ...props }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      return !inline && match ? (
+        <SyntaxHighlighter
+          language={match[1]}
+          style={oneDark as any}
+          PreTag="div"
+          className="rounded-md text-sm"
         >
-          <div className="text-sm font-semibold mb-1">
-            {isUser ? 'You' : 'AI Assistant'}
-          </div>
-          <div className="text-sm">
-            {isUser || !isTyping ? (
-              <div className="flex flex-col gap-2">
-                {message.content.split('\n').map((line, i) => (
-                  <div key={i} className="text-gray-700 dark:text-gray-300">
-                    {line.trim().startsWith('```') ? (
-                      <SyntaxHighlighter
-                        language="javascript"
-                        style={vscDarkPlus}
-                        customStyle={{ margin: 0, padding: '1rem', borderRadius: '0.5rem' }}
-                      >
-                        {line.replace(/```/g, '')}
-                      </SyntaxHighlighter>
-                    ) : (
-                      line
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <TypeWriter
-                text={message.content}
-                onComplete={() => setIsTyping(false)}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const MessageList: React.FC<{ isLoading?: boolean }> = ({ isLoading }) => {
-  const { messages } = useStore();
-  const containerRef = useRef<HTMLDivElement>(null);
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      ) : (
+        <code
+          className={`${
+            inline
+              ? 'bg-gray-200 dark:bg-gray-700 rounded px-1 py-0.5'
+              : ''
+          }`}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    ul: ({ children }) => (
+      <ul className="list-disc pl-4 space-y-2">{children}</ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal pl-4 space-y-2">{children}</ol>
+    ),
+  };
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto p-4">
-      <div className="flex flex-col justify-end min-h-full">
+    <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col space-y-4 pb-4">
         {messages.map((message, index) => (
-          <MessageItem
-            key={`${message.conversationId}-${index}`}
-            message={message}
-            index={index}
-          />
+          <div
+            key={index}
+            className={`flex ${
+              message.role === 'user' ? 'justify-end' : 'justify-start'
+            } px-4 md:px-6 lg:px-8`}
+          >
+            <div
+              className={`flex ${
+                message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+              } items-start gap-4 max-w-[85%]`}
+            >
+              <div className="flex-shrink-0 mt-1">
+                {message.role === 'user' ? (
+                  <div className="h-7 w-7 rounded-full bg-blue-500 flex items-center justify-center">
+                    <UserIcon className="h-5 w-5 text-white" />
+                  </div>
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-gray-600 flex items-center justify-center">
+                    <BotIcon className="h-5 w-5 text-white" />
+                  </div>
+                )}
+              </div>
+              <div
+                className={`flex flex-col space-y-1 overflow-hidden ${
+                  message.role === 'user'
+                    ? 'items-end'
+                    : 'items-start'
+                }`}
+              >
+                <div
+                  className={`rounded-2xl px-4 py-2 ${
+                    message.role === 'user'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  }`}
+                >
+                  <ReactMarkdown components={components}>
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
-        {isLoading && <TypingIndicator />}
+        {loading && (
+          <div className="flex justify-start px-4 md:px-6 lg:px-8">
+            <div className="flex flex-row items-start gap-4 max-w-[85%]">
+              <div className="flex-shrink-0 mt-1">
+                <div className="h-7 w-7 rounded-full bg-gray-600 flex items-center justify-center">
+                  <BotIcon className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <div className="flex flex-col space-y-1">
+                <div className="rounded-2xl px-4 py-2 bg-gray-100 dark:bg-gray-800">
+                  <div className="animate-pulse flex space-x-2">
+                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
     </div>
   );

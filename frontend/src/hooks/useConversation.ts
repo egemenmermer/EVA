@@ -26,9 +26,11 @@ export const useConversation = (conversationId?: string) => {
     enabled: !!conversationId && !!user,
     retry: false,
     onSuccess: (data) => {
+      console.log('Fetched messages:', data);
       setMessages(data);
     },
     onError: (error: Error) => {
+      console.error('Error fetching messages:', error);
       if (error.message.includes('401')) {
         setUser(null);
       }
@@ -38,10 +40,14 @@ export const useConversation = (conversationId?: string) => {
   const startConversationMutation = useMutation({
     mutationFn: (managerType: ManagerType) => conversationApi.start(managerType),
     onSuccess: (data: ConversationResponseDTO) => {
+      console.log('Started new conversation:', data);
       setCurrentConversation(data);
+      // Clear messages when starting new conversation
+      setMessages([]);
       queryClient.invalidateQueries(['conversations']);
     },
     onError: (error: Error) => {
+      console.error('Error starting conversation:', error);
       if (error.message.includes('401')) {
         setUser(null);
       }
@@ -50,6 +56,8 @@ export const useConversation = (conversationId?: string) => {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: string; userQuery: string }) => {
+      console.log('Sending message:', data);
+      
       // First, immediately add the user's message to the UI
       const userMessage: ConversationContentResponseDTO = {
         conversationId: data.conversationId,
@@ -59,21 +67,28 @@ export const useConversation = (conversationId?: string) => {
       };
       addMessage(userMessage);
 
-      // Then make the API call
-      const response = await conversationApi.sendMessage(data.conversationId, data.userQuery);
-      
-      // Add the AI response
-      const aiMessage: ConversationContentResponseDTO = {
-        conversationId: response.conversationId,
-        content: response.content,
-        role: 'assistant',
-        createdAt: new Date().toISOString()
-      };
-      addMessage(aiMessage);
+      try {
+        // Then make the API call
+        const response = await conversationApi.sendMessage(data.conversationId, data.userQuery);
+        console.log('Received AI response:', response);
+        
+        // Add the AI response
+        const aiMessage: ConversationContentResponseDTO = {
+          conversationId: response.conversationId,
+          content: response.content,
+          role: 'assistant',
+          createdAt: new Date().toISOString()
+        };
+        addMessage(aiMessage);
 
-      return response;
+        return response;
+      } catch (error) {
+        console.error('Error sending message:', error);
+        throw error;
+      }
     },
     onError: (error: Error) => {
+      console.error('Message mutation error:', error);
       if (error.message.includes('401')) {
         setUser(null);
       }

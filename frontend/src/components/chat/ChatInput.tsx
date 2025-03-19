@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -7,12 +7,11 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading = false, disabled = false }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading = false }) => {
   const [message, setMessage] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = () => {
-    if (message.trim() && !isLoading && !disabled) {
+    if (message.trim()) {
       onSendMessage(message.trim());
       setMessage('');
     }
@@ -26,47 +25,37 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading =
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 animate-in slide-in-from-bottom duration-300">
-      <div className="max-w-4xl mx-auto flex items-end gap-4">
-        <div className="flex-1 relative">
+    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-gray-900 pt-6 pb-3">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="relative flex items-end bg-white dark:bg-gray-800 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(0,0,0,0.3)]">
           <textarea
-            rows={1}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder="Type your message..."
-            className="w-full resize-none rounded-lg border border-gray-200 dark:border-gray-700 
-                     bg-white dark:bg-gray-900 p-3 pr-10
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-                     text-gray-900 dark:text-gray-100 transition-all duration-200
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || disabled}
+            placeholder="Message EVA..."
+            className="w-full resize-none rounded-xl border-0 bg-transparent py-[14px] pl-5 pr-12
+                     focus:ring-0 focus-visible:ring-0 dark:bg-transparent
+                     text-base md:text-[16px] text-gray-900 dark:text-gray-100
+                     placeholder:text-gray-500 dark:placeholder:text-gray-400"
+            style={{
+              maxHeight: '200px',
+              minHeight: '52px',
+              overflowY: 'hidden',
+              height: 'auto'
+            }}
+            rows={1}
           />
-          <div className={`absolute right-3 bottom-3 text-sm text-gray-400 transition-opacity duration-200
-                        ${message.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
-            Press Enter ↵
-          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={!message.trim()}
+            className="absolute right-3 bottom-3 p-1.5 rounded-lg
+                     text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
+                     disabled:opacity-40 disabled:cursor-not-allowed
+                     transition-all duration-200"
+          >
+            <Send className="h-5 w-5" />
+          </button>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={!message.trim() || isLoading || disabled}
-          className={`rounded-lg bg-blue-500 p-3 text-white
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-all duration-200 transform
-                   ${message.trim() && !isLoading && !disabled
-                     ? 'hover:bg-blue-600 hover:scale-105' 
-                     : 'cursor-not-allowed'}`}
-        >
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Send className={`h-5 w-5 transition-transform duration-200
-                          ${message.trim() ? 'scale-100' : 'scale-90'}`} />
-          )}
-        </button>
       </div>
     </div>
   );

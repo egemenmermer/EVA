@@ -25,7 +25,7 @@ const getInitialDarkMode = () => {
 
 export const useStore = create<Store>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       currentConversation: null,
       messages: [],
@@ -40,13 +40,30 @@ export const useStore = create<Store>()(
           set({ currentConversation: null, messages: [] });
         }
       },
-      setCurrentConversation: (conversation: Conversation | null) => 
-        set({ currentConversation: conversation, messages: [] }),
-      setMessages: (messages: ConversationContentResponseDTO[]) =>
-        set({ messages }),
+      setCurrentConversation: (conversation: Conversation | null) => {
+        const currentMessages = get().messages;
+        set({ 
+          currentConversation: conversation,
+          // Only clear messages if it's a new conversation
+          messages: conversation?.conversationId !== get().currentConversation?.conversationId ? [] : currentMessages
+        });
+      },
+      setMessages: (messages: ConversationContentResponseDTO[]) => {
+        console.log('Setting messages:', messages);
+        set({ messages });
+      },
       addMessage: (message: ConversationContentResponseDTO) => 
         set((state) => {
           console.log('Adding message to store:', message);
+          // Check for duplicates before adding
+          const isDuplicate = state.messages.some(
+            (m) => m.content === message.content && 
+                  m.role === message.role && 
+                  m.conversationId === message.conversationId
+          );
+          if (isDuplicate) {
+            return state;
+          }
           return { messages: [...state.messages, message] };
         }),
       deleteMessage: (messageId: string) =>
@@ -62,15 +79,23 @@ export const useStore = create<Store>()(
       partialize: (state) => ({
         user: state.user,
         darkMode: state.darkMode,
-        managerType: state.managerType
+        managerType: state.managerType,
+        messages: state.messages,
+        currentConversation: state.currentConversation
       }),
-      onRehydrateStorage: () => (state) => {
-        // Check if there's a token but no user
-        const token = localStorage.getItem('token');
-        if (!token && state?.user) {
-          state.setUser(null);
-        }
-        console.log('Store rehydrated:', state);
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          const data = JSON.parse(str);
+          console.log('Loading from storage:', data);
+          return data;
+        },
+        setItem: (name, value) => {
+          console.log('Saving to storage:', value);
+          localStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => localStorage.removeItem(name)
       }
     }
   )

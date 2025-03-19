@@ -15,8 +15,11 @@ import {
   LogOut,
   Trash2,
   Wand2,
-  Eye
+  Eye,
+  Github,
+  FileText
 } from 'lucide-react';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ManagerType } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -125,49 +128,47 @@ export const Sidebar: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-800">
       {/* Manager Type Selection - Fixed height */}
-      <div className="flex-none p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="space-y-2">
-          <button
-            onClick={() => setManagerType('PUPPETEER')}
-            className={cn(
-              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm select-none",
-              managerType === 'PUPPETEER' ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-            )}
-          >
-            <Wand2 className="h-4 w-4" />
-            Puppeteer
-          </button>
-          <button
-            onClick={() => setManagerType('DILUTER')}
-            className={cn(
-              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm select-none",
-              managerType === 'DILUTER' ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-            )}
-          >
-            <Shield className="h-4 w-4" />
-            Diluter
-          </button>
-          <button
-            onClick={() => setManagerType('CAMOUFLAGER')}
-            className={cn(
-              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm select-none",
-              managerType === 'CAMOUFLAGER' ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-            )}
-          >
-            <Eye className="h-4 w-4" />
-            Camouflager
-          </button>
-        </div>
+      <div className="flex-none p-2 space-y-0.5">
+        <button
+          onClick={() => setManagerType('PUPPETEER')}
+          className={cn(
+            "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+            managerType === 'PUPPETEER' ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+          )}
+        >
+          <Wand2 className="h-4 w-4" />
+          Puppeteer
+        </button>
+        <button
+          onClick={() => setManagerType('DILUTER')}
+          className={cn(
+            "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+            managerType === 'DILUTER' ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+          )}
+        >
+          <Shield className="h-4 w-4" />
+          Diluter
+        </button>
+        <button
+          onClick={() => setManagerType('CAMOUFLAGER')}
+          className={cn(
+            "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+            managerType === 'CAMOUFLAGER' ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+          )}
+        >
+          <Eye className="h-4 w-4" />
+          Camouflager
+        </button>
       </div>
 
       {/* Conversation List - Scrollable */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-2">
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="space-y-0.5">
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-blue-500 hover:bg-blue-600 text-white select-none"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-900 dark:text-gray-100"
           >
             <Plus className="h-4 w-4" />
             New Chat
@@ -179,40 +180,84 @@ export const Sidebar: React.FC = () => {
               onClick={() => setCurrentConversation(conversation)}
               onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
               className={cn(
-                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm select-none",
+                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors duration-200",
                 currentConversation?.conversationId === conversation.conversationId
-                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
               )}
             >
-              <MessageSquare className="h-4 w-4" />
-              Conversation {format(new Date(conversation.createdAt), 'MMM d, yyyy')}
+              <MessageSquare className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate flex-1 text-left">New conversation</span>
+              <span className="flex-shrink-0 text-xs text-gray-400">
+                {format(new Date(conversation.createdAt), 'MMM d')}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* User Actions - Fixed height */}
-      <div className="flex-none p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-            {user?.fullName}
-          </span>
-          <button
-            onClick={toggleDarkMode}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
-                     rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+      {/* User section */}
+      <div className="mt-auto border-t border-gray-200 dark:border-gray-700">
+        <div className="relative">
+          <div className="flex items-center p-2">
+            <button
+              onClick={() => setShowLogout(!showLogout)}
+              className="flex items-center gap-2 flex-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors rounded p-1"
+            >
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="bg-blue-600 text-white text-sm">
+                  {user?.fullName?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm truncate">{user?.fullName}</span>
+            </button>
+            <button
+              onClick={toggleDarkMode}
+              className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded"
+            >
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
+
+          {showLogout && (
+            <>
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setShowLogout(false)}
+              />
+              <div className="absolute bottom-full left-0 w-full mb-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden z-20">
+                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                  {user?.email}
+                </div>
+                <div className="p-1">
+                  <a
+                    href="https://github.com/egemenmermer/yu-thesis"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 w-full p-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded"
+                  >
+                    <Github className="h-4 w-4" />
+                    GitHub Repository
+                  </a>
+                  <a
+                    href="#"
+                    className="flex items-center gap-2 w-full p-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Research Paper
+                  </a>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full p-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </button>
       </div>
 
       {/* Context Menu */}
@@ -223,12 +268,13 @@ export const Sidebar: React.FC = () => {
             onClick={() => setShowContextMenu(false)}
           />
           <div
+            ref={contextMenuRef}
             style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}
-            className="absolute z-50 min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
+            className="fixed z-50 min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
           >
             <button
               onClick={handleDelete}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <Trash2 className="h-4 w-4" />
               Delete
