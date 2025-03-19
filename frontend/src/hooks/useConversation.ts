@@ -6,7 +6,7 @@ import type { ManagerType } from '@/types';
 
 export const useConversation = (conversationId?: string) => {
   const queryClient = useQueryClient();
-  const { user, setUser, setCurrentConversation, setMessages, addMessage } = useStore();
+  const { user, setUser, setCurrentConversation, setMessages, addMessage, currentConversation } = useStore();
 
   const { data: conversations, isError: isConversationsError } = useQuery({
     queryKey: ['conversations', user?.id],
@@ -80,11 +80,29 @@ export const useConversation = (conversationId?: string) => {
     }
   });
 
+  const deleteConversationMutation = useMutation({
+    mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['conversations']);
+      // Clear current conversation if it was deleted
+      if (currentConversation?.conversationId === conversationId) {
+        setCurrentConversation(null);
+      }
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        setUser(null);
+      }
+      console.error('Failed to delete conversation:', error);
+    }
+  });
+
   return {
     conversations,
     messages,
     startConversation: startConversationMutation.mutate,
     sendMessage: sendMessageMutation.mutate,
+    deleteConversation: deleteConversationMutation.mutate,
     isLoading: startConversationMutation.isLoading || sendMessageMutation.isLoading || isMessagesLoading,
     isError: isConversationsError || isMessagesError
   };

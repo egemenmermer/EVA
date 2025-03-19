@@ -6,7 +6,7 @@ import { ChatInput } from './ChatInput';
 import { Loader2 } from 'lucide-react';
 
 export const ChatWindow: React.FC = () => {
-  const { currentConversation, managerType } = useStore();
+  const { currentConversation } = useStore();
   const { sendMessage, isLoading } = useConversation(currentConversation?.conversationId);
 
   const handleSendMessage = async (message: string) => {
@@ -20,28 +20,37 @@ export const ChatWindow: React.FC = () => {
 
   if (!currentConversation) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Welcome to EthicAI
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Start a new conversation by clicking the "New Chat" button
-          </p>
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center space-y-4 max-w-lg">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Welcome to EthicAI
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400">
+              Start a new conversation by clicking the "New Chat" button
+            </p>
+          </div>
+        </div>
+        <div className="flex-none border-t border-gray-200 dark:border-gray-700">
+          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} disabled />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
-      {isLoading && !currentConversation && (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-        </div>
-      )}
-      <MessageList isLoading={isLoading} />
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-hidden relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        )}
+        <MessageList isLoading={isLoading} />
+      </div>
+      <div className="flex-none border-t border-gray-200 dark:border-gray-700">
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      </div>
     </div>
   );
 }; 

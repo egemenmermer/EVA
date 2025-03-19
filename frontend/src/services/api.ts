@@ -215,6 +215,15 @@ export const conversationApi = {
       console.error('Get user conversations error:', error);
       throw error;
     }
+  },
+
+  deleteConversation: async (conversationId: string): Promise<void> => {
+    try {
+      await api.delete(`/conversation/${conversationId}`);
+    } catch (error) {
+      console.error('Delete conversation error:', error);
+      throw error;
+    }
   }
 };
 

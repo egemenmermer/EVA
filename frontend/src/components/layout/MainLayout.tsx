@@ -6,10 +6,10 @@ import logo from '@/assets/logo.svg';
 
 export const MainLayout: React.FC = () => {
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Header */}
-      <header className="w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center h-16 px-64">
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* Header - Fixed height */}
+      <header className="flex-none h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center h-full px-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <img src={logo} alt="EVA Logo" className="h-14 w-14 object-contain" />
             <div>
@@ -24,20 +24,24 @@ export const MainLayout: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
-        <Sidebar />
+      {/* Main Content - Fill remaining height */}
+      <div className="flex-1 flex min-h-0">
+        {/* Left Sidebar - Fixed width */}
+        <div className="w-64 flex-none">
+          <Sidebar />
+        </div>
         
-        {/* Main Chat Window */}
-        <main className="flex-1 flex flex-col">
+        {/* Main Chat Window - Flexible width */}
+        <main className="flex-1 min-w-0">
           <ChatWindow />
         </main>
         
-        {/* Right Panel */}
-        <aside className="w-80 border-l border-gray-200 dark:border-gray-700 p-4 hidden lg:block">
-          <EthicalGuidelines />
-        </aside>
+        {/* Right Panel - Fixed width */}
+        <div className="w-80 flex-none hidden lg:block border-l border-gray-200 dark:border-gray-700">
+          <div className="h-full overflow-y-auto p-4">
+            <EthicalGuidelines />
+          </div>
+        </div>
       </div>
     </div>
   );

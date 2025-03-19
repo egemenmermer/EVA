@@ -61,80 +61,13 @@ const TypeWriter = ({ text, onComplete }: { text: string; onComplete: () => void
 
 const MessageItem = ({ message, index }: MessageItemProps) => {
   const [isTyping, setIsTyping] = useState(true);
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
-  const deleteMessage = useStore(state => state.deleteMessage);
   const messageRef = useRef<HTMLDivElement>(null);
-  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (messageRef.current) {
       messageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [message]);
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default browser context menu
-    e.stopPropagation(); // Stop event from bubbling up
-    
-    // Calculate position relative to viewport
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    // Get viewport dimensions
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // Get context menu dimensions (approximate if not yet rendered)
-    const menuWidth = 150; // Approximate width of context menu
-    const menuHeight = 40; // Approximate height of context menu
-    
-    // Adjust position if it would render outside viewport
-    const adjustedX = Math.min(x, viewportWidth - menuWidth);
-    const adjustedY = Math.min(y, viewportHeight - menuHeight);
-    
-    setContextMenuPosition({ x: adjustedX, y: adjustedY });
-    setShowContextMenu(true);
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteMessage(`${message.conversationId}-${index}`);
-    setShowContextMenu(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
-        setShowContextMenu(false);
-      }
-    };
-
-    const handleScroll = () => {
-      setShowContextMenu(false);
-    };
-
-    // Add event listeners
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('scroll', handleScroll);
-    document.addEventListener('contextmenu', (e) => {
-      if (!messageRef.current?.contains(e.target as Node)) {
-        setShowContextMenu(false);
-      }
-    });
-
-    return () => {
-      // Remove event listeners
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('contextmenu', (e) => {
-        if (!messageRef.current?.contains(e.target as Node)) {
-          setShowContextMenu(false);
-        }
-      });
-    };
-  }, []);
 
   const isUser = message.role === 'user';
 
@@ -145,11 +78,10 @@ const MessageItem = ({ message, index }: MessageItemProps) => {
         'flex w-full mb-4 animate-fade-in',
         isUser ? 'justify-end' : 'justify-start'
       )}
-      onContextMenu={handleContextMenu}
     >
       <div
         className={cn(
-          'flex gap-3 max-w-[80%] relative', // Added relative positioning
+          'flex gap-3 max-w-[80%]',
           isUser ? 'flex-row-reverse' : 'flex-row'
         )}
       >
@@ -160,7 +92,7 @@ const MessageItem = ({ message, index }: MessageItemProps) => {
 
         <div
           className={cn(
-            'flex flex-col rounded-lg p-4 relative', // Added relative positioning
+            'flex flex-col rounded-lg p-4',
             isUser
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
@@ -171,29 +103,23 @@ const MessageItem = ({ message, index }: MessageItemProps) => {
           </div>
           <div className="text-sm">
             {isUser || !isTyping ? (
-              <ReactMarkdown
-                components={{
-                  code({ inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    return !inline && match ? (
+              <div className="flex flex-col gap-2">
+                {message.content.split('\n').map((line, i) => (
+                  <div key={i} className="text-gray-700 dark:text-gray-300">
+                    {line.trim().startsWith('```') ? (
                       <SyntaxHighlighter
-                        language={match[1]}
-                        PreTag="div"
+                        language="javascript"
                         style={vscDarkPlus}
-                        {...props}
+                        customStyle={{ margin: 0, padding: '1rem', borderRadius: '0.5rem' }}
                       >
-                        {String(children).replace(/\n$/, '')}
+                        {line.replace(/```/g, '')}
                       </SyntaxHighlighter>
                     ) : (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
+                      line
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
               <TypeWriter
                 text={message.content}
@@ -201,27 +127,6 @@ const MessageItem = ({ message, index }: MessageItemProps) => {
               />
             )}
           </div>
-
-          {/* Context Menu */}
-          {showContextMenu && (
-            <div
-              ref={contextMenuRef}
-              className="fixed bg-white dark:bg-gray-800 shadow-lg rounded-lg p-2 z-50"
-              style={{
-                top: contextMenuPosition.y,
-                left: contextMenuPosition.x,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg w-full"
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -233,9 +138,8 @@ export const MessageList: React.FC<{ isLoading?: boolean }> = ({ isLoading }) =>
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto">
-      <div className="flex flex-col min-h-full">
-        <div className="flex-1" />
+    <div ref={containerRef} className="flex-1 overflow-y-auto p-4">
+      <div className="flex flex-col justify-end min-h-full">
         {messages.map((message, index) => (
           <MessageItem
             key={`${message.conversationId}-${index}`}
@@ -243,8 +147,8 @@ export const MessageList: React.FC<{ isLoading?: boolean }> = ({ isLoading }) =>
             index={index}
           />
         ))}
+        {isLoading && <TypingIndicator />}
       </div>
-      {isLoading && <TypingIndicator />}
     </div>
   );
 }; 
