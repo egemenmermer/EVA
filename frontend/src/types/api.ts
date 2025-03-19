@@ -25,8 +25,8 @@ export interface ConversationResponseDTO {
 
 export interface ConversationContentResponseDTO {
   conversationId: string;
-  userQuery: string;
-  agentResponse: string;
+  content: string;
+  role: 'user' | 'assistant';
   createdAt: string;
 }
 

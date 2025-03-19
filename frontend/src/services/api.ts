@@ -172,7 +172,11 @@ export const conversationApi = {
         conversationId, 
         userQuery 
       });
-      return response.data;
+      return {
+        ...response.data,
+        role: 'assistant',
+        content: response.data.agentResponse
+      };
     } catch (error) {
       console.error('Send message error:', error);
       throw error;
@@ -192,7 +196,11 @@ export const conversationApi = {
   getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
     try {
       const response = await api.get<ConversationContentResponseDTO[]>(`/conversation/message/${conversationId}`);
-      return response.data;
+      return response.data.map(msg => ({
+        ...msg,
+        role: msg.userQuery ? 'user' : 'assistant',
+        content: msg.userQuery || msg.agentResponse
+      }));
     } catch (error) {
       console.error('Get conversation messages error:', error);
       throw error;

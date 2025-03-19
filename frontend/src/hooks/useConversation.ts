@@ -15,13 +15,12 @@ export const useConversation = (conversationId?: string) => {
     retry: false,
     onError: (error: Error) => {
       if (error.message.includes('401')) {
-        // Clear user state if unauthorized
         setUser(null);
       }
     }
   });
 
-  const { data: messages, isError: isMessagesError } = useQuery({
+  const { data: messages, isLoading: isMessagesLoading, isError: isMessagesError } = useQuery({
     queryKey: ['messages', conversationId],
     queryFn: () => conversationId ? conversationApi.getConversationMessages(conversationId) : Promise.resolve([]),
     enabled: !!conversationId && !!user,
@@ -50,11 +49,29 @@ export const useConversation = (conversationId?: string) => {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { conversationId: string; userQuery: string }) =>
-      conversationApi.sendMessage(data.conversationId, data.userQuery),
-    onSuccess: (data: ConversationContentResponseDTO) => {
-      addMessage(data);
-      queryClient.invalidateQueries(['messages', conversationId]);
+    mutationFn: async (data: { conversationId: string; userQuery: string }) => {
+      // First, immediately add the user's message to the UI
+      const userMessage: ConversationContentResponseDTO = {
+        conversationId: data.conversationId,
+        content: data.userQuery,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+      addMessage(userMessage);
+
+      // Then make the API call
+      const response = await conversationApi.sendMessage(data.conversationId, data.userQuery);
+      
+      // Add the AI response
+      const aiMessage: ConversationContentResponseDTO = {
+        conversationId: response.conversationId,
+        content: response.content,
+        role: 'assistant',
+        createdAt: new Date().toISOString()
+      };
+      addMessage(aiMessage);
+
+      return response;
     },
     onError: (error: Error) => {
       if (error.message.includes('401')) {
@@ -68,7 +85,7 @@ export const useConversation = (conversationId?: string) => {
     messages,
     startConversation: startConversationMutation.mutate,
     sendMessage: sendMessageMutation.mutate,
-    isLoading: startConversationMutation.isLoading || sendMessageMutation.isLoading,
+    isLoading: startConversationMutation.isLoading || sendMessageMutation.isLoading || isMessagesLoading,
     isError: isConversationsError || isMessagesError
   };
 }; 

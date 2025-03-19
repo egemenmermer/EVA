@@ -13,6 +13,7 @@ interface Store {
   setCurrentConversation: (conversation: Conversation | null) => void;
   setMessages: (messages: ConversationContentResponseDTO[]) => void;
   addMessage: (message: ConversationContentResponseDTO) => void;
+  deleteMessage: (messageId: string) => void;
   setManagerType: (type: ManagerType) => void;
   toggleDarkMode: () => void;
 }
@@ -38,14 +39,20 @@ export const useStore = create<Store>()(
           // Clear related state when user is logged out
           set({ currentConversation: null, messages: [] });
         }
-        console.log('User set in store. Current state:', useStore.getState());
       },
       setCurrentConversation: (conversation: Conversation | null) => 
         set({ currentConversation: conversation, messages: [] }),
       setMessages: (messages: ConversationContentResponseDTO[]) =>
         set({ messages }),
       addMessage: (message: ConversationContentResponseDTO) => 
-        set((state) => ({ messages: [...state.messages, message] })),
+        set((state) => {
+          console.log('Adding message to store:', message);
+          return { messages: [...state.messages, message] };
+        }),
+      deleteMessage: (messageId: string) =>
+        set((state) => ({
+          messages: state.messages.filter((msg, index) => `${msg.conversationId}-${index}` !== messageId)
+        })),
       setManagerType: (type: ManagerType) => set({ managerType: type }),
       toggleDarkMode: () => 
         set((state) => ({ darkMode: !state.darkMode })),

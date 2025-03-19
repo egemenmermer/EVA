@@ -35,12 +35,12 @@ export const ChatWindow: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
-      {isLoading && (
-        <div className="absolute inset-0 bg-black/10 dark:bg-black/20 flex items-center justify-center">
+      {isLoading && !currentConversation && (
+        <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       )}
-      <MessageList />
+      <MessageList isLoading={isLoading} />
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
   );
