@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { 
   LoginResponseDTO, 
   RegisterResponseDTO, 
@@ -8,12 +8,17 @@ import {
 } from '@/types/api';
 import { ManagerType } from '@/types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173/api/v1';
+// Configure API URL with fallback
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443/api/v1';
+console.log('Using API URL:', API_URL);
 
-// Simple token management - directly using the token as received from the backend
-const getToken = () => {
+// Debug mode
+const DEBUG = true;
+
+// Helper function to get token from localStorage
+const getToken = (): string | null => {
   const token = localStorage.getItem('token');
-  console.log('Token from localStorage:', token ? 'EXISTS' : 'MISSING');
+  if (DEBUG) console.log(`Token retrieved from localStorage: ${token ? 'exists' : 'null'}`);
   return token;
 };
 
@@ -27,37 +32,24 @@ const getFallbackToken = () => {
   return hardcodedToken;
 };
 
-// Axios instance with authorization header
-const apiClient = axios.create({
+// API instance with interceptors
+const api: AxiosInstance = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  // Set a very long timeout to prevent quick failures
-  timeout: 60000, // 60 seconds
+  timeout: 30000, // 30 seconds
 });
 
-// Add interceptor to add auth token to requests
-apiClient.interceptors.request.use(
+// Request interceptor
+api.interceptors.request.use(
   (config) => {
     const token = getToken();
-    
-    if (token && config.headers) {
-      // Just use the token as it is stored - no additional formatting
-      config.headers.Authorization = token;
-      console.log(`🔐 Added auth header to ${config.method?.toUpperCase() || 'GET'} ${config.url}`);
+    if (token) {
+      // Make sure the token has the 'Bearer ' prefix
+      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      config.headers.Authorization = formattedToken;
+      if (DEBUG) console.log('Request with auth token:', config.url);
     } else {
-      console.warn(`⚠️ No token for request ${config.method?.toUpperCase() || 'GET'} ${config.url}`);
-      
-      // For development: Use fallback token if no token is found
-      // Comment this out in production
-      const fallbackToken = getFallbackToken();
-      if (fallbackToken && config.headers) {
-        config.headers.Authorization = fallbackToken;
-        console.log(`🔑 Using fallback token for ${config.method?.toUpperCase() || 'GET'} ${config.url}`);
-      }
+      if (DEBUG) console.log('Request without auth token:', config.url);
     }
-    
     return config;
   },
   (error) => {
@@ -66,86 +58,83 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle token errors - NEVER log out automatically
-apiClient.interceptors.response.use(
+// Response interceptor
+api.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Success: ${response.config.method?.toUpperCase() || 'GET'} ${response.config.url}`);
+    if (DEBUG) console.log('Response success:', response.config.url, response.status);
     return response;
   },
   (error) => {
-    // Log detailed error information
-    console.error('API Error:', error?.response?.status, 
-      error?.response?.data, 
-      `URL: ${error?.config?.method?.toUpperCase() || 'GET'} ${error?.config?.url}`,
-      'Headers:', error?.config?.headers);
+    console.error('API Error:', error.config?.url, error.response?.status, error.message);
     
-    // Log specifically for conversation fetching problems
-    if (error?.config?.url?.includes('/conversation') && !error?.config?.url?.includes('/message')) {
-      console.error('❌ Conversation fetch failed:', error?.response?.status, error?.response?.data);
-      console.log('Auth header used:', error?.config?.headers?.Authorization);
-      
-      // Special debug info for 401 errors
-      if (error?.response?.status === 401) {
-        console.error('🔒 Authentication error - token may be invalid or expired');
-        console.log('Current token:', getToken());
-      }
+    // Handle 401 Unauthorized errors (token expired or invalid)
+    if (error.response?.status === 401) {
+      console.warn('Authentication error. Redirecting to login.');
+      // You might want to clear token and redirect to login here
     }
     
-    // Never log out automatically
     return Promise.reject(error);
   }
 );
 
-// Authentication API
+// Auth API methods
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponseDTO> => {
     try {
-      const response = await apiClient.post<LoginResponseDTO>('/auth/login', { email, password });
+      console.log('Attempting login for:', email);
+      const response: AxiosResponse<LoginResponseDTO> = await api.post('/auth/login', { email, password });
+      console.log('Login successful:', response.data.userDetails.email);
       
-      // Store token exactly as received - no formatting
+      // Store token in localStorage
       const token = response.data.accessToken;
       localStorage.setItem('token', token);
-      console.log('✅ Login successful, token stored:', token ? 'EXISTS' : 'MISSING');
       
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login failed:', error);
       throw error;
     }
   },
-
+  
   register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
     try {
-      const response = await apiClient.post<RegisterResponseDTO>('/auth/register', { email, password, fullName });
+      console.log('Attempting registration for:', email);
+      const response: AxiosResponse<RegisterResponseDTO> = await api.post('/auth/register', { 
+        email, 
+        password, 
+        fullName 
+      });
+      console.log('Registration response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Registration failed:', error);
       throw error;
     }
   },
-
-  oauth2Callback: async (provider: string, code: string) => {
+  
+  logout: async (): Promise<void> => {
+    console.log('Logging out user');
+    localStorage.removeItem('token');
+  },
+  
+  activate: async (token: string): Promise<any> => {
     try {
-      const response = await apiClient.post<{ token: string; user: any }>(`/auth/oauth2/${provider}/callback`, { code });
-      
-      // Store token exactly as received - no formatting
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-      console.log(`✅ OAuth2 ${provider} callback successful, token stored:`, token ? 'EXISTS' : 'MISSING');
-      
+      console.log('Activating account with token');
+      const response = await api.post('/auth/activate', { token });
       return response.data;
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      console.error('Activation failed:', error);
       throw error;
     }
   },
-
-  activate: async (token: string) => {
+  
+  oauth2Callback: async (provider: string, code: string): Promise<any> => {
     try {
-      const response = await apiClient.post<{ message: string }>('/auth/activate', { token });
+      console.log(`Processing ${provider} OAuth callback`);
+      const response = await api.post(`/auth/oauth2/${provider}`, { code });
       return response.data;
     } catch (error) {
-      console.error('Activation error:', error);
+      console.error('OAuth callback failed:', error);
       throw error;
     }
   }
@@ -161,184 +150,67 @@ const createMockConversation = (managerType: ManagerType): ConversationResponseD
   };
 };
 
-// Conversation API
+// Conversation API methods
 export const conversationApi = {
   createConversation: async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
     try {
-      console.log(`🔄 Creating conversation with manager: ${managerType}`);
-      const token = getToken();
-      if (!token) {
-        console.error('❌ No token available for creating conversation');
-        
-        // For development: Return mock data when token is missing
-        const mockData = createMockConversation(managerType);
-        console.log('⚠️ Using mock conversation data');
-        return mockData;
-      }
-      
-      const response = await apiClient.post<ConversationResponseDTO>('/conversation', { managerType });
-      console.log('✅ Created conversation:', response.data);
+      console.log('Creating conversation with manager type:', managerType);
+      const response = await api.post('/conversation', { managerType });
+      console.log('Conversation created:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Create conversation error:', error);
-      
-      // For development: Return mock data on error
-      const mockData = createMockConversation(managerType);
-      console.log('⚠️ Using mock conversation data after error');
-      return mockData;
+      console.error('Failed to create conversation:', error);
+      throw error;
     }
   },
-
-  getConversations: async () => {
+  
+  getConversations: async (): Promise<ConversationResponseDTO[]> => {
     try {
-      console.log('🔄 Fetching conversations...');
-      const token = getToken();
-      if (!token) {
-        console.error('❌ No token available for fetching conversations');
-        
-        // For development: Return mock data when token is missing
-        const mockData = [
-          createMockConversation('PUPPETEER'),
-          createMockConversation('DILUTER'),
-          createMockConversation('CAMOUFLAGER')
-        ];
-        console.log('⚠️ Using mock conversation data');
-        return mockData;
-      }
-      
-      // Make direct API call with the token in Authorization header
-      const response = await fetch(`${API_URL}/conversation`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log(`✅ Fetched ${data.length} conversations using fetch API`);
-      return data;
-    } catch (error) {
-      console.error('❌ Get conversations error:', error);
-      
-      // For development: Return mock data on error
-      const mockData = [
-        createMockConversation('PUPPETEER'),
-        createMockConversation('DILUTER'),
-        createMockConversation('CAMOUFLAGER')
-      ];
-      console.log('⚠️ Using mock conversation data after error');
-      return mockData;
-    }
-  },
-
-  deleteConversation: async (conversationId: string) => {
-    try {
-      const response = await apiClient.delete<{ message: string }>(`/conversation/${conversationId}`);
-      console.log('✅ Deleted conversation:', conversationId);
+      console.log('Fetching conversations');
+      const response = await api.get('/conversation');
+      console.log('Fetched conversations:', response.data.length);
       return response.data;
     } catch (error) {
-      console.error('Delete conversation error:', error);
-      // Return mock success response
-      return { message: 'Conversation deleted successfully (mock)' };
+      console.error('Failed to fetch conversations:', error);
+      throw error;
     }
   },
-
-  sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationContentResponseDTO> => {
+  
+  deleteConversation: async (conversationId: string): Promise<void> => {
     try {
-      interface MessageResponse {
-        conversationId: string;
-        userQuery: string;
-        agentResponse: string;
-        createdAt: string;
-      }
-      
-      console.log(`🔄 Sending message to conversation: ${conversationId}`);
-      const response = await apiClient.post<MessageResponse>('/conversation/message', {
+      console.log('Deleting conversation:', conversationId);
+      await api.delete(`/conversation/${conversationId}`);
+      console.log('Conversation deleted');
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
+      throw error;
+    }
+  },
+  
+  sendMessage: async (conversationId: string, userQuery: string): Promise<any> => {
+    try {
+      console.log('Sending message to conversation:', conversationId);
+      const response = await api.post('/conversation/message', {
         conversationId,
         userQuery
       });
-      
-      // Map the response to the expected DTO format
-      return {
-        conversationId: response.data.conversationId,
-        content: response.data.agentResponse,
-        role: 'assistant',
-        createdAt: response.data.createdAt,
-        userQuery: response.data.userQuery,
-        agentResponse: response.data.agentResponse
-      };
+      console.log('Message sent, response received');
+      return response.data;
     } catch (error) {
-      console.error('Send message error:', error);
-      
-      // For development: Return mock data on error
-      return {
-        conversationId: conversationId,
-        content: "I'm sorry, I couldn't process your request. This is a mock response.",
-        role: 'assistant',
-        createdAt: new Date().toISOString(),
-        userQuery: userQuery,
-        agentResponse: "I'm sorry, I couldn't process your request. This is a mock response."
-      };
+      console.error('Failed to send message:', error);
+      throw error;
     }
   },
-
-  getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
+  
+  getConversationMessages: async (conversationId: string): Promise<any[]> => {
     try {
-      interface MessageDTO {
-        conversationId: string;
-        userQuery: string;
-        agentResponse: string;
-        createdAt: string;
-      }
-      
-      console.log(`🔄 Fetching messages for conversation: ${conversationId}`);
-      const response = await apiClient.get<MessageDTO[]>(`/conversation/message/${conversationId}`);
-      
-      // Create two messages from each response - one for user and one for assistant
-      const messages: ConversationContentResponseDTO[] = [];
-      
-      response.data.forEach((msg: MessageDTO) => {
-        // Add user message
-        messages.push({
-          conversationId: msg.conversationId,
-          role: 'user',
-          content: msg.userQuery,
-          createdAt: msg.createdAt
-        });
-        
-        // Add assistant response
-        messages.push({
-          conversationId: msg.conversationId,
-          role: 'assistant',
-          content: msg.agentResponse,
-          createdAt: msg.createdAt
-        });
-      });
-      
-      console.log(`✅ Fetched ${messages.length} messages for conversation ${conversationId}`);
-      return messages;
+      console.log('Fetching messages for conversation:', conversationId);
+      const response = await api.get(`/conversation/message/${conversationId}`);
+      console.log('Fetched messages:', response.data.length);
+      return response.data;
     } catch (error) {
-      console.error('Get conversation messages error:', error);
-      // Return mock messages
-      return [
-        {
-          conversationId: conversationId,
-          role: 'user',
-          content: 'Hello, this is a mock message.',
-          createdAt: new Date().toISOString()
-        },
-        {
-          conversationId: conversationId,
-          role: 'assistant',
-          content: 'Hi there! This is a mock response.',
-          createdAt: new Date().toISOString()
-        }
-      ];
+      console.error('Failed to fetch messages:', error);
+      throw error;
     }
   }
 };
@@ -351,7 +223,7 @@ export const feedbackApi = {
     rating: number
   ): Promise<FeedbackResponseDTO> => {
     try {
-      const response = await apiClient.post<FeedbackResponseDTO>('/feedback', {
+      const response = await api.post<FeedbackResponseDTO>('/feedback', {
         conversationId,
         userFeedback,
         rating
@@ -365,7 +237,7 @@ export const feedbackApi = {
 
   getFeedback: async (conversationId: string): Promise<FeedbackResponseDTO> => {
     try {
-      const response = await apiClient.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
+      const response = await api.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
       return response.data;
     } catch (error) {
       console.error('Get feedback error:', error);

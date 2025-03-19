@@ -11,38 +11,40 @@ import { conversationApi } from '@/services/api';
 import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 
-// Type for manager types
+// Type for manager types - use the original enum values
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
-  { type: 'PUPPETEER', icon: null, label: 'Web Search' },
-  { type: 'FUNCTION', icon: null, label: 'Function Calling' },
-  { type: 'NO_TOOLS', icon: null, label: 'No Tools' },
+  { type: 'PUPPETEER', icon: null, label: 'Puppeteer' },
+  { type: 'DILUTER', icon: null, label: 'Diluter' },
+  { type: 'CAMOUFLAGER', icon: null, label: 'Camouflager' },
 ];
 
 export const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [showLogout, setShowLogout] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const { setCurrentConversation, currentConversation, managerType, setManagerType, user } = useStore();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  
+  // State for direct fetched conversations
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const contextMenuRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  
-  const { 
-    user, 
-    darkMode, 
-    setCurrentConversation, 
-    currentConversation,
-    managerType, 
-    setManagerType, 
-    toggleDarkMode 
-  } = useStore();
-  
-  const { logout } = useAuth();
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+  const [contextMenuConversationId, setContextMenuConversationId] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Convert any conversation list to remove mock IDs
+  const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
+    return conversations.filter(conv => {
+      // Only keep conversation IDs that look like valid UUIDs
+      if (conv.conversationId && conv.conversationId.includes('mock-')) {
+        console.warn('Filtering out mock conversation:', conv.conversationId);
+        return false;
+      }
+      return true;
+    });
+  };
 
   // Fetch conversations directly from API
   const fetchConversations = async () => {
@@ -52,28 +54,33 @@ export const Sidebar: React.FC = () => {
     try {
       const response = await conversationApi.getConversations();
       console.log('Fetched conversations:', response);
-      setDirectFetchedConversations(response || []);
-    } catch (err) {
+      
+      // Store fetched conversations after sanitizing
+      if (response && Array.isArray(response)) {
+        const sanitized = sanitizeConversations(response);
+        setDirectFetchedConversations(sanitized);
+      }
+    } catch (err: any) {
       console.error('Error fetching conversations:', err);
-      setError('Failed to load conversations');
-      // Use mock data for development if API fails
-      setDirectFetchedConversations([
-        { conversationId: 'mock-1', lastMessageDate: new Date().toISOString(), lastMessage: 'Hello, how can I help you?', title: 'New conversation' },
-        { conversationId: 'mock-2', lastMessageDate: new Date().toISOString(), lastMessage: 'Can you tell me about ethical AI?', title: 'About AI Ethics' }
-      ]);
+      if (err?.response?.status === 401) {
+        setError('Authentication error. Please log in again.');
+      } else {
+        setError('Failed to load conversations. Check server connection.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch conversations on mount and periodically
+  // Fetch conversations on mount and periodically with reduced frequency
   useEffect(() => {
+    // Initial fetch
     fetchConversations();
     
-    // Refresh every 30 seconds
+    // Refresh less frequently - once per minute
     const interval = setInterval(() => {
       fetchConversations();
-    }, 30000);
+    }, 60000); // 1 minute
     
     return () => clearInterval(interval);
   }, []);
@@ -102,52 +109,64 @@ export const Sidebar: React.FC = () => {
       }
     } catch (error) {
       console.error('Error starting new conversation:', error);
-      // Create a mock conversation for development
-      const mockConv = { 
-        conversationId: `mock-${Date.now()}`, 
-        title: 'New conversation',
-        lastMessageDate: new Date().toISOString()
-      };
-      setCurrentConversation(mockConv);
+      setError('Failed to create new conversation. Check server connection.');
     }
   };
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
-    setShowLogout(false);
+    setShowContextMenu(false);
   };
 
   const handleSelectConversation = (conversation: Conversation) => {
+    // Skip if trying to select an invalid conversation ID (non-UUID)
+    if (conversation.conversationId && conversation.conversationId.includes('mock-')) {
+      console.error('Cannot select mock conversation with non-UUID ID:', conversation.conversationId);
+      setError('Cannot use mock conversation. Please create a new chat.');
+      return;
+    }
+    
+    console.log('Selected conversation:', conversation.conversationId);
     setCurrentConversation(conversation);
+    // Close the mobile menu if open
+    setMobileOpen(false);
   };
 
   const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    e.preventDefault();
     
-    if (!id) return;
+    // Skip if trying to delete an invalid conversation ID (non-UUID)
+    if (id && id.includes('mock-')) {
+      console.error('Cannot delete mock conversation with non-UUID ID:', id);
+      setError('Cannot delete mock conversation. Please create a new chat.');
+      setShowContextMenu(false);
+      return;
+    }
     
     try {
       await conversationApi.deleteConversation(id);
-      setDirectFetchedConversations(prev => prev.filter(c => c.conversationId !== id));
       
+      // If we were viewing the deleted conversation, clear it
       if (currentConversation?.conversationId === id) {
         setCurrentConversation(null);
       }
       
-      await fetchConversations(); // Refresh the list
+      // Refresh the conversation list
+      await fetchConversations();
     } catch (error) {
-      console.error('Error deleting conversation', error);
+      console.error('Error deleting conversation:', error);
+      setError('Failed to delete conversation');
     }
     
+    // Hide the context menu
     setShowContextMenu(false);
   };
 
   const handleContextMenu = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    setSelectedConversationId(id);
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setContextMenuConversationId(id);
+    setContextMenuPosition({ top: e.clientY, left: e.clientX });
     setShowContextMenu(true);
   };
 
@@ -163,7 +182,8 @@ export const Sidebar: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
+      {/* New Chat Button */}
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-between p-3 rounded-md bg-gray-800 hover:bg-gray-700 text-white transition-colors"
@@ -171,6 +191,29 @@ export const Sidebar: React.FC = () => {
           <span className="font-medium">New chat</span>
           <HiPlus size={20} />
         </button>
+      </div>
+
+      {/* Manager Type Selector - Moved to the top */}
+      <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          Manager Type
+        </div>
+        <div className="space-y-1">
+          {managerTypes.map((item) => (
+            <button
+              key={item.type}
+              onClick={() => setManagerType(item.type)}
+              className={cn(
+                "w-full text-left px-3 py-2 rounded-md flex items-center space-x-2 text-sm",
+                managerType === item.type 
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Conversations List */}
@@ -215,32 +258,9 @@ export const Sidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Manager Type Selector */}
-      <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-          Manager Type
-        </div>
-        <div className="space-y-1">
-          {managerTypes.map((item) => (
-            <button
-              key={item.type}
-              onClick={() => setManagerType(item.type)}
-              className={cn(
-                "w-full text-left px-3 py-2 rounded-md flex items-center space-x-2 text-sm",
-                managerType === item.type 
-                  ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              )}
-            >
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* User Profile Section */}
       <div className="mt-auto p-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <div className="flex items-center p-3 rounded-md bg-gray-100 dark:bg-gray-700">
           <div className="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white">
             {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
           </div>
@@ -256,7 +276,7 @@ export const Sidebar: React.FC = () => {
 
         <button
           onClick={handleLogout}
-          className="mt-2 w-full flex items-center justify-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
+          className="mt-3 w-full flex items-center justify-center gap-2 p-2 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
         >
           <HiLogout size={18} />
           <span className="text-sm font-medium">Log out</span>
@@ -264,19 +284,19 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Context Menu */}
-      {showContextMenu && selectedConversationId && (
+      {showContextMenu && contextMenuConversationId && (
         <div
           ref={contextMenuRef}
           style={{ 
             position: 'fixed', 
-            top: contextMenuPosition.y, 
-            left: contextMenuPosition.x,
+            top: contextMenuPosition.top, 
+            left: contextMenuPosition.left,
             zIndex: 50
           }}
           className="bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 p-1"
         >
           <button
-            onClick={(e) => handleDeleteConversation(e, selectedConversationId)}
+            onClick={(e) => handleDeleteConversation(e, contextMenuConversationId)}
             className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 w-full text-left"
           >
             <HiOutlineTrash size={16} />

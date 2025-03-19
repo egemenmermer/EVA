@@ -7,7 +7,10 @@ export interface User {
 }
 
 export interface Conversation {
-  conversationId: string;
+  // Required fields
+  conversationId: string; // This should be a valid UUID string
+  
+  // Optional fields
   userId?: string;
   managerType?: ManagerType;
   createdAt?: string;

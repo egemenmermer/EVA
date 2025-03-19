@@ -1,12 +1,19 @@
 import React, { useEffect, useRef } from 'react';
-import { ConversationContentResponseDTO } from '@/types/api';
 import { UserCircle, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+interface Message {
+  id?: string;
+  conversationId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt?: string;
+}
 
 interface Props {
-  messages: ConversationContentResponseDTO[];
+  messages: Message[];
   loading?: boolean;
 }
 
@@ -22,97 +29,66 @@ export const MessageList: React.FC<Props> = ({ messages, loading }) => {
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto py-4">
-      <div className="flex flex-col space-y-6 px-4 md:px-6 lg:px-8">
-        {messages.map((message, index) => (
+    <div className="flex flex-col space-y-4 p-4 overflow-y-auto scrollbar-thin h-full">
+      {messages.map((message, index) => (
+        <div
+          key={message.id || index}
+          className={`flex ${
+            message.role === 'user' ? 'justify-end' : 'justify-start'
+          }`}
+        >
           <div
-            key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
+            className={`flex max-w-[80%] md:max-w-[70%] rounded-lg p-4 animate-in slide-in-from-bottom-4 ${
+              message.role === 'user'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
             }`}
           >
-            <div
-              className={`flex ${
-                message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-              } items-start gap-3 max-w-[85%]`}
-            >
-              <div className="flex-shrink-0 mt-1">
-                {message.role === 'user' ? (
-                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                    <UserCircle className="h-5 w-5 text-white" />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
-                    <Bot className="h-5 w-5 text-white" />
-                  </div>
-                )}
-              </div>
-              <div
-                className={`rounded-2xl px-4 py-3 ${
-                  message.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                }`}
+            <div className="mr-2 flex-shrink-0 self-end">
+              {message.role === 'user' ? (
+                <UserCircle className="h-6 w-6" />
+              ) : (
+                <Bot className="h-6 w-6" />
+              )}
+            </div>
+            <div className="flex-1">
+              <ReactMarkdown
+                components={{
+                  code(props) {
+                    const { children, className } = props;
+                    const match = /language-(\w+)/.exec(className || '');
+                    
+                    if (!match) {
+                      return <code className={className}>{children}</code>;
+                    }
+                    
+                    return (
+                      <SyntaxHighlighter
+                        style={oneDark as any}
+                        language={match[1]}
+                        PreTag="div"
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    );
+                  }
+                }}
               >
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => (
-                      <p className="whitespace-pre-wrap mb-2 last:mb-0 text-[15px]">{children}</p>
-                    ),
-                    code: ({ className, children }) => {
-                      const match = /language-(\w+)/.exec(className || '');
-                      return match ? (
-                        <SyntaxHighlighter
-                          language={match[1]}
-                          style={oneDark}
-                          PreTag="div"
-                          className="rounded-md text-sm my-2"
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code className="bg-gray-200 dark:bg-gray-700 rounded px-1 py-0.5">
-                          {children}
-                        </code>
-                      );
-                    },
-                    ul: ({ children }) => (
-                      <ul className="list-disc pl-4 space-y-2 text-[15px]">{children}</ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className="list-decimal pl-4 space-y-2 text-[15px]">{children}</ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className="text-[15px]">{children}</li>
-                    ),
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
-              </div>
+                {message.content}
+              </ReactMarkdown>
             </div>
           </div>
-        ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="flex flex-row items-start gap-3">
-              <div className="flex-shrink-0 mt-1">
-                <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="rounded-2xl px-4 py-3 bg-gray-100 dark:bg-gray-800">
-                <div className="animate-pulse flex space-x-2">
-                  <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
-                  <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
-                  <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
-                </div>
-              </div>
-            </div>
+        </div>
+      ))}
+      {loading && (
+        <div className="flex justify-start">
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 animate-pulse flex items-center space-x-2">
+            <Bot className="h-6 w-6" />
+            <div className="h-4 w-28 bg-gray-300 dark:bg-gray-600 rounded" />
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
+      )}
+      <div ref={messagesEndRef} />
     </div>
   );
 }; 

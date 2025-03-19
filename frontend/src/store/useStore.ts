@@ -3,22 +3,39 @@ import { persist } from 'zustand/middleware';
 import type { User, Conversation, ManagerType } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 
-interface Store {
+// Define the Message type properly
+interface Message {
+  id?: string;
+  conversationId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt?: string;
+}
+
+export interface Store {
   user: User | null;
+  token: string | null;
   currentConversation: Conversation | null;
-  messages: ConversationContentResponseDTO[];
+  messages: Message[];
   managerType: ManagerType;
   darkMode: boolean;
-  token: string | null;
+  
+  // Setters
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setCurrentConversation: (conversation: Conversation | null) => void;
-  setMessages: (messages: ConversationContentResponseDTO[]) => void;
-  addMessage: (message: ConversationContentResponseDTO) => void;
+  setMessages: (messages: Message[]) => void;
+  addMessage: (message: Message) => void;
   deleteMessage: (messageId: string) => void;
-  setManagerType: (type: ManagerType) => void;
+  setManagerType: (managerType: ManagerType) => void;
   toggleDarkMode: () => void;
 }
+
+// Format token with Bearer prefix if needed
+const formatToken = (token: string | null): string | null => {
+  if (!token) return null;
+  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+};
 
 // Get initial dark mode from system preference
 const getInitialDarkMode = () => {
@@ -43,14 +60,14 @@ export const useStore = create<Store>()(
   persist(
     (set, get) => ({
       user: MOCK_USER, // Start with mock user for easier development
+      token: null,
       currentConversation: null,
       messages: [],
       managerType: 'PUPPETEER',
       darkMode: getInitialDarkMode(),
-      token: getInitialToken(),
       
-      setUser: (user: User | null) => {
-        console.log('Setting user in store:', user ? user.fullName : 'null');
+      setUser: (user) => {
+        console.log('Store: Setting user:', user?.email || 'null');
         set({ user });
         if (!user) {
           // Clear related state when user is logged out
@@ -59,19 +76,26 @@ export const useStore = create<Store>()(
         }
       },
       
-      setToken: (token: string | null) => {
-        // Store token exactly as received - no formatting
-        console.log('Setting token in store:', token ? '[TOKEN]' : 'null');
-        set({ token });
-        if (token) {
-          localStorage.setItem('token', token);
+      setToken: (token) => {
+        console.log('Store: Setting token:', token ? 'EXISTS' : 'null');
+        // Format token with Bearer prefix if needed
+        const formattedToken = formatToken(token);
+        set({ token: formattedToken });
+        if (formattedToken) {
+          localStorage.setItem('token', formattedToken);
         } else {
           localStorage.removeItem('token');
         }
       },
       
-      setCurrentConversation: (conversation: Conversation | null) => {
-        console.log('Setting current conversation:', conversation?.conversationId || 'null');
+      setCurrentConversation: (conversation) => {
+        // Skip setting if conversation ID is invalid (mock)
+        if (conversation?.conversationId && conversation.conversationId.includes('mock-')) {
+          console.error('Attempted to set mock conversation:', conversation.conversationId);
+          return;
+        }
+        
+        console.log('Store: Setting current conversation:', conversation?.conversationId || 'null');
         const currentMessages = get().messages;
         set({ 
           currentConversation: conversation,
@@ -80,22 +104,14 @@ export const useStore = create<Store>()(
         });
       },
       
-      setMessages: (messages: ConversationContentResponseDTO[]) => {
-        console.log('Setting messages:', messages.length);
-        // Make sure messages are unique before setting
-        const uniqueMessages = messages.filter((message, index, self) => 
-          index === self.findIndex((m) => 
-            m.content === message.content && 
-            m.role === message.role && 
-            m.conversationId === message.conversationId
-          )
-        );
-        set({ messages: uniqueMessages });
+      setMessages: (messages) => {
+        console.log('Store: Setting messages array, count:', messages.length);
+        set({ messages });
       },
       
-      addMessage: (message: ConversationContentResponseDTO) => 
+      addMessage: (message) => {
+        console.log('Store: Adding message:', message.role);
         set((state) => {
-          console.log('Adding message to store:', message.role, message.content.substring(0, 20) + '...');
           // Check for duplicates before adding
           const isDuplicate = state.messages.some(
             (m) => m.content === message.content && 
@@ -106,35 +122,39 @@ export const useStore = create<Store>()(
             return state;
           }
           return { messages: [...state.messages, message] };
-        }),
-        
-      deleteMessage: (messageId: string) =>
-        set((state) => ({
-          messages: state.messages.filter((msg, index) => `${msg.conversationId}-${index}` !== messageId)
-        })),
-        
-      setManagerType: (type: ManagerType) => {
-        console.log('Setting manager type:', type);
-        set({ managerType: type });
+        });
       },
       
-      toggleDarkMode: () => 
+      deleteMessage: (messageId) => {
+        console.log('Store: Deleting message:', messageId);
+        set((state) => ({ 
+          messages: state.messages.filter((msg) => msg.id !== messageId) 
+        }));
+      },
+      
+      setManagerType: (managerType) => {
+        console.log('Store: Setting manager type:', managerType);
+        set({ managerType });
+      },
+      
+      toggleDarkMode: () => {
         set((state) => {
           const newDarkMode = !state.darkMode;
-          console.log('Toggling dark mode:', newDarkMode ? 'dark' : 'light');
+          console.log('Store: Toggling dark mode:', newDarkMode ? 'dark' : 'light');
           return { darkMode: newDarkMode };
-        }),
+        });
+      }
     }),
     {
       name: 'app-storage',
       partialize: (state) => ({
         user: state.user,
+        token: state.token,
         darkMode: state.darkMode,
         managerType: state.managerType,
         // Don't store messages in localStorage to prevent it from growing too large
         // They'll be fetched from API when needed
-        currentConversation: state.currentConversation,
-        token: state.token
+        currentConversation: state.currentConversation
       }),
       storage: {
         getItem: (name) => {
