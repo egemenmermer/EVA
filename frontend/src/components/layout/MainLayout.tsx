@@ -7,16 +7,27 @@ import logo from '@/assets/logo.svg';
 import { useNavigate } from 'react-router-dom';
 
 export const MainLayout: React.FC = () => {
-  const { darkMode, user, token } = useStore();
+  const { darkMode, user, token, setUser } = useStore();
   const navigate = useNavigate();
 
   // Double-check that we have a token - if not, redirect to login
   useEffect(() => {
     const hasToken = Boolean(localStorage.getItem('token'));
+    console.log('MainLayout - hasToken:', hasToken, 'store token:', Boolean(token), 'user:', Boolean(user));
+    
     if (!hasToken && !token) {
+      console.log('No token found, redirecting to login');
       navigate('/login');
+    } else if (hasToken && !user) {
+      // We have a token but no user - restore user data
+      console.log('Token found but no user, restoring user data');
+      setUser({
+        id: 'layout-recovery',
+        email: 'user@example.com',
+        fullName: 'User'
+      });
     }
-  }, [navigate, token]);
+  }, [navigate, token, user, setUser]);
 
   return (
     <div className={`${darkMode ? 'dark' : ''}`}>
@@ -31,8 +42,9 @@ export const MainLayout: React.FC = () => {
         
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Fixed width */}
-          <div className="w-[260px] flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-            <div className="flex-1 overflow-y-auto">
+          <div className="w-[260px] flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden">
+            {/* Force the sidebar to take up the full height */}
+            <div className="flex-1 flex flex-col min-h-0">
               <Sidebar />
             </div>
           </div>

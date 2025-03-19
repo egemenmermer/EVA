@@ -11,15 +11,17 @@ import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore } from '@/store/useStore';
 
-// Configure the query client with better defaults
+// Configure the query client with better defaults for reliable data fetching
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 3,
       retryDelay: 1000,
-      staleTime: 0,
+      staleTime: 0, // Never use stale data
       refetchOnWindowFocus: true,
       refetchOnMount: true,
+      refetchOnReconnect: true,
+      refetchInterval: 30000, // Refresh data every 30 seconds by default
     },
   },
 });
@@ -27,25 +29,46 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   const { user, darkMode, setToken, setUser } = useStore();
 
-  // Check for token on app startup
+  // Check for token on app startup and ensure user data is available
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token && !user) {
-      console.log('Found token, restoring session');
+    if (token) {
+      console.log('Found token in localStorage, restoring session');
+      
       // Format token properly
       const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       setToken(formattedToken);
       
       // Set a placeholder user if we don't have user data
       if (!user) {
+        console.log('No user data in store, setting placeholder');
         setUser({
           id: 'restored-session',
           email: 'user@example.com',
           fullName: 'User'
         });
       }
+    } else {
+      console.log('No token found in localStorage');
     }
   }, [setToken, setUser, user]);
+
+  // Double check token presence periodically to prevent session loss
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const token = localStorage.getItem('token');
+      if (token && !user) {
+        console.log('Detected token but no user, restoring user data');
+        setUser({
+          id: 'session-recovery',
+          email: 'user@example.com',
+          fullName: 'User'
+        });
+      }
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
+  }, [setUser, user]);
 
   const theme = createTheme({
     palette: {
@@ -61,6 +84,8 @@ export const App: React.FC = () => {
 
   // Check if we have a token, regardless of user state
   const hasToken = Boolean(localStorage.getItem('token'));
+  
+  console.log('App render - has token:', hasToken, 'has user:', Boolean(user));
 
   return (
     <QueryClientProvider client={queryClient}>

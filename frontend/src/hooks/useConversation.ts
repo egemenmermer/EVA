@@ -10,18 +10,35 @@ import { ConversationContentResponseDTO } from '@/types/api';
  */
 export const useConversation = (conversationId?: string) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user, setCurrentConversation, messages, setMessages, addMessage } = useStore();
+  const { setCurrentConversation, messages, setMessages, addMessage } = useStore();
   const queryClient = useQueryClient();
 
-  // Get conversation list
+  // Get conversation list - important: don't depend on user as it can cause issues
   const { data: conversations = [], refetch: refetchConversations } = useQuery({
     queryKey: ['conversations'],
-    queryFn: () => conversationApi.getConversations(),
+    queryFn: async () => {
+      console.log('Fetching conversations from hook...');
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('No token available, cannot fetch conversations');
+          return [];
+        }
+        
+        const result = await conversationApi.getConversations();
+        console.log('Fetched conversations in hook:', result?.length);
+        return result;
+      } catch (error) {
+        console.error('Error fetching conversations in hook:', error);
+        return [];
+      }
+    },
     retry: 3,
     retryDelay: 1000,
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 10000, // Refresh every 10 seconds
     onError: (error: Error) => {
       console.error('Error fetching conversations:', error);
       // Never log out automatically
@@ -30,11 +47,22 @@ export const useConversation = (conversationId?: string) => {
 
   // Periodically refresh conversations
   useEffect(() => {
+    console.log('Setting up conversation refresh interval');
     const intervalId = setInterval(() => {
+      console.log('Refresh interval triggered');
       refetchConversations();
     }, 5000); // Refresh every 5 seconds
     
     return () => clearInterval(intervalId);
+  }, [refetchConversations]);
+
+  // Force initial fetch
+  useEffect(() => {
+    // Short timeout to let things initialize
+    setTimeout(() => {
+      console.log('Forcing initial conversation fetch');
+      refetchConversations();
+    }, 500);
   }, [refetchConversations]);
 
   // Get messages for current conversation
@@ -47,6 +75,7 @@ export const useConversation = (conversationId?: string) => {
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 10000, // Refresh messages every 10 seconds
     onSuccess: (data) => {
       if (data && Array.isArray(data)) {
         console.log('Fetched messages:', data.length);
@@ -74,7 +103,9 @@ export const useConversation = (conversationId?: string) => {
       setCurrentConversation(data);
       // Clear messages when starting new conversation
       setMessages([]);
-      queryClient.invalidateQueries(['conversations']);
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      // Force an immediate refetch
+      setTimeout(() => refetchConversations(), 300);
     },
     onError: (error: Error) => {
       console.error('Error starting conversation:', error);
@@ -125,7 +156,7 @@ export const useConversation = (conversationId?: string) => {
         refetchMessages();
       }
       // Refresh conversation list to update timestamps
-      queryClient.invalidateQueries(['conversations']);
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
     onError: (error: Error) => {
       console.error('Error in message mutation:', error);
@@ -152,7 +183,9 @@ export const useConversation = (conversationId?: string) => {
   const deleteConversationMutation = useMutation({
     mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['conversations']);
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      // Force an immediate refetch
+      setTimeout(() => refetchConversations(), 300);
     }
   });
 
@@ -162,6 +195,7 @@ export const useConversation = (conversationId?: string) => {
     isLoading,
     sendMessage,
     startConversation,
-    deleteConversation: deleteConversationMutation.mutate
+    deleteConversation: deleteConversationMutation.mutate,
+    refetchConversations
   };
 }; 

@@ -25,15 +25,24 @@ const getInitialDarkMode = () => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-// Get initial token from localStorage directly
+// Get initial token from localStorage directly - no formatting
 const getInitialToken = () => {
-  return localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+  console.log('Initial token from localStorage:', token ? 'EXISTS' : 'MISSING');
+  return token;
+};
+
+// Mock user for development
+const MOCK_USER: User = {
+  id: 'mock-user-id',
+  email: 'egemenmermer@gmail.com',
+  fullName: 'Egemen Mermer'
 };
 
 export const useStore = create<Store>()(
   persist(
     (set, get) => ({
-      user: null,
+      user: MOCK_USER, // Start with mock user for easier development
       currentConversation: null,
       messages: [],
       managerType: 'PUPPETEER',
@@ -41,7 +50,7 @@ export const useStore = create<Store>()(
       token: getInitialToken(),
       
       setUser: (user: User | null) => {
-        console.log('Setting user in store:', user);
+        console.log('Setting user in store:', user ? user.fullName : 'null');
         set({ user });
         if (!user) {
           // Clear related state when user is logged out
@@ -51,6 +60,7 @@ export const useStore = create<Store>()(
       },
       
       setToken: (token: string | null) => {
+        // Store token exactly as received - no formatting
         console.log('Setting token in store:', token ? '[TOKEN]' : 'null');
         set({ token });
         if (token) {
@@ -61,6 +71,7 @@ export const useStore = create<Store>()(
       },
       
       setCurrentConversation: (conversation: Conversation | null) => {
+        console.log('Setting current conversation:', conversation?.conversationId || 'null');
         const currentMessages = get().messages;
         set({ 
           currentConversation: conversation,
@@ -102,10 +113,17 @@ export const useStore = create<Store>()(
           messages: state.messages.filter((msg, index) => `${msg.conversationId}-${index}` !== messageId)
         })),
         
-      setManagerType: (type: ManagerType) => set({ managerType: type }),
+      setManagerType: (type: ManagerType) => {
+        console.log('Setting manager type:', type);
+        set({ managerType: type });
+      },
       
       toggleDarkMode: () => 
-        set((state) => ({ darkMode: !state.darkMode })),
+        set((state) => {
+          const newDarkMode = !state.darkMode;
+          console.log('Toggling dark mode:', newDarkMode ? 'dark' : 'light');
+          return { darkMode: newDarkMode };
+        }),
     }),
     {
       name: 'app-storage',

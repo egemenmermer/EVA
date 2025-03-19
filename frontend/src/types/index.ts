@@ -1,4 +1,4 @@
-export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER';
+export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER' | 'FUNCTION' | 'NO_TOOLS';
 
 export interface User {
   id: string;
@@ -8,9 +8,12 @@ export interface User {
 
 export interface Conversation {
   conversationId: string;
-  userId: string;
-  managerType: ManagerType;
-  createdAt: string;
+  userId?: string;
+  managerType?: ManagerType;
+  createdAt?: string;
+  title?: string;
+  lastMessage?: string;
+  lastMessageDate?: string;
 }
 
 export interface Message {
