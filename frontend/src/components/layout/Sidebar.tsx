@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
+import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon } from 'lucide-react';
 
 // Type for manager types - use the original enum values
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
@@ -19,11 +20,12 @@ const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[
 ];
 
 export const Sidebar: React.FC = () => {
-  const { setCurrentConversation, currentConversation, managerType, setManagerType, user } = useStore();
+  const { setCurrentConversation, currentConversation, managerType, setManagerType, user, darkMode } = useStore();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   
   // State for direct fetched conversations
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
@@ -33,6 +35,7 @@ export const Sidebar: React.FC = () => {
   const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
   const [contextMenuConversationId, setContextMenuConversationId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
@@ -97,6 +100,17 @@ export const Sidebar: React.FC = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleNewChat = async () => {
@@ -186,7 +200,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-between p-3 rounded-md bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+          className="w-full flex items-center justify-between p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
         >
           <span className="font-medium">New chat</span>
           <HiPlus size={20} />
@@ -259,28 +273,72 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* User Profile Section */}
-      <div className="mt-auto p-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center p-3 rounded-md bg-gray-100 dark:bg-gray-700">
-          <div className="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white">
-            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+      <div className="mt-auto p-3 border-t border-gray-200 dark:border-gray-700" ref={profileMenuRef}>
+        <div className="flex items-center justify-between">
+          <div 
+            className="flex items-center p-3 rounded-md bg-gray-200 dark:bg-gray-800 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex-grow mr-2"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <div className="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white">
+              {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div className="ml-3 flex-1 overflow-hidden">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {user?.fullName || 'User'}
+              </p>
+            </div>
           </div>
-          <div className="ml-3 flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {user?.fullName || 'User'}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {user?.email || 'user@example.com'}
-            </p>
-          </div>
+
+          <button
+            onClick={() => useStore.getState().toggleDarkMode()}
+            className="p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? (
+              <Sun className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+            ) : (
+              <Moon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+            )}
+          </button>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="mt-3 w-full flex items-center justify-center gap-2 p-2 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
-        >
-          <HiLogout size={18} />
-          <span className="text-sm font-medium">Log out</span>
-        </button>
+        {showProfileMenu && (
+          <div className="absolute bottom-24 left-3 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {user?.email || 'user@example.com'}
+              </p>
+            </div>
+            <a 
+              href="https://github.com/egemenmermer/Thesis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Github className="mr-2 h-4 w-4" />
+              GitHub Repository
+              <ExternalLink className="ml-auto h-4 w-4" />
+            </a>
+            <a 
+              href="https://example.com/research-paper.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Research Paper
+              <ExternalLink className="ml-auto h-4 w-4" />
+            </a>
+            <div className="border-t border-gray-200 dark:border-gray-700" />
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Context Menu */}

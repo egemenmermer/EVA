@@ -96,12 +96,7 @@ export const useStore = create<Store>()(
         }
         
         console.log('Store: Setting current conversation:', conversation?.conversationId || 'null');
-        const currentMessages = get().messages;
-        set({ 
-          currentConversation: conversation,
-          // Only clear messages if it's a new conversation
-          messages: conversation?.conversationId !== get().currentConversation?.conversationId ? [] : currentMessages
-        });
+        set({ currentConversation: conversation });
       },
       
       setMessages: (messages) => {

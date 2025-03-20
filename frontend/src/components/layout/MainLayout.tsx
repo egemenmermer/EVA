@@ -60,18 +60,18 @@ export const MainLayout: React.FC = () => {
     <div className={`${darkMode ? 'dark' : ''}`}>
       <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
         {/* Header - Fixed height */}
-        <header className="h-14 flex-none flex items-center px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="h-8 w-8" />
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">EthicAI</h1>
-          </div>
-          <div className="ml-auto">
-            <button 
-              onClick={handleAuthError}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              Logout
-            </button>
+        <header className="h-20 flex-none flex items-center px-64 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
+            <img src={logo} alt="Logo" className="h-20 w-20" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              EVA -
+            </h1>
+            <h2 className="text-3l text-gray-900 dark:text-gray-100">
+              Ethical Virtual Assistant
+            </h2>
           </div>
         </header>
         

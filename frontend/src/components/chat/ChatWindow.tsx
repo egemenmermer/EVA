@@ -29,28 +29,51 @@ export const ChatWindow: React.FC = () => {
   // Load messages when conversation changes
   useEffect(() => {
     if (currentConversation?.conversationId) {
-      fetchMessages(currentConversation.conversationId);
+      console.log('ChatWindow: Conversation changed, fetching messages for:', currentConversation.conversationId);
+      setLoading(true);
+      fetchMessages(currentConversation.conversationId)
+        .finally(() => setLoading(false));
     } else {
       // Clear messages if no conversation is selected
       setMessages([]);
     }
-  }, [currentConversation?.conversationId]);
+  }, [currentConversation?.conversationId, setMessages]);
 
   const fetchMessages = async (conversationId: string) => {
     try {
       console.log('Fetching messages for conversation:', conversationId);
       const fetchedMessages = await conversationApi.getConversationMessages(conversationId);
       
-      // Convert API messages to our format
-      const formattedMessages: Message[] = fetchedMessages.map(msg => ({
-        id: uuidv4(), // Generate a temporary ID
-        conversationId: msg.conversationId,
-        role: msg.role,
-        content: msg.content,
-        createdAt: msg.createdAt
-      }));
+      console.log('API response for messages:', fetchedMessages);
       
-      setMessages(formattedMessages);
+      if (Array.isArray(fetchedMessages)) {
+        // Convert API messages to our format and maintain order
+        const formattedMessages: Message[] = fetchedMessages.map(msg => {
+          // Determine the role (user or assistant)
+          let role: 'user' | 'assistant' = 'assistant';
+          if (msg.userQuery && !msg.agentResponse) {
+            role = 'user';
+          }
+          
+          return {
+            id: msg.id || uuidv4(), // Use existing ID if available
+            conversationId: conversationId,
+            role: role,
+            content: role === 'user' ? msg.userQuery : msg.agentResponse || '',
+            createdAt: msg.createdAt
+          };
+        });
+        
+        console.log('Formatted messages:', formattedMessages.length, formattedMessages);
+        
+        // Filter out any messages with empty content
+        const validMessages = formattedMessages.filter(msg => msg.content.trim() !== '');
+        
+        setMessages(validMessages);
+      } else {
+        console.error('API returned invalid message format:', fetchedMessages);
+        setError('Failed to parse messages from server. Please try again.');
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
       setError('Failed to load messages. Please try again.');
@@ -133,7 +156,7 @@ export const ChatWindow: React.FC = () => {
         <div className="flex items-center justify-center h-full">
           <div className="text-center p-8 max-w-md">
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Welcome to EthicAI
+              Welcome to EVA
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Select a conversation from the sidebar or start a new one to begin.

@@ -204,12 +204,35 @@ export const conversationApi = {
   
   getConversationMessages: async (conversationId: string): Promise<any[]> => {
     try {
-      console.log('Fetching messages for conversation:', conversationId);
+      console.log('API: Fetching messages for conversation:', conversationId);
       const response = await api.get(`/conversation/message/${conversationId}`);
-      console.log('Fetched messages:', response.data.length);
-      return response.data;
+      
+      if (response.data && Array.isArray(response.data)) {
+        console.log('API: Fetched messages count:', response.data.length);
+        
+        // Format messages for frontend consumption
+        const formattedMessages = response.data.map((msg: any) => {
+          // Ensure the message has a conversationId
+          if (!msg.conversationId) {
+            msg.conversationId = conversationId;
+          }
+          return msg;
+        });
+        
+        // Sort messages by createdAt if available
+        if (formattedMessages.length > 0 && formattedMessages[0].createdAt) {
+          formattedMessages.sort((a: any, b: any) => {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          });
+        }
+        
+        return formattedMessages;
+      }
+      
+      console.warn('API: Unexpected message format received:', response.data);
+      return [];
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      console.error('API: Failed to fetch messages:', error);
       throw error;
     }
   }
