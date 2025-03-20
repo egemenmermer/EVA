@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios from 'axios';
 import { 
   LoginResponseDTO, 
   RegisterResponseDTO, 
@@ -9,7 +9,7 @@ import {
 import { ManagerType } from '@/types';
 
 // Configure API URL with fallback
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 console.log('Using API URL:', API_URL);
 
 // Debug mode
@@ -33,7 +33,7 @@ const getFallbackToken = () => {
 };
 
 // API instance with interceptors
-const api: AxiosInstance = axios.create({
+const api = axios.create({
   baseURL: API_URL,
   timeout: 30000, // 30 seconds
 });
@@ -41,15 +41,7 @@ const api: AxiosInstance = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = getToken();
-    if (token) {
-      // Make sure the token has the 'Bearer ' prefix
-      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      config.headers.Authorization = formattedToken;
-      if (DEBUG) console.log('Request with auth token:', config.url);
-    } else {
-      if (DEBUG) console.log('Request without auth token:', config.url);
-    }
+    if (DEBUG) console.log('Making request to:', config.url);
     return config;
   },
   (error) => {
@@ -66,13 +58,6 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('API Error:', error.config?.url, error.response?.status, error.message);
-    
-    // Handle 401 Unauthorized errors (token expired or invalid)
-    if (error.response?.status === 401) {
-      console.warn('Authentication error. Redirecting to login.');
-      // You might want to clear token and redirect to login here
-    }
-    
     return Promise.reject(error);
   }
 );
@@ -82,7 +67,7 @@ export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponseDTO> => {
     try {
       console.log('Attempting login for:', email);
-      const response: AxiosResponse<LoginResponseDTO> = await api.post('/auth/login', { email, password });
+      const response = await api.post<LoginResponseDTO>('/auth/login', { email, password });
       console.log('Login successful:', response.data.userDetails.email);
       
       // Store token in localStorage
@@ -99,7 +84,7 @@ export const authApi = {
   register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
     try {
       console.log('Attempting registration for:', email);
-      const response: AxiosResponse<RegisterResponseDTO> = await api.post('/auth/register', { 
+      const response = await api.post<RegisterResponseDTO>('/auth/register', { 
         email, 
         password, 
         fullName 
@@ -155,7 +140,7 @@ export const conversationApi = {
   createConversation: async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
     try {
       console.log('Creating conversation with manager type:', managerType);
-      const response = await api.post('/conversation', { managerType });
+      const response = await api.post<ConversationResponseDTO>('/start-conversation', { managerType });
       console.log('Conversation created:', response.data);
       return response.data;
     } catch (error) {
@@ -164,37 +149,14 @@ export const conversationApi = {
     }
   },
   
-  getConversations: async (): Promise<ConversationResponseDTO[]> => {
-    try {
-      console.log('Fetching conversations');
-      const response = await api.get('/conversation');
-      console.log('Fetched conversations:', response.data.length);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch conversations:', error);
-      throw error;
-    }
-  },
-  
-  deleteConversation: async (conversationId: string): Promise<void> => {
-    try {
-      console.log('Deleting conversation:', conversationId);
-      await api.delete(`/conversation/${conversationId}`);
-      console.log('Conversation deleted');
-    } catch (error) {
-      console.error('Failed to delete conversation:', error);
-      throw error;
-    }
-  },
-  
-  sendMessage: async (conversationId: string, userQuery: string): Promise<any> => {
+  sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationResponseDTO> => {
     try {
       console.log('Sending message to conversation:', conversationId);
-      const response = await api.post('/conversation/message', {
+      const response = await api.post<ConversationResponseDTO>('/generate-response', {
         conversationId,
         userQuery
       });
-      console.log('Message sent, response received');
+      console.log('Message sent, response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -202,37 +164,31 @@ export const conversationApi = {
     }
   },
   
-  getConversationMessages: async (conversationId: string): Promise<any[]> => {
+  getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
     try {
-      console.log('API: Fetching messages for conversation:', conversationId);
-      const response = await api.get(`/conversation/message/${conversationId}`);
-      
-      if (response.data && Array.isArray(response.data)) {
-        console.log('API: Fetched messages count:', response.data.length);
-        
-        // Format messages for frontend consumption
-        const formattedMessages = response.data.map((msg: any) => {
-          // Ensure the message has a conversationId
-          if (!msg.conversationId) {
-            msg.conversationId = conversationId;
-          }
-          return msg;
-        });
-        
-        // Sort messages by createdAt if available
-        if (formattedMessages.length > 0 && formattedMessages[0].createdAt) {
-          formattedMessages.sort((a: any, b: any) => {
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          });
-        }
-        
-        return formattedMessages;
-      }
-      
-      console.warn('API: Unexpected message format received:', response.data);
+      // Since we don't store message history in the agent, return an empty array
+      // The messages will be maintained in the frontend state
       return [];
     } catch (error) {
-      console.error('API: Failed to fetch messages:', error);
+      console.error('Failed to fetch messages:', error);
+      return [];
+    }
+  },
+  
+  submitFeedback: async (
+    conversationId: string,
+    rating: number,
+    comment?: string
+  ): Promise<FeedbackResponseDTO> => {
+    try {
+      const response = await api.post<FeedbackResponseDTO>('/feedback', {
+        conversationId,
+        rating,
+        comment
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Submit feedback error:', error);
       throw error;
     }
   }
@@ -240,24 +196,6 @@ export const conversationApi = {
 
 // Feedback API
 export const feedbackApi = {
-  submitFeedback: async (
-    conversationId: string,
-    userFeedback: string,
-    rating: number
-  ): Promise<FeedbackResponseDTO> => {
-    try {
-      const response = await api.post<FeedbackResponseDTO>('/feedback', {
-        conversationId,
-        userFeedback,
-        rating
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Submit feedback error:', error);
-      throw error;
-    }
-  },
-
   getFeedback: async (conversationId: string): Promise<FeedbackResponseDTO> => {
     try {
       const response = await api.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
