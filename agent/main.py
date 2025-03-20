@@ -42,7 +42,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request/Response Models with detailed documentation
+# Request/Response Models
+class StartConversationRequest(BaseModel):
+    """Model for starting a new conversation."""
+    managerType: str = Field(
+        ...,
+        description="Type of manager (PUPPETEER, DILUTER, CAMOUFLAGER)",
+        example="PUPPETEER"
+    )
+
+class StartConversationResponse(BaseModel):
+    """Model for conversation initialization response."""
+    conversationId: str = Field(
+        ...,
+        description="Unique identifier for the conversation",
+        example="conv-123-456"
+    )
+    message: str = Field(
+        ...,
+        description="Welcome message",
+        example="Welcome to the Ethical AI Assistant..."
+    )
+    success: bool = Field(
+        default=True,
+        description="Whether the conversation was successfully initialized"
+    )
+
 class Query(BaseModel):
     """Model for ethical queries."""
     userQuery: str = Field(
@@ -50,14 +75,9 @@ class Query(BaseModel):
         description="The ethical question or scenario to analyze",
         example="What are the ethical implications of using facial recognition?"
     )
-    managerType: str = Field(
+    conversationId: str = Field(
         ...,
-        description="Type of manager (PUPPETEER, DILUTER, CAMOUFLAGER)",
-        example="PUPPETEER"
-    )
-    conversationId: Optional[str] = Field(
-        None,
-        description="The conversation identifier (handled by the backend)",
+        description="The conversation identifier from start_conversation",
         example="conv-123-456"
     )
 
@@ -68,14 +88,45 @@ class ConversationResponse(BaseModel):
         description="The ethical guidance response",
         example="Based on ethical guidelines..."
     )
-    conversationId: Optional[str] = Field(
-        None,
-        description="The conversation identifier (passed through from request)",
+    conversationId: str = Field(
+        ...,
+        description="The conversation identifier",
         example="conv-123-456"
     )
     success: bool = Field(
         default=True,
         description="Whether the response was successfully generated"
+    )
+
+class FeedbackRequest(BaseModel):
+    """Model for feedback submission."""
+    conversationId: str = Field(
+        ...,
+        description="The conversation identifier",
+        example="conv-123-456"
+    )
+    rating: int = Field(
+        ...,
+        description="Rating from 1-5",
+        ge=1,
+        le=5
+    )
+    comment: Optional[str] = Field(
+        None,
+        description="Optional feedback comment",
+        example="The response was helpful but could be more specific"
+    )
+
+class FeedbackResponse(BaseModel):
+    """Model for feedback submission response."""
+    feedbackId: str = Field(
+        ...,
+        description="Unique identifier for the feedback",
+        example="feedback-123"
+    )
+    success: bool = Field(
+        default=True,
+        description="Whether the feedback was successfully recorded"
     )
 
 # Dependency for getting the ethical agent
@@ -106,33 +157,49 @@ async def root():
         "description": "Provides ethical guidance for software professionals"
     }
 
+@app.post("/start-conversation",
+    response_model=StartConversationResponse,
+    tags=["Conversation"],
+    summary="Start a new conversation",
+    description="Initializes a new conversation with the specified manager type"
+)
+async def start_conversation(
+    request: StartConversationRequest,
+    agent: EthicalAgent = Depends(get_agent)
+) -> StartConversationResponse:
+    """Initialize a new conversation with the specified manager type."""
+    try:
+        # Initialize conversation and set manager type
+        welcome_message = agent.start_conversation()
+        agent.manager_type = request.managerType
+        
+        return StartConversationResponse(
+            conversationId=agent.conversation_id,
+            message=welcome_message,
+            success=True
+        )
+    except Exception as e:
+        logger.error(f"Error starting conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/generate-response",
     response_model=ConversationResponse,
     tags=["Conversation"],
     summary="Process ethical query",
-    description="Processes an ethical query and returns guidance based on manager type"
+    description="Processes an ethical query and returns guidance"
 )
 async def generate_response(
     query: Query,
     agent: EthicalAgent = Depends(get_agent)
 ) -> ConversationResponse:
-    """Generate an ethical response based on the query and manager type."""
+    """Generate an ethical response based on the query."""
     try:
-        # Extract user query
-        user_query = query.userQuery
-        
-        # Log the query details for debugging
-        logger.info(f"Processing query: '{user_query[:50]}...' with manager type: {query.managerType}")
-        
-        # Process the query with the agent
+        # Process the query
         response = agent.process_query(
-            query=user_query,
-            manager_type=query.managerType
+            query=query.userQuery,
+            manager_type=agent.manager_type  # Use the manager type set during conversation start
         )
         
-        logger.info(f"Generated response (first 50 chars): '{response[:50]}...'")
-        
-        # Return the response with the conversation ID passed through
         return ConversationResponse(
             response=response,
             conversationId=query.conversationId,
@@ -145,6 +212,32 @@ async def generate_response(
             conversationId=query.conversationId,
             success=False
         )
+
+@app.post("/feedback",
+    response_model=FeedbackResponse,
+    tags=["Feedback"],
+    summary="Submit feedback",
+    description="Submit feedback for a conversation"
+)
+async def submit_feedback(
+    feedback: FeedbackRequest,
+    agent: EthicalAgent = Depends(get_agent)
+) -> FeedbackResponse:
+    """Submit feedback for a conversation."""
+    try:
+        feedback_id = agent.save_feedback(
+            query_id=feedback.conversationId,
+            rating=feedback.rating,
+            comment=feedback.comment
+        )
+        
+        return FeedbackResponse(
+            feedbackId=feedback_id,
+            success=True
+        )
+    except Exception as e:
+        logger.error(f"Error submitting feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health",
     response_model=Dict[str, str],
@@ -162,7 +255,7 @@ async def health_check():
 if __name__ == "__main__":
     # Run the API server
     uvicorn.run(
-        "app:app",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=True,

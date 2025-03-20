@@ -20,7 +20,7 @@ class LlamaModel:
 
         self.model_name = model_name
         self.api_token = api_token
-        self.api_url = f"https://api-inference.huggingface.co/models/{model_name}"
+        self.api_url = f"https://api-inference.huggingface.co/pipeline/text-generation/{model_name}"
         self.headers = {"Authorization": f"Bearer {api_token}"}
         self.cache = {}
 
