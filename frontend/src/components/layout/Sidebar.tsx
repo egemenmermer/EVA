@@ -114,16 +114,41 @@ export const Sidebar: React.FC = () => {
   }, []);
 
   const handleNewChat = async () => {
-    console.log('Creating new chat with manager type:', managerType);
     try {
+      setIsLoading(true);
+      setError(null);
+      
+      console.log('Creating new conversation with manager type:', managerType);
       const newConversation = await conversationApi.createConversation(managerType);
+      
+      console.log('New conversation created:', newConversation);
+      
       if (newConversation && newConversation.conversationId) {
-        setCurrentConversation(newConversation);
-        await fetchConversations(); // Refresh the list
+        // Create a properly formatted conversation object
+        const conversation: Conversation = {
+          conversationId: newConversation.conversationId,
+          title: 'New conversation',
+          lastMessage: '',
+          lastMessageDate: newConversation.createdAt,
+          managerType: newConversation.managerType
+        };
+        
+        // Update the conversation list
+        setDirectFetchedConversations(prev => [conversation, ...prev]);
+        
+        // Set as current conversation
+        setCurrentConversation(conversation);
+        
+        // Close mobile sidebar if open
+        setMobileOpen(false);
+      } else {
+        throw new Error('Invalid response from server');
       }
-    } catch (error) {
-      console.error('Error starting new conversation:', error);
-      setError('Failed to create new conversation. Check server connection.');
+    } catch (err: any) {
+      console.error('Error creating new conversation:', err);
+      setError('Failed to create conversation. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -149,32 +174,27 @@ export const Sidebar: React.FC = () => {
 
   const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    setShowContextMenu(false);
     
-    // Skip if trying to delete an invalid conversation ID (non-UUID)
-    if (id && id.includes('mock-')) {
-      console.error('Cannot delete mock conversation with non-UUID ID:', id);
-      setError('Cannot delete mock conversation. Please create a new chat.');
-      setShowContextMenu(false);
-      return;
+    // If it's the current conversation, clear it
+    if (currentConversation?.conversationId === id) {
+      setCurrentConversation(null);
     }
     
     try {
-      await conversationApi.deleteConversation(id);
+      // Remove from local state
+      setDirectFetchedConversations(prev => 
+        prev.filter(conv => conv.conversationId !== id)
+      );
       
-      // If we were viewing the deleted conversation, clear it
-      if (currentConversation?.conversationId === id) {
-        setCurrentConversation(null);
-      }
+      // API call to delete from server would go here
+      // await conversationApi.deleteConversation(id);
       
-      // Refresh the conversation list
-      await fetchConversations();
-    } catch (error) {
-      console.error('Error deleting conversation:', error);
-      setError('Failed to delete conversation');
+    } catch (err) {
+      console.error('Failed to delete conversation:', err);
+      // Refetch to ensure UI is in sync
+      fetchConversations();
     }
-    
-    // Hide the context menu
-    setShowContextMenu(false);
   };
 
   const handleContextMenu = (e: React.MouseEvent, id: string) => {

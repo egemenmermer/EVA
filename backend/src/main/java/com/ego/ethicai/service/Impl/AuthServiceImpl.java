@@ -114,18 +114,23 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public ActivationResponseDTO activate(ActivationRequestDTO activationRequestDto) {
         if (activationRequestDto == null || activationRequestDto.getToken() == null) {
+            logger.error("Activation failed: token is null");
             throw new IllegalArgumentException("Activation token is required");
         }
 
+        logger.debug("Looking up activation token: {}", activationRequestDto.getToken().substring(0, 10) + "...");
         Optional<ActivationToken> activationToken = activationTokenRepository.findByToken(activationRequestDto.getToken());
         if (activationToken.isEmpty()) {
+            logger.error("Activation failed: token not found in database");
             throw new RuntimeException("Invalid activation token");
         }
 
         ActivationToken activationTokenEntity = activationToken.get();
         User user = activationTokenEntity.getUser();
+        logger.debug("Found user for activation: {}", user.getEmail());
 
         if (user.getActivatedAt() != null) {
+            logger.warn("User already activated: {}", user.getEmail());
             throw new RuntimeException("User already activated");
         }
 
@@ -133,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         userService.saveUser(user);
 
         activationTokenRepository.deleteById(activationTokenEntity.getId());
-        logger.debug("Activated user: {} with ID: {}", user.getEmail(), user.getId());
+        logger.info("Successfully activated user: {} with ID: {}", user.getEmail(), user.getId());
 
         return new ActivationResponseDTO("Activation successful", LocalDateTime.now());
     }

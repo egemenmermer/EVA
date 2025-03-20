@@ -68,10 +68,14 @@ public class AuthenticationController {
     public ResponseEntity<ActivationResponseDTO> activate(
             @RequestBody ActivationRequestDTO activationRequestDto) {
         try {
+            logger.info("Received activation request with token: {}", 
+                activationRequestDto != null ? activationRequestDto.getToken().substring(0, 10) + "..." : "null");
+            
             ActivationResponseDTO response = authService.activate(activationRequestDto);
+            logger.info("Account activation successful");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Account activation failed", e);
+            logger.error("Account activation failed: {}", e.getMessage());
             return ResponseEntity.badRequest().body(
                 new ActivationResponseDTO("Activation failed: " + e.getMessage())
             );

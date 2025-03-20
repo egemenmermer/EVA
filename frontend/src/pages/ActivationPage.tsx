@@ -20,19 +20,27 @@ export const ActivationPage: React.FC = () => {
 
       try {
         const token = searchParams.get('token');
+        console.log('Attempting account activation with token:', token ? 'Present' : 'Missing');
+        
         if (!token) {
-          setError('No activation token found');
+          setError('No activation token found in URL');
           setIsLoading(false);
           return;
         }
 
-        await authApi.activate(token);
+        const response = await authApi.activate(token);
+        console.log('Activation successful:', response);
+        
         // Wait a bit before redirecting to show success message
         setTimeout(() => {
           navigate('/login');
         }, 2000);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to activate account');
+      } catch (err: any) {
+        console.error('Activation failed:', {
+          message: err.message,
+          response: err.response?.data
+        });
+        setError(err.response?.data?.message || err.message || 'Failed to activate account');
       } finally {
         setIsLoading(false);
       }

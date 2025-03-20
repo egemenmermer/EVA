@@ -24,13 +24,11 @@ export interface ConversationResponseDTO {
 }
 
 export interface ConversationContentResponseDTO {
+  id?: string;
   conversationId: string;
-  content: string;
-  role: 'user' | 'assistant';
-  createdAt: string;
-  // Backend specific fields
   userQuery?: string;
   agentResponse?: string;
+  createdAt: string;
 }
 
 export interface FeedbackResponseDTO {

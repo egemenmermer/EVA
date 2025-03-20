@@ -84,9 +84,10 @@ class EthicalAgent(BaseAgent):
             if manager_type:
                 if manager_type not in self.MANAGER_TYPES:
                     logger.warning(f"Invalid manager type: {manager_type}. Using default.")
+                    self.manager_type = "PUPPETEER"  # Default manager type
                 else:
                     self.manager_type = manager_type
-                    
+
             # Extract prefixes if present (practice: or understand:)
             mode = "understand"  # Default mode
             original_query = query

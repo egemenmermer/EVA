@@ -41,6 +41,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            // Skip token validation for preflight requests
+            if (request.getMethod().equals("OPTIONS")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String requestTokenHeader = request.getHeader("Authorization");
             String email = null;
             String jwtToken = null;
@@ -142,6 +148,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                path.startsWith("/api/v1/auth/oauth2") ||
                path.startsWith("/swagger-ui") ||
                path.startsWith("/v3/api-docs") ||
-               path.startsWith("/api-docs");
+               path.startsWith("/api-docs") ||
+               request.getMethod().equals("OPTIONS");
     }
 }

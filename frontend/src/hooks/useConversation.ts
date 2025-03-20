@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import { ManagerType } from '@/types';
 import { useStore } from '@/store/useStore';
-import { ConversationContentResponseDTO } from '@/types/api';
+import { ConversationContentResponseDTO, ConversationResponseDTO } from '@/types/api';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Hook for handling conversation operations
@@ -13,7 +14,7 @@ export const useConversation = (conversationId?: string) => {
   const { setCurrentConversation, messages, setMessages, addMessage } = useStore();
   const queryClient = useQueryClient();
 
-  // Get conversation list - important: don't depend on user as it can cause issues
+  // Get conversation list
   const { data: conversations = [], refetch: refetchConversations } = useQuery({
     queryKey: ['conversations'],
     queryFn: async () => {
@@ -35,13 +36,12 @@ export const useConversation = (conversationId?: string) => {
     },
     retry: 3,
     retryDelay: 1000,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchInterval: 10000,
     onError: (error: Error) => {
       console.error('Error fetching conversations:', error);
-      // Never log out automatically
     }
   });
 
@@ -72,10 +72,10 @@ export const useConversation = (conversationId?: string) => {
     enabled: !!conversationId,
     retry: 3,
     retryDelay: 1000,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 10000, // Refresh messages every 10 seconds
+    refetchInterval: 10000,
     onSuccess: (data) => {
       if (data && Array.isArray(data)) {
         console.log('Fetched messages:', data.length);
@@ -84,7 +84,6 @@ export const useConversation = (conversationId?: string) => {
     },
     onError: (error: Error) => {
       console.error('Error fetching messages:', error);
-      // Never log out automatically
     }
   });
 
@@ -101,15 +100,12 @@ export const useConversation = (conversationId?: string) => {
     onSuccess: (data) => {
       console.log('Started new conversation:', data);
       setCurrentConversation(data);
-      // Clear messages when starting new conversation
       setMessages([]);
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      // Force an immediate refetch
       setTimeout(() => refetchConversations(), 300);
     },
     onError: (error: Error) => {
       console.error('Error starting conversation:', error);
-      // Never log out automatically
     }
   });
 
@@ -117,25 +113,25 @@ export const useConversation = (conversationId?: string) => {
     mutationFn: async (data: { conversationId: string; userQuery: string }) => {
       console.log('Sending message:', data);
       
-      // First, immediately add the user's message to the UI
+      // Add user message to UI immediately
       const userMessage: ConversationContentResponseDTO = {
+        id: uuidv4(),
         conversationId: data.conversationId,
-        content: data.userQuery,
-        role: 'user',
+        userQuery: data.userQuery,
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
 
       try {
-        // Then make the API call
+        // Make API call
         const response = await conversationApi.sendMessage(data.conversationId, data.userQuery);
         console.log('Received AI response:', response);
         
-        // Add the AI response
+        // Add AI response to UI
         const aiMessage: ConversationContentResponseDTO = {
+          id: uuidv4(),
           conversationId: response.conversationId,
-          content: response.content,
-          role: 'assistant',
+          agentResponse: response.agentResponse,
           createdAt: new Date().toISOString()
         };
         addMessage(aiMessage);
@@ -151,16 +147,13 @@ export const useConversation = (conversationId?: string) => {
     },
     onSettled: () => {
       setIsLoading(false);
-      // Refresh the message list
       if (conversationId) {
         refetchMessages();
       }
-      // Refresh conversation list to update timestamps
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
     onError: (error: Error) => {
       console.error('Error in message mutation:', error);
-      // Never log out automatically
     }
   });
 
@@ -184,7 +177,6 @@ export const useConversation = (conversationId?: string) => {
     mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      // Force an immediate refetch
       setTimeout(() => refetchConversations(), 300);
     }
   });

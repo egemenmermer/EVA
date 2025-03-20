@@ -44,42 +44,18 @@ export const ChatWindow: React.FC = () => {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      console.log('Fetching messages for conversation:', conversationId);
-      const fetchedMessages = await conversationApi.getConversationMessages(conversationId);
-      
-      console.log('API response for messages:', fetchedMessages);
-      
-      if (Array.isArray(fetchedMessages)) {
-        // Convert API messages to our format and maintain order
-        const formattedMessages: Message[] = fetchedMessages.map(msg => {
-          // Determine the role (user or assistant)
-          let role: 'user' | 'assistant' = 'assistant';
-          if (msg.userQuery && !msg.agentResponse) {
-            role = 'user';
-          }
-          
-          return {
-            id: msg.id || uuidv4(), // Use existing ID if available
-            conversationId: conversationId,
-            role: role,
-            content: role === 'user' ? msg.userQuery : msg.agentResponse || '',
-            createdAt: msg.createdAt
-          };
-        });
-        
-        console.log('Formatted messages:', formattedMessages.length, formattedMessages);
-        
-        // Filter out any messages with empty content
-        const validMessages = formattedMessages.filter(msg => msg.content.trim() !== '');
-        
-        setMessages(validMessages);
-      } else {
-        console.error('API returned invalid message format:', fetchedMessages);
-        setError('Failed to parse messages from server. Please try again.');
-      }
+      const messages = await conversationApi.getConversationMessages(conversationId);
+      // Map backend messages to frontend format
+      const formattedMessages: Message[] = messages.map(msg => ({
+        id: msg.id || uuidv4(),
+        conversationId: msg.conversationId,
+        role: msg.userQuery ? 'user' as const : 'assistant' as const,
+        content: msg.userQuery || msg.agentResponse || '',
+        createdAt: msg.createdAt
+      }));
+      setMessages(formattedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      setError('Failed to load messages. Please try again.');
     }
   };
 
@@ -146,70 +122,49 @@ export const ChatWindow: React.FC = () => {
   
   // Modified sendMessage to handle practice mode responses
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || !currentConversation?.conversationId) return;
-
-    // Handle special commands for practice mode
-    if (content.toLowerCase() === 'yes' && showPracticeBanner && !practiceMode) {
-      handleEnterPracticeMode();
-      setShowPracticeBanner(false);
-      return;
-    }
-    
-    if (content.toLowerCase() === 'exit practice mode' && practiceMode) {
-      handleExitPracticeMode();
-      return;
-    }
+    if (!currentConversation || !content.trim()) return;
 
     try {
       setLoading(true);
-      setError(null);
-
-      // Add user message to UI immediately
-      const userMessage: Message = {
+      
+      // Add user message immediately
+      const userMessage = {
         id: uuidv4(),
         conversationId: currentConversation.conversationId,
-        role: 'user',
-        content,
+        role: 'user' as const,
+        content: content,
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
-      
-      // Handle the banner state
-      if (showPracticeBanner) {
-        setShowPracticeBanner(false);
-      }
 
-      // Prefix the message with practice mode indicator if in practice mode
-      let messageToSend = content;
-      if (practiceMode && !content.startsWith('practice:')) {
-        messageToSend = `practice: ${content}`;
-      }
-
-      // Send to API
-      console.log('Sending message to API:', messageToSend);
+      // Send message to backend
       const response = await conversationApi.sendMessage(
         currentConversation.conversationId,
-        messageToSend
+        content
       );
 
-      // Add AI response to UI
-      const assistantMessage: Message = {
+      // Add AI response
+      const aiMessage = {
         id: uuidv4(),
         conversationId: currentConversation.conversationId,
-        role: 'assistant',
-        content: response.agentResponse || response.content,
-        createdAt: response.createdAt
+        role: 'assistant' as const,
+        content: response.agentResponse || 'No response received',
+        createdAt: new Date().toISOString()
       };
-      
-      addMessage(assistantMessage);
-      
-      // Check if this is a practice mode offer and show banner if needed
-      if (detectPracticeModeOffer(assistantMessage.content)) {
-        setShowPracticeBanner(true);
-      }
+      addMessage(aiMessage);
+
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
+      // Add error message to chat
+      const errorMessage = {
+        id: uuidv4(),
+        conversationId: currentConversation.conversationId,
+        role: 'assistant' as const,
+        content: 'Sorry, there was an error processing your message. Please try again.',
+        createdAt: new Date().toISOString(),
+        isSystemMessage: true
+      };
+      addMessage(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,7 @@ public class EmailUtil {
             logger.debug("Created MimeMessageHelper instance");
             
             // Construct the activation URL
-            String activationLink = String.format("%s/auth/activate?token=%s", frontendUrl, token);
+            String activationLink = String.format("%s/activation?token=%s", frontendUrl, token);
             logger.debug("Generated activation link: {}", activationLink);
             
             try {

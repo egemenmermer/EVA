@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import logging
 from agents.ethical_agent import EthicalAgent
 from datetime import datetime
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -33,13 +34,14 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-# Enable CORS
+# Enable CORS with more permissive settings for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Allow all origins in development
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+    expose_headers=["*"]  # Expose all headers
 )
 
 # Request/Response Models
@@ -51,21 +53,55 @@ class StartConversationRequest(BaseModel):
         example="PUPPETEER"
     )
 
-class StartConversationResponse(BaseModel):
-    """Model for conversation initialization response."""
+class ConversationResponseDTO(BaseModel):
+    """Model for conversation response."""
     conversationId: str = Field(
         ...,
         description="Unique identifier for the conversation",
         example="conv-123-456"
     )
-    message: str = Field(
+    userId: str = Field(
         ...,
-        description="Welcome message",
-        example="Welcome to the Ethical AI Assistant..."
+        description="ID of the user who owns this conversation",
+        example="user-123"
     )
-    success: bool = Field(
-        default=True,
-        description="Whether the conversation was successfully initialized"
+    managerType: str = Field(
+        ...,
+        description="Type of manager used for this conversation",
+        example="PUPPETEER"
+    )
+    createdAt: str = Field(
+        ...,
+        description="ISO timestamp when the conversation was created",
+        example="2023-06-01T12:00:00Z"
+    )
+
+class ConversationContentResponseDTO(BaseModel):
+    """Model for conversation message content."""
+    id: str = Field(
+        ...,
+        description="Unique identifier for the message",
+        example="msg-123-456"
+    )
+    conversationId: str = Field(
+        ...,
+        description="Conversation ID this message belongs to",
+        example="conv-123-456"
+    )
+    userQuery: Optional[str] = Field(
+        None,
+        description="The user's question",
+        example="What are the ethical implications of using facial recognition?"
+    )
+    agentResponse: Optional[str] = Field(
+        None,
+        description="The agent's response",
+        example="Based on ethical guidelines..."
+    )
+    createdAt: str = Field(
+        ...,
+        description="ISO timestamp when the message was created",
+        example="2023-06-01T12:05:00Z"
     )
 
 class Query(BaseModel):
@@ -79,23 +115,6 @@ class Query(BaseModel):
         ...,
         description="The conversation identifier from start_conversation",
         example="conv-123-456"
-    )
-
-class ConversationResponse(BaseModel):
-    """Model for API responses."""
-    response: str = Field(
-        ...,
-        description="The ethical guidance response",
-        example="Based on ethical guidelines..."
-    )
-    conversationId: str = Field(
-        ...,
-        description="The conversation identifier",
-        example="conv-123-456"
-    )
-    success: bool = Field(
-        default=True,
-        description="Whether the response was successfully generated"
     )
 
 class FeedbackRequest(BaseModel):
@@ -129,6 +148,10 @@ class FeedbackResponse(BaseModel):
         description="Whether the feedback was successfully recorded"
     )
 
+# Storage for in-memory conversations (for demo purposes)
+mock_conversations = {}
+mock_messages = {}
+
 # Dependency for getting the ethical agent
 def get_agent():
     """Get or create an EthicalAgent instance."""
@@ -157,8 +180,23 @@ async def root():
         "description": "Provides ethical guidance for software professionals"
     }
 
+@app.get("/conversations",
+    response_model=List[ConversationResponseDTO],
+    tags=["Conversation"],
+    summary="Get all conversations",
+    description="Retrieves all conversations for the current user"
+)
+async def get_conversations():
+    """Get all conversations."""
+    try:
+        # Return mock conversations for demo
+        return list(mock_conversations.values())
+    except Exception as e:
+        logger.error(f"Error fetching conversations: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/start-conversation",
-    response_model=StartConversationResponse,
+    response_model=ConversationResponseDTO,
     tags=["Conversation"],
     summary="Start a new conversation",
     description="Initializes a new conversation with the specified manager type"
@@ -166,24 +204,51 @@ async def root():
 async def start_conversation(
     request: StartConversationRequest,
     agent: EthicalAgent = Depends(get_agent)
-) -> StartConversationResponse:
+) -> ConversationResponseDTO:
     """Initialize a new conversation with the specified manager type."""
     try:
-        # Initialize conversation and set manager type
-        welcome_message = agent.start_conversation()
+        # Initialize conversation
+        agent.start_conversation()
         agent.manager_type = request.managerType
         
-        return StartConversationResponse(
-            conversationId=agent.conversation_id,
-            message=welcome_message,
-            success=True
+        # Create a new conversation ID
+        conversation_id = f"conv-{uuid.uuid4()}"
+        
+        # Create conversation record
+        conversation = ConversationResponseDTO(
+            conversationId=conversation_id,
+            userId="user-mock", # Mock user ID
+            managerType=request.managerType,
+            createdAt=datetime.now().isoformat()
         )
+        
+        # Store in mock database
+        mock_conversations[conversation_id] = conversation
+        mock_messages[conversation_id] = []
+        
+        return conversation
     except Exception as e:
         logger.error(f"Error starting conversation: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/conversations/{conversation_id}/messages",
+    response_model=List[ConversationContentResponseDTO],
+    tags=["Conversation"],
+    summary="Get conversation messages",
+    description="Retrieves all messages for a specific conversation"
+)
+async def get_conversation_messages(conversation_id: str):
+    """Get all messages for a conversation."""
+    try:
+        if conversation_id not in mock_messages:
+            return []
+        return mock_messages[conversation_id]
+    except Exception as e:
+        logger.error(f"Error fetching messages: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/generate-response",
-    response_model=ConversationResponse,
+    response_model=ConversationResponseDTO,
     tags=["Conversation"],
     summary="Process ethical query",
     description="Processes an ethical query and returns guidance"
@@ -191,26 +256,41 @@ async def start_conversation(
 async def generate_response(
     query: Query,
     agent: EthicalAgent = Depends(get_agent)
-) -> ConversationResponse:
+) -> ConversationResponseDTO:
     """Generate an ethical response based on the query."""
     try:
+        # Check if conversation exists
+        if query.conversationId not in mock_conversations:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+            
         # Process the query
-        response = agent.process_query(
+        response_text = agent.process_query(
             query=query.userQuery,
-            manager_type=agent.manager_type  # Use the manager type set during conversation start
+            manager_type=mock_conversations[query.conversationId].managerType
         )
         
-        return ConversationResponse(
-            response=response,
+        # Create message record
+        message_id = f"msg-{uuid.uuid4()}"
+        message = ConversationContentResponseDTO(
+            id=message_id,
             conversationId=query.conversationId,
-            success=True
+            userQuery=query.userQuery,
+            agentResponse=response_text,
+            createdAt=datetime.now().isoformat()
         )
+        
+        # Store in mock database
+        mock_messages[query.conversationId].append(message)
+        
+        # Return the updated conversation
+        return mock_conversations[query.conversationId]
     except Exception as e:
         logger.error(f"Error in generate_response: {str(e)}")
-        return ConversationResponse(
-            response=f"I apologize, but I'm having difficulty processing your request right now. Error: {str(e)}",
+        return ConversationResponseDTO(
             conversationId=query.conversationId,
-            success=False
+            userId="user-mock",
+            managerType=mock_conversations.get(query.conversationId, {}).get("managerType", "UNKNOWN"),
+            createdAt=datetime.now().isoformat()
         )
 
 @app.post("/feedback",
@@ -225,11 +305,9 @@ async def submit_feedback(
 ) -> FeedbackResponse:
     """Submit feedback for a conversation."""
     try:
-        feedback_id = agent.save_feedback(
-            query_id=feedback.conversationId,
-            rating=feedback.rating,
-            comment=feedback.comment
-        )
+        feedback_id = f"feedback-{uuid.uuid4()}"
+        
+        # In a real implementation, you would save the feedback to a database
         
         return FeedbackResponse(
             feedbackId=feedback_id,

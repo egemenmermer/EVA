@@ -8,7 +8,8 @@ export const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [validationError, setValidationError] = useState('');
-  const { register, isLoading, error } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const { register, loading, error } = useAuth();
 
   const validateForm = () => {
     if (password.length < 8) {
@@ -32,7 +33,8 @@ export const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
     
     try {
-      await register({ email, password, fullName });
+      await register(email, password, fullName);
+      setSuccess(true);
     } catch (err) {
       console.error('Registration error:', err);
     }
@@ -46,6 +48,35 @@ export const RegisterPage: React.FC = () => {
       return String((error as { message: string }).message);
     return 'An error occurred during registration. Please try again.';
   };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+            Registration Successful!
+          </h2>
+          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+              <p className="text-center text-gray-700 dark:text-gray-300">
+                Please check your email to activate your account. The activation link will expire in 24 hours.
+              </p>
+              <div className="mt-6">
+                <Link
+                  to="/login"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm
+                           text-sm font-medium text-white bg-blue-600 hover:bg-blue-700
+                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Return to Login
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -75,7 +106,7 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
-                  disabled={isLoading}
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -97,7 +128,7 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
-                  disabled={isLoading}
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -119,7 +150,7 @@ export const RegisterPage: React.FC = () => {
                            rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-blue-500 focus:border-blue-500
                            dark:bg-gray-700 dark:text-gray-100"
-                  disabled={isLoading}
+                  disabled={loading}
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   Password must be at least 8 characters long
@@ -139,13 +170,13 @@ export const RegisterPage: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm
                          text-sm font-medium text-white bg-blue-600 hover:bg-blue-700
                          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {loading ? 'Creating account...' : 'Create account'}
               </button>
             </div>
           </form>
