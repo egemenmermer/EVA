@@ -57,7 +57,7 @@ class Query(BaseModel):
     )
     conversationId: Optional[str] = Field(
         None,
-        description="The conversation identifier",
+        description="The conversation identifier (handled by the backend)",
         example="conv-123-456"
     )
 
@@ -70,28 +70,12 @@ class ConversationResponse(BaseModel):
     )
     conversationId: Optional[str] = Field(
         None,
-        description="The conversation identifier",
+        description="The conversation identifier (passed through from request)",
         example="conv-123-456"
     )
-    context: Optional[List[Dict]] = Field(
-        None,
-        description="Additional context for the response",
-        example=[{"type": "reference", "content": "Ethics guideline section 2.1"}]
-    )
-
-class FeedbackRequest(BaseModel):
-    """Model for user feedback."""
-    rating: int = Field(
-        ...,
-        description="Feedback rating (1-5)",
-        ge=1,
-        le=5,
-        example=5
-    )
-    comment: Optional[str] = Field(
-        None,
-        description="Optional feedback comment",
-        example="Very helpful guidance"
+    success: bool = Field(
+        default=True,
+        description="Whether the response was successfully generated"
     )
 
 # Dependency for getting the ethical agent
@@ -122,21 +106,6 @@ async def root():
         "description": "Provides ethical guidance for software professionals"
     }
 
-@app.post("/start",
-    response_model=Dict[str, str],
-    tags=["Conversation"],
-    summary="Start a conversation",
-    description="Starts a new conversation and returns a welcome message"
-)
-async def start_conversation(agent: EthicalAgent = Depends(get_agent)):
-    """Start a new conversation."""
-    try:
-        welcome_message = agent.start_conversation()
-        return {"message": welcome_message}
-    except Exception as e:
-        logger.error(f"Error starting conversation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.post("/generate-response",
     response_model=ConversationResponse,
     tags=["Conversation"],
@@ -149,44 +118,33 @@ async def generate_response(
 ) -> ConversationResponse:
     """Generate an ethical response based on the query and manager type."""
     try:
+        # Extract user query
+        user_query = query.userQuery
+        
+        # Log the query details for debugging
+        logger.info(f"Processing query: '{user_query[:50]}...' with manager type: {query.managerType}")
+        
+        # Process the query with the agent
         response = agent.process_query(
-            query=query.userQuery,
+            query=user_query,
             manager_type=query.managerType
         )
         
+        logger.info(f"Generated response (first 50 chars): '{response[:50]}...'")
+        
+        # Return the response with the conversation ID passed through
         return ConversationResponse(
             response=response,
-            conversationId=query.conversationId
+            conversationId=query.conversationId,
+            success=True
         )
     except Exception as e:
         logger.error(f"Error in generate_response: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
+        return ConversationResponse(
+            response=f"I apologize, but I'm having difficulty processing your request right now. Error: {str(e)}",
+            conversationId=query.conversationId,
+            success=False
         )
-
-@app.post("/feedback/{query_id}",
-    response_model=Dict[str, str],
-    tags=["Feedback"],
-    summary="Submit feedback",
-    description="Submit feedback for a specific response"
-)
-async def submit_feedback(
-    query_id: str,
-    feedback: FeedbackRequest,
-    agent: EthicalAgent = Depends(get_agent)
-) -> Dict[str, str]:
-    """Submit feedback for a response."""
-    try:
-        feedback_id = agent.save_feedback(
-            query_id=query_id,
-            rating=feedback.rating,
-            comment=feedback.comment
-        )
-        return {"message": "Feedback submitted successfully", "feedback_id": feedback_id}
-    except Exception as e:
-        logger.error(f"Error submitting feedback: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error submitting feedback")
 
 @app.get("/health",
     response_model=Dict[str, str],

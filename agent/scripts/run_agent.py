@@ -38,7 +38,7 @@ def parse_args():
         "--model",
         type=str,
         default="meta-llama/Llama-2-7b-chat-hf",
-        help="Name of the model to use"
+        help="Model name for the LLM"
     )
     parser.add_argument(
         "--cache-dir",

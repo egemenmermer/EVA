@@ -17,15 +17,26 @@ class BaseAgent(ABC):
         self.user_role = None
         
     @abstractmethod
+    def process_query(self, query: str, **kwargs) -> str:
+        """Process a user query.
+        
+        Args:
+            query (str): The user's query
+            **kwargs: Additional parameters for processing
+            
+        Returns:
+            str: Response to the query
+        """
+        pass
+        
     def start_conversation(self) -> str:
         """Start a new conversation.
         
         Returns:
             str: Welcome message
         """
-        pass
+        return "Welcome to the Ethical Decision-Making Assistant. How can I help you today?"
         
-    @abstractmethod
     def set_user_role(self, role: str) -> Tuple[bool, str]:
         """Set the user's role.
         
@@ -35,23 +46,11 @@ class BaseAgent(ABC):
         Returns:
             Tuple[bool, str]: Success status and message
         """
-        pass
+        self.user_role = role
+        return True, f"Role set to {role}"
         
-    @abstractmethod
-    def process_query(self, query: str) -> str:
-        """Process a user query.
-        
-        Args:
-            query (str): The user's query
-            
-        Returns:
-            str: Response to the query
-        """
-        pass
-        
-    @abstractmethod
     def save_feedback(self, query_id: str, rating: int, comment: Optional[str] = None) -> str:
-        """Save feedback for a response.
+        """Log feedback information (implementation optional in subclasses).
         
         Args:
             query_id (str): ID of the query to give feedback on
@@ -61,4 +60,4 @@ class BaseAgent(ABC):
         Returns:
             str: Feedback ID
         """
-        pass 
+        return "feedback-not-implemented" 

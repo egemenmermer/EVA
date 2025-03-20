@@ -199,3 +199,126 @@ Provide structured response."""
         except Exception as e:
             logger.error(f"Error generating clarifying questions: {str(e)}")
             return {}
+
+    def generate(self, prompt: str) -> str:
+        """Generate a response using the Llama-2 API with a raw prompt.
+        
+        Args:
+            prompt (str): The raw prompt to send to the model
+            
+        Returns:
+            str: The generated response
+        """
+        # Check cache first to avoid redundant API calls
+        cache_key = hashlib.md5(prompt.encode()).hexdigest()
+        if cache_key in self.cache:
+            logger.info(f"Using cached response for prompt: {prompt[:30]}...")
+            return self.cache[cache_key]
+
+        try:
+            # Print detailed diagnostic information
+            logger.info(f"Token starts with: {self.api_token[:8]}...")
+            logger.info(f"API URL: {self.api_url}")
+            logger.info(f"Prompt length: {len(prompt)} characters")
+            
+            # API Request with Retry Mechanism
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    logger.info(f"Attempt {attempt+1}: Sending request to {self.api_url}")
+                    response = requests.post(
+                        self.api_url,
+                        headers=self.headers,
+                        json={
+                            "inputs": prompt,
+                            "parameters": {
+                                "max_length": 2048,
+                                "temperature": 0.7,
+                                "top_p": 0.9,
+                                "do_sample": True,
+                                "return_full_text": False
+                            }
+                        },
+                        timeout=30
+                    )
+                    
+                    logger.info(f"Response status code: {response.status_code}")
+                    
+                    if response.status_code == 200:
+                        logger.info("Successful API response received")
+                        result = response.json()
+                        logger.info(f"Response type: {type(result)}")
+                        
+                        # Extract the generated text from the response
+                        if isinstance(result, list) and len(result) > 0:
+                            generated_text = result[0].get('generated_text', '')
+                        else:
+                            generated_text = result.get('generated_text', '')
+                            
+                        logger.info(f"Generated text length: {len(generated_text)} characters")
+                        
+                        # Cache the response
+                        self.cache[cache_key] = generated_text
+                        
+                        return generated_text
+                    
+                    elif response.status_code == 404:
+                        logger.error(f"Model not found: {self.model_name}. Response: {response.text}")
+                        # If we've tried multiple times and still get 404, return a fallback
+                        if attempt == max_retries - 1:
+                            return self._generate_fallback_response(prompt)
+                        time.sleep(2 ** attempt)
+                        
+                    else:
+                        logger.error(f"API Error: {response.status_code} - {response.text}")
+                        if attempt == max_retries - 1:  # Last attempt
+                            return self._generate_fallback_response(prompt)
+                        time.sleep(2 ** attempt)
+                    
+                except requests.exceptions.RequestException as e:
+                    logger.error(f"Request failed: {str(e)}")
+                    if attempt == max_retries - 1:  # Last attempt
+                        return self._generate_fallback_response(prompt)
+                    logger.warning(f"API call failed, retrying ({attempt+1}/{max_retries}): {str(e)}")
+                    time.sleep(2 ** attempt)  # Exponential backoff
+
+        except Exception as e:
+            logger.error(f"API request failed: {str(e)}")
+            return self._generate_fallback_response(prompt)
+            
+    def _generate_fallback_response(self, prompt: str) -> str:
+        """Generate a fallback response when API calls fail.
+        
+        Args:
+            prompt (str): The original prompt
+            
+        Returns:
+            str: A fallback response
+        """
+        # Check if the prompt is about ethical concerns
+        ethical_keywords = ["ethical", "ethics", "moral", "dilemma", "right", "wrong", 
+                           "privacy", "data", "scraping", "legal", "illegal", "compliance"]
+        
+        if any(keyword in prompt.lower() for keyword in ethical_keywords):
+            return """I understand you're facing an ethical dilemma. While I'm having technical difficulties 
+connecting to my advanced reasoning model, I can offer some general guidance:
+
+1. Prioritize human welfare and respect privacy
+2. Consider transparency and accountability in your decisions
+3. Evaluate both short and long-term consequences
+4. Consult your organization's ethics guidelines or legal team
+
+I recommend documenting your concerns and discussing them with appropriate stakeholders. 
+Would you like to try again with a more specific question about this ethical scenario?"""
+        else:
+            return """I'm experiencing technical difficulties connecting to my knowledge base. 
+Let me try to help with what I know:
+
+The issue you're describing sounds challenging. While I'm currently limited in my ability to 
+provide a comprehensive response, I'd recommend:
+
+1. Breaking down the problem into smaller components
+2. Consulting relevant documentation or guidelines
+3. Seeking input from colleagues with expertise in this area
+
+Could you provide additional details about your situation so I can try to assist further?"""

@@ -1,42 +1,48 @@
-from sqlalchemy import create_engine, Column, String, DateTime, Integer, JSON, Text, ForeignKey
+from sqlalchemy import create_engine, Table, Column, String, DateTime, Integer, Text, ForeignKey, MetaData
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import UUID
 import os
 import logging
 from typing import Dict, List, Optional
-from pathlib import Path
 from datetime import datetime
 import uuid
 import json
 
 logger = logging.getLogger(__name__)
 
-# Create SQLAlchemy base class
-Base = declarative_base()
+# Create SQLAlchemy metadata
+metadata = MetaData()
 
-class Conversation(Base):
-    """Model for storing conversations."""
-    __tablename__ = 'conversations'
+# Define tables directly instead of using declarative models
+conversations = Table(
+    'conversations', 
+    metadata,
+    Column('id', UUID(as_uuid=True), primary_key=True),
+    Column('user_id', UUID(as_uuid=True), ForeignKey('users.id')),
+    Column('manager_type', String),
+    Column('created_at', DateTime),
+    Column('updated_at', DateTime)
+)
 
-    id = Column(String, primary_key=True)
-    conversation_id = Column(String, nullable=False)
-    timestamp = Column(DateTime, nullable=False)
-    role = Column(String, nullable=False)
-    query = Column(Text, nullable=False)
-    response = Column(Text, nullable=False)
-    context = Column(JSON)
-    created_at = Column(DateTime, server_default='now()')
+conversation_contents = Table(
+    'conversation_contents',
+    metadata,
+    Column('id', UUID(as_uuid=True), primary_key=True),
+    Column('conversation_id', UUID(as_uuid=True), ForeignKey('conversations.id')),
+    Column('user_query', Text),
+    Column('agent_response', Text),
+    Column('created_at', DateTime)
+)
 
-class Feedback(Base):
-    """Model for storing user feedback."""
-    __tablename__ = 'feedback'
-
-    id = Column(String, primary_key=True)
-    conversation_id = Column(String, nullable=False)
-    query_id = Column(String, ForeignKey('conversations.id'), nullable=False)
-    rating = Column(Integer)
-    comment = Column(Text)
-    created_at = Column(DateTime, server_default='now()')
+feedback_table = Table(
+    'feedback',
+    metadata,
+    Column('id', UUID(as_uuid=True), primary_key=True),
+    Column('conversation_id', UUID(as_uuid=True), ForeignKey('conversations.id')),
+    Column('rating', Integer),
+    Column('user_feedback', Text),
+    Column('submitted_at', DateTime)
+)
 
 class DatabaseConnector:
     """Handle PostgreSQL database operations."""
@@ -44,6 +50,9 @@ class DatabaseConnector:
     def __init__(self):
         """Initialize database connection."""
         try:
+            # Get SSL mode from environment
+            ssl_mode = os.getenv('POSTGRES_SSL_MODE', 'disable')
+            
             # Create database URL
             db_url = (
                 f"postgresql://{os.getenv('POSTGRES_USER')}:"
@@ -51,17 +60,23 @@ class DatabaseConnector:
                 f"{os.getenv('POSTGRES_HOST')}:"
                 f"{os.getenv('POSTGRES_PORT')}/"
                 f"{os.getenv('POSTGRES_DB')}"
-                f"?sslmode={os.getenv('POSTGRES_SSL_MODE', 'require')}"
-                f"&options=endpoint%3Dep-square-dust-a5ayana1"
+                f"?sslmode={ssl_mode}"
             )
             
-            # Create engine and session
-            self.engine = create_engine(db_url, connect_args={'sslmode': 'require'})
+            # Create connection arguments based on SSL mode
+            connect_args = {}
+            if ssl_mode != 'disable':
+                connect_args['sslmode'] = ssl_mode
+            
+            # Create engine with explicit UUID casting
+            self.engine = create_engine(
+                db_url, 
+                connect_args=connect_args
+            )
+            
+            # Create session
             Session = sessionmaker(bind=self.engine)
             self.session = Session()
-            
-            # Create tables
-            Base.metadata.create_all(self.engine)
             
             logger.info("Database connection initialized successfully")
             
@@ -71,33 +86,50 @@ class DatabaseConnector:
             
     def save_conversation(self, 
                          conversation_id: str,
+                         user_id: str,
                          role: str,
                          query: str,
                          response: str,
                          context: Optional[List[Dict]] = None) -> str:
         """Save a conversation entry."""
         try:
-            query_id = str(uuid.uuid4())
+            # Convert string IDs to UUID objects
+            conv_uuid = uuid.UUID(conversation_id) if conversation_id else uuid.uuid4()
+            user_uuid = uuid.UUID(user_id) if user_id else None
+            message_id = uuid.uuid4()
             
-            # Create new conversation entry
-            conversation = Conversation(
-                id=query_id,
-                conversation_id=conversation_id,
-                timestamp=datetime.now(),
-                role=role,
-                query=query,
-                response=response,
-                context=context
+            # Check if conversation exists
+            result = self.engine.execute(
+                conversations.select().where(conversations.c.id == conv_uuid)
+            ).fetchone()
+            
+            # Create conversation if it doesn't exist
+            if not result:
+                # Insert the conversation
+                self.engine.execute(
+                    conversations.insert().values(
+                        id=conv_uuid,
+                        user_id=user_uuid,
+                        manager_type=role.upper() if role else "DILUTER",
+                        created_at=datetime.now(),
+                        updated_at=datetime.now()
+                    )
+                )
+                
+            # Insert message entry
+            self.engine.execute(
+                conversation_contents.insert().values(
+                    id=message_id,
+                    conversation_id=conv_uuid,
+                    user_query=query,
+                    agent_response=response,
+                    created_at=datetime.now()
+                )
             )
             
-            # Add and commit
-            self.session.add(conversation)
-            self.session.commit()
-            
-            return query_id
+            return str(message_id)
             
         except Exception as e:
-            self.session.rollback()
             logger.error(f"Error saving conversation: {str(e)}")
             raise
             
@@ -106,25 +138,26 @@ class DatabaseConnector:
                                limit: int = 10) -> List[Dict]:
         """Get conversation history for a given conversation ID."""
         try:
-            # Query conversations
-            conversations = (
-                self.session.query(Conversation)
-                .filter(Conversation.conversation_id == conversation_id)
-                .order_by(Conversation.timestamp.desc())
+            # Convert string ID to UUID
+            conv_uuid = uuid.UUID(conversation_id)
+            
+            # Query conversation contents
+            result = self.engine.execute(
+                conversation_contents.select()
+                .where(conversation_contents.c.conversation_id == conv_uuid)
+                .order_by(conversation_contents.c.created_at.desc())
                 .limit(limit)
-                .all()
-            )
+            ).fetchall()
             
             # Convert to dictionary format
             history = []
-            for conv in conversations:
+            for row in result:
                 history.append({
-                    'id': conv.id,
-                    'timestamp': conv.timestamp.isoformat(),
-                    'role': conv.role,
-                    'query': conv.query,
-                    'response': conv.response,
-                    'context': conv.context
+                    'id': str(row['id']),
+                    'conversationId': str(row['conversation_id']),
+                    'userQuery': row['user_query'],
+                    'agentResponse': row['agent_response'],
+                    'createdAt': row['created_at'].isoformat() if row['created_at'] else None
                 })
             
             return history
@@ -134,29 +167,27 @@ class DatabaseConnector:
             
     def save_feedback(self,
                      conversation_id: str,
-                     query_id: str,
                      rating: int,
-                     comment: Optional[str] = None) -> str:
+                     feedback: Optional[str] = None) -> str:
         """Save user feedback for a response."""
         try:
-            feedback_id = str(uuid.uuid4())
+            # Convert string ID to UUID
+            conv_uuid = uuid.UUID(conversation_id)
+            feedback_id = uuid.uuid4()
             
-            # Create new feedback entry
-            feedback = Feedback(
-                id=feedback_id,
-                conversation_id=conversation_id,
-                query_id=query_id,
-                rating=rating,
-                comment=comment
+            # Insert feedback entry
+            self.engine.execute(
+                feedback_table.insert().values(
+                    id=feedback_id,
+                    conversation_id=conv_uuid,
+                    rating=rating,
+                    user_feedback=feedback,
+                    submitted_at=datetime.now()
+                )
             )
             
-            # Add and commit
-            self.session.add(feedback)
-            self.session.commit()
-            
-            return feedback_id
+            return str(feedback_id)
             
         except Exception as e:
-            self.session.rollback()
             logger.error(f"Error saving feedback: {str(e)}")
             raise 

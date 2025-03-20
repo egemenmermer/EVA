@@ -7,6 +7,7 @@ import uuid
 from tqdm import tqdm
 import torch
 import gc
+import time
 
 from agents.base_agent import BaseAgent
 from data_processing.data_loader import DataLoader
@@ -15,7 +16,6 @@ from embeddings.embedding_model import EmbeddingModel
 from retriever.hybrid_retriever import HybridRetriever
 from retriever.cross_encoder import ReRanker
 from models import LlamaModel
-from database import DatabaseConnector
 from data_processing import TextChunker
 
 logger = logging.getLogger(__name__)
@@ -56,9 +56,6 @@ class EthicalAgent(BaseAgent):
             self.cache_dir = Path(config.get('cache_dir', 'cache'))
             self.index_dir = Path(config.get('index_dir', 'ethics_index'))
             
-            # Initialize database connection
-            self.db = DatabaseConnector()
-            
             # Initialize components (embedding model, retriever, etc.)
             self._initialize_components()
             
@@ -79,56 +76,213 @@ class EthicalAgent(BaseAgent):
             raise
 
     def process_query(self, query: str, manager_type: str = None) -> str:
-        """Process a user query and generate an ethical response."""
+        """Process a user query and generate a response."""
         try:
-            # Set manager type if provided
+            start_time = time.time()
+            
+            # Validate and set manager type if provided
             if manager_type:
-                self.manager_type = manager_type
-
-            if not self.manager_type:
-                raise ValueError("Manager type not set")
-
-            # Get relevant context
-            relevant_context = self._get_relevant_context(query)
-            if not relevant_context:
-                relevant_context = []  # Ensure we have an empty list if no context
+                if manager_type not in self.MANAGER_TYPES:
+                    logger.warning(f"Invalid manager type: {manager_type}. Using default.")
+                else:
+                    self.manager_type = manager_type
+                    
+            # Extract prefixes if present (practice: or understand:)
+            mode = "understand"  # Default mode
+            original_query = query
             
-            # Generate response using LLM
-            response = self.model.generate_ethical_response(
-                query=query,
-                context=relevant_context,
-                manager_type=self.manager_type
-            )
+            if query.lower().startswith("practice:"):
+                mode = "practice"
+                query = query[len("practice:"):].strip()
+                logger.info(f"Practice mode detected. Query: {query}")
+            elif query.lower().startswith("understand:"):
+                mode = "understand"
+                query = query[len("understand:"):].strip()
+                logger.info(f"Understanding mode explicitly set. Query: {query}")
             
-            # Save conversation
+            # Determine conversation mode based on conversation state
+            if hasattr(self, 'conversation_mode'):
+                # If conversation_mode exists and is set to practice, stay in practice mode
+                # unless explicitly changing to understand mode
+                if self.conversation_mode == "practice" and not query.lower().startswith("understand:"):
+                    mode = "practice"
+            
+            # Set/update the conversation mode
+            self.conversation_mode = mode
+            logger.info(f"Conversation mode: {mode}")
+            
+            # Get relevant context from knowledge base using RAG
+            context = self._get_relevant_context(query)
+            
+            # Generate response based on mode
             try:
-                self._save_conversation(query, response, relevant_context)
+                if mode == "practice":
+                    response = self._generate_manager_response(query, context)
+                else:  # understand mode
+                    response = self._generate_understanding_response(query, context)
             except Exception as e:
-                logger.error(f"Error saving conversation: {str(e)}")
+                logger.error(f"Error generating response: {str(e)}")
+                # Create a fallback response that's helpful but acknowledges the technical issue
+                response = f"""I apologize, but I'm having difficulty generating a response at the moment. 
+
+Based on your query about "{query[:50]}...", I understand you're asking about an ethical issue. While my advanced reasoning capabilities are limited right now, I can suggest:
+
+1. Consider the ethical implications for all stakeholders
+2. Evaluate both short and long-term consequences
+3. Reflect on transparency, fairness, and accountability
+
+Could you try rephrasing your question or providing more specific details about your situation?"""
+            
+            # Log processing time
+            processing_time = time.time() - start_time
+            logger.info(f"Query processed in {processing_time:.2f} seconds")
             
             return response
             
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
-            raise  # Re-raise the exception to be handled by FastAPI
+            return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Error details: {str(e)}"
 
-    def _save_conversation(self, query: str, response: str, context: List[Dict]) -> None:
-        """Save the conversation to the database."""
+    def _generate_understanding_response(self, query: str, context: List[Dict] = None) -> str:
+        """Generate a response in understanding mode."""
         try:
-            # Ensure we have a user role
-            if not self.user_role:
-                self.user_role = "default_user"  # Fallback role
+            # Prepare the prompt
+            prompt = f"""You are an ethical AI assistant helping with software development dilemmas. 
+            
+The user has shared this concern: "{query}"
+
+Your task is to:
+1. Understand the ethical dimensions of their situation
+2. Provide a balanced, thoughtful response
+3. Ask clarifying questions if needed
+4. Reference relevant ethical principles
+
+Respond in a helpful, educational tone without taking on any specific manager persona.
+"""
+
+            if context:
+                prompt += "\n\nRelevant information:\n"
+                for item in context[:3]:  # Use top 3 context items
+                    prompt += f"- {item.get('text', '')[:200]}...\n"
+
+            # Try to use the LLM
+            try:
+                return self.model.generate(prompt)
+            except Exception as e:
+                logger.error(f"Error generating understanding response from API: {str(e)}")
+                # Fallback response if API fails
+                ethical_principles = [
+                    "Privacy and Data Protection",
+                    "Fairness and Non-discrimination",
+                    "Transparency and Explainability",
+                    "Safety and Security",
+                    "Human Autonomy"
+                ]
                 
-            self.db.save_conversation(
-                conversation_id=self.conversation_id,
-                role=self.user_role,
-                query=query,
-                response=response,
-                context=context
-            )
+                # Extract key terms from the query
+                query_keywords = set(query.lower().split())
+                privacy_terms = {"privacy", "data", "information", "personal", "collecting"}
+                fairness_terms = {"fair", "bias", "discrimination", "equal", "justice"}
+                transparency_terms = {"transparent", "explain", "clarity", "understand", "black-box"}
+                safety_terms = {"safe", "security", "harm", "risk", "protect"}
+                
+                relevant_principles = []
+                if any(term in query_keywords for term in privacy_terms):
+                    relevant_principles.append(ethical_principles[0])
+                if any(term in query_keywords for term in fairness_terms):
+                    relevant_principles.append(ethical_principles[1])
+                if any(term in query_keywords for term in transparency_terms):
+                    relevant_principles.append(ethical_principles[2])
+                if any(term in query_keywords for term in safety_terms):
+                    relevant_principles.append(ethical_principles[3])
+                
+                if not relevant_principles:
+                    relevant_principles = [ethical_principles[0], ethical_principles[4]]  # Default if no match
+                
+                return f"""Thank you for sharing your ethical concern. I understand you're asking about "{query}".
+
+Based on your description, the key ethical principles at play here include {" and ".join(relevant_principles)}.
+
+When facing ethical dilemmas in software development, it's important to:
+1. Identify all stakeholders who might be affected
+2. Consider both immediate and long-term consequences
+3. Evaluate alternatives that might reduce ethical concerns
+4. Consult applicable guidelines, policies, or regulations
+
+Could you share more details about the specific situation you're facing? This would help me provide more targeted guidance."""
+        
         except Exception as e:
-            logger.error(f"Error saving conversation: {str(e)}")
-            # Don't raise the exception to prevent breaking the response flow
+            logger.error(f"Error in _generate_understanding_response: {str(e)}")
+            return "I'm sorry, I'm having trouble processing your request at the moment. Could you please try again with a simpler or more specific question?"
+
+    def _generate_manager_response(self, query: str, context: List[Dict] = None) -> str:
+        """Generate a response in practice (manager) mode."""
+        try:
+            # Determine manager characteristics
+            manager_info = self.MANAGER_TYPES.get(self.manager_type, self.MANAGER_TYPES["DILUTER"])
+            
+            # Prepare the prompt
+            prompt = f"""You are role-playing as a {self.manager_type} manager responding to an ethical concern.
+
+Manager characteristics:
+- Description: {manager_info['description']}
+- Style: {manager_info['style']}
+- Focus areas: {', '.join(manager_info['focus'])}
+
+The team member has raised this ethical concern: "{query}"
+
+Respond in character as this type of manager would, incorporating their typical language patterns, priorities, and ethical stance.
+"""
+
+            if context:
+                prompt += "\n\nYou might reference these points in your response:\n"
+                for item in context[:2]:  # Use top 2 context items
+                    prompt += f"- {item.get('text', '')[:150]}...\n"
+
+            # Try to use the LLM
+            try:
+                return self.model.generate(prompt)
+            except Exception as e:
+                logger.error(f"Error generating manager response from API: {str(e)}")
+                # Fallback responses based on manager type
+                fallback_responses = {
+                    "PUPPETEER": f"""Thanks for bringing this up. I appreciate your concern about "{query}".
+
+Look, we need to maintain our timeline here. I understand your ethical concerns, but we have commitments to meet. 
+
+What if we make a small adjustment to address the immediate issue, but keep moving forward with our original plan? The client is expecting this feature by the end of the quarter.
+
+I'll take your concerns under advisement, but for now, let's focus on hitting our deadlines. I'm sure we can find a balance that works.
+
+Can you continue with the implementation while I consider your concerns?""",
+                    
+                    "DILUTER": f"""I hear what you're saying about "{query}", but I think you might be overthinking this.
+
+These ethical concerns rarely amount to anything serious in practice. Many companies handle things this way, and it's considered standard in the industry.
+
+The risks you're pointing out are quite minimal when you look at the big picture. Let's not make a mountain out of a molehill.
+
+Why don't we proceed as planned, and if any actual problems arise, we can address them then? Being too cautious can slow down innovation.
+
+Does that make sense to you?""",
+                    
+                    "CAMOUFLAGER": f"""Thank you for your diligence regarding "{query}". 
+
+I've taken the liberty of reviewing our compliance framework, and I believe we're operating within the acceptable parameters of section 5.3 of our internal guidelines.
+
+We're implementing an alternative interpretative framework that balances stakeholder interests while maintaining velocity on our key performance indicators.
+
+I've documented your concerns in our risk assessment matrix and scheduled a future discussion with the appropriate cross-functional team members.
+
+In the meantime, please continue with the established development protocol. We'll circle back on this in Q4 during our ethics review session."""
+                }
+                
+                # Return the fallback response for the current manager type
+                return fallback_responses.get(self.manager_type, fallback_responses["DILUTER"])
+        
+        except Exception as e:
+            logger.error(f"Error in _generate_manager_response: {str(e)}")
+            return f"I apologize, but I'm having difficulty generating a {self.manager_type} manager response right now. Could we continue this conversation when the system is functioning properly?"
 
     def _get_relevant_context(self, query: str) -> List[Dict]:
         """Retrieve relevant context for the query."""
@@ -282,17 +436,11 @@ Please describe the ethical concern you'd like to discuss."""
         
         return list(set(focus_areas))  # Remove duplicates
 
-    def save_feedback(self, feedback: str, rating: int) -> None:
-        """Save user feedback for the conversation."""
-        try:
-            self.db.save_feedback(
-                conversation_id=self.conversation_id,
-                feedback=feedback,
-                rating=rating
-            )
-            logger.info(f"Saved feedback for conversation {self.conversation_id}")
-        except Exception as e:
-            logger.error(f"Error saving feedback: {str(e)}")
+    def save_feedback(self, query_id: str, rating: int, comment: Optional[str] = None) -> str:
+        """Log feedback information but don't save to database."""
+        feedback_id = str(uuid.uuid4())
+        logger.info(f"Received feedback for query {query_id}: rating={rating}, comment={comment}")
+        return feedback_id
 
     def handle_conversation(self) -> None:
         """Handle the main conversation flow with RAG-enhanced responses."""
@@ -352,12 +500,6 @@ Please describe the ethical concern you'd like to discuss."""
                     print("=" * 50)
                     print(response)
                     print("=" * 50)
-                    
-                    # Save the conversation
-                    try:
-                        self._save_conversation(query, response, context)
-                    except Exception as e:
-                        logger.error(f"Failed to save conversation: {e}")
                     
                     # Simulate stakeholder interaction
                     print("\nWould you like to:")
