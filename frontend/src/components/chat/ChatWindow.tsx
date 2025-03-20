@@ -12,6 +12,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   createdAt?: string;
+  isSystemMessage?: boolean;
 }
 
 export const ChatWindow: React.FC = () => {
@@ -25,6 +26,8 @@ export const ChatWindow: React.FC = () => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [practiceMode, setPracticeMode] = useState(false);
+  const [showPracticeBanner, setShowPracticeBanner] = useState(false);
 
   // Load messages when conversation changes
   useEffect(() => {
@@ -80,8 +83,82 @@ export const ChatWindow: React.FC = () => {
     }
   };
 
+  // Function to detect if a message is asking about practice mode
+  const detectPracticeModeOffer = (content: string): boolean => {
+    const lowerContent = content.toLowerCase();
+    const practiceKeywords = [
+      'would you like to practice handling this situation',
+      'practice with a manager',
+      'practice session',
+      'role-playing'
+    ];
+    
+    return practiceKeywords.some(keyword => lowerContent.includes(keyword));
+  };
+  
+  // Function to handle entering practice mode
+  const handleEnterPracticeMode = () => {
+    setPracticeMode(true);
+    setShowPracticeBanner(true);
+    
+    // Add a system message to indicate the mode change
+    const systemMessage: Message = {
+      id: uuidv4(),
+      conversationId: currentConversation?.conversationId || '',
+      role: 'assistant',
+      content: `You've entered practice mode. EVA will now respond as a ${managerType} manager to help you practice your ethical communication skills.`,
+      createdAt: new Date().toISOString(),
+      isSystemMessage: true
+    };
+    
+    addMessage(systemMessage);
+  };
+  
+  // Function to handle exiting practice mode
+  const handleExitPracticeMode = () => {
+    setPracticeMode(false);
+    
+    // Add a system message to indicate the mode change
+    const systemMessage: Message = {
+      id: uuidv4(),
+      conversationId: currentConversation?.conversationId || '',
+      role: 'assistant',
+      content: `You've exited practice mode. EVA will now respond normally to help you understand ethical considerations.`,
+      createdAt: new Date().toISOString(),
+      isSystemMessage: true
+    };
+    
+    addMessage(systemMessage);
+    
+    // Send a special command to the agent to exit practice mode
+    handleSendMessage("understand: Let's continue our discussion without role-playing");
+  };
+  
+  // Detect practice mode offers in new messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant' && detectPracticeModeOffer(lastMessage.content)) {
+        setShowPracticeBanner(true);
+      }
+    }
+  }, [messages]);
+  
+  // Modified sendMessage to handle practice mode responses
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || !currentConversation?.conversationId) return;
+
+    // Handle special commands for practice mode
+    if (content.toLowerCase() === 'yes' && showPracticeBanner && !practiceMode) {
+      handleEnterPracticeMode();
+      setShowPracticeBanner(false);
+      return;
+    }
+    
+    if (content.toLowerCase() === 'exit practice mode' && practiceMode) {
+      handleExitPracticeMode();
+      return;
+    }
 
     try {
       setLoading(true);
@@ -96,12 +173,23 @@ export const ChatWindow: React.FC = () => {
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
+      
+      // Handle the banner state
+      if (showPracticeBanner) {
+        setShowPracticeBanner(false);
+      }
+
+      // Prefix the message with practice mode indicator if in practice mode
+      let messageToSend = content;
+      if (practiceMode && !content.startsWith('practice:')) {
+        messageToSend = `practice: ${content}`;
+      }
 
       // Send to API
-      console.log('Sending message to API:', content);
+      console.log('Sending message to API:', messageToSend);
       const response = await conversationApi.sendMessage(
         currentConversation.conversationId,
-        content
+        messageToSend
       );
 
       // Add AI response to UI
@@ -114,6 +202,11 @@ export const ChatWindow: React.FC = () => {
       };
       
       addMessage(assistantMessage);
+      
+      // Check if this is a practice mode offer and show banner if needed
+      if (detectPracticeModeOffer(assistantMessage.content)) {
+        setShowPracticeBanner(true);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message. Please try again.');
@@ -137,10 +230,34 @@ export const ChatWindow: React.FC = () => {
     <div className="h-full flex flex-col">
       {currentConversation ? (
         <>
+          {showPracticeBanner && (
+            <div className="bg-blue-50 dark:bg-blue-900 p-4 border-b border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    {practiceMode ? 'Practice Mode Active' : 'Practice Mode Offered'}
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
+                    {practiceMode 
+                      ? `EVA is currently role-playing as a ${managerType} manager. Type "exit practice mode" to return to normal conversation.` 
+                      : `EVA is offering to role-play as a ${managerType} manager to help you practice. Reply with "yes" to start practice mode.`}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowPracticeBanner(false)} 
+                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  <span>×</span>
+                </button>
+              </div>
+            </div>
+          )}
+          
           <div className="flex-1 overflow-hidden">
             <MessageList 
               messages={messages.length > 0 ? messages : [getWelcomeMessage()]} 
-              loading={loading} 
+              loading={loading}
+              practiceMode={practiceMode}
             />
           </div>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">

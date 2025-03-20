@@ -3,6 +3,7 @@ import { UserCircle, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useStore } from '@/store/useStore';
 
 // Custom hook for typing effect
 const useTypewriter = (text: string, speed: number = 50) => {
@@ -46,17 +47,20 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   createdAt?: string;
+  isSystemMessage?: boolean;
 }
 
 interface Props {
   messages: Message[];
   loading?: boolean;
+  practiceMode?: boolean;
 }
 
-export const MessageList: React.FC<Props> = ({ messages, loading }) => {
+export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode = false }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [lastMessage, setLastMessage] = useState<Message | null>(null);
   const [hasRenderedMessages, setHasRenderedMessages] = useState(false);
+  const { managerType } = useStore();
   
   // Reset the typing animation state when messages array changes completely
   useEffect(() => {
@@ -70,7 +74,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading }) => {
       
       // Set up typing animation for the last assistant message
       if (!hasRenderedMessages) {
-        const lastAssistantMessage = [...messages].reverse().find(msg => msg.role === 'assistant');
+        const lastAssistantMessage = [...messages].reverse().find(msg => msg.role === 'assistant' && !msg.isSystemMessage);
         if (lastAssistantMessage) {
           console.log('MessageList: Setting last assistant message for typing effect');
           setLastMessage(lastAssistantMessage);
@@ -88,7 +92,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading }) => {
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg.role === 'assistant' && (!lastMessage || lastMsg.id !== lastMessage.id)) {
+      if (lastMsg.role === 'assistant' && !lastMsg.isSystemMessage && (!lastMessage || lastMsg.id !== lastMessage.id)) {
         console.log('MessageList: New assistant message detected, animating it');
         setLastMessage(lastMsg);
       }
@@ -120,6 +124,18 @@ export const MessageList: React.FC<Props> = ({ messages, loading }) => {
         messages.map((message, index) => {
           const isLastAssistantMessage = message === lastMessage;
           const messageContent = isLastAssistantMessage ? displayedText : message.content;
+          const isSystemMsg = message.isSystemMessage === true;
+
+          // Skip typing animation for system messages
+          if (isSystemMsg) {
+            return (
+              <div key={message.id || index} className="flex justify-center">
+                <div className="max-w-[90%] bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 text-sm text-yellow-800 dark:text-yellow-200">
+                  {message.content}
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div
@@ -132,17 +148,30 @@ export const MessageList: React.FC<Props> = ({ messages, loading }) => {
                 className={`flex max-w-[80%] md:max-w-[70%] rounded-lg p-4 animate-in slide-in-from-bottom-4 ${
                   message.role === 'user'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                    : practiceMode
+                      ? 'bg-purple-100 dark:bg-purple-900 text-gray-900 dark:text-gray-100 border border-purple-200 dark:border-purple-800'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <div className="mr-2 flex-shrink-0 self-end">
                   {message.role === 'user' ? (
                     <UserCircle className="h-6 w-6" />
                   ) : (
-                    <Bot className="h-6 w-6" />
+                    practiceMode ? (
+                      <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                        M
+                      </div>
+                    ) : (
+                      <Bot className="h-6 w-6" />
+                    )
                   )}
                 </div>
                 <div className="flex-1">
+                  {practiceMode && message.role === 'assistant' && (
+                    <div className="mb-1 text-xs font-medium text-purple-700 dark:text-purple-300">
+                      Manager ({managerType})
+                    </div>
+                  )}
                   <ReactMarkdown
                     components={{
                       code(props) {
