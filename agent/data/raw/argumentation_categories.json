@@ -1,0 +1,92 @@
+{
+  "argumentation_categories": [
+    {
+      "category": "Soft Resistance",
+      "description": "Subtle tactics to push for ethical change within existing corporate structures",
+      "example_tactics": [
+        "Delaying an unethical project by requesting more user testing",
+        "Making informal ethical concern notes",
+        "Suggesting alternative approaches that are more ethical"
+      ],
+      "effectiveness": "Low to Medium",
+      "risk_level": "Low"
+    },
+    {
+      "category": "Persuasive Rhetoric",
+      "description": "Logical, emotional, and credibility-based persuasion methods to convince stakeholders",
+      "example_tactics": [
+        "Using empirical evidence to show business risks",
+        "Appealing to company values and reputation",
+        "Presenting case studies of similar ethical decisions"
+      ],
+      "effectiveness": "Medium to High",
+      "risk_level": "Low to Medium"
+    },
+    {
+      "category": "Process-Based Advocacy",
+      "description": "Embedding ethical concerns into structured processes like compliance and design reviews",
+      "example_tactics": [
+        "Proposing ethics reviews",
+        "Integrating ethical checkpoints in development workflow",
+        "Using compliance requirements to enforce ethical standards"
+      ],
+      "effectiveness": "High",
+      "risk_level": "Low"
+    },
+    {
+      "category": "Direct Confrontation",
+      "description": "More explicit, riskier tactics where a person directly challenges unethical decisions",
+      "example_tactics": [
+        "Writing open letters against unethical deployments",
+        "Escalating concerns to higher management",
+        "Refusing to implement unethical features"
+      ],
+      "effectiveness": "Variable",
+      "risk_level": "High"
+    }
+  ],
+  "ethical_valence_scoring": [
+    {
+      "tactic": "Citing business risks of unethical action",
+      "category": "Persuasive Rhetoric",
+      "score": 3,
+      "justification": "Proactively addresses ethical concerns while aligning with business interests"
+    },
+    {
+      "tactic": "Using legal/compliance requirements to slow down unethical action",
+      "category": "Process-Based Advocacy",
+      "score": 2,
+      "justification": "Leverages existing frameworks to promote ethical behavior"
+    },
+    {
+      "tactic": "Requesting additional testing before implementation",
+      "category": "Soft Resistance",
+      "score": 1,
+      "justification": "Creates space for ethical consideration without direct confrontation"
+    },
+    {
+      "tactic": "Making an informal ethical concern note",
+      "category": "Soft Resistance",
+      "score": 0,
+      "justification": "Minimal action that documents concerns but doesn't actively resist"
+    },
+    {
+      "tactic": "Ignoring an ethical issue due to pressure",
+      "category": "None",
+      "score": -1,
+      "justification": "Passive acceptance of unethical behavior"
+    },
+    {
+      "tactic": "Agreeing with an unethical directive",
+      "category": "None",
+      "score": -2,
+      "justification": "Active participation in unethical behavior"
+    },
+    {
+      "tactic": "Openly promoting unethical decisions",
+      "category": "None",
+      "score": -3,
+      "justification": "Actively encouraging unethical behavior in others"
+    }
+  ]
+} 

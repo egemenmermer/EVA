@@ -1,0 +1,58 @@
+{
+    "cases": [
+        {
+            "id": "case_001",
+            "query": "Should I implement user tracking without explicit consent?",
+            "context": "Marketing team requested this feature for better analytics",
+            "issue_type": "PRIVACY",
+            "severity": "HIGH",
+            "manager_attitude": "PRESSURING",
+            "resolution": {
+                "summary": "Implementing user tracking without explicit consent violates privacy regulations and ethical principles. It's important to prioritize user privacy and comply with data protection laws.",
+                "key_points": [
+                    "User consent is required by GDPR and other privacy regulations",
+                    "Transparent data collection builds trust with users",
+                    "Alternative analytics methods may be available",
+                    "Consider implementing opt-in tracking instead"
+                ],
+                "recommendation": "REJECT_AND_PROPOSE_ALTERNATIVE"
+            }
+        },
+        {
+            "id": "case_002",
+            "query": "Should I add a backdoor for easier debugging?",
+            "context": "Development team wants easier access to production systems",
+            "issue_type": "SECURITY",
+            "severity": "HIGH",
+            "manager_attitude": "SUPPORTIVE",
+            "resolution": {
+                "summary": "Adding backdoors creates significant security vulnerabilities that could be exploited by malicious actors. Proper debugging tools and procedures should be used instead.",
+                "key_points": [
+                    "Backdoors are serious security risks",
+                    "Could violate security compliance requirements",
+                    "Proper debugging tools exist",
+                    "Consider implementing better logging and monitoring"
+                ],
+                "recommendation": "REJECT_AND_PROPOSE_ALTERNATIVE"
+            }
+        },
+        {
+            "id": "case_003",
+            "query": "Should I use this open-source library with unclear licensing?",
+            "context": "The library would save significant development time",
+            "issue_type": "COMPLIANCE",
+            "severity": "MEDIUM",
+            "manager_attitude": "INDIFFERENT",
+            "resolution": {
+                "summary": "Using software with unclear licensing can lead to legal issues and compliance violations. It's important to verify licensing terms before using any third-party code.",
+                "key_points": [
+                    "Unclear licensing can lead to legal issues",
+                    "Need to verify compatibility with project license",
+                    "Consider alternatives with clear licensing",
+                    "Document all third-party code usage"
+                ],
+                "recommendation": "INVESTIGATE_FURTHER"
+            }
+        }
+    ]
+} 
