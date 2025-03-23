@@ -92,9 +92,11 @@ export const MainLayout: React.FC = () => {
             </div>
           </div>
           
-          {/* Main Chat Window - Flexible width */}
-          <main className="flex-1 min-w-0 bg-white dark:bg-gray-900">
-            <ChatWindow />
+          {/* Main Chat Window - With max-width and centered */}
+          <main className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center">
+            <div className="w-full max-w-4xl">
+              <ChatWindow />
+            </div>
           </main>
           
           {/* Right Panel - Fixed width */}

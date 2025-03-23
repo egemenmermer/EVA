@@ -1,36 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 
-interface Props {
-  onSendMessage: (message: string) => void;
+interface MessageInputProps {
+  onSendMessage: (content: string) => void;
   disabled?: boolean;
 }
 
-export const MessageInput: React.FC<Props> = ({ onSendMessage, disabled = false }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ 
+  onSendMessage, 
+  disabled = false 
+}) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Adjust textarea height based on content
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-    }
-  };
-
   useEffect(() => {
-    adjustTextareaHeight();
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'inherit';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${scrollHeight}px`;
+    }
   }, [message]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (message.trim() && !disabled) {
       onSendMessage(message);
       setMessage('');
-      // Reset height after sending
+      
+      // Reset textarea height
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = 'inherit';
       }
     }
   };
@@ -43,32 +43,34 @@ export const MessageInput: React.FC<Props> = ({ onSendMessage, disabled = false 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="relative flex items-center">
+    <div className="max-w-4xl mx-auto w-full">
+      <form onSubmit={handleSubmit} className="relative border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400">
         <textarea
           ref={textareaRef}
+          className="w-full resize-none rounded-lg bg-transparent py-3 pr-12 pl-4 placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-900 dark:text-white focus:outline-none"
+          rows={1}
+          placeholder="Message EVA..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type your message..."
           disabled={disabled}
-          className="w-full p-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 resize-none min-h-[44px] max-h-[120px] overflow-y-auto"
-          rows={1}
         />
         <button
           type="submit"
+          className={`absolute right-2.5 bottom-2.5 p-1.5 rounded-md transition-colors ${
+            message.trim() && !disabled
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+          }`}
           disabled={!message.trim() || disabled}
-          className="absolute right-2 p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
           aria-label="Send message"
         >
-          <Send size={20} />
+          <Send className="h-4 w-4" />
         </button>
+      </form>
+      <div className="text-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+        Press Enter to send, Shift+Enter for a new line
       </div>
-      {disabled && (
-        <div className="absolute bottom-full mb-2 left-0 right-0 text-center text-sm text-gray-500 dark:text-gray-400">
-          AI is thinking...
-        </div>
-      )}
-    </form>
+    </div>
   );
 }; 

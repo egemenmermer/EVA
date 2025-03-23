@@ -170,7 +170,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           // Skip typing animation for system messages
           if (isSystemMsg) {
             return (
-              <div key={message.id || index} className="flex justify-center">
+              <div key={message.id || index} className="flex justify-center my-2">
                 <div className="max-w-[90%] bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 text-sm text-yellow-800 dark:text-yellow-200">
                   {message.content}
                 </div>
@@ -181,73 +181,79 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           return (
             <div
               key={message.id || index}
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`w-full py-4 px-1`}
             >
-              <div
-                className={`flex max-w-[80%] md:max-w-[70%] rounded-lg p-4 animate-in slide-in-from-bottom-4 ${
-                  message.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : practiceMode
-                      ? 'bg-purple-100 dark:bg-purple-900 text-gray-900 dark:text-gray-100 border border-purple-200 dark:border-purple-800'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                }`}
-              >
-                <div className="mr-2 flex-shrink-0 self-end">
-                  {message.role === 'user' ? (
-                    <UserCircle className="h-6 w-6" />
-                  ) : (
-                    practiceMode ? (
-                      <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
+              {message.role === 'assistant' ? (
+                // Assistant message - left side
+                <div className="max-w-4xl mx-auto flex items-start gap-4">
+                  <div className="flex-shrink-0 mt-1">
+                    {practiceMode ? (
+                      <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
                         M
                       </div>
                     ) : (
-                      <Bot className="h-6 w-6" />
-                    )
-                  )}
-                </div>
-                <div className="flex-1">
-                  {practiceMode && message.role === 'assistant' && (
-                    <div className="mb-1 text-xs font-medium text-purple-700 dark:text-purple-300">
-                      Manager ({managerType})
-                    </div>
-                  )}
-                  <ReactMarkdown
-                    components={{
-                      code(props) {
-                        const { children, className } = props;
-                        const match = /language-(\w+)/.exec(className || '');
-                        
-                        if (!match) {
-                          return <code className={className}>{children}</code>;
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 rounded-lg py-2 px-1">
+                    {practiceMode && (
+                      <div className="mb-1 text-xs font-medium text-purple-700 dark:text-purple-300">
+                        Manager ({managerType})
+                      </div>
+                    )}
+                    <ReactMarkdown
+                      components={{
+                        code(props) {
+                          const { children, className } = props;
+                          const match = /language-(\w+)/.exec(className || '');
+                          
+                          if (!match) {
+                            return <code className={className}>{children}</code>;
+                          }
+                          
+                          return (
+                            <SyntaxHighlighter
+                              style={oneDark as any}
+                              language={match[1]}
+                              PreTag="div"
+                            >
+                              {String(children).replace(/\n$/, '')}
+                            </SyntaxHighlighter>
+                          );
                         }
-                        
-                        return (
-                          <SyntaxHighlighter
-                            style={oneDark as any}
-                            language={match[1]}
-                            PreTag="div"
-                          >
-                            {String(children).replace(/\n$/, '')}
-                          </SyntaxHighlighter>
-                        );
-                      }
-                    }}
-                  >
-                    {messageContent}
-                  </ReactMarkdown>
+                      }}
+                    >
+                      {messageContent}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                // User message - right side
+                <div className="max-w-4xl mx-auto flex justify-end">
+                  <div className="max-w-[85%] bg-blue-600 text-white rounded-lg py-3 px-4">
+                    {messageContent}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })
       )}
       {(loading || isTyping) && (
-        <div className="flex justify-start">
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 animate-pulse flex items-center space-x-2">
-            <Bot className="h-6 w-6" />
-            <div className="h-4 w-28 bg-gray-300 dark:bg-gray-600 rounded" />
+        <div className="w-full py-4 px-1">
+          <div className="max-w-4xl mx-auto flex items-start gap-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-10 h-10 rounded-full overflow-hidden">
+                <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce"></div>
+              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            </div>
           </div>
         </div>
       )}

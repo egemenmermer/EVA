@@ -19,6 +19,7 @@ export interface Store {
   messages: Message[];
   managerType: ManagerType;
   darkMode: boolean;
+  temperature: number;
   
   // Setters
   setUser: (user: User | null) => void;
@@ -28,6 +29,7 @@ export interface Store {
   addMessage: (message: Message) => void;
   deleteMessage: (messageId: string) => void;
   setManagerType: (managerType: ManagerType) => void;
+  setTemperature: (temperature: number) => void;
   toggleDarkMode: () => void;
 }
 
@@ -68,6 +70,7 @@ export const useStore = create<Store>()(
       messages: [],
       managerType: 'PUPPETEER',
       darkMode: getInitialDarkMode(),
+      temperature: 0.7,
       
       setUser: (user) => {
         console.log('Store: Setting user:', user?.email || 'null');
@@ -165,6 +168,11 @@ export const useStore = create<Store>()(
         set({ managerType });
       },
       
+      setTemperature: (temperature) => {
+        console.log('Store: Setting temperature:', temperature);
+        set({ temperature });
+      },
+      
       toggleDarkMode: () => {
         set((state) => {
           const newDarkMode = !state.darkMode;
@@ -180,6 +188,7 @@ export const useStore = create<Store>()(
         token: state.token,
         darkMode: state.darkMode,
         managerType: state.managerType,
+        temperature: state.temperature,
         // Store current conversation ID to reload after refresh
         currentConversation: state.currentConversation,
         // Store a limited number of recent messages to preserve context across refreshes

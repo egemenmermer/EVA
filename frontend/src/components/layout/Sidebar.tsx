@@ -11,6 +11,7 @@ import { conversationApi } from '@/services/api';
 import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon } from 'lucide-react';
+import { TemperatureControl } from '@/components/controls/TemperatureControl';
 
 // Type for manager types - use the original enum values
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
@@ -271,6 +272,9 @@ export const Sidebar: React.FC = () => {
           ))}
         </div>
       </div>
+      
+      {/* Temperature Control */}
+      <TemperatureControl />
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto py-2 space-y-1">

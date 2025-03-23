@@ -234,15 +234,25 @@ export const conversationApi = {
     }
   },
   
-  sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationContentResponseDTO> => {
+  sendMessage: async (conversationId: string, userQuery: string, temperature?: number): Promise<ConversationContentResponseDTO> => {
     try {
       console.log('Sending message to conversation:', conversationId);
       console.log('Message content:', userQuery.substring(0, 50) + (userQuery.length > 50 ? '...' : ''));
+      if (temperature !== undefined) {
+        console.log('Using temperature:', temperature);
+      }
       
-      const response = await api.post<ConversationContentResponseDTO>('/api/v1/conversation/message', {
+      const requestBody: any = {
         conversationId,
         userQuery
-      });
+      };
+      
+      // Add temperature parameter if provided
+      if (temperature !== undefined) {
+        requestBody.temperature = temperature;
+      }
+      
+      const response = await api.post<ConversationContentResponseDTO>('/api/v1/conversation/message', requestBody);
       console.log('Message sent, response received:', response.data);
       return response.data;
     } catch (error) {
@@ -252,6 +262,7 @@ export const conversationApi = {
       console.error('Send message error details:', {
         conversationId,
         messageLength: userQuery?.length,
+        temperature,
         status: err?.response?.status,
         data: err?.response?.data
       });

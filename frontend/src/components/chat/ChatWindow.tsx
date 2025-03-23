@@ -22,7 +22,8 @@ export const ChatWindow: React.FC = () => {
     setMessages, 
     addMessage, 
     managerType,
-    setCurrentConversation
+    setCurrentConversation,
+    temperature
   } = useStore();
   
   const [loading, setLoading] = useState(false);
@@ -291,7 +292,8 @@ export const ChatWindow: React.FC = () => {
         console.log('ChatWindow: Sending message to backend API');
         const response = await conversationApi.sendMessage(
           conversationId,
-          content
+          content,
+          temperature
         );
         console.log('ChatWindow: Received response from backend:', response);
         
@@ -426,10 +428,10 @@ export const ChatWindow: React.FC = () => {
               practiceMode={practiceMode}
             />
           </div>
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-4 md:p-6 border-t border-gray-200 dark:border-gray-700">
             <MessageInput onSendMessage={handleSendMessage} disabled={loading} />
             {error && (
-              <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+              <div className="mt-4 max-w-3xl mx-auto text-sm text-red-600 dark:text-red-400">
                 {error}
               </div>
             )}
