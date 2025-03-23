@@ -10,6 +10,7 @@ import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore } from '@/store/useStore';
+import { conversationApi } from '@/services/api';
 
 // Configure the query client with better defaults for reliable data fetching
 const queryClient = new QueryClient({
@@ -27,7 +28,7 @@ const queryClient = new QueryClient({
 });
 
 export const App: React.FC = () => {
-  const { user, darkMode, setToken, setUser } = useStore();
+  const { user, darkMode, setToken, setUser, setCurrentConversation, currentConversation } = useStore();
 
   // Check for token on app startup and ensure user data is available
   useEffect(() => {
@@ -70,6 +71,32 @@ export const App: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [setUser, user]);
 
+  // Attempt to restore conversation on app startup
+  useEffect(() => {
+    if (!currentConversation) {
+      // Try to restore from localStorage
+      const savedConversationId = localStorage.getItem('current-conversation-id');
+      if (savedConversationId) {
+        console.log('Attempting to restore conversation on app startup:', savedConversationId);
+        
+        // Fetch the conversation details
+        conversationApi.getConversations()
+          .then(conversations => {
+            const savedConversation = conversations.find(c => c.conversationId === savedConversationId);
+            if (savedConversation) {
+              console.log('Found saved conversation, restoring:', savedConversation);
+              setCurrentConversation(savedConversation);
+            } else {
+              console.warn('Saved conversation ID not found in API response');
+            }
+          })
+          .catch(error => {
+            console.error('Error restoring conversation:', error);
+          });
+      }
+    }
+  }, []);
+
   const theme = createTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',
@@ -98,9 +125,7 @@ export const App: React.FC = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route 
                   path="/dashboard" 
-                  element={
-                    user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
-                  } 
+                  element={<MainLayout />} 
                 />
                 <Route 
                   path="/login" 
@@ -114,9 +139,7 @@ export const App: React.FC = () => {
                 <Route path="/auth/google/callback" element={<OAuthCallback />} />
                 <Route path="/auth/github/callback" element={<OAuthCallback />} />
                 {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
-                <Route path="*" element={
-                  user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
-                } />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </Router>
           </div>

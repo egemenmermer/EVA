@@ -51,13 +51,6 @@ class LangChainAgent(BaseAgent):
             "focus": ["obscure", "confuse", "misdirect"]
         }
     }
-    
-    ARGUMENTATION_STRATEGIES = {
-        "DIRECT": "Directly address ethical concerns with clear evidence and principles",
-        "STAKEHOLDER": "Focus on impact to various stakeholders and their interests",
-        "CONSEQUENCE": "Emphasize long-term consequences and potential risks",
-        "ALTERNATIVE": "Propose alternative solutions that maintain ethical standards"
-    }
 
     def __init__(self, config: Dict):
         """Initialize the LangChain agent."""
@@ -68,7 +61,7 @@ class LangChainAgent(BaseAgent):
             self.user_role = None
             self.conversation_id = str(uuid.uuid4())
             self.practice_mode = False
-            self.current_manager = None
+            self.manager_type = None  # Will be set at conversation start
             self.current_scenario = None
             self.practice_scores = []
             
@@ -109,7 +102,7 @@ class LangChainAgent(BaseAgent):
             
             # Initialize conversation memory
             self.memory = ConversationBufferMemory(
-                memory_key="chat_history",
+                memory_key="history",
                 return_messages=True
             )
             
@@ -152,7 +145,7 @@ class LangChainAgent(BaseAgent):
             3. Move on to a different topic
             
             Base your responses on established ethical principles and best practices in software engineering."""),
-            MessagesPlaceholder(variable_name="chat_history"),
+            MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
         
@@ -167,7 +160,7 @@ class LangChainAgent(BaseAgent):
             - Effectiveness of the approach (40 points)
             - Understanding of ethical principles (30 points)
             - Professional communication (30 points)"""),
-            MessagesPlaceholder(variable_name="chat_history"),
+            MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
         
@@ -219,7 +212,7 @@ Format the response as a JSON object with the following structure:
             response = chain.invoke({
                 "input": query,
                 "context": context,
-                "chat_history": self.memory.chat_memory.messages
+                "history": self.memory.chat_memory.messages
             })
             
             return response
@@ -228,45 +221,98 @@ Format the response as a JSON object with the following structure:
             logger.error(f"Error in understanding mode: {str(e)}")
             return "I apologize, but I'm having trouble processing your request. Could you please try again?"
 
+    def _get_argumentation_strategies(self, ethical_context: str) -> List[Dict[str, str]]:
+        """Get relevant argumentation strategies based on the ethical context using RAG."""
+        try:
+            # Query for argumentation strategies
+            strategy_query = f"""Given this ethical context: {ethical_context}
+            What are the most effective argumentation strategies to address this situation?
+            Include name and description for each strategy."""
+            
+            # Get strategies from knowledge base
+            strategies_response = self.qa_chain.run(strategy_query)
+            
+            # Parse strategies using LLM
+            parse_prompt = PromptTemplate(
+                input_variables=["strategies"],
+                template="""Extract the argumentation strategies from the following text and format them as a JSON array of objects with 'name' and 'description' fields:
+
+{strategies}
+
+Format:
+[
+    {{"name": "Strategy Name", "description": "Strategy Description"}},
+    ...
+]""")
+            
+            parse_chain = LLMChain(llm=self.llm, prompt=parse_prompt)
+            strategies_json = parse_chain.run(strategies=strategies_response)
+            
+            # Parse JSON string to Python object
+            strategies = json.loads(strategies_json)
+            
+            return strategies[:4]  # Limit to 4 strategies
+            
+        except Exception as e:
+            logger.error(f"Error getting argumentation strategies: {str(e)}")
+            # Fallback to basic strategies if RAG fails
+            return [
+                {"name": "Ethical Principles", "description": "Appeal to established ethical principles and guidelines"},
+                {"name": "Stakeholder Impact", "description": "Analyze impact on all stakeholders"},
+                {"name": "Risk Assessment", "description": "Evaluate potential risks and consequences"},
+                {"name": "Alternative Solutions", "description": "Propose ethical alternatives"}
+            ]
+
     def _handle_practice_mode(self, query: str) -> str:
         """Handle queries in practice mode."""
         try:
-            if not self.current_manager:
-                # Start practice session
-                self.current_manager = self._select_random_manager()
-                manager_info = self.MANAGER_TYPES[self.current_manager]
+            if not self.current_scenario:
+                # Get manager info
+                if not self.manager_type or self.manager_type not in self.MANAGER_TYPES:
+                    return "Please select a manager type before entering practice mode."
                 
-                return f"""Welcome to practice mode! You'll be interacting with a {self.current_manager} manager.
+                manager_info = self.MANAGER_TYPES[self.manager_type]
+                
+                # Get context-specific argumentation strategies
+                last_context = self.memory.chat_memory.messages[-2].content if len(self.memory.chat_memory.messages) >= 2 else ""
+                strategies = self._get_argumentation_strategies(last_context)
+                
+                # Store current scenario
+                self.current_scenario = {
+                    "context": last_context,
+                    "strategies": strategies
+                }
+                
+                # Format strategies message
+                strategies_text = "\n".join(
+                    f"{i+1}. {strategy['name']}: {strategy['description']}"
+                    for i, strategy in enumerate(strategies)
+                )
+                
+                return f"""Welcome to practice mode! You'll be interacting with a {self.manager_type} manager.
 
 This manager typically {manager_info['description']}.
 Their communication style is {manager_info['style']}.
 
-Choose your argumentation strategy:
-1. DIRECT: {self.ARGUMENTATION_STRATEGIES['DIRECT']}
-2. STAKEHOLDER: {self.ARGUMENTATION_STRATEGIES['STAKEHOLDER']}
-3. CONSEQUENCE: {self.ARGUMENTATION_STRATEGIES['CONSEQUENCE']}
-4. ALTERNATIVE: {self.ARGUMENTATION_STRATEGIES['ALTERNATIVE']}
+Based on your ethical concern, here are relevant argumentation strategies:
+
+{strategies_text}
 
 Type the number (1-4) of your chosen strategy."""
             
             # Handle strategy selection
             if query.strip() in ["1", "2", "3", "4"]:
-                strategy_map = {
-                    "1": "DIRECT",
-                    "2": "STAKEHOLDER",
-                    "3": "CONSEQUENCE",
-                    "4": "ALTERNATIVE"
-                }
-                chosen_strategy = strategy_map[query.strip()]
+                strategy_idx = int(query.strip()) - 1
+                chosen_strategy = self.current_scenario["strategies"][strategy_idx]
                 
                 # Create evaluation chain
                 chain = self.evaluation_prompt | self.llm | self.strategy_parser
                 
                 # Evaluate strategy
                 evaluation = chain.invoke({
-                    "strategy": self.ARGUMENTATION_STRATEGIES[chosen_strategy],
+                    "strategy": f"{chosen_strategy['name']}: {chosen_strategy['description']}",
                     "response": self.memory.chat_memory.messages[-1].content if self.memory.chat_memory.messages else "",
-                    "manager_type": self.current_manager
+                    "manager_type": self.manager_type
                 })
                 
                 # Store score
@@ -282,29 +328,24 @@ Areas for Improvement:
 {chr(10).join(f'- {area}' for area in evaluation.improvement_areas)}
 
 {'Congratulations! You\'ve mastered this scenario!' if evaluation.effectiveness == 100 else 'Would you like to:'}
-{'1. Try a different strategy with this manager' if evaluation.effectiveness < 100 else ''}
-{'2. Practice with a different manager type' if evaluation.effectiveness == 100 else ''}
-3. Exit practice mode
+{'1. Try a different strategy for this scenario' if evaluation.effectiveness < 100 else ''}
+2. Exit practice mode
 
 Type the number of your choice."""
                 
                 return response
             
             # Handle continuation choices
-            if query.strip() in ["1", "2", "3"]:
+            if query.strip() in ["1", "2"]:
                 if query.strip() == "1" and self.practice_scores[-1] < 100:
-                    # Reset for another try with same manager
-                    return self._handle_practice_mode("")
-                elif query.strip() == "2" and self.practice_scores[-1] == 100:
-                    # Reset with new manager
-                    self.current_manager = None
-                    self.practice_scores = []
+                    # Reset for another try with same scenario
+                    self.current_scenario["strategies"] = self._get_argumentation_strategies(self.current_scenario["context"])
                     return self._handle_practice_mode("")
                 else:
                     # Exit practice mode
                     avg_score = sum(self.practice_scores) / len(self.practice_scores)
                     self.practice_mode = False
-                    self.current_manager = None
+                    self.current_scenario = None
                     self.practice_scores = []
                     return f"""Practice session completed!
 Average score: {avg_score:.1f}/100
@@ -317,16 +358,12 @@ Returning to understanding mode. How else can I help you with ethical challenges
             logger.error(f"Error in practice mode: {str(e)}")
             return "I apologize, but I encountered an error in practice mode. Let's return to understanding mode."
 
-    def _select_random_manager(self) -> str:
-        """Select a random manager type for practice."""
-        import random
-        return random.choice(list(self.MANAGER_TYPES.keys()))
-
-    def start_conversation(self) -> str:
+    def start_conversation(self, manager_type: Optional[str] = None) -> str:
         """Start a new conversation."""
         self.conversation_id = str(uuid.uuid4())
         self.practice_mode = False
-        self.current_manager = None
+        self.manager_type = manager_type if manager_type in self.MANAGER_TYPES else None
+        self.current_scenario = None
         self.practice_scores = []
         self.memory.clear()
         
@@ -343,13 +380,15 @@ Please describe the ethical concern you'd like to discuss."""
 
     def enter_practice_mode(self) -> str:
         """Enter practice mode."""
+        if not self.manager_type:
+            return "Please select a manager type before entering practice mode."
         self.practice_mode = True
         return self._handle_practice_mode("")
 
     def exit_practice_mode(self) -> str:
         """Exit practice mode."""
         self.practice_mode = False
-        self.current_manager = None
+        self.current_scenario = None
         self.practice_scores = []
         return "Exited practice mode. How else can I help you with ethical challenges?"
 

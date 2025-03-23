@@ -14,6 +14,7 @@ console.log('Using API URL:', API_URL);
 
 // Debug mode
 const DEBUG = true;
+const BYPASS_AUTH = false; // Use real authentication
 
 // Helper function to get token from localStorage
 const getToken = (): string | null => {
@@ -36,23 +37,40 @@ const getFallbackToken = () => {
 const api = axios.create({
   baseURL: API_URL,
   timeout: 30000, // 30 seconds
-  withCredentials: true, // Enable sending cookies in cross-origin requests
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
 
+// Verbose debugging function
+const debugRequest = (method: string, url: string, data?: any) => {
+  console.log(`%c API Request: ${method} ${url}`, 'background: #222; color: #bada55');
+  if (data) console.log('Request data:', data);
+};
+
+// Verbose debugging function for responses
+const debugResponse = (method: string, url: string, status: number, data: any) => {
+  const color = status >= 200 && status < 300 ? '#4CAF50' : '#F44336';
+  console.log(`%c API Response: ${method} ${url} [${status}]`, `background: #222; color: ${color}`);
+  console.log('Response data:', data);
+};
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    if (DEBUG) console.log('Making request to:', config.url);
+    debugRequest(config.method?.toUpperCase() || 'UNKNOWN', config.url || '', config.data);
     const token = getToken();
+    
     if (token) {
       // Ensure headers object exists
       config.headers = config.headers || {};
       config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      if (DEBUG) console.log('Using token for request:', token.substring(0, 20) + '...');
+    } else {
+      console.warn('No token available for API request to:', config.url);
     }
+    
     return config;
   },
   (error) => {
@@ -64,16 +82,36 @@ api.interceptors.request.use(
 // Response interceptor with improved error handling
 api.interceptors.response.use(
   (response) => {
-    if (DEBUG) console.log('Response success:', response.config.url, response.status);
+    debugResponse(
+      response.config.method?.toUpperCase() || 'UNKNOWN',
+      response.config.url || '',
+      response.status,
+      response.data
+    );
     return response;
   },
   (error) => {
     if (DEBUG) {
       console.error('API Error:', {
         url: error.config?.url,
+        method: error.config?.method?.toUpperCase() || 'UNKNOWN',
         status: error.response?.status,
         message: error.message,
-        response: error.response?.data
+        response: error.response?.data,
+        stack: error.stack,
+        headers: error.config?.headers
+      });
+      
+      // Log full request details for debugging
+      console.error('Full request details:', {
+        baseURL: error.config?.baseURL,
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.config?.data,
+        params: error.config?.params,
+        timeout: error.config?.timeout,
+        withCredentials: error.config?.withCredentials,
+        headers: error.config?.headers
       });
     }
     
@@ -181,6 +219,13 @@ export const conversationApi = {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch conversations:', error);
+      // Add more debugging info
+      const err = error as any;
+      console.error('Fetch conversations error details:', {
+        message: err?.message || 'Unknown error',
+        status: err?.response?.status,
+        data: err?.response?.data
+      });
       return [];
     }
   },
@@ -199,10 +244,12 @@ export const conversationApi = {
     }
   },
   
-  sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationResponseDTO> => {
+  sendMessage: async (conversationId: string, userQuery: string): Promise<ConversationContentResponseDTO> => {
     try {
       console.log('Sending message to conversation:', conversationId);
-      const response = await api.post<ConversationResponseDTO>('/api/v1/conversation/message', {
+      console.log('Message content:', userQuery.substring(0, 50) + (userQuery.length > 50 ? '...' : ''));
+      
+      const response = await api.post<ConversationContentResponseDTO>('/api/v1/conversation/message', {
         conversationId,
         userQuery
       });
@@ -210,6 +257,14 @@ export const conversationApi = {
       return response.data;
     } catch (error) {
       console.error('Failed to send message:', error);
+      // Add more debugging info
+      const err = error as any;
+      console.error('Send message error details:', {
+        conversationId,
+        messageLength: userQuery?.length,
+        status: err?.response?.status,
+        data: err?.response?.data
+      });
       throw error;
     }
   },
@@ -217,11 +272,19 @@ export const conversationApi = {
   getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
     try {
       console.log('Fetching messages for conversation:', conversationId);
+      
       const response = await api.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
       console.log('Fetched messages:', response.data);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch messages:', error);
+      // Add more debugging info
+      const err = error as any;
+      console.error('Fetch messages error details:', {
+        conversationId,
+        status: err?.response?.status,
+        data: err?.response?.data
+      });
       return [];
     }
   },

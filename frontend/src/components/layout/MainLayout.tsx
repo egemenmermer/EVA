@@ -21,6 +21,8 @@ export const MainLayout: React.FC = () => {
     const storedToken = localStorage.getItem('token');
     console.log('MainLayout - token check:', storedToken ? 'EXISTS' : 'MISSING', 'user:', Boolean(user));
     
+    // Comment out redirection for testing
+    /*
     if (!storedToken) {
       console.log('No token found, redirecting to login');
       // Clear any existing user data
@@ -29,6 +31,7 @@ export const MainLayout: React.FC = () => {
       navigate('/login');
       return;
     }
+    */
     
     // If we have a token in localStorage but not in store, add it to store
     if (storedToken && !token) {
@@ -43,6 +46,14 @@ export const MainLayout: React.FC = () => {
         id: 'layout-recovery',
         email: 'egemenmermer@gmail.com',
         fullName: 'Egemen Mermer'
+      });
+    } else if (!user) {
+      // Create a mock user for testing when no user or token exists
+      console.log('No user or token found, creating test user');
+      setUser({
+        id: 'test-user',
+        email: 'test@example.com',
+        fullName: 'Test User'
       });
     }
   }, [navigate, token, user, setUser, setToken]);

@@ -15,7 +15,6 @@ from data_processing.chunking import process_document, chunk_documents
 from embeddings.embedding_model import EmbeddingModel
 from retriever.hybrid_retriever import HybridRetriever
 from retriever.cross_encoder import ReRanker
-from models import LlamaModel
 from data_processing import TextChunker
 
 logger = logging.getLogger(__name__)
@@ -58,16 +57,6 @@ class EthicalAgent(BaseAgent):
             
             # Initialize components (embedding model, retriever, etc.)
             self._initialize_components()
-            
-            # Initialize the LLM model
-            self.model = LlamaModel(
-                model_name="meta-llama/Llama-2-7b-chat-hf",
-                api_token=config.get('api_token'),
-                use_api=True
-            )
-            
-            # Ensure index is created
-            self._ensure_index()
             
             logger.info("Ethical Agent initialized successfully")
             

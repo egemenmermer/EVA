@@ -139,6 +139,13 @@ export const Sidebar: React.FC = () => {
         // Set as current conversation
         setCurrentConversation(conversation);
         
+        // Save current conversation ID to localStorage
+        localStorage.setItem('current-conversation-id', conversation.conversationId);
+        console.log('Saved new conversation ID to localStorage:', conversation.conversationId);
+        
+        // Initialize empty message array in localStorage
+        localStorage.setItem(`messages-${conversation.conversationId}`, JSON.stringify([]));
+        
         // Close mobile sidebar if open
         setMobileOpen(false);
       } else {
@@ -168,7 +175,12 @@ export const Sidebar: React.FC = () => {
     
     console.log('Selected conversation:', conversation.conversationId);
     setCurrentConversation(conversation);
-    // Close the mobile menu if open
+    
+    // Save current conversation ID to localStorage
+    localStorage.setItem('current-conversation-id', conversation.conversationId);
+    console.log('Saved selected conversation ID to localStorage:', conversation.conversationId);
+    
+    // Close mobile sidebar if open
     setMobileOpen(false);
   };
 

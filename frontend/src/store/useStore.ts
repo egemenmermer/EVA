@@ -45,7 +45,7 @@ const getInitialDarkMode = () => {
 // Get initial token from localStorage directly - no formatting
 const getInitialToken = () => {
   const token = localStorage.getItem('token');
-  console.log('Initial token from localStorage:', token ? 'EXISTS' : 'MISSING');
+  console.log('Initial token from localStorage:', token ? 'EXISTS' : 'MISSING', token ? token.substring(0, 20) + '...' : '');
   return token;
 };
 
@@ -55,6 +55,9 @@ const MOCK_USER: User = {
   email: 'egemenmermer@gmail.com',
   fullName: 'Egemen Mermer'
 };
+
+// Debug initial store state
+console.log('Initializing store with mock user:', MOCK_USER);
 
 export const useStore = create<Store>()(
   persist(
@@ -97,11 +100,28 @@ export const useStore = create<Store>()(
         
         console.log('Store: Setting current conversation:', conversation?.conversationId || 'null');
         set({ currentConversation: conversation });
+        
+        // Save current conversation ID to a separate localStorage key for redundancy
+        if (conversation?.conversationId) {
+          localStorage.setItem('current-conversation-id', conversation.conversationId);
+          console.log('Saved current conversation ID to localStorage:', conversation.conversationId);
+        }
       },
       
       setMessages: (messages) => {
         console.log('Store: Setting messages array, count:', messages.length);
         set({ messages });
+        
+        // Ensure we save messages to localStorage for redundancy
+        if (messages.length > 0 && get().currentConversation?.conversationId) {
+          const conversationId = get().currentConversation?.conversationId || '';
+          try {
+            localStorage.setItem(`messages-${conversationId}`, JSON.stringify(messages.slice(-50)));
+            console.log(`Saved ${messages.length} messages to localStorage for conversation:`, conversationId);
+          } catch (error) {
+            console.error('Error saving messages to localStorage:', error);
+          }
+        }
       },
       
       addMessage: (message) => {
@@ -116,7 +136,20 @@ export const useStore = create<Store>()(
           if (isDuplicate) {
             return state;
           }
-          return { messages: [...state.messages, message] };
+          
+          const updatedMessages = [...state.messages, message];
+          
+          // Save to localStorage for backup
+          if (message.conversationId) {
+            try {
+              localStorage.setItem(`messages-${message.conversationId}`, JSON.stringify(updatedMessages.slice(-50)));
+              console.log(`Saved updated messages (${updatedMessages.length}) to localStorage`);
+            } catch (error) {
+              console.error('Error saving messages to localStorage in addMessage:', error);
+            }
+          }
+          
+          return { messages: updatedMessages };
         });
       },
       
@@ -147,9 +180,10 @@ export const useStore = create<Store>()(
         token: state.token,
         darkMode: state.darkMode,
         managerType: state.managerType,
-        // Don't store messages in localStorage to prevent it from growing too large
-        // They'll be fetched from API when needed
-        currentConversation: state.currentConversation
+        // Store current conversation ID to reload after refresh
+        currentConversation: state.currentConversation,
+        // Store a limited number of recent messages to preserve context across refreshes
+        messages: state.messages.slice(-20) // Keep last 20 messages
       }),
       storage: {
         getItem: (name) => {
