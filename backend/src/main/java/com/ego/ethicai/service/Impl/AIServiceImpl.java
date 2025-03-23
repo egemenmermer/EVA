@@ -44,6 +44,7 @@ public class AIServiceImpl implements AIService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("userQuery", request.getUserQuery());
             requestBody.put("managerType", request.getManagerType().toString());
+            requestBody.put("conversationId", request.getConversationId());
             
             // Make request to agent
             Map<String, Object> response = webClient.post()
@@ -59,8 +60,8 @@ public class AIServiceImpl implements AIService {
                                 retrySignal.totalRetries() + 1)))
                     .block();
 
-            if (response != null && response.containsKey("response")) {
-                return new AIResponseDTO((String) response.get("response"));
+            if (response != null && response.containsKey("agentResponse")) {
+                return new AIResponseDTO((String) response.get("agentResponse"));
             } else {
                 throw new RuntimeException("Invalid response format from AI agent");
             }

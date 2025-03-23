@@ -53,7 +53,8 @@ public class ConversationContentController {
             // Get AI response using AIService
             AIRequestDTO aiRequest = new AIRequestDTO(
                 conversation.getManagerType(),
-                request.getUserQuery()
+                request.getUserQuery(),
+                conversation.getId()
             );
             
             logger.debug("Requesting AI response for query: {} with manager type: {}", 
