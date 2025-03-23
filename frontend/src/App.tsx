@@ -125,7 +125,9 @@ export const App: React.FC = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route 
                   path="/dashboard" 
-                  element={<MainLayout />} 
+                  element={
+                    user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
+                  } 
                 />
                 <Route 
                   path="/login" 
@@ -139,7 +141,9 @@ export const App: React.FC = () => {
                 <Route path="/auth/google/callback" element={<OAuthCallback />} />
                 <Route path="/auth/github/callback" element={<OAuthCallback />} />
                 {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={
+                  user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
+                } />
               </Routes>
             </Router>
           </div>

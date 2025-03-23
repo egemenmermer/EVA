@@ -23,16 +23,6 @@ const getToken = (): string | null => {
   return token;
 };
 
-// Debug token - use this to prevent failures during development
-const TEMP_DEBUG_TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiaWF0IjoxNjQ5NjU0MDM3LCJleHAiOjE3MDQwMDAwMDB9.dummy_token_for_testing';
-
-// Create a standalone testing token - modify as needed for your backend
-const getFallbackToken = () => {
-  const hardcodedToken = TEMP_DEBUG_TOKEN;
-  console.log('⚠️ Using fallback token for testing');
-  return hardcodedToken;
-};
-
 // API instance with interceptors
 const api = axios.create({
   baseURL: API_URL,

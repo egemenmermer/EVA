@@ -21,8 +21,6 @@ export const MainLayout: React.FC = () => {
     const storedToken = localStorage.getItem('token');
     console.log('MainLayout - token check:', storedToken ? 'EXISTS' : 'MISSING', 'user:', Boolean(user));
     
-    // Comment out redirection for testing
-    /*
     if (!storedToken) {
       console.log('No token found, redirecting to login');
       // Clear any existing user data
@@ -31,7 +29,6 @@ export const MainLayout: React.FC = () => {
       navigate('/login');
       return;
     }
-    */
     
     // If we have a token in localStorage but not in store, add it to store
     if (storedToken && !token) {

@@ -188,20 +188,30 @@ export const Sidebar: React.FC = () => {
     e.stopPropagation();
     setShowContextMenu(false);
     
-    // If it's the current conversation, clear it
-    if (currentConversation?.conversationId === id) {
-      setCurrentConversation(null);
-    }
-    
     try {
-      // Remove from local state
+      console.log('Deleting conversation:', id);
+      
+      // If it's the current conversation, clear it
+      if (currentConversation?.conversationId === id) {
+        setCurrentConversation(null);
+        // Also clear from localStorage
+        localStorage.removeItem('current-conversation-id');
+      }
+      
+      // Remove from local state first for immediate UI feedback
       setDirectFetchedConversations(prev => 
         prev.filter(conv => conv.conversationId !== id)
       );
       
-      // API call to delete from server would go here
-      // await conversationApi.deleteConversation(id);
+      // Clear messages from localStorage
+      localStorage.removeItem(`messages-${id}`);
       
+      // API call to delete from server
+      await conversationApi.deleteConversation(id);
+      console.log('Conversation successfully deleted from server');
+      
+      // Refetch to ensure UI is in sync with server
+      fetchConversations();
     } catch (err) {
       console.error('Failed to delete conversation:', err);
       // Refetch to ensure UI is in sync
@@ -293,7 +303,7 @@ export const Sidebar: React.FC = () => {
               </div>
               <div className="flex justify-between items-center mt-1">
                 <div className="text-sm truncate text-gray-500 dark:text-gray-400 flex-1">
-                  {conversation.lastMessage || 'No messages yet'}
+                  {conversation.lastMessage || ''}
                 </div>
                 <div className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2">
                   {conversation.lastMessageDate ? formatDate(conversation.lastMessageDate) : ''}

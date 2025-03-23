@@ -21,7 +21,8 @@ export const ChatWindow: React.FC = () => {
     messages, 
     setMessages, 
     addMessage, 
-    managerType
+    managerType,
+    setCurrentConversation
   } = useStore();
   
   const [loading, setLoading] = useState(false);
@@ -41,6 +42,11 @@ export const ChatWindow: React.FC = () => {
         if (savedMessages) {
           const parsedMessages = JSON.parse(savedMessages) as Message[];
           console.log('Loaded messages from localStorage:', parsedMessages.length);
+          
+          // Debug log message types
+          const userMsgs = parsedMessages.filter(msg => msg.role === 'user').length;
+          const assistantMsgs = parsedMessages.filter(msg => msg.role === 'assistant').length;
+          console.log(`Message types - User: ${userMsgs}, Assistant: ${assistantMsgs}`);
           
           // Use these messages initially
           setMessages(parsedMessages);
@@ -64,6 +70,12 @@ export const ChatWindow: React.FC = () => {
           if (savedMessages) {
             const parsedMessages = JSON.parse(savedMessages) as Message[];
             console.log('Restored', parsedMessages.length, 'messages from localStorage');
+            
+            // Debug log message types
+            const userMsgs = parsedMessages.filter(msg => msg.role === 'user').length;
+            const assistantMsgs = parsedMessages.filter(msg => msg.role === 'assistant').length;
+            console.log(`Restored message types - User: ${userMsgs}, Assistant: ${assistantMsgs}`);
+            
             setMessages(parsedMessages);
           }
         } catch (error) {
@@ -100,21 +112,49 @@ export const ChatWindow: React.FC = () => {
       try {
         const serverMessages = await conversationApi.getConversationMessages(conversationId);
         console.log('Fetched messages from server, count:', serverMessages.length);
+        console.log('Raw server messages:', serverMessages);
         
         if (serverMessages.length > 0) {
           // Server has messages, use them
-          const formattedMessages: Message[] = serverMessages.map(msg => ({
-            id: msg.id || uuidv4(),
-            conversationId: msg.conversationId,
-            role: msg.userQuery ? 'user' as const : 'assistant' as const,
-            content: msg.userQuery || msg.agentResponse || '',
-            createdAt: msg.createdAt
-          }));
+          const messagesArray: Message[] = [];
           
-          setMessages(formattedMessages);
+          // Process each server message and convert to our format
+          // The server returns a single object for each exchange (userQuery + agentResponse)
+          for (const msg of serverMessages) {
+            // First add user message if it exists
+            if (msg.userQuery && msg.userQuery.trim()) {
+              messagesArray.push({
+                id: `user-${msg.id || uuidv4()}`,
+                conversationId: msg.conversationId,
+                role: 'user',
+                content: msg.userQuery,
+                createdAt: msg.createdAt
+              });
+            }
+            
+            // Then add agent response if it exists
+            if (msg.agentResponse && msg.agentResponse.trim()) {
+              messagesArray.push({
+                id: `agent-${msg.id || uuidv4()}`,
+                conversationId: msg.conversationId,
+                role: 'assistant',
+                content: msg.agentResponse,
+                createdAt: msg.createdAt
+              });
+            }
+          }
+          
+          console.log('Processed message array:', messagesArray);
+          
+          // Sort messages by createdAt date
+          messagesArray.sort((a, b) => {
+            return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+          });
+          
+          setMessages(messagesArray);
           
           // Update local storage with server messages
-          localStorage.setItem(`messages-${conversationId}`, JSON.stringify(formattedMessages));
+          localStorage.setItem(`messages-${conversationId}`, JSON.stringify(messagesArray));
           console.log('Updated localStorage with server messages');
         } else if (!hasLocalMessages) {
           // No messages on server or locally - could be a new conversation
@@ -203,6 +243,7 @@ export const ChatWindow: React.FC = () => {
 
     try {
       setLoading(true);
+      console.log('ChatWindow: Sending message to conversation:', currentConversation.conversationId);
       
       // Generate a unique ID for this conversation if not available
       const conversationId = currentConversation.conversationId || uuidv4();
@@ -216,49 +257,82 @@ export const ChatWindow: React.FC = () => {
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
+      console.log('ChatWindow: Added user message to UI');
+      
+      // Check if this is the first message and update conversation title if needed
+      const allMessages = [...messages, userMessage];
+      if (messages.length === 0 && content.length > 0) {
+        // This is the first message, use it to update the conversation title
+        // Limit title to first 30 characters
+        const title = content.length > 30 ? content.substring(0, 30) + '...' : content;
+        
+        if (currentConversation) {
+          const updatedConversation = {
+            ...currentConversation,
+            title: title,
+            lastMessage: content,
+            lastMessageDate: new Date().toISOString()
+          };
+          // Update current conversation in store
+          setCurrentConversation(updatedConversation);
+        }
+      }
 
       // Always save user message to localStorage for redundancy
       try {
-        const allMessages = [...messages, userMessage];
         localStorage.setItem(`messages-${conversationId}`, JSON.stringify(allMessages.slice(-50)));
-        console.log('Saved user message to localStorage');
+        console.log('ChatWindow: Saved user message to localStorage');
       } catch (error) {
         console.error('Error saving message to localStorage:', error);
       }
 
       // Send message to backend
       try {
+        console.log('ChatWindow: Sending message to backend API');
         const response = await conversationApi.sendMessage(
           conversationId,
           content
         );
+        console.log('ChatWindow: Received response from backend:', response);
+        
+        // Verify we have an agent response
+        if (!response.agentResponse) {
+          console.error('Agent response is missing from API response:', response);
+          throw new Error('Missing agent response from server');
+        }
+        
+        console.log('ChatWindow: Agent response content:', response.agentResponse);
 
         // Add AI response
         const aiMessage = {
           id: uuidv4(),
           conversationId: conversationId,
           role: 'assistant' as const,
-          content: response.agentResponse || 'No response received',
+          content: response.agentResponse,
           createdAt: new Date().toISOString()
         };
+        console.log('ChatWindow: Creating AI message:', aiMessage);
         addMessage(aiMessage);
+        console.log('ChatWindow: Added AI message to UI');
         
         // Save AI response to localStorage too
         try {
           const allMessages = [...messages, userMessage, aiMessage];
           localStorage.setItem(`messages-${conversationId}`, JSON.stringify(allMessages.slice(-50)));
-          console.log('Saved AI response to localStorage');
-        } catch (error) {
-          console.error('Error saving AI response to localStorage:', error);
+          console.log('ChatWindow: Saved AI response to localStorage');
+        } catch (storageError) {
+          console.error('Error saving AI response to localStorage:', storageError);
         }
-      } catch (error) {
-        console.error('Error sending message to backend:', error);
+      } catch (apiError: any) {
+        console.error('Error sending message to backend:', apiError);
+        console.error('Error details:', apiError.response?.data || apiError.message);
+        
         // Add error message to chat
         const errorMessage = {
           id: uuidv4(),
           conversationId: conversationId,
           role: 'assistant' as const,
-          content: 'Sorry, there was an error processing your message. Please try again.',
+          content: 'Sorry, there was an error processing your message. Please check the console for more details.',
           createdAt: new Date().toISOString(),
           isSystemMessage: true
         };
@@ -272,7 +346,7 @@ export const ChatWindow: React.FC = () => {
           console.error('Error saving error message to localStorage:', storageError);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleSendMessage:', error);
       setError('There was an error sending your message. Please try again.');
     } finally {
@@ -293,7 +367,7 @@ export const ChatWindow: React.FC = () => {
 
   // Check if we should show welcome message
   const shouldShowWelcomeMessage = () => {
-    // Don't show welcome message if we have existing messages
+    // Don't show welcome message if we have existing messages in state
     if (messages.length > 0) {
       return false;
     }
@@ -302,8 +376,12 @@ export const ChatWindow: React.FC = () => {
     if (currentConversation?.conversationId) {
       try {
         const savedMessages = localStorage.getItem(`messages-${currentConversation.conversationId}`);
-        if (savedMessages && JSON.parse(savedMessages).length > 0) {
-          return false;
+        if (savedMessages) {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Return false if we have stored messages
+          if (parsedMessages && Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+            return false;
+          }
         }
       } catch (error) {
         console.error('Error checking for saved messages:', error);
