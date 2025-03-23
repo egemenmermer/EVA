@@ -170,8 +170,8 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           // Skip typing animation for system messages
           if (isSystemMsg) {
             return (
-              <div key={message.id || index} className="flex justify-center my-2">
-                <div className="max-w-[90%] bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 text-sm text-yellow-800 dark:text-yellow-200">
+              <div key={message.id || index} className="flex justify-center my-2 px-2">
+                <div className="max-w-[95%] bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 text-sm text-yellow-800 dark:text-yellow-200">
                   {message.content}
                 </div>
               </div>
@@ -181,58 +181,61 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           return (
             <div
               key={message.id || index}
-              className={`w-full py-4 px-1`}
+              className={`w-full py-3 sm:py-4 px-2 sm:px-1`}
             >
               {message.role === 'assistant' ? (
                 // Assistant message - left side
-                <div className="max-w-4xl mx-auto flex items-start gap-4">
+                <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
                   <div className="flex-shrink-0 mt-1">
                     {practiceMode ? (
-                      <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
                         M
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden">
                         <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 rounded-lg py-2 px-1">
+                  <div className="flex-1 rounded-lg py-2 px-1 max-w-[calc(100%-40px)]">
                     {practiceMode && (
                       <div className="mb-1 text-xs font-medium text-purple-700 dark:text-purple-300">
                         Manager ({managerType})
                       </div>
                     )}
-                    <ReactMarkdown
-                      components={{
-                        code(props) {
-                          const { children, className } = props;
-                          const match = /language-(\w+)/.exec(className || '');
-                          
-                          if (!match) {
-                            return <code className={className}>{children}</code>;
+                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none break-words bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-gray-800 dark:text-gray-200">
+                      <ReactMarkdown
+                        components={{
+                          code(props) {
+                            const { children, className } = props;
+                            const match = /language-(\w+)/.exec(className || '');
+                            
+                            if (!match) {
+                              return <code className={className}>{children}</code>;
+                            }
+                            
+                            return (
+                              <SyntaxHighlighter
+                                style={oneDark as any}
+                                language={match[1]}
+                                PreTag="div"
+                                className="text-sm sm:text-base overflow-auto max-w-full"
+                              >
+                                {String(children).replace(/\n$/, '')}
+                              </SyntaxHighlighter>
+                            );
                           }
-                          
-                          return (
-                            <SyntaxHighlighter
-                              style={oneDark as any}
-                              language={match[1]}
-                              PreTag="div"
-                            >
-                              {String(children).replace(/\n$/, '')}
-                            </SyntaxHighlighter>
-                          );
-                        }
-                      }}
-                    >
-                      {messageContent}
-                    </ReactMarkdown>
+                        }}
+                      >
+                        {messageContent}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
               ) : (
                 // User message - right side
-                <div className="max-w-4xl mx-auto flex justify-end">
-                  <div className="max-w-[85%] bg-blue-600 text-white rounded-lg py-3 px-4">
+                <div className="max-w-full md:max-w-4xl mx-auto flex justify-end">
+                  <div className="max-w-[85%] bg-blue-600 text-white rounded-lg py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
                     {messageContent}
                   </div>
                 </div>
@@ -242,17 +245,17 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
         })
       )}
       {(loading || isTyping) && (
-        <div className="w-full py-4 px-1">
-          <div className="max-w-4xl mx-auto flex items-start gap-4">
+        <div className="w-full py-3 sm:py-4 px-2 sm:px-1">
+          <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
             <div className="flex-shrink-0 mt-1">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden">
                 <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce"></div>
-              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="h-3 w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce"></div>
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
           </div>
         </div>

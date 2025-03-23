@@ -43,11 +43,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full">
-      <form onSubmit={handleSubmit} className="relative border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400">
+    <div className="max-w-full md:max-w-4xl mx-auto w-full px-2 sm:px-4 pb-2 sm:pb-4">
+      <form onSubmit={handleSubmit} className="relative border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400">
         <textarea
           ref={textareaRef}
-          className="w-full resize-none rounded-lg bg-transparent py-3 pr-12 pl-4 placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-900 dark:text-white focus:outline-none"
+          className="w-full resize-none rounded-lg bg-transparent py-2 sm:py-3 pr-10 pl-3 sm:pl-4 placeholder:text-gray-400 dark:placeholder:text-gray-300 text-gray-900 dark:text-white focus:outline-none text-sm sm:text-base"
           rows={1}
           placeholder="Message EVA..."
           value={message}
@@ -57,18 +57,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         />
         <button
           type="submit"
-          className={`absolute right-2.5 bottom-2.5 p-1.5 rounded-md transition-colors ${
+          className={`absolute right-2 bottom-2 p-1.5 rounded-md transition-colors ${
             message.trim() && !disabled
               ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-300 cursor-not-allowed'
           }`}
           disabled={!message.trim() || disabled}
           aria-label="Send message"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
       </form>
-      <div className="text-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-center mt-1 sm:mt-2 text-xs text-gray-500 dark:text-gray-300">
         Press Enter to send, Shift+Enter for a new line
       </div>
     </div>
