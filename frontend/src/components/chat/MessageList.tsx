@@ -192,7 +192,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
                         M
                       </div>
                     ) : (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-transparent">
                         <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -248,14 +248,14 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
         <div className="w-full py-3 sm:py-4 px-2 sm:px-1">
           <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
             <div className="flex-shrink-0 mt-1">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-transparent">
                 <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce"></div>
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-gray-300 dark:bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
           </div>
         </div>
