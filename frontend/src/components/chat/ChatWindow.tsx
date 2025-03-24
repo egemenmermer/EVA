@@ -246,13 +246,64 @@ export const ChatWindow: React.FC = () => {
       setLoading(true);
       console.log('ChatWindow: Sending message to conversation:', currentConversation.conversationId);
       
-      // Generate a unique ID for this conversation if not available
-      const conversationId = currentConversation.conversationId || uuidv4();
+      let actualConversationId = currentConversation.conversationId;
+      let isNewConversation = false;
+      
+      // Check if this is a draft conversation that needs to be created on the server
+      if (currentConversation.isDraft) {
+        console.log('Creating real conversation from draft');
+        isNewConversation = true;
+        
+        try {
+          // Create the conversation on the server
+          const newConversation = await conversationApi.createConversation(currentConversation.managerType);
+          
+          if (!newConversation || !newConversation.conversationId) {
+            throw new Error('Failed to create conversation on server');
+          }
+          
+          console.log('Created real conversation on server:', newConversation);
+          actualConversationId = newConversation.conversationId;
+          
+          // Update the conversation object
+          const realConversation = {
+            conversationId: newConversation.conversationId,
+            title: '', // Will be set after title generation
+            lastMessage: content,
+            lastMessageDate: new Date().toISOString(),
+            managerType: newConversation.managerType,
+            isDraft: false
+          };
+          
+          // Update current conversation in store
+          setCurrentConversation(realConversation);
+          
+          // Also update the sidebar list in the local state
+          // Get the sidebar component to refresh its list
+          try {
+            const sidebarState = window.localStorage.getItem('app-storage');
+            if (sidebarState) {
+              const parsedState = JSON.parse(sidebarState);
+              if (parsedState && parsedState.state && parsedState.state.currentConversation) {
+                parsedState.state.currentConversation = realConversation;
+                window.localStorage.setItem('app-storage', JSON.stringify(parsedState));
+              }
+            }
+          } catch (error) {
+            console.error('Error updating localStorage with real conversation:', error);
+          }
+        } catch (error) {
+          console.error('Error creating real conversation:', error);
+          setError('Failed to create conversation. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
       
       // Add user message immediately
       const userMessage = {
         id: uuidv4(),
-        conversationId: conversationId,
+        conversationId: actualConversationId,
         role: 'user' as const,
         content: content,
         createdAt: new Date().toISOString()
@@ -261,27 +312,54 @@ export const ChatWindow: React.FC = () => {
       console.log('ChatWindow: Added user message to UI');
       
       // Check if this is the first message and update conversation title if needed
-      const allMessages = [...messages, userMessage];
-      if (messages.length === 0 && content.length > 0) {
-        // This is the first message, use it to update the conversation title
-        // Limit title to first 30 characters
-        const title = content.length > 30 ? content.substring(0, 30) + '...' : content;
+      if (isNewConversation || messages.length === 0) {
+        // Generate a title using Gemini Pro
+        let title = content.length > 30 ? content.substring(0, 30) + '...' : content;
         
-        if (currentConversation) {
+        try {
+          // Generate title using Gemini Pro
+          title = await conversationApi.updateConversationTitle(actualConversationId || '', content);
+          console.log('Generated conversation title:', title);
+          
+          // Update conversation object with new title
           const updatedConversation = {
             ...currentConversation,
+            conversationId: actualConversationId,
             title: title,
             lastMessage: content,
-            lastMessageDate: new Date().toISOString()
+            lastMessageDate: new Date().toISOString(),
+            isDraft: false
           };
+          
           // Update current conversation in store
           setCurrentConversation(updatedConversation);
+          
+          // Also update conversation in localStorage to ensure sidebar shows updated title
+          try {
+            // Get current conversations list from localStorage
+            const storedConversationsJson = localStorage.getItem('app-storage');
+            if (storedConversationsJson) {
+              const storedData = JSON.parse(storedConversationsJson);
+              if (storedData && storedData.state && storedData.state.currentConversation) {
+                // Update the conversation in the stored currentConversation
+                storedData.state.currentConversation = updatedConversation;
+                localStorage.setItem('app-storage', JSON.stringify(storedData));
+                console.log('Updated conversation title in localStorage:', title);
+              }
+            }
+          } catch (storageError) {
+            console.error('Error updating conversation title in localStorage:', storageError);
+          }
+        } catch (error) {
+          console.error('Error generating title with Gemini Pro:', error);
+          // Fall back to default title already set
         }
       }
 
       // Always save user message to localStorage for redundancy
       try {
-        localStorage.setItem(`messages-${conversationId}`, JSON.stringify(allMessages.slice(-50)));
+        const allMessages = [...messages, userMessage];
+        localStorage.setItem(`messages-${actualConversationId}`, JSON.stringify(allMessages.slice(-50)));
         console.log('ChatWindow: Saved user message to localStorage');
       } catch (error) {
         console.error('Error saving message to localStorage:', error);
@@ -291,7 +369,7 @@ export const ChatWindow: React.FC = () => {
       try {
         console.log('ChatWindow: Sending message to backend API');
         const response = await conversationApi.sendMessage(
-          conversationId,
+          actualConversationId,
           content,
           temperature
         );
@@ -308,7 +386,7 @@ export const ChatWindow: React.FC = () => {
         // Add AI response
         const aiMessage = {
           id: uuidv4(),
-          conversationId: conversationId,
+          conversationId: actualConversationId,
           role: 'assistant' as const,
           content: response.agentResponse,
           createdAt: new Date().toISOString()
@@ -317,10 +395,21 @@ export const ChatWindow: React.FC = () => {
         addMessage(aiMessage);
         console.log('ChatWindow: Added AI message to UI');
         
+        // If this was a new conversation, update the sidebar to show it
+        if (isNewConversation) {
+          // Request the sidebar to refresh conversations
+          try {
+            // Manually trigger a refetch of conversations by dispatching a custom event
+            window.dispatchEvent(new CustomEvent('refresh-conversations'));
+          } catch (error) {
+            console.error('Error triggering conversation refresh:', error);
+          }
+        }
+        
         // Save AI response to localStorage too
         try {
           const allMessages = [...messages, userMessage, aiMessage];
-          localStorage.setItem(`messages-${conversationId}`, JSON.stringify(allMessages.slice(-50)));
+          localStorage.setItem(`messages-${actualConversationId}`, JSON.stringify(allMessages.slice(-50)));
           console.log('ChatWindow: Saved AI response to localStorage');
         } catch (storageError) {
           console.error('Error saving AI response to localStorage:', storageError);
@@ -332,7 +421,7 @@ export const ChatWindow: React.FC = () => {
         // Add error message to chat
         const errorMessage = {
           id: uuidv4(),
-          conversationId: conversationId,
+          conversationId: actualConversationId,
           role: 'assistant' as const,
           content: 'Sorry, there was an error processing your message. Please check the console for more details.',
           createdAt: new Date().toISOString(),
@@ -343,7 +432,7 @@ export const ChatWindow: React.FC = () => {
         // Still save error message to localStorage
         try {
           const allMessages = [...messages, userMessage, errorMessage];
-          localStorage.setItem(`messages-${conversationId}`, JSON.stringify(allMessages.slice(-50)));
+          localStorage.setItem(`messages-${actualConversationId}`, JSON.stringify(allMessages.slice(-50)));
         } catch (storageError) {
           console.error('Error saving error message to localStorage:', storageError);
         }
@@ -390,7 +479,12 @@ export const ChatWindow: React.FC = () => {
       }
     }
     
-    // Show welcome message only for new conversations
+    // Don't show welcome message for draft conversations 
+    if (currentConversation?.isDraft) {
+      return false;
+    }
+    
+    // Show welcome message only for established (non-draft) conversations
     return true;
   };
 
@@ -422,11 +516,18 @@ export const ChatWindow: React.FC = () => {
           )}
           
           <div className="flex-1 overflow-hidden">
-            <MessageList 
-              messages={messages.length > 0 ? messages : shouldShowWelcomeMessage() ? [getWelcomeMessage()] : []} 
-              loading={loading}
-              practiceMode={practiceMode}
-            />
+            {/* For draft conversations (new chats), don't show any message until the user sends one */}
+            {currentConversation.isDraft ? (
+              <div className="flex items-center justify-center h-full">
+                {/* Empty state - just like ChatGPT */}
+              </div>
+            ) : (
+              <MessageList 
+                messages={messages.length > 0 ? messages : shouldShowWelcomeMessage() ? [getWelcomeMessage()] : []} 
+                loading={loading}
+                practiceMode={practiceMode}
+              />
+            )}
           </div>
           <div className="p-4 md:p-6 border-t border-gray-200 dark:border-gray-700">
             <MessageInput onSendMessage={handleSendMessage} disabled={loading} />

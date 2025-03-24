@@ -39,12 +39,14 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setUser(user);
         conversation.setManagerType(managerType);
         conversation.setCreatedAt(LocalDateTime.now());
+        conversation.setTitle("New conversation"); // Default title
 
         Conversation savedConversation = conversationRepository.save(conversation);
 
         return new ConversationResponseDTO(
                 savedConversation.getId(),
                 savedConversation.getUser().getId(),
+                savedConversation.getTitle(),
                 savedConversation.getManagerType(),
                 savedConversation.getCreatedAt()
         );
@@ -56,6 +58,7 @@ public class ConversationServiceImpl implements ConversationService {
             return new ConversationResponseDTO(
                     conversation.getId(),
                     conversation.getUser().getId(),
+                    conversation.getTitle(),
                     conversation.getManagerType(),
                     conversation.getCreatedAt()
             );
@@ -78,10 +81,36 @@ public class ConversationServiceImpl implements ConversationService {
                 .map(conversation -> new ConversationResponseDTO(
                         conversation.getId(),
                         conversation.getUser().getId(),
+                        conversation.getTitle(),
                         conversation.getManagerType(),
                         conversation.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public ConversationResponseDTO updateConversationTitle(UUID conversationId, UUID userId, String title) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+        
+        // Verify the conversation belongs to the user
+        if (!conversation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized access to conversation");
+        }
+        
+        // Update the title
+        conversation.setTitle(title);
+        conversation.setUpdatedAt(LocalDateTime.now());
+        
+        Conversation updatedConversation = conversationRepository.save(conversation);
+        
+        return new ConversationResponseDTO(
+                updatedConversation.getId(),
+                updatedConversation.getUser().getId(),
+                updatedConversation.getTitle(),
+                updatedConversation.getManagerType(),
+                updatedConversation.getCreatedAt()
+        );
     }
 
     @Override

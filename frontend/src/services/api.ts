@@ -7,6 +7,7 @@ import {
   FeedbackResponseDTO
 } from '@/types/api';
 import { ManagerType } from '@/types';
+import { generateConversationTitle } from '@/utils/titleGenerator';
 
 // Configure API URL with fallback
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
@@ -287,6 +288,32 @@ export const conversationApi = {
         data: err?.response?.data
       });
       return [];
+    }
+  },
+  
+  updateConversationTitle: async (conversationId: string, userQuery: string): Promise<string> => {
+    try {
+      console.log('Generating title for conversation:', conversationId);
+      
+      // First generate title using Gemini Pro in the frontend
+      const generatedTitle = await generateConversationTitle(userQuery);
+      console.log('Generated title with Gemini Pro:', generatedTitle);
+      
+      // Then update the title on the backend (if the endpoint is available)
+      try {
+        const response = await api.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
+          title: generatedTitle
+        });
+        console.log('Title updated on backend:', response.data.title);
+        return response.data.title;
+      } catch (backendError) {
+        console.warn('Backend title update failed, using frontend generated title:', backendError);
+        return generatedTitle;
+      }
+    } catch (error) {
+      console.error('Failed to generate conversation title:', error);
+      // If API fails, generate a simple title from the query
+      return userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
     }
   },
   

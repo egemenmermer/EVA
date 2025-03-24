@@ -14,4 +14,5 @@ public interface ConversationService {
     List<ConversationResponseDTO> getUserConversations(UUID userId);
     void deleteConversation(UUID conversationId);
     Optional<Conversation> getConversationEntityById(UUID conversationId);
+    ConversationResponseDTO updateConversationTitle(UUID conversationId, UUID userId, String title);
 }

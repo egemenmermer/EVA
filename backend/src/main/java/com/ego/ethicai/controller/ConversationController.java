@@ -63,6 +63,17 @@ public class ConversationController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{id}/update-title")
+    public ResponseEntity<ConversationResponseDTO> updateConversationTitle(
+            @CurrentUser CustomUserDetails currentUser,
+            @PathVariable UUID id,
+            @RequestBody UpdateTitleRequest updateTitleRequest) {
+        logger.info("Updating title for conversation: {} to: {}", id, updateTitleRequest.getTitle());
+        ConversationResponseDTO response = conversationService.updateConversationTitle(
+            id, currentUser.getId(), updateTitleRequest.getTitle());
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteConversation(
             @CurrentUser CustomUserDetails currentUser,
@@ -70,5 +81,18 @@ public class ConversationController {
         logger.info("Deleting conversation with ID: {} for user: {}", id, currentUser.getEmail());
         conversationService.deleteConversation(id);
         return ResponseEntity.ok().build();
+    }
+    
+    // Request class for updating conversation title
+    public static class UpdateTitleRequest {
+        private String title;
+        
+        public String getTitle() {
+            return title;
+        }
+        
+        public void setTitle(String title) {
+            this.title = title;
+        }
     }
 }

@@ -12,11 +12,12 @@ export interface Conversation {
   
   // Optional fields
   userId?: string;
-  managerType?: ManagerType;
+  managerType: ManagerType;
   createdAt?: string;
   title?: string;
   lastMessage?: string;
   lastMessageDate?: string;
+  isDraft?: boolean;
 }
 
 export interface Message {

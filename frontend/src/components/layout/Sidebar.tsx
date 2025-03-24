@@ -12,6 +12,7 @@ import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon } from 'lucide-react';
 import { TemperatureControl } from '@/components/controls/TemperatureControl';
+import { v4 as uuidv4 } from 'uuid';
 
 // Type for manager types - use the original enum values
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
@@ -59,9 +60,14 @@ export const Sidebar: React.FC = () => {
       const response = await conversationApi.getConversations();
       console.log('Fetched conversations:', response);
       
-      // Store fetched conversations after sanitizing
+      // Store fetched conversations after sanitizing and mapping to add isDraft property
       if (response && Array.isArray(response)) {
-        const sanitized = sanitizeConversations(response);
+        const mappedConversations = response.map(conv => ({
+          ...conv,
+          isDraft: false // All server conversations are not drafts
+        }));
+        
+        const sanitized = sanitizeConversations(mappedConversations);
         setDirectFetchedConversations(sanitized);
       }
     } catch (err: any) {
@@ -87,6 +93,20 @@ export const Sidebar: React.FC = () => {
     }, 60000); // 1 minute
     
     return () => clearInterval(interval);
+  }, []);
+
+  // Listen for refresh events from ChatWindow
+  useEffect(() => {
+    const handleRefreshEvent = () => {
+      console.log('Sidebar: Received refresh-conversations event');
+      fetchConversations();
+    };
+    
+    window.addEventListener('refresh-conversations', handleRefreshEvent);
+    
+    return () => {
+      window.removeEventListener('refresh-conversations', handleRefreshEvent);
+    };
   }, []);
 
   useEffect(() => {
@@ -116,47 +136,34 @@ export const Sidebar: React.FC = () => {
 
   const handleNewChat = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      // Instead of immediately creating a conversation on the server,
+      // create a temporary draft conversation object
+      const draftConversation: Conversation = {
+        conversationId: `draft-${uuidv4()}`, // Use a special prefix to identify draft conversations
+        title: '', // No title yet
+        lastMessage: '',
+        lastMessageDate: new Date().toISOString(),
+        managerType: managerType,
+        isDraft: true // Add a flag to indicate this is a draft conversation
+      };
       
-      console.log('Creating new conversation with manager type:', managerType);
-      const newConversation = await conversationApi.createConversation(managerType);
+      console.log('Creating draft conversation:', draftConversation);
       
-      console.log('New conversation created:', newConversation);
+      // Set as current conversation
+      setCurrentConversation(draftConversation);
       
-      if (newConversation && newConversation.conversationId) {
-        // Create a properly formatted conversation object
-        const conversation: Conversation = {
-          conversationId: newConversation.conversationId,
-          title: 'New conversation',
-          lastMessage: '',
-          lastMessageDate: newConversation.createdAt,
-          managerType: newConversation.managerType
-        };
-        
-        // Update the conversation list
-        setDirectFetchedConversations(prev => [conversation, ...prev]);
-        
-        // Set as current conversation
-        setCurrentConversation(conversation);
-        
-        // Save current conversation ID to localStorage
-        localStorage.setItem('current-conversation-id', conversation.conversationId);
-        console.log('Saved new conversation ID to localStorage:', conversation.conversationId);
-        
-        // Initialize empty message array in localStorage
-        localStorage.setItem(`messages-${conversation.conversationId}`, JSON.stringify([]));
-        
-        // Close mobile sidebar if open
-        setMobileOpen(false);
-      } else {
-        throw new Error('Invalid response from server');
-      }
+      // We won't add it to the conversation list until it's saved on the server
+      // This mimics ChatGPT's behavior
+      
+      // Clear existing messages
+      useStore.getState().setMessages([]);
+      
+      // Close mobile sidebar if open
+      setMobileOpen(false);
+      
     } catch (err: any) {
       console.error('Error creating new conversation:', err);
       setError('Failed to create conversation. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -291,30 +298,32 @@ export const Sidebar: React.FC = () => {
             No conversations yet. Start a new chat!
           </div>
         ) : (
-          directFetchedConversations.map((conversation) => (
-            <div
-              key={conversation.conversationId}
-              onClick={() => handleSelectConversation(conversation)}
-              onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
-              className={`flex flex-col cursor-pointer p-3 rounded-md ${
-                currentConversation?.conversationId === conversation.conversationId
-                  ? 'bg-gray-200 dark:bg-gray-700'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              <div className="font-medium truncate text-gray-900 dark:text-gray-100">
-                {conversation.title || 'New conversation'}
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <div className="text-sm truncate text-gray-500 dark:text-gray-400 flex-1">
-                  {conversation.lastMessage || ''}
+          // Filter out draft conversations - they shouldn't appear in the list until saved
+          directFetchedConversations
+            .filter(conversation => !conversation.isDraft)
+            .map((conversation) => (
+              <div
+                key={conversation.conversationId}
+                onClick={() => handleSelectConversation(conversation)}
+                onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
+                className={`flex items-center px-3 py-3 cursor-pointer rounded-md transition-colors ${
+                  currentConversation?.conversationId === conversation.conversationId
+                    ? 'bg-gray-200 dark:bg-gray-700'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex-1 truncate">
+                  <div className="font-medium truncate text-gray-900 dark:text-gray-100">
+                    {conversation.title || 'New conversation'}
+                  </div>
+                  {conversation.lastMessageDate && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formatDate(conversation.lastMessageDate)}
+                    </div>
+                  )}
                 </div>
-                <div className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2">
-                  {conversation.lastMessageDate ? formatDate(conversation.lastMessageDate) : ''}
-                </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
 

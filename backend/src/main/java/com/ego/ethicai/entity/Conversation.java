@@ -29,6 +29,9 @@ public class Conversation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "title", length = 255)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "manager_type", nullable = false)
     private ManagerTypes managerType;

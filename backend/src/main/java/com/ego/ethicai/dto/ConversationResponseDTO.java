@@ -18,6 +18,7 @@ public class ConversationResponseDTO {
 
     private UUID conversationId;
     private UUID userId;
+    private String title;
     private ManagerTypes managerType;
     private LocalDateTime createdAt;
 }

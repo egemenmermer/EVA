@@ -9,16 +9,21 @@ import { useStore } from '@/store/useStore';
 const useTypewriter = (text: string, speed: number = 50, shouldAnimate: boolean = true) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-
+  
+  // Reset state completely when text changes to avoid animation carry-over between conversations
   useEffect(() => {
-    // If animation is disabled, just set the text directly
+    // If animation is disabled, just set the text directly without animating
     if (!shouldAnimate) {
       setDisplayedText(text);
+      setIsTyping(false);
       return;
     }
     
+    // Start animation
     setIsTyping(true);
     setDisplayedText('');
+    
+    let isMounted = true; // Track component mounted state
     
     // Split text into words, preserving spaces and punctuation
     const words = text.match(/\S+|\s+|[.,!?;:]/g) || [];
@@ -26,6 +31,8 @@ const useTypewriter = (text: string, speed: number = 50, shouldAnimate: boolean 
     let currentIndex = 0;
 
     const typeNextWord = () => {
+      if (!isMounted) return; // Don't continue if unmounted
+      
       if (currentIndex < words.length) {
         currentText += words[currentIndex];
         setDisplayedText(currentText);
@@ -38,7 +45,9 @@ const useTypewriter = (text: string, speed: number = 50, shouldAnimate: boolean 
 
     typeNextWord();
 
+    // Cleanup - important for switching conversations
     return () => {
+      isMounted = false;
       setIsTyping(false);
       setDisplayedText('');
     };
@@ -68,6 +77,10 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
   const [hasRenderedMessages, setHasRenderedMessages] = useState(false);
   // Track which message IDs have already been animated
   const [animatedMessageIds, setAnimatedMessageIds] = useState<Set<string>>(new Set());
+  // Track current conversation ID to detect conversation changes
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  // Track if animation is currently happening
+  const [isAnimating, setIsAnimating] = useState(false);
   const { managerType } = useStore();
   
   // Debug log the messages when they change
@@ -79,70 +92,90 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
       const assistantMsgs = messages.filter(msg => msg.role === 'assistant').length;
       console.log(`MessageList: Message types - User: ${userMsgs}, Assistant: ${assistantMsgs}`);
       
-      // Log the last few messages for debugging
-      if (messages.length > 0) {
-        const lastFewMessages = messages.slice(-3);
-        console.log('MessageList: Last few messages:', lastFewMessages);
-      }
-    }
-  }, [messages]);
-  
-  // Reset state when conversation changes
-  useEffect(() => {
-    if (messages.length > 0) {
-      // Check if we've switched to a new conversation
-      if (lastMessage && lastMessage.conversationId !== messages[0].conversationId) {
-        console.log('MessageList: Conversation changed, resetting state');
-        setLastMessage(null);
-        setHasRenderedMessages(false);
-        // Reset animated message IDs when conversation changes
-        setAnimatedMessageIds(new Set());
-      }
+      // Get the conversation ID from the first message
+      const conversationId = messages[0]?.conversationId;
       
-      // Mark all initially loaded messages as already animated
-      if (!hasRenderedMessages) {
-        console.log('MessageList: Marking initial messages as already animated');
-        const initialIds = new Set<string>();
+      // Check if conversation has changed
+      if (conversationId && conversationId !== currentConversationId) {
+        console.log('MessageList: Detected conversation change from', 
+                    currentConversationId || 'none', 'to', conversationId);
+        
+        // Reset animation state on conversation change
+        setLastMessage(null);
+        setIsAnimating(false);
+        setCurrentConversationId(conversationId);
+        setHasRenderedMessages(false);
+        
+        // Mark ALL messages in the new conversation as already animated to prevent animation on load
+        const newIds = new Set<string>();
         messages.forEach(msg => {
-          if (msg.id) initialIds.add(msg.id);
+          if (msg.id) newIds.add(msg.id);
         });
-        setAnimatedMessageIds(initialIds);
+        setAnimatedMessageIds(newIds);
+        console.log('MessageList: Marked all existing messages as animated:', newIds.size);
         setHasRenderedMessages(true);
       }
-    } else {
-      // If there are no messages, reset the state
-      setLastMessage(null);
-      setHasRenderedMessages(false);
-      setAnimatedMessageIds(new Set());
     }
-  }, [messages, hasRenderedMessages, lastMessage]);
+  }, [messages, currentConversationId]);
   
-  // When new messages come in, only animate them if they're truly new
+  // Only detect and animate new messages that arrive after initial load
   useEffect(() => {
-    if (messages.length > 0) {
+    // Only look for new messages if we've already rendered the initial messages
+    if (hasRenderedMessages && messages.length > 0 && !isAnimating) {
       const lastMsg = messages[messages.length - 1];
-      // Only animate if: it's an assistant message, not a system message, and hasn't been animated before
+      
+      // Only animate if:
+      // 1. It's an assistant message
+      // 2. Not a system message
+      // 3. Has an ID
+      // 4. Hasn't been animated before
+      // 5. Belongs to the current conversation
       if (
         lastMsg.role === 'assistant' && 
         !lastMsg.isSystemMessage && 
         lastMsg.id && 
-        !animatedMessageIds.has(lastMsg.id)
+        !animatedMessageIds.has(lastMsg.id) &&
+        lastMsg.conversationId === currentConversationId
       ) {
         console.log('MessageList: New assistant message detected for animation:', lastMsg.id);
         setLastMessage(lastMsg);
+        setIsAnimating(true);
+        
         // Add this message ID to the set of animated messages
-        setAnimatedMessageIds(prev => new Set([...prev, lastMsg.id as string]));
+        setAnimatedMessageIds(prev => {
+          const updated = new Set([...prev]);
+          updated.add(lastMsg.id as string);
+          return updated;
+        });
       }
     }
-  }, [messages, animatedMessageIds]);
+  }, [messages, hasRenderedMessages, animatedMessageIds, currentConversationId, isAnimating]);
 
-  // Only animate the last message if it hasn't been animated before
-  const shouldAnimateLastMessage = !!(lastMessage?.id && !animatedMessageIds.has(lastMessage.id));
+  // Only animate the message if it hasn't been animated before and is the last message
+  const shouldAnimateMessage = (message: Message): boolean => {
+    return (
+      message.role === 'assistant' &&
+      !message.isSystemMessage &&
+      message.id === lastMessage?.id &&
+      message.conversationId === currentConversationId &&
+      !animatedMessageIds.has(message.id || '')
+    );
+  };
+
+  // Use typewriter effect only for the message being animated
   const { displayedText, isTyping } = useTypewriter(
     lastMessage?.content || '', 
-    50,
-    shouldAnimateLastMessage
+    30, // Speed in milliseconds
+    isAnimating // Only animate if we're actively animating
   );
+  
+  // When typing animation completes, update state
+  useEffect(() => {
+    if (isAnimating && !isTyping && lastMessage) {
+      console.log('MessageList: Animation completed for message:', lastMessage.id);
+      setIsAnimating(false);
+    }
+  }, [isTyping, isAnimating, lastMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -162,9 +195,9 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
         </div>
       ) : (
         messages.map((message, index) => {
-          // Only apply the typing animation if this is the last message and it needs animation
-          const isLastAssistantMessage = message === lastMessage && shouldAnimateLastMessage;
-          const messageContent = isLastAssistantMessage ? displayedText : message.content;
+          // Only apply the typing animation if this message needs animation
+          const shouldAnimate = shouldAnimateMessage(message);
+          const messageContent = shouldAnimate ? displayedText : message.content;
           const isSystemMsg = message.isSystemMessage === true;
 
           // Skip typing animation for system messages
@@ -192,7 +225,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
                         M
                       </div>
                     ) : (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-transparent">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full dark:bg-transparent">
                         <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -248,7 +281,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
         <div className="w-full py-3 sm:py-4 px-2 sm:px-1">
           <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
             <div className="flex-shrink-0 mt-1">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-transparent">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full dark:bg-transparent">
                 <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
               </div>
             </div>
