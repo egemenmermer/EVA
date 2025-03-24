@@ -30,6 +30,21 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   const { user, darkMode, setToken, setUser, setCurrentConversation, currentConversation } = useStore();
 
+  // Apply dark mode class to html element
+  useEffect(() => {
+    console.log('Dark mode state changed:', darkMode ? 'dark' : 'light');
+    
+    // Only add/remove the class, don't change other styling
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      // Add a specific class to prevent background color changes
+      document.documentElement.classList.add('keep-bg-light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('keep-bg-light');
+    }
+  }, [darkMode]);
+
   // Check for token on app startup and ensure user data is available
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -118,35 +133,33 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className={darkMode ? 'dark' : ''}>
-          <div className="min-h-screen bg-white dark:bg-gray-900">
-            <Router>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
-                  } 
-                />
-                <Route 
-                  path="/login" 
-                  element={user || hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
-                />
-                <Route 
-                  path="/register" 
-                  element={user || hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />} 
-                />
-                <Route path="/auth/activate" element={<ActivationPage />} />
-                <Route path="/auth/google/callback" element={<OAuthCallback />} />
-                <Route path="/auth/github/callback" element={<OAuthCallback />} />
-                {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
-                <Route path="*" element={
-                  user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
-                } />
-              </Routes>
-            </Router>
-          </div>
+        <div className="min-h-screen bg-white dark:bg-gray-900">
+          <Router>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
+                } 
+              />
+              <Route 
+                path="/login" 
+                element={user || hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
+              />
+              <Route 
+                path="/register" 
+                element={user || hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />} 
+              />
+              <Route path="/auth/activate" element={<ActivationPage />} />
+              <Route path="/auth/google/callback" element={<OAuthCallback />} />
+              <Route path="/auth/github/callback" element={<OAuthCallback />} />
+              {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
+              <Route path="*" element={
+                user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
+              } />
+            </Routes>
+          </Router>
         </div>
       </ThemeProvider>
     </QueryClientProvider>

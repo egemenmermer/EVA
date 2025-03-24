@@ -75,108 +75,106 @@ export const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className={`${darkMode ? 'dark' : ''}`}>
-      <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
-        {/* Header - Responsive padding */}
-        <header className="h-16 md:h-20 flex-none flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center">
-            {/* Mobile sidebar toggle */}
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="mr-3 md:hidden"
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="h-6 w-6 text-gray-700 dark:text-gray-100" />
-            </button>
-            
-            <div 
-              className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate('/')}
-            >
-              <img src={logo} alt="Logo" className="h-10 w-10 md:h-16 md:w-16" />
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                  EVA
-                </h1>
-                <h2 className="hidden sm:block text-sm md:text-base text-gray-700 dark:text-gray-200">
-                  Ethical Virtual Assistant
-                </h2>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile guidelines toggle */}
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
+      {/* Header - Responsive padding */}
+      <header className="h-16 md:h-20 flex-none flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex items-center">
+          {/* Mobile sidebar toggle */}
           <button 
-            onClick={() => setGuidelinesOpen(!guidelinesOpen)} 
-            className="md:hidden bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-200 p-1.5 rounded-md"
-            aria-label="Toggle guidelines"
+            onClick={() => setSidebarOpen(!sidebarOpen)} 
+            className="mr-3 md:hidden"
+            aria-label="Toggle sidebar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <Menu className="h-6 w-6 text-gray-700 dark:text-gray-100" />
           </button>
-        </header>
-        
-        <div className="flex-1 flex overflow-hidden relative">
-          {/* Left Sidebar - Responsive */}
-          <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-30 w-[85%] sm:w-[320px] md:w-[260px] h-[calc(100%-4rem)] md:h-auto flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden transition-transform duration-300 ease-in-out`}>
-            {/* Close button on mobile */}
-            <button 
-              onClick={() => setSidebarOpen(false)} 
-              className="absolute top-4 right-4 md:hidden"
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-            </button>
-            
-            {/* Force the sidebar to take up the full height */}
-            <div className="flex-1 flex flex-col min-h-0 pt-6 md:pt-0">
-              <Sidebar />
-            </div>
-          </div>
           
-          {/* Backdrop for mobile sidebar */}
-          {sidebarOpen && (
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" 
-              onClick={() => setSidebarOpen(false)}
-              aria-hidden="true"
-            />
-          )}
-          
-          {/* Main Chat Window - Responsive width and padding */}
-          <main 
-            className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden"
-            onClick={handleMainContentClick}
+          <div 
+            className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
           >
-            <div className="w-full max-w-full md:max-w-4xl px-2 sm:px-4">
-              <ChatWindow />
-            </div>
-          </main>
-          
-          {/* Right Panel - Responsive on mobile */}
-          <div className={`${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 fixed md:relative right-0 top-16 md:top-0 z-30 w-[85%] sm:w-[320px] md:w-[240px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
-            {/* Close button on mobile */}
-            <button 
-              onClick={() => setGuidelinesOpen(false)} 
-              className="absolute top-4 left-4 md:hidden"
-              aria-label="Close guidelines"
-            >
-              <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-            </button>
-            
-            <div className="h-full overflow-y-auto p-4 pt-12 md:pt-4">
-              <EthicalGuidelines />
+            <img src={logo} alt="Logo" className="h-10 w-10 md:h-16 md:w-16" />
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                EVA
+              </h1>
+              <h2 className="hidden sm:block text-sm md:text-base text-gray-700 dark:text-gray-200">
+                Ethical Virtual Assistant
+              </h2>
             </div>
           </div>
-          
-          {/* Backdrop for mobile guidelines */}
-          {guidelinesOpen && (
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" 
-              onClick={() => setGuidelinesOpen(false)}
-              aria-hidden="true"
-            />
-          )}
         </div>
+
+        {/* Mobile guidelines toggle */}
+        <button 
+          onClick={() => setGuidelinesOpen(!guidelinesOpen)} 
+          className="md:hidden bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-200 p-1.5 rounded-md"
+          aria-label="Toggle guidelines"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </button>
+      </header>
+      
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Left Sidebar - Responsive */}
+        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-30 w-[85%] sm:w-[320px] md:w-[260px] h-[calc(100%-4rem)] md:h-auto flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden transition-transform duration-300 ease-in-out`}>
+          {/* Close button on mobile */}
+          <button 
+            onClick={() => setSidebarOpen(false)} 
+            className="absolute top-4 right-4 md:hidden"
+            aria-label="Close sidebar"
+          >
+            <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+          </button>
+          
+          {/* Force the sidebar to take up the full height */}
+          <div className="flex-1 flex flex-col min-h-0 pt-6 md:pt-0">
+            <Sidebar />
+          </div>
+        </div>
+        
+        {/* Backdrop for mobile sidebar */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" 
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+        
+        {/* Main Chat Window - Responsive width and padding */}
+        <main 
+          className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden"
+          onClick={handleMainContentClick}
+        >
+          <div className="w-full max-w-full md:max-w-4xl px-2 sm:px-4">
+            <ChatWindow />
+          </div>
+        </main>
+        
+        {/* Right Panel - Responsive on mobile */}
+        <div className={`${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 fixed md:relative right-0 top-16 md:top-0 z-30 w-[85%] sm:w-[320px] md:w-[240px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+          {/* Close button on mobile */}
+          <button 
+            onClick={() => setGuidelinesOpen(false)} 
+            className="absolute top-4 left-4 md:hidden"
+            aria-label="Close guidelines"
+          >
+            <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+          </button>
+          
+          <div className="h-full overflow-y-auto p-4 pt-12 md:pt-4">
+            <EthicalGuidelines />
+          </div>
+        </div>
+        
+        {/* Backdrop for mobile guidelines */}
+        {guidelinesOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" 
+            onClick={() => setGuidelinesOpen(false)}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -21,6 +22,88 @@ const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[
   { type: 'CAMOUFLAGER', icon: null, label: 'Camouflager' },
 ];
 
+// Profile Menu component to be rendered in a portal
+const ProfileMenu = ({ 
+  user, 
+  onLogout, 
+  menuRef 
+}: { 
+  user: any, 
+  onLogout: () => void,
+  menuRef: React.RefObject<HTMLDivElement>
+}) => {
+  // Get dark mode state from store
+  const { darkMode } = useStore();
+  
+  // Create portal to render outside the sidebar
+  return ReactDOM.createPortal(
+    <>
+      {/* Backdrop to ensure menu stands out */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'transparent',
+          zIndex: 9998,
+        }}
+        className="animate-in fade-in duration-150"
+        onClick={() => document.dispatchEvent(new MouseEvent('mousedown'))}
+      />
+      
+      {/* Actual menu */}
+      <div 
+        ref={menuRef}
+        style={{
+          position: 'fixed',
+          bottom: '70px',
+          left: '20px',
+          zIndex: 9999,
+          width: '260px'
+        }}
+        className="bg-white dark:bg-gray-800 rounded-md shadow-xl border-2 border-gray-300 dark:border-gray-600 overflow-hidden animate-in slide-in-from-bottom-2 duration-150"
+      >
+        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {user?.email || 'user@example.com'}
+          </p>
+        </div>
+        <a 
+          href="https://github.com/egemenmermer/Thesis"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <Github className="mr-2 h-4 w-4" />
+          GitHub Repository
+          <ExternalLink className="ml-auto h-4 w-4" />
+        </a>
+        <a 
+          href="https://example.com/research-paper.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <FileText className="mr-2 h-4 w-4" />
+          Research Paper
+          <ExternalLink className="ml-auto h-4 w-4" />
+        </a>
+        <div className="border-t border-gray-200 dark:border-gray-700" />
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Log out
+        </button>
+      </div>
+    </>,
+    document.body
+  );
+};
+
 export const Sidebar: React.FC = () => {
   const { setCurrentConversation, currentConversation, managerType, setManagerType, user, darkMode } = useStore();
   const { logout } = useAuth();
@@ -35,7 +118,6 @@ export const Sidebar: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [profileMenuPosition, setProfileMenuPosition] = useState({ top: 0, left: 0 });
 
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
@@ -238,25 +320,8 @@ export const Sidebar: React.FC = () => {
     }).format(date);
   };
 
-  // Update profile menu position when toggling
+  // Simplified toggle for profile menu
   const toggleProfileMenu = () => {
-    if (profileButtonRef.current) {
-      const rect = profileButtonRef.current.getBoundingClientRect();
-      // Position menu above the button, with a minimum distance from the top of the viewport
-      const menuHeight = 210; // Approximate height of the menu
-      const top = Math.max(10, rect.top - menuHeight); 
-      
-      // Calculate left position to keep the menu within the sidebar
-      // Use the width of the sidebar rather than button's left position
-      const sidebarWidth = document.querySelector('.sidebar-container')?.getBoundingClientRect().width || 260;
-      // Position menu aligned with the sidebar's right edge minus menu width
-      const left = Math.max(10, sidebarWidth - 260);
-      
-      setProfileMenuPosition({
-        top: top,
-        left: left
-      });
-    }
     setShowProfileMenu(!showProfileMenu);
   };
 
@@ -380,8 +445,11 @@ export const Sidebar: React.FC = () => {
           </div>
 
           <button
-            onClick={() => useStore.getState().toggleDarkMode()}
-            className="p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => {
+              console.log('Dark mode toggle clicked, current state:', darkMode);
+              useStore.getState().toggleDarkMode();
+            }}
+            className="p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors relative group"
             aria-label="Toggle dark mode"
           >
             {darkMode ? (
@@ -389,55 +457,18 @@ export const Sidebar: React.FC = () => {
             ) : (
               <Moon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
             )}
+            <span className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              {darkMode ? 'Light mode' : 'Dark mode'}
+            </span>
           </button>
         </div>
 
         {showProfileMenu && (
-          <div 
-            ref={profileMenuRef}
-            style={{
-              position: 'fixed',
-              top: `${profileMenuPosition.top}px`,
-              left: `${profileMenuPosition.left}px`,
-              zIndex: 9999, // Make sure it's higher than anything else
-              maxWidth: '260px' // Ensure it doesn't exceed sidebar width
-            }}
-            className="bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-bottom-2 duration-150"
-          >
-            <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.email || 'user@example.com'}
-              </p>
-            </div>
-            <a 
-              href="https://github.com/egemenmermer/Thesis"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <Github className="mr-2 h-4 w-4" />
-              GitHub Repository
-              <ExternalLink className="ml-auto h-4 w-4" />
-            </a>
-            <a 
-              href="https://example.com/research-paper.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Research Paper
-              <ExternalLink className="ml-auto h-4 w-4" />
-            </a>
-            <div className="border-t border-gray-200 dark:border-gray-700" />
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
-            </button>
-          </div>
+          <ProfileMenu 
+            user={user} 
+            onLogout={handleLogout}
+            menuRef={profileMenuRef}
+          />
         )}
       </div>
     </div>
