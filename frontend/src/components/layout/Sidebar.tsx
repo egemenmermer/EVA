@@ -108,6 +108,14 @@ export const Sidebar: React.FC = () => {
       window.removeEventListener('refresh-conversations', handleRefreshEvent);
     };
   }, []);
+  
+  // Re-fetch conversations when current conversation changes
+  useEffect(() => {
+    if (currentConversation && !currentConversation.isDraft) {
+      console.log('Sidebar: Current conversation changed, refreshing conversation list');
+      fetchConversations();
+    }
+  }, [currentConversation]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -175,13 +183,18 @@ export const Sidebar: React.FC = () => {
 
   const handleSelectConversation = (conversation: Conversation) => {
     // Skip if trying to select an invalid conversation ID (non-UUID)
-    if (conversation.conversationId && conversation.conversationId.includes('mock-')) {
-      console.error('Cannot select mock conversation with non-UUID ID:', conversation.conversationId);
-      setError('Cannot use mock conversation. Please create a new chat.');
+    if (conversation.conversationId && (
+      conversation.conversationId.includes('mock-') || 
+      (conversation.conversationId.startsWith('draft-') && !conversation.isDraft)
+    )) {
+      console.error('Cannot select invalid conversation with non-UUID ID:', conversation.conversationId);
+      setError('Cannot use this conversation. Please create a new chat.');
       return;
     }
     
     console.log('Selected conversation:', conversation.conversationId);
+    
+    // Set the selected conversation
     setCurrentConversation(conversation);
     
     // Save current conversation ID to localStorage
@@ -301,6 +314,12 @@ export const Sidebar: React.FC = () => {
           // Filter out draft conversations - they shouldn't appear in the list until saved
           directFetchedConversations
             .filter(conversation => !conversation.isDraft)
+            // Sort by lastMessageDate (or createdAt) in descending order (newest first)
+            .sort((a, b) => {
+              const dateA = a.lastMessageDate || a.createdAt || '';
+              const dateB = b.lastMessageDate || b.createdAt || '';
+              return new Date(dateB).getTime() - new Date(dateA).getTime();
+            })
             .map((conversation) => (
               <div
                 key={conversation.conversationId}

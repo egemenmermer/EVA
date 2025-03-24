@@ -34,6 +34,14 @@ export const ChatWindow: React.FC = () => {
   // Load messages when conversation changes
   useEffect(() => {
     if (currentConversation?.conversationId) {
+      // Skip fetching messages for draft conversations
+      if (currentConversation.isDraft || currentConversation.conversationId.startsWith('draft-')) {
+        console.log('Skipping message fetch for draft conversation:', currentConversation.conversationId);
+        setMessages([]);
+        setLoading(false);
+        return;
+      }
+      
       console.log('ChatWindow: Conversation changed, fetching messages for:', currentConversation.conversationId);
       setLoading(true);
       
@@ -92,6 +100,12 @@ export const ChatWindow: React.FC = () => {
   const fetchMessages = async (conversationId: string) => {
     try {
       console.log('Fetching messages for conversation:', conversationId);
+
+      // Skip API call for draft or invalid conversation IDs
+      if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
+        console.log('Skipping server fetch for draft/invalid conversation:', conversationId);
+        return;
+      }
 
       // First check for locally stored messages
       let hasLocalMessages = false;
@@ -250,7 +264,7 @@ export const ChatWindow: React.FC = () => {
       let isNewConversation = false;
       
       // Check if this is a draft conversation that needs to be created on the server
-      if (currentConversation.isDraft) {
+      if (currentConversation.isDraft || currentConversation.conversationId.startsWith('draft-')) {
         console.log('Creating real conversation from draft');
         isNewConversation = true;
         
@@ -263,11 +277,12 @@ export const ChatWindow: React.FC = () => {
           }
           
           console.log('Created real conversation on server:', newConversation);
-          actualConversationId = newConversation.conversationId;
+          // Make sure we're using the actual UUID from the server response
+          actualConversationId = newConversation.conversationId.toString();
           
           // Update the conversation object
           const realConversation = {
-            conversationId: newConversation.conversationId,
+            conversationId: actualConversationId,
             title: '', // Will be set after title generation
             lastMessage: content,
             lastMessageDate: new Date().toISOString(),
@@ -313,13 +328,21 @@ export const ChatWindow: React.FC = () => {
       
       // Check if this is the first message and update conversation title if needed
       if (isNewConversation || messages.length === 0) {
-        // Generate a title using Gemini Pro
+        console.log('Generating title for new conversation');
+        // Default title in case title generation fails
         let title = content.length > 30 ? content.substring(0, 30) + '...' : content;
         
         try {
           // Generate title using Gemini Pro
-          title = await conversationApi.updateConversationTitle(actualConversationId || '', content);
-          console.log('Generated conversation title:', title);
+          const generatedTitle = await conversationApi.updateConversationTitle(actualConversationId || '', content);
+          console.log('Generated conversation title:', generatedTitle);
+          
+          if (generatedTitle && generatedTitle !== title) {
+            title = generatedTitle;
+            console.log('Using generated title:', title);
+          } else {
+            console.warn('Using fallback title:', title);
+          }
           
           // Update conversation object with new title
           const updatedConversation = {
@@ -351,8 +374,21 @@ export const ChatWindow: React.FC = () => {
             console.error('Error updating conversation title in localStorage:', storageError);
           }
         } catch (error) {
-          console.error('Error generating title with Gemini Pro:', error);
+          console.error('Error generating title:', error);
           // Fall back to default title already set
+          console.warn('Using default title due to error:', title);
+          
+          // Still update conversation with the default title
+          const updatedConversation = {
+            ...currentConversation,
+            conversationId: actualConversationId,
+            title: title,
+            lastMessage: content,
+            lastMessageDate: new Date().toISOString(),
+            isDraft: false
+          };
+          
+          setCurrentConversation(updatedConversation);
         }
       }
 
@@ -368,6 +404,9 @@ export const ChatWindow: React.FC = () => {
       // Send message to backend
       try {
         console.log('ChatWindow: Sending message to backend API');
+        // Keep loading state true while waiting for response
+        setLoading(true);
+        
         const response = await conversationApi.sendMessage(
           actualConversationId,
           content,
@@ -401,6 +440,30 @@ export const ChatWindow: React.FC = () => {
           try {
             // Manually trigger a refetch of conversations by dispatching a custom event
             window.dispatchEvent(new CustomEvent('refresh-conversations'));
+            console.log('ChatWindow: Triggered conversation refresh event for new conversation');
+            
+            // Also update local storage to ensure the conversation appears correctly
+            const storedConversationsJson = localStorage.getItem('app-storage');
+            if (storedConversationsJson) {
+              try {
+                const storedData = JSON.parse(storedConversationsJson);
+                if (storedData && storedData.state) {
+                  // Make sure the current conversation is up to date
+                  const currentTitle = currentConversation.title || 'New conversation';
+                  storedData.state.currentConversation = {
+                    ...currentConversation,
+                    conversationId: actualConversationId,
+                    title: currentTitle,
+                    lastMessage: content,
+                    lastMessageDate: new Date().toISOString(),
+                    isDraft: false
+                  };
+                  localStorage.setItem('app-storage', JSON.stringify(storedData));
+                }
+              } catch (err) {
+                console.error('Error updating app storage for new conversation:', err);
+              }
+            }
           } catch (error) {
             console.error('Error triggering conversation refresh:', error);
           }
@@ -436,11 +499,12 @@ export const ChatWindow: React.FC = () => {
         } catch (storageError) {
           console.error('Error saving error message to localStorage:', storageError);
         }
+      } finally {
+        setLoading(false);
       }
     } catch (error: any) {
       console.error('Error in handleSendMessage:', error);
       setError('There was an error sending your message. Please try again.');
-    } finally {
       setLoading(false);
     }
   };

@@ -150,6 +150,15 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
       }
     }
   }, [messages, hasRenderedMessages, animatedMessageIds, currentConversationId, isAnimating]);
+  
+  // Handle loading state change: when loading becomes true, we should prepare for a new message
+  useEffect(() => {
+    if (loading) {
+      console.log('MessageList: Loading state is now true, preparing for new message');
+      // Clear animation flags to ensure we'll animate the next incoming message
+      setIsAnimating(false);
+    }
+  }, [loading]);
 
   // Only animate the message if it hasn't been animated before and is the last message
   const shouldAnimateMessage = (message: Message): boolean => {

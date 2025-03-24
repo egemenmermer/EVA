@@ -4,7 +4,18 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 
 // Initialize the Gemini API with the API key
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+let genAI: GoogleGenerativeAI | null = null;
+
+try {
+  if (!API_KEY) {
+    console.warn('Warning: No Gemini API key found in environment variables. Title generation will use fallback method.');
+  } else {
+    genAI = new GoogleGenerativeAI(API_KEY);
+    console.log('Gemini AI initialized successfully with API key');
+  }
+} catch (error) {
+  console.error('Error initializing Gemini AI:', error);
+}
 
 /**
  * Generates a concise, descriptive title for a conversation based on the first message
@@ -17,8 +28,17 @@ export const generateConversationTitle = async (userMessage: string): Promise<st
     // Default title if API fails
     let defaultTitle = userMessage.length > 25 ? userMessage.substring(0, 25) + '...' : userMessage;
     
+    console.log('Attempting to generate title for message:', userMessage.substring(0, 30) + '...');
+    console.log('Using Gemini API Key:', API_KEY ? 'Available (starts with ' + API_KEY.substring(0, 5) + '...)' : 'Missing');
+    
     // Don't call API for very short messages
     if (userMessage.length < 10) {
+      console.log('Message too short, using default title');
+      return defaultTitle;
+    }
+    
+    if (!API_KEY || !genAI) {
+      console.error('Gemini API not available. Check .env file for VITE_GEMINI_API_KEY');
       return defaultTitle;
     }
     
@@ -52,6 +72,8 @@ User message: "${userMessage}"
 
 Title:`;
 
+    console.log('Sending prompt to Gemini Pro');
+    
     // Generate content
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -59,10 +81,20 @@ Title:`;
     
     console.log('Gemini generated title:', title);
     
+    // Validate the title
+    if (!title || title.length === 0) {
+      console.warn('Gemini returned an empty title, using default');
+      return defaultTitle;
+    }
+    
     // Return the generated title if valid, otherwise fallback to default
     return title || defaultTitle;
   } catch (error) {
     console.error('Error generating title with Gemini Pro:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     // Fallback to using the first part of the message
     return userMessage.length > 25 ? userMessage.substring(0, 25) + '...' : userMessage;
   }
