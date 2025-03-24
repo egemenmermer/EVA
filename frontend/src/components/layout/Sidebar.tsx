@@ -26,18 +26,16 @@ export const Sidebar: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const contextMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLDivElement>(null);
   
   // State for direct fetched conversations
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-  const [contextMenuConversationId, setContextMenuConversationId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [profileMenuPosition, setProfileMenuPosition] = useState({ top: 0, left: 0 });
 
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
@@ -119,28 +117,20 @@ export const Sidebar: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
-        setShowContextMenu(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+      if (
+        showProfileMenu &&
+        profileMenuRef.current && 
+        profileButtonRef.current && 
+        !profileMenuRef.current.contains(e.target as Node) &&
+        !profileButtonRef.current.contains(e.target as Node)
+      ) {
         setShowProfileMenu(false);
       }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showProfileMenu]);
 
   const handleNewChat = async () => {
     try {
@@ -178,7 +168,6 @@ export const Sidebar: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/login');
-    setShowContextMenu(false);
   };
 
   const handleSelectConversation = (conversation: Conversation) => {
@@ -207,7 +196,6 @@ export const Sidebar: React.FC = () => {
 
   const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    setShowContextMenu(false);
     
     try {
       console.log('Deleting conversation:', id);
@@ -240,13 +228,6 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  const handleContextMenu = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    setContextMenuConversationId(id);
-    setContextMenuPosition({ top: e.clientY, left: e.clientX });
-    setShowContextMenu(true);
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', { 
@@ -257,8 +238,30 @@ export const Sidebar: React.FC = () => {
     }).format(date);
   };
 
+  // Update profile menu position when toggling
+  const toggleProfileMenu = () => {
+    if (profileButtonRef.current) {
+      const rect = profileButtonRef.current.getBoundingClientRect();
+      // Position menu above the button, with a minimum distance from the top of the viewport
+      const menuHeight = 210; // Approximate height of the menu
+      const top = Math.max(10, rect.top - menuHeight); 
+      
+      // Calculate left position to keep the menu within the sidebar
+      // Use the width of the sidebar rather than button's left position
+      const sidebarWidth = document.querySelector('.sidebar-container')?.getBoundingClientRect().width || 260;
+      // Position menu aligned with the sidebar's right edge minus menu width
+      const left = Math.max(10, sidebarWidth - 260);
+      
+      setProfileMenuPosition({
+        top: top,
+        left: left
+      });
+    }
+    setShowProfileMenu(!showProfileMenu);
+  };
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col sidebar-container">
       {/* New Chat Button */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
         <button
@@ -324,8 +327,7 @@ export const Sidebar: React.FC = () => {
               <div
                 key={conversation.conversationId}
                 onClick={() => handleSelectConversation(conversation)}
-                onContextMenu={(e) => handleContextMenu(e, conversation.conversationId)}
-                className={`flex items-center px-3 py-3 cursor-pointer rounded-md transition-colors ${
+                className={`group relative flex items-center px-3 py-3 cursor-pointer rounded-md transition-colors ${
                   currentConversation?.conversationId === conversation.conversationId
                     ? 'bg-gray-200 dark:bg-gray-700'
                     : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -341,17 +343,31 @@ export const Sidebar: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                {/* Inline Delete Button - Always visible on hover */}
+                <button
+                  onClick={(e) => handleDeleteConversation(e, conversation.conversationId)}
+                  className={`ml-2 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all ${
+                    currentConversation?.conversationId === conversation.conversationId
+                      ? 'opacity-70'
+                      : 'opacity-0 group-hover:opacity-70'
+                  }`}
+                  aria-label="Delete conversation"
+                >
+                  <HiOutlineTrash size={16} />
+                </button>
               </div>
             ))
         )}
       </div>
 
       {/* User Profile Section */}
-      <div className="mt-auto p-3 border-t border-gray-200 dark:border-gray-700" ref={profileMenuRef}>
+      <div className="mt-auto p-3 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div 
+            ref={profileButtonRef}
             className="flex items-center p-3 rounded-md bg-gray-200 dark:bg-gray-800 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex-grow mr-2"
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            onClick={toggleProfileMenu}
           >
             <div className="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white">
               {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
@@ -377,7 +393,17 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {showProfileMenu && (
-          <div className="absolute bottom-24 left-3 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div 
+            ref={profileMenuRef}
+            style={{
+              position: 'fixed',
+              top: `${profileMenuPosition.top}px`,
+              left: `${profileMenuPosition.left}px`,
+              zIndex: 9999, // Make sure it's higher than anything else
+              maxWidth: '260px' // Ensure it doesn't exceed sidebar width
+            }}
+            className="bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-bottom-2 duration-150"
+          >
             <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {user?.email || 'user@example.com'}
@@ -414,28 +440,6 @@ export const Sidebar: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Context Menu */}
-      {showContextMenu && contextMenuConversationId && (
-        <div
-          ref={contextMenuRef}
-          style={{ 
-            position: 'fixed', 
-            top: contextMenuPosition.top, 
-            left: contextMenuPosition.left,
-            zIndex: 50
-          }}
-          className="bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 p-1"
-        >
-          <button
-            onClick={(e) => handleDeleteConversation(e, contextMenuConversationId)}
-            className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 w-full text-left"
-          >
-            <HiOutlineTrash size={16} />
-            <span>Delete</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }; 
