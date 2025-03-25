@@ -61,9 +61,14 @@ class LangChainAgent(BaseAgent):
             self.user_role = None
             self.conversation_id = str(uuid.uuid4())
             self.practice_mode = False
-            self.manager_type = None  # Will be set at conversation start
+            self.manager_type = config.get('manager_type', 'PUPPETEER')  # Get manager type from config
             self.current_scenario = None
             self.practice_scores = []
+            
+            # Validate manager type
+            if self.manager_type not in self.MANAGER_TYPES:
+                logger.warning(f"Invalid manager type: {self.manager_type}. Using default: PUPPETEER")
+                self.manager_type = 'PUPPETEER'
             
             # Set up directories
             self.cache_dir = Path(config.get('cache_dir', 'cache'))
@@ -74,7 +79,7 @@ class LangChainAgent(BaseAgent):
             # Initialize LangChain components
             self._initialize_components()
             
-            logger.info("LangChain Agent initialized successfully")
+            logger.info(f"LangChain Agent initialized successfully with manager type: {self.manager_type}")
             
         except Exception as e:
             logger.error(f"Failed to initialize LangChainAgent: {str(e)}")
@@ -89,26 +94,7 @@ class LangChainAgent(BaseAgent):
             )
             
             # Initialize vector store with FAISS
-            index_path = str(self.index_dir / "faiss.index")
-            if os.path.exists(index_path):
-                logger.info(f"Loading existing FAISS index from {index_path}")
-                self.vectorstore = FAISS.load_local(
-                    folder_path=str(self.index_dir),
-                    embeddings=self.embeddings,
-                    index_name="faiss.index"
-                )
-            else:
-                logger.info("Creating new FAISS index")
-                # Create empty FAISS index - it will be populated when needed
-                self.vectorstore = FAISS.from_texts(
-                    ["placeholder"],  # Placeholder text to initialize
-                    self.embeddings
-                )
-                # Save the index
-                self.vectorstore.save_local(
-                    folder_path=str(self.index_dir),
-                    index_name="faiss.index"
-                )
+            self._initialize_faiss_index()
             
             # Get temperature from config or use default
             temperature = self.config.get('temperature', 0.7)
@@ -120,29 +106,24 @@ class LangChainAgent(BaseAgent):
                 temperature=temperature
             )
             
-            # Initialize conversation memory
+            # Initialize conversation memory with enhanced context
             self.memory = ConversationBufferMemory(
                 memory_key="history",
-                return_messages=True
+                return_messages=True,
+                output_key="output"
             )
             
-            # Create base conversation chain
+            # Create base conversation chain with EVA's persona
             self.conversation = ConversationChain(
                 llm=self.llm,
                 memory=self.memory,
                 verbose=True
             )
             
-            # Create QA chain for ethical guidance
-            self.qa_chain = RetrievalQA.from_chain_type(
-                llm=self.llm,
-                chain_type="stuff",
-                retriever=self.vectorstore.as_retriever(
-                    search_kwargs={"k": 3}
-                )
-            )
+            # Create enhanced QA chain with multi-query retrieval
+            self.qa_chain = self._create_enhanced_qa_chain()
             
-            # Initialize prompts
+            # Initialize prompts with EVA's persona
             self._initialize_prompts()
             
             # Initialize output parser for argumentation strategies
@@ -152,64 +133,156 @@ class LangChainAgent(BaseAgent):
             logger.error(f"Error initializing LangChain components: {str(e)}")
             raise
 
+    def _initialize_faiss_index(self):
+        """Initialize FAISS index with proper error handling and logging."""
+        try:
+            index_path = str(self.index_dir / "faiss.index")
+            metadata_path = str(self.index_dir / "faiss_metadata.json")
+            
+            if os.path.exists(index_path) and os.path.exists(metadata_path):
+                logger.info(f"Loading existing FAISS index from {index_path}")
+                self.vectorstore = FAISS.load_local(
+                    folder_path=str(self.index_dir),
+                    embeddings=self.embeddings,
+                    index_name="faiss.index"
+                )
+                
+                # Load metadata
+                with open(metadata_path, 'r') as f:
+                    self.index_metadata = json.load(f)
+                logger.info(f"Loaded index metadata: {len(self.index_metadata.get('documents', []))} documents indexed")
+            else:
+                logger.warning("No existing index found, initializing empty FAISS index")
+                # Initialize with ethical guidelines placeholder
+                initial_texts = [
+                    "Ethical decision making in software development requires careful consideration of privacy, security, and user welfare.",
+                    "Developers should prioritize transparency, accountability, and user consent in their solutions.",
+                    "Technical decisions should be balanced with social responsibility and ethical implications."
+                ]
+                self.vectorstore = FAISS.from_texts(
+                    initial_texts,
+                    self.embeddings
+                )
+                
+                # Save index and metadata
+                self.vectorstore.save_local(
+                    folder_path=str(self.index_dir),
+                    index_name="faiss.index"
+                )
+                self.index_metadata = {
+                    "created_at": datetime.now().isoformat(),
+                    "documents": initial_texts,
+                    "version": "1.0"
+                }
+                with open(metadata_path, 'w') as f:
+                    json.dump(self.index_metadata, f, indent=2)
+                
+                logger.info("Initialized new FAISS index with ethical guidelines")
+        except Exception as e:
+            logger.error(f"Error initializing FAISS index: {str(e)}")
+            raise
+
+    def _create_enhanced_qa_chain(self) -> RetrievalQA:
+        """Create an enhanced QA chain with multi-query retrieval."""
+        try:
+            # Create a retriever with better search parameters
+            retriever = self.vectorstore.as_retriever(
+                search_kwargs={
+                    "k": 5,  # Increased from 3 for better context
+                    "fetch_k": 20,  # Fetch more candidates for better selection
+                    "maximal_marginal_relevance": True,  # Use MMR for diversity
+                    "distance_metric": "cos",  # Use cosine similarity
+                }
+            )
+            
+            return RetrievalQA.from_chain_type(
+                llm=self.llm,
+                chain_type="stuff",
+                retriever=retriever,
+                return_source_documents=True,  # Include sources for transparency
+                verbose=True
+            )
+        except Exception as e:
+            logger.error(f"Error creating QA chain: {str(e)}")
+            raise
+
     def _initialize_prompts(self):
         """Initialize various prompts used by the agent."""
-        # Understanding mode prompt
+        # Understanding mode prompt with EVA's persona
         self.understanding_prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an ethical AI assistant helping with software development dilemmas.
-            Your goal is to help users understand ethical challenges in their work and develop effective strategies to address them.
+            ("system", """You are EVA (Ethical Virtual Assistant), an AI designed to help developers navigate ethical challenges in software development.
+            Your goal is to provide clear, practical guidance while helping users understand the broader implications of their decisions.
             
-            After providing guidance, always ask if they would like to:
-            1. Practice handling this situation with a simulated manager (enter practice mode)
-            2. Explore different aspects of the ethical challenge
-            3. Move on to a different topic
+            When responding:
+            1. First acknowledge and validate the ethical concern
+            2. Provide clear, actionable guidance based on ethical principles
+            3. Reference relevant examples or case studies when available
+            4. Offer to either:
+               - Practice handling this situation through an interactive scenario
+               - Explore different aspects of the ethical challenge
+               - Move on to a different topic
             
-            Base your responses on established ethical principles and best practices in software engineering."""),
+            Remember: Your role is to educate and guide, not just provide answers."""),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
         
-        # Practice mode prompt
+        # Practice mode prompt with enhanced manager simulation
         self.practice_prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are simulating a {manager_type} manager who {description}.
-            Your communication style is {style}.
-            You focus on: {focus}
+            ("system", """You are simulating a {manager_type} manager in an ethical scenario.
+            Management Style: {style}
+            Key Behaviors: {focus}
             
-            Respond to the team member's ethical concern while staying in character.
-            Evaluate their argumentation strategy and provide a score based on:
-            - Effectiveness of the approach (40 points)
-            - Understanding of ethical principles (30 points)
-            - Professional communication (30 points)"""),
+            Your role is to create a realistic ethical challenge that tests the user's ability to:
+            1. Identify ethical concerns
+            2. Articulate principled positions
+            3. Navigate professional relationships
+            4. Maintain ethical standards under pressure
+            
+            After each response, provide structured feedback:
+            - Effectiveness (40 points): How well the approach addresses the ethical concern
+            - Principles (30 points): Understanding and application of ethical principles
+            - Communication (30 points): Professional and clear articulation
+            
+            End with specific suggestions for improvement."""),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
         
-        # Strategy evaluation prompt
+        # Strategy evaluation prompt with clearer structure
         self.evaluation_prompt = PromptTemplate(
             input_variables=["strategy", "response", "manager_type"],
-            template="""Evaluate the effectiveness of the following argumentation strategy:
+            template="""As EVA, evaluate this ethical argumentation strategy:
 
-Strategy: {strategy}
-Response: {response}
-Manager Type: {manager_type}
+Context:
+- Strategy Used: {strategy}
+- Response: {response}
+- Manager Type: {manager_type}
 
-Provide a detailed evaluation including:
-1. Overall effectiveness score (0-100)
-2. Specific feedback on the approach
-3. Areas for improvement
+Provide a comprehensive evaluation covering:
+1. Overall Effectiveness (0-100)
+2. Strengths Demonstrated
+3. Areas for Improvement
+4. Suggested Next Steps
 
-Format the response as a JSON object with the following structure:
+Format your response as a structured JSON object:
 {
-    "strategy": "strategy name",
+    "strategy": "name of strategy used",
     "effectiveness": score,
-    "feedback": "detailed feedback",
-    "improvement_areas": ["area1", "area2", ...]
+    "feedback": "detailed analysis of approach",
+    "improvement_areas": ["specific area 1", "specific area 2"],
+    "next_steps": ["concrete action 1", "concrete action 2"]
 }"""
         )
 
     def process_query(self, query: str, manager_type: str = None) -> str:
         """Process a user query and generate a response."""
         try:
+            # Update manager type if provided
+            if manager_type and manager_type in self.MANAGER_TYPES:
+                self.manager_type = manager_type
+                logger.info(f"Updated manager type to: {manager_type}")
+            
             if self.practice_mode:
                 return self._handle_practice_mode(query)
             else:
