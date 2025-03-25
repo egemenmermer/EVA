@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Shield, Eye, Wand2 } from 'lucide-react';
+import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
 export const LandingPage: React.FC = () => {
@@ -67,65 +67,100 @@ export const LandingPage: React.FC = () => {
       <div className="container mx-auto px-4 pt-20 pb-16">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            EVA - Ethical Virtual Assistant
+            Meet EVA – Your AI Companion for Ethical Decision-Making
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Your intelligent companion for making ethical decisions in software development.
-            Get personalized guidance through complex ethical challenges.
+            Practice navigating complex ethical scenarios with confidence and clarity.
           </p>
-          <button
-            onClick={handleGetStarted}
-            className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-          >
-            Get Started
-            <Bot className="ml-2 h-5 w-5" />
-          </button>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handleGetStarted}
+              className="px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              Start Practicing
+            </button>
+            <a
+              href="#learn-more"
+              className="px-6 py-3 text-lg font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              Learn More
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Manager Types Section */}
-      <div className="bg-white dark:bg-gray-800 py-16">
+      {/* Introduction Section */}
+      <div id="learn-more" className="bg-white dark:bg-gray-800 py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              What is EVA?
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              EVA (Ethical Virtual Assistant) helps software professionals navigate challenging ethical situations, 
+              specifically tailored to issues of data privacy and feasibility. Train with scenarios, understand 
+              different managerial attitudes, and confidently handle real-world ethical dilemmas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* How it Works Section */}
+      <div className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Manager Types
+            How EVA Works
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                1. Pick a Manager Type
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                EVA can simulate different managerial styles to help you practice handling various scenarios.
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                2. Practice & Get Feedback
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Engage with EVA's realistic simulations, respond to multiple-choice prompts, and receive immediate feedback.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Benefits Section */}
+      <div className="py-16 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            Why Practice with EVA?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Puppeteer */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 shadow-lg">
-              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
-                <Wand2 className="h-6 w-6 text-blue-600 dark:text-blue-300" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Puppeteer
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Realistic Ethical Dilemmas
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Controls project flow to nudge developers into unethical decisions.
+                Scenarios based on real-life case studies and industry guidelines.
               </p>
             </div>
-
-            {/* Diluter */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 shadow-lg">
-              <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-purple-600 dark:text-purple-300" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Diluter
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Interactive Feedback
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Weakens ethical concerns by making them seem less important.
+                Instantly understand your strengths and areas for improvement.
               </p>
             </div>
-
-            {/* Camouflager */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 shadow-lg">
-              <div className="h-12 w-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
-                <Eye className="h-6 w-6 text-green-600 dark:text-green-300" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Camouflager
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Adaptability
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Hides ethical concerns in bureaucracy or misleading language.
+                Experience various manager personalities to prepare for diverse workplace interactions.
               </p>
             </div>
           </div>
@@ -133,39 +168,87 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-16">
+      <div className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Key Features
+            Features
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Real-time Guidance
-              </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <div className="flex items-center mb-4">
+                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Knowledge-Powered
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Get instant ethical advice as you develop your software
+                Backed by ACM, IEEE guidelines, GDPR compliance standards, and peer-reviewed research.
               </p>
             </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Case-based Learning
-              </h3>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <div className="flex items-center mb-4">
+                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  AI-Driven
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Learn from a vast database of ethical case studies
+                Utilizes cutting-edge language models combined with retrieval-augmented generation.
               </p>
             </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Customizable Approach
-              </h3>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <div className="flex items-center mb-4">
+                <Target className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Scenario Diversity
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Choose the AI manager that best fits your needs
+                Wide range of cases across privacy and feasibility ethics, thoroughly vetted and relevant.
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <div className="flex items-center mb-4">
+                <Rocket className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Easy & Interactive
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Simple UI, animated interactions, and immediate scoring.
               </p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Final CTA Section */}
+      <div className="py-16 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+            Ready to Start?
+          </h2>
+          <button
+            onClick={handleGetStarted}
+            className="px-8 py-4 text-xl font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+          >
+            Start Practicing Now
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Privacy Policy</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Terms of Use</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</a>
+            <a href="https://github.com/yourusername/eva" className="hover:text-blue-600 dark:hover:text-blue-400">GitHub</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Documentation</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }; 
