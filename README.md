@@ -6,17 +6,17 @@ A comprehensive web-based application that helps software professionals navigate
 
 EVA consists of three main components:
 
-1. **Agent (Python)** - Core AI engine powered by Llama-2 for ethical decision processing
+1. **Agent (Python)** - Core AI engine powered by OpenAI GPT for ethical decision processing
 2. **Backend (Spring Boot)** - REST API for user management and conversation handling
 3. **Frontend (React + TypeScript)** - Modern, responsive UI for interacting with EVA
 
 ## Features
 
-- 🤖 **AI-Powered Guidance**: Utilizes OpenAI and retrieval-augmented generation for contextual responses
+- 🤖 **AI-Powered Guidance**: Utilizes OpenAI GPT models for intelligent, contextual responses
 - 🎭 **Multiple Manager Types**: Simulates different managerial approaches to ethical challenges
 - 📚 **Knowledge-Based**: Incorporates ACM, IEEE guidelines, and GDPR compliance standards
 - 🔄 **Interactive Learning**: Real-time feedback and scoring on ethical decision-making
-- 🛡️ **Secure Authentication**: JWT-based auth with Google / Github OAuth integration
+- 🛡️ **Secure Authentication**: JWT-based auth with Google OAuth integration
 - 🌓 **Dark Mode Support**: Full dark mode implementation for better user experience
 
 ## Project Structure
@@ -26,7 +26,7 @@ eva/
 ├── agent/                 # Python AI Agent
 │   ├── agents/           # Agent implementations
 │   ├── data_processing/  # Data processing utilities
-│   ├── embeddings/       # Embedding models
+│   ├── embeddings/       # OpenAI embeddings
 │   ├── evaluation/       # Evaluation tools
 │   ├── retriever/        # Search and retrieval
 │   ├── models.py         # Core model definitions
@@ -57,8 +57,8 @@ eva/
 
 ### Agent (Python)
 - FastAPI for API endpoints
-- OpenAI for language processing
-- Sentence Transformers for embeddings
+- OpenAI GPT-4 for language processing
+- OpenAI Ada for embeddings
 - FAISS for similarity search
 - PyTorch for machine learning
 
@@ -101,7 +101,7 @@ eva/
    
    # Configure .env
    cp .env.example .env
-   # Add your API keys and configuration
+   # Add your OpenAI API key and other configuration
    ```
 
 3. **Set up the Backend**
@@ -133,9 +133,7 @@ eva/
 
 ### Agent (.env)
 ```env
-OPENAI_API_KEY=your_key_here
-HUGGINGFACE_TOKEN=your_token_here
-MODEL_NAME=meta-llama/Llama-2-7b-chat-hf
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### Frontend (.env)
@@ -181,6 +179,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
+- [OpenAI GPT](https://openai.com/) for AI capabilities
 - [ACM Code of Ethics](https://www.acm.org/code-of-ethics)
 - [IEEE Code of Ethics](https://www.ieee.org/about/corporate/governance/p7-8.html)
 
