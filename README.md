@@ -12,11 +12,11 @@ EVA consists of three main components:
 
 ## Features
 
-- 🤖 **AI-Powered Guidance**: Utilizes Llama-2 and retrieval-augmented generation for contextual responses
+- 🤖 **AI-Powered Guidance**: Utilizes OpenAI and retrieval-augmented generation for contextual responses
 - 🎭 **Multiple Manager Types**: Simulates different managerial approaches to ethical challenges
 - 📚 **Knowledge-Based**: Incorporates ACM, IEEE guidelines, and GDPR compliance standards
 - 🔄 **Interactive Learning**: Real-time feedback and scoring on ethical decision-making
-- 🛡️ **Secure Authentication**: JWT-based auth with Google OAuth integration
+- 🛡️ **Secure Authentication**: JWT-based auth with Google / Github OAuth integration
 - 🌓 **Dark Mode Support**: Full dark mode implementation for better user experience
 
 ## Project Structure
