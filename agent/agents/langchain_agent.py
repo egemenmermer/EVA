@@ -14,7 +14,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import ConversationChain, LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.output_parsers import PydanticOutputParser
@@ -88,16 +88,36 @@ class LangChainAgent(BaseAgent):
                 model="text-embedding-ada-002"
             )
             
-            # Initialize vector store
-            self.vectorstore = Chroma(
-                persist_directory=str(self.index_dir),
-                embedding_function=self.embeddings
-            )
+            # Initialize vector store with FAISS
+            index_path = str(self.index_dir / "faiss.index")
+            if os.path.exists(index_path):
+                logger.info(f"Loading existing FAISS index from {index_path}")
+                self.vectorstore = FAISS.load_local(
+                    folder_path=str(self.index_dir),
+                    embeddings=self.embeddings,
+                    index_name="faiss.index"
+                )
+            else:
+                logger.info("Creating new FAISS index")
+                # Create empty FAISS index - it will be populated when needed
+                self.vectorstore = FAISS.from_texts(
+                    ["placeholder"],  # Placeholder text to initialize
+                    self.embeddings
+                )
+                # Save the index
+                self.vectorstore.save_local(
+                    folder_path=str(self.index_dir),
+                    index_name="faiss.index"
+                )
+            
+            # Get temperature from config or use default
+            temperature = self.config.get('temperature', 0.7)
+            logger.info(f"Initializing LLM with temperature: {temperature}")
             
             # Initialize LLM
             self.llm = ChatOpenAI(
                 model_name="gpt-4",
-                temperature=0.7
+                temperature=temperature
             )
             
             # Initialize conversation memory
