@@ -1,193 +1,192 @@
-# Ethical AI Decision-Making Assistant
+# EVA - Ethical Virtual Assistant
 
-A comprehensive web-based application that provides ethical guidance for software development decisions, leveraging AI models and a database of ethical guidelines and case studies.
+A comprehensive web-based application that helps software professionals navigate ethical decision-making scenarios through AI-powered simulations and guidance.
 
 ## Project Overview
 
-This project consists of three main components:
+EVA consists of three main components:
 
-1. **AI Agent (Python)** - The core AI engine that processes ethical queries and provides guidance
-2. **Backend (Spring Boot)** - Java-based REST API for handling user authentication, data persistence, and communication with the AI agent
-3. **Frontend (React)** - User interface for interacting with the ethical AI assistant
+1. **Agent (Python)** - Core AI engine powered by Llama-2 for ethical decision processing
+2. **Backend (Spring Boot)** - REST API for user management and conversation handling
+3. **Frontend (React + TypeScript)** - Modern, responsive UI for interacting with EVA
 
-## Repository Structure
+## Features
+
+- 🤖 **AI-Powered Guidance**: Utilizes Llama-2 and retrieval-augmented generation for contextual responses
+- 🎭 **Multiple Manager Types**: Simulates different managerial approaches to ethical challenges
+- 📚 **Knowledge-Based**: Incorporates ACM, IEEE guidelines, and GDPR compliance standards
+- 🔄 **Interactive Learning**: Real-time feedback and scoring on ethical decision-making
+- 🛡️ **Secure Authentication**: JWT-based auth with Google OAuth integration
+- 🌓 **Dark Mode Support**: Full dark mode implementation for better user experience
+
+## Project Structure
 
 ```
-ethical-agent/
-├── ai-agent-python/     # Python AI agent implementation
-│   ├── agents/          # Agent implementations
-│   ├── data/            # Data storage and processing
-│   ├── data_processing/ # Data processing utilities
-│   ├── database/        # Database operations
-│   ├── docs/            # Documentation
-│   ├── embeddings/      # Embedding models
-│   ├── app.py           # FastAPI application
-│   ├── Dockerfile       # Docker configuration
-│   └── README.md        # Agent documentation
+eva/
+├── agent/                 # Python AI Agent
+│   ├── agents/           # Agent implementations
+│   ├── data_processing/  # Data processing utilities
+│   ├── embeddings/       # Embedding models
+│   ├── evaluation/       # Evaluation tools
+│   ├── retriever/        # Search and retrieval
+│   ├── models.py         # Core model definitions
+│   ├── main.py          # FastAPI application
+│   └── requirements.txt  # Python dependencies
 │
-├── backend/             # Spring Boot backend
-│   ├── src/             # Java source code
-│   │   ├── main/        # Application code
-│   │   └── test/        # Test code
-│   ├── .mvn/            # Maven wrapper
-│   ├── mvnw             # Maven wrapper script (Unix)
-│   ├── mvnw.cmd         # Maven wrapper script (Windows)
+├── backend/              # Spring Boot Backend
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   └── resources/
+│   │   └── test/
 │   └── pom.xml          # Maven dependencies
 │
-└── frontend/            # React frontend
-    ├── public/          # Static files
-    ├── src/             # React source code
-    │   ├── components/  # Reusable UI components
+└── frontend/            # React Frontend
+    ├── public/          # Static assets
+    ├── src/
+    │   ├── components/  # React components
     │   ├── pages/       # Page components
     │   ├── services/    # API services
-    │   └── styles/      # CSS and styling
-    ├── package.json     # NPM dependencies
-    └── tsconfig.json    # TypeScript configuration
+    │   ├── store/       # State management
+    │   └── types/       # TypeScript types
+    ├── .env            # Environment variables
+    └── package.json    # NPM dependencies
 ```
 
-## Component Details
+## Technology Stack
 
-### AI Agent (Python)
+### Agent (Python)
+- FastAPI for API endpoints
+- Llama-2 for language processing
+- Sentence Transformers for embeddings
+- FAISS for similarity search
+- PyTorch for machine learning
 
-The AI agent is built with Python and uses the following technologies:
+### Backend (Java)
+- Spring Boot 3.x
+- Spring Security with JWT
+- PostgreSQL database
+- Flyway migrations
+- Maven for dependency management
 
-- **FastAPI**: Web framework for creating the API endpoints
-- **Sentence Transformers**: For generating embeddings from text
-- **FAISS**: For efficient similarity search
-- **SQLAlchemy**: ORM for database operations
-- **PyPDF2**: For processing PDF documents
-
-The agent processes ethical queries by:
-1. Analyzing the query against a database of ethical guidelines
-2. Retrieving relevant context using semantic search
-3. Generating a response using an LLM (Llama-2)
-4. Storing the conversation for future reference
-
-### Backend (Spring Boot)
-
-The Java backend provides:
-
-- User authentication and authorization
-- Data persistence using PostgreSQL
-- RESTful API endpoints for the frontend
-- Integration with the Python AI agent
-- Security features and input validation
-
-Technologies used:
-- Spring Boot 3.4.3
-- Spring Security with JWT authentication
-- Spring Data JPA for ORM
-- PostgreSQL for data storage
-- Flyway for database migrations
-
-### Frontend (React)
-
-The React frontend offers:
-
-- User-friendly interface for ethical queries
-- Role-based views for different user types
-- Conversation history and management
-- Feedback collection for responses
-
-Technologies used:
-- React 18 with TypeScript
-- Material UI for components
+### Frontend (TypeScript)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Zustand for state management
 - React Query for data fetching
-- React Router for navigation
 
 ## Getting Started
 
 ### Prerequisites
-
+- Python 3.8+
 - Java 23
-- Python 3.8 or higher
-- Node.js 18 or higher
-- PostgreSQL 12 or higher
-- Docker (optional, for containerized deployment)
+- Node.js 18+
+- PostgreSQL 12+
 
-### Local Development Setup
+### Environment Setup
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/egemenmermer/vu-thesis.git
-   cd vu-thesis
+   git clone https://github.com/egemenmermer/eva.git
+   cd eva
    ```
 
-2. **Set up the AI Agent**
+2. **Set up the Agent**
    ```bash
-   cd ethical-agent/ai-agent-python
+   cd agent
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -r requirements.txt
+   
+   # Configure .env
+   cp .env.example .env
+   # Add your API keys and configuration
    ```
 
 3. **Set up the Backend**
    ```bash
    cd backend
-   ./mvnw clean install
+   
+   # Configure .env
+   cp .env.example .env
+   # Add your database and API configuration
+   
+   # Run the application
+   ./mvnw spring-boot:run
    ```
 
 4. **Set up the Frontend**
    ```bash
    cd frontend
    npm install
+   
+   # Configure .env
+   cp .env.example .env
+   # Add your API URLs and OAuth credentials
+   
+   # Start the development server
+   npm run dev
    ```
 
-5. **Configure environment variables**
-   - Create `.env` files in each component directory based on the provided examples
+## Environment Variables
 
-6. **Run the components**
-   - AI Agent: `uvicorn app:app --reload --host 0.0.0.0 --port 8000`
-   - Backend: `./mvnw spring-boot:run`
-   - Frontend: `npm start`
-
-## Deployment
-
-### Docker Deployment
-
-Each component includes a Dockerfile for containerized deployment:
-
-```bash
-# Build and run the AI Agent
-cd ethical-agent/ai-agent-python
-docker build -t ethical-ai-agent .
-docker run -p 8000:8000 ethical-ai-agent
-
-# Build and run the Backend
-cd backend
-docker build -t ethical-ai-backend .
-docker run -p 8080:8080 ethical-ai-backend
-
-# Build and run the Frontend
-cd frontend
-docker build -t ethical-ai-frontend .
-docker run -p 3000:80 ethical-ai-frontend
+### Agent (.env)
+```env
+OPENAI_API_KEY=your_key_here
+HUGGINGFACE_TOKEN=your_token_here
+MODEL_NAME=meta-llama/Llama-2-7b-chat-hf
 ```
 
-### Cloud Deployment
+### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:8443
+VITE_GOOGLE_CLIENT_ID=your_client_id
+VITE_GITHUB_CLIENT_ID=your_client_id
+```
 
-The application can be deployed to various cloud platforms:
+## Development Workflow
 
-- **AWS**: Using ECS, EKS, or Elastic Beanstalk
-- **Google Cloud**: Using Cloud Run or GKE
-- **Azure**: Using App Service or AKS
+1. **Running Tests**
+   ```bash
+   # Agent tests
+   cd agent
+   pytest
+   
+   # Backend tests
+   cd backend
+   ./mvnw test
+   
+   # Frontend tests
+   cd frontend
+   npm test
+   ```
 
-Detailed deployment instructions are available in the documentation.
+2. **Code Style**
+   - Python: Black formatter
+   - Java: Google Java Style
+   - TypeScript: ESLint + Prettier
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Llama-2](https://ai.meta.com/llama/) by Meta AI
+- [ACM Code of Ethics](https://www.acm.org/code-of-ethics)
+- [IEEE Code of Ethics](https://www.ieee.org/about/corporate/governance/p7-8.html)
 
 ---
 
 **Author:** Egemen Mermer  
-**Affiliation:** Vrije Universiteit Amsterdam  
-**Contact:** [Your email or professional website]
+**Institution:** Vrije Universiteit Amsterdam  
+**Contact:** egemenmermer@gmail.com
