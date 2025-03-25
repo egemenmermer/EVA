@@ -57,7 +57,7 @@ eva/
 
 ### Agent (Python)
 - FastAPI for API endpoints
-- Llama-2 for language processing
+- OpenAI for language processing
 - Sentence Transformers for embeddings
 - FAISS for similarity search
 - PyTorch for machine learning
