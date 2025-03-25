@@ -1,8 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bot, Shield, Eye, Wand2 } from 'lucide-react';
+import { useStore } from '@/store/useStore';
 
 export const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useStore();
+  
+  // Debug check to prevent any refresh loops
+  useEffect(() => {
+    console.log('Landing page mounted, user:', Boolean(user));
+    
+    // Ensure the landing page doesn't have incorrect styling classes
+    document.body.classList.remove('dashboard-active', 'login-page');
+    document.body.classList.add('landing-page');
+    
+    // Check URL for ?stay=true parameter to prevent redirect when intentionally visiting
+    const urlParams = new URLSearchParams(window.location.search);
+    const stayOnLanding = urlParams.get('stay') === 'true';
+    
+    if (stayOnLanding) {
+      console.log('Stay parameter detected, skipping redirect');
+      return;
+    }
+    
+    // If we're logged in, redirect to dashboard after a short delay
+    // This helps prevent infinite redirect loops
+    const token = localStorage.getItem('token');
+    
+    // Only redirect if we have both a token and user data
+    if (token && user && parseInt(sessionStorage.getItem('landing_refresh_count') || '0') < 3) {
+      console.log('User is logged in, redirecting to dashboard in 500ms');
+      const redirectTimer = setTimeout(() => {
+        navigate('/dashboard');
+      }, 500);
+      
+      return () => clearTimeout(redirectTimer);
+    } else if (parseInt(sessionStorage.getItem('landing_refresh_count') || '0') >= 5) {
+      console.warn('Too many landing page refreshes detected, clearing problematic state');
+      sessionStorage.removeItem('landing_refresh_count');
+      localStorage.removeItem('token');
+    }
+    
+    return () => {
+      console.log('Landing page unmounted');
+      sessionStorage.removeItem('landing_refresh_count');
+    };
+  }, [navigate, user]);
+  
+  const handleGetStarted = () => {
+    if (user) {
+      console.log('User already logged in, navigating to dashboard');
+      navigate('/dashboard');
+    } else {
+      console.log('Get Started clicked, navigating to login');
+      navigate('/login');
+    }
+  };
+  
+  // Log renders
+  console.log('LandingPage rendering');
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
@@ -15,13 +73,13 @@ export const LandingPage: React.FC = () => {
             Your intelligent companion for making ethical decisions in software development.
             Get personalized guidance through complex ethical challenges.
           </p>
-          <Link
-            to="/login"
+          <button
+            onClick={handleGetStarted}
             className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
           >
             Get Started
             <Bot className="ml-2 h-5 w-5" />
-          </Link>
+          </button>
         </div>
       </div>
 

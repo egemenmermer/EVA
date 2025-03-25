@@ -11,7 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
-import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon } from 'lucide-react';
+import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot } from 'lucide-react';
 import { TemperatureControl } from '@/components/controls/TemperatureControl';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -89,6 +89,13 @@ const ProfileMenu = ({
           <FileText className="mr-2 h-4 w-4" />
           Research Paper
           <ExternalLink className="ml-auto h-4 w-4" />
+        </a>
+        <a 
+          href="/?stay=true"
+          className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <Bot className="mr-2 h-4 w-4" />
+          About EVA
         </a>
         <div className="border-t border-gray-200 dark:border-gray-700" />
         <button

@@ -1,12 +1,13 @@
 import axios from 'axios';
-import { 
-  LoginResponseDTO, 
-  RegisterResponseDTO, 
-  ConversationResponseDTO, 
+import type { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+import type { ManagerType } from '@/types';
+import type {
+  LoginResponseDTO,
+  RegisterResponseDTO,
+  ConversationResponseDTO,
   ConversationContentResponseDTO,
-  FeedbackResponseDTO
+  SendMessageRequestDTO
 } from '@/types/api';
-import { ManagerType } from '@/types';
 import { generateConversationTitle } from '@/utils/titleGenerator';
 
 // Configure API URL with fallback
@@ -14,25 +15,78 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 console.log('Using API URL:', API_URL);
 
 // Debug mode
-const DEBUG = true;
+const DEBUG = import.meta.env.DEV;
 const BYPASS_AUTH = false; // Use real authentication
 
 // Helper function to get token from localStorage
 const getToken = (): string | null => {
   const token = localStorage.getItem('token');
-  if (DEBUG) console.log(`Token retrieved from localStorage: ${token ? 'exists' : 'null'}`);
-  return token;
+  if (!token) {
+    console.warn('No token available for API request');
+    return null;
+  }
+  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 };
 
-// API instance with interceptors
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 30000, // 30 seconds
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
+// Add interceptor to handle 401 errors
+const setupAxiosInterceptors = (api: AxiosInstance): AxiosInstance => {
+  api.interceptors.response.use(
+    (response: AxiosResponse) => response,
+    (error: AxiosError) => {
+      // If we receive a 401 Unauthorized error, clear token and user data
+      if (error.response && error.response.status === 401) {
+        console.error('API returned 401 Unauthorized - clearing token');
+        localStorage.removeItem('token');
+        // We can't directly access the store here, so we'll add a flag
+        sessionStorage.setItem('auth_error', 'true');
+        
+        // If we're on the dashboard, redirect to login
+        if (window.location.pathname === '/dashboard') {
+          console.log('Redirecting to login due to 401 error');
+          window.location.href = '/login';
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+  
+  return api;
+};
+
+// Create and configure axios instance
+const createApi = (): AxiosInstance => {
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8443',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    timeout: 15000,
+  });
+  
+  // Add request interceptor to add token to every request
+  api.interceptors.request.use(
+    (config: AxiosRequestConfig) => {
+      const token = getToken();
+      if (token) {
+        // Create headers object if it doesn't exist
+        if (!config.headers) {
+          config.headers = {};
+        }
+        config.headers['Authorization'] = token;
+      }
+      return config;
+    },
+    (error: AxiosError) => {
+      return Promise.reject(error);
+    }
+  );
+  
+  // Add response interceptor to handle auth errors
+  return setupAxiosInterceptors(api);
+};
+
+const api = createApi();
 
 // Verbose debugging function
 const debugRequest = (method: string, url: string, data?: any) => {
@@ -46,77 +100,6 @@ const debugResponse = (method: string, url: string, status: number, data: any) =
   console.log(`%c API Response: ${method} ${url} [${status}]`, `background: #222; color: ${color}`);
   console.log('Response data:', data);
 };
-
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
-    debugRequest(config.method?.toUpperCase() || 'UNKNOWN', config.url || '', config.data);
-    const token = getToken();
-    
-    if (token) {
-      // Ensure headers object exists
-      config.headers = config.headers || {};
-      config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      if (DEBUG) console.log('Using token for request:', token.substring(0, 20) + '...');
-    } else {
-      console.warn('No token available for API request to:', config.url);
-    }
-    
-    return config;
-  },
-  (error) => {
-    console.error('Request interceptor error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor with improved error handling
-api.interceptors.response.use(
-  (response) => {
-    debugResponse(
-      response.config.method?.toUpperCase() || 'UNKNOWN',
-      response.config.url || '',
-      response.status,
-      response.data
-    );
-    return response;
-  },
-  (error) => {
-    if (DEBUG) {
-      console.error('API Error:', {
-        url: error.config?.url,
-        method: error.config?.method?.toUpperCase() || 'UNKNOWN',
-        status: error.response?.status,
-        message: error.message,
-        response: error.response?.data,
-        stack: error.stack,
-        headers: error.config?.headers
-      });
-      
-      // Log full request details for debugging
-      console.error('Full request details:', {
-        baseURL: error.config?.baseURL,
-        url: error.config?.url,
-        method: error.config?.method,
-        data: error.config?.data,
-        params: error.config?.params,
-        timeout: error.config?.timeout,
-        withCredentials: error.config?.withCredentials,
-        headers: error.config?.headers
-      });
-    }
-    
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      // Clear invalid token
-      localStorage.removeItem('token');
-      // Redirect to login if needed
-      window.location.href = '/login';
-    }
-    
-    return Promise.reject(error);
-  }
-);
 
 // Auth API methods
 export const authApi = {

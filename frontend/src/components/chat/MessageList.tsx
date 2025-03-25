@@ -277,7 +277,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
               ) : (
                 // User message - right side
                 <div className="max-w-full md:max-w-4xl mx-auto flex justify-end">
-                  <div className="max-w-[85%] bg-blue-600 text-white rounded-lg py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                  <div className="max-w-[85%] bg-blue-600 dark:bg-blue-600 text-white dark:text-white user-message-bubble rounded-lg py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base shadow-sm">
                     {messageContent}
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,8 +9,10 @@ import { RegisterPage } from '@/pages/RegisterPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
+import { DebugPage } from '@/pages/DebugPage';
 import { useStore } from '@/store/useStore';
 import { conversationApi } from '@/services/api';
+import { ResetButton } from '@/components/ResetButton';
 
 // Configure the query client with better defaults for reliable data fetching
 const queryClient = new QueryClient({
@@ -27,6 +29,57 @@ const queryClient = new QueryClient({
   },
 });
 
+// Helper component to track route changes and update document body class
+const RouteObserver: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const isDashboard = location.pathname === '/dashboard';
+    const isLogin = location.pathname === '/login';
+    const isLanding = location.pathname === '/';
+    
+    console.log('Location changed:', location.pathname, 
+                'Is dashboard:', isDashboard,
+                'Is login:', isLogin,
+                'Is landing:', isLanding);
+    
+    // Update body class based on route
+    document.body.classList.remove('dashboard-active', 'login-page', 'landing-page');
+    
+    if (isDashboard) {
+      document.body.classList.add('dashboard-active');
+      
+      // Track dashboard visits to prevent loops
+      sessionStorage.removeItem('login_refresh_count');
+      sessionStorage.removeItem('landing_refresh_count');
+    } else if (isLogin) {
+      document.body.classList.add('login-page');
+      
+      // Track login page visits to detect loops
+      let refreshCount = parseInt(sessionStorage.getItem('login_refresh_count') || '0');
+      refreshCount++;
+      sessionStorage.setItem('login_refresh_count', refreshCount.toString());
+      console.log('Updated login refresh count:', refreshCount);
+      
+      if (refreshCount > 5) {
+        console.warn('Too many login page visits, clearing problematic state');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('login_refresh_count');
+      }
+    } else if (isLanding) {
+      document.body.classList.add('landing-page');
+      
+      // Track landing page visits to detect loops
+      let refreshCount = parseInt(sessionStorage.getItem('landing_refresh_count') || '0');
+      refreshCount++;
+      sessionStorage.setItem('landing_refresh_count', refreshCount.toString());
+      console.log('Updated landing refresh count:', refreshCount);
+    }
+  }, [location]);
+
+  return null;
+};
+
 export const App: React.FC = () => {
   const { user, darkMode, setToken, setUser, setCurrentConversation, currentConversation } = useStore();
 
@@ -34,20 +87,43 @@ export const App: React.FC = () => {
   useEffect(() => {
     console.log('Dark mode state changed:', darkMode ? 'dark' : 'light');
     
-    // Only add/remove the class, don't change other styling
+    // Add body class for current route
+    const currentPath = window.location.pathname;
+    const isLandingPage = currentPath === '/';
+    const isLoginPage = currentPath === '/login';
+    const isDashboard = currentPath === '/dashboard';
+    
+    console.log('Current path for dark mode check:', currentPath, 
+                'Is landing page:', isLandingPage,
+                'Is login page:', isLoginPage,
+                'Is dashboard:', isDashboard);
+    
+    // Apply dark mode selectively
     if (darkMode) {
+      // Only apply keep-bg-light when on dashboard
       document.documentElement.classList.add('dark');
-      // Add a specific class to prevent background color changes
-      document.documentElement.classList.add('keep-bg-light');
+      
+      if (isDashboard) {
+        document.documentElement.classList.add('keep-bg-light');
+      } else {
+        document.documentElement.classList.remove('keep-bg-light');
+      }
     } else {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.remove('keep-bg-light');
     }
+    
+    // Move the dashboard-active class handling to RouteObserver
   }, [darkMode]);
 
   // Check for token on app startup and ensure user data is available
   useEffect(() => {
     const token = localStorage.getItem('token');
+    
+    // Reset any refresh counters on app startup to break loops
+    sessionStorage.removeItem('login_refresh_count');
+    sessionStorage.removeItem('landing_refresh_count');
+    
     if (token) {
       console.log('Found token in localStorage, restoring session');
       
@@ -66,6 +142,11 @@ export const App: React.FC = () => {
       }
     } else {
       console.log('No token found in localStorage');
+      // Ensure user is null if no token exists
+      if (user) {
+        console.log('User exists but no token, clearing user');
+        setUser(null);
+      }
     }
   }, [setToken, setUser, user]);
 
@@ -135,30 +216,44 @@ export const App: React.FC = () => {
         <CssBaseline />
         <div className="min-h-screen bg-white dark:bg-gray-900">
           <Router>
+            <RouteObserver />
             <Routes>
+              {/* Landing page is always accessible without a token */}
               <Route path="/" element={<LandingPage />} />
               <Route 
                 path="/dashboard" 
                 element={
+                  // Only redirect if we are certain user is not authenticated
                   user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
                 } 
               />
               <Route 
                 path="/login" 
-                element={user || hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
+                element={
+                  // Only redirect if we have both a token and a user
+                  user && hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />
+                } 
               />
               <Route 
                 path="/register" 
-                element={user || hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />} 
+                element={
+                  // Only redirect if we have both a token and a user
+                  user && hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+                } 
               />
+              {/* Debug page - always accessible */}
+              <Route path="/debug" element={<DebugPage />} />
               <Route path="/auth/activate" element={<ActivationPage />} />
               <Route path="/auth/google/callback" element={<OAuthCallback />} />
               <Route path="/auth/github/callback" element={<OAuthCallback />} />
-              {/* Catch all route - redirect to dashboard if logged in, otherwise landing page */}
+              {/* Catch all route - redirect to landing page if not logged in */}
               <Route path="*" element={
-                user || hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
+                user && hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
               } />
             </Routes>
+            
+            {/* Add debug reset button that's available on all pages */}
+            <ResetButton />
           </Router>
         </div>
       </ThemeProvider>

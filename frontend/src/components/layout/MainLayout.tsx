@@ -21,6 +21,13 @@ export const MainLayout: React.FC = () => {
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
+    // Don't redirect if we're on the landing page
+    const isLandingPage = window.location.pathname === '/';
+    if (isLandingPage) {
+      console.log('On landing page, skipping token check');
+      return;
+    }
+  
     const storedToken = localStorage.getItem('token');
     console.log('MainLayout - token check:', storedToken ? 'EXISTS' : 'MISSING', 'user:', Boolean(user));
     
@@ -75,7 +82,7 @@ export const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">
       {/* Header - Responsive padding */}
       <header className="h-16 md:h-20 flex-none flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex items-center">
@@ -90,7 +97,7 @@ export const MainLayout: React.FC = () => {
           
           <div 
             className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/?stay=true')}
           >
             <img src={logo} alt="Logo" className="h-10 w-10 md:h-16 md:w-16" />
             <div>

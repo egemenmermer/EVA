@@ -1,20 +1,125 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Github, Chrome, AlertCircle } from 'lucide-react';
+import { Github, Chrome, AlertCircle, Server, Wifi, WifiOff } from 'lucide-react';
+import axios from 'axios';
+
+// Connection status component for API troubleshooting
+const ConnectionStatus: React.FC = () => {
+  const [status, setStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [message, setMessage] = useState('Checking API connection...');
+  const [showDetails, setShowDetails] = useState(false);
+  
+  useEffect(() => {
+    checkApiConnection();
+  }, []);
+  
+  const checkApiConnection = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+      setStatus('checking');
+      setMessage('Checking API connection...');
+      
+      const response = await axios.get(baseUrl, { timeout: 5000 });
+      setStatus('connected');
+      setMessage(`API connected (${response.status})`);
+    } catch (error: any) {
+      setStatus('error');
+      setMessage(`Cannot connect to API: ${error.message}`);
+    }
+  };
+  
+  return (
+    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          {status === 'checking' && <Server className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500 animate-pulse" />}
+          {status === 'connected' && <Wifi className="h-4 w-4 mr-2 text-green-500" />}
+          {status === 'error' && <WifiOff className="h-4 w-4 mr-2 text-red-500" />}
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {message}
+          </span>
+        </div>
+        
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDetails(!showDetails)}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {showDetails ? 'Hide Details' : 'Show Details'}
+          </button>
+          <button
+            type="button"
+            onClick={checkApiConnection}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+      
+      {showDetails && (
+        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300">
+          <p>API URL: {import.meta.env.VITE_API_URL || 'http://localhost:8443'}</p>
+          <p>Having trouble connecting? Try the <Link to="/debug" className="text-blue-600 dark:text-blue-400 hover:underline">diagnostic page</Link>.</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('egemenmermer@gmail.com');
   const [password, setPassword] = useState('');
   const { login, loading, error, token } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [redirectAttempts, setRedirectAttempts] = useState(0);
   
-  // If already authenticated, redirect to home
+  // Debug check to prevent any refresh loops
+  useEffect(() => {
+    console.log('Login page mounted, removing any problematic classes');
+    
+    // Ensure the login page doesn't have incorrect styling classes
+    document.body.classList.remove('dashboard-active');
+    
+    // If there's any issue with redirects, we'll track it
+    let refreshCount = parseInt(sessionStorage.getItem('login_refresh_count') || '0');
+    refreshCount++;
+    sessionStorage.setItem('login_refresh_count', refreshCount.toString());
+    
+    console.log('Login page refresh count:', refreshCount);
+    
+    // If we detect too many refreshes, clear session data
+    if (refreshCount > 5) {
+      console.warn('Too many login page refreshes detected, clearing session data');
+      sessionStorage.removeItem('login_refresh_count');
+      localStorage.removeItem('token'); // Clear any problematic token
+    }
+    
+    return () => {
+      console.log('Login page unmounted');
+    };
+  }, []);
+  
+  // If already authenticated, redirect to home - but with safety limit
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    if (storedToken || token) {
-      console.log('Already logged in, redirecting to app');
-      navigate('/');
+    console.log('Login page auth check - token exists:', !!storedToken);
+    
+    // Remove problematic styling to ensure page renders correctly
+    document.body.classList.remove('dashboard-active');
+    document.documentElement.classList.remove('keep-bg-light');
+    
+    // Only redirect if we have a valid token AND we haven't tried to redirect too many times
+    if (storedToken && parseInt(sessionStorage.getItem('login_refresh_count') || '0') < 3) {
+      console.log('Valid token found, redirecting to dashboard');
+      navigate('/dashboard');
+    } else if (parseInt(sessionStorage.getItem('login_refresh_count') || '0') >= 3) {
+      console.warn('Too many login redirects detected, clearing token');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('login_refresh_count');
     }
   }, [navigate, token]);
 
@@ -31,6 +136,7 @@ export const LoginPage: React.FC = () => {
       
       // Login successful - the useAuth hook will handle navigation
       console.log('Login successful, navigating to app');
+      navigate('/dashboard'); // Explicitly navigate to dashboard
     } catch (err) {
       console.error('Login error:', err);
       // Error handling is done in the useAuth hook
@@ -77,7 +183,20 @@ export const LoginPage: React.FC = () => {
         {error && (
           <div className="bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 p-3 rounded-md flex items-start">
             <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-            <span>{getErrorMessage(error)}</span>
+            <div>
+              <span>{getErrorMessage(error)}</span>
+              {error.includes('401') && (
+                <div className="mt-2 text-xs">
+                  API connection issue detected. Try{' '}
+                  <Link 
+                    to="/debug" 
+                    className="underline font-medium"
+                  >
+                    diagnostic page
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         )}
         
@@ -160,6 +279,8 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
         </form>
+        
+        <ConnectionStatus />
       </div>
     </div>
   );

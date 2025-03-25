@@ -51,21 +51,31 @@ const getInitialToken = () => {
   return token;
 };
 
-// Mock user for development
-const MOCK_USER: User = {
-  id: 'mock-user-id',
-  email: 'egemenmermer@gmail.com',
-  fullName: 'Egemen Mermer'
+// Mock user for development - only use if token exists
+const getMockUser = (): User | null => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.log('No token found, starting with null user');
+    return null;
+  }
+  
+  console.log('Token found, using mock user for development');
+  return {
+    id: 'mock-user-id',
+    email: 'egemenmermer@gmail.com',
+    fullName: 'Egemen Mermer'
+  };
 };
 
 // Debug initial store state
-console.log('Initializing store with mock user:', MOCK_USER);
+const initialUser = getMockUser();
+console.log('Initializing store with user:', initialUser ? initialUser.email : 'null');
 
 export const useStore = create<Store>()(
   persist(
     (set, get) => ({
-      user: MOCK_USER, // Start with mock user for easier development
-      token: null,
+      user: initialUser, // Start with null user if no token
+      token: getInitialToken(),
       currentConversation: null,
       messages: [],
       managerType: 'PUPPETEER',

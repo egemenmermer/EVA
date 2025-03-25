@@ -46,28 +46,40 @@
   }
 }
 
-/* Override dark mode background colors to keep them white/light */
-.dark.keep-bg-light {
+/* Specific styling for dashboard page only */
+body.dashboard-active .dark.keep-bg-light {
   --background: 0 0% 100% !important; /* White */
 }
 
-.dark.keep-bg-light body,
-.dark.keep-bg-light .bg-gray-900 {
+/* Scope overrides to prevent affecting landing page */
+body.dashboard-active .dark.keep-bg-light body,
+body.dashboard-active .dark.keep-bg-light .bg-gray-900 {
   background-color: #ffffff !important;
 }
 
-.dark.keep-bg-light .bg-gray-800 {
+body.dashboard-active .dark.keep-bg-light .bg-gray-800 {
   background-color: #f3f4f6 !important;
 }
 
-.dark.keep-bg-light .bg-gray-700 {
+body.dashboard-active .dark.keep-bg-light .bg-gray-700 {
   background-color: #e5e7eb !important;
 }
 
-/* Keep text colors for better readability in dark mode */
-.dark.keep-bg-light .text-gray-100,
-.dark.keep-bg-light .text-white {
+/* Keep text colors for better readability in dark mode, but only in dashboard */
+body.dashboard-active .dark.keep-bg-light .text-gray-100,
+body.dashboard-active .dark.keep-bg-light .text-white:not(.user-message-bubble *) {
   color: #111827 !important; /* Dark text for better contrast on light bg */
+}
+
+/* Ensure user message bubble text remains white */
+.dark.keep-bg-light .bg-blue-600 {
+  background-color: #2563eb !important; /* Keep blue background */
+}
+
+.dark.keep-bg-light .user-message-bubble,
+.dark.keep-bg-light .bg-blue-600.text-white,
+.dark.keep-bg-light .bg-blue-600 .text-white {
+  color: white !important; /* Always white text in blue bubbles */
 }
 
 @layer base {
@@ -97,4 +109,16 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Specific styling for user messages to override dark mode */
+.user-message-bubble {
+  background-color: #2563eb !important; /* Blue 600 */
+  color: white !important;
+}
+
+.dark .user-message-bubble,
+.dark.keep-bg-light .user-message-bubble {
+  background-color: #2563eb !important;
+  color: white !important;
 } 
