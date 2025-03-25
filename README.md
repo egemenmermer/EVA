@@ -181,7 +181,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- [Llama-2](https://ai.meta.com/llama/) by Meta AI
 - [ACM Code of Ethics](https://www.acm.org/code-of-ethics)
 - [IEEE Code of Ethics](https://www.ieee.org/about/corporate/governance/p7-8.html)
 
