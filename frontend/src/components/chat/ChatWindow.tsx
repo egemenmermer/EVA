@@ -4,6 +4,7 @@ import { MessageInput } from './MessageInput';
 import { useStore } from '@/store/useStore';
 import { conversationApi } from '@/services/api';
 import { v4 as uuidv4 } from 'uuid';
+import type { ConversationContentResponseDTO } from '@/types/api';
 
 // Define the Message type consistently with what's used in useStore
 interface Message {
@@ -132,18 +133,43 @@ export const ChatWindow: React.FC = () => {
         if (serverMessages.length > 0) {
           // Server has messages, use them
           const messagesArray: Message[] = [];
-          
+
           // Process each server message and convert to our format
-          // The server returns a single object for each exchange (userQuery + agentResponse)
           for (const msg of serverMessages) {
-            // Add message with correct properties
-            messagesArray.push({
-              id: msg.id,
-              conversationId: msg.conversationId,
-              role: msg.role,
-              content: msg.content,
-              createdAt: msg.createdAt
-            });
+            // Handle both old and new message formats
+            if (msg.userQuery && msg.agentResponse) {
+              // Old format - split into two messages
+              if (msg.userQuery.trim()) {
+                messagesArray.push({
+                  id: `user-${msg.id || uuidv4()}`,
+                  conversationId: msg.conversationId,
+                  role: 'user',
+                  content: msg.userQuery,
+                  createdAt: msg.createdAt || new Date().toISOString()
+                });
+              }
+              
+              if (msg.agentResponse.trim()) {
+                messagesArray.push({
+                  id: `agent-${msg.id || uuidv4()}`,
+                  conversationId: msg.conversationId,
+                  role: 'assistant',
+                  content: msg.agentResponse,
+                  createdAt: msg.createdAt || new Date().toISOString()
+                });
+              }
+            } else if (msg.role && msg.content) {
+              // New format - single message with role and content
+              // Ensure role is one of the allowed values
+              const role = msg.role === 'user' || msg.role === 'assistant' ? msg.role : 'assistant';
+              messagesArray.push({
+                id: msg.id || uuidv4(),
+                conversationId: msg.conversationId,
+                role: role,
+                content: msg.content,
+                createdAt: msg.createdAt || new Date().toISOString()
+              });
+            }
           }
           
           console.log('Processed message array:', messagesArray);
@@ -152,7 +178,7 @@ export const ChatWindow: React.FC = () => {
           messagesArray.sort((a, b) => {
             return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
           });
-          
+
           setMessages(messagesArray);
           
           // Update local storage with server messages

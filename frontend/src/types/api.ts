@@ -22,11 +22,14 @@ export interface ConversationResponseDTO {
   createdAt: string;
 }
 
+// Support both old and new message formats
 export interface ConversationContentResponseDTO {
   id: string;
   conversationId: string;
-  role: 'user' | 'assistant';
-  content: string;
+  role?: 'user' | 'assistant';
+  content?: string;
+  userQuery?: string;
+  agentResponse?: string;
   createdAt: string;
 }
 
