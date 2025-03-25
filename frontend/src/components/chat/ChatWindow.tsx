@@ -136,27 +136,14 @@ export const ChatWindow: React.FC = () => {
           // Process each server message and convert to our format
           // The server returns a single object for each exchange (userQuery + agentResponse)
           for (const msg of serverMessages) {
-            // First add user message if it exists
-            if (msg.userQuery && msg.userQuery.trim()) {
-              messagesArray.push({
-                id: `user-${msg.id || uuidv4()}`,
-                conversationId: msg.conversationId,
-                role: 'user',
-                content: msg.userQuery,
-                createdAt: msg.createdAt
-              });
-            }
-            
-            // Then add agent response if it exists
-            if (msg.agentResponse && msg.agentResponse.trim()) {
-              messagesArray.push({
-                id: `agent-${msg.id || uuidv4()}`,
-                conversationId: msg.conversationId,
-                role: 'assistant',
-                content: msg.agentResponse,
-                createdAt: msg.createdAt
-              });
-            }
+            // Add message with correct properties
+            messagesArray.push({
+              id: msg.id,
+              conversationId: msg.conversationId,
+              role: msg.role,
+              content: msg.content,
+              createdAt: msg.createdAt
+            });
           }
           
           console.log('Processed message array:', messagesArray);
@@ -414,21 +401,21 @@ export const ChatWindow: React.FC = () => {
         );
         console.log('ChatWindow: Received response from backend:', response);
         
-        // Verify we have an agent response
-        if (!response.agentResponse) {
-          console.error('Agent response is missing from API response:', response);
-          throw new Error('Missing agent response from server');
+        // Verify we have a response
+        if (!response.content) {
+          console.error('Response content is missing from API response:', response);
+          throw new Error('Missing response content from server');
         }
         
-        console.log('ChatWindow: Agent response content:', response.agentResponse);
+        console.log('ChatWindow: Agent response content:', response.content);
 
         // Add AI response
         const aiMessage = {
-          id: uuidv4(),
+          id: response.id,
           conversationId: actualConversationId,
           role: 'assistant' as const,
-          content: response.agentResponse,
-          createdAt: new Date().toISOString()
+          content: response.content,
+          createdAt: response.createdAt || new Date().toISOString()
         };
         console.log('ChatWindow: Creating AI message:', aiMessage);
         addMessage(aiMessage);

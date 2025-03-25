@@ -1,18 +1,23 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
 import type { ManagerType } from '@/types';
 import type {
   LoginResponseDTO,
   RegisterResponseDTO,
   ConversationResponseDTO,
   ConversationContentResponseDTO,
-  SendMessageRequestDTO
+  SendMessageRequestDTO,
+  FeedbackResponseDTO
 } from '@/types/api';
 import { generateConversationTitle } from '@/utils/titleGenerator';
 
-// Configure API URL with fallback
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
-console.log('Using API URL:', API_URL);
+// Create API instance
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8443',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 // Debug mode
 const DEBUG = import.meta.env.DEV;
@@ -28,65 +33,32 @@ const getToken = (): string | null => {
   return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 };
 
-// Add interceptor to handle 401 errors
-const setupAxiosInterceptors = (api: AxiosInstance): AxiosInstance => {
-  api.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    (error: AxiosError) => {
-      // If we receive a 401 Unauthorized error, clear token and user data
-      if (error.response && error.response.status === 401) {
-        console.error('API returned 401 Unauthorized - clearing token');
-        localStorage.removeItem('token');
-        // We can't directly access the store here, so we'll add a flag
-        sessionStorage.setItem('auth_error', 'true');
-        
-        // If we're on the dashboard, redirect to login
-        if (window.location.pathname === '/dashboard') {
-          console.log('Redirecting to login due to 401 error');
-          window.location.href = '/login';
-        }
-      }
-      
-      return Promise.reject(error);
+// Add request interceptor to add token to every request
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token && config.headers) {
+      config.headers.Authorization = token;
     }
-  );
-  
-  return api;
-};
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-// Create and configure axios instance
-const createApi = (): AxiosInstance => {
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8443',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    timeout: 15000,
-  });
-  
-  // Add request interceptor to add token to every request
-  api.interceptors.request.use(
-    (config: AxiosRequestConfig) => {
-      const token = getToken();
-      if (token) {
-        // Create headers object if it doesn't exist
-        if (!config.headers) {
-          config.headers = {};
-        }
-        config.headers['Authorization'] = token;
-      }
-      return config;
-    },
-    (error: AxiosError) => {
-      return Promise.reject(error);
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If we receive a 401 Unauthorized error, clear token and user data
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
-  );
-  
-  // Add response interceptor to handle auth errors
-  return setupAxiosInterceptors(api);
-};
-
-const api = createApi();
+    return Promise.reject(error);
+  }
+);
 
 // Verbose debugging function
 const debugRequest = (method: string, url: string, data?: any) => {
@@ -107,11 +79,13 @@ export const authApi = {
     try {
       console.log('Attempting login for:', email);
       const response = await api.post<LoginResponseDTO>('/api/v1/auth/login', { email, password });
-      console.log('Login successful:', response.data.userDetails.email);
+      console.log('Login successful:', response.data.user.email);
       
-      // Store token in localStorage
-      const token = response.data.accessToken;
-      localStorage.setItem('token', token);
+      // Store token
+      const token = response.data.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
       
       return response.data;
     } catch (error) {
@@ -176,9 +150,10 @@ export const authApi = {
 // Debug function to simulate a conversation
 const createMockConversation = (managerType: ManagerType): ConversationResponseDTO => {
   return {
-    conversationId: 'mock-' + Date.now(),
+    conversationId: `mock-${Date.now()}`,
     userId: 'mock-user',
-    managerType: managerType,
+    title: 'New conversation',
+    managerType,
     createdAt: new Date().toISOString()
   };
 };
