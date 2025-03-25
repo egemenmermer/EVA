@@ -1,20 +1,17 @@
 from typing import List, Dict, Optional
 import numpy as np
-from rank_bm25 import BM25Okapi
 import logging
 from embeddings.embedding_model import EmbeddingModel
-from embeddings.index import FAISSIndex
 import os
 import json
 import faiss
 from tqdm import tqdm
-import torch
 import gc
 
 logger = logging.getLogger(__name__)
 
 class HybridRetriever:
-    """Hybrid search combining dense and sparse retrieval."""
+    """Hybrid search combining dense retrieval with FAISS."""
     
     def __init__(self, embedding_model: EmbeddingModel, cache_dir: Optional[str] = None):
         """Initialize retriever with embedding model."""
@@ -34,7 +31,6 @@ class HybridRetriever:
         if not self.cache_dir:
             return None, None
             
-        # Use simple flat structure for DAS-6
         emb_path = os.path.join(self.cache_dir, "retriever", "embeddings.npy")
         docs_path = os.path.join(self.cache_dir, "retriever", "documents.json")
         logger.info(f"Cache paths - Embeddings: {emb_path}, Documents: {docs_path}")
@@ -105,32 +101,27 @@ class HybridRetriever:
         """Index documents with progress tracking."""
         try:
             self.documents = documents
+            
+            # Try to load cached embeddings first
+            if not force_reindex:
+                cached_embeddings = self._load_cached_embeddings()
+                if cached_embeddings is not None:
+                    logger.info("Using cached embeddings")
+                    self.index = faiss.IndexFlatL2(cached_embeddings.shape[1])
+                    self.index.add(cached_embeddings.astype('float32'))
+                    return True
+            
+            # Generate new embeddings
             texts = [doc['text'] for doc in documents]
-            total_processed = 0
-            embeddings_list = []
-            
-            # Process in batches
-            for i in range(0, len(texts), batch_size):
-                batch = texts[i:i + batch_size]
-                batch_embeddings = self.embedding_model.encode(batch)
-                embeddings_list.append(batch_embeddings)
-                
-                # Update progress
-                batch_size_actual = len(batch)
-                total_processed += batch_size_actual
-                if progress_callback:
-                    progress_callback(batch_size_actual)
-                
-                # Cleanup
-                gc.collect()
-            
-            # Combine embeddings
-            embeddings = np.concatenate(embeddings_list)
+            embeddings = self.embedding_model.encode(texts, batch_size=batch_size)
             
             # Create and populate FAISS index
             dimension = embeddings.shape[1]
             self.index = faiss.IndexFlatL2(dimension)
             self.index.add(embeddings.astype('float32'))
+            
+            # Cache the embeddings
+            self._save_embeddings_cache(embeddings)
             
             return True
             
@@ -138,38 +129,15 @@ class HybridRetriever:
             logger.error(f"Error indexing documents: {str(e)}")
             return False
 
-    def _get_free_disk_space(self, path: str) -> Optional[int]:
-        """Get free disk space in bytes."""
-        try:
-            if os.path.exists(path):
-                stats = os.statvfs(path)
-                return stats.f_frsize * stats.f_bavail
-            return None
-        except:
-            return None
-
-    def _cleanup_temp_files(self):
-        """Clean up temporary embedding files."""
-        try:
-            if self.cache_dir:
-                for file in os.listdir(self.cache_dir):
-                    if file.startswith("temp_embeddings_") and file.endswith(".npy"):
-                        try:
-                            os.remove(os.path.join(self.cache_dir, file))
-                        except:
-                            pass
-        except:
-            pass
-
     def hybrid_search(self, query: str, top_k: int = 5) -> List[Dict]:
-        """Perform hybrid search."""
+        """Perform hybrid search using OpenAI embeddings."""
         try:
             if not self.index or not self.documents:
                 logger.warning("No index available for search")
                 return []
                 
             # Get query embedding
-            query_embedding = self.embedding_model.encode([query])[0].reshape(1, -1).astype('float32')
+            query_embedding = self.embedding_model.encode_query(query).reshape(1, -1).astype('float32')
             
             # Search index
             distances, indices = self.index.search(query_embedding, top_k)

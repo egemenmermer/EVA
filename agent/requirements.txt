@@ -4,20 +4,14 @@ uvicorn[standard]==0.27.1
 pydantic==2.6.1
 python-dotenv==1.0.1
 
-# LangChain and Related
-langchain==0.0.27
+# LangChain and OpenAI
+langchain==0.1.12
+langchain-openai==0.0.8
+langchain-community==0.0.27
 openai==1.14.1
 
-# Machine Learning and Embeddings
-torch<2.2.0
-transformers==4.37.2
-sentence-transformers==2.3.1
+# Vector Search
 faiss-cpu==1.7.4
-
-# PDF Processing
-PyPDF2==3.0.1
-pdfplumber==0.10.3
-nltk==3.8.1
 
 # Data Processing
 numpy==1.24.3

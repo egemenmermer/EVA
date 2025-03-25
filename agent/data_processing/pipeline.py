@@ -5,11 +5,11 @@ from typing import Dict, List, Optional
 import json
 from tqdm import tqdm
 import numpy as np
+import faiss
 
 from data_processing.pdf_processor import PDFProcessor
 from data_processing.chunking import TextChunker
 from embeddings.embedding_model import EmbeddingModel
-from embeddings.index import FAISSIndex
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +40,12 @@ class DataPipeline:
             overlap=config.get('overlap', 50)
         )
         self.embedding_model = EmbeddingModel(
+            model_name="text-embedding-ada-002",
             cache_dir=str(self.cache_dir)
         )
-        self.index = FAISSIndex(
-            dimension=self.embedding_model.dimension
-        )
+        
+        # Initialize FAISS index
+        self.index = None
         
     def process_documents(self) -> Dict[str, List[Dict]]:
         """Process all documents through the pipeline."""
@@ -151,15 +152,13 @@ class DataPipeline:
                 texts.append(chunk_text)
                 processed_chunks.append(chunk)
         
-        # Process in batches of 100
-        batch_size = 100
+        # Process in batches of 32 (OpenAI recommended batch size)
+        batch_size = 32
         all_embeddings = []
         
         for i in tqdm(range(0, len(texts), batch_size), desc="Creating embeddings"):
             batch_texts = texts[i:i + batch_size]
             batch_embeddings = self.embedding_model.encode(batch_texts)
-            if isinstance(batch_embeddings, list):
-                batch_embeddings = np.array(batch_embeddings)
             all_embeddings.append(batch_embeddings)
             
         # Concatenate all embeddings
@@ -177,14 +176,13 @@ class DataPipeline:
         all_chunks.extend(documents["guidelines"])
         all_chunks.extend(documents["case_studies"])
         
-        # Add to index
-        self.index.add_documents(
-            documents=all_chunks,
-            embeddings=embeddings["embeddings"]
-        )
+        # Create and populate FAISS index
+        dimension = embeddings["embeddings"].shape[1]  # Should be 1536 for Ada
+        self.index = faiss.IndexFlatL2(dimension)
+        self.index.add(embeddings["embeddings"].astype('float32'))
         
         # Save index and documents to ethics_index directory
-        self.index.save(self.index_dir / "faiss.index")
+        faiss.write_index(self.index, str(self.index_dir / "faiss.index"))
         
         # Save documents separately for the index
         with open(self.index_dir / "documents.json", 'w', encoding='utf-8') as f:
@@ -198,39 +196,37 @@ class DataPipeline:
             json.dump(documents, f, ensure_ascii=False, indent=2)
             
         # Save processing metadata
-        meta_path = self.processed_dir / "metadata.json"
         metadata = {
-            "num_guidelines": len(documents["guidelines"]),
-            "num_case_studies": len(documents["case_studies"]),
-            "chunk_size": self.config.get("chunk_size", 512),
-            "overlap": self.config.get("overlap", 50),
-            "embedding_dimension": self.embedding_model.dimension
+            "total_guidelines": len(documents["guidelines"]),
+            "total_case_studies": len(documents["case_studies"]),
+            "embedding_model": "text-embedding-ada-002",
+            "chunk_size": self.chunker.chunk_size,
+            "overlap": self.chunker.overlap
         }
+        
+        meta_path = self.processed_dir / "metadata.json"
         with open(meta_path, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2)
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
             
     def load_processed_data(self) -> Optional[Dict[str, List[Dict]]]:
         """Load processed documents if they exist."""
-        try:
-            docs_path = self.processed_dir / "documents.json"
-            if not docs_path.exists():
-                return None
-                
-            with open(docs_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-                
-        except Exception as e:
-            logger.error(f"Error loading processed data: {str(e)}")
+        docs_path = self.processed_dir / "documents.json"
+        if not docs_path.exists():
             return None
             
+        with open(docs_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+            
     def load_search_index(self) -> bool:
-        """Load search index if it exists."""
+        """Load the FAISS search index if it exists."""
         try:
             index_path = self.index_dir / "faiss.index"
-            if not index_path.exists():
+            docs_path = self.index_dir / "documents.json"
+            
+            if not index_path.exists() or not docs_path.exists():
                 return False
                 
-            self.index.load(index_path)
+            self.index = faiss.read_index(str(index_path))
             return True
             
         except Exception as e:

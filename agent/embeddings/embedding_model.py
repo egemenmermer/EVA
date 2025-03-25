@@ -1,28 +1,29 @@
-from sentence_transformers import SentenceTransformer
-import torch
+from langchain_openai import OpenAIEmbeddings
+import numpy as np
 import logging
 import os
-import numpy as np
+from typing import List, Dict
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
 class EmbeddingModel:
-    """Handle text embeddings using sentence transformers."""
+    """Handle text embeddings using OpenAI Ada."""
     
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2", cache_dir: str = None):
+    def __init__(self, model_name: str = "text-embedding-ada-002", cache_dir: str = None):
         """Initialize the embedding model."""
         try:
             # Create cache directory if needed
             if cache_dir:
                 os.makedirs(cache_dir, exist_ok=True)
             
-            # Initialize the model
-            self.model = SentenceTransformer(model_name, cache_folder=cache_dir)
+            # Initialize OpenAI embeddings
+            self.model = OpenAIEmbeddings(
+                model=model_name,
+                cache_folder=cache_dir if cache_dir else None
+            )
             
-            # Keep on CPU for now - we'll manage CUDA explicitly during encoding
-            self.model = self.model.cpu()
-            logger.info(f"Initialized embedding model: {model_name}")
+            logger.info(f"Initialized OpenAI embedding model: {model_name}")
             
         except Exception as e:
             logger.error(f"Error initializing embedding model: {str(e)}")
@@ -31,50 +32,28 @@ class EmbeddingModel:
     @property
     def dimension(self) -> int:
         """Get the embedding dimension of the model."""
-        return self.model.get_sentence_embedding_dimension()
+        return 1536  # Ada-002 embedding dimension
 
-    def encode(self, texts: list, batch_size: int = 32) -> np.ndarray:
+    def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """Generate embeddings for a list of texts."""
         try:
-            # Move model to GPU if available
-            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            self.model = self.model.to(device)
-            logger.info(f"Using device: {device}")
-
             # Process in batches
             all_embeddings = []
             for i in tqdm(range(0, len(texts), batch_size), desc="Processing batches"):
                 batch_texts = texts[i:i + batch_size]
                 
                 # Generate embeddings for batch
-                with torch.no_grad():  # Disable gradient computation
-                    embeddings = self.model.encode(
-                        batch_texts,
-                        convert_to_tensor=True,
-                        show_progress_bar=False
-                    )
-                    
-                    # Move to CPU and convert to numpy
-                    embeddings = embeddings.cpu().numpy()
-                    all_embeddings.append(embeddings)
-                
-                # Clear GPU cache periodically
-                if device.type == 'cuda' and (i + 1) % (batch_size * 10) == 0:
-                    torch.cuda.empty_cache()
+                embeddings = self.model.embed_documents(batch_texts)
+                all_embeddings.extend(embeddings)
             
-            # Move model back to CPU to free GPU memory
-            self.model = self.model.cpu()
-            if device.type == 'cuda':
-                torch.cuda.empty_cache()
-            
-            # Combine all batches
-            return np.concatenate(all_embeddings, axis=0)
+            # Convert to numpy array
+            return np.array(all_embeddings)
             
         except Exception as e:
             logger.error(f"Error generating embeddings: {str(e)}")
             raise
 
-    def encode_documents(self, documents: list) -> np.ndarray:
+    def encode_documents(self, documents: List[Dict]) -> np.ndarray:
         """Generate embeddings for a list of documents."""
         try:
             texts = [doc['text'] for doc in documents]
@@ -86,7 +65,8 @@ class EmbeddingModel:
     def encode_query(self, query: str) -> np.ndarray:
         """Generate embedding for a query string."""
         try:
-            return self.encode([query])[0]
+            embedding = self.model.embed_query(query)
+            return np.array(embedding)
         except Exception as e:
             logger.error(f"Error encoding query: {str(e)}")
             raise 

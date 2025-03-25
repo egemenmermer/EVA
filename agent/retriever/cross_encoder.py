@@ -1,5 +1,4 @@
-from sentence_transformers import SentenceTransformer
-import torch
+from langchain_openai import OpenAIEmbeddings
 import logging
 from typing import List, Dict
 import os
@@ -9,47 +8,41 @@ from sklearn.metrics.pairwise import cosine_similarity
 logger = logging.getLogger(__name__)
 
 class ReRanker:
-    """Re-rank retrieval results using semantic similarity."""
+    """Re-rank retrieval results using OpenAI embeddings for semantic similarity."""
     
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+    def __init__(self, model_name: str = "text-embedding-ada-002",
                  cache_dir: str = None):
         """Initialize re-ranker model."""
         try:
             if cache_dir:
                 os.makedirs(cache_dir, exist_ok=True)
-                os.environ['TRANSFORMERS_CACHE'] = cache_dir
                 
-            self.model = SentenceTransformer(model_name, cache_folder=cache_dir)
-            if torch.cuda.is_available():
-                self.model.to(torch.device('cuda'))
-            logger.info(f"Initialized re-ranker model: {model_name}")
+            self.model = OpenAIEmbeddings(
+                model=model_name,
+                cache_folder=cache_dir if cache_dir else None
+            )
+            logger.info(f"Initialized OpenAI re-ranker model: {model_name}")
             
         except Exception as e:
             logger.error(f"Error initializing re-ranker: {str(e)}")
             raise
 
     def rerank(self, query: str, results: List[Dict], top_k: int = 5) -> List[Dict]:
-        """Re-rank results using semantic similarity scores."""
+        """Re-rank results using semantic similarity scores from OpenAI embeddings."""
         try:
             # Skip reranking if only a few results
             if len(results) <= top_k:
                 return results
             
-            # Use Apple MPS if available
-            device = 'mps' if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else 'cpu'
-            
-            # Get embeddings in smaller batches
-            batch_size = 16  # Smaller for M1
-            
             # Get embeddings for query and results
-            query_embedding = self.model.encode([query], convert_to_tensor=True)
+            query_embedding = np.array(self.model.embed_query(query))
             result_texts = [result['text'] for result in results]
-            result_embeddings = self.model.encode(result_texts, convert_to_tensor=True)
+            result_embeddings = np.array(self.model.embed_documents(result_texts))
             
             # Calculate similarity scores
             scores = cosine_similarity(
-                query_embedding.cpu().numpy(),
-                result_embeddings.cpu().numpy()
+                query_embedding.reshape(1, -1),
+                result_embeddings
             )[0]
             
             # Add scores to results
