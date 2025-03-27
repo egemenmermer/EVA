@@ -24,9 +24,9 @@ interface Message extends StoreMessage {
 interface MessageResponseDTO {
   messages: Array<{
     id: string;
-    conversationId: string;
-    role: 'user' | 'assistant';
-    content: string;
+  conversationId: string;
+  role: 'user' | 'assistant';
+  content: string;
     userQuery?: string;
     agentResponse?: string;
     createdAt: string;
@@ -277,7 +277,7 @@ export const ChatWindow: React.FC = () => {
     } catch (error) {
       console.error('Fatal error in fetchMessages:', error);
       if (!isPolling) {
-        setError('Failed to load conversation. Please try refreshing the page.');
+      setError('Failed to load conversation. Please try refreshing the page.');
         setLoading(false);
       }
     }
@@ -354,12 +354,12 @@ export const ChatWindow: React.FC = () => {
     
     // Create the user message immediately
     const userMessage: Message = {
-      id: uuidv4(),
-      conversationId: actualConversationId,
+        id: uuidv4(),
+        conversationId: actualConversationId,
       role: 'user',
-      content: content,
-      createdAt: new Date().toISOString()
-    };
+        content: content,
+        createdAt: new Date().toISOString()
+      };
     
     // Create a placeholder for the assistant's response
     const assistantPlaceholder: Message = {
@@ -392,7 +392,7 @@ export const ChatWindow: React.FC = () => {
             // Update the current conversation in store
             setCurrentConversation({
               ...newConversation,
-              lastMessage: content,
+            lastMessage: content,
               lastMessageDate: new Date().toISOString()
             });
             
@@ -424,12 +424,12 @@ export const ChatWindow: React.FC = () => {
       
       // Send the message to the backend with the possibly updated conversation ID
       console.log('ChatWindow: Sending message to backend, conversationId:', actualConversationId);
-      
-      const response = await conversationApi.sendMessage(
-        actualConversationId,
-        content,
-        temperature
-      );
+        
+        const response = await conversationApi.sendMessage(
+          actualConversationId,
+          content,
+          temperature
+        );
       
       console.log('Full response from server:', JSON.stringify(response));
       
@@ -450,7 +450,7 @@ export const ChatWindow: React.FC = () => {
               ...assistantPlaceholder,
               id: assistantMessage.id || assistantPlaceholder.id,
               content: assistantMessage.content || assistantMessage.agentResponse || 'No response',
-              conversationId: actualConversationId,
+                    conversationId: actualConversationId,
               isLoading: assistantMessage.isLoading === true
             } : {
               ...msg,

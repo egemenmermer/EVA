@@ -9,19 +9,20 @@ import uuid
 import json
 import traceback
 
+# Change imports to use newer langchain structure
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import LLMChain, RetrievalQA
-from langchain_core.runnables import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.memory import ConversationBufferMemory
-from langchain.prompts.prompt import PromptTemplate
-from langchain.output_parsers import PydanticOutputParser
-from pydantic import BaseModel, Field
+from langchain_core.prompts import PromptTemplate
+from langchain_community.callbacks.manager import get_openai_callback
+from langchain_core.chat_history import BaseChatMessageHistory
 
 from agents.base_agent import BaseAgent
 
@@ -159,7 +160,7 @@ class LangChainAgent(BaseAgent):
             # Initialize memory using the newer approach to avoid deprecation warning
             from langchain_core.chat_history import BaseChatMessageHistory
             from langchain_core.messages import AIMessage, HumanMessage
-            from langchain.memory.chat_message_histories import ChatMessageHistory
+            from langchain_community.chat_message_histories import ChatMessageHistory
             from langchain.memory import ConversationBufferMemory
             
             # Create a message history store
@@ -516,7 +517,6 @@ Please try your question again later when the system is less busy."""
                 logger.info("Getting argumentation strategies...")
                 qa_response = self.qa_chain.invoke({
                     "query": strategy_query,
-                    "question": strategy_query
                 })
                 
                 # Extract the result from response, handling different possible formats
@@ -641,7 +641,7 @@ Feedback: {evaluation.feedback}
 Areas for Improvement:
 {chr(10).join(f'- {area}' for area in evaluation.improvement_areas)}
 
-{'Congratulations! You\'ve mastered this scenario!' if evaluation.effectiveness == 100 else 'Would you like to:'}
+{'Congratulations! You have mastered this scenario!' if evaluation.effectiveness == 100 else 'Would you like to:'}
 {'1. Try a different strategy for this scenario' if evaluation.effectiveness < 100 else ''}
 2. Exit practice mode
 
@@ -731,13 +731,11 @@ Please describe the ethical concern you'd like to discuss."""
             logger.info(f"Retrieving relevant guidelines for conversation context")
             
             # Extract key ethical concerns from the conversation
-            extraction_prompt = f"""
-            Extract the main ethical concerns or topics from this conversation:
-            
-            {conversation_text}
-            
-            Return ONLY the ethical topics/concerns as a comma-separated list.
-            """
+            extraction_prompt = (
+                f"Extract the main ethical concerns or topics from this conversation:\n\n"
+                f"{conversation_text}\n\n"
+                f"Return ONLY the ethical topics/concerns as a comma-separated list."
+            )
             
             ethical_concerns = self.llm.invoke(extraction_prompt).content
             logger.info(f"Extracted ethical concerns: {ethical_concerns}")
@@ -856,13 +854,11 @@ Please describe the ethical concern you'd like to discuss."""
             logger.info(f"Retrieving relevant case studies for conversation context")
             
             # Extract key ethical concerns from the conversation
-            extraction_prompt = f"""
-            Extract the main ethical concerns, technologies, or scenarios from this conversation:
-            
-            {conversation_text}
-            
-            Return ONLY the main themes as a comma-separated list.
-            """
+            extraction_prompt = (
+                f"Extract the main ethical concerns, technologies, or scenarios from this conversation:\n\n"
+                f"{conversation_text}\n\n"
+                f"Return ONLY the main themes as a comma-separated list."
+            )
             
             ethical_themes = self.llm.invoke(extraction_prompt).content
             logger.info(f"Extracted ethical themes: {ethical_themes}")
@@ -914,15 +910,13 @@ Please describe the ethical concern you'd like to discuss."""
                     title = title[:100] + "..."
                 
                 # Use LLM to extract summary and outcome
-                extraction_prompt = f"""
-                Extract a concise summary and key outcome/lesson from this case study text:
-                
-                {content}
-                
-                Format your response as:
-                Summary: [1-2 sentence summary]
-                Outcome: [key lesson or outcome]
-                """
+                extraction_prompt = (
+                    f"Extract a concise summary and key outcome/lesson from this case study text:\n\n"
+                    f"{content}\n\n"
+                    f"Format your response as:\n"
+                    f"Summary: [1-2 sentence summary]\n"
+                    f"Outcome: [key lesson or outcome]"
+                )
                 
                 try:
                     extraction_result = self.llm.invoke(extraction_prompt).content
@@ -1016,7 +1010,7 @@ Please describe the ethical concern you'd like to discuss."""
                 logger.info(f"Loading vector store from {index_dir}")
                 import faiss
                 from langchain_community.vectorstores import FAISS
-                from langchain_openai import OpenAIEmbeddings
+                from langchain_openai import ChatOpenAI
                 
                 embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
                 self.vectorstore = FAISS.load_local(index_dir, embeddings)

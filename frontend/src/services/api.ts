@@ -11,6 +11,7 @@ import type {
 import { generateConversationTitle } from '@/utils/titleGenerator';
 import { v4 as uuid } from 'uuid';
 import { useStore } from '@/store/useStore';
+import api from './axiosConfig';
 
 // Default manager type to use for mock conversations
 const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
@@ -34,66 +35,8 @@ const getManagerType = (): ManagerType => {
   return DEFAULT_MANAGER_TYPE;
 };
 
-// Create API instance
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8443',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  validateStatus: (status) => {
-    // Consider 401 as a valid status for authentication endpoints
-    if (status === 401) {
-      const url = window.location.pathname;
-      // Don't redirect on login/register pages
-      if (url === '/login' || url === '/register') {
-        return true;
-      }
-    }
-    return status >= 200 && status < 300;
-  }
-});
-
 // Debug mode
 const DEBUG = import.meta.env.DEV;
-const BYPASS_AUTH = false; // Use real authentication
-
-// Helper function to get token from localStorage
-const getToken = (): string | null => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.warn('No token available for API request');
-    return null;
-  }
-  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-};
-
-// Add request interceptor to add token to every request
-api.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token && config.headers) {
-      config.headers.Authorization = token;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor to handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // If we receive a 401 Unauthorized error, clear token and user data
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
 
 // Verbose debugging function
 const debugRequest = (method: string, url: string, data?: any) => {
@@ -108,52 +51,14 @@ const debugResponse = (method: string, url: string, status: number, data: any) =
   console.log('Response data:', data);
 };
 
-// Add a function to handle API fallbacks to direct backend calls
-const AGENT_BASE_URL = 'http://localhost:5001';
-const BACKEND_BASE_URL = 'http://localhost:8443';
-
-// Helper function for making requests with fallback to direct backend call
-const apiRequestWithFallback = async (
-  url: string, 
-  options: any,
-  fallbackUrl?: string
-): Promise<any> => {
-  try {
-    // First try the agent server
-    const response = await axios({
-      url: `${AGENT_BASE_URL}${url}`,
-      ...options,
-      timeout: 5000 // 5 second timeout
-    });
-    return response.data;
-  } catch (error: any) {
-    // Check if agent server is down or timed out
-    const isAgentDown = 
-      error.code === 'ECONNREFUSED' || 
-      error.code === 'ECONNABORTED' ||
-      error.message?.includes('timeout') ||
-      error.message?.includes('Network Error');
-    
-    // If agent server is down and we have a fallback URL
-    if (isAgentDown && fallbackUrl) {
-      console.log('Agent server is down, falling back to direct backend call');
-      try {
-        // Try direct backend call
-        const fallbackResponse = await axios({
-          url: `${BACKEND_BASE_URL}${fallbackUrl}`,
-          ...options,
-          timeout: 8000 // 8 second timeout for backend
-        });
-        return fallbackResponse.data;
-      } catch (backendError: any) {
-        console.error('Backend fallback also failed:', backendError);
-        throw backendError;
-      }
-    }
-    
-    // If no fallback or other error
-    throw error;
+// Helper function to get token from localStorage
+const getToken = (): string | null => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('No token available for API request');
+    return null;
   }
+  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 };
 
 // Auth API methods
@@ -248,11 +153,8 @@ export const conversationApi = {
     debugRequest('GET', '/api/v1/conversation');
     
     try {
-      const conversations = await apiRequestWithFallback(
-        '/api/v1/conversation',
-        { method: 'GET' },
-        '/api/v1/conversation' // Same endpoint for fallback
-      );
+      const response = await api.get<ConversationResponseDTO[]>('/api/v1/conversation');
+      const conversations = response.data;
       
       debugResponse('GET', '/api/v1/conversation', 200, conversations);
       
@@ -334,11 +236,8 @@ export const conversationApi = {
     debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
     
     try {
-      const messages = await apiRequestWithFallback(
-        `/api/v1/conversation/message/${conversationId}`, 
-        { method: 'GET' },
-        `/api/v1/conversation/message/${conversationId}` // Same endpoint for fallback
-      );
+      const response = await api.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
+      const messages = response.data;
       
       debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, 200, messages);
       return messages;

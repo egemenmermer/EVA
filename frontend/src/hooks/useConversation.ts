@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import { ManagerType } from '@/types';
-import { useStore } from '@/store/useStore';
-import { ConversationContentResponseDTO, ConversationResponseDTO } from '@/types/api';
+import { useStore, Message } from '@/store/useStore';
+import { ConversationContentResponseDTO } from '@/types/api';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -79,7 +79,15 @@ export const useConversation = (conversationId?: string) => {
     onSuccess: (data) => {
       if (data && Array.isArray(data)) {
         console.log('Fetched messages:', data.length);
-        setMessages(data);
+        // Convert response data to Message type
+        const mappedMessages: Message[] = data.map((msg: ConversationContentResponseDTO): Message => ({
+          id: msg.id,
+          conversationId: msg.conversationId,
+          role: msg.role || (msg.userQuery ? 'user' : 'assistant'),
+          content: msg.content || msg.userQuery || msg.agentResponse || '',
+          createdAt: msg.createdAt
+        }));
+        setMessages(mappedMessages);
       }
     },
     onError: (error: Error) => {
@@ -90,7 +98,15 @@ export const useConversation = (conversationId?: string) => {
   // Set messages in store when fetchedMessages changes
   useEffect(() => {
     if (fetchedMessages && fetchedMessages.length > 0) {
-      setMessages(fetchedMessages);
+      // Convert response data to Message type
+      const mappedMessages: Message[] = fetchedMessages.map((msg: ConversationContentResponseDTO): Message => ({
+        id: msg.id,
+        conversationId: msg.conversationId,
+        role: msg.role || (msg.userQuery ? 'user' : 'assistant'),
+        content: msg.content || msg.userQuery || msg.agentResponse || '',
+        createdAt: msg.createdAt
+      }));
+      setMessages(mappedMessages);
     }
   }, [fetchedMessages, setMessages]);
 
@@ -114,10 +130,11 @@ export const useConversation = (conversationId?: string) => {
       console.log('Sending message:', data);
       
       // Add user message to UI immediately
-      const userMessage: ConversationContentResponseDTO = {
+      const userMessage: Message = {
         id: uuidv4(),
         conversationId: data.conversationId,
-        userQuery: data.userQuery,
+        role: 'user',
+        content: data.userQuery,
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
@@ -128,10 +145,11 @@ export const useConversation = (conversationId?: string) => {
         console.log('Received AI response:', response);
         
         // Add AI response to UI
-        const aiMessage: ConversationContentResponseDTO = {
+        const aiMessage: Message = {
           id: uuidv4(),
           conversationId: response.conversationId,
-          agentResponse: response.agentResponse,
+          role: 'assistant',
+          content: response.agentResponse || '',
           createdAt: new Date().toISOString()
         };
         addMessage(aiMessage);

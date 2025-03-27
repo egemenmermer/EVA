@@ -1,56 +1,71 @@
 import axios from 'axios';
 
-// Set base URL for all axios requests to the agent server
-axios.defaults.baseURL = 'http://localhost:5001';
+// Use the agent for all API requests
+// The agent will forward requests to the backend appropriately
+const api = axios.create({
+  baseURL: 'http://localhost:5001',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
-// Add a request interceptor to include auth token
-axios.interceptors.request.use(
+// Add a request interceptor to attach the authentication token to all requests
+api.interceptors.request.use(
   (config) => {
-    // Get the token from localStorage
+    // Get token from localStorage
     const token = localStorage.getItem('token');
+    
+    // Ensure headers object exists
+    config.headers = config.headers || {};
+    
+    // Set authorization header if token exists
     if (token) {
-      // Ensure headers object exists
-      config.headers = config.headers || {};
       config.headers.Authorization = token;
     }
     
-    // Set needed headers
-    config.headers = config.headers || {};
+    // Set content type and accept headers
     config.headers['Content-Type'] = 'application/json';
-    config.headers['Accept'] = 'application/json';
+    config.headers.Accept = 'application/json';
     
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor for error handling
-axios.interceptors.response.use(
+// Add a response interceptor to handle errors
+api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    console.error('Response error:', error);
-    
-    // Handle specific error cases
+    // Log detailed error information for debugging
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.log('Error response data:', error.response.data);
-      console.log('Error response status:', error.response.status);
+      // The request was made and the server responded with a status code outside of 2xx
+      console.error('Error response:', {
+        data: error.response.data,
+        status: error.response.status,
+        headers: error.response.headers
+      });
     } else if (error.request) {
       // The request was made but no response was received
-      console.log('No response received:', error.request);
+      console.error('Error request:', error.request);
     } else {
-      // Something happened in setting up the request that triggered an Error
-      console.log('Error message:', error.message);
+      // Something happened in setting up the request
+      console.error('Error message:', error.message);
+    }
+    
+    // If we receive a 401 Unauthorized error, clear token and redirect to login
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
     
     return Promise.reject(error);
   }
 );
 
-export default axios; 
+export default api; 

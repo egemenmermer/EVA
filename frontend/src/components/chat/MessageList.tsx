@@ -72,9 +72,11 @@ interface Props {
   messages: Message[];
   loading?: boolean;
   practiceMode?: boolean;
+  showPracticeBanner?: boolean;
+  onExitPractice?: () => void;
 }
 
-export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode = false }) => {
+export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode = false, showPracticeBanner, onExitPractice }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [lastMessage, setLastMessage] = useState<Message | null>(null);
   const [hasRenderedMessages, setHasRenderedMessages] = useState(false);
