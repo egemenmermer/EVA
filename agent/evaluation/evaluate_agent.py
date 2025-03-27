@@ -6,14 +6,14 @@ from rouge_score import rouge_scorer
 from pathlib import Path
 import json
 from datetime import datetime
-from agents.ethical_agent import EthicalAgent
+from agents.langchain_agent import LangChainAgent
 
 logger = logging.getLogger(__name__)
 
 class AgentEvaluator:
     """Evaluate ethical agent performance using multiple metrics."""
     
-    def __init__(self, agent: EthicalAgent):
+    def __init__(self, agent: LangChainAgent):
         """Initialize evaluator with metrics."""
         self.agent = agent
         

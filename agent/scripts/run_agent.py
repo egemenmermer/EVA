@@ -11,7 +11,7 @@ import shutil
 project_root = str(Path(__file__).parent.parent)
 sys.path.append(project_root)
 
-from agents.ethical_agent import EthicalAgent
+from agents.langchain_agent import LangChainAgent
 
 # Create logs directory if it doesn't exist
 Path("logs").mkdir(exist_ok=True)
@@ -104,6 +104,7 @@ def main():
         config = {
             'model_name': args.model,
             'api_token': os.getenv('HUGGINGFACE_TOKEN'),
+            'openai_api_key': os.getenv('OPENAI_API_KEY'),  # Added for LangChain
             'cache_dir': 'cache',
             'batch_size': 16,  # Smaller batch size for M1
             'memory_efficient': True,
@@ -119,10 +120,29 @@ def main():
         print("Please share your ethical concern or question, and I'll guide you through it.")
         
         print("\nInitializing assistant...")
-        agent = EthicalAgent(config)
+        agent = LangChainAgent(config)
         
         # Start conversation
-        agent.handle_conversation()
+        welcome_msg = agent.start_conversation()
+        print(welcome_msg)
+        
+        while True:
+            try:
+                query = input("\nYou: ").strip()
+                if not query:
+                    continue
+                if query.lower() in ['exit', 'quit', 'q']:
+                    break
+                    
+                response = agent.process_query(query)
+                print("\nEVA:", response)
+                
+            except KeyboardInterrupt:
+                print("\nGoodbye!")
+                break
+            except Exception as e:
+                logger.error(f"Error processing query: {str(e)}")
+                print("\nI apologize, but I encountered an error. Please try again.")
         
     except Exception as e:
         logger.error(f"Error in main: {str(e)}")

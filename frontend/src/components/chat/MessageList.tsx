@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useStore } from '@/store/useStore';
+import logoLight from '@/assets/logo-light.png';
+import logoDark from '@/assets/logo-dark.png';
 
 // Custom hook for typing effect
 const useTypewriter = (text: string, speed: number = 50, shouldAnimate: boolean = true) => {
@@ -81,7 +83,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   // Track if animation is currently happening
   const [isAnimating, setIsAnimating] = useState(false);
-  const { managerType } = useStore();
+  const { managerType, darkMode } = useStore();
   
   // Debug log the messages when they change
   useEffect(() => {
@@ -235,7 +237,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
                       </div>
                     ) : (
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full dark:bg-transparent">
-                        <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
+                        <img src={darkMode ? logoDark : logoLight} alt="EVA Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
@@ -291,7 +293,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
             <div className="flex-shrink-0 mt-1">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full dark:bg-transparent">
-                <img src="/logo.svg" alt="EVA Logo" className="w-full h-full object-cover" />
+                <img src={darkMode ? logoDark : logoLight} alt="EVA Logo" className="w-full h-full object-cover" />
               </div>
             </div>
             <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">

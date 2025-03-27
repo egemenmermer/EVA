@@ -3,7 +3,8 @@ import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { EthicalGuidelines } from '../guidelines/EthicalGuidelines';
 import { useStore } from '@/store/useStore';
-import logo from '@/assets/logo.svg';
+import logoLight from '@/assets/logo-light.png';
+import logoDark from '@/assets/logo-dark.png';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
@@ -99,7 +100,7 @@ export const MainLayout: React.FC = () => {
             className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/?stay=true')}
           >
-            <img src={logo} alt="Logo" className="h-10 w-10 md:h-16 md:w-16" />
+            <img src={darkMode ? logoDark : logoLight} alt="Logo" className="h-10 w-10 md:h-16 md:w-16" />
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                 EVA
