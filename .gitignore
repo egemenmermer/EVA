@@ -48,6 +48,11 @@ yarn-error.log*
 *.env
 .secrets
 export_env.sh
+**/agent_config.json
+**/*_config.json
+**/*.config.json
+secrets.json
+**/secrets/
 
 # Logs
 **/logs/
