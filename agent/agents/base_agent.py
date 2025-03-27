@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple
+import os
+from langchain.chat_models import ChatOpenAI
 
 class BaseAgent(ABC):
     """Abstract base class for all agents."""
@@ -60,4 +62,24 @@ class BaseAgent(ABC):
         Returns:
             str: Feedback ID
         """
-        return "feedback-not-implemented" 
+        return "feedback-not-implemented"
+
+    def initialize_components(self):
+        """Initialize LangChain components."""
+        try:
+            # Extract and validate configuration
+            openai_api_key = self.config.get('openai_api_key', os.getenv("OPENAI_API_KEY"))
+            if not openai_api_key:
+                raise ValueError("OpenAI API key is required")
+            
+            temperature = self.config.get('temperature', 0.7)
+            
+            # Initialize LLM
+            self.llm = ChatOpenAI(
+                model_name="gpt-3.5-turbo",
+                temperature=temperature,
+                openai_api_key=openai_api_key
+            )
+        except Exception as e:
+            print(f"Error initializing components: {str(e)}")
+            raise 

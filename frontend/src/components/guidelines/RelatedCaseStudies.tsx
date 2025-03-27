@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import axios from 'axios';
+import axios from '@/services/axiosConfig';
 
 interface CaseStudy {
   id: string;
@@ -42,7 +42,7 @@ export const RelatedCaseStudies: React.FC = () => {
           caseStudies: CaseStudy[];
         }
         
-        const response = await axios.post<CaseStudiesResponse>('/api/case-studies/relevant', {
+        const response = await axios.post<CaseStudiesResponse>('/case-studies/relevant', {
           messages
         });
         

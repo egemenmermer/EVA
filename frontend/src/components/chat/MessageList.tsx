@@ -65,6 +65,7 @@ interface Message {
   content: string;
   createdAt?: string;
   isSystemMessage?: boolean;
+  isLoading?: boolean;
 }
 
 interface Props {
@@ -92,7 +93,8 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
       // Log counts of each message type
       const userMsgs = messages.filter(msg => msg.role === 'user').length;
       const assistantMsgs = messages.filter(msg => msg.role === 'assistant').length;
-      console.log(`MessageList: Message types - User: ${userMsgs}, Assistant: ${assistantMsgs}`);
+      const loadingMsgs = messages.filter(msg => msg.isLoading === true).length;
+      console.log(`MessageList: Message types - User: ${userMsgs}, Assistant: ${assistantMsgs}, Loading: ${loadingMsgs}`);
       
       // Get the conversation ID from the first message
       const conversationId = messages[0]?.conversationId;
@@ -173,6 +175,25 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
     );
   };
 
+  // Check if a message is in loading state
+  const isMessageLoading = (message: Message): boolean => {
+    return message.isLoading === true;
+  };
+
+  // Debug current message state
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      console.log('MessageList: Last message:', {
+        id: lastMsg.id,
+        role: lastMsg.role,
+        isLoading: lastMsg.isLoading,
+        contentPreview: lastMsg.content.substring(0, 50) + (lastMsg.content.length > 50 ? '...' : ''),
+        isSystemMessage: lastMsg.isSystemMessage
+      });
+    }
+  }, [messages]);
+
   // Use typewriter effect only for the message being animated
   const { displayedText, isTyping } = useTypewriter(
     lastMessage?.content || '', 
@@ -196,6 +217,22 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
     scrollToBottom();
   }, [messages, displayedText]);
 
+  // Get the content to display for a message
+  const getMessageContent = (message: Message): string => {
+    // For animated messages, use the typewriter effect
+    if (shouldAnimateMessage(message)) {
+      return displayedText;
+    } 
+    // For loading messages, show an empty message (we'll show dots animation separately)
+    else if (isMessageLoading(message)) {
+      return ""; // Empty content instead of "Thinking..."
+    } 
+    // For normal messages, just show the content
+    else {
+      return message.content;
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-4 p-4 overflow-y-auto scrollbar-thin h-full">
       {messages.length === 0 && !loading ? (
@@ -208,7 +245,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
         messages.map((message, index) => {
           // Only apply the typing animation if this message needs animation
           const shouldAnimate = shouldAnimateMessage(message);
-          const messageContent = shouldAnimate ? displayedText : message.content;
+          const messageContent = getMessageContent(message);
           const isSystemMsg = message.isSystemMessage === true;
 
           // Skip typing animation for system messages
@@ -273,6 +310,13 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
                       >
                         {messageContent}
                       </ReactMarkdown>
+                      {isMessageLoading(message) && (
+                        <div className="flex items-center space-x-1 mt-1">
+                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce"></span>
+                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -287,22 +331,6 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
             </div>
           );
         })
-      )}
-      {(loading || isTyping) && (
-        <div className="w-full py-3 sm:py-4 px-2 sm:px-1">
-          <div className="max-w-full md:max-w-4xl mx-auto flex items-start gap-2 sm:gap-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full dark:bg-transparent">
-                <img src={darkMode ? logoDark : logoLight} alt="EVA Logo" className="w-full h-full object-cover" />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce"></div>
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="h-2 w-2 sm:h-3 sm:w-3 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-            </div>
-          </div>
-        </div>
       )}
       <div ref={messagesEndRef} />
     </div>

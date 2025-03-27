@@ -55,38 +55,71 @@ class LangChainAgent(BaseAgent):
         }
     }
 
-    def __init__(self, config: Dict):
-        """Initialize the LangChain agent."""
+    def __init__(self, config: Dict[str, Any]):
+        """Initialize the agent.
+        
+        Args:
+            config: Configuration dictionary with necessary parameters.
+        """
         try:
-            super().__init__(config)
+            # Configure logging
+            self.logger = logging.getLogger("langchain_agent")
             
-            # Initialize state
-            self.user_role = None
-            self.conversation_id = str(uuid.uuid4())
+            # Store important configuration
+            self.config = config
+            self.openai_api_key = config.get('openai_api_key', os.getenv('OPENAI_API_KEY'))
+            self.model_name = config.get('model_name', "gpt-3.5-turbo")
+            self.temperature = config.get('temperature', 0.7)
+            
+            # Conversation state
+            self.conversation_id = None
+            self.history = []
             self.practice_mode = False
-            self.manager_type = config.get('manager_type', 'PUPPETEER')  # Get manager type from config
-            self.current_scenario = None
-            self.practice_scores = []
+            self.manager_type = None  # Default to no specific manager type
             
-            # Validate manager type
-            if self.manager_type not in self.MANAGER_TYPES:
-                logger.warning(f"Invalid manager type: {self.manager_type}. Using default: PUPPETEER")
-                self.manager_type = 'PUPPETEER'
+            # Initialize Langchain components
+            self.llm = ChatOpenAI(
+                model_name=self.model_name,
+                temperature=self.temperature,
+                openai_api_key=self.openai_api_key
+            )
             
-            # Set up directories
-            self.cache_dir = Path(config.get('cache_dir', 'cache'))
-            self.index_dir = Path(config.get('index_dir', 'ethics_index'))
-            self.cache_dir.mkdir(exist_ok=True)
-            self.index_dir.mkdir(exist_ok=True)
-            
-            # Initialize LangChain components
-            self.initialize_components()
-            
-            logger.info(f"LangChain Agent initialized successfully with manager type: {self.manager_type}")
+            # Initialize knowledge retrieval
+            if 'index_dir' in config:
+                self._initialize_knowledge_base(config['index_dir'])
+            else:
+                logger.warning("No index_dir provided. Running without knowledge base.")
+                self.vectorstore = None
+                self.qa_chain = None
+                
+            # Initialize conversation chain
+            self._setup_conversation_chain()
             
         except Exception as e:
-            logger.error(f"Failed to initialize LangChainAgent: {str(e)}")
-            raise
+            logger.error(f"Error initializing agent: {str(e)}")
+            traceback.print_exc()
+            # Initialize minimal components to avoid crashes
+            self.llm = ChatOpenAI(
+                model_name="gpt-3.5-turbo",
+                temperature=0.7,
+                openai_api_key=self.openai_api_key
+            )
+            self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            self.conversation_chain = None
+            self.vectorstore = None
+            self.qa_chain = None
+            
+    def _setup_conversation_chain(self):
+        """Set up the core conversation chain."""
+        # Initialize the memory buffer for the conversation chain
+        self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        
+        # Initialize the LLM for the conversation chain
+        conversation_llm = ChatOpenAI(
+            model_name=self.model_name,
+            temperature=self.temperature,
+            openai_api_key=self.openai_api_key
+        )
 
     def initialize_components(self):
         """Initialize LangChain components such as embeddings, retriever, and LLM."""
@@ -118,7 +151,7 @@ class LangChainAgent(BaseAgent):
             
             # Initialize LLM
             self.llm = ChatOpenAI(
-                model_name="gpt-4",
+                model_name="gpt-3.5-turbo",
                 temperature=temperature,
                 openai_api_key=openai_api_key
             )
@@ -393,60 +426,82 @@ Based on ethical principles regarding user location data collection:
 Would you like to try asking your question again in a different way?"""
 
     def _handle_understanding_mode(self, query: str) -> str:
-        """Process a query in understanding mode by providing ethical guidance."""
+        """Process query in understanding mode, providing ethical guidance."""
         try:
             logger.info(f"Handling query in understanding mode: {query[:30]}...")
             
-            # Add the user query to history manually
-            self._add_to_history("human", query)
-            
-            # Invoke QA chain to get context from knowledge base
+            # First, retrieve relevant knowledge using our QA chain
             logger.info("Invoking QA chain...")
-            qa_response = self.qa_chain.invoke({"query": query, "question": query})
+            try:
+                qa_response = self.qa_chain({"query": query})
+                
+                logger.info(f"QA response type: {type(qa_response)}")
+                logger.info(f"QA response keys: {qa_response.keys()}")
+                
+                # Extract the context from QA response
+                knowledge_context = qa_response.get("result", "")
+                
+                # Get additional context from the retrieved documents
+                source_documents = qa_response.get("source_documents", [])
+                additional_context = ""
+                for doc in source_documents[:2]:  # Use first two documents only
+                    additional_context += f"{doc.page_content}\n\n"
+                    
+                # Prepare context for the LLM
+                extracted_context = f"{knowledge_context}\n\n{additional_context}"
+                logger.info(f"Extracted context length: {len(extracted_context)}")
+            except Exception as e:
+                logger.error(f"Error in QA chain: {str(e)}")
+                extracted_context = "No specific ethical guidelines could be retrieved."
             
-            logger.info(f"QA response type: {type(qa_response)}")
-            logger.info(f"QA response keys: {qa_response.keys()}")
+            # Use direct LLM call instead of conversation chain to avoid memory issues
+            logger.info("Making direct LLM call...")
             
-            # Extract context from QA response
-            context = qa_response.get("result", "")
-            logger.info(f"Extracted context length: {len(context)}")
+            # Create a simple system prompt
+            system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
+            Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
+            Focus on helping the user understand ethical implications and make informed decisions."""
             
-            # Invoke conversation chain
-            logger.info("Invoking conversation chain...")
-            response = self.conversation.predict(
-                input=query,
-                context=context
-            )
+            # Format the prompt with the query and context
+            user_message = f"""Query: {query}
             
-            # Add AI response to history manually
-            self._add_to_history("ai", response)
+            Relevant ethical context:
+            {extracted_context}
             
-            return response
+            Please provide ethical guidance on this issue."""
             
+            # Make a direct call to the LLM
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ]
+            
+            try:
+                # Set a timeout for the LLM call to prevent long waits
+                response = self.llm.predict_messages(messages, timeout=10)
+                agent_response = response.content
+            except Exception as llm_error:
+                logger.error(f"Error in LLM call: {str(llm_error)}")
+                # Provide a fallback response if the LLM call fails
+                agent_response = """I apologize, but I'm currently having trouble processing your request. 
+
+Here are some general principles to consider regarding location data:
+- Only collect the minimum amount of data necessary
+- Be transparent with users about data collection
+- Obtain informed consent before collecting sensitive data like location
+- Provide clear opt-out mechanisms
+- Ensure data security and proper access controls
+
+Please try your question again later when the system is less busy."""
+            
+            # Save the interaction to history
+            self._add_to_history("user", query)
+            self._add_to_history("assistant", agent_response)
+            
+            return agent_response
         except Exception as e:
-            logger.error(f"Error in conversation chain: {str(e)}")
-            traceback.print_exc()
-            
-            # Provide a fallback response based on ethical principles
-            fallback_response = """I apologize, but I'm having trouble accessing my knowledge base right now.
-
-Based on general ethical principles, when dealing with storing user location data:
-
-1. Privacy concerns: Collecting location data raises significant privacy concerns. Users should have full transparency about what data is collected and how it's used.
-
-2. Data minimization: If the product doesn't require location data to function, it's best practice to not collect it at all. This aligns with the principle of data minimization.
-
-3. Legal considerations: Many jurisdictions have regulations about collecting location data (GDPR in Europe, CCPA in California, etc.).
-
-4. Suggestions for your situation:
-   - Discuss with your manager why they want to collect this data
-   - Propose alternatives that don't require location tracking
-   - Suggest making the feature opt-in rather than default
-   - Document your concerns in writing
-
-Would you like more specific guidance on how to approach this conversation with your manager?"""
-            
-            return fallback_response
+            logger.error(f"General error in understanding mode: {str(e)}")
+            return "I apologize, but I encountered an error processing your question. Please try again or rephrase your query."
 
     def _get_argumentation_strategies(self, ethical_context: str) -> List[Dict[str, str]]:
         """Get relevant argumentation strategies based on the ethical context using RAG."""
@@ -943,4 +998,64 @@ Please describe the ethical concern you'd like to discuss."""
             else:
                 logger.warning(f"Unknown role: {role}")
         except Exception as e:
-            logger.error(f"Error adding message to history: {str(e)}") 
+            logger.error(f"Error adding message to history: {str(e)}")
+
+    def _initialize_knowledge_base(self, index_dir: str):
+        """Initialize the knowledge base from documents."""
+        try:
+            # Create a faiss vectorstore from documents if one doesn't exist
+            index_path = Path(index_dir)
+            if not index_path.exists():
+                logger.error(f"Index directory does not exist: {index_dir}")
+                self.vectorstore = None
+                self.qa_chain = None
+                return
+                
+            # Load existing index
+            try:
+                logger.info(f"Loading vector store from {index_dir}")
+                import faiss
+                from langchain_community.vectorstores import FAISS
+                from langchain_openai import OpenAIEmbeddings
+                
+                embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+                self.vectorstore = FAISS.load_local(index_dir, embeddings)
+                logger.info(f"Successfully loaded vector store with {self.vectorstore._index.ntotal} documents")
+                
+                # Create a retrieval QA chain using the vectorstore
+                from langchain.chains.question_answering import load_qa_chain
+                
+                # Create a chain using the same LLM as the conversation
+                qa_llm = ChatOpenAI(
+                    model_name=self.model_name,
+                    temperature=0.3,  # Lower temperature for more factual responses
+                    openai_api_key=self.openai_api_key
+                )
+                
+                # Create the QA chain with the LLM
+                qa_chain = load_qa_chain(qa_llm, chain_type="stuff")
+                
+                # Create a retrieval qa chain that combines retrieval and QA
+                from langchain.chains import RetrievalQA
+                
+                self.qa_chain = RetrievalQA.from_chain_type(
+                    llm=qa_llm,
+                    chain_type="stuff",
+                    retriever=self.vectorstore.as_retriever(
+                        search_type="similarity",
+                        search_kwargs={"k": 4}
+                    ),
+                    return_source_documents=True
+                )
+                
+                logger.info("Successfully initialized QA chain")
+                
+            except Exception as e:
+                logger.error(f"Error loading vector store: {str(e)}")
+                self.vectorstore = None
+                self.qa_chain = None
+                
+        except Exception as e:
+            logger.error(f"Error initializing knowledge base: {str(e)}")
+            self.vectorstore = None
+            self.qa_chain = None 

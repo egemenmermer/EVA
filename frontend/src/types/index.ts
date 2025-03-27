@@ -1,4 +1,5 @@
 export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER' | 'FUNCTION' | 'NO_TOOLS';
+export type Role = 'user' | 'assistant' | 'system';
 
 export interface User {
   id: string;
@@ -22,10 +23,11 @@ export interface Conversation {
 
 export interface Message {
   id: string;
-  conversationId: string;
-  userQuery: string;
-  agentResponse: string;
+  role: Role;
+  content: string;
   createdAt: string;
+  conversationId: string;
+  isLoading?: boolean;
 }
 
 export interface Feedback {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import axios from 'axios';
+import axios from '@/services/axiosConfig';
 
 interface Guideline {
   id: string;
@@ -38,7 +38,11 @@ export const DynamicGuidelines: React.FC = () => {
           return;
         }
         
-        const response = await axios.post('/api/guidelines/relevant', {
+        interface GuidelinesResponse {
+          guidelines: Guideline[];
+        }
+        
+        const response = await axios.post<GuidelinesResponse>('/guidelines/relevant', {
           messages
         });
         

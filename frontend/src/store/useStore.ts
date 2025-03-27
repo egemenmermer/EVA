@@ -11,6 +11,7 @@ export interface Message {
   content: string;
   createdAt: string;
   conversationId: string;
+  isLoading?: boolean;
 }
 
 export interface Conversation {

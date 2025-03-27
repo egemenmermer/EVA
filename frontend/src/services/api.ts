@@ -9,6 +9,30 @@ import type {
   FeedbackResponseDTO
 } from '@/types/api';
 import { generateConversationTitle } from '@/utils/titleGenerator';
+import { v4 as uuid } from 'uuid';
+import { useStore } from '@/store/useStore';
+
+// Default manager type to use for mock conversations
+const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
+
+// Get the current manager type from the store, or use default
+const getManagerType = (): ManagerType => {
+  try {
+    // Try to get from localStorage first (this approach doesn't depend on React hooks)
+    const storedState = localStorage.getItem('eva-store');
+    if (storedState) {
+      const parsedState = JSON.parse(storedState);
+      if (parsedState?.state?.managerType) {
+        return parsedState.state.managerType;
+      }
+    }
+  } catch (e) {
+    console.error('Error getting manager type from store:', e);
+  }
+  
+  // Return default if not found
+  return DEFAULT_MANAGER_TYPE;
+};
 
 // Create API instance
 const api = axios.create({
@@ -82,6 +106,54 @@ const debugResponse = (method: string, url: string, status: number, data: any) =
   const color = status >= 200 && status < 300 ? '#4CAF50' : '#F44336';
   console.log(`%c API Response: ${method} ${url} [${status}]`, `background: #222; color: ${color}`);
   console.log('Response data:', data);
+};
+
+// Add a function to handle API fallbacks to direct backend calls
+const AGENT_BASE_URL = 'http://localhost:5001';
+const BACKEND_BASE_URL = 'http://localhost:8443';
+
+// Helper function for making requests with fallback to direct backend call
+const apiRequestWithFallback = async (
+  url: string, 
+  options: any,
+  fallbackUrl?: string
+): Promise<any> => {
+  try {
+    // First try the agent server
+    const response = await axios({
+      url: `${AGENT_BASE_URL}${url}`,
+      ...options,
+      timeout: 5000 // 5 second timeout
+    });
+    return response.data;
+  } catch (error: any) {
+    // Check if agent server is down or timed out
+    const isAgentDown = 
+      error.code === 'ECONNREFUSED' || 
+      error.code === 'ECONNABORTED' ||
+      error.message?.includes('timeout') ||
+      error.message?.includes('Network Error');
+    
+    // If agent server is down and we have a fallback URL
+    if (isAgentDown && fallbackUrl) {
+      console.log('Agent server is down, falling back to direct backend call');
+      try {
+        // Try direct backend call
+        const fallbackResponse = await axios({
+          url: `${BACKEND_BASE_URL}${fallbackUrl}`,
+          ...options,
+          timeout: 8000 // 8 second timeout for backend
+        });
+        return fallbackResponse.data;
+      } catch (backendError: any) {
+        console.error('Backend fallback also failed:', backendError);
+        throw backendError;
+      }
+    }
+    
+    // If no fallback or other error
+    throw error;
+  }
 };
 
 // Auth API methods
@@ -173,21 +245,31 @@ const createMockConversation = (managerType: ManagerType): ConversationResponseD
 // Conversation API methods
 export const conversationApi = {
   getConversations: async (): Promise<ConversationResponseDTO[]> => {
+    debugRequest('GET', '/api/v1/conversation');
+    
     try {
-      console.log('Fetching conversations');
-      const response = await api.get<ConversationResponseDTO[]>('/api/v1/conversation');
-      console.log('Fetched conversations:', response.data);
-      return response.data;
+      const conversations = await apiRequestWithFallback(
+        '/api/v1/conversation',
+        { method: 'GET' },
+        '/api/v1/conversation' // Same endpoint for fallback
+      );
+      
+      debugResponse('GET', '/api/v1/conversation', 200, conversations);
+      
+      // If we received no conversations or an empty array, return mock data
+      if (!conversations || (Array.isArray(conversations) && conversations.length === 0)) {
+        console.log('No conversations returned, falling back to mock data');
+        const currentManagerType = getManagerType();
+        return [createMockConversation(currentManagerType)];
+      }
+      
+      // Otherwise, return the conversations from the API
+      return conversations;
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
-      // Add more debugging info
-      const err = error as any;
-      console.error('Fetch conversations error details:', {
-        message: err?.message || 'Unknown error',
-        status: err?.response?.status,
-        data: err?.response?.data
-      });
-      return [];
+      console.error('Error getting conversations:', error);
+      // Return mock data as fallback
+      const currentManagerType = getManagerType();
+      return [createMockConversation(currentManagerType)];
     }
   },
   
@@ -205,70 +287,75 @@ export const conversationApi = {
     }
   },
   
-  sendMessage: async (conversationId: string, userQuery: string, temperature?: number): Promise<ConversationContentResponseDTO> => {
+  sendMessage: async (
+    conversationId: string, 
+    content: string,
+    temperature?: number
+  ): Promise<any> => {
+    debugRequest('POST', '/api/v1/conversation/message', { conversationId, content, temperature });
+    
     try {
-      console.log('Sending message to conversation:', conversationId);
-      console.log('Message content:', userQuery.substring(0, 50) + (userQuery.length > 50 ? '...' : ''));
-      
-      // Skip API call for invalid conversation IDs
-      if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-        throw new Error('Cannot send message to invalid conversation ID. Create a valid conversation first.');
-      }
-      
-      if (temperature !== undefined) {
-        console.log('Using temperature:', temperature);
-      }
-      
-      const requestBody: any = {
+      const payload = {
         conversationId,
-        userQuery
+        content,
+        temperature: temperature || 0.7
       };
+
+      // Make the request to our agent
+      const response = await api.post('/api/v1/conversation/message', payload);
+      debugResponse('POST', '/api/v1/conversation/message', response.status, response.data);
       
-      // Add temperature parameter if provided
-      if (temperature !== undefined) {
-        requestBody.temperature = temperature;
-      }
+      // Log the complete response
+      console.log('Complete response from sendMessage:', JSON.stringify(response.data));
       
-      const response = await api.post<ConversationContentResponseDTO>('/api/v1/conversation/message', requestBody);
-      console.log('Message sent, response received:', response.data);
-      return response.data;
+      return response.data; // New format will have messages array with loading indicator
     } catch (error) {
-      console.error('Failed to send message:', error);
-      // Add more debugging info
-      const err = error as any;
-      console.error('Send message error details:', {
-        conversationId,
-        messageLength: userQuery?.length,
-        temperature,
-        status: err?.response?.status,
-        data: err?.response?.data
-      });
-      throw error;
+      console.error('Error calling sendMessage:', error);
+      
+      // Return a fallback response format with loading indicator
+      const timestamp = new Date().toISOString();
+      
+      return {
+        messages: [
+          {
+            id: generateId(),
+            conversationId,
+            role: 'assistant',
+            content: 'I encountered an error processing your request. Please try again.',
+            createdAt: timestamp,
+            isLoading: false
+          }
+        ]
+      };
     }
   },
   
   getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
+    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
+    
     try {
-      console.log('Fetching messages for conversation:', conversationId);
+      const messages = await apiRequestWithFallback(
+        `/api/v1/conversation/message/${conversationId}`, 
+        { method: 'GET' },
+        `/api/v1/conversation/message/${conversationId}` // Same endpoint for fallback
+      );
       
-      // Skip API call for invalid conversation IDs
-      if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-        console.log('Skipping backend fetch for invalid conversationId:', conversationId);
-        return [];
+      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, 200, messages);
+      return messages;
+    } catch (error) {
+      console.error(`Error getting messages for conversation ${conversationId}:`, error);
+      
+      // Try to get messages from localStorage as a last resort
+      try {
+        const savedMessages = localStorage.getItem(`messages-${conversationId}`);
+        if (savedMessages) {
+          return JSON.parse(savedMessages);
+        }
+      } catch (localStorageError) {
+        console.error('Error getting messages from localStorage:', localStorageError);
       }
       
-      const response = await api.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
-      console.log('Fetched messages:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch messages:', error);
-      // Add more debugging info
-      const err = error as any;
-      console.error('Fetch messages error details:', {
-        conversationId,
-        status: err?.response?.status,
-        data: err?.response?.data
-      });
+      // Return empty array if all else fails
       return [];
     }
   },
@@ -338,6 +425,25 @@ export const conversationApi = {
       console.error('Failed to delete conversation:', error);
       throw error;
     }
+  },
+
+  getMessages: async (conversationId: string): Promise<any> => {
+    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
+    
+    try {
+      const response = await api.get(`/api/v1/conversation/message/${conversationId}`);
+      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, response.status, response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching messages for conversation ${conversationId}:`, error);
+      return [];
+    }
+  },
+
+  getAllMessages: async (): Promise<ConversationContentResponseDTO[]> => {
+    // Implementation needed
+    throw new Error("Method not implemented");
   }
 };
 
@@ -352,4 +458,9 @@ export const feedbackApi = {
       throw error;
     }
   }
+};
+
+// Helper function to generate IDs
+const generateId = () => {
+  return crypto.randomUUID?.() || `msg-${Date.now()}`;
 }; 
