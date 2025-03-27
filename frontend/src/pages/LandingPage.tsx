@@ -129,6 +129,56 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Manager Types Section */}
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
+              Available Manager Types
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-red-500">
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Puppeteer
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Controls project flow to nudge developers into unethical decisions.
+                </p>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
+                  <li>Uses manipulative tactics to influence team members</li>
+                  <li>Creates pressure to compromise on ethical standards</li>
+                  <li>Controls information flow to guide decisions</li>
+                </ul>
+              </div>
+              
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-yellow-500">
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Diluter
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Weakens ethical concerns by making them seem less important.
+                </p>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
+                  <li>Minimizes the significance of ethical problems</li>
+                  <li>Rationalizes questionable practices as necessary</li>
+                  <li>Downplays potential consequences of ethical violations</li>
+                </ul>
+              </div>
+              
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-blue-500">
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Camouflager
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Hides ethical concerns in bureaucracy or misleading language.
+                </p>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
+                  <li>Obscures ethical issues with complex jargon</li>
+                  <li>Creates confusion around ethical responsibilities</li>
+                  <li>Uses misdirection to avoid addressing concerns</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
