@@ -4,11 +4,13 @@ import { Send } from 'lucide-react';
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({ 
   onSendMessage, 
-  disabled = false 
+  disabled = false,
+  placeholder = "Message EVA..."
 }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,7 +51,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           ref={textareaRef}
           className="w-full resize-none rounded-lg bg-transparent py-2 sm:py-3 pr-10 pl-3 sm:pl-4 placeholder:text-gray-400 dark:placeholder:text-gray-300 text-gray-900 dark:text-white focus:outline-none text-sm sm:text-base"
           rows={1}
-          placeholder="Message EVA..."
+          placeholder={placeholder}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}

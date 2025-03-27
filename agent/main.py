@@ -728,6 +728,11 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat()
     }
 
+@app.get("/api/health", status_code=200)
+async def health_check():
+    """Health check endpoint to verify the API is running."""
+    return {"status": "ok", "message": "Agent API is running"}
+
 # Frontend compatibility API endpoints
 @app.get("/api/v1/conversation",
     tags=["Frontend Compatibility"],
@@ -1437,6 +1442,95 @@ async def update_conversation_title(conversation_id: str, request: Request):
             "title": request_body.get("title", "Untitled Conversation"),
             "updatedAt": datetime.utcnow().isoformat()
         }
+
+@app.get("/api/v1/auth/verify-token",
+    tags=["Authentication"],
+    summary="Verify token",
+    description="Verifies if the token is valid by checking with the backend"
+)
+async def verify_token(request: Request):
+    """Verify if the token is valid by forwarding the request to the backend"""
+    try:
+        # Extract the authorization header from the incoming request
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            return {"status": "error", "message": "No authorization token provided"}
+        
+        headers = {
+            "Accept": "application/json",
+            "Authorization": auth_header
+        }
+        
+        # Make a request to the backend API to verify the token
+        # We'll use the conversation endpoint as it requires authentication
+        response = requests.get(
+            f"{BACKEND_BASE_URL}/api/v1/conversation",
+            headers=headers
+        )
+        
+        # Check if the request was successful (token is valid)
+        if response.status_code == 200:
+            return {"status": "ok", "message": "Token is valid"}
+        else:
+            return {
+                "status": "error", 
+                "message": f"Token verification failed: {response.status_code}", 
+                "details": response.text
+            }
+    except Exception as e:
+        logger.error(f"Error verifying token: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {"status": "error", "message": f"Error verifying token: {str(e)}"}
+
+@app.post("/api/v1/auth/login",
+    tags=["Authentication"],
+    summary="Login",
+    description="Authenticates a user and returns a JWT token"
+)
+async def login(request: Request):
+    """Forward login request to the backend"""
+    try:
+        # Extract the request body
+        request_body = await request.json()
+        
+        # Forward the request to the backend
+        response = requests.post(
+            f"{BACKEND_BASE_URL}/api/v1/auth/login",
+            json=request_body,
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        )
+        
+        # Return the backend response
+        status_code = response.status_code
+        response_data = response.json()
+        
+        # Log the login result
+        if status_code == 200:
+            logger.info(f"User login successful: {request_body.get('email')}")
+            
+            # Store the token for later use in agent-backend communication
+            if response_data.get('accessToken'):
+                token = response_data.get('accessToken')
+                formatted_token = token if token.startswith('Bearer ') else f"Bearer {token}"
+                os.environ["CURRENT_AUTH_TOKEN"] = formatted_token
+                logger.info("Saved authentication token for backend communication")
+        else:
+            logger.error(f"Login failed: {status_code} - {response_data}")
+        
+        return JSONResponse(
+            status_code=status_code,
+            content=response_data
+        )
+    except Exception as e:
+        logger.error(f"Error processing login: {str(e)}")
+        logger.error(traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"message": f"Internal server error: {str(e)}"}
+        )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5001) 
