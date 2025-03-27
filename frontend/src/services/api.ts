@@ -275,57 +275,32 @@ export const conversationApi = {
   
   updateConversationTitle: async (conversationId: string, userQuery: string): Promise<string> => {
     try {
-      console.log('Generating title for conversation:', conversationId);
-      console.log('Original user query for title generation:', userQuery.substring(0, 50) + (userQuery.length > 50 ? '...' : ''));
-      
-      // Skip backend call if the conversationId is invalid (draft or empty)
-      if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-        console.log('Skipping backend title update for invalid conversationId, generating title locally');
-        // Generate title using Gemini Pro in the frontend only
+        console.log('Generating title for conversation:', conversationId);
+        
+        // Use a simple fallback title if the conversation is invalid or a draft
+        if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
+            console.log('Using simple title for invalid/draft conversation');
+            return userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
+        }
+        
+        // Create a simple title from the first message
+        const simpleTitle = userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
+        
         try {
-          const generatedTitle = await generateConversationTitle(userQuery);
-          console.log('Title generated locally:', generatedTitle);
-          return generatedTitle || (userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery);
-        } catch (localError) {
-          console.error('Failed to generate title locally:', localError);
-          return userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
+            // Try to update the title on the backend
+            console.log('Updating title on backend:', simpleTitle);
+            const response = await api.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
+                title: simpleTitle
+            });
+            console.log('Title updated on backend:', response.data.title);
+            return response.data.title;
+        } catch (backendError) {
+            console.warn('Backend title update failed, using simple title:', backendError);
+            return simpleTitle;
         }
-      }
-      
-      // First generate title using Gemini Pro in the frontend
-      let generatedTitle;
-      try {
-        generatedTitle = await generateConversationTitle(userQuery);
-        console.log('Generated title with Gemini Pro:', generatedTitle);
-        
-        // If title generation failed, use a fallback
-        if (!generatedTitle) {
-          console.warn('Gemini title generation returned empty result, using fallback');
-          generatedTitle = userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
-        }
-      } catch (titleError) {
-        console.error('Error generating title with Gemini:', titleError);
-        generatedTitle = userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
-      }
-      
-      // Then update the title on the backend (if the endpoint is available)
-      try {
-        console.log('Updating title on backend for conversation:', conversationId);
-        console.log('Title to be sent to backend:', generatedTitle);
-        
-        const response = await api.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
-          title: generatedTitle
-        });
-        console.log('Title updated on backend:', response.data.title);
-        return response.data.title;
-      } catch (backendError) {
-        console.warn('Backend title update failed, using frontend generated title:', backendError);
-        return generatedTitle;
-      }
     } catch (error) {
-      console.error('Failed to generate conversation title:', error);
-      // If API fails, generate a simple title from the query
-      return userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
+        console.error('Failed to generate/update title:', error);
+        return 'New Conversation';
     }
   },
   
