@@ -9,8 +9,7 @@ import { RegisterPage } from '@/pages/RegisterPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
-import { DebugPage } from '@/pages/DebugPage';
-import { useStore } from '@/store/useStore';
+import { useStore, type Conversation } from '@/store/useStore';
 import { conversationApi } from '@/services/api';
 import { ResetButton } from '@/components/ResetButton';
 
@@ -181,7 +180,15 @@ export const App: React.FC = () => {
             const savedConversation = conversations.find(c => c.conversationId === savedConversationId);
             if (savedConversation) {
               console.log('Found saved conversation, restoring:', savedConversation);
-              setCurrentConversation(savedConversation);
+              // Map the API response to our Conversation type
+              const mappedConversation: Conversation = {
+                conversationId: savedConversation.conversationId,
+                title: savedConversation.title || 'Untitled Conversation',
+                managerType: savedConversation.managerType,
+                createdAt: savedConversation.createdAt,
+                userId: savedConversation.userId
+              };
+              setCurrentConversation(mappedConversation);
             } else {
               console.warn('Saved conversation ID not found in API response');
             }
@@ -241,8 +248,6 @@ export const App: React.FC = () => {
                   user && hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />
                 } 
               />
-              {/* Debug page - always accessible */}
-              <Route path="/debug" element={<DebugPage />} />
               <Route path="/auth/activate" element={<ActivationPage />} />
               <Route path="/auth/google/callback" element={<OAuthCallback />} />
               <Route path="/auth/github/callback" element={<OAuthCallback />} />

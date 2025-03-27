@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
-import { EthicalGuidelines } from '../guidelines/EthicalGuidelines';
+import { GuidelinesPanel } from '../guidelines/GuidelinesPanel';
 import { useStore } from '@/store/useStore';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -170,9 +170,7 @@ export const MainLayout: React.FC = () => {
             <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
           </button>
           
-          <div className="h-full overflow-y-auto p-4 pt-12 md:pt-4">
-            <EthicalGuidelines />
-          </div>
+          <GuidelinesPanel />
         </div>
         
         {/* Backdrop for mobile guidelines */}

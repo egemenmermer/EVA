@@ -223,29 +223,21 @@ export const Sidebar: React.FC = () => {
 
   const handleNewChat = async () => {
     try {
-      // Instead of immediately creating a conversation on the server,
-      // create a temporary draft conversation object
+      const timestamp = new Date().toISOString();
+      // Create a temporary draft conversation object
       const draftConversation: Conversation = {
-        conversationId: `draft-${uuidv4()}`, // Use a special prefix to identify draft conversations
-        title: '', // No title yet
-        lastMessage: '',
-        lastMessageDate: new Date().toISOString(),
+        conversationId: `draft-${uuidv4()}`,
+        title: 'New Conversation',
         managerType: managerType,
-        isDraft: true // Add a flag to indicate this is a draft conversation
+        createdAt: timestamp,
+        lastMessage: '',
+        lastMessageDate: timestamp,
+        isDraft: true
       };
       
       console.log('Creating draft conversation:', draftConversation);
-      
-      // Set as current conversation
       setCurrentConversation(draftConversation);
-      
-      // We won't add it to the conversation list until it's saved on the server
-      // This mimics ChatGPT's behavior
-      
-      // Clear existing messages
       useStore.getState().setMessages([]);
-      
-      // Close mobile sidebar if open
       setMobileOpen(false);
       
     } catch (err: any) {
@@ -260,7 +252,7 @@ export const Sidebar: React.FC = () => {
   };
 
   const handleSelectConversation = (conversation: Conversation) => {
-    // Skip if trying to select an invalid conversation ID (non-UUID)
+    // Skip if trying to select an invalid conversation ID
     if (conversation.conversationId && (
       conversation.conversationId.includes('mock-') || 
       (conversation.conversationId.startsWith('draft-') && !conversation.isDraft)
@@ -270,16 +262,18 @@ export const Sidebar: React.FC = () => {
       return;
     }
     
-    console.log('Selected conversation:', conversation.conversationId);
+    const timestamp = new Date().toISOString();
+    // Ensure all fields are present with defaults
+    const mappedConversation: Conversation = {
+      ...conversation,
+      title: conversation.title || 'Untitled Conversation',
+      createdAt: conversation.createdAt || timestamp,
+      lastMessageDate: conversation.lastMessageDate || conversation.createdAt || timestamp
+    };
     
-    // Set the selected conversation
-    setCurrentConversation(conversation);
-    
-    // Save current conversation ID to localStorage
-    localStorage.setItem('current-conversation-id', conversation.conversationId);
-    console.log('Saved selected conversation ID to localStorage:', conversation.conversationId);
-    
-    // Close mobile sidebar if open
+    console.log('Selected conversation:', mappedConversation.conversationId);
+    setCurrentConversation(mappedConversation);
+    localStorage.setItem('current-conversation-id', mappedConversation.conversationId);
     setMobileOpen(false);
   };
 
