@@ -56,11 +56,12 @@ eva/
 ## Technology Stack
 
 ### Agent (Python)
+- Python 3.12
 - FastAPI for API endpoints
 - OpenAI GPT-4 for language processing
-- OpenAI Ada for embeddings
-- FAISS for similarity search
-- PyTorch for machine learning
+- LangChain for AI framework
+- LangChain Community and FAISS for vector search
+- Uvicorn for ASGI server
 
 ### Backend (Java)
 - Spring Boot 3.x
@@ -68,6 +69,7 @@ eva/
 - PostgreSQL database
 - Flyway migrations
 - Maven for dependency management
+- JDK 17+
 
 ### Frontend (TypeScript)
 - React 18
@@ -75,44 +77,52 @@ eva/
 - Tailwind CSS
 - Zustand for state management
 - React Query for data fetching
+- Vite for build tooling
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.8+
-- Java 23
+- Python 3.12+
+- Java JDK 17+
 - Node.js 18+
-- PostgreSQL 12+
+- PostgreSQL 15+
 
 ### Environment Setup
 
 1. **Clone the repository**
    ```bash
    git clone https://github.com/egemenmermer/vu-thesis.git
-   cd eva
+   cd vu-thesis
    ```
 
-2. **Set up the Agent**
+2. **Set up the Agent (Python 3.12)**
    ```bash
    cd agent
-   python -m venv venv
+   
+   # Create virtual environment
+   python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install dependencies
    pip install -r requirements.txt
    
-   # Configure .env
-   cp .env.example .env
-   # Add your OpenAI API key and other configuration
+   # Configure environment
+   mkdir -p logs
+   cp .env.example .env  # If .env.example exists
+   # Edit .env to add your OpenAI API key
+   
+   # Run the application
+   python -m uvicorn main:app --reload --port 5001 --log-level info
    ```
 
 3. **Set up the Backend**
    ```bash
    cd backend
    
-   # Configure .env
-   cp .env.example .env
-   # Add your database and API configuration
+   # Configure application.properties or .env
+   # Edit src/main/resources/application.properties with database settings
    
-   # Run the application
+   # Run the application with Maven
    ./mvnw spring-boot:run
    ```
 
@@ -122,26 +132,65 @@ eva/
    npm install
    
    # Configure .env
-   cp .env.example .env
-   # Add your API URLs and OAuth credentials
+   cp .env.example .env  # If .env.example exists
+   # Edit .env with API URLs 
    
    # Start the development server
    npm run dev
    ```
 
+5. **Verify All Services**
+   
+   After starting all components, verify they're running:
+   
+   - Agent API: http://localhost:5001/api/health
+   - Backend API: http://localhost:8443/api/health
+   - Frontend: http://localhost:5173
+
 ## Environment Variables
 
 ### Agent (.env)
-```env
+```
 OPENAI_API_KEY=your_openai_api_key_here
+BACKEND_URL=http://localhost:8443
+```
+
+### Backend (application.properties)
+```properties
+# Database Configuration
+spring.datasource.url=jdbc:postgresql://localhost:5432/eva
+spring.datasource.username=postgres
+spring.datasource.password=yourpassword
+
+# JWT Configuration
+app.jwt.secret=your-secret-key
+app.jwt.expiration=86400000
 ```
 
 ### Frontend (.env)
-```env
-VITE_API_URL=http://localhost:8443
-VITE_GOOGLE_CLIENT_ID=your_client_id
-VITE_GITHUB_CLIENT_ID=your_client_id
 ```
+VITE_API_URL=http://localhost:5001
+```
+
+## Troubleshooting Common Issues
+
+### Python 3.12 Compatibility Issues
+If you encounter module not found errors with Python 3.12:
+1. Ensure you have created and activated the virtual environment
+2. Make sure all dependencies are installed with `pip install -r requirements.txt`
+3. If using a system Python, you may need to add `--break-system-packages` flag
+
+### Connection Issues
+If components can't communicate with each other:
+1. Verify all services are running (check health endpoints)
+2. Ensure correct ports are configured (5001 for agent, 8443 for backend, 5173 for frontend)
+3. Check CORS configuration in the backend if needed
+
+### JWT Authentication Issues
+If experiencing login or authentication problems:
+1. Clear browser localStorage and cookies
+2. Verify JWT secret key matches between agent and backend
+3. Check token expiration times
 
 ## Development Workflow
 
@@ -149,6 +198,7 @@ VITE_GITHUB_CLIENT_ID=your_client_id
    ```bash
    # Agent tests
    cd agent
+   source venv/bin/activate
    pytest
    
    # Backend tests
@@ -165,6 +215,19 @@ VITE_GITHUB_CLIENT_ID=your_client_id
    - Java: Google Java Style
    - TypeScript: ESLint + Prettier
 
+## Deployment
+
+### Docker (Optional)
+Docker support is available for containerized deployment:
+
+```bash
+# Build containers
+docker-compose build
+
+# Start all services
+docker-compose up -d
+```
+
 ## Contributing
 
 1. Fork the repository
@@ -180,6 +243,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [OpenAI GPT](https://openai.com/) for AI capabilities
+- [LangChain](https://langchain.com/) for AI framework
 - [ACM Code of Ethics](https://www.acm.org/code-of-ethics)
 - [IEEE Code of Ethics](https://www.ieee.org/about/corporate/governance/p7-8.html)
 
