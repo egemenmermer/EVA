@@ -16,6 +16,17 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
+  },
+  validateStatus: (status) => {
+    // Consider 401 as a valid status for authentication endpoints
+    if (status === 401) {
+      const url = window.location.pathname;
+      // Don't redirect on login/register pages
+      if (url === '/login' || url === '/register') {
+        return true;
+      }
+    }
+    return status >= 200 && status < 300;
   }
 });
 
@@ -79,12 +90,13 @@ export const authApi = {
     try {
       console.log('Attempting login for:', email);
       const response = await api.post<LoginResponseDTO>('/api/v1/auth/login', { email, password });
-      console.log('Login successful:', response.data.user.email);
+      console.log('Login successful:', response.data.userDetails.email);
       
-      // Store token
-      const token = response.data.token;
+      // Store token with Bearer prefix
+      const token = response.data.accessToken;
       if (token) {
-        localStorage.setItem('token', token);
+        const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        localStorage.setItem('token', formattedToken);
       }
       
       return response.data;

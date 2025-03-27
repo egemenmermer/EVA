@@ -5,8 +5,8 @@ import { useStore } from '@/store/useStore';
 import { LoginResponseDTO } from '@/types/api';
 
 // Format token with Bearer prefix if needed
-const formatToken = (token: string) => {
-  if (!token) return null;
+const formatToken = (token: string): string => {
+  if (!token) return '';
   return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 };
 
@@ -26,9 +26,17 @@ export const useAuth = () => {
       console.log('Attempting login for:', email);
       const response = await authApi.login(email, password);
       
+      // Format token with Bearer prefix if needed
+      const formattedToken = formatToken(response.accessToken);
+      
       // Update global state with user data
       setUser(response.userDetails);
-      setToken(response.accessToken);
+      setToken(formattedToken);
+      
+      // Store token in localStorage
+      if (formattedToken) {
+        localStorage.setItem('token', formattedToken);
+      }
       
       console.log('Login successful for:', response.userDetails.email);
       return response;

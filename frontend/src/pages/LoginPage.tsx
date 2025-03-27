@@ -20,12 +20,29 @@ const ConnectionStatus: React.FC = () => {
       setStatus('checking');
       setMessage('Checking API connection...');
       
-      const response = await axios.get(baseUrl, { timeout: 5000 });
-      setStatus('connected');
-      setMessage(`API connected (${response.status})`);
+      const response = await axios.get(baseUrl, {
+        validateStatus: (status) => {
+          // Accept both 200-299 and 401 as valid responses
+          // 401 means the API is running but we're not authenticated yet
+          return (status >= 200 && status < 300) || status === 401;
+        }
+      });
+
+      // If we get a 401, that's actually good - it means the API is running
+      if (response.status === 401) {
+        setStatus('connected');
+        setMessage('API available (requires authentication)');
+      } else {
+        setStatus('connected');
+        setMessage(`API connected (${response.status})`);
+      }
     } catch (error: any) {
       setStatus('error');
-      setMessage(`Cannot connect to API: ${error.message}`);
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Cannot connect to API: Network Error - Is the backend running?');
+      } else {
+        setMessage(`Cannot connect to API: ${error.message}`);
+      }
     }
   };
   
