@@ -88,7 +88,7 @@ eva/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/egemenmermer/eva.git
+   git clone https://github.com/egemenmermer/vu-thesis.git
    cd eva
    ```
 
