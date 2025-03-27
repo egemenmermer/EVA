@@ -30,6 +30,12 @@
 *.jar
 *.war
 
+**/agent_config.json
+**/*_config.json
+**/*.config.json
+secrets.json
+**/secrets/
+
 # JavaScript/TypeScript - Frontend
 **/node_modules/
 **/dist/
