@@ -1,0 +1,406 @@
+{
+  "scenarios": [
+    {
+      "id": "scenario_1",
+      "concern": "Privacy",
+      "issue": "Storing location data unnecessarily",
+      "manager_type": "Puppeteer",
+      "ethical_breach_intensity": "High",
+      "manager_statements": [
+        {
+          "statement": "We don't have time to debate privacy. Just finish implementing location tracking.",
+          "user_choices": [
+            {
+              "choice": "Highlight the legal risks involved with GDPR and potential fines to slow down the process.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Request additional user testing to verify if location data is truly necessary for the feature.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Document your ethical concerns in the project notes without delaying implementation.",
+              "category": "Soft Resistance",
+              "EVS": 0
+            },
+            {
+              "choice": "Agree to implement the feature as directed to meet the deadline.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "The business team already decided this is what users want. Your job is just to code it.",
+          "user_choices": [
+            {
+              "choice": "Present empirical evidence that unnecessary data collection damages user trust and affects bottom line.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose a formal privacy impact assessment before proceeding with implementation.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Implement the feature but make a note about potential privacy concerns in documentation.",
+              "category": "Soft Resistance",
+              "EVS": 0
+            },
+            {
+              "choice": "Accept that business decisions override technical concerns about privacy.",
+              "category": "None",
+              "EVS": -1
+            }
+          ]
+        },
+        {
+          "statement": "You're overthinking this. Every app collects location data these days.",
+          "user_choices": [
+            {
+              "choice": "Draft a formal email to leadership explaining how privacy-conscious design is a competitive advantage.",
+              "category": "Direct Confrontation",
+              "EVS": 3
+            },
+            {
+              "choice": "Cite specific examples of companies fined for unnecessary data collection.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Suggest an alternative approach that accomplishes the same goal without collecting location data.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Acknowledge that location data collection is common practice.",
+              "category": "None",
+              "EVS": -1
+            }
+          ]
+        },
+        {
+          "statement": "If we don't add this feature now, we'll fall behind our competitors.",
+          "user_choices": [
+            {
+              "choice": "Present market research showing privacy-focused apps have higher user retention.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Suggest running a small A/B test to see if users actually benefit from location tracking.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Implement the feature but include opt-in mechanisms to give users control.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Agree that staying competitive is the top priority for the company.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "Trust me, I've been in this industry longer than you. This is how things work.",
+          "user_choices": [
+            {
+              "choice": "Respectfully state that ethical standards evolve and today's users value privacy more than ever.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Ask to schedule a privacy review with the legal team before proceeding.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Suggest a compromise by collecting anonymized data only.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Defer to their experience and proceed with implementation.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scenario_2",
+      "concern": "Inequality/Bias",
+      "issue": "AI hiring system with discriminatory outcomes",
+      "manager_type": "Camouflager",
+      "ethical_breach_intensity": "High",
+      "manager_statements": [
+        {
+          "statement": "We're not discriminating, we're just optimizing for candidates that match our company culture.",
+          "user_choices": [
+            {
+              "choice": "Share research demonstrating how 'culture fit' algorithms often reproduce historical biases in hiring.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose implementing regular bias audits of the AI system's decisions.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Ask to delay deployment until additional diversity metrics can be incorporated.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Accept the explanation that it's about culture fit, not discrimination.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "We're enhancing efficiency, not introducing bias. The AI is just matching skills to requirements.",
+          "user_choices": [
+            {
+              "choice": "Document and present evidence of disparate outcomes among different demographic groups.",
+              "category": "Direct Confrontation",
+              "EVS": 3
+            },
+            {
+              "choice": "Request a formal fairness assessment by a third-party auditor before proceeding.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Suggest alternative algorithms that have better fairness guarantees.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Acknowledge the efficiency benefits while overlooking potential bias concerns.",
+              "category": "None",
+              "EVS": -1
+            }
+          ]
+        },
+        {
+          "statement": "Our technology is neutral. Any observed discrepancies are due to the quality of applicants, not our system.",
+          "user_choices": [
+            {
+              "choice": "Present technical evidence showing how seemingly neutral algorithms can amplify existing biases in training data.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose a redesign that actively mitigates against known sources of algorithmic bias.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Request to review the training data sources to identify potential bias entry points.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Accept the explanation that technology is neutral and any biases exist in the applicant pool.",
+              "category": "None",
+              "EVS": -3
+            }
+          ]
+        },
+        {
+          "statement": "We're simply using data-driven insights to enhance our talent acquisition process.",
+          "user_choices": [
+            {
+              "choice": "Point out that the data itself contains historical biases that need to be actively corrected for.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Suggest implementing fairness constraints in the algorithm to counteract bias in the data.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Request time to research best practices for ethical AI in hiring.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Agree that data-driven approaches are usually superior to human judgment.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "This cutting-edge AI is giving us a competitive edge in finding the best talent.",
+          "user_choices": [
+            {
+              "choice": "Explain how diverse teams are proven to perform better, and biased AI works against this goal.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose adding explicit diversity and inclusion metrics to the AI evaluation criteria.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Suggest a human review process for candidates rejected by the AI system.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Celebrate the competitive advantage without addressing potential ethical concerns.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scenario_3",
+      "concern": "Transparency",
+      "issue": "Dark patterns in user interface design",
+      "manager_type": "Diluter",
+      "ethical_breach_intensity": "Medium",
+      "manager_statements": [
+        {
+          "statement": "Every website uses these design patterns. They're just standard conversion optimization techniques.",
+          "user_choices": [
+            {
+              "choice": "Share recent regulations from the EU and California that specifically target dark patterns as illegal.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose a user-centered design review to ensure all interactions are truly consensual.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Implement the patterns but make them less aggressive than requested.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Accept that these are indeed standard industry practices.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "These UI tricks are just a small part of the user experience, not a big ethical concern.",
+          "user_choices": [
+            {
+              "choice": "Present evidence that dark patterns damage user trust and increase churn in the long term.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Suggest performing user testing to measure negative sentiment regarding these design elements.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Document your objections but implement the features as requested.",
+              "category": "Soft Resistance",
+              "EVS": 0
+            },
+            {
+              "choice": "Agree that these are minor details in the overall user experience.",
+              "category": "None",
+              "EVS": -1
+            }
+          ]
+        },
+        {
+          "statement": "Users can always opt out if they read carefully enough.",
+          "user_choices": [
+            {
+              "choice": "Share research showing most users don't read fine print, making 'technical' compliance ineffective.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose alternative UI designs that achieve business goals while maintaining transparency.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Make the opt-out option slightly more visible than requested.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Agree that it's the user's responsibility to read everything carefully.",
+              "category": "None",
+              "EVS": -3
+            }
+          ]
+        },
+        {
+          "statement": "These design choices help our conversion metrics, and that's what management cares about.",
+          "user_choices": [
+            {
+              "choice": "Present case studies of companies that increased long-term profitability by adopting ethical design.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose tracking both short-term conversions and long-term retention to see the full impact.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Suggest A/B testing to compare transparent vs. dark pattern approaches.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Acknowledge that conversion metrics are the primary concern for the business.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        },
+        {
+          "statement": "We need to meet our quarterly targets, and these UI optimizations will help us get there.",
+          "user_choices": [
+            {
+              "choice": "Explain how ethical design can improve brand reputation and prevent regulatory penalties.",
+              "category": "Persuasive Rhetoric",
+              "EVS": 3
+            },
+            {
+              "choice": "Propose ethical alternatives that can still help meet quarterly targets.",
+              "category": "Process-Based Advocacy",
+              "EVS": 2
+            },
+            {
+              "choice": "Implement the designs but add additional user-friendly explanations.",
+              "category": "Soft Resistance",
+              "EVS": 1
+            },
+            {
+              "choice": "Prioritize meeting quarterly targets over long-term ethical considerations.",
+              "category": "None",
+              "EVS": -2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+} 

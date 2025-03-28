@@ -10,6 +10,8 @@ EVA consists of three main components:
 2. **Backend (Spring Boot)** - REST API for user management and conversation handling
 3. **Frontend (React + TypeScript)** - Modern, responsive UI for interacting with EVA
 
+The system offers an interactive environment where software engineers can practice ethical decision-making through simulated scenarios and conversations with AI-powered manager personas.
+
 ## Features
 
 - 🤖 **AI-Powered Guidance**: Utilizes OpenAI GPT models for intelligent, contextual responses
@@ -18,39 +20,31 @@ EVA consists of three main components:
 - 🔄 **Interactive Learning**: Real-time feedback and scoring on ethical decision-making
 - 🛡️ **Secure Authentication**: JWT-based auth with Google OAuth integration
 - 🌓 **Dark Mode Support**: Full dark mode implementation for better user experience
+- 🎮 **Practice Mode**: Interactive scenario-based practice with different manager types and ethical dilemmas
+- 💬 **AI-Powered Ethical Conversations**: Engage in realistic ethical discussions with various manager personas
+- 🧠 **Ethical Reasoning Framework**: Incorporates established ethical principles and reasoning techniques
+- 📊 **Performance Tracking**: Monitor and improve your ethical reasoning skills over time
 
 ## Project Structure
 
 ```
-eva/
-├── agent/                 # Python AI Agent
-│   ├── agents/           # Agent implementations
-│   ├── data_processing/  # Data processing utilities
-│   ├── embeddings/       # OpenAI embeddings
-│   ├── evaluation/       # Evaluation tools
-│   ├── retriever/        # Search and retrieval
-│   ├── models.py         # Core model definitions
-│   ├── main.py          # FastAPI application
-│   └── requirements.txt  # Python dependencies
-│
-├── backend/              # Spring Boot Backend
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   └── resources/
-│   │   └── test/
-│   └── pom.xml          # Maven dependencies
-│
-└── frontend/            # React Frontend
-    ├── public/          # Static assets
-    ├── src/
-    │   ├── components/  # React components
-    │   ├── pages/       # Page components
-    │   ├── services/    # API services
-    │   ├── store/       # State management
-    │   └── types/       # TypeScript types
-    ├── .env            # Environment variables
-    └── package.json    # NPM dependencies
+.
+├── agent/                     # AI agent and practice module
+│   ├── app/                   # Main agent application code
+│   ├── practice_module/       # Ethical practice scenarios module
+│   │   ├── scenarios.json     # Ethical scenario definitions
+│   │   ├── evaluator.py       # Scenario evaluation logic
+│   │   ├── interaction_flow.py # Conversation flow management
+│   │   └── strategy_knowledge.py # Ethical strategies information
+│   ├── main.py                # Entry point for the AI agent
+│   └── ...
+├── backend/                   # Spring Boot backend service
+│   ├── src/                   # Source code
+│   └── ...
+├── frontend/                  # React frontend application
+│   ├── src/                   # Source code
+│   └── ...
+└── ...
 ```
 
 ## Technology Stack
@@ -147,11 +141,37 @@ eva/
    - Backend API: http://localhost:8443/api/health
    - Frontend: http://localhost:5173
 
+## Practice Module
+
+The practice module offers interactive scenario-based ethical decision-making practice. Key features include:
+
+- **Different Manager Types**: Practice handling ethical issues with various manager personalities:
+  - Puppeteer: Managers who directly pressure employees into unethical actions
+  - Camouflager: Managers who disguise unethical requests as standard business practices
+  - Diluter: Managers who acknowledge ethical concerns but minimize their importance
+
+- **Ethical Argumentation Framework**: Learn and practice different ethical advocacy strategies:
+  - Direct Confrontation: Explicitly challenging unethical directives
+  - Persuasive Rhetoric: Aligning ethical concerns with organizational goals
+  - Process-Based Advocacy: Using organizational processes to address ethical concerns
+  - Soft Resistance: Subtle approaches to mitigate ethical issues
+
+- **Scenario-Based Learning**: Practice with realistic scenarios covering privacy, bias, transparency, and other ethical concerns common in software engineering
+
+- **Feedback System**: Receive immediate feedback on your ethical choices with detailed evaluations and suggestions for improvement
+
+To use the practice module:
+```bash
+cd agent
+./practice_module/example.py
+```
+
 ## Environment Variables
 
 ### Agent (.env)
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_openai_api_key
+MODEL_NAME=gpt-4
 BACKEND_URL=http://localhost:8443
 ```
 
@@ -170,6 +190,7 @@ app.jwt.expiration=86400000
 ### Frontend (.env)
 ```
 VITE_API_URL=http://localhost:5001
+VITE_AGENT_URL=http://localhost:5001
 ```
 
 ## Troubleshooting Common Issues
