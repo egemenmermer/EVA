@@ -1,0 +1,25 @@
+# Configure language detection for repository
+
+# Mark JavaScript and TypeScript files as such
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Mark Java files as such
+*.java linguist-language=Java
+
+# Mark generated files as not countable towards language statistics
+frontend/build/** linguist-generated=true
+backend/target/** linguist-generated=true
+
+# Explicitly label Python files
+*.py linguist-language=Python
+
+# Adjust the weighting for large JSON files that skew the statistics
+agent/practice_module/scenarios.json linguist-documentation=true
+**/test/**/*.json linguist-documentation=true
+
+# Ensure documentation is not counted towards language statistics
+*.md linguist-documentation=true
+*.txt linguist-documentation=true 
