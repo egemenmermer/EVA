@@ -9,16 +9,37 @@
 # Mark Java files as such
 *.java linguist-language=Java
 
-# Mark generated files as not countable towards language statistics
-frontend/build/** linguist-generated=true
-backend/target/** linguist-generated=true
-
 # Explicitly label Python files
 *.py linguist-language=Python
 
+# Mark special files to ensure proper language detection
+frontend/**/*.ts linguist-detectable=true
+frontend/**/*.tsx linguist-detectable=true
+backend/src/**/*.java linguist-detectable=true
+
+# Mark generated files as not countable towards language statistics
+frontend/build/** linguist-generated=true
+backend/target/** linguist-generated=true
+**/node_modules/** linguist-vendored=true
+
+# Mark large Python files that might skew statistics
+agent/practice_module/evaluator.py linguist-vendored=false linguist-generated=false linguist-detectable=true
+agent/practice_module/interaction_flow.py linguist-vendored=false linguist-generated=false linguist-detectable=true
+agent/practice_module/strategy_knowledge.py linguist-vendored=false linguist-generated=false linguist-detectable=true
+
 # Adjust the weighting for large JSON files that skew the statistics
-agent/practice_module/scenarios.json linguist-documentation=true
+agent/practice_module/scenarios.json linguist-documentation=true linguist-detectable=false
 **/test/**/*.json linguist-documentation=true
+
+# Explicitly weigh language distribution
+*.py linguist-language=Python linguist-detectable=true
+*.java linguist-language=Java linguist-detectable=true
+*.ts linguist-language=TypeScript linguist-detectable=true
+*.tsx linguist-language=TypeScript linguist-detectable=true
+
+# Set vendored or generated code to be undetected in statistics
+**/venv/** linguist-vendored=true
+**/__pycache__/** linguist-generated=true
 
 # Ensure documentation is not counted towards language statistics
 *.md linguist-documentation=true
