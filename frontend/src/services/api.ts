@@ -74,6 +74,15 @@ export const authApi = {
       if (token) {
         const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         localStorage.setItem('token', formattedToken);
+        console.log('Token stored with format:', 
+          formattedToken.substring(0, 10) + '...' + formattedToken.substring(formattedToken.length - 5));
+        
+        // Log token format but mask most of it for security
+        const isBearer = formattedToken.startsWith('Bearer ');
+        const hasSpace = formattedToken.includes(' ');
+        console.log('Token format check - starts with Bearer:', isBearer, 'contains space:', hasSpace);
+      } else {
+        console.warn('No token received from login response');
       }
       
       return response.data;
@@ -362,4 +371,28 @@ export const feedbackApi = {
 // Helper function to generate IDs
 const generateId = () => {
   return crypto.randomUUID?.() || `msg-${Date.now()}`;
+};
+
+// Add utility function to check token validity
+export const verifyToken = async (): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found in localStorage');
+      return false;
+    }
+    
+    // Call the token verification endpoint
+    const response = await api.get<{status?: string; message?: string}>('/api/v1/auth/verify-token');
+    
+    if (response.data && response.data.status === 'ok') {
+      return true;
+    } else {
+      console.warn('Token verification failed:', response.data);
+      return false;
+    }
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return false;
+  }
 }; 

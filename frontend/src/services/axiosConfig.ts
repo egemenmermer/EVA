@@ -22,7 +22,17 @@ api.interceptors.request.use(
     
     // Set authorization header if token exists
     if (token) {
-      config.headers.Authorization = token;
+      // Make sure the token has the proper Bearer format
+      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      config.headers.Authorization = formattedToken;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Request with auth token:', config.url);
+      }
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Request without auth token:', config.url);
+      }
     }
     
     // Set content type and accept headers
@@ -60,8 +70,14 @@ api.interceptors.response.use(
     
     // If we receive a 401 Unauthorized error, clear token and redirect to login
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const token = localStorage.getItem('token');
+      console.error('Authentication error - current token:', token ? token.substring(0, 10) + '...' : 'none');
+      
+      // Show a more user-friendly message
+      if (window.confirm('Your session has expired. Please log in again.')) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);

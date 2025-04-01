@@ -10,7 +10,7 @@ import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore, type Conversation } from '@/store/useStore';
-import { conversationApi } from '@/services/api';
+import { conversationApi, verifyToken } from '@/services/api';
 import { ResetButton } from '@/components/ResetButton';
 
 // Configure the query client with better defaults for reliable data fetching
@@ -130,6 +130,24 @@ export const App: React.FC = () => {
       const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       setToken(formattedToken);
       
+      // Verify token at startup
+      verifyToken().then(isValid => {
+        if (!isValid) {
+          console.warn('Token verification failed on startup, clearing token');
+          localStorage.removeItem('token');
+          setToken(null);
+          setUser(null);
+          
+          // Only redirect if we're not already on login or landing page
+          const currentPath = window.location.pathname;
+          if (currentPath !== '/login' && currentPath !== '/' && !currentPath.startsWith('/landing')) {
+            window.location.href = '/login';
+          }
+        } else {
+          console.log('Token successfully verified at startup');
+        }
+      });
+      
       // Set a placeholder user if we don't have user data
       if (!user) {
         console.log('No user data in store, setting placeholder');
@@ -149,22 +167,29 @@ export const App: React.FC = () => {
     }
   }, [setToken, setUser, user]);
 
-  // Double check token presence periodically to prevent session loss
+  // Periodically verify token validity
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      const token = localStorage.getItem('token');
-      if (token && !user) {
-        console.log('Detected token but no user, restoring user data');
-        setUser({
-          id: 'session-recovery',
-          email: 'user@example.com',
-          fullName: 'User'
-        });
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    // Verify token every 10 minutes
+    const intervalId = setInterval(async () => {
+      const isValid = await verifyToken();
+      if (!isValid) {
+        console.warn('Periodic token verification failed, clearing token');
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+        
+        // Show notification and redirect if needed
+        if (window.confirm('Your session has expired. Please log in again.')) {
+          window.location.href = '/login';
+        }
       }
-    }, 5000);
+    }, 10 * 60 * 1000); // 10 minutes
     
     return () => clearInterval(intervalId);
-  }, [setUser, user]);
+  }, [setToken, setUser]);
 
   // Attempt to restore conversation on app startup
   useEffect(() => {
@@ -251,6 +276,9 @@ export const App: React.FC = () => {
               <Route path="/auth/activate" element={<ActivationPage />} />
               <Route path="/auth/google/callback" element={<OAuthCallback />} />
               <Route path="/auth/github/callback" element={<OAuthCallback />} />
+              
+              {/* Practice module route removed */}
+              
               {/* Catch all route - redirect to landing page if not logged in */}
               <Route path="*" element={
                 user && hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />

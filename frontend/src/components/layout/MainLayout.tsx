@@ -7,6 +7,7 @@ import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import PracticeModule from '../practice/PracticeModule';
 
 // Format token to include Bearer prefix if needed
 const formatToken = (token: string | null): string | null => {
@@ -14,7 +15,10 @@ const formatToken = (token: string | null): string | null => {
   return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 };
 
-export const MainLayout: React.FC = () => {
+interface MainLayoutProps {
+}
+
+export const MainLayout: React.FC<MainLayoutProps> = () => {
   const { darkMode, user, token, setUser, setToken } = useStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);

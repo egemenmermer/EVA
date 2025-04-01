@@ -17,8 +17,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -136,6 +139,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
         error.put("status", String.valueOf(status));
+        error.put("timestamp", new Date().toString());
+        error.put("path", ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRequestURI());
 
         objectMapper.writeValue(response.getWriter(), error);
     }

@@ -11,7 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { conversationApi } from '@/services/api';
 import type { ManagerType, Conversation } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
-import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot } from 'lucide-react';
+import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot, BookOpen } from 'lucide-react';
 import { TemperatureControl } from '@/components/controls/TemperatureControl';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,6 +21,11 @@ const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[
   { type: 'DILUTER', icon: null, label: 'Diluter' },
   { type: 'CAMOUFLAGER', icon: null, label: 'Camouflager' },
 ];
+
+// Type for the Sidebar component props
+interface SidebarProps {
+  // showPracticeLink prop removed
+}
 
 // Profile Menu component to be rendered in a portal
 const ProfileMenu = ({ 
@@ -111,8 +116,8 @@ const ProfileMenu = ({
   );
 };
 
-export const Sidebar: React.FC = () => {
-  const { setCurrentConversation, currentConversation, managerType, setManagerType, user, darkMode } = useStore();
+export const Sidebar: React.FC<SidebarProps> = () => {
+  const { setCurrentConversation, currentConversation, managerType, setManagerType, user, darkMode, setMessages } = useStore();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -230,14 +235,18 @@ export const Sidebar: React.FC = () => {
         title: 'New Conversation',
         managerType: managerType,
         createdAt: timestamp,
-        lastMessage: '',
-        lastMessageDate: timestamp,
         isDraft: true
       };
       
       console.log('Creating draft conversation:', draftConversation);
+      
+      // Clear messages first
+      setMessages([]);
+      
+      // Then set the new conversation
       setCurrentConversation(draftConversation);
-      useStore.getState().setMessages([]);
+      
+      // Close mobile sidebar if open
       setMobileOpen(false);
       
     } catch (err: any) {
@@ -327,36 +336,38 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col sidebar-container">
-      {/* New Chat Button */}
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* New Chat Button only (practice button removed) */}
+      <div className="flex flex-col p-3 gap-2">
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-between p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
         >
-          <span className="font-medium">New chat</span>
-          <HiPlus size={20} />
+          <HiPlus size={18} />
+          <span>New Chat</span>
         </button>
       </div>
 
-      {/* Manager Type Selector - Moved to the top */}
-      <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+      {/* Manager Type Selector - unchanged */}
+      <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Manager Type
-        </div>
-        <div className="space-y-1">
-          {managerTypes.map((item) => (
+        </label>
+        <div className="flex flex-col gap-1">
+          {managerTypes.map((type) => (
             <button
-              key={item.type}
-              onClick={() => setManagerType(item.type)}
-              className={cn(
-                "w-full text-left px-3 py-2 rounded-md flex items-center space-x-2 text-sm",
-                managerType === item.type 
-                  ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              )}
+              key={type.type}
+              className={`flex items-center p-2 rounded-md transition-colors ${
+                managerType === type.type
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-200'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+              onClick={() => setManagerType(type.type)}
             >
-              <span>{item.label}</span>
+              <div className="w-5 h-5 flex items-center justify-center mr-2">
+                {type.icon}
+              </div>
+              <span>{type.label}</span>
             </button>
           ))}
         </div>

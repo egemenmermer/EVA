@@ -995,61 +995,27 @@ Please describe the ethical concern you'd like to discuss."""
             logger.error(f"Error adding message to history: {str(e)}")
 
     def _initialize_knowledge_base(self, index_dir: str):
-        """Initialize the knowledge base from documents."""
+        """Initialize the knowledge base from a saved FAISS index."""
         try:
-            # Create a faiss vectorstore from documents if one doesn't exist
-            index_path = Path(index_dir)
-            if not index_path.exists():
-                logger.error(f"Index directory does not exist: {index_dir}")
-                self.vectorstore = None
-                self.qa_chain = None
-                return
-                
-            # Load existing index
-            try:
-                logger.info(f"Loading vector store from {index_dir}")
-                import faiss
-                from langchain_community.vectorstores import FAISS
-                from langchain_openai import ChatOpenAI
-                
-                embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
-                self.vectorstore = FAISS.load_local(index_dir, embeddings)
-                logger.info(f"Successfully loaded vector store with {self.vectorstore._index.ntotal} documents")
-                
-                # Create a retrieval QA chain using the vectorstore
-                from langchain.chains.question_answering import load_qa_chain
-                
-                # Create a chain using the same LLM as the conversation
-                qa_llm = ChatOpenAI(
-                    model_name=self.model_name,
-                    temperature=0.3,  # Lower temperature for more factual responses
-                    openai_api_key=self.openai_api_key
-                )
-                
-                # Create the QA chain with the LLM
-                qa_chain = load_qa_chain(qa_llm, chain_type="stuff")
-                
-                # Create a retrieval qa chain that combines retrieval and QA
-                from langchain.chains import RetrievalQA
-                
-                self.qa_chain = RetrievalQA.from_chain_type(
-                    llm=qa_llm,
-                    chain_type="stuff",
-                    retriever=self.vectorstore.as_retriever(
-                        search_type="similarity",
-                        search_kwargs={"k": 4}
-                    ),
-                    return_source_documents=True
-                )
-                
-                logger.info("Successfully initialized QA chain")
-                
-            except Exception as e:
-                logger.error(f"Error loading vector store: {str(e)}")
-                self.vectorstore = None
-                self.qa_chain = None
-                
+            logger.info(f"Loading vector store from {index_dir}")
+            
+            # Load the FAISS index with safe deserialization enabled
+            self.vectorstore = FAISS.load_local(
+                index_dir,
+                OpenAIEmbeddings(openai_api_key=self.openai_api_key),
+                allow_dangerous_deserialization=True  # Enable safe deserialization
+            )
+            
+            # Initialize the QA chain
+            self.qa_chain = RetrievalQA.from_chain_type(
+                llm=self.llm,
+                chain_type="stuff",
+                retriever=self.vectorstore.as_retriever(),
+                return_source_documents=True
+            )
+            
+            logger.info("Successfully loaded knowledge base")
         except Exception as e:
-            logger.error(f"Error initializing knowledge base: {str(e)}")
+            logger.error(f"Error loading vector store: {str(e)}")
             self.vectorstore = None
             self.qa_chain = None 

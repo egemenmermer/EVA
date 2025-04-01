@@ -81,4 +81,15 @@ public class AuthenticationController {
             );
         }
     }
+
+    @GetMapping("/verify-token")
+    public ResponseEntity<?> verifyToken() {
+        // If this endpoint is reached, it means the token is valid
+        // because the JWT filter would have rejected any invalid tokens
+        logger.debug("Token verification successful");
+        return ResponseEntity.ok(Map.of(
+            "status", "ok",
+            "message", "Token is valid"
+        ));
+    }
 }
