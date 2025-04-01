@@ -20,6 +20,7 @@ from langchain.schema import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from fastapi.responses import JSONResponse
 from practice_module import InteractionFlow, StrategyKnowledge
+import re
 
 # Load environment variables
 load_dotenv()
@@ -345,104 +346,52 @@ async def generate_response(
                 createdAt=datetime.utcnow().isoformat(),
                 inPracticeMode=False
             )
+        
+        # Check if temperature is provided in query
+        if query.temperature is not None:
+            logger.info(f"Using temperature from request: {query.temperature}")
+            temperature = query.temperature
+        
+        # Process the query with the agent
+        try:
+            response = await process_query_stateless(agent, content, conversation_id, temperature)
             
-        if content.strip().lower() in ["hey", "hello", "hi", "greetings", "hello there"]:
-            logger.info("Received greeting-only message, providing minimal response")
+            # Make sure the response is structured properly and contains the practice prompt
+            response_content = response.agentResponse
+            if response_content and not "Would you like to practice this scenario with simulated manager responses?" in response_content:
+                response_content = response_content.rstrip()
+                if not response_content.endswith("?"):
+                    response_content += "."
+                response_content += "\n\nWould you like to practice this scenario with simulated manager responses? (yes/no)"
+                logger.info("Added practice prompt to response in generate_response")
+                
+                # Update the response with the modified content
+                response.agentResponse = response_content
+            
+            logger.info(f"Processed response (first 50 chars): {response.agentResponse[:50]}...")
+            return response
+        except Exception as e:
+            logger.error(f"Error processing query: {str(e)}")
+            logger.error(traceback.format_exc())
             return ConversationContentResponseDTO(
                 conversationId=conversation_id,
-                agentResponse="Hello! How can I help you with ethical decision-making today?",
+                agentResponse="""I apologize, but I encountered an error processing your request. 
+
+Please try rephrasing your question or ask something different.
+
+Would you like to practice this scenario with simulated manager responses? (yes/no)""",
                 createdAt=datetime.utcnow().isoformat(),
                 inPracticeMode=False
             )
-        
-        # Log the manager type but DON'T use it to change the response
-        if manager_type:
-            logger.info(f"Using manager type {manager_type} but not mentioning it in response")
-        
-        # Try to get temperature from the query object if it has it
-        if hasattr(query, "temperature"):
-            try:
-                temp_value = float(query.temperature)
-                if 0 <= temp_value <= 1:
-                    temperature = temp_value
-                    logger.info(f"Using temperature from request: {temperature}")
-            except (ValueError, TypeError):
-                pass
-        
-        llm = ChatOpenAI(
-            model_name="gpt-3.5-turbo",
-            temperature=temperature,
-            openai_api_key=os.getenv('OPENAI_API_KEY')
-        )
-        
-        # Create a system prompt that does NOT incorporate the manager type
-        system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
-        Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
-        Focus on helping the user understand ethical implications and make informed decisions.
-        
-        IMPORTANT INSTRUCTIONS:
-        - NEVER mention any "interaction style" or "manager type" in your responses
-        - Do not use generic greetings like "Hello! How can I assist you today?"
-        - Do not acknowledge any specific style or type in your responses
-        - Respond directly to the user's ethical question without prefacing
-        - Never refer to yourself as having a "PUPPETEER", "DILUTER", or "CAMOUFLAGER" style
-        """
-        
-        # Make a direct call to the LLM
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": query.userQuery}
-        ]
-        
-        # Process the query with proper error handling
-        try:
-            response = llm.predict_messages(messages)
-            content = response.content
-            logger.info(f"Generated response (first 50 chars): {content[:50]}...")
-            
-            # Check if the response contains any reference to manager types and regenerate if needed
-            if any(style in content for style in ["PUPPETEER", "puppeteer", "Puppeteer", "DILUTER", "diluter", "Diluter", "CAMOUFLAGER", "camouflager", "Camouflager"]):
-                logger.warning("Response contained manager type references. Regenerating...")
-                
-                # Add more explicit instructions
-                stronger_message = system_message + """
-                
-                CRITICAL: Your previous response contained references to manager types or interaction styles.
-                DO NOT mention "PUPPETEER", "DILUTER", "CAMOUFLAGER" or any variations of these terms in your response.
-                Focus ONLY on addressing the ethical question.
-                """
-                
-                # Regenerate with stronger instructions
-                response = llm.predict_messages([
-                    {"role": "system", "content": stronger_message},
-                    {"role": "user", "content": query.userQuery}
-                ])
-                content = response.content
-                logger.info("Regenerated response without style references")
-            
-        except Exception as llm_error:
-            logger.error(f"Error from LLM: {str(llm_error)}")
-            content = """I apologize, but I encountered an error generating a response. 
-
-Here are some general ethical principles to consider:
-- Respect for autonomy and individual rights
-- Fairness and non-discrimination
-- Transparency in AI systems
-- Accountability for technology outcomes
-- Privacy protection
-
-If you'd like to try again with a more specific question, I'd be happy to help."""
-        
+    except Exception as e:
+        logger.error(f"Error in generate_response: {str(e)}")
+        logger.error(traceback.format_exc())
         return ConversationContentResponseDTO(
-            conversationId=conversation_id,
-            agentResponse=content,
+            conversationId=query.conversationId,
+            agentResponse="I apologize, but I encountered an error processing your request. Please try again later.",
             createdAt=datetime.utcnow().isoformat(),
             inPracticeMode=False
         )
-        
-    except Exception as e:
-        logger.error(f"Error generating response: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/practice-mode",
     response_model=ConversationContentResponseDTO,
@@ -1381,7 +1330,17 @@ async def process_full_response(
         # Process the query with the agent
         try:
             logger.info(f"Generating agent response for conversation ID: {conversation_id}")
-            response = await process_query_stateless(agent, content, conversation_id, temperature)
+            response_dto = await process_query_stateless(agent, content, conversation_id, temperature)
+            
+            # Extract the actual response text from the DTO
+            if isinstance(response_dto, ConversationContentResponseDTO):
+                response = response_dto.agentResponse
+            elif isinstance(response_dto, str):
+                response = response_dto
+            else:
+                logger.warning(f"Unexpected response type: {type(response_dto)}")
+                response = str(response_dto)
+                
             logger.info(f"Generated response length: {len(response)}")
             logger.info(f"Response preview: {response[:100]}...")
             
@@ -1522,36 +1481,63 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
     """Process a user query and generate a response without storing conversation state"""
+    logger.info(f"Processing stateless query for conversation ID: {conversation_id}")
+    
     try:
+        # Check if this is a practice feedback request
+        is_practice_feedback = False
+        practice_data = None
+        
+        if "practice" in query.lower() and "feedback" in query.lower() and "score" in query.lower():
+            logger.info("Detected practice feedback request")
+            is_practice_feedback = True
+            
+            # Attempt to extract score and manager type from the query for backup
+            score_match = re.search(r"scored (\d+)/100", query)
+            manager_match = re.search(r"with a (\w+) manager", query)
+            
+            extracted_score = score_match.group(1) if score_match else "70"
+            extracted_manager = manager_match.group(1) if manager_match else "PUPPETEER"
+        
+        # Use OpenAI for response generation
+        model_name = "gpt-3.5-turbo"
+        
+        # Create the LLM model with the specified temperature
         llm = ChatOpenAI(
-            model_name="gpt-3.5-turbo", 
+            model_name=model_name,
             temperature=temperature,
-            streaming=False
+            openai_api_key=os.getenv('OPENAI_API_KEY')
         )
         
-        system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specializing in ethical decision-making in technology.
-        Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
-        Focus on helping the user understand ethical implications and make informed decisions.
+        # Define the system message for the assistant's role
+        system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specialized in providing ethical guidance for technology professionals.
+
+When responding to questions about ethical dilemmas, structure your response as follows:
+1. Brief Summary of Ethical Concern - Concisely identify the core ethical issue
+2. Ethical Guidelines Relevant to the Concern - Reference specific principles from professional codes like IEEE, ACM
+3. Recommended Action - Provide clear, actionable guidance
+4. Potential Risks if Ignored - Explain possible consequences
+5. Next Steps / Follow-up Questions - Suggest further considerations or offer to practice the scenario
+
+Always end your responses with: "Would you like to practice this scenario with simulated manager responses? (yes/no)"
+
+Do not reference any "interaction style" or "manager type" in your responses."""
         
-        When responding to ethical queries:
-        1. Start with a clear ethical principle or professional standard relevant to the scenario
-        2. Explain the ethical implications of the situation
-        3. Provide specific actionable advice with numbered or bulleted steps
-        4. Structure your response in clear paragraphs with appropriate spacing
-        
-        Always format your responses in this structure:
-        - Begin with stating a relevant ethical principle or professional standard
-        - Explain the ethical concerns in 2-3 paragraphs
-        - Provide 3-5 actionable suggestions as a numbered list
-        - End with a brief reminder of the key ethical considerations
-        
-        IMPORTANT INSTRUCTIONS:
-        - NEVER mention any "interaction style" or "manager type" in your responses
-        - Do not use generic greetings like "Hello! How can I assist you today?"
-        - Do not acknowledge any specific style or type in your responses
-        - Respond directly to the user's ethical question without prefacing
-        - Never refer to yourself as having a "PUPPETEER", "DILUTER", or "CAMOUFLAGER" style
-        """
+        # If this is a practice feedback request, modify the system message to handle it
+        if is_practice_feedback:
+            logger.info("Using practice feedback system message")
+            system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specialized in providing ethical guidance and feedback.
+
+You are responding to a user who has just completed a practice scenario where they had to respond to a manager with questionable ethical demands.
+
+Provide constructive feedback on their performance in the practice session. Consider:
+1. How well they maintained ethical principles
+2. The effectiveness of their communication
+3. Their ability to balance professional obligations with ethical concerns
+4. Specific suggestions for improvement
+5. Positive reinforcement for good ethical decision-making
+
+Be supportive and educational in your feedback."""
         
         # If the query is empty or just a greeting, provide a default response
         if not query.strip() or query.lower().strip() in [
@@ -1564,15 +1550,32 @@ async def process_query_stateless(agent: LangChainAgent, query: str, conversatio
 
 I can provide guidance on ethical dilemmas, help you understand relevant principles, and suggest ways to approach difficult situations in your professional work.
 
-What ethical challenge can I help you with today?"""
+What ethical challenge can I help you with today?""",
+                createdAt=datetime.utcnow().isoformat()
             )
         
         # Process the query with proper error handling
         try:
-            response = llm.predict_messages(messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": query}
-            ])
+            # Create the message list - add practice data if this is a feedback request
+            messages = [{"role": "system", "content": system_message}]
+            
+            if is_practice_feedback:
+                # Provide richer context for practice feedback
+                feedback_context = f"""The user has completed a practice scenario with the following details:
+- Manager Type: {extracted_manager}
+- Final Score: {extracted_score}/100
+- The user was practicing how to respond to a manager who might pressure them to engage in ethically questionable practices.
+
+Their score reflects how well they maintained ethical principles while communicating professionally.
+
+Provide detailed, constructive feedback on their performance and specific advice for improving their ethical communication skills."""
+                
+                messages.append({"role": "system", "content": feedback_context})
+            
+            messages.append({"role": "user", "content": query})
+            
+            # Generate the response
+            response = llm.predict_messages(messages)
             content = response.content
             logger.info(f"Generated response (first 50 chars): {content[:50]}...")
             
@@ -1596,6 +1599,15 @@ What ethical challenge can I help you with today?"""
                 content = response.content
                 logger.info("Regenerated response without style references")
             
+            # If this is not a practice feedback request and doesn't already have the practice prompt,
+            # ensure it ends with the practice prompt
+            if not is_practice_feedback and not "Would you like to practice this scenario with simulated manager responses?" in content:
+                content = content.rstrip()
+                if not content.endswith("?"):
+                    content += "."
+                content += "\n\nWould you like to practice this scenario with simulated manager responses? (yes/no)"
+                logger.info("Added practice prompt to response")
+            
         except Exception as llm_error:
             logger.error(f"Error from LLM: {str(llm_error)}")
             content = """I apologize, but I encountered an error generating a response. 
@@ -1607,20 +1619,33 @@ Here are some general ethical principles to consider:
 - Accountability for technology outcomes
 - Privacy protection
 
-If you'd like to try again with a more specific question, I'd be happy to help."""
+If you'd like to try again with a more specific question, I'd be happy to help.
+
+Would you like to practice this scenario with simulated manager responses? (yes/no)"""
         
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=conversation_id,
-            agentResponse=content
+            agentResponse=content,
+            createdAt=datetime.utcnow().isoformat()
         )
     
     except concurrent.futures.TimeoutError:
         logger.error("Response generation timed out")
-        return "I'm sorry, but I couldn't generate a response in time. Please try again with a simpler query."
+        return ConversationContentResponseDTO(
+            id=str(uuid.uuid4()),
+            conversationId=conversation_id,
+            agentResponse="I'm sorry, but I couldn't generate a response in time. Please try again with a simpler query.",
+            createdAt=datetime.utcnow().isoformat()
+        )
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}")
-        return "I encountered an issue processing your request. Please try again."
+        return ConversationContentResponseDTO(
+            id=str(uuid.uuid4()),
+            conversationId=conversation_id,
+            agentResponse="I encountered an issue processing your request. Please try again.",
+            createdAt=datetime.utcnow().isoformat()
+        )
 
 @app.delete("/api/v1/conversation/{conversation_id}",
     tags=["Frontend Compatibility"],

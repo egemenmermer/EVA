@@ -85,9 +85,12 @@ export const ChatWindow: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // In a production application, this function would be passed from a parent component
-  // that manages the conversation list. We're omitting it here for simplicity.
+  // Add state for practice mode
+  const [practiceMode, setPracticeMode] = useState(false);
+  const [activeManagerType, setActiveManagerType] = useState<string | undefined>(undefined);
+  
+  // Create a ref to the handleSendMessage function to use in the useEffect
+  const handleSendMessageRef = useRef<(content: string) => Promise<void>>();
   
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -189,10 +192,22 @@ export const ChatWindow: React.FC = () => {
           return messages;
         });
         
-        // Only update messages if we got new ones
+        // Only update messages if we got new ones and they're different
         if (messages.length > 0) {
-          setMessages(messages);
+          // Check if the new messages are different from existing ones
+          const currentMessageContents = storeMessages.map(m => `${m.role}:${m.content}`).join('|');
+          const newMessageContents = messages.map(m => `${m.role}:${m.content}`).join('|');
+          
+          // Only update the UI if the messages have actually changed
+          if (currentMessageContents !== newMessageContents) {
+            console.log('Updating messages with new content from server');
+            setMessages(messages);
+          } else {
+            console.log('Messages unchanged, preserving current state');
+          }
           setError(null); // Clear any previous errors on successful fetch
+        } else {
+          console.log('No messages received from server');
         }
       }
     } catch (error) {
@@ -415,105 +430,257 @@ export const ChatWindow: React.FC = () => {
     }
   };
 
+  // Update the ref whenever handleSendMessage changes
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  }, [storeMessages]);
+  
+  // Use useEffect to check for practice feedback requests
+  useEffect(() => {
+    const handlePracticeFeedbackRequest = () => {
+      console.log('Practice feedback request event received');
+      
+      // Get the complete practice data from localStorage instead of just a message
+      const practiceData = localStorage.getItem('practice_data');
+      
+      if (practiceData && handleSendMessageRef.current) {
+        console.log('Found practice data in localStorage:', practiceData);
+        
+        // Parse the practice data
+        try {
+          const parsedData = JSON.parse(practiceData);
+          
+          // Create a structured feedback request that includes all necessary details
+          // but doesn't ask the user to provide information the agent already has
+          const feedbackMessage = `I just completed a practice scenario with a ${parsedData.managerType} manager type and scored ${parsedData.finalScore}/100. Please provide feedback on my performance.`;
+          
+          // Send the feedback request
+          setTimeout(() => {
+            handleSendMessageRef.current!(feedbackMessage);
+            // Clean up after sending
+            localStorage.removeItem('practice_data');
+            localStorage.removeItem('feedbackRequest');
+          }, 500);
+        } catch (err) {
+          console.error('Error parsing practice data:', err);
+          
+          // Fallback to the basic feedback request if parsing fails
+          const feedbackRequest = localStorage.getItem('feedbackRequest');
+          if (feedbackRequest && handleSendMessageRef.current) {
+            setTimeout(() => {
+              handleSendMessageRef.current!(feedbackRequest);
+              localStorage.removeItem('feedbackRequest');
+            }, 500);
+          }
+        }
+      } else {
+        // Fallback to the basic feedback request
+        const feedbackRequest = localStorage.getItem('feedbackRequest');
+        if (feedbackRequest && handleSendMessageRef.current) {
+          console.log('Found feedback request in localStorage:', feedbackRequest);
+          // Small delay to ensure state is properly updated
+          setTimeout(() => {
+            handleSendMessageRef.current!(feedbackRequest);
+            localStorage.removeItem('feedbackRequest');
+          }, 500);
+        }
+      }
+    };
+
+    // Check on mount if there's a pending feedback request
+    const practiceData = localStorage.getItem('practice_data');
+    if (practiceData && handleSendMessageRef.current) {
+      console.log('Found practice data on mount:', practiceData);
+      // Give more time on initial load
+      setTimeout(() => {
+        handlePracticeFeedbackRequest();
+      }, 1500);
+    } else {
+      const feedbackRequest = localStorage.getItem('feedbackRequest');
+      if (feedbackRequest && handleSendMessageRef.current) {
+        console.log('Found feedback request on mount:', feedbackRequest);
+        // Give more time on initial load
+        setTimeout(() => {
+          handleSendMessageRef.current!(feedbackRequest);
+          localStorage.removeItem('feedbackRequest');
+        }, 1500);
+      }
+    }
+
+    // Listen for future feedback requests
+    window.addEventListener('practice-feedback-request', handlePracticeFeedbackRequest);
+    
+    return () => {
+      window.removeEventListener('practice-feedback-request', handlePracticeFeedbackRequest);
+    };
+  }, []);
+
   const renderMessage = (message: Message) => {
     const isUserMessage = message.role === 'user';
     
+    // Check if the message contains the practice prompt question - improve detection with more flexibility
+    const hasPracticePrompt = !isUserMessage && (
+      message.content.includes("Would you like to practice this scenario with simulated manager responses? (yes/no)") ||
+      message.content.includes("Would you like to practice this scenario with simulated manager responses?") ||
+      (message.content.includes("practice this scenario") && message.content.includes("simulated manager"))
+    );
+    
+    // If it has the practice prompt, remove it from the displayed content
+    let displayContent = message.content;
+    
+    if (hasPracticePrompt) {
+      // Remove all variations of the practice prompt question
+      displayContent = message.content
+        .replace("Would you like to practice this scenario with simulated manager responses? (yes/no)", "")
+        .replace("Would you like to practice this scenario with simulated manager responses?", "")
+        .replace(/\n*If needed, would you like to practice this scenario with simulated manager responses\?/g, "")
+        .trim();
+    }
+    
     return (
-      <div key={message.id} className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'} mb-4`}>
-        {!isUserMessage && (
-          <div className="flex-shrink-0 mr-2">
-            <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
-          </div>
-        )}
-        <div
-          className={`
-            max-w-[85%] md:max-w-[75%] p-4 rounded-lg
-            ${isUserMessage 
-              ? 'bg-blue-600 text-white user-message-bubble' 
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-            }
-          `}
-        >
-          <div className={`prose dark:prose-invert prose-sm sm:prose-base max-w-none ${
-            isUserMessage ? 'text-white' : 'text-gray-900 dark:text-gray-100'
-          }`}>
-            <ReactMarkdown>
-              {message.content}
-            </ReactMarkdown>
+      <div key={message.id} className={`flex flex-col ${isUserMessage ? 'items-end' : 'items-start'} mb-4`}>
+        <div className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'} w-full`}>
+          {!isUserMessage && (
+            <div className="flex-shrink-0 mr-2">
+              <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
+            </div>
+          )}
+          <div
+            className={`
+              max-w-[85%] md:max-w-[75%] p-4 rounded-lg
+              ${isUserMessage 
+                ? 'bg-blue-600 text-white user-message-bubble' 
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+              }
+            `}
+          >
+            <div className={`prose dark:prose-invert prose-sm sm:prose-base max-w-none ${
+              isUserMessage ? 'text-white' : 'text-gray-900 dark:text-gray-100'
+            }`}>
+              <ReactMarkdown>
+                {displayContent}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
+        
+        {/* Add practice module buttons if this is an assistant message with the practice prompt */}
+        {hasPracticePrompt && (
+          <div className="mt-3 ml-8 flex gap-2">
+            <button
+              onClick={() => handlePracticeResponse('yes')}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-sm"
+            >
+              Yes, practice with simulated manager
+            </button>
+            <button
+              onClick={() => handlePracticeResponse('no')}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md transition-colors text-sm"
+            >
+              No, not now
+            </button>
+          </div>
+        )}
       </div>
     );
   };
 
-  // Add this function to handle practice mode options
-  const handlePracticeOption = (option: 'practice' | 'explore' | 'next') => {
-    if (option === 'practice') {
-      // Start practice mode with the current manager type
-      navigate('/practice', { 
-        state: { 
-          managerType: currentConversation?.managerType || 'PUPPETEER',
-          returnPath: '/chat'
-        } 
-      });
-    } else if (option === 'explore') {
-      // Send a message to explore different aspects
-      handleSendMessage("I'd like to explore different aspects of this ethical challenge. Can you elaborate on potential impacts to users and organizational risks?");
-    } else {
-      // Just acknowledge and let the user ask something new
-      const acknowledgementMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: "I understand you'd like to move on. Feel free to ask about any other ethical challenges or questions you have.",
-        conversationId: currentConversation?.conversationId || 'draft-conversation',
-        createdAt: new Date().toISOString(),
-      };
+  // Update the handlePracticeResponse function
+  const handlePracticeResponse = (response: 'yes' | 'no') => {
+    if (response === 'yes') {
+      // Get the most recent user message and agent response
+      const recentUserMessage = storeMessages.find(m => m.role === 'user');
+      const recentAgentMessage = storeMessages.find(m => m.role === 'assistant');
       
-      setMessages([...storeMessages, acknowledgementMessage]);
+      if (recentUserMessage && recentAgentMessage) {
+        console.log('Setting up practice mode with:', recentUserMessage.content);
+        
+        // Store the query and response in localStorage for the practice module to use
+        localStorage.setItem('practice_user_query', recentUserMessage.content);
+        localStorage.setItem('practice_agent_response', recentAgentMessage.content);
+        
+        // Set active manager type based on conversation
+        const activeManagerType = currentConversation?.managerType || 'PUPPETEER';
+        localStorage.setItem('practice_manager_type', activeManagerType);
+        setActiveManagerType(activeManagerType);
+        
+        // Enter practice mode
+        setPracticeMode(true);
+      } else {
+        // Handle edge case - no prior messages found
+        console.error('No recent messages found for practice mode');
+        setError('Could not find conversation content for practice. Please try sending a message first.');
+      }
+    } else {
+      // User chose not to practice, acknowledge their choice
+      handleSendMessage('I understand, let me know if you need any further ethical guidance.');
     }
   };
 
+  // Add a handler for exiting practice mode
+  const handleExitPracticeMode = () => {
+    setPracticeMode(false);
+    setActiveManagerType(undefined);
+    
+    // Refresh messages when returning to chat
+    if (currentConversation && !currentConversation.conversationId.startsWith('draft-')) {
+      fetchMessages();
+    }
+  };
+
+  // Render practice module or chat interface based on practice mode state
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-4xl mx-auto">
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
-              {error}
-              {!currentConversation?.conversationId.startsWith('draft-') && (
-                <button 
-                  onClick={fetchMessages}
-                  className="ml-2 underline text-red-600 dark:text-red-400 font-medium"
-                >
-                  Refresh
-                </button>
-              )}
-            </div>
-          )}
-          {storeMessages.map(message => renderMessage(message))}
-          {loading && (
-            <div className="flex justify-start mb-4">
-              <div className="flex-shrink-0 mr-2">
-                <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+      {practiceMode && activeManagerType ? (
+        <div className="flex-1 overflow-y-auto">
+          <PracticeModule 
+            onExit={handleExitPracticeMode}
+            managerType={activeManagerType}
+          />
         </div>
-      </div>
-      
-      <ChatInput 
-        onSendMessage={handleSendMessage}
-        isLoading={loading}
-        disabled={loading}
-      />
+      ) : (
+        <>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="max-w-4xl mx-auto">
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+                  {error}
+                  {!currentConversation?.conversationId.startsWith('draft-') && (
+                    <button 
+                      onClick={fetchMessages}
+                      className="ml-2 underline text-red-600 dark:text-red-400 font-medium"
+                    >
+                      Refresh
+                    </button>
+                  )}
+                </div>
+              )}
+              {storeMessages.map(message => renderMessage(message))}
+              {loading && (
+                <div className="flex justify-start mb-4">
+                  <div className="flex-shrink-0 mr-2">
+                    <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+          
+          <ChatInput 
+            onSendMessage={handleSendMessage}
+            isLoading={loading}
+            disabled={loading}
+          />
+        </>
+      )}
     </div>
   );
 }; 
