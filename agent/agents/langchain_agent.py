@@ -313,9 +313,6 @@ class LangChainAgent(BaseAgent):
             logger.error(f"Error testing FAISS index: {str(e)}")
             logger.warning("FAISS index may not be properly initialized or is inaccessible")
             return False
-
-    def _initialize_prompts(self):
-        """Initialize various prompts used by the agent."""
         # Understanding mode prompt with EVA's persona - updated to be more conversational
         self.understanding_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are EVA, a friendly and insightful Ethical Virtual Assistant who helps software engineers tackle ethical dilemmas at work. Communicate clearly, conversationally, and empathetically. When users approach you, respond like an experienced, understanding colleague, not just an informational bot.
