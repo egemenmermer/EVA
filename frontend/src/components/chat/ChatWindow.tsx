@@ -204,6 +204,14 @@ export const ChatWindow: React.FC = () => {
     }
   };
 
+  // Add this after fetchMessages function
+  const triggerSidebarRefresh = () => {
+    // Create and dispatch a custom event to notify the sidebar to refresh conversations
+    const refreshEvent = new Event('refresh-conversations');
+    window.dispatchEvent(refreshEvent);
+    console.log('Dispatched refresh-conversations event');
+  };
+
   const handleSendMessage = async (content: string) => {
     if (loading || !content.trim()) return;
 
@@ -226,12 +234,14 @@ export const ChatWindow: React.FC = () => {
     try {
       // If this is a draft conversation, create a real conversation first
       let conversationId = currentConversation?.conversationId;
+      // Generate a meaningful title from the first message
+      const messageTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
 
       if (!conversationId || conversationId.startsWith('draft-')) {
         try {
           console.log('Creating new conversation for message');
           const response = await api.post<CreateConversationResponse>('/api/v1/conversation', {
-            title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+            title: messageTitle,
             managerType: 'PUPPETEER' as ManagerType  // Default to PUPPETEER if not specified
           });
           
@@ -242,18 +252,51 @@ export const ChatWindow: React.FC = () => {
             // Update the current conversation 
             setCurrentConversation({
               conversationId: conversationId,
-              title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+              title: messageTitle,
               createdAt: response.data.createdAt || new Date().toISOString(),
               managerType: 'PUPPETEER' as ManagerType,
             });
             
             // Update user message with real conversation ID
             userMessage.conversationId = conversationId;
+            
+            // Update conversation title on the backend to ensure it persists
+            try {
+              await api.post(`/api/v1/conversation/${conversationId}/update-title`, {
+                title: messageTitle
+              });
+              console.log('Conversation title updated to:', messageTitle);
+              
+              // Trigger sidebar refresh to update the conversation list
+              triggerSidebarRefresh();
+            } catch (titleErr) {
+              console.error('Failed to update conversation title:', titleErr);
+            }
           }
         } catch (err) {
           console.error('Error creating conversation:', err);
           // Continue with draft conversation if creation fails
           conversationId = 'draft-' + tempId;
+        }
+      } else if (storeMessages.length === 0) {
+        // If this is the first message in an existing conversation, update its title
+        try {
+          await api.post(`/api/v1/conversation/${conversationId}/update-title`, {
+            title: messageTitle
+          });
+          
+          // Update the title in the local state too
+          setCurrentConversation({
+            ...currentConversation!,
+            title: messageTitle
+          });
+          
+          console.log('Updated title for existing conversation:', messageTitle);
+          
+          // Trigger sidebar refresh to update the conversation list
+          triggerSidebarRefresh();
+        } catch (titleErr) {
+          console.error('Failed to update conversation title:', titleErr);
         }
       }
       
@@ -402,20 +445,6 @@ export const ChatWindow: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 py-2 px-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-          {currentConversation?.title || 'New Conversation'}
-        </h2>
-        <button
-          onClick={fetchMessages}
-          disabled={isRefreshing || !currentConversation || currentConversation.conversationId.startsWith('draft-')}
-          className={`p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed ${isRefreshing ? 'animate-spin' : ''}`}
-          title="Refresh messages"
-        >
-          <RefreshCw size={18} />
-        </button>
-      </div>
-    
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto">
           {error && (
