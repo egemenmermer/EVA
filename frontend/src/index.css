@@ -46,6 +46,54 @@
   }
 }
 
+/* Enhanced markdown styling for dark mode */
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+.dark .prose p,
+.dark .prose ul,
+.dark .prose ol,
+.dark .prose li {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose a {
+  color: #3b82f6 !important; /* text-blue-500 */
+  text-decoration: underline;
+}
+
+.dark .prose code {
+  background-color: rgba(31, 41, 55, 0.5) !important; /* bg-gray-800 with opacity */
+  color: #e5e7eb !important; /* text-gray-200 */
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.dark .prose pre {
+  background-color: #1f2937 !important; /* bg-gray-800 */
+  border: 1px solid #374151 !important; /* border-gray-700 */
+}
+
+.dark .prose pre code {
+  background-color: transparent !important;
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+.dark .prose blockquote {
+  border-left-color: #4b5563 !important; /* border-gray-600 */
+  color: #9ca3af !important; /* text-gray-400 */
+}
+
+.dark .prose strong {
+  color: #f3f4f6 !important; /* text-gray-100 */
+}
+
 /* Specific styling for dashboard page only */
 body.dashboard-active .dark.keep-bg-light {
   --background: 0 0% 100% !important; /* White */

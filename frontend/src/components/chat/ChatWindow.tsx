@@ -388,11 +388,11 @@ export const ChatWindow: React.FC = () => {
         <div
           className={`max-w-[80%] p-4 rounded-lg ${
             isUser
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100'
+              ? 'bg-blue-500 text-white user-message-bubble'
+              : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
           }`}
         >
-          <div className="prose dark:prose-invert max-w-none">
+          <div className={`prose dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-ul:text-gray-800 dark:prose-ul:text-gray-200 prose-ol:text-gray-800 dark:prose-ol:text-gray-200 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:text-gray-800 dark:prose-pre:text-gray-200 prose-code:text-gray-800 dark:prose-code:text-gray-200 max-w-none`}>
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         </div>
@@ -414,7 +414,7 @@ export const ChatWindow: React.FC = () => {
         >
           <RefreshCw size={18} />
         </button>
-                </div>
+      </div>
     
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto">
@@ -442,7 +442,7 @@ export const ChatWindow: React.FC = () => {
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-          </div>
+                </div>
               </div>
             </div>
           )}
