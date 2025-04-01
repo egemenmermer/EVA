@@ -1521,94 +1521,99 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
         return {"success": False, "reason": "exception", "error": str(e)}
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
-    """Process a query statelessly without maintaining agent state."""
-    logger.info(f"Processing stateless query for conversation ID: {conversation_id}")
-    
+    """Process a user query and generate a response without storing conversation state"""
     try:
-        # Skip processing for empty queries or greeting-only messages
-        if not query or query.strip() == "":
-            logger.info("Received empty query, not generating a response")
-            return ""
-            
-        if query.strip().lower() in ["hey", "hello", "hi", "greetings", "hello there"]:
-            logger.info("Received greeting-only message, providing minimal response")
-            return "Hello! How can I help you with ethical decision-making today?"
-        
-        # Retrieve conversation details if possible to get manager type
-        manager_type = None
-        try:
-            if conversation_id and not conversation_id.startswith("draft-"):
-                backend_url = f"{os.getenv('BACKEND_URL', 'http://localhost:8443')}/api/v1/conversation/{conversation_id}"
-                async with httpx.AsyncClient(timeout=3.0) as client:
-                    response = await client.get(backend_url)
-                    if response.status_code == 200:
-                        conversation_data = response.json()
-                        manager_type = conversation_data.get("managerType")
-                        # Log but don't use in prompt - just for debugging
-                        logger.info(f"Found manager type from conversation: {manager_type} (will not mention in response)")
-        except Exception as e:
-            logger.warning(f"Could not retrieve conversation details: {str(e)}")
-        
-        # Initialize the OpenAI model
         llm = ChatOpenAI(
-            model_name="gpt-3.5-turbo",
+            model_name="gpt-3.5-turbo", 
             temperature=temperature,
-            openai_api_key=os.getenv('OPENAI_API_KEY')
+            streaming=False
         )
         
-        # Create the prompt that focuses on the current query without mentioning styles
-        system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
+        system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specializing in ethical decision-making in technology.
         Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
         Focus on helping the user understand ethical implications and make informed decisions.
+        
+        When responding to ethical queries:
+        1. Start with a clear ethical principle or professional standard relevant to the scenario
+        2. Explain the ethical implications of the situation
+        3. Provide specific actionable advice with numbered or bulleted steps
+        4. Structure your response in clear paragraphs with appropriate spacing
+        
+        Always format your responses in this structure:
+        - Begin with stating a relevant ethical principle or professional standard
+        - Explain the ethical concerns in 2-3 paragraphs
+        - Provide 3-5 actionable suggestions as a numbered list
+        - End with a brief reminder of the key ethical considerations
         
         IMPORTANT INSTRUCTIONS:
         - NEVER mention any "interaction style" or "manager type" in your responses
         - Do not use generic greetings like "Hello! How can I assist you today?"
-        - Do not acknowledge that the user selected any specific style
+        - Do not acknowledge any specific style or type in your responses
         - Respond directly to the user's ethical question without prefacing
-        - If the user just says "hello" or similar, simply ask what ethical question they'd like help with
         - Never refer to yourself as having a "PUPPETEER", "DILUTER", or "CAMOUFLAGER" style
         """
         
-        # Make a direct call to the LLM
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": query}
-        ]
-        
-        # Use a timeout to prevent hanging
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(
-                lambda: llm.invoke([
-                    SystemMessage(content=system_message),
-                    HumanMessage(content=query)
-                ]).content
+        # If the query is empty or just a greeting, provide a default response
+        if not query.strip() or query.lower().strip() in [
+            'hi', 'hello', 'hey', 'greetings', 'hi there', 'hello there', 'hey there'
+        ]:
+            return ConversationContentResponseDTO(
+                id=str(uuid.uuid4()),
+                conversationId=conversation_id,
+                agentResponse="""Hello! I'm EVA, your Ethical Virtual Assistant. I'm here to help you navigate ethical challenges in software engineering and technology development.
+
+I can provide guidance on ethical dilemmas, help you understand relevant principles, and suggest ways to approach difficult situations in your professional work.
+
+What ethical challenge can I help you with today?"""
             )
-            response = future.result(timeout=25)  # 25 second timeout
         
-        # Check if the response contains any reference to manager types and regenerate if needed
-        if any(style in response for style in ["PUPPETEER", "puppeteer", "Puppeteer", "DILUTER", "diluter", "Diluter", "CAMOUFLAGER", "camouflager", "Camouflager"]):
-            logger.warning("Response contained manager type references. Regenerating...")
+        # Process the query with proper error handling
+        try:
+            response = llm.predict_messages(messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": query}
+            ])
+            content = response.content
+            logger.info(f"Generated response (first 50 chars): {content[:50]}...")
             
-            # Add more explicit instructions
-            stronger_message = system_message + """
+            # Check if the response contains any reference to manager types and regenerate if needed
+            if any(style in content for style in ["PUPPETEER", "puppeteer", "Puppeteer", "DILUTER", "diluter", "Diluter", "CAMOUFLAGER", "camouflager", "Camouflager"]):
+                logger.warning("Response contained manager type references. Regenerating...")
+                
+                # Add more explicit instructions
+                stronger_message = system_message + """
+                
+                CRITICAL: Your previous response contained references to manager types or interaction styles.
+                DO NOT mention "PUPPETEER", "DILUTER", "CAMOUFLAGER" or any variations of these terms in your response.
+                Focus ONLY on addressing the ethical question.
+                """
+                
+                # Regenerate with stronger instructions
+                response = llm.predict_messages([
+                    {"role": "system", "content": stronger_message},
+                    {"role": "user", "content": query}
+                ])
+                content = response.content
+                logger.info("Regenerated response without style references")
             
-            CRITICAL: Your previous response contained references to manager types or interaction styles.
-            DO NOT mention "PUPPETEER", "DILUTER", "CAMOUFLAGER" or any variations of these terms in your response.
-            Focus ONLY on addressing the ethical question without any meta-discussion about conversation styles.
-            """
-            
-            # Regenerate with stronger instructions
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(
-                    lambda: llm.invoke([
-                        SystemMessage(content=stronger_message),
-                        HumanMessage(content=query)
-                    ]).content
-                )
-                response = future.result(timeout=25)
+        except Exception as llm_error:
+            logger.error(f"Error from LLM: {str(llm_error)}")
+            content = """I apologize, but I encountered an error generating a response. 
+
+Here are some general ethical principles to consider:
+- Respect for autonomy and individual rights
+- Fairness and non-discrimination
+- Transparency in AI systems
+- Accountability for technology outcomes
+- Privacy protection
+
+If you'd like to try again with a more specific question, I'd be happy to help."""
         
-        return response
+        return ConversationContentResponseDTO(
+            id=str(uuid.uuid4()),
+            conversationId=conversation_id,
+            agentResponse=content
+        )
     
     except concurrent.futures.TimeoutError:
         logger.error("Response generation timed out")

@@ -416,31 +416,61 @@ export const ChatWindow: React.FC = () => {
   };
 
   const renderMessage = (message: Message) => {
-    const isUser = message.role === 'user';
+    const isUserMessage = message.role === 'user';
     
     return (
-      <div
-        key={message.id}
-        className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
-      >
-        {!isUser && (
+      <div key={message.id} className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'} mb-4`}>
+        {!isUserMessage && (
           <div className="flex-shrink-0 mr-2">
             <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
           </div>
         )}
         <div
-          className={`max-w-[80%] p-4 rounded-lg ${
-            isUser
-              ? 'bg-blue-500 text-white user-message-bubble'
-              : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-          }`}
+          className={`
+            max-w-[85%] md:max-w-[75%] p-4 rounded-lg
+            ${isUserMessage 
+              ? 'bg-blue-600 text-white user-message-bubble' 
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+            }
+          `}
         >
-          <div className={`prose dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-ul:text-gray-800 dark:prose-ul:text-gray-200 prose-ol:text-gray-800 dark:prose-ol:text-gray-200 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:text-gray-800 dark:prose-pre:text-gray-200 prose-code:text-gray-800 dark:prose-code:text-gray-200 max-w-none`}>
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+          <div className={`prose dark:prose-invert prose-sm sm:prose-base max-w-none ${
+            isUserMessage ? 'text-white' : 'text-gray-900 dark:text-gray-100'
+          }`}>
+            <ReactMarkdown>
+              {message.content}
+            </ReactMarkdown>
           </div>
         </div>
       </div>
     );
+  };
+
+  // Add this function to handle practice mode options
+  const handlePracticeOption = (option: 'practice' | 'explore' | 'next') => {
+    if (option === 'practice') {
+      // Start practice mode with the current manager type
+      navigate('/practice', { 
+        state: { 
+          managerType: currentConversation?.managerType || 'PUPPETEER',
+          returnPath: '/chat'
+        } 
+      });
+    } else if (option === 'explore') {
+      // Send a message to explore different aspects
+      handleSendMessage("I'd like to explore different aspects of this ethical challenge. Can you elaborate on potential impacts to users and organizational risks?");
+    } else {
+      // Just acknowledge and let the user ask something new
+      const acknowledgementMessage: Message = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: "I understand you'd like to move on. Feel free to ask about any other ethical challenges or questions you have.",
+        conversationId: currentConversation?.conversationId || 'draft-conversation',
+        createdAt: new Date().toISOString(),
+      };
+      
+      setMessages([...storeMessages, acknowledgementMessage]);
+    }
   };
 
   return (
