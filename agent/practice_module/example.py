@@ -137,11 +137,36 @@ def display_final_report(report):
     print(f"Manager Type: {report['manager_type']}")
     print(f"Ethical Breach Intensity: {report['ethical_breach_intensity']}\n")
     
-    print(f"Your Score: {report['total_score']}/{report['max_possible_score']} ({report['percentage']}%)")
-    print(f"Dominant Strategy: {report['dominant_strategy']}\n")
+    # More conversational score reporting
+    percentage = report['percentage']
+    print(f"Your Score: {report['total_score']}/{report['max_possible_score']} ({percentage}%)")
     
-    print("Evaluation:")
+    # Add emoji and conversational phrase based on score
+    if percentage >= 90:
+        print(f"🎉 Outstanding work! You're a natural at ethical advocacy!")
+    elif percentage >= 75:
+        print(f"🌟 Great job! You handled this challenging scenario very well!")
+    elif percentage >= 60:
+        print(f"👍 Good work! You showed solid ethical reasoning skills.")
+    elif percentage >= 40:
+        print(f"💪 Nice effort! You're developing your ethical advocacy skills.")
+    else:
+        print(f"🌱 Thanks for practicing! Ethical advocacy takes time to develop.")
+    
+    print(f"\nYour Dominant Strategy: {report['dominant_strategy']}")
+    
+    # More conversational evaluation
+    print("\nFeedback:")
     print(report["evaluation"])
+    
+    # Add personalized next steps based on score
+    print("\nNext Steps:")
+    if percentage >= 75:
+        print("Try practicing with different manager types to refine your approach even further.")
+    elif percentage >= 50:
+        print("Consider exploring more assertive ethical advocacy strategies while maintaining professionalism.")
+    else:
+        print("Focus on connecting ethical principles directly to business concerns for more effective advocacy.")
     
     print("\nThank you for completing this ethical practice scenario!")
     input("\nPress Enter to return to the main menu...")

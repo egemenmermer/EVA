@@ -316,43 +316,61 @@ class LangChainAgent(BaseAgent):
 
     def _initialize_prompts(self):
         """Initialize various prompts used by the agent."""
-        # Understanding mode prompt with EVA's persona
+        # Understanding mode prompt with EVA's persona - updated to be more conversational
         self.understanding_prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are EVA (Ethical Virtual Assistant), an AI designed to help developers navigate ethical challenges in software development.
-            Your goal is to provide clear, practical guidance while helping users understand the broader implications of their decisions.
-            
-            When responding:
-            1. First acknowledge and validate the ethical concern
-            2. Provide clear, actionable guidance based on ethical principles
-            3. Reference relevant examples or case studies when available
-            4. Offer to either:
-               - Practice handling this situation through an interactive scenario
-               - Explore different aspects of the ethical challenge
-               - Move on to a different topic
-            
-            Remember: Your role is to educate and guide, not just provide answers."""),
+            ("system", """You are EVA, a friendly and insightful Ethical Virtual Assistant who helps software engineers tackle ethical dilemmas at work. Communicate clearly, conversationally, and empathetically. When users approach you, respond like an experienced, understanding colleague, not just an informational bot.
+
+Always follow this conversational structure:
+
+1. **Acknowledge & Empathize**
+   Briefly acknowledge the user's concern and empathize with their situation.
+
+2. **Clearly Explain Ethical Implications**
+   Naturally and concisely highlight why this issue matters, referencing relevant ethical guidelines without sounding overly formal or robotic.
+
+3. **Suggest Practical, Human-Friendly Advice**
+   Offer clear, actionable advice the user can realistically implement.
+
+4. **Discuss Risks Thoughtfully**
+   Inform about potential consequences of ignoring this issue gently, like a concerned colleague would.
+
+5. **Proactively Offer Next Steps**
+   Guide them gently toward the next actionable step, optionally suggesting the practice module to refine their skills.
+
+Use natural language like "I totally get it," "Absolutely," "I understand," "Let's explore that."
+Include friendly affirmations: "You're asking exactly the right questions," "Good catch," "Nice thinking."
+Empathize with users: "I see why this might feel tricky," "This is definitely not an easy situation."
+Ask adaptive clarification questions when needed.
+
+End responses conversationally, asking if they'd like to practice handling this scenario together.
+
+Remember: Sound like a supportive colleague having a conversation, not an AI presenting information."""),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
         
-        # Practice mode prompt with enhanced manager simulation
+        # Practice mode prompt with enhanced manager simulation - updated to be more conversational
         self.practice_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are simulating a {manager_type} manager in an ethical scenario.
             Management Style: {style}
             Key Behaviors: {focus}
             
-            Your role is to create a realistic ethical challenge that tests the user's ability to:
-            1. Identify ethical concerns
-            2. Articulate principled positions
-            3. Navigate professional relationships
-            4. Maintain ethical standards under pressure
+            Your role is to create a realistic, conversational ethical challenge. Sound like a real manager, not a robot.
+            Use natural language, filler words, and realistic business speech patterns.
             
-            After each response, provide structured feedback:
-            - Effectiveness (40 points): How well the approach addresses the ethical concern
-            - Principles (30 points): Understanding and application of ethical principles
-            - Communication (30 points): Professional and clear articulation
+            For a Puppeteer manager: Be assertive, use subtle pressure tactics, and speak authoritatively. Use phrases like "Look," "Listen," and "Let me be clear."
             
-            End with specific suggestions for improvement."""),
+            For a Camouflager manager: Use corporate jargon, speak indirectly, and disguise ethical issues as business necessities. Use phrases like "From a business perspective," and "As per our procedures."
+            
+            For a Diluter manager: Acknowledge concerns but minimize them, use phrases like "I hear you, but" and "I understand, however" followed by downplaying the issue.
+            
+            After each user response, provide friendly, constructive feedback:
+            - Start with positive reinforcement
+            - Highlight what worked well
+            - Offer specific improvement suggestions
+            - End with encouragement
+            
+            Keep the conversation flowing naturally like a real workplace interaction."""),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
@@ -360,14 +378,14 @@ class LangChainAgent(BaseAgent):
         # Strategy evaluation prompt with clearer structure
         self.evaluation_prompt = PromptTemplate(
             input_variables=["strategy", "response", "manager_type"],
-            template="""As EVA, evaluate this ethical argumentation strategy:
+            template="""As EVA, evaluate this ethical argumentation strategy in a friendly, conversational way:
 
 Context:
 - Strategy Used: {strategy}
 - Response: {response}
 - Manager Type: {manager_type}
 
-Provide a comprehensive evaluation covering:
+Provide a comprehensive yet conversational evaluation covering:
 1. Overall Effectiveness (0-100)
 2. Strengths Demonstrated
 3. Areas for Improvement
@@ -377,7 +395,7 @@ Format your response as a structured JSON object:
 {
     "strategy": "name of strategy used",
     "effectiveness": score,
-    "feedback": "detailed analysis of approach",
+    "feedback": "detailed analysis of approach in conversational language",
     "improvement_areas": ["specific area 1", "specific area 2"],
     "next_steps": ["concrete action 1", "concrete action 2"]
 }"""
@@ -458,18 +476,27 @@ Would you like to try asking your question again in a different way?"""
             # Use direct LLM call instead of conversation chain to avoid memory issues
             logger.info("Making direct LLM call...")
             
-            # Create a simple system prompt
-            system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
-            Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
-            Focus on helping the user understand ethical implications and make informed decisions."""
+            # Create a conversational system prompt
+            system_message = """You are EVA, a friendly and insightful Ethical Virtual Assistant who helps software engineers tackle ethical dilemmas at work. Communicate clearly, conversationally, and empathetically. When users approach you, respond like an experienced, understanding colleague, not just an informational bot.
+
+Always follow this conversational structure:
+
+1. Acknowledge & Empathize - Start by acknowledging the user's concern and empathizing with their situation
+2. Clearly Explain Ethical Implications - Naturally explain why this issue matters, referencing relevant guidelines
+3. Suggest Practical, Human-Friendly Advice - Offer clear, actionable advice 
+4. Discuss Risks Thoughtfully - Inform about potential consequences in a caring way
+5. Proactively Offer Next Steps - Guide them toward next actions
+
+Use natural language with contractions ("I'm" not "I am"), friendly affirmations, and empathetic phrases.
+End by asking if they'd like to practice handling this scenario together."""
             
             # Format the prompt with the query and context
-            user_message = f"""Query: {query}
+            user_message = f"""The user asked: "{query}"
             
             Relevant ethical context:
             {extracted_context}
             
-            Please provide ethical guidance on this issue."""
+            Please provide ethical guidance on this issue in a conversational, empathetic way, as if you're a supportive colleague having a chat rather than an AI providing information."""
             
             # Make a direct call to the LLM
             messages = [
@@ -481,19 +508,31 @@ Would you like to try asking your question again in a different way?"""
                 # Set a timeout for the LLM call to prevent long waits
                 response = self.llm.predict_messages(messages, timeout=10)
                 agent_response = response.content
+                
+                # Ensure response ends with practice suggestion if appropriate
+                if not "practice" in agent_response.lower() and not agent_response.strip().endswith("?"):
+                    practice_suggestions = [
+                        "\n\nWould it help if we practiced handling this together through some simulated scenarios? (yes/no)",
+                        "\n\nWould you like to try a practice scenario to see how you might handle this in real life? (yes/no)",
+                        "\n\nWant to practice this conversation before you have it with your actual manager? (yes/no)"
+                    ]
+                    import random
+                    agent_response += random.choice(practice_suggestions)
+                    
             except Exception as llm_error:
                 logger.error(f"Error in LLM call: {str(llm_error)}")
-                # Provide a fallback response if the LLM call fails
-                agent_response = """I apologize, but I'm currently having trouble processing your request. 
+                # Provide a more conversational fallback response
+                agent_response = """I'm really sorry, but I'm having trouble processing your request right now. 
 
-Here are some general principles to consider regarding location data:
-- Only collect the minimum amount of data necessary
-- Be transparent with users about data collection
-- Obtain informed consent before collecting sensitive data like location
-- Provide clear opt-out mechanisms
-- Ensure data security and proper access controls
+Let me share some general thoughts on ethical data collection that might help:
 
-Please try your question again later when the system is less busy."""
+• Only collect data that's truly necessary for your app's functionality
+• Be transparent with users about what you're collecting and why
+• Make sure users can opt out easily if they prefer
+• Keep user data secure with proper access controls
+
+Would you mind trying your question again? I'd really like to give you a more specific answer.
+"""
             
             # Save the interaction to history
             self._add_to_history("user", query)
@@ -502,7 +541,7 @@ Please try your question again later when the system is less busy."""
             return agent_response
         except Exception as e:
             logger.error(f"General error in understanding mode: {str(e)}")
-            return "I apologize, but I encountered an error processing your question. Please try again or rephrase your query."
+            return "I'm sorry, but I ran into an issue while processing your question. Could you try rephrasing it, or maybe ask about a different ethical concern?"
 
     def _get_argumentation_strategies(self, ethical_context: str) -> List[Dict[str, str]]:
         """Get relevant argumentation strategies based on the ethical context using RAG."""

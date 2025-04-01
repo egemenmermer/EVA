@@ -21,6 +21,7 @@ from langchain_openai import ChatOpenAI
 from fastapi.responses import JSONResponse
 from practice_module import InteractionFlow, StrategyKnowledge
 import re
+import random  # Added for random choice in practice mode
 
 # Load environment variables
 load_dotenv()
@@ -407,9 +408,25 @@ async def toggle_practice_mode(
     try:
         # Simply generate a response message without changing agent state
         if request.enter:
-            response = "Entering practice mode. I'll provide practical ethical scenarios and feedback on your responses."
+            # More conversational, friendly entering practice mode messages
+            enter_messages = [
+                "Great idea! Let's dive into some practice scenarios to help you feel more confident. I'll simulate realistic manager conversations so you can practice your ethical advocacy skills in a safe environment. Ready to get started?",
+                
+                "I think practicing is a fantastic way to prepare! I'll play the role of different manager types and give you feedback on your responses. This will help you develop effective strategies for real-world ethical situations. Shall we begin?",
+                
+                "Perfect, let's practice together! I'll create simulated ethical scenarios with different manager personalities so you can try various approaches. Don't worry about making mistakes - that's what practice is for! Ready when you are."
+            ]
+            response = random.choice(enter_messages)
         else:
-            response = "Exiting practice mode. Let's continue our conversation about ethical decision-making."
+            # More conversational, friendly exiting practice mode messages
+            exit_messages = [
+                "Thanks for practicing! I hope you found those scenarios helpful. Let's return to our conversation - how else can I support you with ethical decision-making?",
+                
+                "Great practice session! You've explored some valuable strategies for ethical advocacy. Now we're back in conversation mode - what other ethical questions or concerns would you like to discuss?",
+                
+                "That was good practice! Handling ethical situations takes both knowledge and skill, and you're developing both. I'm here if you want to discuss any other ethical challenges you're facing."
+            ]
+            response = random.choice(exit_messages)
             
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),

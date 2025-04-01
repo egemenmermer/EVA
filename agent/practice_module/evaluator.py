@@ -1,5 +1,6 @@
 import json
 from typing import Dict, List, Optional, Tuple
+import random  # Add import at the top of the file if needed
 
 class EthicalScenarioEvaluator:
     """
@@ -119,20 +120,46 @@ class EthicalScenarioEvaluator:
         }
     
     def _generate_feedback(self, choice: Dict) -> str:
-        """Generate feedback based on the user's choice."""
+        """Generate more conversational, coaching-style feedback."""
         evs = choice["EVS"]
         category = choice["category"]
         
+        # More conversational, friendly feedback templates
         if evs >= 3:
-            return f"Excellent choice using {category}. This response strongly upholds ethical principles while effectively addressing business concerns."
+            templates = [
+                f"That's a fantastic approach using {category}! You really nailed the ethical reasoning while keeping the conversation professional. Great job seeing both the ethical and practical sides here.",
+                f"Excellent choice! Your {category} approach shows real thoughtfulness. I love how you balanced addressing the ethical concern while maintaining a constructive relationship.",
+                f"Really well done! Using {category} here was spot-on. You found a way to stand up for ethical principles while still being practical and professional. That's exactly what works in real situations."
+            ]
+            return random.choice(templates)
         elif evs == 2:
-            return f"Good approach using {category}. You're advocating for ethics through established processes, which is often effective in organizational settings."
+            templates = [
+                f"Good thinking with this {category} approach! You're definitely on the right track here. This shows solid ethical reasoning while still being practical.",
+                f"Nice work using {category}! This is a solid approach that addresses the ethical concern effectively. It shows you're thinking about both principles and practical implementation.",
+                f"That's a good strategy! Your {category} approach demonstrates thoughtful ethical reasoning. You're balancing multiple considerations well here."
+            ]
+            return random.choice(templates)
         elif evs == 1:
-            return f"Your {category} approach shows ethical awareness, though there might be more impactful ways to address the concern."
+            templates = [
+                f"I see where you're going with this {category} approach. It shows awareness of the ethical issue, though there might be more direct ways to address it while still being professional.",
+                f"You're showing ethical awareness with this {category} approach, which is good! With a bit more directness, you could make an even stronger case while keeping it constructive.",
+                f"There's good thinking in your {category} approach. You're being thoughtful, though you could perhaps be a bit more specific about the ethical principle at stake."
+            ]
+            return random.choice(templates)
         elif evs == 0:
-            return "This response acknowledges the ethical issue but doesn't take strong action to address it."
+            templates = [
+                f"I understand why you might take this approach. It acknowledges the issue, but doesn't quite address the ethical concern directly. Consider being a bit more specific about what principles are at stake.",
+                f"I see you're trying to keep things civil, which is good! However, this response doesn't fully address the ethical issue. Try being more specific about your ethical concerns while staying professional.",
+                f"You're being cautious, which makes sense in workplace situations. However, this response might not effectively communicate the ethical importance of the issue. Consider being more direct while remaining respectful."
+            ]
+            return random.choice(templates)
         else:
-            return "This response may prioritize compliance with authority over ethical considerations. Consider how you might better advocate for ethical practices."
+            templates = [
+                f"I understand the instinct to go along with authority, but this response might compromise ethical standards. Remember that respectful ethical advocacy is part of professional responsibility.",
+                f"I see you're prioritizing workplace harmony, which is understandable. However, this approach may miss an opportunity to address an important ethical concern. Consider how you might raise issues constructively.",
+                f"I understand why this might feel like the path of least resistance. However, remember that ethical considerations are an important part of professional decision-making. There are ways to raise concerns respectfully."
+            ]
+            return random.choice(templates)
     
     def get_final_report(self) -> Dict:
         """
@@ -155,15 +182,15 @@ class EthicalScenarioEvaluator:
         
         dominant_strategy = max(strategies.items(), key=lambda x: x[1])[0] if strategies else "None"
         
-        # Generate feedback based on score percentage
+        # Generate conversational feedback based on score percentage
         if percentage >= 80:
-            evaluation = "Excellent ethical reasoning! You consistently prioritize ethical considerations while effectively addressing business concerns."
+            evaluation = "Great job! 🎉 You showed excellent ethical reasoning throughout this scenario. I really liked how you consistently prioritized ethical considerations while still addressing business concerns in a practical way. This balanced approach is exactly what makes ethical advocacy effective in real workplace situations."
         elif percentage >= 60:
-            evaluation = "Good ethical awareness. You generally make ethically sound choices, though there's room for more assertive ethical advocacy."
+            evaluation = "Nice work! You showed good ethical awareness in this scenario. You generally made sound ethical choices, though there were a few opportunities where you could have been a bit more assertive in your ethical advocacy. Keep practicing this balance and you'll be even more effective in navigating these tricky situations."
         elif percentage >= 40:
-            evaluation = "Moderate ethical reasoning. You show some ethical awareness but often defer to authority or business concerns when conflicts arise."
+            evaluation = "You're on the right track with your ethical reasoning. I noticed you showed awareness of the ethical issues, but sometimes deferred to authority or business concerns when conflicts arose. With practice, you can develop more confidence in advocating for ethical positions while still being respectful and professional."
         else:
-            evaluation = "There's significant room for improving your ethical advocacy. Consider how you might more effectively balance business goals with ethical principles."
+            evaluation = "Thank you for working through this tough scenario. There's definitely room to strengthen your ethical advocacy skills. Consider how you might more effectively balance business goals with ethical principles. Remember that ethical concerns can often be framed in ways that align with business success, making your advocacy more effective."
         
         return {
             "scenario_id": self.current_scenario["id"],
