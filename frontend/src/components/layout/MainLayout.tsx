@@ -41,14 +41,20 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       // Clear any existing user data
       setUser(null);
       setToken(null);
-      navigate('/login');
+      navigate('/login', { replace: true }); // Use replace to prevent back button issues
       return;
     }
     
     // If we have a token in localStorage but not in store, add it to store
     if (storedToken && !token) {
       console.log('Token found in localStorage but not in store, restoring');
-      setToken(formatToken(storedToken));
+      const formattedToken = formatToken(storedToken);
+      if (formattedToken && formattedToken !== storedToken) {
+        localStorage.setItem('token', formattedToken);
+      }
+      if (formattedToken) {
+        setToken(formattedToken);
+      }
     }
     
     // If we have a token but no user, create a placeholder user
@@ -58,14 +64,6 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         id: 'layout-recovery',
         email: 'egemenmermer@gmail.com',
         fullName: 'Egemen Mermer'
-      });
-    } else if (!user) {
-      // Create a mock user for testing when no user or token exists
-      console.log('No user or token found, creating test user');
-      setUser({
-        id: 'test-user',
-        email: 'test@example.com',
-        fullName: 'Test User'
       });
     }
   }, [navigate, token, user, setUser, setToken]);

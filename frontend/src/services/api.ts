@@ -373,26 +373,144 @@ const generateId = () => {
   return crypto.randomUUID?.() || `msg-${Date.now()}`;
 };
 
-// Add utility function to check token validity
-export const verifyToken = async (): Promise<boolean> => {
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+const AGENT_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
+
+// Set auth token if it exists
+const setAuthHeader = () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+};
+
+// Agent API calls
+export const createConversation = async () => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/api/v1/conversation`);
+  return response.data;
+};
+
+export const getConversations = async () => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/api/v1/conversation`);
+  return response.data;
+};
+
+export const getConversationMessages = async (conversationId: string) => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/api/v1/conversation/message/${conversationId}`);
+  return response.data;
+};
+
+export const sendMessage = async (conversationId: string, message: string, temperature: number) => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/api/v1/conversation/message`, {
+    conversationId,
+    content: message,
+    temperature
+  });
+  return response.data;
+};
+
+export const togglePracticeMode = async (conversationId: string, enter: boolean) => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/practice-mode`, {
+    conversationId,
+    enter
+  });
+  return response.data;
+};
+
+export const startScenario = async (conversationId: string, scenarioId: string) => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/practice/scenarios/start`, {
+    conversation_id: conversationId,
+    scenario_id: scenarioId
+  });
+  return response.data;
+};
+
+export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number) => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/practice/scenarios/respond`, {
+    conversation_id: conversationId,
+    scenario_id: scenarioId,
+    choice_index: choiceIndex
+  });
+  return response.data;
+};
+
+export const getAvailableScenarios = async () => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/practice/scenarios`);
+  return response.data;
+};
+
+// Knowledge artifacts API
+export const getKnowledgeArtifacts = async (conversationId: string) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.warn('No token found in localStorage');
-      return false;
+      console.error('No token found for knowledge artifacts request');
+      return { guidelines: [], caseStudies: [] };
     }
-    
-    // Call the token verification endpoint
-    const response = await api.get<{status?: string; message?: string}>('/api/v1/auth/verify-token');
-    
-    if (response.data && response.data.status === 'ok') {
-      return true;
-    } else {
-      console.warn('Token verification failed:', response.data);
-      return false;
+
+    // Skip API call for invalid conversation IDs
+    if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
+      console.log('Skipping knowledge artifacts fetch for invalid conversationId:', conversationId);
+      return { guidelines: [], caseStudies: [] };
     }
+
+    const response = await axios.get(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
+      headers: {
+        Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`
+      }
+    });
+    return response.data;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('Failed to fetch knowledge artifacts:', error);
+    // Return empty arrays instead of throwing to prevent UI errors
+    return { guidelines: [], caseStudies: [] };
+  }
+};
+
+interface TokenVerificationResponse {
+  valid?: boolean;
+  status?: string;
+}
+
+// Auth API calls
+export const login = authApi.login;
+export const logout = authApi.logout;
+export const verifyToken = async (): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    const response = await axios.get<TokenVerificationResponse>('/api/v1/auth/verify-token', {
+      headers: { Authorization: token }
+    });
+
+    return response.data.status === 'ok';
+  } catch (error) {
+    console.error('Token verification failed:', error);
     return false;
   }
-}; 
+};
+
+// Initialize axios interceptors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token is invalid or expired
+      logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);

@@ -4,6 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Github, Chrome, AlertCircle, Server, Wifi, WifiOff } from 'lucide-react';
 import axios from 'axios';
 
+// Add at the top with other imports
+interface TokenVerificationResponse {
+  status: string;
+  message?: string;
+}
+
 // Connection status component for API troubleshooting
 const ConnectionStatus: React.FC = () => {
   const [status, setStatus] = useState<'checking' | 'connected' | 'error'>('checking');
@@ -89,56 +95,57 @@ const ConnectionStatus: React.FC = () => {
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('egemenmermer@gmail.com');
   const [password, setPassword] = useState('');
-  const { login, loading, error, token } = useAuth();
+  const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [redirectAttempts, setRedirectAttempts] = useState(0);
   
-  // Debug check to prevent any refresh loops
+  // Check authentication status only once on mount
   useEffect(() => {
-    console.log('Login page mounted, removing any problematic classes');
-    
-    // Ensure the login page doesn't have incorrect styling classes
-    document.body.classList.remove('dashboard-active');
-    
-    // If there's any issue with redirects, we'll track it
-    let refreshCount = parseInt(sessionStorage.getItem('login_refresh_count') || '0');
-    refreshCount++;
-    sessionStorage.setItem('login_refresh_count', refreshCount.toString());
-    
-    console.log('Login page refresh count:', refreshCount);
-    
-    // If we detect too many refreshes, clear session data
-    if (refreshCount > 5) {
-      console.warn('Too many login page refreshes detected, clearing session data');
-      sessionStorage.removeItem('login_refresh_count');
-      localStorage.removeItem('token'); // Clear any problematic token
-    }
-    
-    return () => {
-      console.log('Login page unmounted');
+    const checkAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        console.log('No token found, staying on login page');
+        return;
+      }
+
+      try {
+        // Ensure token has Bearer prefix
+        const formattedToken = storedToken.startsWith('Bearer ') ? storedToken : `Bearer ${storedToken}`;
+        
+        // Verify token with backend
+        const response = await axios.get<TokenVerificationResponse>('/api/v1/auth/verify-token', {
+          headers: { Authorization: formattedToken }
+        });
+        
+        console.log('Token verification response:', response.data);
+        
+        if (response.data.status === 'ok') {
+          // Update token format if needed
+          if (formattedToken !== storedToken) {
+            console.log('Updating token format in localStorage');
+            localStorage.setItem('token', formattedToken);
+          }
+          
+          // Clear any refresh counters
+          sessionStorage.removeItem('login_refresh_count');
+          
+          // Token is valid, redirect to dashboard
+          console.log('Token valid, redirecting to dashboard');
+          navigate('/dashboard', { replace: true });
+        } else {
+          console.log('Token invalid, clearing and staying on login page');
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('login_refresh_count');
+        }
+      } catch (error) {
+        console.error('Token verification failed:', error);
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('login_refresh_count');
+      }
     };
-  }, []);
-  
-  // If already authenticated, redirect to home - but with safety limit
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    console.log('Login page auth check - token exists:', !!storedToken);
     
-    // Remove problematic styling to ensure page renders correctly
-    document.body.classList.remove('dashboard-active');
-    document.documentElement.classList.remove('keep-bg-light');
-    
-    // Only redirect if we have a valid token AND we haven't tried to redirect too many times
-    if (storedToken && parseInt(sessionStorage.getItem('login_refresh_count') || '0') < 3) {
-      console.log('Valid token found, redirecting to dashboard');
-      navigate('/dashboard');
-    } else if (parseInt(sessionStorage.getItem('login_refresh_count') || '0') >= 3) {
-      console.warn('Too many login redirects detected, clearing token');
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('login_refresh_count');
-    }
-  }, [navigate, token]);
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,15 +155,20 @@ export const LoginPage: React.FC = () => {
     }
     
     try {
-      console.log('Attempting login with email:', email);
+      console.log('Attempting login...');
       await login(email, password);
       
-      // Login successful - the useAuth hook will handle navigation
-      console.log('Login successful, navigating to app');
-      navigate('/dashboard'); // Explicitly navigate to dashboard
+      // Get the token after login
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token received after login');
+        return;
+      }
+      
+      console.log('Login successful, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
-      // Error handling is done in the useAuth hook
     }
   };
 

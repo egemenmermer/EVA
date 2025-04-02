@@ -160,7 +160,13 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         }));
         
         const sanitized = sanitizeConversations(mappedConversations);
-        setDirectFetchedConversations(sanitized);
+        setDirectFetchedConversations(prev => {
+          // Keep existing conversations while loading
+          if (isLoading && prev.length > 0) {
+            return prev;
+          }
+          return sanitized;
+        });
       }
     } catch (err: any) {
       console.error('Error fetching conversations:', err);
@@ -335,6 +341,69 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     setShowProfileMenu(!showProfileMenu);
   };
 
+  // Render conversations with loading state
+  const renderConversations = () => {
+    if (error) {
+      return (
+        <div className="text-center py-4 text-red-600 dark:text-red-400 text-sm">
+          {error}. <button onClick={fetchConversations} className="underline">Retry</button>
+        </div>
+      );
+    }
+
+    if (!isLoading && directFetchedConversations.length === 0) {
+      return (
+        <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+          No conversations yet. Start a new chat!
+        </div>
+      );
+    }
+
+    // Always show conversations, even while loading
+    return directFetchedConversations
+      .filter(conversation => !conversation.isDraft)
+      .sort((a, b) => {
+        const dateA = a.lastMessageDate || a.createdAt || '';
+        const dateB = b.lastMessageDate || b.createdAt || '';
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      })
+      .map((conversation) => (
+        <div
+          key={conversation.conversationId}
+          onClick={() => handleSelectConversation(conversation)}
+          className={`group relative flex items-center px-3 py-3 cursor-pointer rounded-md transition-colors ${
+            currentConversation?.conversationId === conversation.conversationId
+              ? 'bg-gray-200 dark:bg-gray-700'
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          <div className="flex-1 truncate">
+            <div className="font-medium truncate text-gray-900 dark:text-gray-100">
+              {conversation.title || 'New conversation'}
+            </div>
+            {conversation.lastMessageDate && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {formatDate(conversation.lastMessageDate)}
+              </div>
+            )}
+          </div>
+          
+          {/* Inline Delete Button - Always visible on hover */}
+          <button
+            onClick={(e) => handleDeleteConversation(e, conversation.conversationId)}
+            className={`ml-2 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all ${
+              currentConversation?.conversationId === conversation.conversationId
+                ? 'opacity-70'
+                : 'opacity-0 group-hover:opacity-70'
+            }`}
+            aria-label="Delete conversation"
+          >
+            <HiOutlineTrash size={16} />
+          </button>
+        </div>
+      ));
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* New Chat Button only (practice button removed) */}
@@ -378,63 +447,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto py-2 space-y-1">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-24">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        {renderConversations()}
+        {isLoading && (
+          <div className="flex items-center justify-center h-6 mt-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-gray-100"></div>
           </div>
-        ) : error ? (
-          <div className="text-center py-4 text-red-600 dark:text-red-400 text-sm">
-            {error}. <button onClick={fetchConversations} className="underline">Retry</button>
-          </div>
-        ) : directFetchedConversations.length === 0 ? (
-          <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-            No conversations yet. Start a new chat!
-          </div>
-        ) : (
-          // Filter out draft conversations - they shouldn't appear in the list until saved
-          directFetchedConversations
-            .filter(conversation => !conversation.isDraft)
-            // Sort by lastMessageDate (or createdAt) in descending order (newest first)
-            .sort((a, b) => {
-              const dateA = a.lastMessageDate || a.createdAt || '';
-              const dateB = b.lastMessageDate || b.createdAt || '';
-              return new Date(dateB).getTime() - new Date(dateA).getTime();
-            })
-            .map((conversation) => (
-              <div
-                key={conversation.conversationId}
-                onClick={() => handleSelectConversation(conversation)}
-                className={`group relative flex items-center px-3 py-3 cursor-pointer rounded-md transition-colors ${
-                  currentConversation?.conversationId === conversation.conversationId
-                    ? 'bg-gray-200 dark:bg-gray-700'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <div className="flex-1 truncate">
-                  <div className="font-medium truncate text-gray-900 dark:text-gray-100">
-                    {conversation.title || 'New conversation'}
-                  </div>
-                  {conversation.lastMessageDate && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {formatDate(conversation.lastMessageDate)}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Inline Delete Button - Always visible on hover */}
-                <button
-                  onClick={(e) => handleDeleteConversation(e, conversation.conversationId)}
-                  className={`ml-2 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all ${
-                    currentConversation?.conversationId === conversation.conversationId
-                      ? 'opacity-70'
-                      : 'opacity-0 group-hover:opacity-70'
-                  }`}
-                  aria-label="Delete conversation"
-                >
-                  <HiOutlineTrash size={16} />
-                </button>
-              </div>
-            ))
         )}
       </div>
 

@@ -473,8 +473,8 @@ Would you like to try asking your question again in a different way?"""
             # Use direct LLM call instead of conversation chain to avoid memory issues
             logger.info("Making direct LLM call...")
             
-            # Create a conversational system prompt
-            system_message = """You are EVA, a friendly and insightful Ethical Virtual Assistant who helps software engineers tackle ethical dilemmas at work. Communicate clearly, conversationally, and empathetically. When users approach you, respond like an experienced, understanding colleague, not just an informational bot.
+            # Create a conversational system prompt based on manager type
+            base_system_message = """You are EVA, a friendly and insightful Ethical Virtual Assistant who helps software engineers tackle ethical dilemmas at work. Communicate clearly, conversationally, and empathetically. When users approach you, respond like an experienced, understanding colleague, not just an informational bot.
 
 Always follow this conversational structure:
 
@@ -486,6 +486,21 @@ Always follow this conversational structure:
 
 Use natural language with contractions ("I'm" not "I am"), friendly affirmations, and empathetic phrases.
 End by asking if they'd like to practice handling this scenario together."""
+
+            # Add manager type context if available
+            if self.manager_type and self.manager_type in self.MANAGER_TYPES:
+                manager_info = self.MANAGER_TYPES[self.manager_type]
+                manager_context = f"""
+
+The user is dealing with a {self.manager_type} manager type who:
+- {manager_info['description']}
+- Uses a {manager_info['style']} communication style
+- Focuses on: {', '.join(manager_info['focus'])}
+
+Tailor your advice to help the user handle this specific manager type effectively, but DO NOT explicitly mention the manager type or its characteristics in your response."""
+                system_message = base_system_message + manager_context
+            else:
+                system_message = base_system_message
             
             # Format the prompt with the query and context
             user_message = f"""The user asked: "{query}"
@@ -806,8 +821,8 @@ Please describe the ethical concern you'd like to discuss."""
                 if source not in guidelines_by_source:
                     guidelines_by_source[source] = []
                 
-                # Add to the collection with score
-                relevance_score = 1.0 - min(score, 1.0)  # Convert distance to relevance (0-1)
+                # Add to the collection with score - convert float32 to regular float
+                relevance_score = float(1.0 - min(float(score), 1.0))  # Convert distance to relevance (0-1)
                 
                 # Extract content
                 content = doc.page_content
@@ -929,8 +944,8 @@ Please describe the ethical concern you'd like to discuss."""
                 if source not in case_studies_by_source:
                     case_studies_by_source[source] = []
                 
-                # Add to the collection with score
-                relevance_score = 1.0 - min(score, 1.0)  # Convert distance to relevance (0-1)
+                # Add to the collection with score - convert float32 to regular float
+                relevance_score = float(1.0 - min(float(score), 1.0))  # Convert distance to relevance (0-1)
                 
                 # Extract content
                 content = doc.page_content
