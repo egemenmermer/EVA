@@ -1,0 +1,31 @@
+{
+  "guidelines": [
+    {
+      "id": "50eb19ec-302e-42d1-9131-69ca80f018c0",
+      "title": "in total: privacy, accountability, safety and security, transparency and explainability, fairness an...",
+      "description": "in total: privacy, accountability, safety and security, transparency and explainability, fairness and non-discrimination, human control of technology, professional responsibility, and promotion of human values. As mentioned above, a theme consists of a set of principles. In the case of \u201cprivacy,\u201d fo...",
+      "source": "Ethics in the Software Development Process.pdf",
+      "relevance": 0.730303168296814,
+      "category": "guidelines"
+    },
+    {
+      "id": "b8193a27-ea28-46be-a947-897ca6537444",
+      "title": "Computing professionals should be honest about their qualifications, and about ",
+      "description": "Computing professionals should be honest about their qualifications, and about \nany limitations in their competence to complete a task. \nComputing professionals should be forthright about any \ncircumstances that might lead to either real or perceived conflicts of interest or otherwise tend to underm...",
+      "source": "ACM code of ethics.pdf",
+      "relevance": 0.6839362382888794,
+      "category": "guidelines"
+    }
+  ],
+  "caseStudies": [
+    {
+      "id": "aa545a27-82ed-4d82-96dd-4f9781b1f5e5",
+      "title": "Figure 4: Examples of UnBias Project \u2018Awareness Cards\u2019 (reverse side shown)",
+      "summary": "Various organizations and academic institutions have developed tools and resources to raise awareness about bias, fairness, and ethical issues in algorithmic systems.",
+      "outcome": "The key lesson from this case study text is the importance of considering and addressing bias and ethical concerns throughout the development and deployment phases of algorithmic systems.",
+      "source": "Landscape_Summary_-_Bias_in_Algorithmic_Decision-Making.pdf",
+      "relevance": 0.7792920172214508
+    }
+  ],
+  "timestamp": "2025-04-02T17:25:01.660065"
+}

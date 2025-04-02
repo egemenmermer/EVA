@@ -1,0 +1,47 @@
+{
+  "guidelines": [
+    {
+      "id": "1d223e0d-5599-46e3-a042-3b6ee9b892eb",
+      "title": "data collection, ensuring the accuracy of data, understanding the provenance of ",
+      "description": "data collection, ensuring the accuracy of data, understanding the provenance of \nthe data, and protecting it from unauthorized access and accidental disclosure. \nComputing professionals should establish transparent policies and procedures that \nallow individuals to understand what data is being coll...",
+      "source": "ACM code of ethics.pdf",
+      "relevance": 0.73879474401474,
+      "category": "guidelines"
+    },
+    {
+      "id": "a5ad54c4-9dbe-4a92-baf9-7f0875bb6c7b",
+      "title": "in total: privacy, accountability, safety and security, transparency and explainability, fairness an...",
+      "description": "in total: privacy, accountability, safety and security, transparency and explainability, fairness and non-discrimination, human control of technology, professional responsibility, and promotion of human values. As mentioned above, a theme consists of a set of principles. In the case of \u201cprivacy,\u201d fo...",
+      "source": "Ethics in the Software Development Process.pdf",
+      "relevance": 0.7340815961360931,
+      "category": "guidelines"
+    }
+  ],
+  "caseStudies": [
+    {
+      "id": "2670a25c-d48d-44a2-951e-4167b05cc7ab",
+      "title": "Emerging technologies present unique ethical challenges which",
+      "summary": "This case study discusses the importance of equipping professionals with the skills to engage with ethical challenges posed by emerging technologies.",
+      "outcome": "The key lesson learned is the need for incorporating ethics education in computing and technology fields to ensure ethically-focused decision making in students' work practices.",
+      "source": "Understanding \u201cDark\u201d Design Roles in Computing Education (Gray et al., 2021).pdf",
+      "relevance": 0.7294226884841919
+    },
+    {
+      "id": "bd2ef346-1313-4acd-a812-b3fde6f7613f",
+      "title": "need assistance in their technical development\u2014speaking philosophically to deliberate on issues rath...",
+      "summary": "The case study discusses the importance of considering a systematic approach to individual cases when dealing with ethical issues in technology, highlighting the need to assess technological artifacts against a variety of categories such as authority, power relations, technical security, feasibility, and societal values.",
+      "outcome": "The key lesson from this case study is that ethical considerations in technology cannot be approached casuistically, but rather require a deliberate philosophical approach that takes into account a range of factors and perspectives. It emphasizes the importance of developing an \"ethical toolbox\" to guide decision-making in complex ethical dilemmas in technology.",
+      "source": "Ethics in the Software Development Process.pdf",
+      "relevance": 0.716793417930603
+    },
+    {
+      "id": "28d3e2ec-b0d2-42be-8c47-cac1488ac46c",
+      "title": "the growth of the role of \u201cethics owners\u201d in technology companies, ",
+      "summary": "The case study discusses the growth of ethics owners in technology companies and the integration of ethics in computer science and engineering courses.",
+      "outcome": "One key lesson is the importance of creating tools that surface discussions about values in real-world contexts to lead to actionable interventions and outcomes in technology companies.",
+      "source": "Timelines_ A World-Building Activity for Values Advocacy (Wong & Nguyen, 2021).pdf",
+      "relevance": 0.7153833508491516
+    }
+  ],
+  "timestamp": "2025-04-02T17:22:30.623633"
+}

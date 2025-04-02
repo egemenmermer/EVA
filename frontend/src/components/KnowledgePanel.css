@@ -1,0 +1,470 @@
+.knowledge-panel {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dark .knowledge-panel {
+  color: #f3f4f6;
+  background-color: transparent;
+}
+
+.knowledge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.dark .knowledge-header {
+  background-color: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.knowledge-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .knowledge-header h3 {
+  color: #f3f4f6;
+}
+
+.knowledge-header div {
+  display: flex;
+  gap: 6px;
+}
+
+.knowledge-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+
+.dark .knowledge-header button {
+  color: #9ca3af;
+}
+
+.knowledge-header button:hover {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+.dark .knowledge-header button:hover {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+.knowledge-header button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.debug-toggle {
+  background-color: #f3f4f6 !important;
+  border: 1px solid #d1d5db !important;
+  color: #4b5563 !important;
+  font-size: 11px !important;
+  border-radius: 4px;
+}
+
+.dark .debug-toggle {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  color: #9ca3af !important;
+}
+
+.refresh-button, .close-button {
+  font-size: 14px !important;
+  width: 28px;
+  height: 28px;
+}
+
+.dark .refresh-button, .dark .close-button {
+  color: #d1d5db !important;
+}
+
+.generate-button {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #bae6fd !important;
+}
+
+.dark .generate-button {
+  background-color: #0c4a6e !important;
+  color: #bae6fd !important;
+  border: 1px solid #0284c7 !important;
+}
+
+.close-button {
+  margin-left: 4px;
+}
+
+.debug-panel {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  font-size: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  flex-shrink: 0;
+}
+
+.dark .debug-panel {
+  background-color: #111827;
+  border-bottom: 1px solid #1f2937;
+}
+
+.debug-panel h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dark .debug-panel h4 {
+  color: #d1d5db;
+}
+
+.debug-log {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  max-height: 120px;
+  color: #4b5563;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-line {
+  margin-bottom: 2px;
+  line-height: 1.4;
+  font-size: 10px;
+}
+
+.dark .log-line {
+  color: #9ca3af;
+}
+
+.knowledge-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.dark .loading-spinner {
+  border: 3px solid #1f2937;
+  border-top: 3px solid #60a5fa;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.retry-info {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: -8px;
+}
+
+.dark .retry-info {
+  color: #6b7280;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 24px;
+}
+
+.dark .error-container {
+  color: #d1d5db;
+}
+
+.error-message {
+  color: #b91c1c;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.dark .error-message {
+  color: #ef4444;
+}
+
+.retry-button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.dark .retry-button {
+  background-color: #b91c1c;
+}
+
+.retry-button:hover {
+  background-color: #b91c1c;
+}
+
+.dark .retry-button:hover {
+  background-color: #ef4444;
+}
+
+.guidelines-section,
+.case-studies-section {
+  margin-bottom: 16px;
+}
+
+.guidelines-section h4,
+.case-studies-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .guidelines-section h4,
+.dark .case-studies-section h4 {
+  color: #f3f4f6;
+  border-bottom: 1px solid #374151;
+}
+
+.guidelines-section h4 {
+  color: #1d4ed8;
+}
+
+.dark .guidelines-section h4 {
+  color: #93c5fd;
+}
+
+.case-studies-section h4 {
+  color: #7c3aed;
+}
+
+.dark .case-studies-section h4 {
+  color: #c4b5fd;
+}
+
+.guideline-item,
+.case-study-item {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .guideline-item,
+.dark .case-study-item {
+  background-color: #262f3d;
+  border: 1px solid #374151;
+}
+
+.guideline-item {
+  border-left: 4px solid #1d4ed8;
+}
+
+.dark .guideline-item {
+  border-left: 4px solid #3b82f6;
+}
+
+.case-study-item {
+  border-left: 4px solid #7c3aed;
+}
+
+.dark .case-study-item {
+  border-left: 4px solid #8b5cf6;
+}
+
+.guideline-item h5,
+.case-study-item h5 {
+  font-size: 14px;
+  margin: 0;
+  color: #1f2937;
+  font-weight: 600;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dark .guideline-item h5,
+.dark .case-study-item h5 {
+  color: #f3f4f6;
+}
+
+.guideline-item p,
+.case-study-item p {
+  margin: 8px 0;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+}
+
+.dark .guideline-item p,
+.dark .case-study-item p {
+  color: #d1d5db;
+}
+
+.description-text {
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.dark .description-text {
+  color: #e5e7eb;
+}
+
+.description-text p {
+  margin-bottom: 12px;
+}
+
+.description-text p:last-child {
+  margin-bottom: 0;
+}
+
+.description-text strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .description-text strong {
+  color: #f3f4f6;
+}
+
+.metadata {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
+}
+
+.dark .metadata {
+  color: #9ca3af;
+  border-top: 1px solid #374151;
+}
+
+.no-data {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
+  padding: 24px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+.dark .no-data {
+  color: #9ca3af;
+  background-color: #1f2937;
+}
+
+/* Hover effects */
+.guideline-item:hover,
+.case-study-item:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.dark .guideline-item:hover,
+.dark .case-study-item:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .knowledge-header h3 {
+    font-size: 14px;
+  }
+  
+  .knowledge-content {
+    padding: 12px;
+  }
+  
+  .guideline-item,
+  .case-study-item {
+    padding: 12px;
+  }
+  
+  .guideline-item p,
+  .case-study-item p {
+    font-size: 13px;
+  }
+} 

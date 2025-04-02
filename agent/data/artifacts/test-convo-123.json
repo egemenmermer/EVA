@@ -1,0 +1,24 @@
+{
+  "conversationId": "test-convo-123",
+  "guidelines": [
+    {
+      "id": "83669603-d30c-4387-99c1-37747a1b6731",
+      "title": "Data Minimization",
+      "description": "Only collect the minimum amount of data necessary for your application to function properly.",
+      "source": "General Ethical Principles",
+      "category": "Privacy",
+      "relevance": 0.95
+    }
+  ],
+  "caseStudies": [
+    {
+      "id": "8a62103c-c0e0-4e84-8e67-c7d4a1083007",
+      "title": "Cambridge Analytica Data Scandal",
+      "summary": "Cambridge Analytica collected personal data from millions of Facebook users without consent for political targeting.",
+      "outcome": "Resulted in major regulatory changes and heightened awareness about data privacy.",
+      "source": "Data Privacy Case Studies",
+      "relevance": 0.9
+    }
+  ],
+  "timestamp": "2025-04-02T15:04:30.278141+00:00"
+}

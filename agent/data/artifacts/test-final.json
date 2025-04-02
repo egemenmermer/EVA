@@ -1,0 +1,39 @@
+{
+  "guidelines": [
+    {
+      "id": "038cc084-4255-4f13-90b7-7d5a398f5bb6",
+      "title": "in total: privacy, accountability, safety and security, transparency and explainability, fairness an...",
+      "description": "in total: privacy, accountability, safety and security, transparency and explainability, fairness and non-discrimination, human control of technology, professional responsibility, and promotion of human values. As mentioned above, a theme consists of a set of principles. In the case of \u201cprivacy,\u201d fo...",
+      "source": "Ethics in the Software Development Process.pdf",
+      "relevance": 0.7394307851791382,
+      "category": "guidelines"
+    },
+    {
+      "id": "d59a4c45-dec0-45db-85fd-31c0f9a3ad64",
+      "title": "data collection, ensuring the accuracy of data, understanding the provenance of ",
+      "description": "data collection, ensuring the accuracy of data, understanding the provenance of \nthe data, and protecting it from unauthorized access and accidental disclosure. \nComputing professionals should establish transparent policies and procedures that \nallow individuals to understand what data is being coll...",
+      "source": "ACM code of ethics.pdf",
+      "relevance": 0.6705070734024048,
+      "category": "guidelines"
+    }
+  ],
+  "caseStudies": [
+    {
+      "id": "c1d7ea32-a3a8-47e2-ae27-4a548d6ed2c1",
+      "title": "Figure 4: Examples of UnBias Project \u2018Awareness Cards\u2019 (reverse side shown)",
+      "summary": "The UnBias Project created 'Awareness Cards' to raise concerns about bias in algorithmic systems, while the Center for Democracy and Technology developed a 'Digital Decision Tool' to address ethical issues during system development.",
+      "outcome": "The key lesson from this case study is the importance of considering bias, fairness, and ethical issues in the design and deployment of algorithmic systems to ensure they do not have negative impacts on human rights.",
+      "source": "Landscape_Summary_-_Bias_in_Algorithmic_Decision-Making.pdf",
+      "relevance": 0.6974351704120636
+    },
+    {
+      "id": "106b5ab1-f5aa-46d2-9e46-2dc55fb9d025",
+      "title": "ments [ 47], and there is increasing evidence for this: AI practi-",
+      "summary": "The case study discusses the discordance between the values of AI practitioners and the general public in AI system design, leading to concerns about \"ethics washing\" by companies.",
+      "outcome": "The key lesson from this case study is the importance of understanding the needs and behavior of software practitioners in developing ethical systems, and the potential impact of ethical codes on their decision making.",
+      "source": "Its about power.pdf",
+      "relevance": 0.6783733367919922
+    }
+  ],
+  "timestamp": "2025-04-02T17:18:47.077057"
+}

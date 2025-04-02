@@ -450,31 +450,337 @@ export const getAvailableScenarios = async () => {
   return response.data;
 };
 
-// Knowledge artifacts API
-export const getKnowledgeArtifacts = async (conversationId: string) => {
+interface KnowledgeArtifactsResponse {
+  guidelines: Array<{
+    id: string;
+    title: string;
+    description: string;
+    source: string;
+    category: string;
+    relevance: number;
+  }>;
+  caseStudies: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    outcome: string;
+    source: string;
+    relevance: number;
+  }>;
+}
+
+// Replace the entire generateKnowledgeArtifacts function
+export const generateKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
+  const emptyResponse: KnowledgeArtifactsResponse = { guidelines: [], caseStudies: [] };
+  
+  if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
+    console.log('Skipping artifact generation for invalid conversationId:', conversationId);
+    return emptyResponse;
+  }
+  
+  console.log('=== DEBUG: Starting Knowledge Generation Process for conversationId:', conversationId);
+  
+  // Get conversation messages for context
+  let messages = [];
   try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No token found for knowledge artifacts request');
-      return { guidelines: [], caseStudies: [] };
+    console.log('=== DEBUG: Attempting to fetch conversation messages');
+    const messagesResponse = await getConversationMessages(conversationId);
+    if (messagesResponse && Array.isArray(messagesResponse) && messagesResponse.length > 0) {
+      messages = messagesResponse;
+      console.log(`=== DEBUG: Retrieved ${messages.length} messages for context`);
+    } else {
+      console.log('=== DEBUG: No messages retrieved from conversation');
     }
-
-    // Skip API call for invalid conversation IDs
-    if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-      console.log('Skipping knowledge artifacts fetch for invalid conversationId:', conversationId);
-      return { guidelines: [], caseStudies: [] };
-    }
-
-    const response = await axios.get(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
-      headers: {
-        Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`
-      }
-    });
-    return response.data;
   } catch (error) {
-    console.error('Failed to fetch knowledge artifacts:', error);
-    // Return empty arrays instead of throwing to prevent UI errors
-    return { guidelines: [], caseStudies: [] };
+    console.warn('=== DEBUG: Failed to get conversation messages:', error);
+  }
+  
+  const timestamp = Date.now();
+  
+  // Start with the POST method for direct generation
+  try {
+    console.log('=== DEBUG: Trying POST generation endpoint /api/v1/generate-artifacts');
+    
+    const token = localStorage.getItem('token');
+    console.log('=== DEBUG: Token exists:', !!token);
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+      headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    }
+    
+    // Debug log headers (without showing full token)
+    console.log('=== DEBUG: Headers:', Object.keys(headers).join(', '));
+    
+    // Build request body
+    const requestBody = {
+      conversationId,
+      messages
+    };
+    
+    console.log('=== DEBUG: Request body keys:', Object.keys(requestBody));
+    console.log('=== DEBUG: Messages count:', messages.length);
+    
+    // POST request to agent with full logs
+    const postUrl = `${AGENT_URL}/api/v1/generate-artifacts?_=${timestamp}`;
+    console.log('=== DEBUG: POST URL =', postUrl);
+    
+    try {
+      console.log('=== DEBUG: Starting fetch request to', postUrl);
+      const response = await fetch(postUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      });
+      
+      console.log('=== DEBUG: POST response status:', response.status);
+      console.log('=== DEBUG: POST response status text:', response.statusText);
+      
+      if (response.ok) {
+        console.log('=== DEBUG: Successfully received response');
+        
+        // Log the raw response for debugging
+        const responseText = await response.text();
+        console.log('=== DEBUG: Raw response:', responseText);
+        
+        // Parse the text back to JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('=== DEBUG: Parsed response data:', {
+            hasData: !!data,
+            hasGuidelines: !!data?.guidelines,
+            guidelinesLength: data?.guidelines?.length || 0,
+            hasCaseStudies: !!data?.caseStudies,
+            caseStudiesLength: data?.caseStudies?.length || 0
+          });
+          
+          // Ensure arrays exist
+          if (!Array.isArray(data.guidelines)) {
+            console.log('=== DEBUG: Guidelines is not an array, setting to empty array');
+            data.guidelines = [];
+          }
+          
+          if (!Array.isArray(data.caseStudies)) {
+            console.log('=== DEBUG: CaseStudies is not an array, setting to empty array');
+            data.caseStudies = [];
+          }
+          
+          // Cache the results even if empty
+          try {
+            localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
+              ...data,
+              timestamp: new Date().toISOString()
+            }));
+            console.log('=== DEBUG: Cached response to localStorage');
+          } catch (cacheError) {
+            console.warn('=== DEBUG: Failed to cache to localStorage:', cacheError);
+          }
+          
+          return data;
+        } catch (parseError) {
+          console.error('=== DEBUG: Failed to parse JSON response:', parseError);
+          console.error('=== DEBUG: Response text was:', responseText);
+        }
+      }
+    } catch (fetchError) {
+      console.error('=== DEBUG: Fetch error occurred:', fetchError);
+    }
+  } catch (overallError) {
+    console.error('=== DEBUG: Overall POST error:', overallError);
+  }
+  
+  // If all else fails, fall back to the direct GET endpoint
+  try {
+    console.log('=== DEBUG: Trying direct GET endpoint as fallback');
+    const directUrl = `${AGENT_URL}/direct-knowledge-artifacts/${conversationId}?_=${timestamp}`;
+    
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+      headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    }
+    
+    const response = await fetch(directUrl, {
+      method: 'GET',
+      headers: headers
+    });
+    
+    console.log('=== DEBUG: Direct GET response status:', response.status);
+    
+    if (response.ok) {
+      const responseText = await response.text();
+      console.log('=== DEBUG: Raw GET response:', responseText);
+      
+      try {
+        const data = JSON.parse(responseText);
+        console.log('=== DEBUG: Parsed GET response has data:', !!data);
+        
+        if (data && Array.isArray(data.guidelines) && Array.isArray(data.caseStudies)) {
+          // Cache this response
+          try {
+            localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
+              ...data,
+              timestamp: new Date().toISOString()
+            }));
+          } catch (err) {
+            console.warn('=== DEBUG: Failed to cache GET response');
+          }
+          
+          return data;
+        }
+      } catch (parseErr) {
+        console.error('=== DEBUG: Failed to parse GET response');
+      }
+    }
+  } catch (getError) {
+    console.error('=== DEBUG: GET endpoint error:', getError);
+  }
+  
+  console.log('=== DEBUG: All generation attempts failed, returning empty');
+  return emptyResponse;
+};
+
+// Update getKnowledgeArtifacts to use the new generation function as a last resort
+export const getKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
+  try {
+    // Skip invalid conversation IDs to avoid unnecessary network requests
+    if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock')) {
+      console.log(`Skipping knowledge artifacts fetch for invalid conversationId: ${conversationId}`);
+      return { guidelines: [], caseStudies: [] };
+    }
+    
+    // Add timestamp to prevent caching issues
+    const timestamp = new Date().getTime();
+    
+    // Setup headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add auth token if available
+    const token = getToken();
+    if (token) {
+      headers['Authorization'] = token;
+    }
+    
+    console.log(`Fetching knowledge artifacts for conversation: ${conversationId} from database`);
+    
+    // Fetch directly from the backend database
+    try {
+      const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}?t=${timestamp}`, {
+        method: 'GET',
+        headers
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Successfully retrieved artifacts from database');
+        
+        // Validate the response
+        if (data && 
+            Array.isArray(data.guidelines) && 
+            Array.isArray(data.caseStudies)) {
+          console.log(`Got ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies from database`);
+          
+          // Only return if we have actual data
+          if (data.guidelines.length > 0 || data.caseStudies.length > 0) {
+            return data;
+          } else {
+            console.log('Database returned empty collections, will generate new artifacts');
+          }
+        } else {
+          console.log('Database returned invalid data format');
+        }
+      } else {
+        console.log(`Database API returned status ${response.status}`);
+      }
+    } catch (error) {
+      console.log('Error fetching from database API:', error);
+    }
+    
+    // If database retrieval failed or returned empty data, generate new artifacts
+    console.log('Generating new artifacts via direct generation endpoint');
+    
+    // Get the most recent messages to provide context
+    let messages: Array<{ role: string; content: string }> = [];
+    try {
+      const convoMessages = await getConversationMessages(conversationId) as Array<{
+        userQuery?: string;
+        agentResponse?: string;
+      }>;
+      
+      // Only use the last 3 messages to keep context smaller
+      messages = convoMessages.slice(-3).map((msg: any) => ({
+        role: msg.userQuery ? 'user' : 'assistant',
+        content: msg.userQuery || msg.agentResponse || ""
+      }));
+      console.log(`Got ${messages.length} recent messages for context`);
+    } catch (error) {
+      console.log('Could not fetch messages for context, using empty context');
+      messages = [{ role: 'user', content: 'Please generate ethical guidance for this conversation.' }];
+    }
+    
+    // Use a longer timeout for generation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    try {
+      const generateResponse = await fetch(`${AGENT_URL}/api/v1/generate-artifacts`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          conversationId,
+          messages
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (generateResponse.ok) {
+        const data = await generateResponse.json();
+        console.log('Successfully generated new artifacts and saved to database');
+        
+        // Validate the response
+        if (data && 
+            Array.isArray(data.guidelines) && 
+            Array.isArray(data.caseStudies)) {
+          console.log(`Generated ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies`);
+          return data;
+        }
+        console.log('Generate endpoint returned invalid data format');
+      } else {
+        console.log(`Generate endpoint returned status ${generateResponse.status}`);
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.log('Generation timed out after 30 seconds');
+      } else {
+        console.log('Error generating artifacts:', error);
+      }
+    }
+    
+    // If all attempts fail, return empty objects to prevent UI crashes
+    console.log('All attempts to get artifacts failed, returning empty arrays');
+    return {
+      guidelines: [],
+      caseStudies: []
+    };
+  } catch (error) {
+    console.error('Unexpected error in getKnowledgeArtifacts:', error);
+    // Return empty data to prevent UI crashes
+    return {
+      guidelines: [],
+      caseStudies: []
+    };
   }
 };
 

@@ -32,53 +32,101 @@ public class RagArtifactService {
     public RagArtifactsResponseDTO saveArtifacts(RagArtifactsRequestDTO request) {
         String conversationId = request.getConversationId();
         
-        // First delete any existing artifacts for this conversation
-        ragArtifactRepository.deleteByConversationId(conversationId);
-        
-        List<RagArtifact> newArtifacts = new ArrayList<>();
-        
-        // Process guidelines
-        if (request.getGuidelines() != null) {
-            for (RagArtifactDTO guideline : request.getGuidelines()) {
-                RagArtifact artifact = RagArtifact.builder()
-                        .conversationId(conversationId)
-                        .artifactType(RagArtifact.ArtifactType.GUIDELINE)
-                        .artifactId(guideline.getId())
-                        .title(guideline.getTitle())
-                        .description(guideline.getDescription())
-                        .source(guideline.getSource())
-                        .category(guideline.getCategory())
-                        .relevance(guideline.getRelevance())
-                        .build();
-                
-                newArtifacts.add(artifact);
+        try {
+            log.info("Processing request to save artifacts for conversation: {}", conversationId);
+            
+            if (conversationId == null || conversationId.isEmpty()) {
+                log.error("Cannot save artifacts: conversation ID is null or empty");
+                throw new IllegalArgumentException("Conversation ID cannot be null or empty");
             }
-        }
-        
-        // Process case studies
-        if (request.getCaseStudies() != null) {
-            for (RagArtifactDTO caseStudy : request.getCaseStudies()) {
-                RagArtifact artifact = RagArtifact.builder()
-                        .conversationId(conversationId)
-                        .artifactType(RagArtifact.ArtifactType.CASE_STUDY)
-                        .artifactId(caseStudy.getId())
-                        .title(caseStudy.getTitle())
-                        .source(caseStudy.getSource())
-                        .category(caseStudy.getCategory())
-                        .relevance(caseStudy.getRelevance())
-                        .summary(caseStudy.getSummary())
-                        .outcome(caseStudy.getOutcome())
-                        .build();
-                
-                newArtifacts.add(artifact);
+            
+            log.debug("Request contains {} guidelines and {} case studies", 
+                    request.getGuidelines() != null ? request.getGuidelines().size() : 0,
+                    request.getCaseStudies() != null ? request.getCaseStudies().size() : 0);
+            
+            // First delete any existing artifacts for this conversation
+            try {
+                ragArtifactRepository.deleteByConversationId(conversationId);
+                log.info("Deleted existing artifacts for conversation: {}", conversationId);
+            } catch (Exception e) {
+                log.warn("Could not delete existing artifacts: {}", e.getMessage());
+                // Continue with saving new artifacts
             }
+            
+            List<RagArtifact> newArtifacts = new ArrayList<>();
+            
+            // Process guidelines
+            if (request.getGuidelines() != null) {
+                for (RagArtifactDTO guideline : request.getGuidelines()) {
+                    try {
+                        RagArtifact artifact = RagArtifact.builder()
+                                .conversationId(conversationId)
+                                .artifactType(RagArtifact.ArtifactType.GUIDELINE)
+                                .artifactId(guideline.getId())
+                                .title(guideline.getTitle())
+                                .description(guideline.getDescription())
+                                .source(guideline.getSource())
+                                .category(guideline.getCategory())
+                                .relevance(guideline.getRelevance())
+                                .build();
+                        
+                        newArtifacts.add(artifact);
+                    } catch (Exception e) {
+                        log.error("Error processing guideline: {}", e.getMessage());
+                        // Continue with next guideline
+                    }
+                }
+            }
+            
+            // Process case studies
+            if (request.getCaseStudies() != null) {
+                for (RagArtifactDTO caseStudy : request.getCaseStudies()) {
+                    try {
+                        RagArtifact artifact = RagArtifact.builder()
+                                .conversationId(conversationId)
+                                .artifactType(RagArtifact.ArtifactType.CASE_STUDY)
+                                .artifactId(caseStudy.getId())
+                                .title(caseStudy.getTitle())
+                                .source(caseStudy.getSource())
+                                .category(caseStudy.getCategory())
+                                .relevance(caseStudy.getRelevance())
+                                .summary(caseStudy.getSummary())
+                                .outcome(caseStudy.getOutcome())
+                                .build();
+                        
+                        newArtifacts.add(artifact);
+                    } catch (Exception e) {
+                        log.error("Error processing case study: {}", e.getMessage());
+                        // Continue with next case study
+                    }
+                }
+            }
+            
+            if (newArtifacts.isEmpty()) {
+                log.warn("No valid artifacts to save for conversation: {}", conversationId);
+                return RagArtifactsResponseDTO.builder()
+                        .conversationId(conversationId)
+                        .guidelines(List.of())
+                        .caseStudies(List.of())
+                        .build();
+            }
+            
+            // Save all artifacts
+            List<RagArtifact> savedArtifacts;
+            try {
+                savedArtifacts = ragArtifactRepository.saveAll(newArtifacts);
+                log.info("Successfully saved {} artifacts for conversation: {}", savedArtifacts.size(), conversationId);
+            } catch (Exception e) {
+                log.error("Error saving artifacts to database: {}", e.getMessage(), e);
+                throw e;
+            }
+            
+            // Prepare response
+            return createResponseDTO(conversationId, savedArtifacts);
+        } catch (Exception e) {
+            log.error("Unexpected error in saveArtifacts: {}", e.getMessage(), e);
+            throw e;
         }
-        
-        // Save all artifacts
-        List<RagArtifact> savedArtifacts = ragArtifactRepository.saveAll(newArtifacts);
-        
-        // Prepare response
-        return createResponseDTO(conversationId, savedArtifacts);
     }
 
     /**
@@ -89,8 +137,34 @@ public class RagArtifactService {
      */
     @Transactional(readOnly = true)
     public List<RagArtifactsResponseDTO> getArtifacts(UUID conversationId) {
-        List<RagArtifact> artifacts = ragArtifactRepository.findByConversationId(conversationId.toString());
-        return List.of(createResponseDTO(conversationId.toString(), artifacts));
+        try {
+            if (conversationId == null) {
+                log.warn("Null conversationId provided to getArtifacts");
+                return List.of(RagArtifactsResponseDTO.builder()
+                        .guidelines(List.of())
+                        .caseStudies(List.of())
+                        .build());
+            }
+            
+            String conversationIdStr = conversationId.toString();
+            log.debug("Fetching RAG artifacts for conversation UUID: {} (String format: {})", 
+                    conversationId, conversationIdStr);
+            
+            List<RagArtifact> artifacts = ragArtifactRepository.findByConversationId(conversationIdStr);
+            log.debug("Found {} artifacts for conversation {}", artifacts.size(), conversationId);
+            
+            // Create and return the response DTO
+            RagArtifactsResponseDTO responseDTO = createResponseDTO(conversationIdStr, artifacts);
+            return List.of(responseDTO);
+        } catch (Exception e) {
+            log.error("Error retrieving artifacts for conversation {}: {}", conversationId, e.getMessage(), e);
+            // Return empty response instead of failing
+            return List.of(RagArtifactsResponseDTO.builder()
+                    .conversationId(conversationId != null ? conversationId.toString() : null)
+                    .guidelines(List.of())
+                    .caseStudies(List.of())
+                    .build());
+        }
     }
 
     /**

@@ -1,0 +1,43 @@
+{
+  "conversationId": "test-fixed-save",
+  "guidelines": [
+    {
+      "title": "in total: privacy, accountability, safety and security, transparency and explainability, fairness an...",
+      "description": "in total: privacy, accountability, safety and security, transparency and explainability, fairness and non-discrimination, human control of technology, professional responsibility, and promotion of human values. As mentioned above, a theme consists of a set of principles. In the case of \u201cprivacy,\u201d fo...",
+      "artifactId": "b0c2a100-f0ce-41cf-89a4-16ced367f2ee",
+      "artifactType": "GUIDELINE",
+      "relevance": 0.7388565540313721
+    },
+    {
+      "title": "data collection, ensuring the accuracy of data, understanding the provenance of ",
+      "description": "data collection, ensuring the accuracy of data, understanding the provenance of \nthe data, and protecting it from unauthorized access and accidental disclosure. \nComputing professionals should establish transparent policies and procedures that \nallow individuals to understand what data is being coll...",
+      "artifactId": "f2950ac7-fd1b-4631-9fa8-cc772b8b4529",
+      "artifactType": "GUIDELINE",
+      "relevance": 0.6968222558498383
+    }
+  ],
+  "caseStudies": [
+    {
+      "title": "Figure 4: Examples of UnBias Project \u2018Awareness Cards\u2019 (reverse side shown)",
+      "description": "The Center for Democracy and Technology has developed a 'Digital Decision Tool' to raise concerns about bias, fairness, and ethical issues in algorithmic systems, while academics from Harvard Law School and Berkman Klein Center have published documents on the impact of AI on human rights.",
+      "artifactId": "d21a69cf-0cd0-4dd4-80c4-40df3dddf4ff",
+      "artifactType": "CASE_STUDY",
+      "relevance": 0.7237747013568878
+    },
+    {
+      "title": "Emerging technologies present unique ethical challenges which",
+      "description": "This case study discusses the importance of equipping professionals in emerging technologies with the skills to make ethically-focused decisions in their fields.",
+      "artifactId": "4a6410fc-7b25-42d5-bbbe-f7f5519c1f10",
+      "artifactType": "CASE_STUDY",
+      "relevance": 0.7128543853759766
+    },
+    {
+      "title": "instead sell their AI to governments or other companies.\u201d [ 14]. Ma-",
+      "description": "The text highlights the potential for major companies to dominate AI ethics discourse and resources, potentially limiting the perspectives and concerns addressed in the field.",
+      "artifactId": "26b2d321-9810-4dd0-b0c5-ae32b9b03560",
+      "artifactType": "CASE_STUDY",
+      "relevance": 0.7087513208389282
+    }
+  ],
+  "timestamp": "2025-04-02T15:27:49.403048+00:00"
+}
