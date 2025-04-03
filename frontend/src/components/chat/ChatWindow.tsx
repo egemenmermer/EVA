@@ -12,6 +12,7 @@ import api from '../../services/axiosConfig';
 import ReactMarkdown from 'react-markdown';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
+import { getManagerType } from '@/services/api';
 
 // Extended ConversationContentResponseDTO with additional fields from backend
 interface ExtendedConversationDTO extends ConversationContentResponseDTO {
@@ -238,7 +239,7 @@ export const ChatWindow: React.FC = () => {
     const userMessage: Message = {
       id: tempId,
       role: 'user',
-        content: content,
+      content: content,
       conversationId: currentConversation?.conversationId || 'draft-conversation',
       createdAt: new Date().toISOString(),
     };
@@ -252,24 +253,41 @@ export const ChatWindow: React.FC = () => {
       // Generate a meaningful title from the first message
       const messageTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
 
+      // For better persistence, always create a new conversation if we're in a draft state
       if (!conversationId || conversationId.startsWith('draft-')) {
         try {
           console.log('Creating new conversation for message');
+          // Log token information (redacted for security)
+          const token = localStorage.getItem('token');
+          if (token) {
+            console.log('Token available for conversation creation:', token.substring(0, 10) + '...');
+          } else {
+            console.warn('No token available for conversation creation!');
+          }
+          
           const response = await api.post<CreateConversationResponse>('/api/v1/conversation', {
             title: messageTitle,
-            managerType: 'PUPPETEER' as ManagerType  // Default to PUPPETEER if not specified
+            managerType: getManagerType() 
           });
           
           if (response.data && response.data.conversationId) {
             conversationId = response.data.conversationId;
             console.log('Created new conversation:', conversationId);
             
+            // Save conversation ID to localStorage as backup
+            try {
+              localStorage.setItem('current_conversation_id', conversationId);
+              console.log('Saved conversation ID to localStorage:', conversationId);
+            } catch (e) {
+              console.error('Error saving conversation ID to localStorage:', e);
+            }
+            
             // Update the current conversation 
             setCurrentConversation({
               conversationId: conversationId,
               title: messageTitle,
               createdAt: response.data.createdAt || new Date().toISOString(),
-              managerType: 'PUPPETEER' as ManagerType,
+              managerType: getManagerType(),
             });
             
             // Update user message with real conversation ID
@@ -287,6 +305,8 @@ export const ChatWindow: React.FC = () => {
             } catch (titleErr) {
               console.error('Failed to update conversation title:', titleErr);
             }
+          } else {
+            console.error('Conversation creation response missing conversation ID:', response.data);
           }
         } catch (err) {
           console.error('Error creating conversation:', err);
@@ -320,69 +340,79 @@ export const ChatWindow: React.FC = () => {
         conversationId = 'draft-' + tempId;
       }
 
-      // Send message to backend
-      console.log('Sending message to conversation:', conversationId);
-      
-      // Log token information (redacted for security)
-      const token = localStorage.getItem('token');
-      if (token) {
-        console.log('Token available:', token.substring(0, 10) + '...');
-      } else {
-        console.warn('No token available for request!');
-      }
-      
-      // Make API request
-      const response = await api.post<MessageResponse>(`/api/v1/conversation/message`, {
-        conversationId: conversationId,
-        userQuery: content  // This is the required field name for the agent
-      });
-      
-      console.log('Message API response status:', response.status);
-      console.log('Message API response data structure:', Object.keys(response.data));
-      
-      if (response.status === 200 && response.data && response.data.messages) {
-        // Check if we got a warning
-        if (response.data.warning) {
-          console.warn('API warning:', response.data.warning);
-          setError(response.data.warning);
-        }
+      // Send message to backend only if content is not empty
+      if (content.trim()) {
+        console.log('Sending message to conversation:', conversationId);
         
-        // The API should return both the user message and the agent response
-        const messages = response.data.messages;
-        console.log('Received messages:', messages.length);
-        
-        // Find the assistant message
-        const assistantMessage = messages.find(m => m.role === 'assistant');
-        
-        if (assistantMessage && assistantMessage.content) {
-          // Create proper message structure
-          const agentMessage: Message = {
-            id: assistantMessage.id || uuidv4(),
-            role: 'assistant',
-            content: assistantMessage.content,
-            conversationId: conversationId,
-            createdAt: assistantMessage.createdAt || new Date().toISOString(),
-          };
-          
-          // Replace the temporary user message and add the agent response
-          const updatedMessages: Message[] = storeMessages
-            .filter(m => m.id !== userMessage.id)
-            .concat([
-              {
-                ...userMessage,
-                id: messages.find(m => m.role === 'user')?.id || userMessage.id
-              },
-              agentMessage
-            ]);
-          
-          setMessages(updatedMessages);
+        // Log token information (redacted for security)
+        const token = localStorage.getItem('token');
+        if (token) {
+          console.log('Token available:', token.substring(0, 10) + '...');
         } else {
-          console.error('No assistant message or content in response', assistantMessage);
-          setError('Received an empty response from the agent.');
+          console.warn('No token available for request!');
         }
-      } else {
-        console.error('Unexpected response format:', response.data);
-        setError('Received an unexpected response format from the agent.');
+        
+        // Make API request
+        const response = await api.post<MessageResponse>(`/api/v1/conversation/message`, {
+          conversationId: conversationId,
+          userQuery: content  // This is the required field name for the agent
+        });
+        
+        console.log('Message API response status:', response.status);
+        console.log('Message API response data structure:', Object.keys(response.data));
+        
+        if (response.status === 200 && response.data && response.data.messages) {
+          // Check if we got a warning
+          if (response.data.warning) {
+            console.warn('API warning:', response.data.warning);
+            setError(response.data.warning);
+          }
+          
+          // The API should return both the user message and the agent response
+          const messages = response.data.messages;
+          console.log('Received messages:', messages.length);
+          
+          // Find the assistant message
+          const assistantMessage = messages.find(m => m.role === 'assistant');
+          
+          if (assistantMessage && assistantMessage.content) {
+            // Create proper message structure
+            const agentMessage: Message = {
+              id: assistantMessage.id || uuidv4(),
+              role: 'assistant',
+              content: assistantMessage.content,
+              conversationId: conversationId,
+              createdAt: assistantMessage.createdAt || new Date().toISOString(),
+            };
+            
+            // Replace the temporary user message and add the agent response
+            const updatedMessages: Message[] = storeMessages
+              .filter(m => m.id !== userMessage.id)
+              .concat([
+                {
+                  ...userMessage,
+                  id: messages.find(m => m.role === 'user')?.id || userMessage.id,
+                  conversationId: conversationId // Ensure the conversation ID is set correctly
+                },
+                agentMessage
+              ]);
+            
+            setMessages(updatedMessages);
+            
+            // Store messages in localStorage as backup
+            try {
+              localStorage.setItem(`messages_${conversationId}`, JSON.stringify(updatedMessages));
+            } catch (e) {
+              console.error('Error storing messages in localStorage:', e);
+            }
+          } else {
+            console.error('No assistant message or content in response', assistantMessage);
+            setError('Received an empty response from the agent.');
+          }
+        } else {
+          console.error('Unexpected response format:', response.data);
+          setError('Received an unexpected response format from the agent.');
+        }
       }
     } catch (error: any) {
       console.error('Error sending message:', error);

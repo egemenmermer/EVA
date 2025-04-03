@@ -17,7 +17,7 @@ import api from './axiosConfig';
 const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
 
 // Get the current manager type from the store, or use default
-const getManagerType = (): ManagerType => {
+export const getManagerType = (): ManagerType => {
   try {
     // Try to get from localStorage first (this approach doesn't depend on React hooks)
     const storedState = localStorage.getItem('eva-store');
@@ -145,9 +145,12 @@ const setAuthHeader = () => {
   if (token) {
     // Ensure token is properly formatted with Bearer prefix
     axios.defaults.headers.common['Authorization'] = token;
+    console.log("Set Authorization header to:", `${token.substring(0, 15)}...`);
     return true;
+  } else {
+    console.warn("No token available for Authorization header");
+    return false;
   }
-  return false;
 };
 
 // Auth API methods
@@ -576,55 +579,57 @@ const saveArtifactsToDatabase = async (
   console.log(`Saving artifacts to database for UUID: ${conversationId}`);
   console.log(`Token (first 15 chars): ${token.substring(0, 15)}...`);
   
-  // Create the request bodies - one with conversationId in the body (for POST)
-  // and one without (for PUT to a specific endpoint)
-  const putRequestBody = {
-    guidelines: guidelines || [],
-    caseStudies: caseStudies || []
-  };
-  
-  const postRequestBody = {
+  // Create the request body - one consistent format for all endpoints
+  const requestBody = {
     conversationId,
     guidelines: guidelines || [],
     caseStudies: caseStudies || [],
     timestamp: new Date().toISOString()
   };
   
-  // First try POST to /rag-artifacts
+  // Log the request body for debugging
+  console.log(`Request payload: ${JSON.stringify(requestBody).substring(0, 100)}...`);
+  
+  // Try POST to java backend /api/v1/knowledge-artifacts first
   try {
-    console.log("Attempting POST to /api/v1/rag-artifacts");
-    console.log(`Request payload: ${JSON.stringify(postRequestBody).substring(0, 100)}...`);
+    console.log(`Attempting POST to /api/v1/knowledge-artifacts for ${conversationId}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
+    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(postRequestBody),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
     
     clearTimeout(timeoutId);
     
-    console.log(`POST to /api/v1/rag-artifacts response status: ${response.status}`);
+    console.log(`POST to /api/v1/knowledge-artifacts response status: ${response.status}`);
     
     if (response.ok) {
-      console.log('Successfully saved artifacts to database via POST to /api/v1/rag-artifacts');
+      console.log(`Successfully saved artifacts to database via POST to /api/v1/knowledge-artifacts`);
       return true;
     } else {
-      console.warn(`Failed to save via POST to /api/v1/rag-artifacts, status: ${response.status}`);
-      // Continue to next attempt
+      try {
+        const errorText = await response.text();
+        console.warn(`Failed to save via POST. Status: ${response.status}, Error: ${errorText}`);
+      } catch (e) {
+        console.warn(`Failed to save via POST. Status: ${response.status}`);
+      }
+      
+      if (response.status === 401) {
+        console.warn('Authentication error when saving. JWT token might be invalid. Token:', token.substring(0, 20) + '...');
+      }
     }
   } catch (error) {
-    console.warn("Error with POST to /api/v1/rag-artifacts:", error);
-    // Continue to next attempt
+    console.error('Error saving to database via POST:', error);
   }
   
-  // Try PUT to /knowledge-artifacts/{conversationId}
+  // If the first attempt failed, try PUT to a specific ID endpoint
   try {
     console.log(`Attempting PUT to /api/v1/knowledge-artifacts/${conversationId}`);
-    console.log(`Request payload: ${JSON.stringify(putRequestBody).substring(0, 100)}...`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -632,7 +637,7 @@ const saveArtifactsToDatabase = async (
     const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
       method: 'PUT',
       headers,
-      body: JSON.stringify(putRequestBody),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
     
@@ -650,47 +655,42 @@ const saveArtifactsToDatabase = async (
       } catch (e) {
         console.warn(`Failed to save via PUT. Status: ${response.status}`);
       }
-      
-      if (response.status === 401) {
-        console.warn('Authentication error when saving. JWT token might be invalid.');
-      }
     }
   } catch (error) {
     console.error('Error saving to database via PUT:', error);
   }
   
-  // Try POST to /knowledge-artifacts as last resort
+  // Try agent proxy endpoint as last resort
   try {
-    console.log("Attempting POST to /api/v1/knowledge-artifacts");
-    console.log(`Request payload: ${JSON.stringify(postRequestBody).substring(0, 100)}...`);
+    console.log(`Attempting POST to /api/v1/rag-artifacts as last resort`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts`, {
+    const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(postRequestBody),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
     
     clearTimeout(timeoutId);
     
-    console.log(`POST to /api/v1/knowledge-artifacts response status: ${response.status}`);
+    console.log(`POST to /api/v1/rag-artifacts response status: ${response.status}`);
     
     if (response.ok) {
-      console.log('Successfully saved artifacts to database via POST to /api/v1/knowledge-artifacts');
+      console.log(`Successfully saved artifacts to database via POST to /api/v1/rag-artifacts`);
       return true;
     } else {
       try {
         const errorText = await response.text();
-        console.warn(`Failed to save via POST to /knowledge-artifacts. Status: ${response.status}, Error: ${errorText}`);
+        console.warn(`Failed to save via agent proxy. Status: ${response.status}, Error: ${errorText}`);
       } catch (e) {
-        console.warn(`Failed to save via POST to /knowledge-artifacts. Status: ${response.status}`);
+        console.warn(`Failed to save via agent proxy. Status: ${response.status}`);
       }
     }
   } catch (error) {
-    console.error('Error saving to database via POST to /knowledge-artifacts:', error);
+    console.error('Error saving to database via agent proxy:', error);
   }
   
   console.error("All attempts to save to database failed");

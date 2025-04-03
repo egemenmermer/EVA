@@ -1302,8 +1302,11 @@ async def send_message(
     agent: LangChainAgent = Depends(get_agent)
 ):
     try:
+        # Parse request body
         body = await request.json()
-        logger.info(f"Send message request received: {body}")
+        
+        # Log the raw incoming request
+        logger.info(f"Received message request: {body}")
         
         # Save the authorization token for future use
         auth_header = request.headers.get("Authorization")
@@ -1319,14 +1322,19 @@ async def send_message(
         else:
             logger.warning("No authorization token received in the request")
         
-        # Extract data from request
-        conversation_id = body.get("conversationId", "")
-        content = body.get("content", body.get("userQuery", ""))
-        temperature = body.get("temperature", 0.7)
+        # Extract key fields
+        conversation_id = body.get("conversationId")
+        content = body.get("userQuery", "")
+        temperature = float(body.get("temperature", 0.7))
+        
+        # Log request parameters
+        logger.info(f"Processing message for conversation: {conversation_id}")
+        logger.info(f"Message content length: {len(content)}")
+        logger.info(f"Temperature: {temperature}")
         
         # Handle empty queries specially
         if not content or content.strip() == "":
-            logger.info("Received empty message, returning generic response")
+            logger.info("Received empty message, returning generic response WITHOUT saving to backend")
             
             user_message_id = str(uuid.uuid4())
             assistant_message_id = str(uuid.uuid4())
@@ -1510,164 +1518,97 @@ async def process_full_response(
 
 async def send_to_backend(conversation_id: str, message_id: str, content: str, role: str):
     """Send message to backend API."""
-    # No retries for auth failures - they won't succeed on retry
-    retry_attempts = 1  
-    current_attempt = 0
-    
-    # Optimization: Only use token for important operations (user messages or errors)
-    is_important_operation = role == "user" or "error" in content.lower()
-    
-    # Skip token for unimportant operations if we're over usage threshold
-    if not is_important_operation and should_use_cached_token(conversation_id):
-        logger.info(f"Using cached credentials for {role} message (optimization)")
-        # For unimportant operations, no token is better than failing
-        use_token = False
-    else:
-        use_token = True
-    
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    
-    # Only check token if we need to use it
-    if use_token:
-        # Check if we have a token before even trying
-        token = os.getenv('CURRENT_AUTH_TOKEN')
-        if not token:
-            logger.warning("No authorization token found, returning immediately")
-            return {"success": False, "reason": "no_token", "message": "Authentication token is required but not provided"}
-        
-        # Fix token format - ONLY add 'Bearer ' if it's not already there
-        if not token.startswith('Bearer '):
-            token = f'Bearer {token}'
-        
-        # Log token format for debugging (redacted)
-        token_prefix = token[:12] if len(token) > 12 else token
-        token_suffix = token[-5:] if len(token) > 5 else ""
-        logger.info(f"Token format: {token_prefix}...{token_suffix}, Length: {len(token)}")
-        
-        # Add token to headers
-        headers["Authorization"] = token
-    
-    # Construct message payload
-    if role in ["user", "assistant"]:
-        if message_id:
-            # When message_id is provided, include it to maintain thread consistency
-            payload = {
-                "id": message_id,
-                "conversationId": conversation_id,
-                "userQuery": "" if role == "assistant" else content,
-                "agentResponse": content if role == "assistant" else ""
-            }
-        else:
-            # For any other role, create a generic payload
-            payload = {
-                "conversationId": conversation_id,
-                "userQuery": "" if role == "assistant" else content,
-                "agentResponse": content if role == "assistant" else ""
-            }
-    else:
-        # For any other role, create a generic payload
-        payload = {
-            "conversationId": conversation_id,
-            "userQuery": "" if role == "assistant" else content,
-            "agentResponse": content if role == "assistant" else ""
-        }
-    
-    logger.info(f"Sending {role} message to backend for conversation: {conversation_id}")
-    logger.debug(f"Payload: {payload}")
-    
-    # Send the request with proper error handling
-    while current_attempt < retry_attempts:
-        try:
-            backend_url = f"{BACKEND_BASE_URL}/api/v1/conversation/message"
-            logger.info(f"Backend URL: {backend_url}")
+    try:
+        # Only send to backend if we have a valid conversation ID (not a draft) and non-empty content
+        if not conversation_id or conversation_id.startswith("draft-"):
+            logger.info(f"Skipping backend save for draft conversation: {conversation_id}")
+            return
             
-            # Use a short timeout to avoid blocking
-            response = requests.post(
+        if role == "user" and (not content or content.strip() == ""):
+            logger.info(f"Skipping backend save for empty user query")
+            return
+        
+        # Get the token from environment
+        token = os.environ.get("CURRENT_AUTH_TOKEN")
+        
+        # Prepare headers with authentication if token is available
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        if token:
+            # Ensure token is properly formatted with Bearer prefix
+            if not token.startswith("Bearer "):
+                token = f"Bearer {token}"
+            headers["Authorization"] = token
+            logger.info(f"Using authentication token: {token[:15]}...")
+        else:
+            logger.warning("No authentication token available for backend request")
+            
+        backend_url = f"{BACKEND_BASE_URL}/api/v1/conversation/message"
+        
+        # Construct message payload
+        if role in ["user", "assistant"]:
+            if message_id:
+                # When message_id is provided, include it to maintain thread consistency
+                payload = {
+                    "id": message_id,
+                    "conversationId": conversation_id
+                }
+                
+                # Only set non-empty fields
+                if role == "user" and content.strip():
+                    payload["userQuery"] = content
+                    payload["agentResponse"] = ""
+                elif role == "assistant" and content.strip():
+                    payload["userQuery"] = ""  # Don't create empty user queries
+                    payload["agentResponse"] = content
+            else:
+                # For standard payload without message ID
+                payload = {
+                    "conversationId": conversation_id
+                }
+                
+                # Only set non-empty fields
+                if role == "user" and content.strip():
+                    payload["userQuery"] = content
+                    payload["agentResponse"] = ""
+                elif role == "assistant" and content.strip():
+                    payload["userQuery"] = ""  # Don't create empty user queries
+                    payload["agentResponse"] = content
+        else:
+            logger.warning(f"Unexpected role: {role}, not sending to backend")
+            return
+        
+        logger.info(f"Sending {role} message to backend for conversation: {conversation_id}")
+        logger.debug(f"Payload: {payload}")
+        
+        # Only proceed if we have something to send
+        if not (("userQuery" in payload and payload["userQuery"]) or 
+                ("agentResponse" in payload and payload["agentResponse"])):
+            logger.info(f"Skipping backend save for empty content")
+            return
+            
+        # Send request to backend API
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
                 backend_url,
                 json=payload,
-                headers=headers,
-                timeout=3
+                headers=headers
             )
             
-            if response.status_code == 401 and current_attempt < retry_attempts - 1:
-                # Authentication failure, no point in retrying with same token
-                logger.error(f"Authentication failed sending message to backend ({response.status_code})")
-                return {
-                    "success": False,
-                    "reason": "authentication",
-                    "message": "Authentication failed when sending message to backend"
-                }
-            
-            if response.status_code not in [200, 201, 202]:
-                # Non-success status code
-                error_message = f"Error sending message to backend: {response.status_code}"
-                try:
-                    error_data = response.json()
-                    error_message += f" - {error_data}"
-                except:
-                    error_message += f" - {response.text}"
-                
-                logger.error(error_message)
-                
-                if current_attempt < retry_attempts - 1:
-                    current_attempt += 1
-                    continue
-                
-                return {
-                    "success": False,
-                    "reason": "server_error",
-                    "status_code": response.status_code,
-                    "message": error_message
-                }
-            
-            # Success!
-            try:
-                response_data = response.json()
-                logger.info(f"Successfully sent message to backend: {response.status_code}")
-                return {
-                    "success": True,
-                    "data": response_data
-                }
-            except:
-                logger.info(f"Successfully sent message to backend (no JSON response): {response.status_code}")
-                return {
-                    "success": True
-                }
-                
-        except requests.exceptions.Timeout:
-            logger.error(f"Timeout sending message to backend (timeout=3s)")
-            if current_attempt < retry_attempts - 1:
-                current_attempt += 1
-                continue
-            return {
-                "success": False,
-                "reason": "timeout",
-                "message": "Timeout sending message to backend"
-            }
-        except Exception as e:
-            logger.error(f"Error in send_to_backend: {str(e)}")
-            logger.error(f"Conversation ID: {conversation_id}, Role: {role}")
-            logger.error(traceback.format_exc())
-            
-            if current_attempt < retry_attempts - 1:
-                current_attempt += 1
-                continue
-            
-            return {
-                "success": False,
-                "reason": "exception",
-                "message": str(e)
-            }
-        
-    # If we get here, all retries failed
-    return {
-        "success": False,
-        "reason": "max_retries",
-        "message": "Maximum retry attempts reached"
-    }
+            if response.status_code == 200:
+                logger.info(f"Successfully sent {role} message to backend: {response.status_code}")
+                return True
+            else:
+                logger.error(f"Failed to send message to backend: {response.status_code} - {response.text}")
+                if response.status_code == 401:
+                    logger.error("Authentication failure. Token may be invalid or expired.")
+                return False
+    except Exception as e:
+        logger.error(f"Error sending message to backend: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
     """Process a user query and generate a response without storing conversation state"""
