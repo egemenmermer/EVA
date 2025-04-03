@@ -51,14 +51,103 @@ const debugResponse = (method: string, url: string, status: number, data: any) =
   console.log('Response data:', data);
 };
 
-// Helper function to get token from localStorage
-const getToken = (): string | null => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.warn('No token available for API request');
+// Check authorization status and debug tokens
+export const debugAuthTokens = (): void => {
+  try {
+    // Log all keys in localStorage to help diagnose token issues
+    console.log("Checking all localStorage keys for potential tokens:");
+    const allKeys = Object.keys(localStorage);
+    console.log(`Found ${allKeys.length} keys in localStorage`);
+    
+    // Log interesting keys
+    const tokenKeys = allKeys.filter(key => 
+      key.includes('token') || 
+      key.includes('Token') || 
+      key.includes('auth') || 
+      key.includes('Auth') || 
+      key.includes('jwt')
+    );
+    
+    if (tokenKeys.length > 0) {
+      console.log("Potential token keys found:", tokenKeys);
+      tokenKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+          const isBearerToken = value.startsWith('Bearer ');
+          const isJwtFormat = value.split('.').length === 3 || 
+                             (value.startsWith('Bearer ') && value.substring(7).split('.').length === 3);
+          
+          console.log(`Key: ${key} - Has Bearer prefix: ${isBearerToken}, Appears to be JWT format: ${isJwtFormat}`);
+          console.log(`First 15 chars: ${value.substring(0, 15)}...`);
+        }
+      });
+    } else {
+      console.log("No potential token keys found in localStorage");
+    }
+  } catch (error) {
+    console.error("Error during token debugging:", error);
+  }
+};
+
+// Automatically run token debugging on import
+debugAuthTokens();
+
+// Get the authentication token from local storage with better error handling
+export const getToken = (): string | null => {
+  try {
+    console.log("Retrieving authentication token from localStorage");
+    
+    // Try all possible token storage keys
+    const possibleKeys = ['token', 'accessToken', 'authToken', 'jwt', 'jwtToken', 'id_token'];
+    let token = null;
+    
+    // Try each key
+    for (const key of possibleKeys) {
+      const storedValue = localStorage.getItem(key);
+      if (storedValue) {
+        console.log(`Found potential token under '${key}' key`);
+        token = storedValue;
+        break;
+      }
+    }
+    
+    if (!token) {
+      console.warn("No token found in localStorage under any common keys");
+      return null;
+    }
+    
+    // Ensure token is properly formatted with Bearer prefix
+    if (!token.startsWith('Bearer ')) {
+      console.log("Adding 'Bearer ' prefix to token");
+      token = `Bearer ${token}`;
+    } else {
+      console.log("Token already has 'Bearer ' prefix");
+    }
+    
+    // Validate that it looks like a JWT format (for debugging)
+    const tokenWithoutBearer = token.startsWith('Bearer ') ? token.substring(7) : token;
+    const parts = tokenWithoutBearer.split('.');
+    
+    if (parts.length !== 3) {
+      console.warn("Token does not have standard JWT format (should have 3 parts separated by dots)");
+    }
+    
+    return token;
+  } catch (error) {
+    console.error("Error retrieving token from localStorage:", error);
     return null;
   }
-  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+};
+
+// Set auth header for axios
+const setAuthHeader = () => {
+  const token = getToken();
+  if (token) {
+    // Ensure token is properly formatted with Bearer prefix
+    axios.defaults.headers.common['Authorization'] = token;
+    return true;
+  }
+  return false;
 };
 
 // Auth API methods
@@ -377,16 +466,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 const AGENT_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
 
-// Set auth token if it exists
-const setAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  } else {
-    delete axios.defaults.headers.common['Authorization'];
-  }
-};
-
 // Agent API calls
 export const createConversation = async () => {
   setAuthHeader();
@@ -469,182 +548,293 @@ interface KnowledgeArtifactsResponse {
   }>;
 }
 
-// Replace the entire generateKnowledgeArtifacts function
-export const generateKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
-  const emptyResponse: KnowledgeArtifactsResponse = { guidelines: [], caseStudies: [] };
-  
-  if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-    console.log('Skipping artifact generation for invalid conversationId:', conversationId);
-    return emptyResponse;
+// Function to save knowledge artifacts directly to the database
+const saveArtifactsToDatabase = async (
+  conversationId: string, 
+  guidelines: any[], 
+  caseStudies: any[]
+): Promise<boolean> => {
+  // Skip invalid conversation IDs
+  if (!conversationId || !conversationId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    console.log(`Not saving artifacts for invalid UUID: ${conversationId}`);
+    return false;
   }
   
-  console.log('=== DEBUG: Starting Knowledge Generation Process for conversationId:', conversationId);
-  
-  // Get conversation messages for context
-  let messages = [];
-  try {
-    console.log('=== DEBUG: Attempting to fetch conversation messages');
-    const messagesResponse = await getConversationMessages(conversationId);
-    if (messagesResponse && Array.isArray(messagesResponse) && messagesResponse.length > 0) {
-      messages = messagesResponse;
-      console.log(`=== DEBUG: Retrieved ${messages.length} messages for context`);
-    } else {
-      console.log('=== DEBUG: No messages retrieved from conversation');
-    }
-  } catch (error) {
-    console.warn('=== DEBUG: Failed to get conversation messages:', error);
+  // Get the JWT token
+  const token = getToken();
+  if (!token) {
+    console.warn('No authentication token available for database save');
+    return false;
   }
   
-  const timestamp = Date.now();
+  // Set up headers with proper authentication
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Authorization': token
+  };
   
-  // Start with the POST method for direct generation
-  try {
-    console.log('=== DEBUG: Trying POST generation endpoint /api/v1/generate-artifacts');
-    
-    const token = localStorage.getItem('token');
-    console.log('=== DEBUG: Token exists:', !!token);
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (token) {
-      headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-    }
-    
-    // Debug log headers (without showing full token)
-    console.log('=== DEBUG: Headers:', Object.keys(headers).join(', '));
-    
-    // Build request body
-    const requestBody = {
-      conversationId,
-      messages
-    };
-    
-    console.log('=== DEBUG: Request body keys:', Object.keys(requestBody));
-    console.log('=== DEBUG: Messages count:', messages.length);
-    
-    // POST request to agent with full logs
-    const postUrl = `${AGENT_URL}/api/v1/generate-artifacts?_=${timestamp}`;
-    console.log('=== DEBUG: POST URL =', postUrl);
-    
-    try {
-      console.log('=== DEBUG: Starting fetch request to', postUrl);
-      const response = await fetch(postUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(requestBody)
-      });
-      
-      console.log('=== DEBUG: POST response status:', response.status);
-      console.log('=== DEBUG: POST response status text:', response.statusText);
-      
-      if (response.ok) {
-        console.log('=== DEBUG: Successfully received response');
-        
-        // Log the raw response for debugging
-        const responseText = await response.text();
-        console.log('=== DEBUG: Raw response:', responseText);
-        
-        // Parse the text back to JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log('=== DEBUG: Parsed response data:', {
-            hasData: !!data,
-            hasGuidelines: !!data?.guidelines,
-            guidelinesLength: data?.guidelines?.length || 0,
-            hasCaseStudies: !!data?.caseStudies,
-            caseStudiesLength: data?.caseStudies?.length || 0
-          });
-          
-          // Ensure arrays exist
-          if (!Array.isArray(data.guidelines)) {
-            console.log('=== DEBUG: Guidelines is not an array, setting to empty array');
-            data.guidelines = [];
-          }
-          
-          if (!Array.isArray(data.caseStudies)) {
-            console.log('=== DEBUG: CaseStudies is not an array, setting to empty array');
-            data.caseStudies = [];
-          }
-          
-          // Cache the results even if empty
-          try {
-            localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
-              ...data,
-              timestamp: new Date().toISOString()
-            }));
-            console.log('=== DEBUG: Cached response to localStorage');
-          } catch (cacheError) {
-            console.warn('=== DEBUG: Failed to cache to localStorage:', cacheError);
-          }
-          
-          return data;
-        } catch (parseError) {
-          console.error('=== DEBUG: Failed to parse JSON response:', parseError);
-          console.error('=== DEBUG: Response text was:', responseText);
-        }
-      }
-    } catch (fetchError) {
-      console.error('=== DEBUG: Fetch error occurred:', fetchError);
-    }
-  } catch (overallError) {
-    console.error('=== DEBUG: Overall POST error:', overallError);
-  }
+  console.log(`Saving artifacts to database for UUID: ${conversationId}`);
+  console.log(`Token (first 15 chars): ${token.substring(0, 15)}...`);
   
-  // If all else fails, fall back to the direct GET endpoint
+  // Create the request bodies - one with conversationId in the body (for POST)
+  // and one without (for PUT to a specific endpoint)
+  const putRequestBody = {
+    guidelines: guidelines || [],
+    caseStudies: caseStudies || []
+  };
+  
+  const postRequestBody = {
+    conversationId,
+    guidelines: guidelines || [],
+    caseStudies: caseStudies || [],
+    timestamp: new Date().toISOString()
+  };
+  
+  // First try POST to /rag-artifacts
   try {
-    console.log('=== DEBUG: Trying direct GET endpoint as fallback');
-    const directUrl = `${AGENT_URL}/direct-knowledge-artifacts/${conversationId}?_=${timestamp}`;
+    console.log("Attempting POST to /api/v1/rag-artifacts");
+    console.log(`Request payload: ${JSON.stringify(postRequestBody).substring(0, 100)}...`);
     
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    if (token) {
-      headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-    }
-    
-    const response = await fetch(directUrl, {
-      method: 'GET',
-      headers: headers
+    const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(postRequestBody),
+      signal: controller.signal
     });
     
-    console.log('=== DEBUG: Direct GET response status:', response.status);
+    clearTimeout(timeoutId);
+    
+    console.log(`POST to /api/v1/rag-artifacts response status: ${response.status}`);
     
     if (response.ok) {
-      const responseText = await response.text();
-      console.log('=== DEBUG: Raw GET response:', responseText);
-      
-      try {
-        const data = JSON.parse(responseText);
-        console.log('=== DEBUG: Parsed GET response has data:', !!data);
-        
-        if (data && Array.isArray(data.guidelines) && Array.isArray(data.caseStudies)) {
-          // Cache this response
-          try {
-            localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
-              ...data,
-              timestamp: new Date().toISOString()
-            }));
-          } catch (err) {
-            console.warn('=== DEBUG: Failed to cache GET response');
-          }
-          
-          return data;
-        }
-      } catch (parseErr) {
-        console.error('=== DEBUG: Failed to parse GET response');
-      }
+      console.log('Successfully saved artifacts to database via POST to /api/v1/rag-artifacts');
+      return true;
+    } else {
+      console.warn(`Failed to save via POST to /api/v1/rag-artifacts, status: ${response.status}`);
+      // Continue to next attempt
     }
-  } catch (getError) {
-    console.error('=== DEBUG: GET endpoint error:', getError);
+  } catch (error) {
+    console.warn("Error with POST to /api/v1/rag-artifacts:", error);
+    // Continue to next attempt
   }
   
-  console.log('=== DEBUG: All generation attempts failed, returning empty');
-  return emptyResponse;
+  // Try PUT to /knowledge-artifacts/{conversationId}
+  try {
+    console.log(`Attempting PUT to /api/v1/knowledge-artifacts/${conversationId}`);
+    console.log(`Request payload: ${JSON.stringify(putRequestBody).substring(0, 100)}...`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(putRequestBody),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    console.log(`PUT to /api/v1/knowledge-artifacts/${conversationId} response status: ${response.status}`);
+    
+    if (response.ok) {
+      console.log(`Successfully saved artifacts to database via PUT to /api/v1/knowledge-artifacts/${conversationId}`);
+      return true;
+    } else {
+      try {
+        const errorText = await response.text();
+        console.warn(`Failed to save via PUT. Status: ${response.status}, Error: ${errorText}`);
+      } catch (e) {
+        console.warn(`Failed to save via PUT. Status: ${response.status}`);
+      }
+      
+      if (response.status === 401) {
+        console.warn('Authentication error when saving. JWT token might be invalid.');
+      }
+    }
+  } catch (error) {
+    console.error('Error saving to database via PUT:', error);
+  }
+  
+  // Try POST to /knowledge-artifacts as last resort
+  try {
+    console.log("Attempting POST to /api/v1/knowledge-artifacts");
+    console.log(`Request payload: ${JSON.stringify(postRequestBody).substring(0, 100)}...`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(postRequestBody),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    console.log(`POST to /api/v1/knowledge-artifacts response status: ${response.status}`);
+    
+    if (response.ok) {
+      console.log('Successfully saved artifacts to database via POST to /api/v1/knowledge-artifacts');
+      return true;
+    } else {
+      try {
+        const errorText = await response.text();
+        console.warn(`Failed to save via POST to /knowledge-artifacts. Status: ${response.status}, Error: ${errorText}`);
+      } catch (e) {
+        console.warn(`Failed to save via POST to /knowledge-artifacts. Status: ${response.status}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving to database via POST to /knowledge-artifacts:', error);
+  }
+  
+  console.error("All attempts to save to database failed");
+  return false;
+};
+
+// Update the generateKnowledgeArtifacts function to use the new save function
+export const generateKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
+  console.log(`Generating knowledge artifacts for conversation: ${conversationId}`);
+  
+  // Skip invalid conversation IDs
+  if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock')) {
+    console.log(`Not generating artifacts for invalid conversationId: ${conversationId}`);
+    return { guidelines: [], caseStudies: [] };
+  }
+  
+  // Check if conversationId is a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isUuid = uuidPattern.test(conversationId);
+  
+  // Set up properly formatted authentication
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Get token and ensure it's properly formatted with Bearer prefix
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = token;
+    console.log(`Using token for API call: ${token.substring(0, 15)}...`);
+  }
+  
+  try {
+    // First, try to get the last few messages for context
+    let messages: any[] = [];
+    
+    try {
+      // Only try to fetch messages if this is a valid UUID conversation
+      if (isUuid) {
+        console.log(`Fetching messages for context for UUID: ${conversationId}`);
+        const messageResponse = await fetch(`${API_URL}/api/v1/conversation/${conversationId}/messages?limit=3`, {
+          method: 'GET',
+          headers
+        });
+        
+        if (messageResponse.ok) {
+          const data = await messageResponse.json();
+          if (Array.isArray(data)) {
+            messages = data;
+            console.log(`Retrieved ${messages.length} messages for context`);
+          }
+        } else {
+          console.warn(`Failed to get messages, status: ${messageResponse.status}`);
+        }
+      } else {
+        console.log('Not fetching messages for non-UUID conversation ID');
+      }
+    } catch (messageError) {
+      console.warn('Error fetching messages for artifact generation:', messageError);
+    }
+    
+    // Now generate the artifacts
+    console.log(`Calling artifact generation endpoint for: ${conversationId}`);
+    
+    // Add a timeout for the request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    // Extract the last message content or use a default if none available
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1].content : null;
+    const messageContent = lastMessage || "Please generate relevant guidelines and case studies";
+    
+    // Build the request body
+    const requestBody = {
+      conversationId: conversationId,
+      message: messageContent
+    };
+    
+    // Make the API call to generate artifacts
+    const response = await fetch(`${AGENT_URL}/api/v1/generate-artifacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`Generation API returned status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Generation successful, received ${data.guidelines?.length || 0} guidelines and ${data.caseStudies?.length || 0} case studies`);
+    
+    // Cache the results in localStorage
+    try {
+      localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
+        ...data,
+        timestamp: new Date().toISOString()
+      }));
+      console.log(`Cached generated artifacts for ${conversationId}`);
+    } catch (cacheError) {
+      console.warn('Failed to cache artifacts to localStorage:', cacheError);
+    }
+    
+    // Save to the database if it's a valid UUID
+    if (isUuid && token) {
+      await saveArtifactsToDatabase(conversationId, data.guidelines, data.caseStudies);
+    } else {
+      console.log(`Not saving to database - ${!isUuid ? 'not a UUID' : 'no token available'}`);
+    }
+    
+    return data;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      console.error('Generation request timed out after 30 seconds');
+    } else {
+      console.error('Error generating knowledge artifacts:', error);
+    }
+    
+    // Check if there are cached results we can use as fallback
+    try {
+      const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
+      if (cachedData) {
+        const parsedCache = JSON.parse(cachedData);
+        if (parsedCache.guidelines && parsedCache.caseStudies) {
+          console.log(`Using cached artifacts as fallback after generation error for ${conversationId}`);
+          return {
+            guidelines: parsedCache.guidelines,
+            caseStudies: parsedCache.caseStudies
+          };
+        }
+      }
+    } catch (cacheError) {
+      console.warn('Failed to read cache after generation error:', cacheError);
+    }
+    
+    // Return empty data structure to prevent UI crashes
+    return {
+      guidelines: [],
+      caseStudies: []
+    };
+  }
 };
 
 // Update getKnowledgeArtifacts to use the new generation function as a last resort
@@ -656,124 +846,201 @@ export const getKnowledgeArtifacts = async (conversationId: string): Promise<Kno
       return { guidelines: [], caseStudies: [] };
     }
     
-    // Add timestamp to prevent caching issues
-    const timestamp = new Date().getTime();
+    // Check local cache first to prevent redundant fetches
+    try {
+      const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
+      if (cachedData) {
+        const parsedCache = JSON.parse(cachedData);
+        const cacheAge = new Date().getTime() - new Date(parsedCache.timestamp).getTime();
+        
+        // If cache is less than 10 minutes old and has content, use it
+        if (cacheAge < 10 * 60 * 1000 && 
+            Array.isArray(parsedCache.guidelines) && parsedCache.guidelines.length > 0 &&
+            Array.isArray(parsedCache.caseStudies) && parsedCache.caseStudies.length > 0) {
+          console.log(`Using cached artifacts for ${conversationId}, cache age: ${Math.round(cacheAge/1000)}s`);
+          return {
+            guidelines: parsedCache.guidelines,
+            caseStudies: parsedCache.caseStudies
+          };
+        }
+      }
+    } catch (cacheError) {
+      console.warn('Failed to read from cache:', cacheError);
+    }
     
-    // Setup headers
+    // Check if conversationId is in UUID format
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUuid = uuidPattern.test(conversationId);
+    
+    // If not a UUID, skip the database fetch and go straight to generation
+    if (!isUuid) {
+      console.log(`Conversation ID ${conversationId} is not in UUID format, using generation only`);
+      return await generateKnowledgeArtifacts(conversationId);
+    }
+    
+    // Setup headers with proper authentication
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     
-    // Add auth token if available
+    // Get token and ensure it's properly formatted
     const token = getToken();
     if (token) {
       headers['Authorization'] = token;
+      console.log(`Using token for API call: ${token.substring(0, 15)}...`);
+    } else {
+      console.warn('No authentication token available for database fetch');
+      // Without a token, we can't access the database, so go to generation
+      return await generateKnowledgeArtifacts(conversationId);
     }
     
-    console.log(`Fetching knowledge artifacts for conversation: ${conversationId} from database`);
+    // First try to fetch from backend database (only if UUID and token available)
+    console.log(`Fetching knowledge artifacts from database for UUID: ${conversationId}`);
     
-    // Fetch directly from the backend database
     try {
-      const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}?t=${timestamp}`, {
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      
+      // Add signal for abort capability
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      
+      // Use the correct endpoint to match the Java backend
+      const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}?_=${timestamp}`, { 
         method: 'GET',
-        headers
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Successfully retrieved artifacts from database');
-        
-        // Validate the response
-        if (data && 
-            Array.isArray(data.guidelines) && 
-            Array.isArray(data.caseStudies)) {
-          console.log(`Got ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies from database`);
-          
-          // Only return if we have actual data
-          if (data.guidelines.length > 0 || data.caseStudies.length > 0) {
-            return data;
-          } else {
-            console.log('Database returned empty collections, will generate new artifacts');
-          }
-        } else {
-          console.log('Database returned invalid data format');
-        }
-      } else {
-        console.log(`Database API returned status ${response.status}`);
-      }
-    } catch (error) {
-      console.log('Error fetching from database API:', error);
-    }
-    
-    // If database retrieval failed or returned empty data, generate new artifacts
-    console.log('Generating new artifacts via direct generation endpoint');
-    
-    // Get the most recent messages to provide context
-    let messages: Array<{ role: string; content: string }> = [];
-    try {
-      const convoMessages = await getConversationMessages(conversationId) as Array<{
-        userQuery?: string;
-        agentResponse?: string;
-      }>;
-      
-      // Only use the last 3 messages to keep context smaller
-      messages = convoMessages.slice(-3).map((msg: any) => ({
-        role: msg.userQuery ? 'user' : 'assistant',
-        content: msg.userQuery || msg.agentResponse || ""
-      }));
-      console.log(`Got ${messages.length} recent messages for context`);
-    } catch (error) {
-      console.log('Could not fetch messages for context, using empty context');
-      messages = [{ role: 'user', content: 'Please generate ethical guidance for this conversation.' }];
-    }
-    
-    // Use a longer timeout for generation
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    try {
-      const generateResponse = await fetch(`${AGENT_URL}/api/v1/generate-artifacts`, {
-        method: 'POST',
         headers,
-        body: JSON.stringify({
-          conversationId,
-          messages
-        }),
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
       
-      if (generateResponse.ok) {
-        const data = await generateResponse.json();
-        console.log('Successfully generated new artifacts and saved to database');
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Database response status: ${response.status}`);
         
-        // Validate the response
         if (data && 
             Array.isArray(data.guidelines) && 
             Array.isArray(data.caseStudies)) {
-          console.log(`Generated ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies`);
-          return data;
+          
+          // If the database returned content, use it
+          if (data.guidelines.length > 0 || data.caseStudies.length > 0) {
+            console.log(`Database returned ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies`);
+            
+            // Cache the results
+            try {
+              localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
+                guidelines: data.guidelines || [],
+                caseStudies: data.caseStudies || [],
+                timestamp: new Date().toISOString()
+              }));
+              console.log("Cached database response to localStorage");
+            } catch (err) {
+              console.warn('Failed to cache artifacts to localStorage');
+            }
+            
+            return {
+              guidelines: data.guidelines || [],
+              caseStudies: data.caseStudies || []
+            };
+          }
+          
+          console.log('Database returned empty results, generating new artifacts');
         }
-        console.log('Generate endpoint returned invalid data format');
+      } else if (response.status === 401) {
+        console.warn('Authentication error when fetching from database. Token might be invalid.');
       } else {
-        console.log(`Generate endpoint returned status ${generateResponse.status}`);
+        console.log(`Database API returned status ${response.status}`);
       }
     } catch (error) {
-      clearTimeout(timeoutId);
       if (error instanceof DOMException && error.name === 'AbortError') {
-        console.log('Generation timed out after 30 seconds');
+        console.log('Database fetch timed out after 3 seconds');
       } else {
-        console.log('Error generating artifacts:', error);
+        console.log('Error fetching from database API:', error);
       }
     }
     
-    // If all attempts fail, return empty objects to prevent UI crashes
-    console.log('All attempts to get artifacts failed, returning empty arrays');
-    return {
-      guidelines: [],
-      caseStudies: []
-    };
+    // If database retrieval failed or returned empty data, generate new artifacts
+    console.log('Generating new artifacts');
+    const generatedData = await generateKnowledgeArtifacts(conversationId);
+
+    // If generation gave us artifacts and we have a valid UUID with token, try harder to save to database
+    if (generatedData && 
+        ((generatedData.guidelines && generatedData.guidelines.length > 0) || 
+         (generatedData.caseStudies && generatedData.caseStudies.length > 0)) && 
+        isUuid && token) {
+      console.log('Attempting multiple approaches to save artifacts to database');
+      
+      // Try up to three different approaches
+      
+      // 1. First approach: PUT to /knowledge-artifacts/{conversationId}
+      try {
+        console.log(`Trying PUT to /api/v1/knowledge-artifacts/${conversationId}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            guidelines: generatedData.guidelines || [],
+            caseStudies: generatedData.caseStudies || []
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          console.log('Successfully saved artifacts via PUT /knowledge-artifacts/{id}');
+        } else {
+          console.warn(`Failed with status ${response.status}, trying next approach`);
+        }
+      } catch (error) {
+        console.warn('Error with first save approach:', error);
+      }
+      
+      // 2. Second approach: POST to /rag-artifacts
+      try {
+        console.log('Trying POST to /api/v1/rag-artifacts');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            conversationId: conversationId,
+            guidelines: generatedData.guidelines || [],
+            caseStudies: generatedData.caseStudies || [],
+            timestamp: new Date().toISOString()
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          console.log('Successfully saved artifacts via POST to /rag-artifacts');
+        } else {
+          console.warn(`Failed with status ${response.status}, trying final approach`);
+        }
+      } catch (error) {
+        console.warn('Error with second save approach:', error);
+      }
+      
+      // 3. Final approach: Direct SQL API (if available)
+      try {
+        console.log('Trying direct SQL approach via the agent API');
+        // This is a hypothetical approach - would need a direct SQL endpoint
+        // Use the direct save function if it exists
+        await saveArtifactsToDatabase(conversationId, generatedData.guidelines, generatedData.caseStudies);
+      } catch (error) {
+        console.warn('Error with final save approach:', error);
+        console.error('All attempts to save to database failed');
+      }
+    }
+
+    return generatedData;
   } catch (error) {
     console.error('Unexpected error in getKnowledgeArtifacts:', error);
     // Return empty data to prevent UI crashes
@@ -806,7 +1073,7 @@ export const verifyToken = async (): Promise<boolean> => {
     console.error('Token verification failed:', error);
     return false;
   }
-};
+}; 
 
 // Initialize axios interceptors
 axios.interceptors.response.use(

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { getKnowledgeArtifacts, getConversationMessages, generateKnowledgeArtifacts } from '../services/api';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import './KnowledgePanel.css';
@@ -35,7 +35,7 @@ interface KnowledgePanelProps {
 const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen, onClose }) => {
   const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [autoRefreshCount, setAutoRefreshCount] = useState(0);
@@ -44,23 +44,25 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   const [givenUp, setGivenUp] = useState(false);
   const [expandedGuidelines, setExpandedGuidelines] = useState<Set<string>>(new Set());
   const [expandedCaseStudies, setExpandedCaseStudies] = useState<Set<string>>(new Set());
-  const [showAllGuidelines, setShowAllGuidelines] = useState(false);
-  const [showAllCaseStudies, setShowAllCaseStudies] = useState(false);
+  const [showAllGuidelines, setShowAllGuidelines] = useState<boolean | null>(null);
+  const [showAllCaseStudies, setShowAllCaseStudies] = useState<boolean | null>(null);
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  
+  const prevConversationIdRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Reduced values to minimize token usage
-  const maxRetries = 2; // Reduced from 5
-  const retryDelay = 3000; // Increased from 1500ms to 3000ms
-  const maxAutoRefreshes = 2; // Reduced from 8
-  const autoRefreshInterval = 20000; // Increased from 15000ms to 20000ms
-  const initialDelay = 2000; // Increased from 1000ms to 2000ms
+  const maxRetries = 2;
+  const retryDelay = 3000;
+  const maxAutoRefreshes = 2;
+  const autoRefreshInterval = 20000;
+  const initialDelay = 2000;
 
-  // Add a debug log function
   const addDebugLog = useCallback((message: string) => {
     setDebugLog(prev => [...prev, `${new Date().toISOString().substr(11, 8)}: ${message}`]);
   }, []);
 
-  // Helper function to copy debug logs to clipboard
-  const copyDebugToClipboard = () => {
+  const copyDebugToClipboard = useCallback(() => {
     const debugInfo = {
       conversationId,
       timestamp: new Date().toISOString(),
@@ -74,9 +76,8 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     
     navigator.clipboard.writeText(JSON.stringify(debugInfo, null, 2));
     addDebugLog("Debug info copied to clipboard");
-  };
+  }, [conversationId, debugLog, guidelines.length, caseStudies.length, retryCount, autoRefreshCount, error]);
 
-  // Toggle expanded state for a guideline
   const toggleGuideline = useCallback((id: string) => {
     setExpandedGuidelines(prevExpanded => {
       const newExpanded = new Set(prevExpanded);
@@ -89,7 +90,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     });
   }, []);
 
-  // Toggle expanded state for a case study
   const toggleCaseStudy = useCallback((id: string) => {
     setExpandedCaseStudies(prevExpanded => {
       const newExpanded = new Set(prevExpanded);
@@ -102,47 +102,137 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     });
   }, []);
 
-  // Fetch artifacts
-  const fetchArtifacts = useCallback(async () => {
+  const isValidUuid = useCallback((id: string): boolean => {
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidPattern.test(id);
+  }, []);
+
+  const checkExistingArtifacts = useCallback((conversationId: string) => {
+    try {
+      console.log(`Checking for cached artifacts for ${conversationId}`);
+      const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
+      if (cachedData) {
+        const parsedCache = JSON.parse(cachedData);
+        if (
+          parsedCache &&
+          Array.isArray(parsedCache.guidelines) && 
+          Array.isArray(parsedCache.caseStudies)
+        ) {
+          console.log(`Found cached artifacts for ${conversationId}`);
+          
+          setGuidelines(parsedCache.guidelines || []);
+          setCaseStudies(parsedCache.caseStudies || []);
+          
+          setExpandedGuidelines(new Set());
+          setExpandedCaseStudies(new Set());
+          
+          if ((parsedCache.guidelines && parsedCache.guidelines.length > 0) || 
+              (parsedCache.caseStudies && parsedCache.caseStudies.length > 0)) {
+            setHasAttemptedFetch(true);
+            setIsLoading(false);
+            return true;
+          }
+        }
+      } else {
+        console.log(`No cached artifacts found for ${conversationId}`);
+      }
+      return false;
+    } catch (error) {
+      console.warn("Error checking cached artifacts", error);
+      return false;
+    }
+  }, []);
+
+  const resetState = useCallback(() => {
+    setGuidelines([]);
+    setCaseStudies([]);
+    setIsLoading(true);
+    setError(null);
+    setRetryCount(0);
+    setAutoRefreshCount(0);
+    setGivenUp(false);
+    setExpandedGuidelines(new Set());
+    setExpandedCaseStudies(new Set());
+    setShowAllGuidelines(null);
+    setShowAllCaseStudies(null);
+    setHasAttemptedFetch(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
     if (!conversationId) {
-      addDebugLog("No conversation ID provided");
+      console.log("No conversation ID provided, cannot fetch artifacts");
       setIsLoading(false);
       return;
     }
 
+    console.log(`fetchArtifacts called for ${conversationId}, skipCache=${skipCache}, hasAttemptedFetch=${hasAttemptedFetch}`);
+
+    if (hasAttemptedFetch && !skipCache) {
+      console.log(`Already attempted fetch for ${conversationId}, not fetching again`);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!skipCache && checkExistingArtifacts(conversationId)) {
+      console.log(`Using cached artifacts for ${conversationId}`);
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      console.log("Aborting previous fetch request");
+      abortControllerRef.current.abort();
+    }
+    
+    abortControllerRef.current = new AbortController();
+    
     setIsLoading(true);
     setError(null);
     
     try {
-      addDebugLog(`Fetching artifacts for conversation: ${conversationId}`);
-      const data = await getKnowledgeArtifacts(conversationId);
+      console.log(`Starting network fetch for conversation ${conversationId}`);
+      const response = await getKnowledgeArtifacts(conversationId);
       
-      if (data && data.guidelines && data.caseStudies) {
-        // Sort guidelines and case studies by relevance
-        const sortedGuidelines = [...data.guidelines].sort((a, b) => b.relevance - a.relevance);
-        const sortedCaseStudies = [...data.caseStudies].sort((a, b) => b.relevance - a.relevance);
+      if (conversationId !== prevConversationIdRef.current) {
+        console.log("Conversation changed during fetch, discarding results");
+        return;
+      }
+      
+      console.log(`Fetch successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
+      
+      if (response) {
+        setGuidelines(response.guidelines || []);
+        setCaseStudies(response.caseStudies || []);
         
-        setGuidelines(sortedGuidelines);
-        setCaseStudies(sortedCaseStudies);
-        addDebugLog(`Loaded ${sortedGuidelines.length} guidelines, ${sortedCaseStudies.length} case studies`);
+        setExpandedGuidelines(new Set());
+        setExpandedCaseStudies(new Set());
         
-        // Auto-expand the most relevant items
-        if (sortedGuidelines.length > 0) {
-          setExpandedGuidelines(new Set([sortedGuidelines[0].id]));
-        }
-        if (sortedCaseStudies.length > 0) {
-          setExpandedCaseStudies(new Set([sortedCaseStudies[0].id]));
-        }
-      } else {
-        addDebugLog("Received empty or invalid data");
-        setError("No relevant guidelines or case studies found");
+        const debugData = {
+          guidelineCount: response.guidelines?.length || 0,
+          caseStudyCount: response.caseStudies?.length || 0,
+          conversationId,
+          isUuid: isValidUuid(conversationId),
+          timestamp: new Date().toISOString()
+        };
+        setDebugInfo(JSON.stringify(debugData, null, 2));
+        
+        setHasAttemptedFetch(true);
       }
     } catch (err) {
-      addDebugLog(`Error fetching artifacts: ${err}`);
+      console.error(`Error in fetchArtifacts for ${conversationId}:`, err);
+      
+      if (err instanceof DOMException && err.name === "AbortError") {
+        console.log("Request was aborted");
+        return;
+      }
+      
       setError("Failed to load guidelines and case studies");
       
       if (retryCount < maxRetries) {
-        addDebugLog(`Will retry in ${retryDelay}ms (retry ${retryCount + 1}/${maxRetries})`);
+        console.log(`Will retry in ${retryDelay}ms (retry ${retryCount + 1}/${maxRetries})`);
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
         }, retryDelay);
@@ -150,78 +240,129 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setGivenUp(true);
       }
     } finally {
+      console.log(`Fetch attempt complete, setting isLoading=false`);
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
-  }, [conversationId, retryCount, maxRetries, retryDelay, addDebugLog]);
+  }, [conversationId, hasAttemptedFetch, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef]);
 
-  // Generate artifacts manually
-  const generateArtifacts = async () => {
+  const generateArtifacts = useCallback(async () => {
     if (!conversationId) return;
+    
+    console.log(`Manually generating artifacts for conversation ${conversationId}`);
+    
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    abortControllerRef.current = new AbortController();
     
     setIsLoading(true);
     setError(null);
     setGivenUp(false);
-    addDebugLog("Manually generating artifacts...");
     
     try {
-      const data = await generateKnowledgeArtifacts(conversationId);
+      const response = await generateKnowledgeArtifacts(conversationId);
       
-      if (data && data.guidelines && data.caseStudies) {
-        // Sort by relevance
-        const sortedGuidelines = [...data.guidelines].sort((a, b) => b.relevance - a.relevance);
-        const sortedCaseStudies = [...data.caseStudies].sort((a, b) => b.relevance - a.relevance);
-        
-        setGuidelines(sortedGuidelines);
-        setCaseStudies(sortedCaseStudies);
-        addDebugLog(`Generated ${sortedGuidelines.length} guidelines, ${sortedCaseStudies.length} case studies`);
-        
-        // Auto-expand the most relevant items
-        if (sortedGuidelines.length > 0) {
-          setExpandedGuidelines(new Set([sortedGuidelines[0].id]));
-        }
-        if (sortedCaseStudies.length > 0) {
-          setExpandedCaseStudies(new Set([sortedCaseStudies[0].id]));
-        }
-      } else {
-        addDebugLog("Generation returned empty or invalid data");
-        setError("Failed to generate relevant guidelines or case studies");
+      if (conversationId !== prevConversationIdRef.current) {
+        console.log("Conversation changed during generation, discarding results");
+        return;
       }
+      
+      console.log(`Generation successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
+      
+      setGuidelines(response.guidelines || []);
+      setCaseStudies(response.caseStudies || []);
+      
+      setExpandedGuidelines(new Set());
+      setExpandedCaseStudies(new Set());
+      
+      setHasAttemptedFetch(true);
     } catch (err) {
-      addDebugLog(`Error generating artifacts: ${err}`);
+      console.error(`Error generating artifacts for ${conversationId}:`, err);
+      
+      if (err instanceof DOMException && err.name === "AbortError") {
+        console.log("Generation request was aborted");
+        return;
+      }
+      
       setError("Failed to generate guidelines and case studies");
     } finally {
+      console.log("Generation attempt complete");
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
-  };
+  }, [conversationId, prevConversationIdRef]);
+
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      if (prevConversationIdRef.current) {
+        addDebugLog(`Conversation changed from ${prevConversationIdRef.current} to ${conversationId}`);
+        resetState();
+      }
+      prevConversationIdRef.current = conversationId;
+    }
+  }, [conversationId, addDebugLog, resetState]);
   
-  // Fetch on mount and when conversation ID changes
   useEffect(() => {
     if (isOpen && conversationId) {
-      addDebugLog(`Panel opened for conversation: ${conversationId}`);
-      setRetryCount(0);
-      setAutoRefreshCount(0);
-      setGivenUp(false);
+      const shouldLoadArtifacts = !hasAttemptedFetch || 
+        (guidelines.length === 0 && caseStudies.length === 0);
       
-      // Add a small initial delay to let the conversation load
-      const timer = setTimeout(() => {
-        fetchArtifacts();
-      }, initialDelay);
-      
-      return () => clearTimeout(timer);
+      if (shouldLoadArtifacts) {
+        console.log(`KnowledgePanel initializing for conversation: ${conversationId}`);
+        setIsLoading(true);
+      } else {
+        console.log(`KnowledgePanel already has data for conversation: ${conversationId}`);
+        setIsLoading(false);
+      }
     }
-  }, [isOpen, conversationId, fetchArtifacts, initialDelay, addDebugLog]);
+  }, [conversationId, isOpen, hasAttemptedFetch, guidelines.length, caseStudies.length]);
   
-  // Auto-refresh on retry count change
+  useEffect(() => {
+    console.log(`KnowledgePanel mounted/updated: open=${isOpen}, id=${conversationId}`);
+    
+    if (isOpen && conversationId) {
+      console.log(`Panel opened for conversation: ${conversationId}`);
+      
+      if (!checkExistingArtifacts(conversationId)) {
+        console.log(`No cached artifacts found, will fetch in ${initialDelay}ms`);
+        setIsLoading(true);
+        
+        const timer = setTimeout(() => {
+          console.log(`Initial delay complete, calling fetchArtifacts`);
+          fetchArtifacts();
+        }, initialDelay);
+        
+        return () => {
+          console.log(`Cleanup: clearing timeout and aborting any in-flight requests`);
+          clearTimeout(timer);
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+          }
+        };
+      } else {
+        console.log(`Using cached artifacts for ${conversationId}, not initiating fetch`);
+      }
+    }
+  }, [isOpen, conversationId, fetchArtifacts, initialDelay, checkExistingArtifacts]);
+  
   useEffect(() => {
     if (retryCount > 0 && retryCount <= maxRetries) {
       fetchArtifacts();
     }
   }, [retryCount, fetchArtifacts, maxRetries]);
   
-  // Auto-refresh on interval if needed
   useEffect(() => {
-    // Only set up auto-refresh if guidelines and case studies are empty
     if (isOpen && conversationId && (guidelines.length === 0 || caseStudies.length === 0) && !givenUp) {
+      const isUuid = isValidUuid(conversationId);
+      
+      if (!isUuid) {
+        addDebugLog(`Skipping auto-refresh for non-UUID conversation ID: ${conversationId}`);
+        return;
+      }
+      
       if (autoRefreshCount < maxAutoRefreshes) {
         addDebugLog(`Setting up auto-refresh (${autoRefreshCount}/${maxAutoRefreshes})`);
         
@@ -231,7 +372,13 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
           fetchArtifacts();
         }, autoRefreshInterval);
         
-        return () => clearTimeout(timer);
+        return () => {
+          clearTimeout(timer);
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+          }
+        };
       } else {
         addDebugLog(`Max auto-refreshes (${maxAutoRefreshes}) reached`);
         setGivenUp(true);
@@ -240,43 +387,37 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, [
     isOpen, conversationId, guidelines.length, caseStudies.length, 
     autoRefreshCount, maxAutoRefreshes, autoRefreshInterval, 
-    fetchArtifacts, givenUp, addDebugLog
+    fetchArtifacts, givenUp, addDebugLog, isValidUuid
   ]);
 
-  // Effect for expand/collapse all guidelines
   useEffect(() => {
-    if (showAllGuidelines) {
+    if (showAllGuidelines === true) {
       const allIds = guidelines.map(g => g.id);
       setExpandedGuidelines(new Set(allIds));
-    } else if (showAllGuidelines === false) { // Only collapse when explicitly set to false (not on initial render)
+    } else if (showAllGuidelines === false) {
       setExpandedGuidelines(new Set());
     }
   }, [showAllGuidelines, guidelines]);
   
-  // Effect for expand/collapse all case studies
   useEffect(() => {
-    if (showAllCaseStudies) {
+    if (showAllCaseStudies === true) {
       const allIds = caseStudies.map(cs => cs.id);
       setExpandedCaseStudies(new Set(allIds));
-    } else if (showAllCaseStudies === false) { // Only collapse when explicitly set to false (not on initial render)
+    } else if (showAllCaseStudies === false) {
       setExpandedCaseStudies(new Set());
     }
   }, [showAllCaseStudies, caseStudies]);
 
-  // Truncate text for display
   const truncateText = (text: string, maxLength: number = 250): string => {
     if (!text) return '';
-    // Clean up text by removing extra whitespace and newlines
     const cleanedText = text.replace(/\s+/g, ' ').trim();
     return cleanedText.length > maxLength ? `${cleanedText.substring(0, maxLength)}...` : cleanedText;
   };
 
-  // Format relevance score for display
   const formatRelevance = (score: number): string => {
     return `${Math.round(score * 100)}%`;
   };
 
-  // Render a guideline
   const renderGuideline = (guideline: Guideline, index: number) => {
     const isExpanded = expandedGuidelines.has(guideline.id);
     const titleText = truncateText(guideline.title, 100);
@@ -323,7 +464,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     );
   };
 
-  // Render a case study
   const renderCaseStudy = (caseStudy: CaseStudy, index: number) => {
     const isExpanded = expandedCaseStudies.has(caseStudy.id);
     const titleText = truncateText(caseStudy.title, 100);
@@ -390,7 +530,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
           
           <button 
             className="refresh-button" 
-            onClick={fetchArtifacts}
+            onClick={() => fetchArtifacts(false)}
             disabled={isLoading}
             title="Refresh artifacts"
           >
@@ -457,7 +597,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
               <div className="text-center mt-4">
                 <button 
                   className="retry-button"
-                  onClick={generateArtifacts}
+                  onClick={() => generateArtifacts()}
                 >
                   Generate Artifacts
                 </button>
@@ -471,7 +611,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
                 onClick={() => {
                   setRetryCount(0);
                   setGivenUp(false);
-                  fetchArtifacts();
+                  fetchArtifacts(true);
                 }}
               >
                 Retry
@@ -488,7 +628,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
                     className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                     onClick={() => setShowAllGuidelines(!showAllGuidelines)}
                   >
-                    {showAllGuidelines ? 'Collapse All' : 'Expand All'}
+                    {showAllGuidelines === true ? 'Collapse All' : 'Expand All'}
                   </button>
                 )}
               </div>
@@ -512,7 +652,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
                     className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                     onClick={() => setShowAllCaseStudies(!showAllCaseStudies)}
                   >
-                    {showAllCaseStudies ? 'Collapse All' : 'Expand All'}
+                    {showAllCaseStudies === true ? 'Collapse All' : 'Expand All'}
                   </button>
                 )}
               </div>
@@ -532,7 +672,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
               <div className="text-center mt-4">
                 <button 
                   className="retry-button"
-                  onClick={generateArtifacts}
+                  onClick={() => generateArtifacts()}
                 >
                   Generate Artifacts
                 </button>
