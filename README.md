@@ -6,6 +6,7 @@ A comprehensive web-based application that helps software professionals navigate
 
 EVA consists of three main components:
 
+
 1. **Agent (Python)** - Core AI engine powered by OpenAI GPT for ethical decision processing
 2. **Backend (Spring Boot)** - REST API for user management and conversation handling
 3. **Frontend (React + TypeScript)** - Modern, responsive UI for interacting with EVA
