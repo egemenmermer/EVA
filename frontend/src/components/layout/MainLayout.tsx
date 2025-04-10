@@ -162,7 +162,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         </main>
         
         {/* Right Panel - Responsive on mobile */}
-        <div className={`${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 fixed md:relative right-0 top-16 md:top-0 z-30 w-[85%] sm:w-[320px] md:w-[240px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+        <div className={`${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 fixed md:relative right-0 top-16 md:top-0 z-30 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
           {/* Close button on mobile */}
           <button 
             onClick={() => setGuidelinesOpen(false)} 

@@ -382,53 +382,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       fetchArtifacts();
     }
   }, [retryCount, fetchArtifacts, maxRetries]);
-  
-  useEffect(() => {
-    if (isOpen && conversationId && messages.length > 0) {
-      const shouldGenerate = shouldGenerateForNewMessage();
-      
-      if (shouldGenerate) {
-        addDebugLog(`New message detected, generating artifacts`);
-        fetchArtifacts(true, true);
-      }
-    }
-  }, [isOpen, conversationId, messages, shouldGenerateForNewMessage, fetchArtifacts, addDebugLog]);
-  
-  useEffect(() => {
-    if (isOpen && conversationId && (guidelines.length === 0 || caseStudies.length === 0) && !givenUp) {
-      const isUuid = isValidUuid(conversationId);
-      
-      if (!isUuid) {
-        addDebugLog(`Skipping auto-refresh for non-UUID conversation ID: ${conversationId}`);
-        return;
-      }
-      
-      if (autoRefreshCount < maxAutoRefreshes) {
-        addDebugLog(`Setting up auto-refresh (${autoRefreshCount}/${maxAutoRefreshes})`);
-        
-        const timer = setTimeout(() => {
-          addDebugLog(`Auto-refreshing (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
-          setAutoRefreshCount(prev => prev + 1);
-          fetchArtifacts();
-        }, autoRefreshInterval);
-        
-        return () => {
-          clearTimeout(timer);
-          if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-            abortControllerRef.current = null;
-          }
-        };
-      } else {
-        addDebugLog(`Max auto-refreshes (${maxAutoRefreshes}) reached`);
-        setGivenUp(true);
-      }
-    }
-  }, [
-    isOpen, conversationId, guidelines.length, caseStudies.length, 
-    autoRefreshCount, maxAutoRefreshes, autoRefreshInterval, 
-    fetchArtifacts, givenUp, addDebugLog, isValidUuid
-  ]);
 
   useEffect(() => {
     if (showAllGuidelines === true) {
@@ -447,6 +400,42 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       setExpandedCaseStudies(new Set());
     }
   }, [showAllCaseStudies, caseStudies]);
+
+  useEffect(() => {
+    if (isOpen && conversationId && (guidelines.length === 0 || caseStudies.length === 0) && !givenUp) {
+      const isUuid = isValidUuid(conversationId);
+
+      if (!isUuid) {
+        addDebugLog(`Skipping auto-refresh for non-UUID conversation ID: ${conversationId}`);
+        return;
+      }
+
+      if (autoRefreshCount < maxAutoRefreshes) {
+        addDebugLog(`Setting up auto-refresh (${autoRefreshCount}/${maxAutoRefreshes})`);
+
+        const timer = setTimeout(() => {
+          addDebugLog(`Auto-refreshing (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
+          setAutoRefreshCount(prev => prev + 1);
+          fetchArtifacts(); // Fetch existing, don't force generate
+        }, autoRefreshInterval);
+
+        return () => {
+          clearTimeout(timer);
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+          }
+        };
+      } else {
+        addDebugLog(`Max auto-refreshes (${maxAutoRefreshes}) reached`);
+        setGivenUp(true);
+      }
+    }
+  }, [
+    isOpen, conversationId, guidelines.length, caseStudies.length,
+    autoRefreshCount, maxAutoRefreshes, autoRefreshInterval,
+    fetchArtifacts, givenUp, addDebugLog, isValidUuid
+  ]);
 
   const truncateText = (text: string, maxLength: number = 250): string => {
     if (!text) return '';
@@ -557,36 +546,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
 
   return (
     <div className="knowledge-panel">
-      <div className="knowledge-header">
-        <h3>Knowledge Panel</h3>
-        <div>
-          <button
-            className="debug-toggle"
-            onClick={() => setShowDebug(!showDebug)}
-            title={showDebug ? "Hide debug info" : "Show debug info"}
-          >
-            {showDebug ? "Hide Debug" : "Debug"}
-          </button>
-          
-          <button 
-            className="refresh-button" 
-            onClick={() => fetchArtifacts(true, true)}
-            disabled={isLoading}
-            title="Refresh artifacts"
-          >
-            ↻
-          </button>
-          
-          <button 
-            className="close-button" 
-            onClick={onClose}
-            title="Close panel"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-      
       {showDebug && (
         <div className="debug-panel">
           <h4>Debug Information</h4>
@@ -664,7 +623,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
           <>
             <div className="guidelines-section">
               <div className="flex justify-between items-center mb-2">
-                <h4>Relevant Guidelines ({guidelines.length})</h4>
+                <h4>Relevant Guidelines</h4>
                 {guidelines.length > 0 && (
                   <button 
                     className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
@@ -688,7 +647,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
             
             <div className="case-studies-section">
               <div className="flex justify-between items-center mb-2">
-                <h4>Relevant Case Studies ({caseStudies.length})</h4>
+                <h4>Relevant Case Studies</h4>
                 {caseStudies.length > 0 && (
                   <button 
                     className="text-xs text-blue-600 dark:text-blue-400 hover:underline"

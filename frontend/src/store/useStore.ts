@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Role } from '@/types/index';
 
 // Types
-export type Role = 'user' | 'assistant';
 export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER' | 'FUNCTION' | 'NO_TOOLS';
 
 export interface Message {

@@ -3,6 +3,8 @@ package com.ego.ethicai.service.Impl;
 import com.ego.ethicai.dto.AIRequestDTO;
 import com.ego.ethicai.dto.AIResponseDTO;
 import com.ego.ethicai.service.AIService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,7 @@ public class AIServiceImpl implements AIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AIServiceImpl.class);
     private final WebClient webClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final int MAX_RETRIES = 2;
     private static final int TIMEOUT_SECONDS = 30;
 
@@ -47,7 +50,7 @@ public class AIServiceImpl implements AIService {
             requestBody.put("conversationId", request.getConversationId());
             
             // Make request to agent
-            Map<String, Object> response = webClient.post()
+            Map<String, Object> responseMap = webClient.post()
                     .uri("/generate-response")
                     .bodyValue(requestBody)
                     .retrieve()
@@ -60,9 +63,10 @@ public class AIServiceImpl implements AIService {
                                 retrySignal.totalRetries() + 1)))
                     .block();
 
-            if (response != null && response.containsKey("agentResponse")) {
-                return new AIResponseDTO((String) response.get("agentResponse"));
+            if (responseMap != null && responseMap.containsKey("agentResponse")) {
+                return new AIResponseDTO((String) responseMap.get("agentResponse"));
             } else {
+                logger.error("Invalid response format or null response from AI agent. Response: {}", responseMap);
                 throw new RuntimeException("Invalid response format from AI agent");
             }
             

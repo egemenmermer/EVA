@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Dispatch, SetStateAction, useRef } from 'react';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
-import { useStore, Message as StoreMessage, Role, ManagerType } from '@/store/useStore';
+import { useStore, ManagerType } from '@/store/useStore';
+import { Role } from '@/types/index';
+import { Message } from '@/types/conversation';
 import { conversationApi } from '@/services/api';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationContentResponseDTO } from '@/types/api';
@@ -20,15 +22,6 @@ interface ExtendedConversationDTO extends ConversationContentResponseDTO {
   agentResponse?: string;
   isUserMessage?: boolean;
   isLoading?: boolean;
-}
-
-// Extend the store Message type to include optional fields needed in this component
-interface Message extends Omit<StoreMessage, 'role'> {
-  id: string;
-  role: Role;
-  content: string;
-  conversationId: string;
-  createdAt: string;
 }
 
 // Add a new interface for the updated response format
@@ -122,12 +115,13 @@ export const ChatWindow: React.FC = () => {
     try {
       const response = await api.get(`/api/v1/conversation/message/${currentConversation.conversationId}`);
       if (Array.isArray(response.data)) {
+        console.log("Raw messages from API:", response.data); // Log raw API data
         const messages = response.data.flatMap((msg: any) => {
-          const messages: Message[] = [];
+          const messageArray: Message[] = []; // Renamed inner variable
           
           // Handle old format (userQuery/agentResponse)
           if (msg.userQuery) {
-            messages.push({
+            messageArray.push({
               id: msg.id || uuidv4(),
               role: 'user',
               content: msg.userQuery,
@@ -145,13 +139,14 @@ export const ChatWindow: React.FC = () => {
               msg.agentResponse.includes("Feel free to ask me anything related to technology ethics");
             
             if (!isDefaultResponse) {
-              messages.push({
+              const assistantMsg: Message = {
                 id: uuidv4(),
                 role: 'assistant',
                 content: msg.agentResponse,
                 conversationId: currentConversation.conversationId,
-                createdAt: msg.createdAt
-              });
+                createdAt: msg.createdAt,
+              };
+              messageArray.push(assistantMsg);
             } else {
               console.log("Filtered out default assistant response");
             }
@@ -168,31 +163,34 @@ export const ChatWindow: React.FC = () => {
                 msg.content.includes("Feel free to ask me anything related to technology ethics");
               
               if (!isDefaultResponse) {
-                messages.push({
+                const assistantMsg: Message = {
                   id: msg.id || uuidv4(),
                   role: msg.role,
                   content: msg.content,
                   conversationId: currentConversation.conversationId,
-                  createdAt: msg.createdAt
-                });
+                  createdAt: msg.createdAt,
+                };
+                messageArray.push(assistantMsg);
               } else {
                 console.log("Filtered out default assistant response (new format)");
               }
             } else {
               // Add non-assistant messages as normal
-              messages.push({
+              const otherMsg: Message = {
                 id: msg.id || uuidv4(),
                 role: msg.role,
                 content: msg.content,
                 conversationId: currentConversation.conversationId,
                 createdAt: msg.createdAt
-              });
+              };
+              messageArray.push(otherMsg);
             }
           }
           
-          return messages;
+          return messageArray;
         });
         
+        console.log("Processed messages to set in state:", messages); // Log messages before setting state
         // Only update messages if we got new ones and they're different
         if (messages.length > 0) {
           // Check if the new messages are different from existing ones

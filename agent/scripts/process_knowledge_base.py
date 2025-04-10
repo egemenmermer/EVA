@@ -137,17 +137,28 @@ def create_chunks(documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         doc_chunks = text_splitter.split_text(doc["content"])
         logger.info(f"Split document '{doc['source']}' into {len(doc_chunks)} chunks")
         
+        # Determine artifact type based on category
+        artifact_type = "unknown"
+        if doc["category"] == "guidelines":
+            artifact_type = "guideline"
+        elif doc["category"] == "case_studies":
+            artifact_type = "case_study"
+        # Add other mappings if necessary (e.g., research_papers, industry_reports)
+        # For now, we only strictly need guideline and case_study for the agent's filter
+
         for i, chunk in enumerate(doc_chunks):
+            # Construct the metadata dictionary that will be saved in the index
+            chunk_metadata = {
+                **doc["metadata"], # Includes filename, category, processed_date
+                "artifact_type": artifact_type, # ADDED artifact_type
+                "chunk_id": i,
+                "total_chunks": len(doc_chunks)
+            }
             chunks.append({
                 "content": chunk,
-                "source": doc["source"],
-                "category": doc["category"],
-                "chunk_id": i,
-                "metadata": {
-                    **doc["metadata"],
-                    "chunk_id": i,
-                    "total_chunks": len(doc_chunks)
-                }
+                "source": doc["source"], # Keep source at top level if needed elsewhere
+                "category": doc["category"], # Keep category at top level if needed elsewhere
+                "metadata": chunk_metadata # Assign the corrected metadata dict
             })
     
     logger.info(f"Created a total of {len(chunks)} chunks")

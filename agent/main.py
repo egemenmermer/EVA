@@ -61,6 +61,149 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# --- Inserted Helper Functions Start ---
+
+async def save_knowledge_artifacts(conversation_id: str, payload: dict) -> bool:
+    """
+    Saves the generated knowledge artifacts (guidelines, case studies) to the backend database.
+
+    Args:
+        conversation_id: The ID of the conversation.
+        payload: A dictionary containing the artifacts to save, matching the backend API expectation.
+                 Expected keys: "conversationId", "guidelines", "caseStudies", "timestamp".
+
+    Returns:
+        True if saving was successful, False otherwise.
+    """
+    logger.info(f"Attempting to save knowledge artifacts to database for conversation {conversation_id}")
+    
+    # Set up headers for the database request
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    
+    # Add token if available 
+    token = os.getenv('CURRENT_AUTH_TOKEN')
+    if token:
+        if not token.startswith('Bearer '):
+            token = f"Bearer {token}"
+        headers["Authorization"] = token
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(
+                f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts",
+                json=payload,
+                headers=headers
+            )
+            
+            if response.status_code in [200, 201]:
+                logger.info(f"Successfully saved artifacts for conversation {conversation_id}")
+                return True
+            else:
+                logger.error(f"Failed to save artifacts. Status: {response.status_code}, Response: {response.text[:500]}")
+                return False
+    except Exception as e:
+        logger.error(f"Error saving artifacts to database: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False
+
+async def generate_and_save_artifacts(conversation_id: str, request: Request, retry_count: int) -> "KnowledgeArtifactsResponse":
+    """
+    Generates new knowledge artifacts using the agent based on the conversation ID,
+    saves them to the database, and returns them.
+
+    Args:
+        conversation_id: The ID of the conversation.
+        request: The FastAPI request object (currently unused but kept for signature consistency).
+        retry_count: The current retry attempt number (unused).
+
+    Returns:
+        A KnowledgeArtifactsResponse containing the generated guidelines and case studies.
+        Returns empty artifacts if generation or saving fails.
+    """
+    logger.warning(f"Generating and saving artifacts for conversation {conversation_id} as none were found in DB.")
+    
+    guidelines = []
+    case_studies = []
+
+    try:
+        # Initialize agent
+        agent = get_agent()
+        if not agent:
+             logger.error("Agent could not be initialized in generate_and_save_artifacts.")
+             # Return empty artifacts if agent fails
+             return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+
+        # TODO: Improve query generation - ideally use last user message or context
+        # Using a placeholder query for now, similar to direct_knowledge_artifacts
+        query = f"Generate relevant guidelines and case studies for conversation {conversation_id}"
+        logger.info(f"Generating artifacts with placeholder query: '{query}'")
+
+        # Generate guidelines and case studies
+        try:
+            guidelines = agent.get_relevant_guidelines(query, max_results=5) # Assuming GuidelineItem structure
+            logger.info(f"Generated {len(guidelines)} guidelines")
+            
+            case_studies = agent.get_relevant_case_studies(query, max_results=3) # Assuming CaseStudyItem structure
+            logger.info(f"Generated {len(case_studies)} case studies")
+            
+            # Ensure the format matches KnowledgeArtifactsResponse Pydantic models
+            # Convert agent output if necessary (assuming agent returns dicts compatible with Pydantic)
+            guidelines = [GuidelineItem(**g) for g in guidelines if isinstance(g, dict)]
+            case_studies = [CaseStudyItem(**cs) for cs in case_studies if isinstance(cs, dict)]
+
+        except Exception as e:
+            logger.error(f"Error during artifact generation by agent: {str(e)}")
+            logger.error(traceback.format_exc())
+            # Return empty artifacts if generation fails
+            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+
+        # Save the generated artifacts to the database if any were generated
+        if guidelines or case_studies:
+            try:
+                # Prepare DTOs for database storage (matching backend expectation)
+                guideline_dtos = [{
+                    "title": g.title, "description": g.description, "artifactId": g.id,
+                    "artifactType": "GUIDELINE", "relevance": g.relevance, "source": g.source, "category": g.category
+                 } for g in guidelines]
+
+                case_study_dtos = [{
+                    "title": cs.title, "description": cs.summary, "artifactId": cs.id, # Using summary for description
+                    "artifactType": "CASE_STUDY", "relevance": cs.relevance, "source": cs.source, "outcome": cs.outcome
+                 } for cs in case_studies]
+
+                # Create the database payload
+                save_payload = {
+                    "conversationId": conversation_id, # Ensure this is the UUID formatted one if needed
+                    "guidelines": guideline_dtos,
+                    "caseStudies": case_study_dtos,
+                    "timestamp": datetime.now(timezone.utc).isoformat() # Use UTC timezone
+                }
+
+                # Save to database (fire and forget for now, log errors)
+                save_success = await save_knowledge_artifacts(conversation_id, save_payload)
+                if not save_success:
+                     logger.error(f"Failed attempt to save generated artifacts for conversation {conversation_id}")
+                
+            except Exception as e:
+                logger.error(f"Error preparing or saving generated artifacts to database: {str(e)}")
+                logger.error(traceback.format_exc())
+        else:
+            logger.info(f"No artifacts were generated for conversation {conversation_id}, nothing to save.")
+
+        # Return the generated artifacts regardless of save success
+        return KnowledgeArtifactsResponse(guidelines=guidelines, caseStudies=case_studies)
+
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_and_save_artifacts for conversation {conversation_id}: {str(e)}")
+        logger.error(traceback.format_exc())
+        # Return empty artifacts on major failure
+        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+
+# --- Inserted Helper Functions End ---
+
 class StartConversationRequest(BaseModel):
     """Model for starting a new conversation."""
     userId: str = Field(
@@ -254,7 +397,7 @@ def get_agent():
                 # Fallback configuration
                 config = {
                     'cache_dir': 'cache',
-                    'index_dir': str(Path('data/processed/combined')),
+                    'index_dir': os.getenv('INDEX_DIR', 'data/processed/combined'), # Reverted default path
                     'openai_api_key': os.getenv('OPENAI_API_KEY')
                 }
         else:
@@ -262,7 +405,7 @@ def get_agent():
             # Default configuration
             config = {
                 'cache_dir': 'cache',
-                'index_dir': str(Path('data/processed/combined')),
+                'index_dir': os.getenv('INDEX_DIR', 'data/processed/combined'), # Reverted default path
                 'openai_api_key': os.getenv('OPENAI_API_KEY')
             }
             
@@ -322,7 +465,7 @@ async def start_conversation(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate-response",
-    response_model=ConversationContentResponseDTO,
+    response_model=ConversationContentResponseDTO, # Revert to original DTO
     tags=["Conversation"],
     summary="Process ethical query",
     description="Processes an ethical query and returns guidance"
@@ -331,7 +474,7 @@ async def generate_response(
     query: Query,
     request: Request,
     agent: LangChainAgent = Depends(get_agent)
-) -> ConversationContentResponseDTO:
+) -> ConversationContentResponseDTO: # Revert return type hint
     """
     Process an ethical query and return guidance.
     """
@@ -351,8 +494,7 @@ async def generate_response(
             session_id=query.conversationId
         )
         
-        # Create a ConversationContentResponseDTO to return
-        # ONLY return the agent's text response. Artifacts are handled separately.
+        # Revert to returning the original DTO structure
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=query.conversationId,
@@ -1880,29 +2022,29 @@ async def get_knowledge_artifacts(conversation_id: str, request: Request, retry_
                                 return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
                     except Exception as e:
                         logger.error(f"Error parsing database response: {str(e)}")
-                        if retry_count < max_retries:
-                            return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
+                        # Don't generate here, just return empty
+                        logger.error("Error parsing database response, returning empty artifacts.")
+                        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
                 elif response.status_code == 401:
                     logger.warning("Authentication failed (401)")
-                    if retry_count < max_retries:
-                        return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
+                    # Don't generate on auth error
+                    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
                 else:
                     logger.warning(f"Database request failed with status {response.status_code}")
-                    if retry_count < max_retries:
-                        return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
+                    # Don't generate on other DB errors
+                    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
         except httpx.RequestError as e:
             logger.error(f"Request error when fetching from database: {str(e)}")
-            if retry_count < max_retries:
-                return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
+            # Don't generate on request error
+            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
     except Exception as e:
         logger.error(f"Unexpected error fetching artifacts: {str(e)}")
         logger.error(traceback.format_exc())
-        if retry_count < max_retries:
-            return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
+        # Don't generate on unexpected error
             
     # If all else fails, return empty data
     logger.error(f"All attempts to get artifacts failed, returning empty data")
-    return {"guidelines": [], "caseStudies": []}
+    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
 
 # Alternative endpoint for frontend compatibility if needed
 @app.get("/knowledge-artifacts/{conversation_id}",
@@ -2228,7 +2370,7 @@ async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(g
 
         # Use the message content provided in the request, or a default if none provided.
         query_text = message_content or "Generate relevant ethical guidelines and case studies."
-        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'" )
+        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'")
         
         # Agent instance is now injected via Depends(get_agent)
         if not agent:
@@ -2238,14 +2380,15 @@ async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(g
         # Generate artifacts using the agent instance
         guidelines = agent.get_relevant_guidelines(query_text)
         case_studies = agent.get_relevant_case_studies(query_text)
-
+        
         logger.info(f"Returning response with {len(guidelines)} guidelines, {len(case_studies)} case studies")
         # Return the generated artifacts directly
         return KnowledgeArtifactsResponse(
             guidelines=guidelines,
             caseStudies=case_studies
         )
-    except Exception as e:
+    except Exception as e: # Correctly aligned with 'try'
+        # Contents are correctly indented further
         logger.error(f"Error generating artifacts: {e}")
         logger.error(traceback.format_exc())
         # Return empty artifacts on error to prevent frontend issues

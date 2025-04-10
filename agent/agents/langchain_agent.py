@@ -8,6 +8,7 @@ from datetime import datetime
 import uuid
 import json
 import traceback
+import re
 
 # Change imports to use newer langchain structure
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -23,6 +24,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import PromptTemplate
 from langchain_community.callbacks.manager import get_openai_callback
 from langchain_core.chat_history import BaseChatMessageHistory
+from langchain.chains.summarize import load_summarize_chain
 
 from agents.base_agent import BaseAgent
 
@@ -768,269 +770,218 @@ Please describe the ethical concern you'd like to discuss."""
         logger.info(f"Received feedback for query {query_id}: rating={rating}, comment={comment}")
         return feedback_id
 
-    def get_relevant_guidelines(self, conversation_text: str, max_results: int = 5) -> List[Dict]:
-        """Retrieve relevant ethical guidelines based on conversation context.
-        
-        Args:
-            conversation_text: The text of the conversation to use as context
-            max_results: Maximum number of guidelines to return
-            
-        Returns:
-            List of guidelines with metadata
-        """
-        try:
-            logger.info(f"Retrieving relevant guidelines for conversation context")
-            
-            # Extract key ethical concerns from the conversation
-            extraction_prompt = (
-                f"Extract the main ethical concerns or topics from this conversation:\n\n"
-                f"{conversation_text}\n\n"
-                f"Return ONLY the ethical topics/concerns as a comma-separated list."
-            )
-            
-            ethical_concerns = self.llm.invoke(extraction_prompt).content
-            logger.info(f"Extracted ethical concerns: {ethical_concerns}")
-            
-            # Search the vectorstore for relevant chunks
-            search_query = f"ethical guidelines for {ethical_concerns}"
-            search_results = self.vectorstore.similarity_search_with_score(
-                search_query, 
-                k=max_results * 3,  # Get more results to filter
-                fetch_k=max_results * 5
-            )
-            
-            # Group results by document and filter to retain most relevant
-            guidelines_by_source = {}
-            
-            for doc, score in search_results:
-                # Only consider documents from guidelines category if possible
-                if hasattr(doc, 'metadata') and doc.metadata.get('category') and 'guideline' not in doc.metadata.get('category', '').lower():
-                    # Check if this is from guidelines, research_papers, or other suitable categories
-                    category = doc.metadata.get('category', '').lower()
-                    if not any(term in category for term in ['guideline', 'ethics', 'principle']):
-                        continue
-                
-                # Generate a source identifier
-                source = None
-                if hasattr(doc, 'metadata'):
-                    source = doc.metadata.get('filename', None) or doc.metadata.get('source', 'Unknown')
-                else:
-                    source = "Unknown"
-                
-                # Create or add to guideline group
-                if source not in guidelines_by_source:
-                    guidelines_by_source[source] = []
-                
-                # Add to the collection with score - convert float32 to regular float
-                relevance_score = float(1.0 - min(float(score), 1.0))  # Convert distance to relevance (0-1)
-                
-                # Extract content
-                content = doc.page_content
-                
-                # Generate a guideline ID
-                guideline_id = str(uuid.uuid4())
-                
-                # Try to extract title from content or generate one
-                title_lines = content.strip().split('\n')
-                title = title_lines[0] if title_lines else "Ethical Guideline"
-                if len(title) > 100:
-                    title = title[:100] + "..."
-                
-                # Only include first 300 characters in description for UI display
-                description = content
-                if len(description) > 300:
-                    description = description[:300] + "..."
-                
-                # Get category from metadata or default
-                category = "General"
-                if hasattr(doc, 'metadata') and doc.metadata.get('category'):
-                    category = doc.metadata.get('category')
-                
-                guidelines_by_source[source].append({
-                    "id": guideline_id,
-                    "title": title,
-                    "description": description,
-                    "source": source,
-                    "relevance": relevance_score,
-                    "category": category
-                })
-            
-            # Get the most relevant guideline from each source
-            guidelines = []
-            for source, source_guidelines in guidelines_by_source.items():
-                # Sort by relevance
-                source_guidelines.sort(key=lambda x: x["relevance"], reverse=True)
-                # Add the most relevant
-                guidelines.extend(source_guidelines[:1])
-            
-            # Sort final list by relevance
-            guidelines.sort(key=lambda x: x["relevance"], reverse=True)
-            
-            # Limit to requested number
-            return guidelines[:max_results]
-            
-        except Exception as e:
-            logger.error(f"Error retrieving guidelines: {str(e)}", exc_info=True)
-            # Return fallback guidelines
-            return [
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "Data Minimization Principle",
-                    "description": "Only collect data that is necessary for the functionality of your application. If location data isn't required for core functionality, it should not be collected.",
-                    "source": "General Ethical Guidelines",
-                    "relevance": 0.95,
-                    "category": "Privacy"
-                },
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "Informed Consent",
-                    "description": "Users should be clearly informed about what data is being collected and how it will be used, with the option to opt out.",
-                    "source": "General Ethical Guidelines",
-                    "relevance": 0.9,
-                    "category": "Privacy"
-                }
-            ]
+    def get_relevant_guidelines(self, conversation_text: str, max_results: int = 3) -> List[Dict]:
+        """Retrieve relevant ethical guidelines based on conversation text."""
+        if self.vectorstore is None:
+            logger.warning("Vector store not initialized. Cannot retrieve guidelines.")
+            return []
 
-    def get_relevant_case_studies(self, conversation_text: str, max_results: int = 3) -> List[Dict]:
-        """Retrieve relevant case studies based on conversation context.
-        
-        Args:
-            conversation_text: The text of the conversation to use as context
-            max_results: Maximum number of case studies to return
-            
-        Returns:
-            List of case studies with metadata
-        """
         try:
-            logger.info(f"Retrieving relevant case studies for conversation context")
-            
-            # Extract key ethical concerns from the conversation
-            extraction_prompt = (
-                f"Extract the main ethical concerns, technologies, or scenarios from this conversation:\n\n"
-                f"{conversation_text}\n\n"
-                f"Return ONLY the main themes as a comma-separated list."
+            logger.info(f"Retrieving guidelines relevant to: '{conversation_text[:100]}...'")
+            # Retrieve relevant document chunks with scores
+            retrieved_docs_with_scores = self.vectorstore.similarity_search_with_score(
+                query=conversation_text,
+                k=max_results, # Fetch k docs
+                filter={"artifact_type": "guideline"} # Filter for guidelines
             )
-            
-            ethical_themes = self.llm.invoke(extraction_prompt).content
-            logger.info(f"Extracted ethical themes: {ethical_themes}")
-            
-            # Search the vectorstore for relevant chunks
-            search_query = f"case studies or examples related to {ethical_themes}"
-            search_results = self.vectorstore.similarity_search_with_score(
-                search_query, 
-                k=max_results * 3,  # Get more results to filter
-                fetch_k=max_results * 5
-            )
-            
-            # Group results by document to avoid duplication
-            case_studies_by_source = {}
-            
-            for doc, score in search_results:
-                # Prefer documents from case_studies category if possible
-                if hasattr(doc, 'metadata') and doc.metadata.get('category') and 'case' not in doc.metadata.get('category', '').lower():
-                    # Only consider if this source looks like a case study
-                    content_lower = doc.page_content.lower()
-                    if not any(term in content_lower for term in ['case study', 'case', 'example', 'incident']):
-                        continue
+
+            if not retrieved_docs_with_scores:
+                logger.info("No relevant guideline documents found.")
+                return []
+
+            # Prepare documents for synthesis
+            retrieved_docs = [doc for doc, score in retrieved_docs_with_scores]
+            scores = [score for doc, score in retrieved_docs_with_scores]
+
+            # Define a prompt for synthesizing guidelines
+            prompt_template = """
+            Based on the following retrieved document sections related to the query "{query}", please synthesize a concise and relevant ethical guideline. 
+            Focus on extracting the core principle or recommendation. Present it clearly.
+            Include the source document name if available in the metadata.
+
+            Retrieved Sections:
+            {text}
+
+            Synthesized Guideline (include Title, Description, and Source):
+            Title: [Your synthesized title based on the core principle]
+            Description: [Your synthesized description of the guideline]
+            Source: [Source document name, e.g., {source}]
+            """
+            GUIDELINE_PROMPT = PromptTemplate(template=prompt_template, input_variables=["text", "query", "source"])
+
+            synthesized_guidelines = []
+            # Synthesize each retrieved document chunk individually
+            for i, doc in enumerate(retrieved_docs):
+                # Correctly get filename from metadata, fall back to old 'source' or 'unknown'
+                filename = doc.metadata.get("filename", doc.metadata.get("source", "unknown"))
                 
-                # Generate a source identifier
-                source = None
-                if hasattr(doc, 'metadata'):
-                    source = doc.metadata.get('filename', None) or doc.metadata.get('source', 'Unknown')
-                else:
-                    source = "Unknown"
-                
-                # Create or add to case study group
-                if source not in case_studies_by_source:
-                    case_studies_by_source[source] = []
-                
-                # Add to the collection with score - convert float32 to regular float
-                relevance_score = float(1.0 - min(float(score), 1.0))  # Convert distance to relevance (0-1)
-                
-                # Extract content
-                content = doc.page_content
-                
-                # Generate a case study ID
-                case_study_id = str(uuid.uuid4())
-                
-                # Process text to create meaningful case study components
-                # Extract title
-                title_lines = content.strip().split('\n')
-                title = title_lines[0] if title_lines else "Case Study"
-                if len(title) > 100:
-                    title = title[:100] + "..."
-                
-                # Use LLM to extract summary and outcome
-                extraction_prompt = (
-                    f"Extract a concise summary and key outcome/lesson from this case study text:\n\n"
-                    f"{content}\n\n"
-                    f"Format your response as:\n"
-                    f"Summary: [1-2 sentence summary]\n"
-                    f"Outcome: [key lesson or outcome]"
-                )
+                # Use filename as the source identifier passed to the prompt and parser
+                source_identifier = filename 
+
+                chain_input = {
+                    "input_documents": [doc], # Process one doc at a time
+                    "query": conversation_text,
+                    "source": source_identifier # Pass the actual filename/source to the prompt
+                }
+
+                # Use a refine chain for potentially better synthesis of individual docs
+                # chain = load_summarize_chain(self.llm, chain_type="refine", question_prompt=GUIDELINE_PROMPT)
+                # For simplicity and speed, using a basic LLMChain first
+                chain = LLMChain(llm=self.llm, prompt=GUIDELINE_PROMPT)
                 
                 try:
-                    extraction_result = self.llm.invoke(extraction_prompt).content
+                    # Prepare input for basic LLMChain (expects 'text' variable from prompt)
+                    llm_input = {"text": doc.page_content, "query": conversation_text, "source": source_identifier}
+                    llm_response_text = chain.run(llm_input)
                     
-                    # Parse extraction result
-                    summary = "No summary available"
-                    outcome = "No outcome available"
-                    
-                    for line in extraction_result.split('\n'):
-                        if line.startswith('Summary:'):
-                            summary = line.replace('Summary:', '').strip()
-                        elif line.startswith('Outcome:'):
-                            outcome = line.replace('Outcome:', '').strip()
-                    
-                except Exception as extraction_error:
-                    logger.error(f"Error extracting case study details: {str(extraction_error)}")
-                    summary = content[:200] + "..." if len(content) > 200 else content
-                    outcome = "See complete case study for details"
-                
-                case_studies_by_source[source].append({
-                    "id": case_study_id,
-                    "title": title,
-                    "summary": summary,
-                    "outcome": outcome,
-                    "source": source,
-                    "relevance": relevance_score
-                })
-            
-            # Get the most relevant case study from each source
-            case_studies = []
-            for source, source_case_studies in case_studies_by_source.items():
-                # Sort by relevance
-                source_case_studies.sort(key=lambda x: x["relevance"], reverse=True)
-                # Add the most relevant
-                case_studies.extend(source_case_studies[:1])
-            
-            # Sort final list by relevance
-            case_studies.sort(key=lambda x: x["relevance"], reverse=True)
-            
-            # Limit to requested number
-            return case_studies[:max_results]
+                    # Basic parsing of the LLM response (assumes format adherence)
+                    # Pass the original source_identifier to the parser
+                    parsed_guideline = self._parse_llm_output(llm_response_text, source_identifier, scores[i]) 
+                    if parsed_guideline:
+                       # Ensure the final source field uses the correct identifier
+                       parsed_guideline['source'] = source_identifier 
+                       synthesized_guidelines.append(parsed_guideline)
+                    else:
+                       logger.warning(f"Could not parse LLM output for guideline from source: {source_identifier}")
+
+                except Exception as chain_error:
+                   logger.error(f"Error running synthesis chain for guideline from {source_identifier}: {chain_error}")
+
+            logger.info(f"Synthesized {len(synthesized_guidelines)} guidelines.")
+            return synthesized_guidelines
             
         except Exception as e:
-            logger.error(f"Error retrieving case studies: {str(e)}", exc_info=True)
-            # Return fallback case studies
-            return [
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "Cambridge Analytica Data Scandal",
-                    "summary": "Cambridge Analytica collected personal data from millions of Facebook users without consent for political targeting.",
-                    "outcome": "Resulted in major regulatory changes and heightened awareness about data privacy.",
-                    "source": "Data Privacy Case Studies",
-                    "relevance": 0.9
-                },
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "Google Street View Wi-Fi Data Collection",
-                    "summary": "Google's Street View cars collected data from unencrypted Wi-Fi networks during mapping operations.",
-                    "outcome": "Led to significant fines and changes in data collection practices.",
-                    "source": "Location Data Ethics",
-                    "relevance": 0.85
-                }
-            ]
+            logger.error(f"Error retrieving/synthesizing guidelines: {e}")
+            return [] # Return empty on error
+
+    def _parse_llm_output(self, llm_output: str, source: str, score: float) -> Optional[Dict]:
+        """Parses the LLM output string to extract structured guideline/case study data."""
+        try:
+            title = "Synthesized Information"
+            description = llm_output # Default to full output if parsing fails
+            summary = ""
+            outcome = ""
+            parsed_source = source
+            is_case_study = False # Flag to check if case study fields are found
+
+            # Basic parsing based on expected keywords (Title:, Description:, Summary:, Outcome:, Source:)
+            title_match = re.search(r"Title:(.*?)(?:Description:|Summary:|Source:|$)", llm_output, re.IGNORECASE | re.DOTALL)
+            if title_match:
+                title = title_match.group(1).strip()
+
+            desc_match = re.search(r"Description:(.*?)(?:Source:|$)", llm_output, re.IGNORECASE | re.DOTALL)
+            if desc_match:
+                description = desc_match.group(1).strip()
+
+            # Look for case study specific fields
+            summary_match = re.search(r"Summary:(.*?)(?:Outcome:|Source:|$)", llm_output, re.IGNORECASE | re.DOTALL)
+            if summary_match:
+                summary = summary_match.group(1).strip()
+                is_case_study = True
+                description = summary # Use summary as description for case studies if Description field isn't explicit
+            
+            outcome_match = re.search(r"Outcome:(.*?)(?:Source:|$)", llm_output, re.IGNORECASE | re.DOTALL)
+            if outcome_match:
+                outcome = outcome_match.group(1).strip()
+                is_case_study = True
+
+            source_match = re.search(r"Source:(.*?)$", llm_output, re.IGNORECASE | re.DOTALL)
+            if source_match:
+                parsed_source = source_match.group(1).strip()
+            
+            # Clean up potential artifacts
+            title = title.replace("[Your synthesized title based on the core principle]", "").replace("[Your synthesized title for the case study]", "").strip()
+            description = description.replace("[Your synthesized description of the guideline]", "").replace("[Your synthesized summary of the case study situation]", "").strip()
+            outcome = outcome.replace("[Your synthesized summary of the outcome or key lesson]", "").strip()
+            parsed_source = parsed_source.replace("[Source document name, e.g., {source}]", source).strip()
+            
+            if not title or not description:
+                logger.warning(f"Could not parse title or description reliably from LLM output: {llm_output[:100]}...")
+                return None # Or return with default values if preferred
+
+            return {
+                "id": parsed_source + "-" + str(uuid.uuid4())[:8],
+                "title": title,
+                "description": description, 
+                "source": parsed_source,
+                "category": "Synthesized", # Or try to get from original doc metadata if needed
+                "relevance": float(1.0 - min(float(score), 1.0)), # Convert distance score to relevance
+                # Add case study fields if present
+                "summary": summary if is_case_study else None, 
+                "outcome": outcome if is_case_study else None,
+            }
+        except Exception as e:
+            logger.error(f"Error parsing LLM output '{llm_output[:50]}...': {e}")
+            return None
+
+    def get_relevant_case_studies(self, conversation_text: str, max_results: int = 2) -> List[Dict]:
+        """Retrieve relevant case studies based on conversation text."""
+        if self.vectorstore is None:
+            logger.warning("Vector store not initialized. Cannot retrieve case studies.")
+            return []
+
+        try:
+            logger.info(f"Retrieving case studies relevant to: '{conversation_text[:100]}...'")
+            # Retrieve relevant document chunks with scores
+            retrieved_docs_with_scores = self.vectorstore.similarity_search_with_score(
+                query=conversation_text,
+                k=max_results,
+                filter={"artifact_type": "case_study"} # Filter for case studies
+            )
+
+            if not retrieved_docs_with_scores:
+                logger.info("No relevant case study documents found.")
+                return []
+
+            retrieved_docs = [doc for doc, score in retrieved_docs_with_scores]
+            scores = [score for doc, score in retrieved_docs_with_scores]
+
+            # Define prompt for synthesizing case studies
+            prompt_template = """
+            Based on the following retrieved document section related to the query "{query}", please synthesize a concise summary of the case study.
+            Include a title, a brief summary of the situation, the outcome (if available), and the source.
+
+            Retrieved Section:
+            {text}
+
+            Synthesized Case Study (include Title, Summary, Outcome, and Source):
+            Title: [Your synthesized title for the case study]
+            Summary: [Your synthesized summary of the case study situation]
+            Outcome: [Your synthesized summary of the outcome or key lesson]
+            Source: [Source document name, e.g., {source}]
+            """
+            CASE_STUDY_PROMPT = PromptTemplate(template=prompt_template, input_variables=["text", "query", "source"])
+
+            synthesized_case_studies = []
+            for i, doc in enumerate(retrieved_docs):
+                # Correctly get filename from metadata, fall back to old 'source' or 'unknown'
+                filename = doc.metadata.get("filename", doc.metadata.get("source", "unknown"))
+                
+                # Use filename as the source identifier passed to the prompt and parser
+                source_identifier = filename
+
+                chain = LLMChain(llm=self.llm, prompt=CASE_STUDY_PROMPT)
+                try:
+                    llm_input = {"text": doc.page_content, "query": conversation_text, "source": source_identifier}
+                    llm_response_text = chain.run(llm_input)
+                    
+                    # Pass the original source_identifier to the parser
+                    parsed_case_study = self._parse_llm_output(llm_response_text, source_identifier, scores[i]) 
+                    if parsed_case_study:
+                        # Ensure the final source field uses the correct identifier
+                        parsed_case_study['source'] = source_identifier
+                        synthesized_case_studies.append(parsed_case_study)
+                    else:
+                        logger.warning(f"Could not parse LLM output for case study from source: {source_identifier}")
+                except Exception as chain_error:
+                    logger.error(f"Error running synthesis chain for case study from {source_identifier}: {chain_error}")
+
+            logger.info(f"Synthesized {len(synthesized_case_studies)} case studies.")
+            return synthesized_case_studies
+            
+        except Exception as e:
+            logger.error(f"Error retrieving/synthesizing case studies: {e}")
+            return [] # Return empty on error
 
     # Add a helper method to add messages to history manually
     def _add_to_history(self, role: str, content: str):

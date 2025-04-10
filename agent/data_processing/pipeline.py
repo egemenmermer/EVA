@@ -6,10 +6,13 @@ import json
 from tqdm import tqdm
 import numpy as np
 import faiss
+import pickle
 
 from data_processing.pdf_processor import PDFProcessor
 from data_processing.chunking import TextChunker
 from embeddings.embedding_model import EmbeddingModel
+from langchain_core.documents import Document
+from langchain.vectorstores import FAISS
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +111,7 @@ class DataPipeline:
                 text=doc["text"],
                 metadata={
                     "source": doc["source"],
-                    "type": "guideline",
+                    "artifact_type": "guideline",
                     "path": doc.get("path", "")
                 }
             )
@@ -120,7 +123,7 @@ class DataPipeline:
                 text=doc["text"],
                 metadata={
                     "source": doc["source"],
-                    "type": "case_study",
+                    "artifact_type": "case_study",
                     "path": doc.get("path", "")
                 }
             )
@@ -171,22 +174,34 @@ class DataPipeline:
         
     def _build_index(self, documents: Dict[str, List[Dict]], embeddings: Dict[str, List]):
         """Build search index from embeddings."""
-        # Combine all documents
-        all_chunks = []
-        all_chunks.extend(documents["guidelines"])
-        all_chunks.extend(documents["case_studies"])
-        
-        # Create and populate FAISS index
-        dimension = embeddings["embeddings"].shape[1]  # Should be 1536 for Ada
-        self.index = faiss.IndexFlatL2(dimension)
-        self.index.add(embeddings["embeddings"].astype('float32'))
-        
-        # Save index and documents to ethics_index directory
-        faiss.write_index(self.index, str(self.index_dir / "faiss.index"))
-        
-        # Save documents separately for the index
-        with open(self.index_dir / "documents.json", 'w', encoding='utf-8') as f:
-            json.dump(all_chunks, f, ensure_ascii=False, indent=2)
+        # Combine all documents and create mapping
+        all_chunks_content = []
+        all_chunks_metadata = []
+        for chunk in documents["guidelines"]:
+            all_chunks_content.append(chunk.get('text', ''))
+            all_chunks_metadata.append(chunk.get('metadata', {}))
+        for chunk in documents["case_studies"]:
+            all_chunks_content.append(chunk.get('text', ''))
+            all_chunks_metadata.append(chunk.get('metadata', {}))
+            
+        # Create LangChain Documents
+        lc_docs = [Document(page_content=content, metadata=meta) 
+                   for content, meta in zip(all_chunks_content, all_chunks_metadata)]
+
+        # Create and populate FAISS index directly from LangChain Documents
+        # This handles saving in the format expected by load_local
+        try:
+            logger.info("Creating FAISS index from documents...")
+            vectorstore = FAISS.from_documents(lc_docs, self.embedding_model.embeddings) # Use the actual embedding function
+            
+            # Save index using the standard FAISS method
+            save_path = str(self.index_dir)
+            vectorstore.save_local(folder_path=save_path, index_name="index") # Explicitly set index_name
+            logger.info(f"FAISS index saved successfully to {save_path}")
+
+        except Exception as e:
+             logger.error(f"Error creating or saving FAISS index: {e}")
+             raise
         
     def _save_processed_data(self, documents: Dict[str, List[Dict]]):
         """Save processed documents and metadata."""
