@@ -339,8 +339,6 @@ async def generate_response(
     
     conversation_id_for_backend = conversation_id
     if conversation_id.startswith("draft-"):
-        # Generate a stable UUID for this draft conversation
-        # This is needed because frontend uses draft-XYZ format for new conversations
         md5_hash = hashlib.md5(conversation_id.encode()).hexdigest()
         conversation_id_for_backend = str(uuid.UUID(md5_hash))
         logging.info(f"Using generated stable UUID {conversation_id_for_backend} for draft conversation {conversation_id}")
@@ -353,17 +351,8 @@ async def generate_response(
             session_id=query.conversationId
         )
         
-        # Set temperature for generation
-        temperature = query.temperature if query.temperature is not None else 0.7
-        
-        # Get relevant guidelines and case studies for the conversation after user has queried
-        guidelines = agent.get_relevant_guidelines(query.userQuery)
-        case_studies = agent.get_relevant_case_studies(query.userQuery)
-        
-        # Create and save knowledge artifacts asynchronously to not block the response
-        await save_knowledge_artifacts(conversation_id_for_backend, guidelines, case_studies)
-        
         # Create a ConversationContentResponseDTO to return
+        # ONLY return the agent's text response. Artifacts are handled separately.
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=query.conversationId,
@@ -373,153 +362,12 @@ async def generate_response(
             inPracticeMode=False
         )
     except Exception as e:
-        logging.error(f"Error processing query: {e}")
+        logging.error(f"Error generating agent response: {str(e)}")
         logging.error(traceback.format_exc())
         raise HTTPException(
             status_code=500,
-            detail=f"Error processing query: {str(e)}"
+            detail=f"Error generating agent response: {str(e)}"
         )
-
-async def save_knowledge_artifacts(conversation_id: str, payload: Dict) -> bool:
-    """Save knowledge artifacts to the backend database.
-    
-    Args:
-        conversation_id: ID of the conversation
-        payload: Dictionary containing guidelines and case studies
-        
-    Returns:
-        bool: True if save was successful, False otherwise
-    """
-    try:
-        logger.info(f"Saving knowledge artifacts for conversation: {conversation_id}")
-        
-        # Basic validation
-        if not conversation_id or not isinstance(conversation_id, str):
-            logger.error(f"Invalid conversation ID: {conversation_id}")
-            return False
-            
-        # Skip for mock or draft conversations
-        if conversation_id.startswith('draft-') or 'mock' in conversation_id:
-            logger.info(f"Skipping save for draft/mock conversation: {conversation_id}")
-            return False
-        
-        # Ensure conversation_id is in UUID format
-        # If it's not a valid UUID, try to convert it to one
-        try:
-            # Validate if it's already a UUID
-            uuid_obj = uuid.UUID(conversation_id)
-            formatted_conversation_id = str(uuid_obj)
-            if formatted_conversation_id != conversation_id:
-                logger.info(f"Reformatted conversation_id from {conversation_id} to {formatted_conversation_id}")
-                # Update the payload with the properly formatted UUID
-                payload["conversationId"] = formatted_conversation_id
-        except ValueError:
-            # If not a valid UUID, generate a deterministic UUID from the string
-            # This ensures the same conversation_id always maps to the same UUID
-            namespace = uuid.NAMESPACE_URL
-            name = f"conversation:{conversation_id}"
-            new_uuid = uuid.uuid5(namespace, name)
-            formatted_conversation_id = str(new_uuid)
-            logger.warning(f"Converted non-UUID conversation_id {conversation_id} to UUID {formatted_conversation_id}")
-            # Update the payload with the UUID
-            payload["conversationId"] = formatted_conversation_id
-            
-        # Extract guidelines and case studies from payload for logging
-        guidelines = payload.get("guidelines", [])
-        case_studies = payload.get("caseStudies", [])
-        logger.info(f"Preparing to save {len(guidelines)} guidelines and {len(case_studies)} case studies to database")
-        
-        # Get the current token for backend request
-        token = os.getenv('CURRENT_AUTH_TOKEN')
-        
-        # Check if token exists and is properly formatted
-        if token:
-            if not token.startswith('Bearer '):
-                token = f"Bearer {token}"
-            logger.info("Token is available for database save")
-        else:
-            logger.warning("No token available for database save, attempting without authentication")
-        
-        # Setup headers for API request
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        if token:
-            headers["Authorization"] = token
-        
-        # Make the API call to the backend with detailed logging
-        logger.info(f"Sending request to {BACKEND_BASE_URL}/api/v1/rag-artifacts")
-        
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    f"{BACKEND_BASE_URL}/api/v1/rag-artifacts",
-                    json=payload,
-                    headers=headers
-                )
-                
-                # Log detailed response information
-                logger.info(f"Database save response status: {response.status_code}")
-                
-                if response.status_code == 200:
-                    logger.info("Successfully saved knowledge artifacts to database")
-                    try:
-                        response_json = response.json()
-                        logger.info(f"Response data: {response_json}")
-                        return True
-                    except Exception as e:
-                        logger.error(f"Error parsing response JSON: {e}")
-                        return False
-                elif response.status_code == 401:
-                    logger.error("Authentication error (401) when saving to database")
-                    # Try refreshing the token and retry once
-                    try:
-                        # Try to get a new token from os.environ (if it was refreshed)
-                        new_token = os.getenv('CURRENT_AUTH_TOKEN')
-                        if new_token and new_token != token:
-                            logger.info("Retrying with refreshed token")
-                            if not new_token.startswith('Bearer '):
-                                new_token = f"Bearer {new_token}"
-                                
-                            headers["Authorization"] = new_token
-                            
-                            # Retry the request
-                            retry_response = await client.post(
-                                f"{BACKEND_BASE_URL}/api/v1/rag-artifacts",
-                                json=payload,
-                                headers=headers
-                            )
-                            
-                            if retry_response.status_code == 200:
-                                logger.info("Successfully saved on retry")
-                                return True
-                            else:
-                                logger.error(f"Retry also failed with status {retry_response.status_code}")
-                                return False
-                        else:
-                            logger.error("No refreshed token available for retry")
-                            return False
-                    except Exception as retry_error:
-                        logger.error(f"Error during retry: {retry_error}")
-                        return False
-                else:
-                    try:
-                        error_body = response.text
-                        logger.error(f"Database save failed with status {response.status_code}: {error_body}")
-                        return False
-                    except Exception as e:
-                        logger.error(f"Database save failed with status {response.status_code}, couldn't read error body: {e}")
-                        return False
-        except Exception as e:
-            logger.error(f"Exception during database save request: {str(e)}")
-            logger.error(traceback.format_exc())
-            return False
-            
-    except Exception as e:
-        logger.error(f"Unexpected error in save_knowledge_artifacts: {str(e)}")
-        logger.error(traceback.format_exc())
-        return False
 
 @app.post("/practice-mode",
     response_model=ConversationContentResponseDTO,
@@ -2368,291 +2216,41 @@ async def diagnostic_rag_artifacts(request: Request):
     return diagnostics
     
 @app.post("/api/v1/generate-artifacts")
-async def generate_artifacts(request: Request):
+async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(get_agent)):
+    """Generate knowledge artifacts based on conversation context."""
     try:
-        logger.info("======= Starting generate_artifacts() =======")
-        # Parse request body
         body = await request.json()
-        logger.info(f"Request body keys: {list(body.keys())}")
-        
         conversation_id = body.get("conversationId")
+        message_content = body.get("message") # Get last message if provided
         
         if not conversation_id:
-            logger.error("No conversationId in request body")
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Missing conversationId in request"}
-            )
+            raise HTTPException(status_code=400, detail="conversationId is required")
+
+        # Use the message content provided in the request, or a default if none provided.
+        query_text = message_content or "Generate relevant ethical guidelines and case studies."
+        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'" )
         
-        logger.info(f"Processing conversation_id: {conversation_id}")
-        
-        # Skip invalid conversation IDs
-        if conversation_id.startswith("draft-") or "mock-" in conversation_id:
-            logger.info(f"Skipping invalid conversation_id: {conversation_id}")
-            return JSONResponse(
-                content={"guidelines": [], "caseStudies": []},
-                status_code=200
-            )
-        
-        # Format conversation_id as UUID for database consistency
-        original_conversation_id = conversation_id
-        try:
-            # Validate if it's already a UUID
-            uuid_obj = uuid.UUID(conversation_id)
-            formatted_conversation_id = str(uuid_obj)
-            if formatted_conversation_id != conversation_id:
-                logger.info(f"Reformatted conversation_id from {conversation_id} to {formatted_conversation_id}")
-                conversation_id = formatted_conversation_id
-        except ValueError:
-            # If not a valid UUID, generate a deterministic UUID from the string
-            namespace = uuid.NAMESPACE_URL
-            name = f"conversation:{conversation_id}"
-            new_uuid = uuid.uuid5(namespace, name)
-            formatted_conversation_id = str(new_uuid)
-            logger.warning(f"Converted non-UUID conversation_id {conversation_id} to UUID {formatted_conversation_id}")
-            conversation_id = formatted_conversation_id
-        
-        # Get messages from request or from backend
-        messages = body.get("messages", [])
-        logger.info(f"Got {len(messages)} messages from request")
-        
-        if not messages:
-            try:
-                logger.info("No messages in request, attempting to fetch from backend")
-                messages = await get_conversation_messages(original_conversation_id)
-                logger.info(f"Retrieved {len(messages)} messages from backend")
-            except Exception as e:
-                logger.error(f"Error fetching messages from backend: {str(e)}")
-                # Create a placeholder message if none are available
-                messages = [{"role": "user", "content": "Please generate knowledge artifacts for this conversation."}]
-                logger.info("Using placeholder message")
-        
-        # Initialize agent
-        try:
-            logger.info("Initializing agent")
-            agent = get_agent()
-        except Exception as e:
-            logger.error(f"Error initializing agent: {str(e)}")
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"Failed to initialize agent: {str(e)}"}
-            )
-        
-        # Construct query from messages
-        query = ""
-        for message in messages:
-            if message.get("role") == "user" and message.get("content"):
-                query += message.get("content") + " "
-        
-        query = query.strip()
-        if not query:
-            query = "Please generate knowledge artifacts."
-        
-        logger.info(f"Constructed query of length {len(query)}")
-        
-        # Generate artifacts
-        guidelines = []
-        case_studies = []
-        
-        try:
-            logger.info("Generating guidelines")
-            guidelines = agent.get_relevant_guidelines(query, max_results=5)
-            logger.info(f"Generated {len(guidelines)} guidelines")
-            
-            logger.info("Generating case studies")
-            case_studies = agent.get_relevant_case_studies(query, max_results=3)
-            logger.info(f"Generated {len(case_studies)} case studies")
-        except Exception as e:
-            logger.error(f"Error generating artifacts: {str(e)}")
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"Failed to generate artifacts: {str(e)}"}
-            )
-        
-        # Prepare data for response
-        result = {
-            "guidelines": guidelines,
-            "caseStudies": case_studies
-        }
-        
-        # Convert to DTOs for backend saving
-        guideline_dtos = []
-        case_study_dtos = []
-        
-        for guideline in guidelines:
-            dto = {
-                "title": guideline.get("title", ""),
-                "description": guideline.get("description", ""),
-                "artifactId": guideline.get("id", ""),
-                "artifactType": "GUIDELINE",
-                "relevance": float(guideline.get("relevance", 0))
-            }
-            guideline_dtos.append(dto)
-            
-        for case_study in case_studies:
-            dto = {
-                "title": case_study.get("title", ""),
-                "description": case_study.get("description", "") or case_study.get("summary", ""),
-                "artifactId": case_study.get("id", ""),
-                "artifactType": "CASE_STUDY",
-                "relevance": float(case_study.get("relevance", 0))
-            }
-            case_study_dtos.append(dto)
-        
-        # Save to backend as primary storage method
-        try:
-            logger.info(f"Saving artifacts to database for conversation: {conversation_id}")
-            
-            # Create the backend payload
-            backend_payload = {
-                "conversationId": conversation_id,
-                "guidelines": guideline_dtos,
-                "caseStudies": case_study_dtos,
-                "timestamp": datetime.now(UTC).isoformat()
-            }
-            
-            # Log the payload details
-            logger.info(f"Database save payload has {len(guideline_dtos)} guidelines and {len(case_study_dtos)} case studies")
-            
-            # Send to backend database
-            save_result = await save_knowledge_artifacts(conversation_id, backend_payload)
-            
-            if save_result:
-                logger.info("Successfully saved artifacts to database")
-            else:
-                logger.error("Failed to save artifacts to database - no error was thrown but save operation may have failed")
-                
-        except Exception as e:
-            logger.error(f"Error saving to database: {str(e)}")
-            logger.error(traceback.format_exc())
-            # We don't return an error here - just log it and continue to return the generated artifacts
-        
-        # Include original conversation_id in the response to maintain client-side consistency
-        result["conversationId"] = original_conversation_id
-        result["timestamp"] = datetime.now().isoformat()
-        
+        # Agent instance is now injected via Depends(get_agent)
+        if not agent:
+            # This check might be redundant now but kept for safety
+            raise HTTPException(status_code=500, detail="Agent is not initialized")
+
+        # Generate artifacts using the agent instance
+        guidelines = agent.get_relevant_guidelines(query_text)
+        case_studies = agent.get_relevant_case_studies(query_text)
+
         logger.info(f"Returning response with {len(guidelines)} guidelines, {len(case_studies)} case studies")
-        return JSONResponse(content=result)
-    except Exception as e:
-        logger.error(f"Unhandled exception in generate_artifacts: {str(e)}")
-        logger.error(traceback.format_exc())
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"Server error: {str(e)}"}
+        # Return the generated artifacts directly
+        return KnowledgeArtifactsResponse(
+            guidelines=guidelines,
+            caseStudies=case_studies
         )
-
-# Add these below the imports
-# Token management for optimization
-TOKEN_EXPIRY = {}  # Store token expiry times
-TOKEN_USAGE_COUNT = {}  # Count token usages
-MAX_TOKEN_USES = 10  # Refresh token after this many uses
-
-# Add this function somewhere before it's first used
-def should_use_cached_token(conversation_id: str) -> bool:
-    """Check if we should use the cached token or refresh it.
-    
-    This helps reduce the frequency of token usage by only refreshing
-    after a certain number of uses or for important operations.
-    """
-    global TOKEN_USAGE_COUNT
-    
-    # Check if we're tracking this conversation
-    if conversation_id not in TOKEN_USAGE_COUNT:
-        TOKEN_USAGE_COUNT[conversation_id] = 0
-        return True
-    
-    # Increment usage count
-    TOKEN_USAGE_COUNT[conversation_id] += 1
-    
-    # Determine if we've used it too many times
-    if TOKEN_USAGE_COUNT[conversation_id] >= MAX_TOKEN_USES:
-        # Reset counter and refresh token
-        TOKEN_USAGE_COUNT[conversation_id] = 0
-        return False
-    
-    # Continue using cached token
-    return True
-
-async def generate_and_save_artifacts(conversation_id: str, request: Request, retry_count: int = 0) -> Dict:
-    """Generate new artifacts and save them to the database.
-    
-    Args:
-        conversation_id: The conversation ID to generate artifacts for
-        request: The original request object
-        retry_count: Current retry attempt
-        
-    Returns:
-        Dict: Generated guidelines and case studies
-    """
-    logger.info(f"Generating new artifacts for conversation: {conversation_id} (retry {retry_count})")
-    
-    try:
-        # Get messages for context
-        messages = []
-        try:
-            messages = await get_conversation_messages(conversation_id)
-            logger.info(f"Retrieved {len(messages)} messages for context")
-        except Exception as e:
-            logger.error(f"Error getting messages for context: {str(e)}")
-            # Create a placeholder message
-            messages = [{"role": "user", "content": "Please generate knowledge artifacts for this conversation."}]
-        
-        # Format payload for generate_artifacts endpoint
-        payload = {
-            "conversationId": conversation_id,
-            "messages": messages
-        }
-        
-        # Get auth token from request
-        token = None
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            token = auth_header
-            if not token.startswith("Bearer "):
-                token = f"Bearer {token}"
-        
-        # Set up headers
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        
-        if token:
-            headers["Authorization"] = token
-        
-        # Make internal request to generate-artifacts endpoint
-        # Use localhost URL since this is an internal call
-        internal_url = "http://localhost:5001/api/v1/generate-artifacts"
-        logger.info(f"Making internal request to {internal_url}")
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                internal_url,
-                json=payload,
-                headers=headers
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                logger.info("Successfully generated artifacts")
-                return {
-                    "guidelines": data.get("guidelines", []),
-                    "caseStudies": data.get("caseStudies", [])
-                }
-            else:
-                logger.error(f"Failed to generate artifacts: {response.status_code}")
-                logger.error(f"Response: {response.text}")
-                return {
-                    "guidelines": [],
-                    "caseStudies": []
-                }
     except Exception as e:
-        logger.error(f"Error in generate_and_save_artifacts: {str(e)}")
+        logger.error(f"Error generating artifacts: {e}")
         logger.error(traceback.format_exc())
-        return {
-            "guidelines": [],
-            "caseStudies": []
-        }
+        # Return empty artifacts on error to prevent frontend issues
+        logger.warning(f"Returning empty artifacts due to generation error for conversation {conversation_id}")
+        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5001) 

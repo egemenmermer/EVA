@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "rag_artifacts")
@@ -22,8 +23,8 @@ public class RagArtifact {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "conversation_id", nullable = false)
-    private String conversationId;
+    @Column(name = "conversation_id", nullable = false, columnDefinition="uuid")
+    private UUID conversationId;
 
     @Column(name = "artifact_type", nullable = false)
     @Enumerated(EnumType.STRING)

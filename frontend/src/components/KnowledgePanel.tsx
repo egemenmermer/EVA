@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { getKnowledgeArtifacts, getConversationMessages, generateKnowledgeArtifacts } from '../services/api';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import './KnowledgePanel.css';
+import { useStore } from '../store/useStore';
 
 interface Guideline {
   id: string;
@@ -49,14 +50,16 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   
+  const { messages } = useStore();
   const prevConversationIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const lastMessageRef = useRef<string | null>(null);
 
   const maxRetries = 2;
   const retryDelay = 3000;
   const maxAutoRefreshes = 2;
-  const autoRefreshInterval = 20000;
-  const initialDelay = 2000;
+  const autoRefreshInterval = 10000;
+  const initialDelay = 1000;
 
   const addDebugLog = useCallback((message: string) => {
     setDebugLog(prev => [...prev, `${new Date().toISOString().substr(11, 8)}: ${message}`]);
@@ -71,12 +74,13 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       caseStudiesCount: caseStudies.length,
       retryCount,
       autoRefreshCount,
-      error
+      error,
+      messagesCount: messages.length
     };
     
     navigator.clipboard.writeText(JSON.stringify(debugInfo, null, 2));
     addDebugLog("Debug info copied to clipboard");
-  }, [conversationId, debugLog, guidelines.length, caseStudies.length, retryCount, autoRefreshCount, error]);
+  }, [conversationId, debugLog, guidelines.length, caseStudies.length, retryCount, autoRefreshCount, error, messages.length]);
 
   const toggleGuideline = useCallback((id: string) => {
     setExpandedGuidelines(prevExpanded => {
@@ -162,7 +166,24 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     }
   }, []);
 
-  const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
+  const shouldGenerateForNewMessage = useCallback(() => {
+    if (messages.length === 0) return false;
+    
+    const lastMessage = messages[messages.length - 1];
+    
+    if (lastMessage.role !== 'user' || lastMessage.conversationId !== conversationId) {
+      return false;
+    }
+    
+    if (lastMessageRef.current !== lastMessage.content) {
+      lastMessageRef.current = lastMessage.content;
+      return true;
+    }
+    
+    return false;
+  }, [messages, conversationId]);
+
+  const fetchArtifacts = useCallback(async (skipCache: boolean = false, forceGenerate: boolean = false) => {
     if (!conversationId) {
       console.log("No conversation ID provided, cannot fetch artifacts");
       setIsLoading(false);
@@ -171,13 +192,13 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
 
     console.log(`fetchArtifacts called for ${conversationId}, skipCache=${skipCache}, hasAttemptedFetch=${hasAttemptedFetch}`);
 
-    if (hasAttemptedFetch && !skipCache) {
+    if (hasAttemptedFetch && !skipCache && !forceGenerate) {
       console.log(`Already attempted fetch for ${conversationId}, not fetching again`);
       setIsLoading(false);
       return;
     }
 
-    if (!skipCache && checkExistingArtifacts(conversationId)) {
+    if (!skipCache && !forceGenerate && checkExistingArtifacts(conversationId)) {
       console.log(`Using cached artifacts for ${conversationId}`);
       return;
     }
@@ -193,8 +214,16 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     setError(null);
     
     try {
-      console.log(`Starting network fetch for conversation ${conversationId}`);
-      const response = await getKnowledgeArtifacts(conversationId);
+      let response;
+      
+      if (forceGenerate || shouldGenerateForNewMessage()) {
+        console.log(`Starting direct generation for conversation ${conversationId}`);
+        response = await generateKnowledgeArtifacts(conversationId);
+        addDebugLog(`Generated new artifacts directly for new message`);
+      } else {
+        console.log(`Starting network fetch for conversation ${conversationId}`);
+        response = await getKnowledgeArtifacts(conversationId);
+      }
       
       if (conversationId !== prevConversationIdRef.current) {
         console.log("Conversation changed during fetch, discarding results");
@@ -244,7 +273,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  }, [conversationId, hasAttemptedFetch, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef]);
+  }, [conversationId, hasAttemptedFetch, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef, shouldGenerateForNewMessage, addDebugLog]);
 
   const generateArtifacts = useCallback(async () => {
     if (!conversationId) return;
@@ -353,6 +382,17 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       fetchArtifacts();
     }
   }, [retryCount, fetchArtifacts, maxRetries]);
+  
+  useEffect(() => {
+    if (isOpen && conversationId && messages.length > 0) {
+      const shouldGenerate = shouldGenerateForNewMessage();
+      
+      if (shouldGenerate) {
+        addDebugLog(`New message detected, generating artifacts`);
+        fetchArtifacts(true, true);
+      }
+    }
+  }, [isOpen, conversationId, messages, shouldGenerateForNewMessage, fetchArtifacts, addDebugLog]);
   
   useEffect(() => {
     if (isOpen && conversationId && (guidelines.length === 0 || caseStudies.length === 0) && !givenUp) {
@@ -530,7 +570,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
           
           <button 
             className="refresh-button" 
-            onClick={() => fetchArtifacts(false)}
+            onClick={() => fetchArtifacts(true, true)}
             disabled={isLoading}
             title="Refresh artifacts"
           >
@@ -571,6 +611,8 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
             <div><strong>Retries:</strong> {retryCount}/{maxRetries}</div>
             <div><strong>Auto-refreshes:</strong> {autoRefreshCount}/{maxAutoRefreshes}</div>
             <div><strong>Has error:</strong> {error ? 'Yes' : 'No'}</div>
+            <div><strong>Messages count:</strong> {messages.length}</div>
+            <div><strong>Last message processed:</strong> {lastMessageRef.current ? 'Yes' : 'No'}</div>
           </div>
           <div className="debug-log">
             {debugLog.map((log, i) => (
@@ -611,7 +653,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
                 onClick={() => {
                   setRetryCount(0);
                   setGivenUp(false);
-                  fetchArtifacts(true);
+                  fetchArtifacts(true, true);
                 }}
               >
                 Retry

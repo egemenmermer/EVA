@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface RagArtifactRepository extends JpaRepository<RagArtifact, Long> {
@@ -12,15 +13,15 @@ public interface RagArtifactRepository extends JpaRepository<RagArtifact, Long> 
     /**
      * Find all artifacts associated with a specific conversation
      */
-    List<RagArtifact> findByConversationId(String conversationId);
+    List<RagArtifact> findByConversationId(UUID conversationId);
     
     /**
      * Find all guidelines associated with a specific conversation
      */
-    List<RagArtifact> findByConversationIdAndArtifactType(String conversationId, RagArtifact.ArtifactType artifactType);
+    List<RagArtifact> findByConversationIdAndArtifactType(UUID conversationId, RagArtifact.ArtifactType artifactType);
     
     /**
      * Delete all artifacts associated with a specific conversation
      */
-    void deleteByConversationId(String conversationId);
+    void deleteByConversationId(UUID conversationId);
 } 
