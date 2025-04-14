@@ -6,8 +6,9 @@ import { useStore } from '@/store/useStore';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import PracticeModule from '../practice/PracticeModule';
+import './KnowledgePanelToggle.css';
 
 // Format token to include Bearer prefix if needed
 const formatToken = (token: string | null): string | null => {
@@ -23,6 +24,10 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+  // State to track if the knowledge panel should be visible on desktop
+  const [showKnowledgePanel, setShowKnowledgePanel] = useState(false);
+  // Track if new knowledge has been loaded (to add a pulse effect)
+  const [hasNewKnowledge, setHasNewKnowledge] = useState(false);
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
@@ -151,28 +156,65 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           />
         )}
         
-        {/* Main Chat Window - Responsive width and padding */}
+        {/* Main Chat Window - Takes full width when knowledge panel is closed */}
         <main 
-          className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden"
+          className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden transition-all duration-300"
           onClick={handleMainContentClick}
         >
-          <div className="w-full max-w-full md:max-w-4xl px-2 sm:px-4">
-            <ChatWindow />
+          {/* Allow full width but with proper spacing */}
+          <div className="w-full transition-all duration-300 px-4 mx-auto"> 
+            <ChatWindow showKnowledgePanel={showKnowledgePanel} />
           </div>
         </main>
         
-        {/* Right Panel - Responsive on mobile */}
-        <div className={`${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 fixed md:relative right-0 top-16 md:top-0 z-30 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
-          {/* Close button on mobile */}
-          <button 
-            onClick={() => setGuidelinesOpen(false)} 
-            className="absolute top-4 left-4 md:hidden"
-            aria-label="Close guidelines"
-          >
-            <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-          </button>
+        {/* Right Panel Container - Only allocated space in the flex layout when visible */}
+        <div className={`${showKnowledgePanel ? 'relative w-[320px]' : 'absolute right-0 w-0'} transition-all duration-300`}>
+          {/* Knowledge Panel Toggle Button - Always visible */}
+          <div className="hidden md:block">
+            <button 
+              onClick={() => {
+                setShowKnowledgePanel(!showKnowledgePanel);
+                setHasNewKnowledge(false); // Clear pulse effect on click
+              }}
+              className={`knowledge-panel-toggle ${hasNewKnowledge && !showKnowledgePanel ? 'has-new-content' : ''}`}
+              aria-label={showKnowledgePanel ? "Hide knowledge panel" : "Show knowledge panel"}
+              style={{ right: showKnowledgePanel ? '320px' : '0' }}
+            >
+              {showKnowledgePanel ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           
-          <GuidelinesPanel />
+          {/* Right Panel - Responsive on mobile, controlled by showKnowledgePanel on desktop */}
+          <div className={`knowledge-panel ${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} ${showKnowledgePanel ? 'md:translate-x-0' : 'md:translate-x-full'} fixed md:relative right-0 top-16 md:top-0 z-40 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+            {/* Close button on mobile */}
+            <button 
+              onClick={() => setGuidelinesOpen(false)} 
+              className="absolute top-4 left-4 md:hidden"
+              aria-label="Close guidelines"
+            >
+              <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+            </button>
+            
+            <GuidelinesPanel 
+              onClose={() => setShowKnowledgePanel(false)} 
+              onNewKnowledge={() => {
+                if (!showKnowledgePanel) {
+                  setHasNewKnowledge(true);
+                  
+                  // Auto-clear the pulse effect after 5 seconds
+                  const timer = setTimeout(() => {
+                    setHasNewKnowledge(false);
+                  }, 5000);
+                  
+                  return () => clearTimeout(timer);
+                }
+              }}
+            />
+          </div>
         </div>
         
         {/* Backdrop for mobile guidelines */}

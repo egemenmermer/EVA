@@ -71,7 +71,7 @@ class LangChainAgent(BaseAgent):
             # Store important configuration
             self.config = config
             self.openai_api_key = config.get('openai_api_key', os.getenv('OPENAI_API_KEY'))
-            self.model_name = config.get('model_name', "gpt-3.5-turbo")
+            self.model_name = config.get('model_name', "gpt-4o-mini")
             self.temperature = config.get('temperature', 0.7)
             
             # Conversation state
@@ -103,7 +103,7 @@ class LangChainAgent(BaseAgent):
             traceback.print_exc()
             # Initialize minimal components to avoid crashes
             self.llm = ChatOpenAI(
-                model_name="gpt-3.5-turbo",
+                model_name="gpt-4o-mini",
                 temperature=0.7,
                 openai_api_key=self.openai_api_key
             )
@@ -154,7 +154,7 @@ class LangChainAgent(BaseAgent):
             
             # Initialize LLM
             self.llm = ChatOpenAI(
-                model_name="gpt-3.5-turbo",
+                model_name="gpt-4o-mini",
                 temperature=temperature,
                 openai_api_key=openai_api_key
             )

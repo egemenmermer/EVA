@@ -1621,7 +1621,7 @@ async def process_query_stateless(agent: LangChainAgent, query: str, conversatio
             extracted_manager = manager_match.group(1) if manager_match else "PUPPETEER"
         
         # Use OpenAI for response generation
-        model_name = "gpt-3.5-turbo"
+        model_name = "gpt-4o-mini" # Changed from gpt-3.5-turbo
         
         # Create the LLM model with the specified temperature
         llm = ChatOpenAI(
@@ -1631,18 +1631,33 @@ async def process_query_stateless(agent: LangChainAgent, query: str, conversatio
         )
         
         # Define the system message for the assistant's role
-        system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specialized in providing ethical guidance for technology professionals.
+        system_message = """You are EVA, an Ethical Virtual Assistant designed to support software professionals in making sound ethical decisions. Imagine you're a trusted, knowledgeable, and approachable colleague.
 
-When responding to questions about ethical dilemmas, structure your response as follows:
-1. Brief Summary of Ethical Concern - Concisely identify the core ethical issue
-2. Ethical Guidelines Relevant to the Concern - Reference specific principles from professional codes like IEEE, ACM
-3. Recommended Action - Provide clear, actionable guidance
-4. Potential Risks if Ignored - Explain possible consequences
-5. Next Steps / Follow-up Questions - Suggest further considerations
+Your primary role is to provide concise, practical, and empathetic ethical guidance. Keep your responses clear, brief, and conversational—like a helpful chat with a coworker, not a lecture.
 
-Always end your responses with a clear practice prompt: "Would you like to practice this scenario with simulated manager responses? (yes/no)"
+**Principles of your communication:**
 
-Do not reference any "interaction style" or "manager type" in your responses."""
+- **Conversational Tone:** Communicate naturally and warmly, acknowledging the user's concerns briefly and empathetically.
+- **Concise Clarity:** Offer succinct, actionable advice. Avoid unnecessary jargon or overly formal language.
+- **Grounded Realism:** Base your advice strictly on real ethical guidelines (such as ACM/IEEE standards). If guidelines are unavailable, transparently use general ethical best practices. Never fabricate guidelines or references.
+- **Constructive Engagement:** End with a brief, interactive question inviting further reflection or practice.
+- **Balanced Perspective:** Acknowledge potential consequences and business implications succinctly and without exaggeration.
+
+**Structured Response Format:**
+
+1. **Brief Empathy:** Start with a quick acknowledgment of the user's situation (e.g., "That's definitely challenging...", "I understand the tension...").
+2. **Core Ethical Insight:** Clearly state the main ethical consideration, briefly referencing relevant guidelines if directly applicable.
+3. **Practical Advice:** Suggest a straightforward, practical step the user can take.
+4. **Risk Awareness (if relevant):** Briefly mention potential risks like user trust or compliance issues.
+5. **Interactive Prompt:** Close with a concise, inviting question (e.g., "Does this make sense?", "Would practicing this conversation help?").
+
+**Critical Reminders:**
+
+- Do NOT reference specific manager styles (Puppeteer, Diluter, Camouflager) unless explicitly asked.
+- NEVER produce hallucinations—adhere strictly to provided facts and context.
+- Keep responses conversationally short and avoid repetitive language.
+
+Your goal is always to empower and educate, helping users navigate ethical complexity with confidence and clarity."""
         
         # If this is a practice feedback request, modify the system message to handle it
         if is_practice_feedback:
@@ -1693,11 +1708,13 @@ Be supportive and educational in your feedback."""
             
             # If this is not a practice feedback request and doesn't already have the practice prompt,
             # ensure it ends with the practice prompt
-            if not is_practice_feedback and not "Would you like to practice this scenario with simulated manager responses?" in content:
+            # Modification: Use the prompt defined in the system message instead of hardcoding
+            practice_prompt_text = "Would practicing a discussion around this be helpful?"
+            if not is_practice_feedback and practice_prompt_text not in content:
                 content = content.rstrip()
-                if not content.endswith("?"):
+                if not content.endswith((".","?","!")):
                     content += "."
-                content += "\n\nWould you like to practice this scenario with simulated manager responses? (yes/no)"
+                content += f"\n\n{practice_prompt_text}"
                 logger.info("Added practice prompt to response")
             
             return ConversationContentResponseDTO(
@@ -2357,19 +2374,18 @@ async def diagnostic_rag_artifacts(request: Request):
     
     return diagnostics
     
-@app.post("/api/v1/generate-artifacts")
 async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(get_agent)):
-    """Generate knowledge artifacts based on conversation context."""
     try:
-        body = await request.json()
-        conversation_id = body.get("conversationId")
-        message_content = body.get("message") # Get last message if provided
+        message_content = await request.json()
+        conversation_id = message_content.get("conversationId")
+        message_text = message_content.get("messageContent")
         
         if not conversation_id:
-            raise HTTPException(status_code=400, detail="conversationId is required")
-
-        # Use the message content provided in the request, or a default if none provided.
-        query_text = message_content or "Generate relevant ethical guidelines and case studies."
+            logger.warning("No conversation ID provided for artifact generation")
+            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+        
+        # Use the message content if provided, otherwise use a default query
+        query_text = message_text if message_text else "What are the ethical considerations for this technology?"
         logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'")
         
         # Agent instance is now injected via Depends(get_agent)
@@ -2387,8 +2403,44 @@ async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(g
             guidelines=guidelines,
             caseStudies=case_studies
         )
-    except Exception as e: # Correctly aligned with 'try'
-        # Contents are correctly indented further
+    except Exception as e:
+        logger.error(f"Error generating artifacts: {e}")
+        logger.error(traceback.format_exc())
+        # Return empty artifacts on error to prevent frontend issues
+        logger.warning(f"Returning empty artifacts due to generation error for conversation {conversation_id}")
+        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+
+@app.post("/api/v1/generate-artifacts")
+async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(get_agent)):
+    try:
+        message_content = await request.json()
+        conversation_id = message_content.get("conversationId")
+        message_text = message_content.get("messageContent")
+        
+        if not conversation_id:
+            logger.warning("No conversation ID provided for artifact generation")
+            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
+        
+        # Use the message content if provided, otherwise use a default query
+        query_text = message_text if message_text else "What are the ethical considerations for this technology?"
+        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'")
+        
+        # Agent instance is now injected via Depends(get_agent)
+        if not agent:
+            # This check might be redundant now but kept for safety
+            raise HTTPException(status_code=500, detail="Agent is not initialized")
+
+        # Generate artifacts using the agent instance
+        guidelines = agent.get_relevant_guidelines(query_text)
+        case_studies = agent.get_relevant_case_studies(query_text)
+        
+        logger.info(f"Returning response with {len(guidelines)} guidelines, {len(case_studies)} case studies")
+        # Return the generated artifacts directly
+        return KnowledgeArtifactsResponse(
+            guidelines=guidelines,
+            caseStudies=case_studies
+        )
+    except Exception as e:
         logger.error(f"Error generating artifacts: {e}")
         logger.error(traceback.format_exc())
         # Return empty artifacts on error to prevent frontend issues

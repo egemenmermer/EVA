@@ -31,9 +31,10 @@ interface KnowledgePanelProps {
   conversationId: string;
   isOpen: boolean;
   onClose: () => void;
+  onNewKnowledge?: () => void;
 }
 
-const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen, onClose }) => {
+const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen, onClose, onNewKnowledge }) => {
   const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -349,39 +350,45 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, [conversationId, isOpen, hasAttemptedFetch, guidelines.length, caseStudies.length]);
   
   useEffect(() => {
-    console.log(`KnowledgePanel mounted/updated: open=${isOpen}, id=${conversationId}`);
+    if (!conversationId) return;
+
+    addDebugLog(`Setting up for conversation: ${conversationId}`);
+    prevConversationIdRef.current = conversationId;
     
-    if (isOpen && conversationId) {
-      console.log(`Panel opened for conversation: ${conversationId}`);
+    resetState();
+    
+    if (!checkExistingArtifacts(conversationId)) {
+      setIsLoading(true);
       
-      if (!checkExistingArtifacts(conversationId)) {
-        console.log(`No cached artifacts found, will fetch in ${initialDelay}ms`);
-        setIsLoading(true);
-        
-        const timer = setTimeout(() => {
-          console.log(`Initial delay complete, calling fetchArtifacts`);
-          fetchArtifacts();
-        }, initialDelay);
-        
-        return () => {
-          console.log(`Cleanup: clearing timeout and aborting any in-flight requests`);
-          clearTimeout(timer);
-          if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-            abortControllerRef.current = null;
-          }
-        };
-      } else {
-        console.log(`Using cached artifacts for ${conversationId}, not initiating fetch`);
-      }
+      const timer = setTimeout(() => {
+        fetchArtifacts();
+      }, initialDelay);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, conversationId, fetchArtifacts, initialDelay, checkExistingArtifacts]);
+  }, [conversationId, fetchArtifacts, resetState, checkExistingArtifacts, addDebugLog, initialDelay]);
   
   useEffect(() => {
-    if (retryCount > 0 && retryCount <= maxRetries) {
-      fetchArtifacts();
+    if (!conversationId || !isOpen) return;
+    if (autoRefreshCount >= maxAutoRefreshes) {
+      addDebugLog(`Reached max auto refreshes (${maxAutoRefreshes}), stopping`);
+      return;
     }
-  }, [retryCount, fetchArtifacts, maxRetries]);
+    
+    const timer = setTimeout(() => {
+      if (guidelines.length === 0 && caseStudies.length === 0 && !error && !givenUp) {
+        addDebugLog(`Auto-refreshing artifacts (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
+        setAutoRefreshCount(prev => prev + 1);
+        fetchArtifacts(true);
+      }
+    }, autoRefreshInterval);
+    
+    return () => clearTimeout(timer);
+  }, [
+    isOpen, conversationId, guidelines.length, caseStudies.length,
+    autoRefreshCount, maxAutoRefreshes, autoRefreshInterval,
+    fetchArtifacts, givenUp, addDebugLog, isValidUuid, error
+  ]);
 
   useEffect(() => {
     if (showAllGuidelines === true) {
@@ -401,41 +408,16 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     }
   }, [showAllCaseStudies, caseStudies]);
 
+  // Notify parent when new knowledge is loaded
   useEffect(() => {
-    if (isOpen && conversationId && (guidelines.length === 0 || caseStudies.length === 0) && !givenUp) {
-      const isUuid = isValidUuid(conversationId);
-
-      if (!isUuid) {
-        addDebugLog(`Skipping auto-refresh for non-UUID conversation ID: ${conversationId}`);
-        return;
-      }
-
-      if (autoRefreshCount < maxAutoRefreshes) {
-        addDebugLog(`Setting up auto-refresh (${autoRefreshCount}/${maxAutoRefreshes})`);
-
-        const timer = setTimeout(() => {
-          addDebugLog(`Auto-refreshing (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
-          setAutoRefreshCount(prev => prev + 1);
-          fetchArtifacts(); // Fetch existing, don't force generate
-        }, autoRefreshInterval);
-
-        return () => {
-          clearTimeout(timer);
-          if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-            abortControllerRef.current = null;
-          }
-        };
-      } else {
-        addDebugLog(`Max auto-refreshes (${maxAutoRefreshes}) reached`);
-        setGivenUp(true);
+    // Check if we have meaningful content
+    if (guidelines.length > 0 || caseStudies.length > 0) {
+      // Notify parent component that we have new knowledge
+      if (onNewKnowledge) {
+        onNewKnowledge();
       }
     }
-  }, [
-    isOpen, conversationId, guidelines.length, caseStudies.length,
-    autoRefreshCount, maxAutoRefreshes, autoRefreshInterval,
-    fetchArtifacts, givenUp, addDebugLog, isValidUuid
-  ]);
+  }, [guidelines.length, caseStudies.length, onNewKnowledge]);
 
   const truncateText = (text: string, maxLength: number = 250): string => {
     if (!text) return '';
@@ -545,43 +527,79 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   if (!isOpen) return null;
 
   return (
-    <div className="knowledge-panel">
-      {showDebug && (
-        <div className="debug-panel">
-          <h4>Debug Information</h4>
-          <div className="flex flex-wrap gap-2 mb-2">
+    <div className="knowledge-panel-container">
+      <div className="knowledge-panel-header flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Relevant Guidelines
+        </h2>
+        <div className="flex items-center gap-2">
+          {isLoading && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
+          <button
+            onClick={() => fetchArtifacts(true, true)}
+            className="p-1.5 text-gray-500 hover:text-blue-500 transition-colors"
+            aria-label="Refresh knowledge artifacts"
+            title="Refresh knowledge artifacts"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          {/* Close button (visible on desktop) */}
+          <button
+            onClick={onClose}
+            className="hidden md:block p-1.5 text-gray-500 hover:text-red-500 transition-colors"
+            aria-label="Close knowledge panel"
+            title="Close knowledge panel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Debug info button - hidden in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mb-4 flex justify-between items-center">
+          <button 
+            onClick={() => setShowDebug(!showDebug)}
+            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            {showDebug ? "Hide Debug Info" : "Show Debug Info"}
+          </button>
+          {showDebug && (
             <button 
-              className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded"
               onClick={copyDebugToClipboard}
+              className="text-xs text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
             >
               Copy Debug Info
             </button>
-            <button 
-              className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
-              onClick={() => setDebugLog([])}
-            >
-              Clear Logs
-            </button>
+          )}
+        </div>
+      )}
+
+      {/* Debug log */}
+      {showDebug && (
+        <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono overflow-auto max-h-[200px]">
+          <div className="mb-2">
+            <strong>Conversation ID:</strong> {conversationId}
           </div>
-          <div className="text-xs mb-2">
-            <div><strong>Conversation ID:</strong> {conversationId || 'None'}</div>
-            <div><strong>Guidelines:</strong> {guidelines.length}</div>
-            <div><strong>Case studies:</strong> {caseStudies.length}</div>
-            <div><strong>Retries:</strong> {retryCount}/{maxRetries}</div>
-            <div><strong>Auto-refreshes:</strong> {autoRefreshCount}/{maxAutoRefreshes}</div>
-            <div><strong>Has error:</strong> {error ? 'Yes' : 'No'}</div>
-            <div><strong>Messages count:</strong> {messages.length}</div>
-            <div><strong>Last message processed:</strong> {lastMessageRef.current ? 'Yes' : 'No'}</div>
+          <div className="mb-2">
+            <strong>Valid UUID:</strong> {isValidUuid(conversationId) ? "✅" : "❌"}
           </div>
-          <div className="debug-log">
-            {debugLog.map((log, i) => (
-              <div key={i} className="log-line">{log}</div>
-            ))}
-            {debugLog.length === 0 && <div className="log-line text-gray-500">No logs yet</div>}
+          <div className="mb-2">
+            <strong>Artifacts Count:</strong> {guidelines.length} guidelines, {caseStudies.length} case studies
+          </div>
+          <div className="mb-2">
+            <strong>Retry Count:</strong> {retryCount}/{maxRetries}
+          </div>
+          <div>
+            <strong>Log:</strong>
+            <ul className="list-disc pl-4">
+              {debugLog.slice(-10).map((log, i) => (
+                <li key={i}>{log}</li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
-      
+
       <div className="knowledge-content">
         {isLoading ? (
           <div className="loading-container">

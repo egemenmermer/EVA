@@ -476,94 +476,200 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   };
 
+  // Add this function to prepare feedback data for the agent
+  const prepareFeedbackPrompt = () => {
+    if (!currentScenario || !currentScenario.conversation || currentScenario.conversation.length === 0) return '';
+    
+    // Get scenario details
+    const scenario = currentScenario.scenario;
+    if (!scenario) return '';
+    
+    // Build a detailed feedback prompt
+    let feedbackPrompt = `I just completed an ethical decision-making practice scenario about "${scenario.concern}: ${scenario.issue}" with a ${scenario.manager_type} manager type. My final score was ${finalScore}/100.\n\n`;
+    
+    // Add details about each choice made
+    feedbackPrompt += "Here are the choices I made:\n";
+    
+    // Safely map through the conversation history
+    if (currentScenario.conversation && Array.isArray(currentScenario.conversation)) {
+      currentScenario.conversation.forEach((message, index) => {
+        if (!message) return;
+        
+        const statement = message.content || '';
+        feedbackPrompt += `\nManager: "${statement}"\n`;
+        if (message.role === 'user') {
+          feedbackPrompt += `My response: "${statement}"\n`;
+        } else if (message.role === 'feedback') {
+          feedbackPrompt += `My response: "${statement}"\n`;
+        }
+        if (message.role === 'feedback' && (message as any).evs !== undefined) {
+          feedbackPrompt += `Ethical Value Score: ${(message as any).evs}/3\n`;
+        }
+      });
+    }
+    
+    // Add request for feedback
+    feedbackPrompt += `\nBased on my choices, please provide feedback on:\n`;
+    feedbackPrompt += `1. What I did well in this scenario\n`;
+    feedbackPrompt += `2. Where I could improve my responses\n`;
+    feedbackPrompt += `3. Specific strategies for dealing with this type of ${scenario.manager_type} manager in the future\n`;
+    feedbackPrompt += `4. Alternative responses that would have been more effective\n`;
+    
+    return feedbackPrompt;
+  };
+
+  // Modify the existing Get Feedback function to use the detailed prompt
   const handleGetFeedback = () => {
-    // Extract the score from the evaluation message for accuracy
-    let evaluationScore = finalScore;
+    const feedbackPrompt = prepareFeedbackPrompt();
     
-    // Look for the score in the final evaluation message if available
-    const finalEvaluation = currentScenario?.conversation?.find(
-      msg => msg.role === 'final_evaluation'
-    );
-    
-    if (finalEvaluation) {
-      // Try to extract the score from the message content
-      const scoreMatch = finalEvaluation.content.match(/score is (\d+)\/100/);
-      if (scoreMatch && scoreMatch[1]) {
-        evaluationScore = parseInt(scoreMatch[1], 10);
-      }
+    if (feedbackPrompt && currentScenario && currentScenario.scenario) {
+      console.log('Preparing practice feedback request');
+      
+      // Store practice data with more details for better agent feedback
+      localStorage.setItem('practice_data', JSON.stringify({
+        managerType: currentScenario.scenario.manager_type,
+        concern: currentScenario.scenario.concern,
+        issue: currentScenario.scenario.issue,
+        finalScore: finalScore,
+        userChoices: currentScenario.conversation && Array.isArray(currentScenario.conversation) 
+          ? currentScenario.conversation.map(message => ({
+              text: message.content || '',
+              evs: message.role === 'feedback' && (message as any).evs !== undefined ? (message as any).evs : 0,
+              category: message.role || 'unknown'
+            }))
+          : [],
+        scenarioHistory: currentScenario.conversation || []
+      }));
+      
+      // Store the detailed feedback prompt
+      localStorage.setItem('feedbackRequest', feedbackPrompt);
+      
+      // Set a flag to indicate we're returning from practice with feedback
+      localStorage.setItem('practice_returning_with_feedback', 'true');
+      
+      console.log('Sending feedback request and returning to chat');
+      
+      // Immediately dispatch the event
+      window.dispatchEvent(new Event('practice-feedback-request'));
+      
+      // Return to chat after a short delay to ensure the feedback request is processed
+      setTimeout(() => {
+        console.log('Navigating back to chat window');
+        handleReturnToChat();
+      }, 800); // Longer delay to ensure the feedback request is processed and visible
     }
-    
-    // Create a detailed feedback request with all practice information
-    const practiceData = {
-      managerType: currentScenario?.scenario.manager_type || localStorage.getItem('practice_manager_type'),
-      finalScore: evaluationScore,
-      selectedChoices: JSON.parse(localStorage.getItem('practice_feedback') || '{}'),
-      userQuery: localStorage.getItem('practice_user_query') || '',
-      agentResponse: localStorage.getItem('practice_agent_response') || ''
-    };
-    
-    // Store all practice data in localStorage for the agent to access
-    localStorage.setItem('practice_data', JSON.stringify(practiceData));
-    
-    // Create a message that doesn't ask the user to provide details, since the agent already has them
-    const feedbackMessage = `I just completed a practice scenario with a ${practiceData.managerType} manager type and scored ${evaluationScore}/100. Please provide feedback on my performance.`;
-    localStorage.setItem('feedbackRequest', feedbackMessage);
-    
-    // First exit practice mode
-    if (onExit) {
-      onExit();
-    }
-    
-    // Wait a bit to ensure the chat window is fully rendered before sending the event
-    setTimeout(() => {
-      console.log('Dispatching practice-feedback-request event with data:', practiceData);
-      window.dispatchEvent(new CustomEvent('practice-feedback-request'));
-    }, 1000);
   };
 
   const handlePracticeAgain = () => {
-    resetSession();
-    
-    // Wait for state to reset before creating a new scenario
-    setTimeout(() => {
-      // Create a new scenario with the same parameters
-      const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
-      const effectiveManagerType = managerType || localStorage.getItem('practice_manager_type') || 'PUPPETEER';
-      
-      // Create a fresh scenario with a new ID to ensure complete reset
-      const freshScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
-      freshScenario.scenario.id = 'custom-scenario-' + Date.now(); // Ensure unique ID
-      
-      setCurrentScenario(freshScenario);
-      console.log('Created new practice scenario:', freshScenario.scenario.id);
-    }, 200);
-  };
-
-  const resetSession = async () => {
+    console.log('Practice Again button clicked');
     setLoading(true);
+    
     try {
-      setCurrentScenario(null);
-      setFeedback(null);
-      setConversationId('practice-' + Math.random().toString(36).substring(7));
-      setError(null);
-      setFinalReport(false);
-      setShowOptions(false);
-      setFinalScore(0);
-    } catch (err: any) {
-      console.error('Error resetting session:', err);
-      setError('Failed to reset session. Please try again.');
-    } finally {
+      // First reset the session
+      resetSession();
+      
+      // Use a setTimeout to ensure state has been reset before creating a new scenario
+      setTimeout(() => {
+        try {
+          // Create a new scenario with the same parameters
+          const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
+          const effectiveManagerType = managerType || localStorage.getItem('practice_manager_type') || 'PUPPETEER';
+          
+          console.log('Creating new scenario with:', { userQuery, effectiveManagerType });
+          
+          // Create a fresh scenario with a new ID to ensure complete reset
+          const freshScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
+          freshScenario.scenario.id = 'custom-scenario-' + Date.now(); // Ensure unique ID
+          
+          // Update state with the new scenario
+          setCurrentScenario(freshScenario);
+          setLoading(false);
+          console.log('Created new practice scenario:', freshScenario.scenario.id);
+        } catch (error) {
+          console.error('Error creating new scenario:', error);
+          setError('Failed to create a new practice scenario. Please try again.');
+          setLoading(false);
+        }
+      }, 300); // Increase timeout slightly to ensure state is updated
+    } catch (error) {
+      console.error('Error in practice again flow:', error);
+      setError('Failed to reset and create a new practice scenario. Please try again.');
       setLoading(false);
     }
   };
 
+  const resetSession = () => {
+    console.log('Resetting practice session');
+    try {
+      // Clear the current scenario state
+      setCurrentScenario(null);
+      setFeedback(null);
+      
+      // Generate a new conversation ID
+      const newConversationId = 'practice-' + Math.random().toString(36).substring(7);
+      console.log('New conversation ID:', newConversationId);
+      setConversationId(newConversationId);
+      
+      // Reset UI states
+      setError(null);
+      setFinalReport(false);
+      setShowOptions(false);
+      setFinalScore(0);
+      
+      // Clear any localStorage values that might affect the new session
+      localStorage.removeItem('practice_selected_choice');
+      localStorage.removeItem('practice_score');
+      localStorage.removeItem('practice_round');
+      localStorage.removeItem('practice_feedback');
+      localStorage.removeItem('practice_final_score');
+      
+      console.log('Session reset complete');
+      return true;
+    } catch (err) {
+      console.error('Error resetting session:', err);
+      setError('Failed to reset session. Please try again.');
+      return false;
+    }
+  };
+
   const handleReturnToChat = () => {
-    // Clean up the practice session
-    resetSession();
+    console.log('Return to Chat button clicked - attempting force navigation');
     
-    // Notify parent component
-    if (onExit) {
-      onExit();
+    // Force clear localStorage items that might affect navigation
+    localStorage.removeItem('practice_user_query');
+    localStorage.removeItem('practice_manager_type');
+    localStorage.removeItem('practice_selected_choice');
+    localStorage.removeItem('practice_score');
+    localStorage.removeItem('practice_final_score');
+    localStorage.removeItem('practice_round');
+    localStorage.removeItem('practice_feedback');
+    
+    // Set a flag in localStorage to indicate we're returning to chat
+    localStorage.setItem('return_to_chat', 'true');
+    
+    try {
+      // Attempt normal cleanup
+      resetSession();
+      
+      // Try calling the onExit callback first
+      if (onExit) {
+        console.log('Calling onExit callback');
+        onExit();
+        
+        // As an extra measure, forcefully redirect after a short delay
+        setTimeout(() => {
+          console.log('Forcing navigation to home');
+          window.location.href = '/';
+        }, 300);
+      } else {
+        // If no onExit callback is provided, redirect immediately
+        console.log('No onExit callback provided, navigating directly');
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Error in handleReturnToChat:', error);
+      // Force redirect as fallback for any errors
+      window.location.href = '/';
     }
   };
 
@@ -612,6 +718,21 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       // It's replaced by the custom scenario creation in the other useEffect
     }
   }, [scenarios, managerType, currentScenario]);
+
+  const handleFinishPractice = () => {
+    if (currentScenario && currentScenario.conversation) {
+      // Set final score instead of a responsiveness score
+      setFinalScore(finalScore);
+      setShowOptions(true);
+      setFinalReport(true);
+    }
+    
+    // Prepare feedback request when practice is finished
+    // handleGetFeedback is called here but we'll let the user click the button manually
+    // to avoid forcing an immediate transition to chat
+    
+    console.log('Practice session completed, showing completion options');
+  };
 
   if (!currentScenario && !scenarioId) {
     // Show loading indicator or scenario list
@@ -753,6 +874,13 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <h3 className="text-lg font-semibold mb-2">Practice Complete</h3>
                   
+                  {/* Display the final score from the last final_evaluation message if available */}
+                  {currentScenario.conversation.find(m => m.role === 'final_evaluation') ? (
+                    <p className="mb-4">{currentScenario.conversation.find(m => m.role === 'final_evaluation')?.content}</p>
+                  ) : (
+                    <p className="mb-4">Your ethical decision-making score is {finalScore}/100.</p>
+                  )}
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <button
                       onClick={handleGetFeedback}
@@ -766,7 +894,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                       onClick={handlePracticeAgain}
                       className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
-                      Practice Again to Improve
+                      Practice Again
                     </button>
                   </div>
                 </div>

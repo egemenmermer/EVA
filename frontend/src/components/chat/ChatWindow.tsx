@@ -63,7 +63,12 @@ interface MessageResponse {
   error?: string;
 }
 
-export const ChatWindow: React.FC = () => {
+// Define props for ChatWindow
+interface ChatWindowProps {
+  showKnowledgePanel: boolean;
+}
+
+export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) => {
   const { 
     currentConversation, 
     messages: storeMessages, 
@@ -113,6 +118,25 @@ export const ChatWindow: React.FC = () => {
 
     setIsRefreshing(true);
     try {
+      // ALWAYS check for exact saved messages in localStorage first
+      const exactSavedMessages = localStorage.getItem(`exact_messages_${currentConversation.conversationId}`);
+      if (exactSavedMessages) {
+        try {
+          const parsedMessages = JSON.parse(exactSavedMessages);
+          if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+            console.log('Using exact saved messages from localStorage - these will not change after refresh');
+            setMessages(parsedMessages);
+            setIsRefreshing(false);
+            setError(null);
+            return; // Exit early - don't fetch from API
+          }
+        } catch (parseErr) {
+          console.error('Error parsing exact saved messages:', parseErr);
+        }
+      }
+      
+      // If we get here, no exact messages were found, proceed with API fetch
+      console.log('No exact saved messages found in localStorage, fetching from API');
       const response = await api.get(`/api/v1/conversation/message/${currentConversation.conversationId}`);
       if (Array.isArray(response.data)) {
         console.log("Raw messages from API:", response.data); // Log raw API data
@@ -397,9 +421,11 @@ export const ChatWindow: React.FC = () => {
             
             setMessages(updatedMessages);
             
-            // Store messages in localStorage as backup
+            // Store messages in localStorage as backup to ensure consistency on page refresh
             try {
-              localStorage.setItem(`messages_${conversationId}`, JSON.stringify(updatedMessages));
+              // Store with a special "exact" key prefix to indicate these shouldn't change
+              localStorage.setItem(`exact_messages_${conversationId}`, JSON.stringify(updatedMessages));
+              console.log(`Saved exact response to localStorage for conversation ${conversationId}`);
             } catch (e) {
               console.error('Error storing messages in localStorage:', e);
             }
@@ -468,71 +494,82 @@ export const ChatWindow: React.FC = () => {
     const handlePracticeFeedbackRequest = () => {
       console.log('Practice feedback request event received');
       
-      // Get the complete practice data from localStorage instead of just a message
+      // Get the complete practice data from localStorage
       const practiceData = localStorage.getItem('practice_data');
+      const feedbackRequest = localStorage.getItem('feedbackRequest');
+      const returningWithFeedback = localStorage.getItem('practice_returning_with_feedback');
       
-      if (practiceData && handleSendMessageRef.current) {
+      if (practiceData && handleSendMessageRef.current && feedbackRequest) {
         console.log('Found practice data in localStorage:', practiceData);
         
-        // Parse the practice data
-        try {
-          const parsedData = JSON.parse(practiceData);
+        // If this is the first time processing after returning from practice
+        if (returningWithFeedback === 'true') {
+          // First, add the user message to the UI immediately for better UX
+          setMessages(prevMessages => [
+            ...prevMessages,
+            {
+              id: `temp-user-${Date.now()}`,
+              role: 'user',
+              content: feedbackRequest,
+              createdAt: new Date().toISOString()
+            }
+          ]);
           
-          // Create a structured feedback request that includes all necessary details
-          // but doesn't ask the user to provide information the agent already has
-          const feedbackMessage = `I just completed a practice scenario with a ${parsedData.managerType} manager type and scored ${parsedData.finalScore}/100. Please provide feedback on my performance.`;
+          // Then set loading state to show the agent typing indicator
+          setLoading(true);
           
-          // Send the feedback request
-          setTimeout(() => {
-            handleSendMessageRef.current!(feedbackMessage);
-            // Clean up after sending
-            localStorage.removeItem('practice_data');
-            localStorage.removeItem('feedbackRequest');
-          }, 500);
-        } catch (err) {
-          console.error('Error parsing practice data:', err);
-          
-          // Fallback to the basic feedback request if parsing fails
-          const feedbackRequest = localStorage.getItem('feedbackRequest');
-          if (feedbackRequest && handleSendMessageRef.current) {
-            setTimeout(() => {
-              handleSendMessageRef.current!(feedbackRequest);
-              localStorage.removeItem('feedbackRequest');
-            }, 500);
-          }
+          // Clear the flag
+          localStorage.removeItem('practice_returning_with_feedback');
         }
-      } else {
-        // Fallback to the basic feedback request
-        const feedbackRequest = localStorage.getItem('feedbackRequest');
-        if (feedbackRequest && handleSendMessageRef.current) {
-          console.log('Found feedback request in localStorage:', feedbackRequest);
-          // Small delay to ensure state is properly updated
-          setTimeout(() => {
-            handleSendMessageRef.current!(feedbackRequest);
-            localStorage.removeItem('feedbackRequest');
-          }, 500);
+        
+        // Automatically send the feedback request without requiring additional user interaction
+        setTimeout(() => {
+          handleSendMessageRef.current!(feedbackRequest);
+          // Clean up after sending
+          localStorage.removeItem('practice_data');
+          localStorage.removeItem('feedbackRequest');
+        }, 800);
+      } else if (feedbackRequest && handleSendMessageRef.current) {
+        // Fallback to just the feedback request if no practice data
+        console.log('Found feedback request in localStorage:', feedbackRequest);
+        
+        // If this is the first time processing after returning from practice
+        if (returningWithFeedback === 'true') {
+          // First, add the user message to the UI immediately
+          setMessages(prevMessages => [
+            ...prevMessages,
+            {
+              id: `temp-user-${Date.now()}`,
+              role: 'user',
+              content: feedbackRequest,
+              createdAt: new Date().toISOString()
+            }
+          ]);
+          
+          // Set loading state to show the agent typing indicator
+          setLoading(true);
+          
+          // Clear the flag
+          localStorage.removeItem('practice_returning_with_feedback');
         }
+        
+        setTimeout(() => {
+          handleSendMessageRef.current!(feedbackRequest);
+          localStorage.removeItem('feedbackRequest');
+        }, 800);
       }
     };
 
     // Check on mount if there's a pending feedback request
     const practiceData = localStorage.getItem('practice_data');
-    if (practiceData && handleSendMessageRef.current) {
-      console.log('Found practice data on mount:', practiceData);
-      // Give more time on initial load
+    const feedbackRequest = localStorage.getItem('feedbackRequest');
+    
+    if ((practiceData || feedbackRequest) && handleSendMessageRef.current) {
+      console.log('Found practice data or feedback request on mount');
+      // Give more time on initial load to ensure everything is initialized
       setTimeout(() => {
         handlePracticeFeedbackRequest();
       }, 1500);
-    } else {
-      const feedbackRequest = localStorage.getItem('feedbackRequest');
-      if (feedbackRequest && handleSendMessageRef.current) {
-        console.log('Found feedback request on mount:', feedbackRequest);
-        // Give more time on initial load
-        setTimeout(() => {
-          handleSendMessageRef.current!(feedbackRequest);
-          localStorage.removeItem('feedbackRequest');
-        }, 1500);
-      }
     }
 
     // Listen for future feedback requests
@@ -543,13 +580,18 @@ export const ChatWindow: React.FC = () => {
     };
   }, []);
 
-  const renderMessage = (message: Message) => {
+  const renderMessage = (message: Message, index: number) => {
     const isUserMessage = message.role === 'user';
+    const isFirstMessage = index === 0;
     
     // Check if the message contains the practice prompt question - improve detection with more flexibility
     const hasPracticePrompt = !isUserMessage && (
       message.content.includes("Would you like to practice this scenario with simulated manager responses? (yes/no)") ||
       message.content.includes("Would you like to practice this scenario with simulated manager responses?") ||
+      message.content.includes("Would practicing a discussion around this be helpful?") ||
+      message.content.includes("Would practicing a discussion") ||
+      message.content.includes("Would you like to practice how to") ||
+      message.content.includes("Would you like to try a practice scenario") ||
       (message.content.includes("practice this scenario") && message.content.includes("simulated manager"))
     );
     
@@ -561,12 +603,19 @@ export const ChatWindow: React.FC = () => {
       displayContent = message.content
         .replace("Would you like to practice this scenario with simulated manager responses? (yes/no)", "")
         .replace("Would you like to practice this scenario with simulated manager responses?", "")
+        .replace("Would practicing a discussion around this be helpful?", "")
+        .replace(/\n*Would practicing a discussion.*be helpful\?/g, "")
+        .replace(/\n*Would you like to try a practice scenario.*\?/g, "")
+        .replace(/\n*Would you like to practice how to.*\?/g, "")
         .replace(/\n*If needed, would you like to practice this scenario with simulated manager responses\?/g, "")
         .trim();
     }
     
     return (
-      <div key={message.id} className={`flex flex-col ${isUserMessage ? 'items-end' : 'items-start'} mb-4`}>
+      <div 
+        key={message.id} 
+        className={`flex flex-col ${isUserMessage ? 'items-end' : 'items-start'} mb-4 ${isFirstMessage ? 'mt-6' : ''}`}
+      >
         <div className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'} w-full`}>
           {!isUserMessage && (
             <div className="flex-shrink-0 mr-2">
@@ -668,8 +717,9 @@ export const ChatWindow: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="max-w-4xl mx-auto">
+          {/* Give messages container even more width */}
+          <div className="flex-1 overflow-y-auto px-4 w-full">
+            <div className="w-full max-w-5xl mx-auto">
               {error && (
                 <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
                   {error}
@@ -683,13 +733,13 @@ export const ChatWindow: React.FC = () => {
                   )}
                 </div>
               )}
-              {storeMessages.map(message => renderMessage(message))}
+              {storeMessages.map((message, index) => renderMessage(message, index))}
               {loading && (
                 <div className="flex justify-start mb-4">
                   <div className="flex-shrink-0 mr-2">
                     <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-auto">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -706,6 +756,7 @@ export const ChatWindow: React.FC = () => {
             onSendMessage={handleSendMessage}
             isLoading={loading}
             disabled={loading}
+            showKnowledgePanel={showKnowledgePanel}
           />
         </>
       )}

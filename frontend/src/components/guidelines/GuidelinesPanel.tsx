@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import KnowledgePanel from '../KnowledgePanel';
 import { useStore } from '@/store/useStore';
 
-export const GuidelinesPanel: React.FC = () => {
+interface GuidelinesPanelProps {
+  onClose?: () => void;
+  onNewKnowledge?: () => void;
+}
+
+export const GuidelinesPanel: React.FC<GuidelinesPanelProps> = ({ onClose, onNewKnowledge }) => {
   const { currentConversation } = useStore();
   const [isOpen, setIsOpen] = useState(true);
   
@@ -20,8 +25,13 @@ export const GuidelinesPanel: React.FC = () => {
       <div className="p-4">
         <KnowledgePanel 
           conversationId={currentConversation.conversationId} 
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
+          isOpen={true} // Always set to true to ensure background loading
+          onClose={() => {
+            // Call the parent's onClose if provided (to collapse the panel)
+            if (onClose) onClose();
+            setIsOpen(false);
+          }}
+          onNewKnowledge={onNewKnowledge}
         />
       </div>
     </div>

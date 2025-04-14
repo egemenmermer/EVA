@@ -5,12 +5,14 @@ interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
+  showKnowledgePanel: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   isLoading = false,
-  disabled = false 
+  disabled = false, 
+  showKnowledgePanel
 }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,7 +51,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <div className="relative flex items-end bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
           <textarea
             ref={textareaRef}
