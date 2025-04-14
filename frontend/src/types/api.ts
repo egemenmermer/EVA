@@ -36,8 +36,10 @@ export interface ConversationContentResponseDTO {
 }
 
 export interface SendMessageRequestDTO {
-  content: string;
-  managerType: ManagerType;
+  conversationId: string;
+  userQuery: string;
+  managerType?: ManagerType;
+  temperature?: number;
 }
 
 export interface FeedbackResponseDTO {

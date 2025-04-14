@@ -1,13 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends, Header, Request
+from fastapi import FastAPI, HTTPException, Depends, Header, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 import uvicorn
 import os
 from dotenv import load_dotenv
 import logging
 from agents.langchain_agent import LangChainAgent
-from datetime import datetime, UTC, timezone
+from datetime import datetime, UTC
 import uuid
 from pathlib import Path
 import json
@@ -17,13 +17,8 @@ import asyncio
 import httpx
 import concurrent.futures
 from langchain.schema import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import ChatOpenAI
 from fastapi.responses import JSONResponse
-from practice_module import InteractionFlow, StrategyKnowledge
-import re
-import random  # Added for random choice in practice mode
-import hashlib
-from uuid import UUID
 
 # Load environment variables
 load_dotenv()
@@ -60,149 +55,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
-
-# --- Inserted Helper Functions Start ---
-
-async def save_knowledge_artifacts(conversation_id: str, payload: dict) -> bool:
-    """
-    Saves the generated knowledge artifacts (guidelines, case studies) to the backend database.
-
-    Args:
-        conversation_id: The ID of the conversation.
-        payload: A dictionary containing the artifacts to save, matching the backend API expectation.
-                 Expected keys: "conversationId", "guidelines", "caseStudies", "timestamp".
-
-    Returns:
-        True if saving was successful, False otherwise.
-    """
-    logger.info(f"Attempting to save knowledge artifacts to database for conversation {conversation_id}")
-    
-    # Set up headers for the database request
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    
-    # Add token if available 
-    token = os.getenv('CURRENT_AUTH_TOKEN')
-    if token:
-        if not token.startswith('Bearer '):
-            token = f"Bearer {token}"
-        headers["Authorization"] = token
-
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.post(
-                f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts",
-                json=payload,
-                headers=headers
-            )
-            
-            if response.status_code in [200, 201]:
-                logger.info(f"Successfully saved artifacts for conversation {conversation_id}")
-                return True
-            else:
-                logger.error(f"Failed to save artifacts. Status: {response.status_code}, Response: {response.text[:500]}")
-                return False
-    except Exception as e:
-        logger.error(f"Error saving artifacts to database: {str(e)}")
-        logger.error(traceback.format_exc())
-        return False
-
-async def generate_and_save_artifacts(conversation_id: str, request: Request, retry_count: int) -> "KnowledgeArtifactsResponse":
-    """
-    Generates new knowledge artifacts using the agent based on the conversation ID,
-    saves them to the database, and returns them.
-
-    Args:
-        conversation_id: The ID of the conversation.
-        request: The FastAPI request object (currently unused but kept for signature consistency).
-        retry_count: The current retry attempt number (unused).
-
-    Returns:
-        A KnowledgeArtifactsResponse containing the generated guidelines and case studies.
-        Returns empty artifacts if generation or saving fails.
-    """
-    logger.warning(f"Generating and saving artifacts for conversation {conversation_id} as none were found in DB.")
-    
-    guidelines = []
-    case_studies = []
-
-    try:
-        # Initialize agent
-        agent = get_agent()
-        if not agent:
-             logger.error("Agent could not be initialized in generate_and_save_artifacts.")
-             # Return empty artifacts if agent fails
-             return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-
-        # TODO: Improve query generation - ideally use last user message or context
-        # Using a placeholder query for now, similar to direct_knowledge_artifacts
-        query = f"Generate relevant guidelines and case studies for conversation {conversation_id}"
-        logger.info(f"Generating artifacts with placeholder query: '{query}'")
-
-        # Generate guidelines and case studies
-        try:
-            guidelines = agent.get_relevant_guidelines(query, max_results=5) # Assuming GuidelineItem structure
-            logger.info(f"Generated {len(guidelines)} guidelines")
-            
-            case_studies = agent.get_relevant_case_studies(query, max_results=3) # Assuming CaseStudyItem structure
-            logger.info(f"Generated {len(case_studies)} case studies")
-            
-            # Ensure the format matches KnowledgeArtifactsResponse Pydantic models
-            # Convert agent output if necessary (assuming agent returns dicts compatible with Pydantic)
-            guidelines = [GuidelineItem(**g) for g in guidelines if isinstance(g, dict)]
-            case_studies = [CaseStudyItem(**cs) for cs in case_studies if isinstance(cs, dict)]
-
-        except Exception as e:
-            logger.error(f"Error during artifact generation by agent: {str(e)}")
-            logger.error(traceback.format_exc())
-            # Return empty artifacts if generation fails
-            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-
-        # Save the generated artifacts to the database if any were generated
-        if guidelines or case_studies:
-            try:
-                # Prepare DTOs for database storage (matching backend expectation)
-                guideline_dtos = [{
-                    "title": g.title, "description": g.description, "artifactId": g.id,
-                    "artifactType": "GUIDELINE", "relevance": g.relevance, "source": g.source, "category": g.category
-                 } for g in guidelines]
-
-                case_study_dtos = [{
-                    "title": cs.title, "description": cs.summary, "artifactId": cs.id, # Using summary for description
-                    "artifactType": "CASE_STUDY", "relevance": cs.relevance, "source": cs.source, "outcome": cs.outcome
-                 } for cs in case_studies]
-
-                # Create the database payload
-                save_payload = {
-                    "conversationId": conversation_id, # Ensure this is the UUID formatted one if needed
-                    "guidelines": guideline_dtos,
-                    "caseStudies": case_study_dtos,
-                    "timestamp": datetime.now(timezone.utc).isoformat() # Use UTC timezone
-                }
-
-                # Save to database (fire and forget for now, log errors)
-                save_success = await save_knowledge_artifacts(conversation_id, save_payload)
-                if not save_success:
-                     logger.error(f"Failed attempt to save generated artifacts for conversation {conversation_id}")
-                
-            except Exception as e:
-                logger.error(f"Error preparing or saving generated artifacts to database: {str(e)}")
-                logger.error(traceback.format_exc())
-        else:
-            logger.info(f"No artifacts were generated for conversation {conversation_id}, nothing to save.")
-
-        # Return the generated artifacts regardless of save success
-        return KnowledgeArtifactsResponse(guidelines=guidelines, caseStudies=case_studies)
-
-    except Exception as e:
-        logger.error(f"Unexpected error in generate_and_save_artifacts for conversation {conversation_id}: {str(e)}")
-        logger.error(traceback.format_exc())
-        # Return empty artifacts on major failure
-        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-
-# --- Inserted Helper Functions End ---
 
 class StartConversationRequest(BaseModel):
     """Model for starting a new conversation."""
@@ -292,11 +144,6 @@ class Query(BaseModel):
         ge=0.0,
         le=1.0
     )
-    managerType: Optional[str] = Field(
-        None,
-        description="Type of manager for the conversation",
-        example="PUPPETEER"
-    )
 
 class PracticeModeRequest(BaseModel):
     """Model for entering/exiting practice mode."""
@@ -372,15 +219,9 @@ class CaseStudiesResponse(BaseModel):
 class ConversationContext(BaseModel):
     """Model for conversation context."""
     messages: List[Dict[str, Any]] = Field(
-        ...,
-        description="List of conversation messages",
-        example=[{"role": "user", "content": "What are the ethical implications..."}]
+        ..., 
+        description="List of conversation messages with role and content"
     )
-
-class KnowledgeArtifactsResponse(BaseModel):
-    """Model for knowledge artifacts response."""
-    guidelines: List[GuidelineItem] = Field(..., description="List of relevant ethical guidelines")
-    caseStudies: List[CaseStudyItem] = Field(..., description="List of relevant case studies")
 
 def get_agent():
     """Create a new agent instance for each request to avoid state sharing."""
@@ -397,7 +238,7 @@ def get_agent():
                 # Fallback configuration
                 config = {
                     'cache_dir': 'cache',
-                    'index_dir': os.getenv('INDEX_DIR', 'data/processed/combined'), # Reverted default path
+                    'index_dir': str(Path('data/processed/combined')),
                     'openai_api_key': os.getenv('OPENAI_API_KEY')
                 }
         else:
@@ -405,7 +246,7 @@ def get_agent():
             # Default configuration
             config = {
                 'cache_dir': 'cache',
-                'index_dir': os.getenv('INDEX_DIR', 'data/processed/combined'), # Reverted default path
+                'index_dir': str(Path('data/processed/combined')),
                 'openai_api_key': os.getenv('OPENAI_API_KEY')
             }
             
@@ -465,50 +306,158 @@ async def start_conversation(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate-response",
-    response_model=ConversationContentResponseDTO, # Revert to original DTO
+    response_model=ConversationContentResponseDTO,
     tags=["Conversation"],
     summary="Process ethical query",
     description="Processes an ethical query and returns guidance"
 )
 async def generate_response(
     query: Query,
-    request: Request,
     agent: LangChainAgent = Depends(get_agent)
-) -> ConversationContentResponseDTO: # Revert return type hint
-    """
-    Process an ethical query and return guidance.
-    """
-    conversation_id = query.conversationId
-    
-    conversation_id_for_backend = conversation_id
-    if conversation_id.startswith("draft-"):
-        md5_hash = hashlib.md5(conversation_id.encode()).hexdigest()
-        conversation_id_for_backend = str(uuid.UUID(md5_hash))
-        logging.info(f"Using generated stable UUID {conversation_id_for_backend} for draft conversation {conversation_id}")
-    
+) -> ConversationContentResponseDTO:
+    """Generate a response to an ethical query - stateless version."""
     try:
-        # Process the query with the agent
-        response = agent.process_query(
-            query.userQuery,
-            manager_type=query.managerType,
-            session_id=query.conversationId
+        logger.info(f"Generating response for conversation ID: {query.conversationId}")
+        logger.info(f"User query: {query.userQuery[:50]}...")
+        
+        # Use OpenAI directly without agent state
+        from langchain.chat_models import ChatOpenAI
+        
+        # Get manager type from conversation if available
+        manager_type = None
+        temperature = 0.7  # Default temperature
+        
+        try:
+            # Try to get conversation details from the backend
+            auth_header = None
+            for header in ["authorization", "Authorization"]:
+                if header in getattr(query, "__dict__", {}).get("headers", {}):
+                    auth_header = query.__dict__["headers"][header]
+                    break
+            
+            headers = {
+                "Accept": "application/json"
+            }
+            if auth_header:
+                headers["Authorization"] = auth_header
+            
+            # Make a request to get conversation details for manager type
+            response = requests.get(
+                f"{BACKEND_BASE_URL}/api/v1/conversation/{query.conversationId}",
+                headers=headers,
+                timeout=3
+            )
+            
+            if response.status_code == 200:
+                conversation_data = response.json()
+                manager_type = conversation_data.get("managerType")
+                
+                # Get temperature from the conversation if available
+                if "temperature" in conversation_data:
+                    try:
+                        temp_value = float(conversation_data.get("temperature"))
+                        if 0 <= temp_value <= 1:
+                            temperature = temp_value
+                            logger.info(f"Using temperature from conversation: {temperature}")
+                    except (ValueError, TypeError):
+                        pass
+                
+                logger.info(f"Retrieved manager type from backend: {manager_type}")
+                
+                # Also update title if it's "New Conversation"
+                if conversation_data.get("title") == "New Conversation":
+                    # Generate a title from the query
+                    title = query.userQuery[:50] + ("..." if len(query.userQuery) > 50 else "")
+                    
+                    # Update the title
+                    title_update_response = requests.post(
+                        f"{BACKEND_BASE_URL}/api/v1/conversation/{query.conversationId}/update-title",
+                        json={"title": title},
+                        headers=headers,
+                        timeout=3
+                    )
+                    
+                    if title_update_response.status_code == 200:
+                        logger.info(f"Updated conversation title to: {title}")
+        except Exception as e:
+            logger.warning(f"Could not retrieve conversation details: {str(e)}")
+        
+        # Try to get temperature from the query object if it has it
+        if hasattr(query, "temperature"):
+            try:
+                temp_value = float(query.temperature)
+                if 0 <= temp_value <= 1:
+                    temperature = temp_value
+                    logger.info(f"Using temperature from request: {temperature}")
+            except (ValueError, TypeError):
+                pass
+        
+        llm = ChatOpenAI(
+            model_name="gpt-3.5-turbo",
+            temperature=temperature,
+            openai_api_key=os.getenv('OPENAI_API_KEY')
         )
         
-        # Revert to returning the original DTO structure
+        # Create a system prompt that incorporates the manager type if available
+        system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
+        Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
+        Focus on helping the user understand ethical implications and make informed decisions."""
+        
+        if manager_type:
+            system_message += f"\n\nThe user has selected '{manager_type}' as their preferred interaction style."
+        
+        # Make a direct call to the LLM
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": query.userQuery}
+        ]
+        
+        # Process the query with proper error handling
+        try:
+            response = llm.predict_messages(messages)
+            content = response.content
+            logger.info(f"Generated response (first 50 chars): {content[:50]}...")
+        except Exception as llm_error:
+            logger.error(f"Error from LLM: {str(llm_error)}")
+            content = """I apologize, but I encountered an error generating a response. 
+
+Here are some general ethical principles to consider:
+- Respect for autonomy and individual rights
+- Fairness and non-discrimination
+- Transparency in AI systems
+- Accountability for technology outcomes
+- Privacy protection
+
+Please try again with a more specific question about your ethical concern."""
+        
+        # Create response DTO
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=query.conversationId,
             userQuery=query.userQuery,
-            agentResponse=response,
-            createdAt=datetime.now(UTC).isoformat(),
-            inPracticeMode=False
+            agentResponse=content,
+            content=content,  # Adding content field for frontend compatibility
+            role="assistant",  # Adding role field for frontend compatibility
+            createdAt=datetime.utcnow().isoformat(),
+            inPracticeMode=False,
+            practiceScore=None
         )
     except Exception as e:
-        logging.error(f"Error generating agent response: {str(e)}")
-        logging.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error generating agent response: {str(e)}"
+        logger.error(f"Error generating response: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # Return a fallback response instead of raising an exception
+        # This ensures the frontend always gets a response
+        return ConversationContentResponseDTO(
+            id=str(uuid.uuid4()),
+            conversationId=getattr(query, "conversationId", "unknown"),
+            userQuery=getattr(query, "userQuery", ""),
+            agentResponse="I apologize, but I encountered an error processing your request. Please try again with a different question.",
+            content="I apologize, but I encountered an error processing your request. Please try again with a different question.",
+            role="assistant",
+            createdAt=datetime.utcnow().isoformat(),
+            inPracticeMode=False,
+            practiceScore=None
         )
 
 @app.post("/practice-mode",
@@ -525,25 +474,9 @@ async def toggle_practice_mode(
     try:
         # Simply generate a response message without changing agent state
         if request.enter:
-            # More conversational, friendly entering practice mode messages
-            enter_messages = [
-                "Great idea! Let's dive into some practice scenarios to help you feel more confident. I'll simulate realistic manager conversations so you can practice your ethical advocacy skills in a safe environment. Ready to get started?",
-                
-                "I think practicing is a fantastic way to prepare! I'll play the role of different manager types and give you feedback on your responses. This will help you develop effective strategies for real-world ethical situations. Shall we begin?",
-                
-                "Perfect, let's practice together! I'll create simulated ethical scenarios with different manager personalities so you can try various approaches. Don't worry about making mistakes - that's what practice is for! Ready when you are."
-            ]
-            response = random.choice(enter_messages)
+            response = "Entering practice mode. I'll provide practical ethical scenarios and feedback on your responses."
         else:
-            # More conversational, friendly exiting practice mode messages
-            exit_messages = [
-                "Thanks for practicing! I hope you found those scenarios helpful. Let's return to our conversation - how else can I support you with ethical decision-making?",
-                
-                "Great practice session! You've explored some valuable strategies for ethical advocacy. Now we're back in conversation mode - what other ethical questions or concerns would you like to discuss?",
-                
-                "That was good practice! Handling ethical situations takes both knowledge and skill, and you're developing both. I'm here if you want to discuss any other ethical challenges you're facing."
-            ]
-            response = random.choice(exit_messages)
+            response = "Exiting practice mode. Let's continue our conversation about ethical decision-making."
             
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
@@ -555,171 +488,6 @@ async def toggle_practice_mode(
         )
     except Exception as e:
         logger.error(f"Error toggling practice mode: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# New imports for practice module
-from practice_module import InteractionFlow, StrategyKnowledge
-
-# Initialize the practice flow as a global singleton for efficiency
-practice_flow = InteractionFlow()
-
-# New model for scenario listings
-class ScenarioListItem(BaseModel):
-    """Model for scenario listing."""
-    id: str = Field(..., description="Unique identifier for the scenario")
-    concern: str = Field(..., description="Ethical concern category")
-    issue: str = Field(..., description="Specific ethical issue")
-    manager_type: str = Field(..., description="Type of manager (Puppeteer, Camouflager, etc.)")
-    ethical_breach_intensity: str = Field(..., description="Intensity of the ethical breach (High, Medium, Low)")
-
-# Response model for scenario listings
-class ScenariosListResponse(BaseModel):
-    """Model for scenarios list response."""
-    scenarios: List[ScenarioListItem] = Field(..., description="List of available ethical scenarios")
-
-# Model for starting a scenario
-class StartScenarioRequest(BaseModel):
-    """Model for starting a scenario."""
-    scenario_id: str = Field(..., description="ID of the scenario to start")
-    conversation_id: str = Field(..., description="Conversation ID for tracking")
-
-# Model for scenario context
-class ScenarioContext(BaseModel):
-    """Model for scenario context."""
-    id: str = Field(..., description="Scenario ID")
-    concern: str = Field(..., description="Ethical concern")
-    issue: str = Field(..., description="Specific ethical issue")
-    manager_type: str = Field(..., description="Type of manager")
-    manager_description: str = Field(..., description="Description of the manager type")
-
-# Model for scenario state
-class ScenarioState(BaseModel):
-    """Model for scenario state."""
-    scenario_context: ScenarioContext = Field(..., description="Context of the scenario")
-    current_statement: str = Field(..., description="Current manager statement")
-    available_choices: List[str] = Field(..., description="Available response choices")
-    conversation_history: List[Dict[str, Any]] = Field(..., description="Conversation history")
-
-# Model for submitting a response
-class SubmitResponseRequest(BaseModel):
-    """Model for submitting a response to a scenario."""
-    scenario_id: str = Field(..., description="ID of the scenario")
-    conversation_id: str = Field(..., description="Conversation ID for tracking")
-    choice_index: int = Field(..., description="Index of the chosen response", ge=0)
-
-# Model for feedback on a response
-class ResponseFeedback(BaseModel):
-    """Model for feedback on a scenario response."""
-    feedback: str = Field(..., description="Feedback on the response")
-    evs: int = Field(..., description="Ethical value score")
-    is_complete: bool = Field(..., description="Whether the scenario is complete")
-    next_statement: Optional[str] = Field(None, description="Next manager statement if any")
-    available_choices: Optional[List[str]] = Field(None, description="Next available choices if any")
-    final_report: Optional[Dict[str, Any]] = Field(None, description="Final evaluation if scenario is complete")
-
-# Model for strategy recommendations
-class StrategyRequest(BaseModel):
-    """Model for requesting strategy recommendations."""
-    manager_type: str = Field(..., description="Type of manager to get strategies for")
-
-class StrategyInfo(BaseModel):
-    """Model for strategy information."""
-    name: str = Field(..., description="Name of the strategy")
-    description: str = Field(..., description="Description of the strategy")
-
-class StrategyRecommendation(BaseModel):
-    """Model for strategy recommendations."""
-    manager_type: str = Field(..., description="Type of manager")
-    manager_description: str = Field(..., description="Description of the manager type")
-    recommended_strategies: List[StrategyInfo] = Field(..., description="Recommended strategies")
-
-@app.get("/practice/scenarios",
-    response_model=ScenariosListResponse,
-    tags=["Practice"],
-    summary="Get available scenarios",
-    description="Returns a list of available ethical scenarios for practice"
-)
-async def get_available_scenarios() -> ScenariosListResponse:
-    """Get a list of available ethical scenarios."""
-    try:
-        scenarios = practice_flow.get_available_scenarios()
-        return ScenariosListResponse(scenarios=scenarios)
-    except Exception as e:
-        logger.error(f"Error getting available scenarios: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/practice/scenarios/start",
-    response_model=ScenarioState,
-    tags=["Practice"],
-    summary="Start a scenario",
-    description="Start a specific practice scenario"
-)
-async def start_scenario(request: StartScenarioRequest) -> ScenarioState:
-    """Start an ethical practice scenario."""
-    try:
-        scenario_data = practice_flow.start_scenario(request.scenario_id)
-        
-        if "error" in scenario_data:
-            raise HTTPException(status_code=404, detail=scenario_data["error"])
-            
-        return ScenarioState(**scenario_data)
-    except KeyError as e:
-        logger.error(f"Invalid scenario data format: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Invalid scenario data format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error starting scenario: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/practice/scenarios/respond",
-    response_model=ResponseFeedback,
-    tags=["Practice"],
-    summary="Submit response",
-    description="Submit a response to the current scenario statement"
-)
-async def submit_response(request: SubmitResponseRequest) -> ResponseFeedback:
-    """Submit a response to an ethical scenario."""
-    try:
-        result = practice_flow.submit_response(request.choice_index)
-        
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result["error"])
-            
-        return ResponseFeedback(**result)
-    except KeyError as e:
-        logger.error(f"Invalid response data format: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Invalid response data format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error submitting response: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/practice/strategies",
-    response_model=StrategyRecommendation,
-    tags=["Practice"],
-    summary="Get strategy recommendations",
-    description="Get recommendations for dealing with a specific manager type"
-)
-async def get_strategy_recommendations(request: StrategyRequest) -> StrategyRecommendation:
-    """Get strategy recommendations for dealing with a specific manager type."""
-    try:
-        recommendations = practice_flow.get_strategy_recommendation(request.manager_type)
-        return StrategyRecommendation(**recommendations)
-    except Exception as e:
-        logger.error(f"Error getting strategy recommendations: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/practice/reset",
-    response_model=Dict[str, Any],
-    tags=["Practice"],
-    summary="Reset practice session",
-    description="Reset the current practice session"
-)
-async def reset_practice_session() -> Dict[str, Any]:
-    """Reset the current practice session."""
-    try:
-        result = practice_flow.reset()
-        return result
-    except Exception as e:
-        logger.error(f"Error resetting practice session: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/feedback",
@@ -960,11 +728,6 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-@app.get("/api/health", status_code=200)
-async def health_check():
-    """Health check endpoint to verify the API is running."""
-    return {"status": "ok", "message": "Agent API is running"}
-
 # Frontend compatibility API endpoints
 @app.get("/api/v1/conversation",
     tags=["Frontend Compatibility"],
@@ -1045,11 +808,6 @@ async def get_conversation_messages(conversation_id: str, request: Request):
                 
                 # Process messages in pairs (user query followed by agent response)
                 for msg in messages:
-                    # Skip messages containing empty queries or default responses
-                    if (msg.get("userQuery", "") == "" and msg.get("agentResponse", "").startswith("It seems like you haven't entered a question")):
-                        logger.info(f"Filtering out empty query message")
-                        continue
-                        
                     # Create a new message with all required fields
                     transformed_msg = {
                         "id": msg.get("id") or str(uuid.uuid4()),
@@ -1059,15 +817,6 @@ async def get_conversation_messages(conversation_id: str, request: Request):
                     
                     # Handle both old and new message formats
                     if "role" in msg and "content" in msg:
-                        # If it's a default response, skip it
-                        if msg["role"] == "assistant" and (
-                            "Hello! How can I assist you today with ethical decision-making" in msg["content"] or
-                            "Greetings! I see you've chosen the 'PUPPETEER' style" in msg["content"] or
-                            "It seems like you haven't entered a question or prompt" in msg["content"]
-                        ):
-                            logger.info(f"Filtering out default assistant message")
-                            continue
-                            
                         # Already in the new format
                         transformed_msg["role"] = msg["role"]
                         transformed_msg["content"] = msg["content"]
@@ -1075,10 +824,6 @@ async def get_conversation_messages(conversation_id: str, request: Request):
                     else:
                         # Old format with userQuery/agentResponse
                         if "userQuery" in msg and msg.get("userQuery"):
-                            # Skip empty queries
-                            if msg["userQuery"].strip() == "":
-                                continue
-                                
                             # Add user message
                             user_msg = {
                                 "id": str(uuid.uuid4()),
@@ -1090,15 +835,6 @@ async def get_conversation_messages(conversation_id: str, request: Request):
                             transformed_messages.append(user_msg)
                             
                         if "agentResponse" in msg and msg.get("agentResponse"):
-                            # Skip default responses
-                            if (
-                                "Hello! How can I assist you today with ethical decision-making" in msg["agentResponse"] or
-                                "Greetings! I see you've chosen the 'PUPPETEER' style" in msg["agentResponse"] or
-                                "It seems like you haven't entered a question or prompt" in msg["agentResponse"]
-                            ):
-                                logger.info(f"Filtering out default assistant response")
-                                continue
-                                
                             # Add assistant message
                             agent_msg = {
                                 "id": str(uuid.uuid4()),
@@ -1185,8 +921,13 @@ async def create_conversation(
         
         # Define a function to communicate with the backend
         async def create_backend_conversation():
-            """Create a conversation in the backend."""
             try:
+                # Format the request for the Java backend
+                backend_request = {
+                    "userId": user_id,
+                    "managerType": manager_type
+                }
+                
                 # Extract the authorization header from the incoming request
                 auth_header = request.headers.get("Authorization")
                 headers = {
@@ -1195,19 +936,14 @@ async def create_conversation(
                 }
                 
                 if auth_header:
-                    # Add Bearer prefix if not present
-                    if not auth_header.startswith("Bearer "):
-                        auth_header = f"Bearer {auth_header}"
                     headers["Authorization"] = auth_header
-                    # Store for future use
-                    os.environ["CURRENT_AUTH_TOKEN"] = auth_header
                 
                 # Make a request to the backend API with timeout
                 response = await asyncio.wait_for(
                     asyncio.to_thread(
                         lambda: requests.post(
                             f"{BACKEND_BASE_URL}/api/v1/conversation",
-                            json=request_body,
+                            json=backend_request,
                             headers=headers,
                             timeout=5  # 5 second timeout for the HTTP request
                         )
@@ -1292,127 +1028,78 @@ async def send_message(
     agent: LangChainAgent = Depends(get_agent)
 ):
     try:
-        # Parse request body
         body = await request.json()
-        
-        # Log the raw incoming request
-        logger.info(f"Received message request: {body}")
+        logger.info(f"Send message request received: {body}")
         
         # Save the authorization token for future use
         auth_header = request.headers.get("Authorization")
         if auth_header:
-            # Log token format (safely)
-            auth_prefix = auth_header[:12] if len(auth_header) > 12 else auth_header
-            auth_suffix = auth_header[-5:] if len(auth_header) > 5 else ""
-            logger.info(f"Received token format: {auth_prefix}...{auth_suffix}, Length: {len(auth_header)}")
-            
-            # Store token as-is without trying to modify it
             os.environ["CURRENT_AUTH_TOKEN"] = auth_header
             logger.info("Saved authorization token for backend communication")
-        else:
-            logger.warning("No authorization token received in the request")
         
-        # Extract key fields
-        conversation_id = body.get("conversationId")
-        content = body.get("content", body.get("userQuery", ""))
-        temperature = float(body.get("temperature", 0.7))
-        
-        # Log request parameters
-        logger.info(f"Processing message for conversation: {conversation_id}")
-        logger.info(f"Message content length: {len(content)}")
-        logger.info(f"Temperature: {temperature}")
-        
-        # Check if this is a practice feedback request by looking for specific content
-        is_practice_feedback = (
-            "practice scenario" in content.lower() and 
-            "manager type" in content.lower() and
-            ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
-        )
-        
-        # Use a longer timeout for practice feedback requests, which are more complex
-        timeout_seconds = 30.0 if is_practice_feedback else 10.0
-        
-        # If practice feedback is detected, log it
-        if is_practice_feedback:
-            logger.info("Detected practice feedback request - using longer timeout")
-        
-        # Handle empty queries specially
-        if not content or content.strip() == "":
-            logger.info("Received empty message, returning generic response WITHOUT saving to backend")
-            
-            user_message_id = str(uuid.uuid4())
-            assistant_message_id = str(uuid.uuid4())
-            
-            return {
-                "messages": [
-                    {
-                        "id": user_message_id,
-                        "conversationId": conversation_id,
-                        "role": "user",
-                        "content": content,
-                        "createdAt": datetime.now(timezone.utc).isoformat()
-                    },
-                    {
-                        "id": assistant_message_id,
-                        "conversationId": conversation_id,
-                        "role": "assistant",
-                        "content": "It seems like you haven't entered a question or prompt. Feel free to ask me anything related to technology ethics, and I'll do my best to provide you with guidance and insights.",
-                        "createdAt": datetime.now(timezone.utc).isoformat(),
-                        "isLoading": False
-                    }
-                ]
-            }
+        # Extract data from request
+        conversation_id = body.get("conversationId", "")
+        content = body.get("content", "")
+        temperature = body.get("temperature", 0.7)
         
         # Generate unique IDs for messages
         user_message_id = str(uuid.uuid4())
         assistant_message_id = str(uuid.uuid4())
         
         # Validate required fields
-        if not conversation_id:
-            logger.error("Missing required fields in message request")
+        if not content or not conversation_id:
             return JSONResponse(
                 status_code=400,
-                content={"error": "Missing required fields: conversationId"}
+                content={"error": "Missing required fields: content or conversationId"}
             )
             
-        # Check if this is a draft conversation
-        is_draft = conversation_id.startswith('draft-')
-        
         # Generate response immediately instead of async
-        # We'll handle the background processing properly later
         try:
-            logger.info(f"Processing message for conversation: {conversation_id}")
+            logger.info(f"Generating response synchronously for conversation ID: {conversation_id}")
+            response = await process_query_stateless(agent, content, conversation_id, temperature)
+            logger.info(f"Generated response length: {len(response)}")
+            logger.info(f"Response preview: {response[:100]}...")
             
-            # Process in background to avoid blocking
-            background_task = asyncio.create_task(
-                process_full_response(
-                    conversation_id, 
-                    content, 
-                    assistant_message_id, 
-                    user_message_id,
-                    temperature,
-                    agent,
-                    is_draft
-                )
-            )
+            # Check if this is a draft conversation ID and handle differently
+            is_draft = conversation_id.startswith("draft-")
             
-            # Wait a short time for the response to be ready
-            # This ensures we don't wait too long before returning to the user
-            try:
-                response = await asyncio.wait_for(background_task, timeout=timeout_seconds)
-                logger.info(f"Response generated within timeout period")
-                
-                # Filter out any references to manager types
-                if any(style in response for style in ["PUPPETEER", "puppeteer", "Puppeteer", "DILUTER", "diluter", "Diluter", "CAMOUFLAGER", "camouflager", "Camouflager"]):
-                    logger.warning("Response contained manager type references. Filtering out.")
-                    # Create a more generic response that doesn't reference styles
-                    response = "I'll help you with your ethical question. What specific aspects of technology ethics would you like to explore?"
-            except asyncio.TimeoutError:
-                logger.warning(f"Response generation taking longer than expected, returning early")
-                # Let the task continue in the background
-                response = "I'm processing your request. Please check back in a moment for my complete response."
-                
-            # Return user message and response
+            # Create response payload with both messages
+            current_time = datetime.now(UTC).isoformat()
+            
+            # Prepare immediate response with both user message and actual agent response
+            immediate_response = {
+                "messages": [
+                    {
+                        "id": user_message_id,
+                        "conversationId": conversation_id,
+                        "role": "user",
+                        "content": content,
+                        "createdAt": current_time
+                    },
+                    {
+                        "id": assistant_message_id,
+                        "conversationId": conversation_id,
+                        "role": "assistant",
+                        "content": response,
+                        "createdAt": current_time,
+                        "isLoading": False
+                    }
+                ]
+            }
+            
+            # Start background task to save messages to backend
+            if not is_draft:
+                asyncio.create_task(send_to_backend(conversation_id, user_message_id, content, "user"))
+                asyncio.create_task(send_to_backend(conversation_id, assistant_message_id, response, "assistant"))
+            
+            return immediate_response
+            
+        except Exception as e:
+            logger.error(f"Error generating response: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # Return error response with placeholder for the assistant's message
+            current_time = datetime.now(UTC).isoformat()
             return {
                 "messages": [
                     {
@@ -1420,45 +1107,25 @@ async def send_message(
                         "conversationId": conversation_id,
                         "role": "user",
                         "content": content,
-                        "createdAt": datetime.now(timezone.utc).isoformat()
+                        "createdAt": current_time
                     },
                     {
                         "id": assistant_message_id,
                         "conversationId": conversation_id,
                         "role": "assistant",
-                        "content": response,
-                        "createdAt": datetime.now(timezone.utc).isoformat(),
+                        "content": "I encountered an error processing your request. Please try again.",
+                        "createdAt": current_time,
                         "isLoading": False
                     }
-                ],
-                "warning": "Backend connection may timeout. Your messages are displayed but may not be saved." if is_draft else None
+                ]
             }
-            
-        except Exception as e:
-            logger.error(f"Error processing message: {str(e)}")
-            logger.error(traceback.format_exc())
-            
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "error": f"Error processing message: {str(e)}", 
-                    "messages": [
-                        {
-                            "conversationId": conversation_id,
-                            "role": "user",
-                            "content": content
-                        }
-                    ]
-                }
-            )
-    
-    except Exception as e:
-        logger.error(f"Error parsing request: {str(e)}")
-        logger.error(traceback.format_exc())
         
+    except Exception as e:
+        logger.error(f"Error processing message: {str(e)}")
+        logger.error(traceback.format_exc())
         return JSONResponse(
-            status_code=400,
-            content={"error": f"Invalid request: {str(e)}"}
+            status_code=500,
+            content={"error": f"Error processing message: {str(e)}"}
         )
 
 async def process_full_response(
@@ -1470,15 +1137,11 @@ async def process_full_response(
     agent: LangChainAgent,
     is_draft: bool = False
 ):
-    """Process a complete user query and generate a response.
-    
-    This function is designed to be run in the background to avoid blocking the main thread.
-    It handles sending the messages to the backend as well.
-    """
-    response = "I'm processing your request..."
-    
+    """Process the full response in the background and update the conversation."""
     try:
-        # If not a draft conversation, try to send the user message to backend
+        logger.info(f"Processing full response for conversation ID: {conversation_id}")
+        
+        # When we're operating with a draft conversation, we skip backend saves
         if not is_draft:
             # Try to send user message to backend first (non-blocking)
             asyncio.create_task(send_to_backend(conversation_id, user_message_id, content, "user"))
@@ -1486,17 +1149,7 @@ async def process_full_response(
         # Process the query with the agent
         try:
             logger.info(f"Generating agent response for conversation ID: {conversation_id}")
-            response_dto = await process_query_stateless(agent, content, conversation_id, temperature)
-            
-            # Extract the actual response text from the DTO
-            if isinstance(response_dto, ConversationContentResponseDTO):
-                response = response_dto.agentResponse
-            elif isinstance(response_dto, str):
-                response = response_dto
-            else:
-                logger.warning(f"Unexpected response type: {type(response_dto)}")
-                response = str(response_dto)
-                
+            response = await process_query_stateless(agent, content, conversation_id, temperature)
             logger.info(f"Generated response length: {len(response)}")
             logger.info(f"Response preview: {response[:100]}...")
             
@@ -1507,74 +1160,83 @@ async def process_full_response(
                 
             # Log success
             logger.info(f"Successfully processed message for conversation ID: {conversation_id}")
-            return response
             
         except Exception as agent_error:
             logger.error(f"Error generating response: {str(agent_error)}")
             logger.error(traceback.format_exc())
             response = "I encountered an issue processing your request. Please try again."
-            return response
         
     except Exception as e:
         logger.error(f"Error in background processing: {str(e)}")
         logger.error(traceback.format_exc())
-        return "I apologize, but there was an error processing your request. Please try again."
 
 async def send_to_backend(conversation_id: str, message_id: str, content: str, role: str):
     """Send a message to the backend for persistence.
     
     This runs in the background and should not block the main request flow.
     """
-    # Configure a shorter timeout to prevent processing hanging
+    logger.info(f"Sending message to backend for conversation {conversation_id}")
+    
+    # Detect if this is practice feedback
+    is_practice_feedback = (
+        "practice scenario" in content.lower() and 
+        "manager type" in content.lower() and
+        ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
+    )
+    
+    if is_practice_feedback:
+        logger.info("Detected practice feedback request in message to backend")
+    
+    # Get token from environment - use the one saved from the request
+    token = os.environ.get("CURRENT_AUTH_TOKEN")
+    
+    # Prepare the request headers and payload
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    
+    if token:
+        headers["Authorization"] = token
+        logger.info(f"Using token for backend request: {token[:15]}...{token[-5:] if len(token) > 5 else ''}")
+    else:
+        logger.warning("No token available for backend request")
+        # Try to get token from a backup location or mechanism
+        fallback_token = os.environ.get("DEFAULT_AUTH_TOKEN")
+        if fallback_token:
+            headers["Authorization"] = fallback_token
+            logger.info("Using fallback token for backend request")
+    
+    # Prepare the request payload
+    payload = {
+        "id": message_id,
+        "conversationId": conversation_id,
+        "content": content,
+        "role": role
+    }
+    
+    # Backend URL from environment
+    backend_url = os.environ.get("BACKEND_URL", "http://localhost:8443")
+    endpoint = f"{backend_url}/api/v1/conversation/message"
+    
+    logger.info(f"Sending message to backend at: {endpoint}")
+    
+    # Add retries for better reliability
+    max_retries = 3
+    retry_count = 0
+    success = False
+    
+    # Create client outside try/except so it can be properly closed
+    client = httpx.AsyncClient(timeout=10.0)
+    
     try:
-        logger.info(f"Sending message to backend for conversation {conversation_id}")
-        
-        # Detect if this is practice feedback
-        is_practice_feedback = (
-            "practice scenario" in content.lower() and 
-            "manager type" in content.lower() and
-            ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
-        )
-        
-        if is_practice_feedback:
-            logger.info("Detected practice feedback request in message to backend")
-        
-        # Create an HTTP client with a timeout
-        client = httpx.AsyncClient(timeout=10.0)  # Increased timeout for better reliability
-        
-        # Get token from environment
-        token = os.environ.get("CURRENT_AUTH_TOKEN")
-        
-        # Prepare the request headers and payload
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-        
-        if token:
-            headers["Authorization"] = token
-        else:
-            logger.warning("No token available for backend request")
-        
-        # Prepare the request payload
-        payload = {
-            "id": message_id,
-            "conversationId": conversation_id,
-            "content": content,
-            "role": role
-        }
-        
-        # Backend URL from environment
-        backend_url = os.environ.get("BACKEND_URL", "http://localhost:8443")
-        endpoint = f"{backend_url}/api/v1/conversation/message"
-        
-        # Add retries for better reliability
-        max_retries = 3
-        retry_count = 0
-        success = False
-        
         while retry_count <= max_retries and not success:
             try:
+                # Log the actual request we're sending
+                logger.info(f"Sending backend request (attempt {retry_count+1}): {endpoint}")
+                logger.info(f"With headers: {', '.join(headers.keys())}")
+                logger.info(f"With payload: conversationId={payload['conversationId']}, role={payload['role']}, content_length={len(payload['content'])}")
+                
                 response = await client.post(
                     endpoint,
                     json=payload,
@@ -1585,7 +1247,7 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
                 if response.status_code == 200:
                     logger.info(f"Successfully sent message to backend: {response.status_code}")
                     success = True
-                    return True
+                    break
                 else:
                     logger.warning(f"Backend returned non-200 status: {response.status_code}")
                     logger.warning(f"Response content: {response.text[:200]}...")
@@ -1612,176 +1274,76 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
             logger.error(f"Failed to send message to backend after {max_retries} retries")
             return False
             
-        return False
+        return success
     except Exception as e:
         logger.error(f"Error sending message to backend: {str(e)}")
         logger.error(traceback.format_exc())
         return False
     finally:
-        await client.aclose()
+        # Always close the client, but don't await it directly (wrap in try/except)
+        try:
+            await client.aclose()
+        except Exception as e:
+            logger.error(f"Error closing HTTP client: {str(e)}")
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
-    """Process a user query and generate a response without storing conversation state"""
+    """Process a query statelessly without maintaining agent state."""
     logger.info(f"Processing stateless query for conversation ID: {conversation_id}")
     
     try:
-        # Check if this is a practice feedback request
-        is_practice_feedback = False
-        practice_data = None
+        # Retrieve conversation details if possible to get manager type
+        manager_type = None
+        try:
+            if conversation_id and not conversation_id.startswith("draft-"):
+                backend_url = f"{os.getenv('BACKEND_URL', 'http://localhost:8443')}/api/v1/conversation/{conversation_id}"
+                async with httpx.AsyncClient(timeout=3.0) as client:
+                    response = await client.get(backend_url)
+                    if response.status_code == 200:
+                        conversation_data = response.json()
+                        manager_type = conversation_data.get("managerType")
+                        logger.info(f"Using manager type from conversation: {manager_type}")
+        except Exception as e:
+            logger.warning(f"Could not retrieve conversation details: {str(e)}")
         
-        if "practice" in query.lower() and "feedback" in query.lower() and "score" in query.lower():
-            logger.info("Detected practice feedback request")
-            is_practice_feedback = True
-            
-            # Attempt to extract score and manager type from the query for backup
-            score_match = re.search(r"scored (\d+)/100", query)
-            manager_match = re.search(r"with a (\w+) manager", query)
-            
-            extracted_score = score_match.group(1) if score_match else "70"
-            extracted_manager = manager_match.group(1) if manager_match else "PUPPETEER"
-        
-        # Use OpenAI for response generation
-        model_name = "gpt-4o-mini" # Changed from gpt-3.5-turbo
-        
-        # Create the LLM model with the specified temperature
+        # Initialize the OpenAI model
         llm = ChatOpenAI(
-            model_name=model_name,
+            model_name="gpt-3.5-turbo",
             temperature=temperature,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         )
         
-        # Define the system message for the assistant's role
-        system_message = """You are EVA, an Ethical Virtual Assistant designed to support software professionals in making sound ethical decisions. Imagine you're a trusted, knowledgeable, and approachable colleague.
-
-Your primary role is to provide concise, practical, and empathetic ethical guidance. Keep your responses clear, brief, and conversational—like a helpful chat with a coworker, not a lecture.
-
-**Principles of your communication:**
-
-- **Conversational Tone:** Communicate naturally and warmly, acknowledging the user's concerns briefly and empathetically.
-- **Concise Clarity:** Offer succinct, actionable advice. Avoid unnecessary jargon or overly formal language.
-- **Grounded Realism:** Base your advice strictly on real ethical guidelines (such as ACM/IEEE standards). If guidelines are unavailable, transparently use general ethical best practices. Never fabricate guidelines or references.
-- **Constructive Engagement:** End with a brief, interactive question inviting further reflection or practice.
-- **Balanced Perspective:** Acknowledge potential consequences and business implications succinctly and without exaggeration.
-
-**Structured Response Format:**
-
-1. **Brief Empathy:** Start with a quick acknowledgment of the user's situation (e.g., "That's definitely challenging...", "I understand the tension...").
-2. **Core Ethical Insight:** Clearly state the main ethical consideration, briefly referencing relevant guidelines if directly applicable.
-3. **Practical Advice:** Suggest a straightforward, practical step the user can take.
-4. **Risk Awareness (if relevant):** Briefly mention potential risks like user trust or compliance issues.
-5. **Interactive Prompt:** Close with a concise, inviting question (e.g., "Does this make sense?", "Would practicing this conversation help?").
-
-**Critical Reminders:**
-
-- Do NOT reference specific manager styles (Puppeteer, Diluter, Camouflager) unless explicitly asked.
-- NEVER produce hallucinations—adhere strictly to provided facts and context.
-- Keep responses conversationally short and avoid repetitive language.
-
-Your goal is always to empower and educate, helping users navigate ethical complexity with confidence and clarity."""
+        # Create the prompt that focuses on the current query without needing conversation history
+        system_message = """You are an ethical AI assistant that helps with ethical decision-making in technology.
+        Provide thoughtful, nuanced guidance based on ethical frameworks and principles.
+        Focus on helping the user understand ethical implications and make informed decisions."""
         
-        # If this is a practice feedback request, modify the system message to handle it
-        if is_practice_feedback:
-            logger.info("Using practice feedback system message")
-            system_message = """You are EVA (Ethical Virtual Assistant), an AI assistant specialized in providing ethical guidance and feedback.
-
-You are responding to a user who has just completed a practice scenario where they had to respond to a manager with questionable ethical demands.
-
-Provide constructive feedback on their performance in the practice session. Consider:
-1. How well they maintained ethical principles
-2. The effectiveness of their communication
-3. Their ability to balance professional obligations with ethical concerns
-4. Specific suggestions for improvement
-5. Positive reinforcement for good ethical decision-making
-
-Be supportive and educational in your feedback."""
+        if manager_type:
+            system_message += f"\n\nThe user has selected '{manager_type}' as their preferred interaction style."
         
-        # Process the query with proper error handling
-        try:
-            # Create the message list - add practice data if this is a feedback request
-            messages = [{"role": "system", "content": system_message}]
-            messages.append({"role": "user", "content": query})
-            
-            # Generate the response
-            response = llm.predict_messages(messages)
-            content = response.content
-            logger.info(f"Generated response (first 50 chars): {content[:50]}...")
-            
-            # Check if the response contains any reference to manager types and regenerate if needed
-            if any(style in content for style in ["PUPPETEER", "puppeteer", "Puppeteer", "DILUTER", "diluter", "Diluter", "CAMOUFLAGER", "camouflager", "Camouflager"]):
-                logger.warning("Response contained manager type references. Regenerating...")
-                
-                # Add more explicit instructions
-                stronger_message = system_message + """
-                
-                CRITICAL: Your previous response contained references to manager types or interaction styles.
-                DO NOT mention "PUPPETEER", "DILUTER", "CAMOUFLAGER" or any variations of these terms in your response.
-                Focus ONLY on addressing the ethical question.
-                """
-                
-                # Regenerate with stronger instructions
-                response = llm.predict_messages([
-                    {"role": "system", "content": stronger_message},
-                    {"role": "user", "content": query}
-                ])
-                content = response.content
-                logger.info("Regenerated response without style references")
-            
-            # If this is not a practice feedback request and doesn't already have the practice prompt,
-            # ensure it ends with the practice prompt
-            # Modification: Use the prompt defined in the system message instead of hardcoding
-            practice_prompt_text = "Would practicing a discussion around this be helpful?"
-            if not is_practice_feedback and practice_prompt_text not in content:
-                content = content.rstrip()
-                if not content.endswith((".","?","!")):
-                    content += "."
-                content += f"\n\n{practice_prompt_text}"
-                logger.info("Added practice prompt to response")
-            
-            return ConversationContentResponseDTO(
-                id=str(uuid.uuid4()),
-                conversationId=conversation_id,
-                agentResponse=content,
-                createdAt=datetime.utcnow().isoformat()
+        # Make a direct call to the LLM
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": query}
+        ]
+        
+        # Use a timeout to prevent hanging
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(
+                lambda: llm.invoke([
+                    SystemMessage(content=system_message),
+                    HumanMessage(content=query)
+                ]).content
             )
-            
-        except Exception as llm_error:
-            logger.error(f"Error from LLM: {str(llm_error)}")
-            content = """I apologize, but I encountered an error generating a response. 
-
-Here are some general ethical principles to consider:
-- Respect for autonomy and individual rights
-- Fairness and non-discrimination
-- Transparency in AI systems
-- Accountability for technology outcomes
-- Privacy protection
-
-If you'd like to try again with a more specific question, I'd be happy to help.
-
-Would you like to practice this scenario with simulated manager responses? (yes/no)"""
-            
-            return ConversationContentResponseDTO(
-                id=str(uuid.uuid4()),
-                conversationId=conversation_id,
-                agentResponse=content,
-                createdAt=datetime.utcnow().isoformat()
-            )
+            response = future.result(timeout=25)  # 25 second timeout
+        
+        return response
     
     except concurrent.futures.TimeoutError:
         logger.error("Response generation timed out")
-        return ConversationContentResponseDTO(
-            id=str(uuid.uuid4()),
-            conversationId=conversation_id,
-            agentResponse="I'm sorry, but I couldn't generate a response in time. Please try again with a simpler query.\n\nWould you like to practice this scenario with simulated manager responses? (yes/no)",
-            createdAt=datetime.utcnow().isoformat()
-        )
+        return "I'm sorry, but I couldn't generate a response in time. Please try again with a simpler query."
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}")
-        return ConversationContentResponseDTO(
-            id=str(uuid.uuid4()),
-            conversationId=conversation_id,
-            agentResponse="I encountered an issue processing your request. Please try again.\n\nWould you like to practice this scenario with simulated manager responses? (yes/no)",
-            createdAt=datetime.utcnow().isoformat()
-        )
+        return "I encountered an issue processing your request. Please try again."
 
 @app.delete("/api/v1/conversation/{conversation_id}",
     tags=["Frontend Compatibility"],
@@ -1869,603 +1431,6 @@ async def update_conversation_title(conversation_id: str, request: Request):
             "title": request_body.get("title", "Untitled Conversation"),
             "updatedAt": datetime.utcnow().isoformat()
         }
-
-@app.get("/api/v1/auth/verify-token",
-    tags=["Authentication"],
-    summary="Verify token",
-    description="Verifies if the token is valid by checking with the backend"
-)
-async def verify_token(request: Request):
-    """Verify if the token is valid by forwarding the request to the backend"""
-    try:
-        # Extract the authorization header from the incoming request
-        auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            return {"status": "error", "message": "No authorization token provided"}
-        
-        headers = {
-            "Accept": "application/json",
-            "Authorization": auth_header
-        }
-        
-        # Make a request to the backend API to verify the token
-        # We'll use the conversation endpoint as it requires authentication
-        response = requests.get(
-            f"{BACKEND_BASE_URL}/api/v1/conversation",
-            headers=headers
-        )
-        
-        # Check if the request was successful (token is valid)
-        if response.status_code == 200:
-            return {"status": "ok", "message": "Token is valid"}
-        else:
-            return {
-                "status": "error", 
-                "message": f"Token verification failed: {response.status_code}", 
-                "details": response.text
-            }
-    except Exception as e:
-        logger.error(f"Error verifying token: {str(e)}")
-        logger.error(traceback.format_exc())
-        return {"status": "error", "message": f"Error verifying token: {str(e)}"}
-
-@app.post("/api/v1/auth/login",
-    tags=["Authentication"],
-    summary="Login",
-    description="Authenticates a user and returns a JWT token"
-)
-async def login(request: Request):
-    """Forward login request to the backend"""
-    try:
-        # Extract the request body
-        request_body = await request.json()
-        
-        # Forward the request to the backend
-        response = requests.post(
-            f"{BACKEND_BASE_URL}/api/v1/auth/login",
-            json=request_body,
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        )
-        
-        # Return the backend response
-        status_code = response.status_code
-        response_data = response.json()
-        
-        # Log the login result
-        if status_code == 200:
-            logger.info(f"User login successful: {request_body.get('email')}")
-            
-            # Store the token for later use in agent-backend communication
-            if response_data.get('accessToken'):
-                token = response_data.get('accessToken')
-                formatted_token = token if token.startswith('Bearer ') else f"Bearer {token}"
-                os.environ["CURRENT_AUTH_TOKEN"] = formatted_token
-                logger.info("Saved authentication token for backend communication")
-        else:
-            logger.error(f"Login failed: {status_code} - {response_data}")
-        
-        return JSONResponse(
-            status_code=status_code,
-            content=response_data
-        )
-    except Exception as e:
-        logger.error(f"Error processing login: {str(e)}")
-        logger.error(traceback.format_exc())
-        return JSONResponse(
-            status_code=500,
-            content={"message": f"Internal server error: {str(e)}"}
-        )
-
-@app.get("/api/v1/knowledge-artifacts/{conversation_id}", response_model=KnowledgeArtifactsResponse)
-async def get_knowledge_artifacts(conversation_id: str, request: Request, retry_count: int = 0, max_retries: int = 3):
-    """Get knowledge artifacts for a conversation.
-    
-    This endpoint provides the guidelines and case studies relevant to a specific conversation.
-    
-    Args:
-        conversation_id: The conversation ID to get artifacts for
-        retry_count: Current retry attempt (internal use)
-        
-    Returns:
-        KnowledgeArtifactsResponse: Guidelines and case studies for the conversation
-    """
-    logger.info(f"[{retry_count}/{max_retries}] Fetching knowledge artifacts for conversation: {conversation_id}")
-    
-    # Skip invalid conversation IDs
-    if conversation_id.startswith("draft-") or "mock-" in conversation_id:
-        logger.info(f"Skipping invalid conversation_id: {conversation_id}")
-        return {"guidelines": [], "caseStudies": []}
-    
-    # Format conversation_id as UUID for database consistency
-    original_conversation_id = conversation_id
-    try:
-        # Validate if it's already a UUID
-        uuid_obj = uuid.UUID(conversation_id)
-        formatted_conversation_id = str(uuid_obj)
-        if formatted_conversation_id != conversation_id:
-            logger.info(f"Reformatted conversation_id from {conversation_id} to {formatted_conversation_id}")
-            conversation_id = formatted_conversation_id
-    except ValueError:
-        # If not a valid UUID, generate a deterministic UUID from the string
-        namespace = uuid.NAMESPACE_URL
-        name = f"conversation:{conversation_id}"
-        new_uuid = uuid.uuid5(namespace, name)
-        formatted_conversation_id = str(new_uuid)
-        logger.warning(f"Converted non-UUID conversation_id {conversation_id} to UUID {formatted_conversation_id}")
-        conversation_id = formatted_conversation_id
-        
-    # Try to get artifacts from the backend database
-    try:
-        logger.info(f"Querying knowledge artifacts database endpoint")
-        
-        # Get the token from the request
-        token = None
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            token = auth_header
-            if not token.startswith("Bearer "):
-                token = f"Bearer {token}"
-                
-        # Set up API request headers
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        
-        if token:
-            headers["Authorization"] = token
-            
-        # Add timestamp to prevent caching
-        timestamp = datetime.now().timestamp()
-        
-        # Make the request to the backend
-        try:
-            async with httpx.AsyncClient(timeout=20.0) as client:
-                response = await client.get(
-                    f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts/{conversation_id}?t={timestamp}",
-                    headers=headers
-                )
-                
-                if response.status_code == 200:
-                    logger.info("Successfully retrieved artifacts from database")
-                    
-                    try:
-                        data = response.json()
-                        
-                        # Validate the data
-                        if (data and 
-                            isinstance(data.get("guidelines", []), list) and 
-                            isinstance(data.get("caseStudies", []), list)):
-                            
-                            guidelines_count = len(data.get("guidelines", []))
-                            case_studies_count = len(data.get("caseStudies", []))
-                            
-                            logger.info(f"Got {guidelines_count} guidelines and {case_studies_count} case studies from database")
-                            
-                            # Only return if we have actual data
-                            if guidelines_count > 0 or case_studies_count > 0:
-                                return data
-                            else:
-                                logger.info("Database returned empty collections")
-                                # If retry limit not reached, attempt to generate new artifacts
-                                if retry_count < max_retries:
-                                    return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
-                        else:
-                            logger.warning("Database returned invalid data format")
-                            if retry_count < max_retries:
-                                return await generate_and_save_artifacts(original_conversation_id, request, retry_count)
-                    except Exception as e:
-                        logger.error(f"Error parsing database response: {str(e)}")
-                        # Don't generate here, just return empty
-                        logger.error("Error parsing database response, returning empty artifacts.")
-                        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-                elif response.status_code == 401:
-                    logger.warning("Authentication failed (401)")
-                    # Don't generate on auth error
-                    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-                else:
-                    logger.warning(f"Database request failed with status {response.status_code}")
-                    # Don't generate on other DB errors
-                    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-        except httpx.RequestError as e:
-            logger.error(f"Request error when fetching from database: {str(e)}")
-            # Don't generate on request error
-            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-    except Exception as e:
-        logger.error(f"Unexpected error fetching artifacts: {str(e)}")
-        logger.error(traceback.format_exc())
-        # Don't generate on unexpected error
-            
-    # If all else fails, return empty data
-    logger.error(f"All attempts to get artifacts failed, returning empty data")
-    return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-
-# Alternative endpoint for frontend compatibility if needed
-@app.get("/knowledge-artifacts/{conversation_id}",
-    tags=["Knowledge Base"],
-    summary="Get knowledge artifacts for a conversation (legacy)",
-    description="Legacy endpoint to retrieve the ethical guidelines and case studies relevant to a specific conversation"
-)
-async def get_knowledge_artifacts_legacy(conversation_id: str, request: Request):
-    """Legacy endpoint to retrieve knowledge artifacts associated with a conversation."""
-    return await get_knowledge_artifacts(conversation_id, request)
-
-@app.get("/direct-knowledge-artifacts/{conversation_id}", response_model=KnowledgeArtifactsResponse)
-async def direct_knowledge_artifacts(conversation_id: str):
-    """
-    Directly retrieve knowledge artifacts for a conversation from the database.
-    This endpoint provides a direct way to access knowledge artifacts without browser cache issues.
-    
-    Args:
-        conversation_id: The conversation ID to get artifacts for
-        
-    Returns:
-        KnowledgeArtifactsResponse: Guidelines and case studies for the conversation
-    """
-    logger.info(f"Direct request for knowledge artifacts for conversation: {conversation_id}")
-    
-    # Skip invalid conversation IDs
-    if conversation_id.startswith("draft-") or "mock-" in conversation_id:
-        logger.info(f"Skipping invalid conversation_id: {conversation_id}")
-        return {"guidelines": [], "caseStudies": []}
-    
-    # Format conversation_id as UUID for database consistency
-    try:
-        # Validate if it's already a UUID
-        uuid_obj = uuid.UUID(conversation_id)
-        formatted_conversation_id = str(uuid_obj)
-        if formatted_conversation_id != conversation_id:
-            logger.info(f"Reformatted conversation_id from {conversation_id} to {formatted_conversation_id}")
-            conversation_id = formatted_conversation_id
-    except ValueError:
-        # If not a valid UUID, generate a deterministic UUID from the string
-        namespace = uuid.NAMESPACE_URL
-        name = f"conversation:{conversation_id}"
-        new_uuid = uuid.uuid5(namespace, name)
-        formatted_conversation_id = str(new_uuid)
-        logger.warning(f"Converted non-UUID conversation_id {conversation_id} to UUID {formatted_conversation_id}")
-        conversation_id = formatted_conversation_id
-    
-    # Set up headers for the database request
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    
-    # Add token if available 
-    token = os.getenv('CURRENT_AUTH_TOKEN')
-    if token:
-        if not token.startswith('Bearer '):
-            token = f"Bearer {token}"
-        headers["Authorization"] = token
-    
-    # First try to get the data directly from the database
-    try:
-        logger.info(f"Attempting to fetch knowledge artifacts from database for {conversation_id}")
-        
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            # Add timestamp to prevent caching issues
-            timestamp = datetime.now().timestamp()
-            response = await client.get(
-                f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts/{conversation_id}?t={timestamp}",
-                headers=headers
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                logger.info(f"Successfully retrieved artifacts from database")
-                
-                # Validate the data
-                if (data and 
-                    isinstance(data.get("guidelines", []), list) and 
-                    isinstance(data.get("caseStudies", []), list)):
-                    
-                    guidelines_count = len(data.get("guidelines", []))
-                    case_studies_count = len(data.get("caseStudies", []))
-                    
-                    logger.info(f"Retrieved {guidelines_count} guidelines and {case_studies_count} case studies from database")
-                    
-                    if guidelines_count > 0 or case_studies_count > 0:
-                        return {
-                            "guidelines": data.get("guidelines", []),
-                            "caseStudies": data.get("caseStudies", [])
-                        }
-                    else:
-                        logger.info("Database returned empty artifacts, will generate new ones")
-                else:
-                    logger.warning("Database returned invalid data format")
-            else:
-                logger.warning(f"Database request failed with status {response.status_code}")
-                
-    except Exception as e:
-        logger.error(f"Error fetching artifacts from database: {str(e)}")
-    
-    logger.info("No artifacts found in database, generating new artifacts")
-    
-    # If database retrieval fails or returns empty data, generate new artifacts
-    try:
-        # Initialize agent
-        agent = get_agent()
-        
-        # Construct a query from the conversation ID
-        query = f"Generate relevant guidelines and case studies for conversation {conversation_id}"
-        
-        logger.info(f"Generating artifacts with query: '{query}'")
-        
-        # Generate guidelines and case studies
-        guidelines = []
-        case_studies = []
-        
-        try:
-            guidelines = agent.get_relevant_guidelines(query, max_results=5)
-            logger.info(f"Generated {len(guidelines)} guidelines")
-            
-            case_studies = agent.get_relevant_case_studies(query, max_results=3)
-            logger.info(f"Generated {len(case_studies)} case studies")
-        except Exception as e:
-            logger.error(f"Error generating artifacts: {str(e)}")
-            logger.error(traceback.format_exc())
-            return {"guidelines": [], "caseStudies": []}
-        
-        # Save the generated artifacts to the database
-        try:
-            # Prepare DTOs for database storage
-            guideline_dtos = []
-            case_study_dtos = []
-            
-            for guideline in guidelines:
-                dto = {
-                    "title": guideline.get("title", ""),
-                    "description": guideline.get("description", ""),
-                    "artifactId": guideline.get("id", ""),
-                    "artifactType": "GUIDELINE",
-                    "relevance": float(guideline.get("relevance", 0))
-                }
-                guideline_dtos.append(dto)
-                
-            for case_study in case_studies:
-                dto = {
-                    "title": case_study.get("title", ""),
-                    "description": case_study.get("description", "") or case_study.get("summary", ""),
-                    "artifactId": case_study.get("id", ""),
-                    "artifactType": "CASE_STUDY",
-                    "relevance": float(case_study.get("relevance", 0))
-                }
-                case_study_dtos.append(dto)
-            
-            # Create the database payload
-            save_payload = {
-                "conversationId": conversation_id,
-                "guidelines": guideline_dtos,
-                "caseStudies": case_study_dtos,
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            # Save to database
-            save_result = await save_knowledge_artifacts(conversation_id, save_payload)
-            
-            if save_result:
-                logger.info("Successfully saved generated artifacts to database")
-            else:
-                logger.error("Failed to save generated artifacts to database")
-                
-        except Exception as e:
-            logger.error(f"Error saving generated artifacts to database: {str(e)}")
-            logger.error(traceback.format_exc())
-        
-        # Return the generated artifacts regardless of save success
-        return {
-            "guidelines": guidelines,
-            "caseStudies": case_studies
-        }
-        
-    except Exception as e:
-        logger.error(f"Error in direct_knowledge_artifacts: {str(e)}")
-        logger.error(traceback.format_exc())
-        return {"guidelines": [], "caseStudies": []}
-
-@app.get("/api/v1/diagnostic/rag-artifacts",
-    tags=["Diagnostic"],
-    summary="Diagnostic endpoint for RAG artifacts issues",
-    description="Provides diagnostic information about RAG artifacts storage and retrieval"
-)
-async def diagnostic_rag_artifacts(request: Request):
-    """Diagnostic endpoint to help troubleshoot problems with RAG artifacts."""
-    logger.info("Running RAG artifacts diagnostics")
-    
-    # Collect diagnostic information
-    diagnostics = {
-        "timestamp": datetime.now(UTC).isoformat(),
-        "environment": {
-            "backend_url": BACKEND_BASE_URL,
-            "agent_version": "1.0", # Or get from somewhere if available
-            "token_available": os.getenv('CURRENT_AUTH_TOKEN') is not None,
-        },
-        "local_storage": {
-            "artifacts_dir_exists": False,
-            "artifact_count": 0,
-            "sample_artifacts": []
-        },
-        "backend_connection": {
-            "status": "unknown",
-            "response_code": None,
-            "error": None
-        }
-    }
-    
-    # Check local artifact storage
-    try:
-        artifacts_dir = Path("data/artifacts")
-        diagnostics["local_storage"]["artifacts_dir_exists"] = artifacts_dir.exists()
-        
-        if artifacts_dir.exists():
-            artifact_files = list(artifacts_dir.glob("*.json"))
-            diagnostics["local_storage"]["artifact_count"] = len(artifact_files)
-            
-            # Add sample of up to 5 most recent artifacts
-            sample_artifacts = sorted(artifact_files, key=lambda p: p.stat().st_mtime, reverse=True)[:5]
-            
-            for artifact_file in sample_artifacts:
-                try:
-                    with open(artifact_file, "r") as f:
-                        artifact_data = json.load(f)
-                    
-                    diagnostics["local_storage"]["sample_artifacts"].append({
-                        "filename": artifact_file.name,
-                        "conversation_id": artifact_data.get("conversationId"),
-                        "guideline_count": len(artifact_data.get("guidelines", [])),
-                        "case_study_count": len(artifact_data.get("caseStudies", [])),
-                        "timestamp": artifact_data.get("timestamp")
-                    })
-                except Exception as e:
-                    diagnostics["local_storage"]["sample_artifacts"].append({
-                        "filename": artifact_file.name,
-                        "error": str(e)
-                    })
-    except Exception as e:
-        diagnostics["local_storage"]["error"] = str(e)
-    
-    # Test backend connection
-    try:
-        token = os.getenv('CURRENT_AUTH_TOKEN')
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
-        
-        if token:
-            headers["Authorization"] = token
-        
-        # Use a simple health check endpoint if available, or a sample conversation ID
-        test_url = f"{BACKEND_BASE_URL}/api/v1/health" 
-        
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(test_url, headers=headers)
-            
-            diagnostics["backend_connection"]["status"] = "connected"
-            diagnostics["backend_connection"]["response_code"] = response.status_code
-            
-            # If we got a successful response, also test the rag-artifacts endpoint with a test UUID
-            if response.status_code < 400:
-                test_conversation_id = "00000000-0000-0000-0000-000000000000"  # Test UUID
-                rag_test_url = f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts/{test_conversation_id}"
-                
-                try:
-                    rag_response = await client.get(rag_test_url, headers=headers)
-                    
-                    diagnostics["rag_endpoint_test"] = {
-                        "status": "tested",
-                        "response_code": rag_response.status_code,
-                        "response_body": rag_response.text[:500] if len(rag_response.text) > 500 else rag_response.text
-                    }
-                except Exception as e:
-                    diagnostics["rag_endpoint_test"] = {
-                        "status": "error",
-                        "error": str(e)
-                    }
-            
-    except Exception as e:
-        diagnostics["backend_connection"]["status"] = "error"
-        diagnostics["backend_connection"]["error"] = str(e)
-    
-    # Database schema analysis
-    diagnostics["database_schema"] = {
-        "expected_fields": [
-            "id (BIGSERIAL PRIMARY KEY)",
-            "conversation_id (UUID NOT NULL)",
-            "artifact_type (VARCHAR(20) NOT NULL)",
-            "artifact_id (VARCHAR(255) NOT NULL)",
-            "title (VARCHAR(255) NOT NULL)",
-            "description (TEXT)",
-            "source (VARCHAR(255))",
-            "category (VARCHAR(255))",
-            "relevance (FLOAT)",
-            "summary (TEXT)",
-            "outcome (TEXT)",
-        ],
-        "expected_constraints": [
-            "CONSTRAINT fk_rag_artifact_conversation FOREIGN KEY (conversation_id) REFERENCES conversations(id)"
-        ],
-        "mismatch_summary": "The database schema expects conversation_id to be a UUID, but the Java code may be storing string values that aren't valid UUIDs."
-    }
-    
-    return diagnostics
-    
-async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(get_agent)):
-    try:
-        message_content = await request.json()
-        conversation_id = message_content.get("conversationId")
-        message_text = message_content.get("messageContent")
-        
-        if not conversation_id:
-            logger.warning("No conversation ID provided for artifact generation")
-            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-        
-        # Use the message content if provided, otherwise use a default query
-        query_text = message_text if message_text else "What are the ethical considerations for this technology?"
-        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'")
-        
-        # Agent instance is now injected via Depends(get_agent)
-        if not agent:
-            # This check might be redundant now but kept for safety
-            raise HTTPException(status_code=500, detail="Agent is not initialized")
-
-        # Generate artifacts using the agent instance
-        guidelines = agent.get_relevant_guidelines(query_text)
-        case_studies = agent.get_relevant_case_studies(query_text)
-        
-        logger.info(f"Returning response with {len(guidelines)} guidelines, {len(case_studies)} case studies")
-        # Return the generated artifacts directly
-        return KnowledgeArtifactsResponse(
-            guidelines=guidelines,
-            caseStudies=case_studies
-        )
-    except Exception as e:
-        logger.error(f"Error generating artifacts: {e}")
-        logger.error(traceback.format_exc())
-        # Return empty artifacts on error to prevent frontend issues
-        logger.warning(f"Returning empty artifacts due to generation error for conversation {conversation_id}")
-        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-
-@app.post("/api/v1/generate-artifacts")
-async def generate_artifacts(request: Request, agent: LangChainAgent = Depends(get_agent)):
-    try:
-        message_content = await request.json()
-        conversation_id = message_content.get("conversationId")
-        message_text = message_content.get("messageContent")
-        
-        if not conversation_id:
-            logger.warning("No conversation ID provided for artifact generation")
-            return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
-        
-        # Use the message content if provided, otherwise use a default query
-        query_text = message_text if message_text else "What are the ethical considerations for this technology?"
-        logger.info(f"Generating artifacts for conversation {conversation_id} based on query: '{query_text[:50]}...'")
-        
-        # Agent instance is now injected via Depends(get_agent)
-        if not agent:
-            # This check might be redundant now but kept for safety
-            raise HTTPException(status_code=500, detail="Agent is not initialized")
-
-        # Generate artifacts using the agent instance
-        guidelines = agent.get_relevant_guidelines(query_text)
-        case_studies = agent.get_relevant_case_studies(query_text)
-        
-        logger.info(f"Returning response with {len(guidelines)} guidelines, {len(case_studies)} case studies")
-        # Return the generated artifacts directly
-        return KnowledgeArtifactsResponse(
-            guidelines=guidelines,
-            caseStudies=case_studies
-        )
-    except Exception as e:
-        logger.error(f"Error generating artifacts: {e}")
-        logger.error(traceback.format_exc())
-        # Return empty artifacts on error to prevent frontend issues
-        logger.warning(f"Returning empty artifacts due to generation error for conversation {conversation_id}")
-        return KnowledgeArtifactsResponse(guidelines=[], caseStudies=[])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5001) 

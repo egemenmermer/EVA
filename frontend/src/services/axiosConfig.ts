@@ -27,11 +27,31 @@ api.interceptors.request.use(
       config.headers.Authorization = formattedToken;
       
       if (process.env.NODE_ENV === 'development') {
-        console.debug('Request with auth token:', config.url);
+        const tokenStart = formattedToken.substring(0, 15);
+        const tokenEnd = formattedToken.length > 20 ? formattedToken.substring(formattedToken.length - 5) : '';
+        console.log(`Request with auth token: ${config.url}, token: ${tokenStart}...${tokenEnd}`);
       }
     } else {
       if (process.env.NODE_ENV === 'development') {
-        console.debug('Request without auth token:', config.url);
+        console.warn(`Request without auth token: ${config.url} - no token found in localStorage`);
+        // Try to recover the token or request reauthorization
+        try {
+          const storedState = localStorage.getItem('eva-store');
+          if (storedState) {
+            const parsedState = JSON.parse(storedState);
+            if (parsedState?.state?.token) {
+              const recoveredToken = parsedState.state.token;
+              const formattedToken = recoveredToken.startsWith('Bearer ') ? recoveredToken : `Bearer ${recoveredToken}`;
+              config.headers.Authorization = formattedToken;
+              console.log(`Recovered token from store state and applied to request: ${config.url}`);
+              
+              // Also save it back to the main token location
+              localStorage.setItem('token', formattedToken);
+            }
+          }
+        } catch (e) {
+          console.error('Error attempting to recover token:', e);
+        }
       }
     }
     

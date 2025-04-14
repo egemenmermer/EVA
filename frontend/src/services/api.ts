@@ -490,11 +490,23 @@ export const getConversationMessages = async (conversationId: string) => {
 
 export const sendMessage = async (conversationId: string, message: string, temperature: number) => {
   setAuthHeader();
-  const response = await axios.post(`${API_URL}/api/v1/conversation/message`, {
+  // For debugging - log exactly what we're sending
+  console.log("Sending message to API:", {
     conversationId,
-    content: message,
+    userQuery: message,
+    managerType: getManagerType(),
     temperature
   });
+  
+  const response = await axios.post(`${API_URL}/api/v1/conversation/message`, {
+    conversationId,
+    userQuery: message,
+    managerType: getManagerType(),
+    temperature
+  });
+  
+  // Log the response for debugging
+  console.log("API response:", response.data);
   return response.data;
 };
 
@@ -731,7 +743,7 @@ export const generateKnowledgeArtifacts = async (conversationId: string): Promis
       // Only try to fetch messages if this is a valid UUID conversation
       if (isUuid) {
         console.log(`Fetching messages for context for UUID: ${conversationId}`);
-        const messageResponse = await fetch(`${API_URL}/api/v1/conversation/${conversationId}/messages?limit=3`, {
+        const messageResponse = await fetch(`${API_URL}/api/v1/conversation/message/${conversationId}`, {
           method: 'GET',
           headers
         });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Dispatch, SetStateAction, useRef } from 'react';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
-import { useStore, ManagerType } from '@/store/useStore';
+import { useStore, ManagerType, Conversation } from '@/store/useStore';
 import { Role } from '@/types/index';
 import { Message } from '@/types/conversation';
 import { conversationApi } from '@/services/api';
@@ -22,7 +22,18 @@ interface ExtendedConversationDTO extends ConversationContentResponseDTO {
   agentResponse?: string;
   isUserMessage?: boolean;
   isLoading?: boolean;
+  managerType?: ManagerType;
+  title?: string;
+  preview?: string;
+  modelName?: string;
+  personaUsed?: string;
 }
+
+// Function to get the current persona from the store
+const getCurrentPersona = (): string => {
+  const managerType = useStore.getState().managerType;
+  return managerType || 'PUPPETEER';
+};
 
 // Add a new interface for the updated response format
 interface MessageResponseDTO {
@@ -61,6 +72,20 @@ interface MessageResponse {
   }[];
   warning?: string;
   error?: string;
+}
+
+// Add this interface near the top of the file with the other interfaces
+interface AgentMessagesResponse {
+  messages: Array<{
+    id: string;
+    conversationId: string;
+    role: Role;
+    content: string;
+    createdAt: string;
+    isLoading?: boolean;
+  }>;
+  warning?: string | null;
+  error?: string | null;
 }
 
 // Define props for ChatWindow
@@ -152,9 +177,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
     }
     
     if (!currentConversation) {
-      return;
-    }
-    
+        return;
+      }
+      
     // Try to recover messages from localStorage first
     if (currentConversation.conversationId) {
       const recoveredMessages = loadConversationState(currentConversation.conversationId);
@@ -163,12 +188,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
         console.log('Recovered messages from localStorage for conversation', currentConversation.conversationId);
         return;
       }
-    }
-    
+      }
+      
     // Don't fetch messages for draft conversations
     if (currentConversation.conversationId.startsWith('draft-')) {
-      return;
-    }
+        return;
+      }
 
     fetchMessages();
   }, [currentConversation?.conversationId]);
@@ -198,8 +223,32 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
         }
       }
       
-      // If we get here, no exact messages were found, proceed with API fetch
-      console.log('No exact saved messages found in localStorage, fetching from API');
+      // For the second case - recovering from localStorage backups
+      const recoveredMessages = loadConversationState(currentConversation.conversationId);
+      if (recoveredMessages && recoveredMessages.length > 0) {
+        console.log('Using recovered messages from localStorage backup');
+        setMessages(recoveredMessages);
+        setIsRefreshing(false);
+        setError(null);
+        return; // Exit early - don't fetch from API
+      }
+
+      // If we get here, no saved messages were found, proceed with API fetch
+      console.log('No saved messages found in localStorage, fetching from API');
+      
+      try {
+        const response = await api.get<MessageResponseDTO>(`/api/v1/conversation/message/${currentConversation.conversationId}`);
+        if (response.data && response.data.messages) {
+          setMessages(response.data.messages);
+          console.log('Fetched messages from API:', response.data.messages.length);
+          // Also save to localStorage for backup
+          saveConversationState(currentConversation.conversationId, response.data.messages);
+        } else {
+          console.warn('No messages returned from API');
+        }
+      } catch (apiError) {
+        // If we get here, no exact messages were found, try alternative API response format
+        console.log('Standard API format failed, trying alternative format');
       const response = await api.get(`/api/v1/conversation/message/${currentConversation.conversationId}`);
       if (Array.isArray(response.data)) {
         console.log("Raw messages from API:", response.data); // Log raw API data
@@ -294,6 +343,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
           setError(null); // Clear any previous errors on successful fetch
         } else {
           console.log('No messages received from server');
+          }
         }
       }
     } catch (error) {
@@ -315,264 +365,175 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
     console.log('Dispatched refresh-conversations event', details);
   };
 
-  const handleSendMessage = async (
-    content: string, 
-    temperature: number = 0.7,
-    hideFromUI: boolean = false
-  ) => {
-    if (!content.trim()) {
-      return;
-    }
+  const handleSendMessage = async (message: string) => {
+    // Prevent sending empty messages or sending while loading
+    if (!message.trim() || loading) return;
 
-    // Auto-select a conversation if needed
-    if (!currentConversation) {
-      // Create a new conversation
-      const newConversationId = uuidv4();
-      
-      // Generate a meaningful title from the message content
-      let title = '';
-      if (content.length <= 30) {
-        title = content; // Use the whole message if it's short
-      } else {
-        // Extract first sentence or first 30 chars
-        const firstSentenceMatch = content.match(/^[^.!?]*[.!?]/);
-        title = firstSentenceMatch 
-          ? firstSentenceMatch[0].substring(0, 50) 
-          : content.substring(0, 50) + '...';
-      }
-      
-      const newConversation = {
-        conversationId: newConversationId,
-        title: title,
-        managerType: getManagerType(),
-        createdAt: new Date().toISOString()
-      };
-      console.log('Creating new draft conversation:', newConversationId);
-      setCurrentConversation(newConversation);
-      
-      // Add a slight delay to ensure conversation state is updated
-      await new Promise(resolve => setTimeout(resolve, 50));
+    // Don't allow messages if in practice mode
+    if (practiceMode) return;
+    
+    // Create timestamp for consistent usage
+    const timestamp = new Date().toISOString();
+    
+    // Create a message object for the user's message
+    const userMessage: Message = {
+      id: uuidv4(),
+      role: 'user',
+      content: message,
+      conversationId: currentConversation?.conversationId || 'unknown',
+      createdAt: timestamp
+    };
+    
+    // Add the user message to our messages array
+    const updatedMessages = [...storeMessages, userMessage];
+    setMessages(updatedMessages);
+    
+    // Update localStorage (best effort)
+    if (currentConversation) {
+      saveConversationState(currentConversation.conversationId, updatedMessages);
     }
     
-    console.log('Using conversation for message:', {
-      id: currentConversation?.conversationId,
-      isDraft: currentConversation?.conversationId.startsWith('draft-'),
-      title: currentConversation?.title
-    });
-
-    setLoading(true);
-    setError(null);
-
+    // Create placeholder for bot response for better UX
+    const botPlaceholder: Message = {
+      id: uuidv4(),
+      role: 'assistant',
+      content: '',
+      conversationId: currentConversation?.conversationId || 'unknown',
+      createdAt: timestamp,
+      isLoading: true
+    };
+    
+    // Add the bot placeholder
+    const messagesWithPlaceholder = [...updatedMessages, botPlaceholder];
+    setMessages(messagesWithPlaceholder);
+    
+    // Scroll to bottom
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    
     try {
-      // Create a user message
-      const userMessage: Message = {
-        id: uuidv4(),
-        role: 'user',
-        content: content,
-        conversationId: currentConversation?.conversationId || '',
-        createdAt: new Date().toISOString()
-      };
-
-      // Only add the user message to the UI if not marked as a background message
-      if (!hideFromUI) {
-        // Get fresh state from the store
-        const currentMessages = useStore.getState().messages;
-        console.log('Adding user message, current message count:', currentMessages.length);
-        
-        // Add user message to the store
-        const updatedMessages = [...currentMessages, userMessage];
-        setMessages(updatedMessages);
-        
-        // Save conversation state
-        if (currentConversation?.conversationId) {
-          saveConversationState(currentConversation.conversationId, updatedMessages);
+      setLoading(true);
+      
+      // This is the main API call to send a message
+      let response;
+      let conversationId = currentConversation?.conversationId;
+      
+      // Check if we need to create a new conversation
+      const isDraftConversation = currentConversation?.conversationId.startsWith('draft-');
+      
+      // If we're sending a message in a draft conversation, create a real one first
+      if (isDraftConversation) {
+        try {
+          // Create new conversation first
+          const createResponse = await api.post<CreateConversationResponse>('/api/v1/conversation', {
+            managerType: getCurrentPersona()
+          });
+          
+          conversationId = createResponse.data.conversationId;
+          
+          // Create a new conversation object and dispatch event to update context
+          const newConversation: Conversation = {
+            conversationId,
+            title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
+            createdAt: new Date().toISOString(),
+            managerType: getCurrentPersona() as ManagerType
+          };
+          
+          // Update the current conversation
+          setCurrentConversation(newConversation);
+          
+          // Emit custom event for ConversationSelector to catch
+          const conversationEvent = new CustomEvent('conversationCreated', { 
+            detail: newConversation 
+          });
+          window.dispatchEvent(conversationEvent);
+          
+          // Start streaming response
+          response = await api.post('/api/v1/conversation/message', {
+            conversationId, 
+            userQuery: message,
+            managerType: getCurrentPersona()
+          });
+        } catch (createError) {
+          console.error('Error creating conversation:', createError);
+          throw createError; // Propagate error to outer catch
         }
-      }
-
-      // Create a placeholder for the bot's response
-      const botMessageId = uuidv4();
-      const botPlaceholder: Message = {
-        id: botMessageId,
-        role: 'assistant',
-        content: '',
-        conversationId: currentConversation?.conversationId || '',
-        createdAt: new Date().toISOString(),
-        isLoading: true
-      };
-
-      // Only add the placeholder if not a background message
-      if (!hideFromUI) {
-        // Get fresh state after user message was added
-        const messagesWithUser = useStore.getState().messages;
-        const messagesWithPlaceholder = [...messagesWithUser, botPlaceholder];
-        setMessages(messagesWithPlaceholder);
-        
-        // Save conversation state with placeholder
-        if (currentConversation?.conversationId) {
-          saveConversationState(currentConversation.conversationId, messagesWithPlaceholder);
+        } else {
+        // Normal message sending in existing conversation
+        if (!conversationId) {
+          throw new Error('No conversation ID available');
         }
+        
+        // Normal streaming API call
+        response = await api.post('/api/v1/conversation/message', {
+          conversationId, 
+          userQuery: message,
+          managerType: getCurrentPersona()
+        });
       }
-
-      // Send the message to the backend
-      const response = await api.post('/api/v1/conversation/message', {
-        content: content,
-        conversationId: currentConversation?.conversationId,
-        managerType: currentConversation?.managerType || 'PUPPETEER',
-        temperature: temperature
-      });
-
-      console.log('Response received from API:', {
-        status: response.status,
-        dataLength: typeof response.data === 'string' ? response.data.length : 'not a string',
-        dataType: typeof response.data,
-        isArray: Array.isArray(response.data),
-        isObject: typeof response.data === 'object' && response.data !== null,
-        sampleData: typeof response.data === 'object' ? JSON.stringify(response.data).substring(0, 100) : 'not an object',
-        conversationId: currentConversation?.conversationId,
-        isDraftConversation: currentConversation?.conversationId.startsWith('draft-')
-      });
-
-      // If the response is successful, update the bot's message
-      if (response.data) {
-        let botContent = '';
+      
+      // Process the response directly since it's not a stream
+      const responseData = response.data as (ConversationContentResponseDTO | AgentMessagesResponse);
+      
+      if (responseData) {
+        let botResponse = '';
         
         // Handle different response formats
-        if (typeof response.data === 'object' && response.data !== null) {
-          try {
-            // Check if response is in the format {messages: [...]}
-            const responseObj = response.data as any;
-            if (responseObj.messages && Array.isArray(responseObj.messages)) {
-              // Find the assistant message
-              const assistantMessage = responseObj.messages.find((m: any) => m.role === 'assistant');
-              if (assistantMessage && assistantMessage.content) {
-                botContent = assistantMessage.content;
-              } else {
-                botContent = "Sorry, I couldn't process the response properly.";
-              }
-            } else {
-              // Try to extract content directly
-              botContent = responseObj.content || JSON.stringify(response.data);
-            }
-          } catch (e) {
-            console.error('Error processing response:', e);
-            botContent = JSON.stringify(response.data);
+        if ('agentResponse' in responseData && responseData.agentResponse) {
+          // Direct format from agent
+          botResponse = responseData.agentResponse;
+        } else if ('messages' in responseData && Array.isArray(responseData.messages)) {
+          // New format with messages array
+          const assistantMessage = responseData.messages.find(
+            (msg) => msg.role === 'assistant' && !msg.isLoading
+          );
+          if (assistantMessage) {
+            botResponse = assistantMessage.content;
           }
         } else {
-          // If it's already a string, use it directly
-          botContent = String(response.data || '');
+          console.error('Unknown response format:', responseData);
+          throw new Error('Failed to parse agent response');
         }
         
-        const botMessage: Message = {
-          id: botMessageId,
-          role: 'assistant',
-          content: botContent,
-          conversationId: currentConversation?.conversationId || '',
+        // Create the final bot message
+        const finalBotMessage: Message = {
+          id: botPlaceholder.id,
+              role: 'assistant',
+          content: botResponse,
+          conversationId: conversationId || 'unknown',
           createdAt: new Date().toISOString(),
           isLoading: false
         };
         
-        // Only update the UI if not a background message
-        if (!hideFromUI) {
-          // Get the current state of messages to ensure we have the latest
-          const currentMessages = useStore.getState().messages;
-          console.log('Current message store state count:', currentMessages.length);
+        // Remove placeholder and add final message
+        const finalMessages = storeMessages.filter(msg => msg.id !== botPlaceholder.id);
+        setMessages([...finalMessages, finalBotMessage]);
+        
+        // Save to localStorage
+        if (conversationId) {
+          saveConversationState(conversationId, [...finalMessages, finalBotMessage]);
           
-          // Replace the loading message with the real one
-          // Use the filter-then-add approach for more reliability
-          const messagesWithoutLoading = currentMessages.filter(msg => msg.id !== botMessageId);
-          const updatedMessages = [...messagesWithoutLoading, botMessage];
-          
-          console.log('Updated messages count after filter-add:', updatedMessages.length);
-          
-          // Save the final conversation state
-          if (currentConversation?.conversationId) {
-            saveConversationState(currentConversation.conversationId, updatedMessages);
-          }
-          
-          setMessages(updatedMessages);
-          
-          // Save the conversation to the backend if it's a draft
-          if (currentConversation?.conversationId.startsWith('draft-')) {
-            try {
-              // Create a non-draft conversation to store these messages
-              console.log('Creating permanent conversation for draft messages');
-              
-              // Extract a good title from the first user message
-              const userMessages = updatedMessages.filter(msg => msg.role === 'user');
-              const firstUserMessage = userMessages.length > 0 ? userMessages[0] : null;
-              
-              // Create a title from the first message or use current title
-              const messageTitle = firstUserMessage 
-                ? firstUserMessage.content.substring(0, 50) + (firstUserMessage.content.length > 50 ? '...' : '')
-                : currentConversation.title || 'New conversation';
-                
-              const createResponse = await api.post<CreateConversationResponse>('/api/v1/conversation', {
-                title: messageTitle,
-                managerType: currentConversation.managerType
-              });
-              
-              if (createResponse.data && createResponse.data.conversationId) {
-                const permanentId = createResponse.data.conversationId;
-                console.log('Created permanent conversation:', permanentId);
-                
-                // Update the current conversation reference
-                const updatedConversation = {
-                  ...currentConversation,
-                  conversationId: permanentId,
-                  title: messageTitle // Make sure the title is set correctly
-                };
-                
-                // Update all messages with the new conversation ID
-                const messagesWithNewId = updatedMessages.map(msg => ({
-                  ...msg,
-                  conversationId: permanentId
-                }));
-                
-                // Save to the store
-                setCurrentConversation(updatedConversation);
-                setMessages(messagesWithNewId);
-                
-                // Save to localStorage
-                saveConversationState(permanentId, messagesWithNewId);
-                
-                // Trigger sidebar refresh to show the new conversation with specific details
-                triggerSidebarRefresh({
-                  type: 'new-conversation',
-                  conversationId: permanentId,
-                  title: messageTitle
-                });
-              }
-            } catch (err) {
-              console.error('Error saving draft conversation to backend:', err);
+          // Also save to exact_messages for reliable recovery
+          localStorage.setItem(`exact_messages_${conversationId}`, 
+            JSON.stringify([...finalMessages, finalBotMessage]));
             }
-          }
-          
-          // Check if messages were updated correctly
-          setTimeout(() => {
-            const stateAfterUpdate = useStore.getState().messages;
-            console.log('Messages state after update:', stateAfterUpdate.length);
-            
-            // If messages are lost, try to recover them
-            if (stateAfterUpdate.length === 0 && currentConversation?.conversationId) {
-              console.log('Message state is empty! Trying to recover...');
-              const recoveredMessages = loadConversationState(currentConversation.conversationId);
-              if (recoveredMessages) {
-                console.log('Successfully recovered messages, re-applying them');
-                setMessages(recoveredMessages);
-              }
-            }
-          }, 100);
-        }
-      }
-    } catch (err) {
-      console.error('Error sending message:', err);
-      setError('Failed to send message. Please try again.');
-      // Remove the loading placeholder if there was an error
-      if (!hideFromUI) {
-        const filteredMessages = storeMessages.filter((msg: Message) => !msg.isLoading);
+          } else {
+        console.error('Error: Response did not contain expected data', response.data);
+        // Remove loading state from bot message if there's an error
+        const filteredMessages = storeMessages.filter(msg => msg.id !== botPlaceholder.id);
         setMessages(filteredMessages);
+        setError('Failed to get response. Please try again.');
       }
-    } finally {
+      
+      setLoading(false);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Remove loading messages in case of error
+      const filteredMessages = storeMessages.filter(msg => !msg.isLoading);
+      setMessages(filteredMessages);
+      setError('Failed to send message. Please try again.');
       setLoading(false);
     }
   };
@@ -726,53 +687,53 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
           let success = false;
           let errorMsg = '';
           let response = null;
-          
-          // Ensure we have a valid conversation ID
-          let conversationId = currentConversation?.conversationId;
-          
-          // If this is a draft conversation, create a real conversation first
-          if (!conversationId || conversationId.startsWith('draft-')) {
-            const title = `Practice Feedback - ${managerType} Manager`;
-            try {
+            
+            // Ensure we have a valid conversation ID
+            let conversationId = currentConversation?.conversationId;
+            
+            // If this is a draft conversation, create a real conversation first
+            if (!conversationId || conversationId.startsWith('draft-')) {
+              const title = `Practice Feedback - ${managerType} Manager`;
+              try {
               const createResponse = await api.post<CreateConversationResponse>('/api/v1/conversation', {
-                title: title,
-                managerType: getManagerType()
-              });
-              
+                  title: title,
+                  managerType: getManagerType()
+                });
+                
               if (createResponse.data && createResponse.data.conversationId) {
                 conversationId = createResponse.data.conversationId;
-                console.log('Created new conversation for practice feedback:', conversationId);
-                
-                // Update the current conversation
+                  console.log('Created new conversation for practice feedback:', conversationId);
+                  
+                  // Update the current conversation
                 const newConversation = {
-                  conversationId: conversationId,
-                  title: title,
+                    conversationId: conversationId,
+                    title: title,
                   createdAt: createResponse.data.createdAt || new Date().toISOString(),
-                  managerType: getManagerType(),
+                    managerType: getManagerType(),
                 };
                 setCurrentConversation(newConversation);
-                
-                // Update user message with real conversation ID
-                userMessage.conversationId = conversationId;
+                  
+                  // Update user message with real conversation ID
+                  userMessage.conversationId = conversationId;
                 
                 // Make sure we save in localStorage to prevent losing messages
                 saveConversationState(conversationId, messagesWithLoading);
+                }
+              } catch (err) {
+                console.error('Error creating conversation for practice feedback:', err);
+                // Continue with existing conversation ID
               }
-            } catch (err) {
-              console.error('Error creating conversation for practice feedback:', err);
-              // Continue with existing conversation ID
             }
-          }
-          
-          // Verify we have a valid query to send
-          const queryContent = completeFeedbackPrompt || feedbackRequest;
-          if (!queryContent || queryContent.trim() === '') {
-            throw new Error('No valid content to send to the agent');
-          }
-          
-          console.log('Sending to agent API, prompt length:', queryContent.length);
-          console.log('First 100 chars of prompt:', queryContent.substring(0, 100) + '...');
-          
+            
+            // Verify we have a valid query to send
+            const queryContent = completeFeedbackPrompt || feedbackRequest;
+            if (!queryContent || queryContent.trim() === '') {
+              throw new Error('No valid content to send to the agent');
+            }
+            
+            console.log('Sending to agent API, prompt length:', queryContent.length);
+            console.log('First 100 chars of prompt:', queryContent.substring(0, 100) + '...');
+            
           // Try direct message route first, then fall back to conversation/message
           while (retryCount <= maxRetries && !success) {
             if (retryCount > 0) {
@@ -801,9 +762,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
                 console.log('Messages endpoint failed, trying conversation/message endpoint');
                 response = await Promise.race([
                   api.post<MessageResponse>(
-                    `/api/v1/conversation/message`, 
-                    {
-                      conversationId: conversationId,
+              `/api/v1/conversation/message`, 
+              {
+                conversationId: conversationId,
                       content: queryContent,
                       userQuery: queryContent,
                       temperature: 0.7
@@ -831,8 +792,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
           // Process the response or show error
           if (success && response && response.status === 200 && response.data) {
             try {
-              console.log('Agent API response received:', response.status);
-              
+            console.log('Agent API response received:', response.status);
+            
               // Get the current messages again to make sure we haven't lost state
               const currentMessagesBeforeUpdate = useStore.getState().messages;
               let messagesForUpdate = currentMessagesBeforeUpdate;
@@ -896,8 +857,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
               if (currentConversation?.conversationId) {
                 saveConversationState(currentConversation.conversationId, messagesWithoutLoading);
               }
-            }
-          } else {
+              }
+            } else {
             console.error('API request failed after retries');
             setError('Failed to get a response from the agent. Please try again.');
             
@@ -1118,16 +1079,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
       displayContent = message.content;
       
       // For messages with practice prompts, strip out the question
-      if (hasPracticePrompt) {
-        displayContent = message.content
+    if (hasPracticePrompt) {
+      displayContent = message.content
           .replace(/Would you like to practice this scenario with simulated manager responses\? \(yes\/no\)/g, "")
           .replace(/Would you like to practice this scenario with simulated manager responses\?/g, "")
           .replace(/Would practicing a discussion around this be helpful\?/g, "")
-          .replace(/\n*Would practicing a discussion.*be helpful\?/g, "")
-          .replace(/\n*Would you like to try a practice scenario.*\?/g, "")
-          .replace(/\n*Would you like to practice how to.*\?/g, "")
-          .replace(/\n*If needed, would you like to practice this scenario with simulated manager responses\?/g, "")
-          .trim();
+        .replace(/\n*Would practicing a discussion.*be helpful\?/g, "")
+        .replace(/\n*Would you like to try a practice scenario.*\?/g, "")
+        .replace(/\n*Would you like to practice how to.*\?/g, "")
+        .replace(/\n*If needed, would you like to practice this scenario with simulated manager responses\?/g, "")
+        .trim();
       }
     } else {
       displayContent = String(message.content || '');
@@ -1174,14 +1135,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-              </div>
+            </div>
             ) : (
               <div className={isPracticeFeedback ? 'feedback-markdown prose prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-lg prose-strong:font-semibold' : ''}>
                 <ReactMarkdown>{displayContent}</ReactMarkdown>
-              </div>
-            )}
           </div>
-          
+            )}
+        </div>
+        
           {isUser && (
             <div className="flex-shrink-0 ml-2 bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
               {/* First letter of user's name or a default icon */}
