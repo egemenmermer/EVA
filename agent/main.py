@@ -1171,120 +1171,126 @@ async def process_full_response(
         logger.error(traceback.format_exc())
 
 async def send_to_backend(conversation_id: str, message_id: str, content: str, role: str):
-    """Send a message to the backend for persistence.
-    
-    This runs in the background and should not block the main request flow.
-    """
-    logger.info(f"Sending message to backend for conversation {conversation_id}")
-    
-    # Detect if this is practice feedback
-    is_practice_feedback = (
-        "practice scenario" in content.lower() and 
-        "manager type" in content.lower() and
-        ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
-    )
-    
-    if is_practice_feedback:
-        logger.info("Detected practice feedback request in message to backend")
-    
-    # Get token from environment - use the one saved from the request
-    token = os.environ.get("CURRENT_AUTH_TOKEN")
-    
-    # Prepare the request headers and payload
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    
-    if token:
-        headers["Authorization"] = token
-        logger.info(f"Using token for backend request: {token[:15]}...{token[-5:] if len(token) > 5 else ''}")
-    else:
-        logger.warning("No token available for backend request")
-        # Try to get token from a backup location or mechanism
-        fallback_token = os.environ.get("DEFAULT_AUTH_TOKEN")
-        if fallback_token:
-            headers["Authorization"] = fallback_token
-            logger.info("Using fallback token for backend request")
-    
-    # Prepare the request payload
-    payload = {
-        "id": message_id,
-        "conversationId": conversation_id,
-        "content": content,
-        "role": role
-    }
-    
-    # Backend URL from environment
-    backend_url = os.environ.get("BACKEND_URL", "http://localhost:8443")
-    endpoint = f"{backend_url}/api/v1/conversation/message"
-    
-    logger.info(f"Sending message to backend at: {endpoint}")
-    
-    # Add retries for better reliability
-    max_retries = 3
-    retry_count = 0
-    success = False
-    
-    # Create client outside try/except so it can be properly closed
-    client = httpx.AsyncClient(timeout=10.0)
-    
+    """Send message to backend API."""
     try:
-        while retry_count <= max_retries and not success:
+        # Only send to backend if we have a valid conversation ID (not a draft)
+        if conversation_id and not conversation_id.startswith("draft-"):
+            backend_url = f"{BACKEND_BASE_URL}/api/v1/conversation/message"
+            
+            # The Java backend expects userQuery and agentResponse, so we need to map our data accordingly
+            if role == "user":
+                payload = {
+                    "conversationId": conversation_id,
+                    "userQuery": content,
+                    "agentResponse": ""  # Will be filled when the agent response arrives
+                }
+            elif role == "assistant":
+                # For assistant messages, we need to update an existing message
+                # First, get the message that needs updating
+                try:
+                    # Make a request to get conversation messages
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    }
+                    
+                    # Use the stored token from global state
+                    token = os.environ.get("CURRENT_AUTH_TOKEN")
+                    if token:
+                        headers["Authorization"] = token
+                    
+                    # Get the messages first to find the one without an agent response
+                    get_response = requests.get(
+                        f"{BACKEND_BASE_URL}/api/v1/conversation/message/{conversation_id}",
+                        headers=headers,
+                        timeout=5
+                    )
+                    
+                    if get_response.status_code == 200:
+                        messages = get_response.json()
+                        # Look for a message with userQuery but no agentResponse
+                        for msg in reversed(messages):  # Start from most recent
+                            if msg.get("userQuery") and not msg.get("agentResponse"):
+                                # Found the message to update
+                                payload = {
+                                    "conversationId": conversation_id,
+                                    "userQuery": msg.get("userQuery", ""),
+                                    "agentResponse": content
+                                }
+                                break
+                        else:
+                            # If no matching message found, create a new one
+                            payload = {
+                                "conversationId": conversation_id,
+                                "userQuery": "Previous query",  # Placeholder
+                                "agentResponse": content
+                            }
+                    else:
+                        logger.error(f"Failed to get messages: {get_response.status_code} - {get_response.text}")
+                        # Fallback payload
+                        payload = {
+                            "conversationId": conversation_id,
+                            "userQuery": "" if role == "assistant" else content,
+                            "agentResponse": content if role == "assistant" else ""
+                        }
+                except Exception as get_error:
+                    logger.error(f"Error getting messages: {str(get_error)}")
+                    # Fallback payload
+                    payload = {
+                        "conversationId": conversation_id,
+                        "userQuery": "" if role == "assistant" else content,
+                        "agentResponse": content if role == "assistant" else ""
+                    }
+            else:
+                # For any other role, create a generic payload
+                payload = {
+                    "conversationId": conversation_id,
+                    "userQuery": "" if role == "assistant" else content,
+                    "agentResponse": content if role == "assistant" else ""
+                }
+            
+            logger.info(f"Sending {role} message to backend for conversation: {conversation_id}")
+            logger.debug(f"Payload: {payload}")
+            
+            # Use the stored token from global state
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            
+            token = os.environ.get("CURRENT_AUTH_TOKEN")
+            if token:
+                headers["Authorization"] = token
+                logger.debug("Including authorization token in request")
+            else:
+                logger.warning("No authorization token available for backend request")
+            
+            # Send the request with proper error handling
             try:
-                # Log the actual request we're sending
-                logger.info(f"Sending backend request (attempt {retry_count+1}): {endpoint}")
-                logger.info(f"With headers: {', '.join(headers.keys())}")
-                logger.info(f"With payload: conversationId={payload['conversationId']}, role={payload['role']}, content_length={len(payload['content'])}")
-                
-                response = await client.post(
-                    endpoint,
+                response = requests.post(
+                    backend_url,
                     json=payload,
-                    headers=headers
+                    headers=headers,
+                    timeout=10
                 )
                 
-                # Log the response
                 if response.status_code == 200:
-                    logger.info(f"Successfully sent message to backend: {response.status_code}")
-                    success = True
-                    break
+                    logger.info(f"Successfully sent {role} message to backend for conversation: {conversation_id}")
+                    return True
                 else:
-                    logger.warning(f"Backend returned non-200 status: {response.status_code}")
-                    logger.warning(f"Response content: {response.text[:200]}...")
-                    # Increment retry count
-                    retry_count += 1
-                    
-                    # Wait before retrying
-                    if retry_count <= max_retries:
-                        await asyncio.sleep(1 * retry_count)  # Exponential backoff
-            except httpx.TimeoutException:
-                logger.error("Timeout when sending message to backend")
-                retry_count += 1
-                if retry_count <= max_retries:
-                    await asyncio.sleep(1 * retry_count)
-            except Exception as e:
-                logger.error(f"Error sending message to backend: {str(e)}")
+                    logger.error(f"Backend API error: {response.status_code} - {response.text}")
+                    return False
+            except Exception as request_error:
+                logger.error(f"Request error sending message to backend: {str(request_error)}")
                 logger.error(traceback.format_exc())
-                retry_count += 1
-                if retry_count <= max_retries:
-                    await asyncio.sleep(1 * retry_count)
-        
-        # If we've exhausted retries, return failure
-        if not success:
-            logger.error(f"Failed to send message to backend after {max_retries} retries")
+                return False
+        else:
+            logger.info(f"Skipping backend save for draft conversation: {conversation_id}")
             return False
-            
-        return success
     except Exception as e:
-        logger.error(f"Error sending message to backend: {str(e)}")
+        logger.error(f"Error in send_to_backend: {str(e)}")
         logger.error(traceback.format_exc())
         return False
-    finally:
-        # Always close the client, but don't await it directly (wrap in try/except)
-        try:
-            await client.aclose()
-        except Exception as e:
-            logger.error(f"Error closing HTTP client: {str(e)}")
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
     """Process a query statelessly without maintaining agent state."""
