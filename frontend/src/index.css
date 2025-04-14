@@ -169,4 +169,66 @@ body.dashboard-active .dark.keep-bg-light .text-white:not(.user-message-bubble *
 .dark.keep-bg-light .user-message-bubble {
   background-color: #2563eb !important;
   color: white !important;
+}
+
+/* Improve the practice feedback styling */
+.practice-feedback {
+  max-width: 90% !important;
+  line-height: 1.5;
+}
+
+.feedback-markdown h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3b82f6; /* Blue color for headers */
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feedback-markdown strong {
+  font-weight: 600;
+  color: #4b5563; /* Gray for strong text */
+}
+
+.feedback-markdown p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.dark .feedback-markdown h3 {
+  color: #60a5fa; /* Lighter blue for dark mode */
+  border-bottom-color: #374151;
+}
+
+.dark .feedback-markdown strong {
+  color: #e5e7eb; /* Lighter gray for dark mode */
+}
+
+/* Styled buttons that appear below messages */
+.mt-3.flex.gap-2.ml-8 button,
+.mt-3.flex.justify-end button {
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+.mt-3.flex.gap-2.ml-8 button:hover,
+.mt-3.flex.justify-end button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the practice buttons container */
+.mt-3.flex.gap-2.ml-8 {
+  margin-top: 0.75rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #e5e7eb;
+}
+
+.dark .mt-3.flex.gap-2.ml-8 {
+  border-left-color: #374151;
 } 

@@ -90,7 +90,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
-                                "/error"
+                                "/error",
+                                "/api/v1/practice-score/**",
+                                "/api/v1/practice-score/submit"
                         )
                         .permitAll()
                         .anyRequest()
@@ -114,6 +116,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
+        logger.info("Security configuration loaded with practice-score endpoints permitted");
+        
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

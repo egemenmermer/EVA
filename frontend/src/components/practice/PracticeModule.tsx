@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import api from '../../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
 
 interface BaseMessage {
   role: string;
@@ -155,7 +156,7 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
   
   // Score based on choice quality
   if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
-    evs = 90 + Math.floor(Math.random() * 10); // 90-99
+    evs = 85 + Math.floor(Math.random() * 15); // 85-99
     feedback = "Excellent response! You stood firm on ethical principles while remaining professional. This approach directly addresses the ethical issue without being confrontational.";
   } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
     evs = 20 + Math.floor(Math.random() * 30); // 20-49
@@ -197,7 +198,7 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
         "Success built on unethical practices isn't sustainable. We should differentiate ourselves with stronger privacy protections.",
         "You're right, I'll implement everything as requested to help the company succeed.",
         "Could we conduct a user survey first to see if they'd be willing to share this data in exchange for better features?",
-        "I understand the business goal, but I'm concerned about regulatory compliance risks."
+        "I'm concerned about regulatory compliance risks."
       ];
       break;
     
@@ -257,6 +258,15 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
     ...(isComplete && { final_report: finalEvaluation })
   };
 };
+
+// Add PracticeResponse interface right after other interface definitions
+interface PracticeResponse {
+  role?: string;
+  content?: string;
+  question?: string;
+  userResponse?: string;
+  score?: number;
+}
 
 export const PracticeModule: React.FC<PracticeModuleProps> = ({ 
   onExit,
@@ -328,8 +338,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const currentChoices = {...currentScenario.scenario};
       const userChoice = currentScenario.currentChoices[choiceIndex];
       
-      // Save the user's choice and score to localStorage for feedback
-      const roundScore = getChoiceScore(choiceIndex, currentScenario.currentStep);
+      // Get score from evaluateChoice instead of getChoiceScore for consistency
+      const evaluation = evaluateChoice(
+        userChoice, 
+        currentScenario.scenario.manager_type, 
+        choiceIndex, 
+        currentScenario.currentStep
+      );
+      
+      // Use the score from the evaluation
+      const roundScore = evaluation.evs;
       const currentRound = currentScenario.currentStep + 1;
       
       // Store practice selection details in localStorage
@@ -337,14 +355,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       localStorage.setItem('practice_score', roundScore.toString());
       localStorage.setItem('practice_round', currentRound.toString());
       localStorage.setItem('practice_manager_type', currentScenario.scenario.manager_type);
-      
-      // Evaluate the choice
-      const evaluation = evaluateChoice(
-        userChoice, 
-        currentScenario.scenario.manager_type, 
-        choiceIndex, 
-        currentScenario.currentStep
-      );
       
       // Store the complete feedback including conversation history
       localStorage.setItem('practice_feedback', JSON.stringify({
@@ -356,7 +366,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         feedback: evaluation.feedback
       }));
       
-      // Update scores in the scenario
+      // Update scores in the scenario with the actual EVS score from evaluation
       currentChoices.userScore = (currentChoices.userScore || 0) + roundScore;
       currentChoices.scoreCount = (currentChoices.scoreCount || 0) + 1;
       
@@ -407,21 +417,31 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         
         // Add final evaluation
         if (evaluation.final_report) {
+          // Calculate final score properly
+          const totalScore = currentChoices.userScore || 0;
+          const scoreCount = currentChoices.scoreCount || 1;
+          
+          // Calculate average score from individual round scores
+          const averageScore = Math.round(totalScore / scoreCount);
+          
+          // Create a final evaluation message with the correct score
+          const finalEvalContent = `Your ethical decision-making score is ${averageScore}/100. ${
+            averageScore >= 80 
+              ? 'You demonstrated excellent ethical judgment!' 
+              : averageScore >= 50 
+                ? 'You showed good awareness of ethical principles.' 
+                : 'Consider being more assertive in upholding ethical standards.'
+          }`;
+          
           updatedConversation.push({
             role: 'final_evaluation',
-            content: evaluation.final_report.evaluation
+            content: finalEvalContent
           } as FinalEvaluationMessage);
+          
+          // Store the final score for feedback
+          localStorage.setItem('practice_final_score', averageScore.toString());
+          setFinalScore(averageScore);
         }
-        
-        // Get overall score from all rounds, ensuring it doesn't exceed 100
-        const totalScore = currentChoices.userScore || 0;
-        const scoreCount = currentChoices.scoreCount || 1;
-        // First calculate the percentage, then cap at 100
-        const scorePercentage = (totalScore / (scoreCount * 10)) * 100;
-        const finalScore = Math.min(Math.round(scorePercentage), 100);
-        
-        // Store the final score for feedback
-        localStorage.setItem('practice_final_score', finalScore.toString());
         
         // Show completion status
         setCurrentScenario({
@@ -434,7 +454,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         });
         
         setFinalReport(true);
-        setFinalScore(finalScore);
         setShowOptions(true);
       }
     } catch (err: any) {
@@ -445,176 +464,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   };
 
-  // Add this function to prepare feedback data for the agent
-  const prepareFeedbackPrompt = () => {
-    if (!currentScenario || !currentScenario.scenario) {
-      console.error('No scenario data available for feedback');
-      return null;
-    }
-    
-    // Verify we have a valid conversation
-    if (!currentScenario.conversation || !Array.isArray(currentScenario.conversation) || currentScenario.conversation.length === 0) {
-      console.error('No valid conversation data available for feedback');
-      return null;
-    }
-    
-    const scenario = currentScenario.scenario;
-    console.log('Preparing feedback prompt for scenario:', scenario.id);
-    
-    // Get all the user's choices to summarize
-    const userChoices = currentScenario.conversation
-      .filter(item => item.role === 'user')
-      .map(item => item.content);
-    
-    console.log('Found', userChoices.length, 'user choices in conversation');
-    
-    // Get all the manager's statements for context
-    const managerStatements = currentScenario.conversation
-      .filter(item => item.role === 'manager')
-      .map(item => item.content);
-    
-    console.log('Found', managerStatements.length, 'manager statements in conversation');
-    
-    // Include any feedback items from the conversation
-    const feedbackItems = currentScenario.conversation
-      .filter(item => item.role === 'feedback')
-      .map(item => item.content);
-    
-    // Start building a comprehensive feedback prompt
-    let feedbackPrompt = `I've completed a practice scenario with a ${scenario.manager_type} manager about "${scenario.issue}". Here's the complete scenario information:\n\n`;
-    
-    // Add scenario details
-    feedbackPrompt += `## Scenario Details\n`;
-    feedbackPrompt += `- Manager Type: ${scenario.manager_type}\n`;
-    feedbackPrompt += `- Ethical Concern: ${scenario.concern}\n`;
-    feedbackPrompt += `- Issue: ${scenario.issue}\n`;
-    feedbackPrompt += `- Final Score: ${finalScore}/100\n\n`;
-    
-    // Add the conversation flow
-    feedbackPrompt += `## Conversation Summary\n`;
-    let conversationIndex = 1;
-    
-    // Loop through the conversation chronologically
-    for (let i = 0; i < currentScenario.conversation.length; i++) {
-      const item = currentScenario.conversation[i];
-      if (!item || !item.role || !item.content) continue;
-      
-      try {
-        if (item.role === 'manager') {
-          feedbackPrompt += `\nManager (Statement ${conversationIndex}):\n${item.content}\n`;
-          conversationIndex++;
-        } else if (item.role === 'user') {
-          feedbackPrompt += `\nMy Response:\n${item.content}\n`;
-        } else if (item.role === 'feedback') {
-          feedbackPrompt += `\nRound Feedback:\n${item.content}\n`;
-          if (item.evs) {
-            feedbackPrompt += `Score for this round: ${item.evs}/10\n`;
-          }
-        } else if (item.role === 'final_evaluation') {
-          feedbackPrompt += `\nFinal Evaluation:\n${item.content}\n`;
-        }
-      } catch (err) {
-        console.error('Error processing conversation item:', err);
-        // Continue to next item
-      }
-    }
-    
-    // Add request for detailed feedback
-    feedbackPrompt += `\n## Feedback Request\n`;
-    feedbackPrompt += `Please provide detailed feedback on my performance in this practice scenario:\n`;
-    feedbackPrompt += `1. What I did well in handling this ${scenario.manager_type} manager\n`;
-    feedbackPrompt += `2. Where I could improve my ethical reasoning and responses\n`;
-    feedbackPrompt += `3. Specific strategies for dealing with this type of ${scenario.manager_type} manager in the future\n`;
-    feedbackPrompt += `4. Alternative responses that would have been more effective\n`;
-    feedbackPrompt += `5. Applicable ethical principles or guidelines that I should keep in mind\n`;
-    
-    console.log('Generated feedback prompt of length:', feedbackPrompt.length);
-    return feedbackPrompt;
-  };
-
-  // Modify the existing Get Feedback function to use a simpler approach
+  // Replace the old handleGetFeedback function completely
   const handleGetFeedback = () => {
-    const feedbackPrompt = prepareFeedbackPrompt();
-    
-    if (feedbackPrompt && currentScenario && currentScenario.scenario) {
-      console.log('Preparing practice feedback request, full prompt length:', feedbackPrompt.length);
-      
-      try {
-        // Get the actual final evaluation message if it exists
-        const finalEvalMessage = currentScenario.conversation.find(m => m.role === 'final_evaluation');
-        // Extract the score from the final evaluation message using regex
-        // The pattern looks for "score is X/100" or similar text
-        const scorePattern = /score (?:is|was) (\d+)\/100/;
-        let scoreMatch = null;
-        if (finalEvalMessage) {
-          scoreMatch = finalEvalMessage.content.match(scorePattern);
-        }
-        
-        // Use the extracted score or fall back to the state's finalScore
-        const actualFinalScore = scoreMatch ? scoreMatch[1] : finalScore.toString();
-        
-        console.log('Using score extracted from final evaluation:', actualFinalScore);
-           
-        // Create user message for feedback with the actual score
-        const simplifiedFeedback = `I just completed a practice scenario with a ${currentScenario.scenario.manager_type} manager type about "${currentScenario.scenario.issue}". My ethical decision-making score was ${actualFinalScore}/100.`;
-        
-        console.log('Simplified feedback for chat display:', simplifiedFeedback);
-        console.log('Using actual score from final evaluation:', actualFinalScore);
-        
-        // Make sure the feedback prompt isn't too large to ensure reliable responses
-        const maxPromptLength = 12000; // Characters
-        let finalFeedbackPrompt = feedbackPrompt;
-        
-        if (feedbackPrompt.length > maxPromptLength) {
-          console.warn(`Feedback prompt is too large (${feedbackPrompt.length} chars). Trimming to ${maxPromptLength} chars.`);
-          finalFeedbackPrompt = feedbackPrompt.substring(0, maxPromptLength) + 
-            "\n\n[Note: This prompt was trimmed due to length. Please provide feedback based on the available information above.]";
-        }
-        
-        // Store both simplified feedback and complete prompt
-        const practiceData = {
-          managerType: currentScenario.scenario.manager_type,
-          concern: currentScenario.scenario.concern,
-          issue: currentScenario.scenario.issue,
-          finalScore: actualFinalScore,
-          completeFeedbackPrompt: finalFeedbackPrompt  // Store the possibly trimmed prompt
-        };
-        
-        console.log('Storing practice data with prompt length:', finalFeedbackPrompt.length);
-        localStorage.setItem('practice_data', JSON.stringify(practiceData));
-        
-        // Store the simplified feedback for display in chat
-        localStorage.setItem('feedbackRequest', simplifiedFeedback);
-        
-        console.log('Dispatching practice-feedback-request event');
-        
-        // Immediately dispatch the event to notify any listeners
-        window.dispatchEvent(new Event('practice-feedback-request'));
-        
-        // Give a short delay before navigating away to ensure the event is processed
-        setTimeout(() => {
-          console.log('Navigating back to chat window');
-          if (onExit) {
-            onExit();  // Call the onExit prop to navigate back to chat
-          } else {
-            // Fallback if onExit is not provided
-            window.location.href = '/';
-          }
-        }, 1000);  // Slightly longer timeout to ensure event is processed
-      } catch (error) {
-        console.error('Error preparing practice feedback:', error);
-        // Fall back to direct navigation
-        if (onExit) {
-          onExit();
-        }
+    console.log('Get Feedback button clicked, using enhanced feedback request');
+    // Call our improved submitFeedbackRequest function
+    submitFeedbackRequest().catch(error => {
+      console.error('Error processing feedback request:', error);
+      if (onExit) {
+        onExit();
+      } else {
+        navigate("/");
       }
-    } else {
-      console.error('Missing feedback prompt or scenario data', {
-        promptAvailable: !!feedbackPrompt,
-        scenarioAvailable: !!currentScenario,
-        scenarioDataAvailable: !!(currentScenario && currentScenario.scenario)
-      });
-    }
+    });
   };
 
   const handlePracticeAgain = () => {
@@ -622,8 +483,32 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setLoading(true);
     
     try {
-      // First reset the session
-      resetSession();
+      // Save current practice history before starting a new session
+      if (currentScenario && currentScenario.conversation && currentScenario.conversation.length > 0) {
+        // Get existing practice history or initialize a new array
+        const existingHistory = localStorage.getItem('practice_history') || '[]';
+        try {
+          const historyArray = JSON.parse(existingHistory);
+          
+          // Add current session to history with timestamp and score
+          const sessionSummary = {
+            id: `practice-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            score: finalScore,
+            managerType: currentScenario.scenario?.manager_type || 'unknown',
+            issue: currentScenario.scenario?.issue || 'ethical dilemma',
+            conversation: currentScenario.conversation
+          };
+          
+          // Add to history and save back to localStorage
+          historyArray.push(sessionSummary);
+          localStorage.setItem('practice_history', JSON.stringify(historyArray));
+          
+          console.log('Saved practice session to history:', sessionSummary.id);
+        } catch (parseError) {
+          console.error('Error parsing practice history:', parseError);
+        }
+      }
       
       // Use a setTimeout to ensure state has been reset before creating a new scenario
       setTimeout(() => {
@@ -650,9 +535,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             } as ManagerMessage
           ];
           
+          // Add a reset marker to identify this is a new practice session
+          localStorage.setItem('practice_is_new_session', 'true');
+          
           // Update state with the new scenario
           setCurrentScenario(freshScenario);
           setLoading(false);
+          
+          // Reset UI state for new session
+          setFinalReport(false);
+          setShowOptions(false);
+          setFinalScore(0);
+          
           console.log('Created new practice scenario:', freshScenario.scenario.id);
         } catch (error) {
           console.error('Error creating new scenario:', error);
@@ -802,6 +696,333 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     console.log('Practice session completed, showing completion options');
   };
 
+  // Submit practice score to the backend
+  useEffect(() => {
+    const handlePracticeFeedback = async () => {
+      const feedbackPrompt = localStorage.getItem("practice_feedback_prompt");
+      const practiceScore = localStorage.getItem("practice_score");
+      
+      if (feedbackPrompt && practiceScore && conversationId) {
+        console.log("Submitting practice score to backend:", practiceScore, "for conversation:", conversationId);
+        
+        // Send the score to the database
+        try {
+          // Ensure the conversation ID is in UUID format if possible
+          let formattedConversationId = conversationId;
+          
+          // Try the direct endpoint first (most likely to work)
+          try {
+            const response = await fetch("/api/v1/practice-score/submit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                score: parseInt(practiceScore, 10),
+                conversationId: formattedConversationId
+              }),
+            });
+            
+            if (!response.ok) {
+              console.error("Failed to send practice score to database, status:", response.status);
+              const responseText = await response.text();
+              console.error("Error response:", responseText);
+              throw new Error(`Server returned ${response.status}: ${responseText}`);
+            } else {
+              console.log("Successfully sent practice score to database");
+              const responseData = await response.json();
+              console.log("Response data:", responseData);
+            }
+          } catch (error) {
+            console.error("Error sending practice score to backend:", error);
+            
+            // If the direct endpoint fails, try the fallback
+            console.log("Attempting fallback endpoint");
+            try {
+              const fallbackResponse = await fetch("/api/practice-score", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  score: parseInt(practiceScore, 10),
+                  conversationId: formattedConversationId
+                }),
+              });
+              
+              if (!fallbackResponse.ok) {
+                console.error("Fallback endpoint also failed:", fallbackResponse.status);
+                const responseText = await fallbackResponse.text();
+                console.error("Error response:", responseText);
+              } else {
+                console.log("Fallback endpoint succeeded");
+                const responseData = await fallbackResponse.json();
+                console.log("Response data:", responseData);
+              }
+            } catch (fallbackError) {
+              console.error("Fallback endpoint error:", fallbackError);
+            }
+          }
+        } catch (error) {
+          console.error("Fatal error sending practice score to database:", error);
+        }
+        
+        // Clear the practice score from localStorage
+        localStorage.removeItem("practice_score");
+      }
+    };
+    
+    handlePracticeFeedback();
+  }, [conversationId]);
+
+  // Add safe event dispatching with browser compatibility checks
+  const dispatchFeedbackEvent = () => {
+    try {
+      // Create and dispatch the event with compatibility checks
+      if (typeof window !== 'undefined' && window.document) {
+        let event;
+        if (typeof Event === 'function') {
+          // Modern browsers
+          event = new Event('practice-feedback-request');
+        } else {
+          // IE11 and older browsers
+          event = document.createEvent('Event');
+          event.initEvent('practice-feedback-request', true, true);
+        }
+        window.dispatchEvent(event);
+        console.log('Practice feedback event dispatched successfully');
+      } else {
+        console.warn('Window or document not available, could not dispatch event');
+      }
+    } catch (error) {
+      console.error('Error dispatching practice feedback event:', error);
+      // Continue with flow even if event dispatch fails
+    }
+  };
+
+  // Fix the submitFeedbackRequest function
+  const submitFeedbackRequest = async () => {
+    try {
+      // Only submit score if we have a current scenario
+      if (currentScenario && typeof finalScore === 'number') {
+        // Map scenario conversation to practice responses
+        const practiceResponses: PracticeResponse[] = currentScenario.conversation.map(m => {
+          return {
+            role: m.role,
+            content: m.content,
+            question: m.role === 'manager' ? m.content : undefined,
+            userResponse: m.role === 'user' ? m.content : undefined,
+            // Use type check instead of instanceof for feedback messages
+            score: m.role === 'feedback' ? (m as FeedbackMessage).evs : undefined
+          };
+        });
+        
+        await submitPracticeScore(finalScore, practiceResponses);
+      }
+      
+      // Set feedback request in localStorage
+      const userQuery = localStorage.getItem('practice_user_query') || '';
+      const managerType = localStorage.getItem('practice_manager_type') || 'Unknown';
+      const currentScore = finalScore;
+      
+      // Create practice responses from current scenario if available
+      const practiceResponses: PracticeResponse[] = currentScenario ? 
+        currentScenario.conversation.map(m => {
+          return {
+            role: m.role,
+            content: m.content,
+            question: m.role === 'manager' ? m.content : undefined,
+            userResponse: m.role === 'user' ? m.content : undefined,
+            score: m.role === 'feedback' ? (m as FeedbackMessage).evs : undefined
+          };
+        }) : [];
+      
+      const feedbackPrompt = `I've just completed a practice scenario with a ${managerType} manager about "${userQuery}". My ethical decision-making score was ${currentScore}/100. Can you provide detailed feedback on my performance?`;
+      
+      localStorage.setItem('feedbackRequest', feedbackPrompt);
+      localStorage.setItem('practice_data', JSON.stringify({
+        userQuery,
+        managerType,
+        finalScore: currentScore,
+        responses: practiceResponses,
+        feedbackPrompt,
+        completeFeedbackPrompt: generateDetailedFeedbackPrompt(
+          userQuery, 
+          managerType, 
+          currentScore, 
+          practiceResponses
+        )
+      }));
+      
+      // Set flag for chat component
+      localStorage.setItem('practice_to_chat', 'true');
+      
+      // Use safe event dispatching
+      dispatchFeedbackEvent();
+      
+      // Only call onExit if it exists
+      if (onExit) {
+        onExit();
+      }
+    } catch (error) {
+      console.error('Error in submitFeedbackRequest:', error);
+      if (onExit) {
+        onExit();
+      }
+    }
+  };
+  
+  // Fix submitPracticeScore function to properly handle types
+  const submitPracticeScore = async (score: number, responses: PracticeResponse[]) => {
+    try {
+      // Get required data from localStorage
+      const conversationId = localStorage.getItem('currentConversationId') || undefined;
+      const userId = localStorage.getItem('userId') || 'anonymous';
+      
+      // Create data object
+      const practiceScoreData = {
+        conversationId,
+        userId,
+        score
+      };
+      
+      console.log('Submitting practice score:', practiceScoreData);
+      
+      // Try to submit to backend with retries
+      let success = false;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (!success && attempts < maxAttempts) {
+        try {
+          const response = await api.post('/api/practice-score', practiceScoreData);
+          console.log('Successfully submitted practice score:', response.data);
+          success = true;
+        } catch (error) {
+          attempts++;
+          console.error(`Failed to submit practice score (attempt ${attempts}/${maxAttempts}):`, error);
+          
+          if (attempts === maxAttempts) {
+            // Store score locally as fallback
+            storeScoreLocally(practiceScoreData, responses);
+          } else {
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+          }
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error in submitPracticeScore:', error);
+      return false;
+    }
+  };
+  
+  // Store score locally for future sync with proper typing
+  const storeScoreLocally = (scoreData: { conversationId?: string, userId: string, score: number }, responses: PracticeResponse[]) => {
+    try {
+      const storedScores = localStorage.getItem('practice_scores') || '[]';
+      const scoresArray = JSON.parse(storedScores);
+      
+      scoresArray.push({
+        ...scoreData,
+        responses: responses.map(r => ({ 
+          question: r.question || '',
+          response: r.userResponse || '',
+          score: r.score || 0
+        })),
+        timestamp: new Date().toISOString(),
+        pendingSync: true
+      });
+      
+      localStorage.setItem('practice_scores', JSON.stringify(scoresArray));
+      console.log('Practice score saved locally for future sync');
+    } catch (error) {
+      console.error('Error storing score locally:', error);
+    }
+  };
+  
+  // Add error handling to ensure the generateDetailedFeedbackPrompt function works even with limited data
+  const generateDetailedFeedbackPrompt = (
+    userQuery: string,
+    managerType: string,
+    finalScore: number,
+    responses: PracticeResponse[]
+  ): string => {
+    // Ensure we have valid inputs
+    const safeUserQuery = userQuery || 'ethical dilemma';
+    const safeManagerType = managerType || 'unknown';
+    const safeScore = Number.isNaN(finalScore) ? 0 : finalScore; 
+    const safeResponses = Array.isArray(responses) ? responses : [];
+    
+    let detailedPrompt = `I've just completed a practice scenario with a ${safeManagerType} manager about "${safeUserQuery}". 
+My ethical decision-making score was ${safeScore}/100. 
+
+Here's a summary of my practice session:
+1. The ethical dilemma: ${safeUserQuery}
+2. My decisions during the practice:
+`;
+
+    if (safeResponses.length > 0) {
+      // Add each practice response
+      safeResponses.forEach((response, index) => {
+        detailedPrompt += `
+   Q${index + 1}: ${response.question || 'No question recorded'}
+   My choice: ${response.userResponse || 'No response recorded'}
+   Score for this choice: ${response.score || 0}/10
+`;
+      });
+    } else {
+      // No responses available
+      detailedPrompt += `
+   No detailed responses available.`;
+    }
+
+    detailedPrompt += `
+Please analyze my ethical decision-making performance, highlighting:
+- The ethical principles I applied correctly
+- Any areas where I could have made better ethical choices
+- Specific feedback on my reasoning process
+- Practical advice for handling similar situations in the future
+
+Can you provide detailed feedback on my performance?`;
+
+    return detailedPrompt;
+  };
+
+  const calculateFinalScore = useCallback(() => {
+    let score = 0;
+    let count = 0;
+    
+    if (currentScenario?.conversation?.length) {
+      currentScenario.conversation.forEach(message => {
+        if (message.role === 'feedback' && message.evs !== undefined) {
+          score += message.evs;
+          count++;
+        }
+      });
+    }
+    
+    // Calculate the average score
+    const calculatedScore = count > 0 ? Math.round(score / count) : 0;
+    
+    // Update finalScore state
+    setFinalScore(calculatedScore);
+    
+    // Store the final score in the current scenario
+    if (currentScenario && currentScenario.conversation && currentScenario.conversation.length > 0) {
+      const updatedScenario = {
+        ...currentScenario,
+        finalScore: calculatedScore
+      };
+      setCurrentScenario(updatedScenario);
+      localStorage.setItem('currentScenario', JSON.stringify(updatedScenario));
+    }
+    
+    return calculatedScore;
+  }, [currentScenario]);
+
   if (!currentScenario && !scenarioId) {
     // Show loading indicator or scenario list
     return (
@@ -942,12 +1163,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <h3 className="text-lg font-semibold mb-2">Practice Complete</h3>
                   
-                  {/* Display the final score from the last final_evaluation message if available */}
-                  {currentScenario.conversation.find(m => m.role === 'final_evaluation') ? (
-                    <p className="mb-4">{currentScenario.conversation.find(m => m.role === 'final_evaluation')?.content}</p>
-                  ) : (
-                    <p className="mb-4">Your ethical decision-making score is {finalScore}/100.</p>
-                  )}
+                  {/* Display the final score - always use the calculated finalScore */}
+                  <p className="mb-4">Your ethical decision-making score is {finalScore}/100. {
+                    finalScore >= 80 
+                      ? 'You demonstrated excellent ethical judgment!' 
+                      : finalScore >= 50 
+                        ? 'You showed good awareness of ethical principles.' 
+                        : 'Consider being more assertive in upholding ethical standards.'
+                  }</p>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <button

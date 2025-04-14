@@ -26,18 +26,46 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                   org.springframework.web.context.request.NativeWebRequest webRequest,
                                   org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
 
+        logger.debug("Resolving argument for parameter: {}", parameter.getParameterName());
+        
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
+        
+        // Check if current user is required
+        CurrentUser currentUserAnnotation = parameter.getParameterAnnotation(CurrentUser.class);
+        boolean isRequired = currentUserAnnotation != null && currentUserAnnotation.required();
+        
+        logger.debug("User required: {}, Authentication present: {}", 
+                     isRequired, authentication != null && authentication.isAuthenticated());
+        
+        // If authentication is valid, return the user details
+        if (authentication != null && authentication.isAuthenticated() && 
+            !"anonymousUser".equals(authentication.getPrincipal())) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) principal;
                 logger.debug("Resolved user details for email: {} with ID: {}", userDetails.getEmail(), userDetails.getId());
                 return userDetails;
             }
-            logger.error("Principal is not an instance of CustomUserDetails: {}", principal.getClass().getName());
+            logger.warn("Principal is not an instance of CustomUserDetails: {}", 
+                       principal != null ? principal.getClass().getName() : "null");
+            
+            // If user is not required, return null instead of throwing exception
+            if (!isRequired) {
+                logger.info("User not required, returning null for non-CustomUserDetails principal");
+                return null;
+            }
+            
             throw new RuntimeException("Invalid authentication principal type");
         }
-        logger.error("No authenticated user found");
+        
+        // No authenticated user but it's not required
+        if (!isRequired) {
+            logger.info("No authenticated user found, but not required - returning null");
+            return null;
+        }
+        
+        // No authenticated user and it is required
+        logger.error("No authenticated user found and user is required");
         throw new RuntimeException("No authenticated user found");
     }
 }

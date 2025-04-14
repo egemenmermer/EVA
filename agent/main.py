@@ -1529,8 +1529,18 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
     try:
         logger.info(f"Sending message to backend for conversation {conversation_id}")
         
+        # Detect if this is practice feedback
+        is_practice_feedback = (
+            "practice scenario" in content.lower() and 
+            "manager type" in content.lower() and
+            ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
+        )
+        
+        if is_practice_feedback:
+            logger.info("Detected practice feedback request in message to backend")
+        
         # Create an HTTP client with a timeout
-        client = httpx.AsyncClient(timeout=5.0)
+        client = httpx.AsyncClient(timeout=10.0)  # Increased timeout for better reliability
         
         # Get token from environment
         token = os.environ.get("CURRENT_AUTH_TOKEN")
@@ -1558,34 +1568,57 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
         backend_url = os.environ.get("BACKEND_URL", "http://localhost:8443")
         endpoint = f"{backend_url}/api/v1/conversation/message"
         
-        try:
-            response = await client.post(
-                endpoint,
-                json=payload,
-                headers=headers
-            )
+        # Add retries for better reliability
+        max_retries = 3
+        retry_count = 0
+        success = False
+        
+        while retry_count <= max_retries and not success:
+            try:
+                response = await client.post(
+                    endpoint,
+                    json=payload,
+                    headers=headers
+                )
+                
+                # Log the response
+                if response.status_code == 200:
+                    logger.info(f"Successfully sent message to backend: {response.status_code}")
+                    success = True
+                    return True
+                else:
+                    logger.warning(f"Backend returned non-200 status: {response.status_code}")
+                    logger.warning(f"Response content: {response.text[:200]}...")
+                    # Increment retry count
+                    retry_count += 1
+                    
+                    # Wait before retrying
+                    if retry_count <= max_retries:
+                        await asyncio.sleep(1 * retry_count)  # Exponential backoff
+            except httpx.TimeoutException:
+                logger.error("Timeout when sending message to backend")
+                retry_count += 1
+                if retry_count <= max_retries:
+                    await asyncio.sleep(1 * retry_count)
+            except Exception as e:
+                logger.error(f"Error sending message to backend: {str(e)}")
+                logger.error(traceback.format_exc())
+                retry_count += 1
+                if retry_count <= max_retries:
+                    await asyncio.sleep(1 * retry_count)
+        
+        # If we've exhausted retries, return failure
+        if not success:
+            logger.error(f"Failed to send message to backend after {max_retries} retries")
+            return False
             
-            # Log the response
-            if response.status_code == 200:
-                logger.info(f"Successfully sent message to backend: {response.status_code}")
-                return True
-            else:
-                logger.warning(f"Backend returned non-200 status: {response.status_code}")
-                logger.warning(f"Response content: {response.text[:200]}...")
-                return False
-        except httpx.TimeoutException:
-            logger.error("Timeout when sending message to backend")
-            return False
-        except Exception as e:
-            logger.error(f"Error sending message to backend: {str(e)}")
-            logger.error(traceback.format_exc())
-            return False
-        finally:
-            await client.aclose()
+        return False
     except Exception as e:
         logger.error(f"Error sending message to backend: {str(e)}")
         logger.error(traceback.format_exc())
         return False
+    finally:
+        await client.aclose()
 
 async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float):
     """Process a user query and generate a response without storing conversation state"""
