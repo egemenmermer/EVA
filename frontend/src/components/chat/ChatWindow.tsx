@@ -88,6 +88,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
   const [practiceMode, setPracticeMode] = useState(false);
   const [activeManagerType, setActiveManagerType] = useState<string | undefined>(undefined);
   
+  // Add a ref to track if feedback is being processed
+  const isProcessingFeedback = useRef(false);
+  
   // Create a ref to the handleSendMessage function to use in the useEffect
   const handleSendMessageRef = useRef<(content: string) => Promise<void>>();
   
@@ -98,6 +101,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
 
   // Load messages when conversation changes
   useEffect(() => {
+    // Don't fetch if feedback is being processed
+    if (isProcessingFeedback.current) {
+      console.log('Skipping fetchMessages because feedback is processing.');
+      return;
+    }
+    
     if (!currentConversation) {
         return;
       }
@@ -267,7 +276,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
     };
     
     // Add user message immediately to UI
-    setMessages([...storeMessages, userMessage]);
+    const updatedMessages = [...storeMessages, userMessage];
+    setMessages(updatedMessages);
     
     try {
       // If this is a draft conversation, create a real conversation first
@@ -377,7 +387,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
         // Make API request
         const response = await api.post<MessageResponse>(`/api/v1/conversation/message`, {
           conversationId: conversationId,
-          userQuery: content  // This is the required field name for the agent
+          userQuery: content,
+          content: content
         });
         
         console.log('Message API response status:', response.status);
@@ -491,72 +502,214 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel }) =>
   
   // Use useEffect to check for practice feedback requests
   useEffect(() => {
-    const handlePracticeFeedbackRequest = () => {
-      console.log('Practice feedback request event received');
+    const handlePracticeFeedbackRequest = async () => {
+      // Prevent running if already processing
+      if (isProcessingFeedback.current) {
+        console.log('Feedback request already in progress, skipping.');
+        return;
+      }
+      
+      isProcessingFeedback.current = true;
+      console.log('Practice feedback request event received and processing started.');
       
       // Get the complete practice data from localStorage
       const practiceData = localStorage.getItem('practice_data');
       const feedbackRequest = localStorage.getItem('feedbackRequest');
-      const returningWithFeedback = localStorage.getItem('practice_returning_with_feedback');
+      console.log('DEBUG - localStorage keys:', Object.keys(localStorage));
+      console.log('DEBUG - practice_data exists:', !!practiceData);
+      console.log('DEBUG - feedbackRequest exists:', !!feedbackRequest);
       
-      if (practiceData && handleSendMessageRef.current && feedbackRequest) {
-        console.log('Found practice data in localStorage:', practiceData);
-        
-        // If this is the first time processing after returning from practice
-        if (returningWithFeedback === 'true') {
-          // First, add the user message to the UI immediately for better UX
-          setMessages(prevMessages => [
-            ...prevMessages,
-            {
-              id: `temp-user-${Date.now()}`,
-              role: 'user',
-              content: feedbackRequest,
-              createdAt: new Date().toISOString()
+      try {
+        if (feedbackRequest) {
+          console.log('Found feedback request:', feedbackRequest);
+          
+          // Create properly typed messages
+          const userMessage: Message = {
+            id: `user-practice-${Date.now()}`,
+            role: 'user' as Role,
+            content: feedbackRequest,
+            conversationId: currentConversation?.conversationId || '',
+            createdAt: new Date().toISOString()
+          };
+          
+          // Parse practice data if available
+          let parsedData = null;
+          let managerType = "unknown";
+          let finalScore = 0;
+          let completeFeedbackPrompt = null;
+          
+          if (practiceData) {
+            try {
+              parsedData = JSON.parse(practiceData);
+              managerType = parsedData.managerType || "unknown";
+              finalScore = parsedData.finalScore || 0;
+              completeFeedbackPrompt = parsedData.completeFeedbackPrompt || null;
+              console.log('Parsed full feedback prompt:', completeFeedbackPrompt?.substring(0, 100) + '...');
+              console.log('Actual practice score:', finalScore);
+            } catch (e) {
+              console.error('Error parsing practice data:', e);
             }
-          ]);
+          }
           
-          // Then set loading state to show the agent typing indicator
-          setLoading(true);
+          // Add the user message to the UI first - DO THIS IMMEDIATELY
+          // This ensures the user's message appears even if the rest fails
+          const updatedMessages = [...storeMessages, userMessage];
+          setMessages(updatedMessages);
           
-          // Clear the flag
-          localStorage.removeItem('practice_returning_with_feedback');
-        }
-        
-        // Automatically send the feedback request without requiring additional user interaction
-        setTimeout(() => {
-          handleSendMessageRef.current!(feedbackRequest);
-          // Clean up after sending
+          // Update messages state to include the loading indicator
+          const loadingMessage: Message = {
+            id: `assistant-loading-${Date.now()}`,
+            role: 'assistant' as Role,
+            content: 'Processing your practice feedback... This may take up to 30 seconds for a detailed response.',
+            conversationId: currentConversation?.conversationId || '',
+            createdAt: new Date().toISOString(),
+            isLoading: true
+          };
+          
+          // Update messages state to include the loading indicator
+          const messagesWithLoading = [...updatedMessages, loadingMessage];
+          setMessages(messagesWithLoading);
+          
+          // Show loading indicator visually
+          setLoading(true); 
+          
+          // Use the API to send the complete feedback prompt to the agent
+          let maxRetries = 2;
+          let retryCount = 0;
+          let success = false;
+          let errorMsg = '';
+          let response = null;
+          
+          // Ensure we have a valid conversation ID
+          let conversationId = currentConversation?.conversationId;
+          
+          // If this is a draft conversation, create a real conversation first
+          if (!conversationId || conversationId.startsWith('draft-')) {
+            const title = `Practice Feedback - ${managerType} Manager`;
+            try {
+              const createResponse = await api.post<CreateConversationResponse>('/api/v1/conversation', {
+                title: title,
+                managerType: getManagerType()
+              });
+              
+              if (createResponse.data && createResponse.data.conversationId) {
+                conversationId = createResponse.data.conversationId;
+                console.log('Created new conversation for practice feedback:', conversationId);
+                
+                // Update the current conversation
+                setCurrentConversation({
+                  conversationId: conversationId,
+                  title: title,
+                  createdAt: createResponse.data.createdAt || new Date().toISOString(),
+                  managerType: getManagerType(),
+                });
+                
+                // Update user message with real conversation ID
+                userMessage.conversationId = conversationId;
+              }
+            } catch (err) {
+              console.error('Error creating conversation for practice feedback:', err);
+              // Continue with existing conversation ID
+            }
+          }
+          
+          // Verify we have a valid query to send
+          const queryContent = completeFeedbackPrompt || feedbackRequest;
+          if (!queryContent || queryContent.trim() === '') {
+            throw new Error('No valid content to send to the agent');
+          }
+          
+          console.log('Sending to agent API, prompt length:', queryContent.length);
+          console.log('First 100 chars of prompt:', queryContent.substring(0, 100) + '...');
+          
+          // Try making the request with retries
+          while (retryCount <= maxRetries && !success) {
+            if (retryCount > 0) {
+              console.log(`Retry attempt ${retryCount} of ${maxRetries}...`);
+            }
+            
+            try {
+              // Make the actual API request with a longer timeout
+              response = await Promise.race([
+                api.post<MessageResponse>(
+                  `/api/v1/conversation/message`, 
+                  {
+                    conversationId: conversationId,
+                    userQuery: queryContent,
+                    content: queryContent
+                  }
+                ),
+                new Promise<null>((_, reject) => 
+                  setTimeout(() => reject(new Error('Request timeout')), 30000)
+                )
+              ]);
+              
+              // If we reach here, the request succeeded
+              success = true;
+            } catch (error) {
+              console.error(`API request attempt ${retryCount + 1} failed:`, error);
+              errorMsg = error instanceof Error ? error.message : 'Unknown error';
+              retryCount++;
+              
+              // Wait before retrying (exponential backoff)
+              if (retryCount <= maxRetries) {
+                const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 5000);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            }
+          }
+          
+          // Process the response or show error
+          if (success && response && response.status === 200 && response.data) {
+            try {
+              console.log('Agent API response received:', response.status);
+              
+              if (!response.data.messages || !Array.isArray(response.data.messages)) {
+                console.error('Response missing messages array:', response.data);
+                throw new Error('Invalid response format from agent API');
+              }
+              
+              // Find the assistant message
+              const assistantMessage = response.data.messages.find(m => m.role === 'assistant');
+              
+              if (assistantMessage && assistantMessage.content) {
+                console.log('Received agent message content length:', assistantMessage.content.length);
+                console.log('First 100 chars of response:', assistantMessage.content.substring(0, 100) + '...');
+                
+                // Create proper message structure for the agent response
+                const agentMessage: Message = {
+                  id: assistantMessage.id || `assistant-practice-${Date.now() + 1}`,
+                  role: 'assistant' as Role,
+                  content: assistantMessage.content,
+                  conversationId: conversationId || '',
+                  createdAt: assistantMessage.createdAt || new Date().toISOString(),
+                };
+                
+                // Update state: Remove loading message and add agent response
+                setMessages([...messagesWithLoading, agentMessage]);
+              } else {
+                throw new Error('No assistant message or empty content in response');
+              }
+            } catch (error) {
+              console.error('Error processing successful API response:', error);
+              setError('Error processing the agent response. Please try again.');
+            }
+          } else {
+            console.error('API request failed after retries');
+            setError('Failed to get a response from the agent. Please try again.');
+          }
+          
+          // Clean up localStorage whether or not the API request succeeded
           localStorage.removeItem('practice_data');
           localStorage.removeItem('feedbackRequest');
-        }, 800);
-      } else if (feedbackRequest && handleSendMessageRef.current) {
-        // Fallback to just the feedback request if no practice data
-        console.log('Found feedback request in localStorage:', feedbackRequest);
-        
-        // If this is the first time processing after returning from practice
-        if (returningWithFeedback === 'true') {
-          // First, add the user message to the UI immediately
-          setMessages(prevMessages => [
-            ...prevMessages,
-            {
-              id: `temp-user-${Date.now()}`,
-              role: 'user',
-              content: feedbackRequest,
-              createdAt: new Date().toISOString()
-            }
-          ]);
-          
-          // Set loading state to show the agent typing indicator
-          setLoading(true);
-          
-          // Clear the flag
-          localStorage.removeItem('practice_returning_with_feedback');
         }
-        
-        setTimeout(() => {
-          handleSendMessageRef.current!(feedbackRequest);
-          localStorage.removeItem('feedbackRequest');
-        }, 800);
+      } catch (error) {
+        console.error('Error handling practice feedback:', error);
+        setError('There was an error processing your practice feedback. Please try again.');
+      } finally {
+        // Always reset loading and processing flags
+        setLoading(false);
+        isProcessingFeedback.current = false;
       }
     };
 

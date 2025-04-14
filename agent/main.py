@@ -1314,13 +1314,27 @@ async def send_message(
         
         # Extract key fields
         conversation_id = body.get("conversationId")
-        content = body.get("userQuery", "")
+        content = body.get("content", body.get("userQuery", ""))
         temperature = float(body.get("temperature", 0.7))
         
         # Log request parameters
         logger.info(f"Processing message for conversation: {conversation_id}")
         logger.info(f"Message content length: {len(content)}")
         logger.info(f"Temperature: {temperature}")
+        
+        # Check if this is a practice feedback request by looking for specific content
+        is_practice_feedback = (
+            "practice scenario" in content.lower() and 
+            "manager type" in content.lower() and
+            ("feedback" in content.lower() or "ethical decision-making score" in content.lower())
+        )
+        
+        # Use a longer timeout for practice feedback requests, which are more complex
+        timeout_seconds = 30.0 if is_practice_feedback else 10.0
+        
+        # If practice feedback is detected, log it
+        if is_practice_feedback:
+            logger.info("Detected practice feedback request - using longer timeout")
         
         # Handle empty queries specially
         if not content or content.strip() == "":
@@ -1385,7 +1399,7 @@ async def send_message(
             # Wait a short time for the response to be ready
             # This ensures we don't wait too long before returning to the user
             try:
-                response = await asyncio.wait_for(background_task, timeout=10)
+                response = await asyncio.wait_for(background_task, timeout=timeout_seconds)
                 logger.info(f"Response generated within timeout period")
                 
                 # Filter out any references to manager types
@@ -1507,94 +1521,67 @@ async def process_full_response(
         return "I apologize, but there was an error processing your request. Please try again."
 
 async def send_to_backend(conversation_id: str, message_id: str, content: str, role: str):
-    """Send message to backend API."""
+    """Send a message to the backend for persistence.
+    
+    This runs in the background and should not block the main request flow.
+    """
+    # Configure a shorter timeout to prevent processing hanging
     try:
-        # Only send to backend if we have a valid conversation ID (not a draft) and non-empty content
-        if not conversation_id or conversation_id.startswith("draft-"):
-            logger.info(f"Skipping backend save for draft conversation: {conversation_id}")
-            return
-            
-        if role == "user" and (not content or content.strip() == ""):
-            logger.info(f"Skipping backend save for empty user query")
-            return
+        logger.info(f"Sending message to backend for conversation {conversation_id}")
         
-        # Get the token from environment
+        # Create an HTTP client with a timeout
+        client = httpx.AsyncClient(timeout=5.0)
+        
+        # Get token from environment
         token = os.environ.get("CURRENT_AUTH_TOKEN")
         
-        # Prepare headers with authentication if token is available
+        # Prepare the request headers and payload
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         }
         
         if token:
-            # Ensure token is properly formatted with Bearer prefix
-            if not token.startswith("Bearer "):
-                token = f"Bearer {token}"
             headers["Authorization"] = token
-            logger.info(f"Using authentication token: {token[:15]}...")
         else:
-            logger.warning("No authentication token available for backend request")
-            
-        backend_url = f"{BACKEND_BASE_URL}/api/v1/conversation/message"
+            logger.warning("No token available for backend request")
         
-        # Construct message payload
-        if role in ["user", "assistant"]:
-            if message_id:
-                # When message_id is provided, include it to maintain thread consistency
-                payload = {
-                    "id": message_id,
-                    "conversationId": conversation_id
-                }
-                
-                # Only set non-empty fields
-                if role == "user" and content.strip():
-                    payload["userQuery"] = content
-                    payload["agentResponse"] = ""
-                elif role == "assistant" and content.strip():
-                    payload["userQuery"] = ""  # Don't create empty user queries
-                    payload["agentResponse"] = content
-            else:
-                # For standard payload without message ID
-                payload = {
-                    "conversationId": conversation_id
-                }
-                
-                # Only set non-empty fields
-                if role == "user" and content.strip():
-                    payload["userQuery"] = content
-                    payload["agentResponse"] = ""
-                elif role == "assistant" and content.strip():
-                    payload["userQuery"] = ""  # Don't create empty user queries
-                    payload["agentResponse"] = content
-        else:
-            logger.warning(f"Unexpected role: {role}, not sending to backend")
-            return
+        # Prepare the request payload
+        payload = {
+            "id": message_id,
+            "conversationId": conversation_id,
+            "content": content,
+            "role": role
+        }
         
-        logger.info(f"Sending {role} message to backend for conversation: {conversation_id}")
-        logger.debug(f"Payload: {payload}")
+        # Backend URL from environment
+        backend_url = os.environ.get("BACKEND_URL", "http://localhost:8443")
+        endpoint = f"{backend_url}/api/v1/conversation/message"
         
-        # Only proceed if we have something to send
-        if not (("userQuery" in payload and payload["userQuery"]) or 
-                ("agentResponse" in payload and payload["agentResponse"])):
-            logger.info(f"Skipping backend save for empty content")
-            return
-            
-        # Send request to backend API
-        async with httpx.AsyncClient() as client:
+        try:
             response = await client.post(
-                backend_url,
+                endpoint,
                 json=payload,
                 headers=headers
             )
             
+            # Log the response
             if response.status_code == 200:
-                logger.info(f"Successfully sent {role} message to backend: {response.status_code}")
+                logger.info(f"Successfully sent message to backend: {response.status_code}")
                 return True
             else:
-                logger.error(f"Failed to send message to backend: {response.status_code} - {response.text}")
-                if response.status_code == 401:
-                    logger.error("Authentication failure. Token may be invalid or expired.")
+                logger.warning(f"Backend returned non-200 status: {response.status_code}")
+                logger.warning(f"Response content: {response.text[:200]}...")
                 return False
+        except httpx.TimeoutException:
+            logger.error("Timeout when sending message to backend")
+            return False
+        except Exception as e:
+            logger.error(f"Error sending message to backend: {str(e)}")
+            logger.error(traceback.format_exc())
+            return False
+        finally:
+            await client.aclose()
     except Exception as e:
         logger.error(f"Error sending message to backend: {str(e)}")
         logger.error(traceback.format_exc())

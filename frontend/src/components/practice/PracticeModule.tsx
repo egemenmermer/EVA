@@ -69,76 +69,32 @@ interface PracticeModuleProps {
 
 // Add this function at the top of your component, before the main component definition
 const createScenarioFromUserQuery = (userQuery: string, managerType: string): ScenarioState => {
-  // Extract the ethical concern from the user's query
-  const concernMatches = userQuery.match(/about\s+(.+?)\s+even though/i) || 
-                          userQuery.match(/regarding\s+(.+?)\s+despite/i) ||
-                          userQuery.match(/concerns\s+about\s+(.+?)\s+when/i);
+  const issueMatch = userQuery.match(/(concerned about|worried about|issue with|problem with) (.+)$/i);
+  const issue = issueMatch ? issueMatch[2] : 'ethical concern in technology';
+  const concernMatch = issue.match(/(privacy|data collection|bias|discrimination|security|transparency)/i);
+  const concern = concernMatch ? concernMatch[0] : 'Privacy';
   
-  const concern = concernMatches ? concernMatches[1] : 'data collection practices';
+  // Create manager description based on type
+  const managerDescription = getManagerDescription(managerType);
   
-  // Create an appropriate manager response based on type
-  let managerResponse = '';
-  let choices: string[] = [];
-  
-  switch(managerType.toUpperCase()) {
-    case 'PUPPETEER':
-      managerResponse = `Look, I understand your concerns about ${concern}, but this is a direct order from above. We need to implement this by the end of the week, or we'll lose our competitive edge. I don't want to hear any more pushback on this - just make it happen.`;
-      choices = [
-        "I understand the pressure, but I'm concerned this violates privacy regulations. Could we at least consult legal first?",
-        "I'll implement it right away as requested.",
-        "I don't feel comfortable doing this. It seems unethical and possibly illegal.",
-        "What if we compromise by collecting only anonymized data with explicit user consent?"
-      ];
-      break;
-    case 'DILUTER':
-      managerResponse = `I hear your concerns about ${concern}, and they're valid in theory. But in our specific situation, it's not really a big issue. Everyone in the industry does this, and users don't really care. We can revisit this later if it becomes a problem.`;
-      choices = [
-        "Even if others are doing it, that doesn't make it right. We should be setting better standards.",
-        "You're right, it's probably not a big deal in practice.",
-        "I'd like to document my concerns in writing before proceeding, just to be safe.",
-        "Could we run a small test first to see how users actually react to this?"
-      ];
-      break;
-    case 'CAMOUFLAGER':
-      managerResponse = `We're not really implementing ${concern} per se, we're simply enhancing the user experience by collecting useful metrics that will help us improve the product. It's just standard analytics that every company uses.`;
-      choices = [
-        "Let's be transparent and call it what it is. This appears to be unnecessary data collection.",
-        "That makes sense. If it's just standard analytics, I'll proceed with implementation.",
-        "Could we be more specific in our privacy policy about exactly what we're collecting and why?",
-        "I understand the business need, but can we implement safeguards to protect user privacy?"
-      ];
-      break;
-    default:
-      managerResponse = `I'd like to discuss your concerns about ${concern}. What specifically are you worried about, and do you have any alternative approaches to suggest?`;
-      choices = [
-        "I'm concerned about user privacy and potential regulatory issues.",
-        "I think we should stick to collecting only essential data with clear user consent.",
-        "I'd like to propose an alternative approach that still meets our business needs.",
-        "Can we consult with our legal and ethics teams before proceeding?"
-      ];
-  }
-  
-  // Create synthetic scenario
   return {
     scenario: {
-      id: 'custom-scenario',
-      concern: 'Privacy & Data Ethics',
-      issue: `Concerns about ${concern}`,
+      id: `custom-scenario-${Date.now()}`,
+      concern,
+      issue,
       manager_type: managerType,
-      manager_description: getManagerDescription(managerType),
-      ethical_breach_intensity: 'High'
+      manager_description: managerDescription,
+      ethical_breach_intensity: 'Medium',
+      userScore: 0, // Initialize with zero, will be updated during practice
+      scoreCount: 0 // Initialize with zero, will be updated during practice
     },
-    currentStatement: managerResponse,
-    currentChoices: choices,
-    conversation: [
-      {
-        role: 'user',
-        content: userQuery
-      },
-      {
-        role: 'manager',
-        content: managerResponse
-      }
+    conversation: [],
+    currentStatement: "Look, we need to get this feature done by next week. Just implement it and we'll deal with these concerns later.",
+    currentChoices: [
+      "I understand the timeline pressure, but I'm concerned about compliance issues. Maybe we should have a quick chat with legal first?",
+      "Before we commit, could we take a day to run some user tests to see if this is even necessary?",
+      "I'll implement it, but I think we should note in our documentation that we need to revisit these issues later.",
+      "You're right, I'll get it done by next week."
     ],
     currentStep: 0
   };
@@ -340,6 +296,19 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     
     // Create a custom scenario based on the user's query
     const customScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
+    
+    // Initialize the conversation with the user's query and the manager's first statement
+    customScenario.conversation = [
+      {
+        role: 'user',
+        content: userQuery
+      } as UserMessage,
+      {
+        role: 'manager',
+        content: customScenario.currentStatement || ''
+      } as ManagerMessage
+    ];
+    
     setCurrentScenario(customScenario);
     setLoading(false);
     
@@ -478,85 +447,173 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Add this function to prepare feedback data for the agent
   const prepareFeedbackPrompt = () => {
-    if (!currentScenario || !currentScenario.conversation || currentScenario.conversation.length === 0) return '';
-    
-    // Get scenario details
-    const scenario = currentScenario.scenario;
-    if (!scenario) return '';
-    
-    // Build a detailed feedback prompt
-    let feedbackPrompt = `I just completed an ethical decision-making practice scenario about "${scenario.concern}: ${scenario.issue}" with a ${scenario.manager_type} manager type. My final score was ${finalScore}/100.\n\n`;
-    
-    // Add details about each choice made
-    feedbackPrompt += "Here are the choices I made:\n";
-    
-    // Safely map through the conversation history
-    if (currentScenario.conversation && Array.isArray(currentScenario.conversation)) {
-      currentScenario.conversation.forEach((message, index) => {
-        if (!message) return;
-        
-        const statement = message.content || '';
-        feedbackPrompt += `\nManager: "${statement}"\n`;
-        if (message.role === 'user') {
-          feedbackPrompt += `My response: "${statement}"\n`;
-        } else if (message.role === 'feedback') {
-          feedbackPrompt += `My response: "${statement}"\n`;
-        }
-        if (message.role === 'feedback' && (message as any).evs !== undefined) {
-          feedbackPrompt += `Ethical Value Score: ${(message as any).evs}/3\n`;
-        }
-      });
+    if (!currentScenario || !currentScenario.scenario) {
+      console.error('No scenario data available for feedback');
+      return null;
     }
     
-    // Add request for feedback
-    feedbackPrompt += `\nBased on my choices, please provide feedback on:\n`;
-    feedbackPrompt += `1. What I did well in this scenario\n`;
-    feedbackPrompt += `2. Where I could improve my responses\n`;
+    // Verify we have a valid conversation
+    if (!currentScenario.conversation || !Array.isArray(currentScenario.conversation) || currentScenario.conversation.length === 0) {
+      console.error('No valid conversation data available for feedback');
+      return null;
+    }
+    
+    const scenario = currentScenario.scenario;
+    console.log('Preparing feedback prompt for scenario:', scenario.id);
+    
+    // Get all the user's choices to summarize
+    const userChoices = currentScenario.conversation
+      .filter(item => item.role === 'user')
+      .map(item => item.content);
+    
+    console.log('Found', userChoices.length, 'user choices in conversation');
+    
+    // Get all the manager's statements for context
+    const managerStatements = currentScenario.conversation
+      .filter(item => item.role === 'manager')
+      .map(item => item.content);
+    
+    console.log('Found', managerStatements.length, 'manager statements in conversation');
+    
+    // Include any feedback items from the conversation
+    const feedbackItems = currentScenario.conversation
+      .filter(item => item.role === 'feedback')
+      .map(item => item.content);
+    
+    // Start building a comprehensive feedback prompt
+    let feedbackPrompt = `I've completed a practice scenario with a ${scenario.manager_type} manager about "${scenario.issue}". Here's the complete scenario information:\n\n`;
+    
+    // Add scenario details
+    feedbackPrompt += `## Scenario Details\n`;
+    feedbackPrompt += `- Manager Type: ${scenario.manager_type}\n`;
+    feedbackPrompt += `- Ethical Concern: ${scenario.concern}\n`;
+    feedbackPrompt += `- Issue: ${scenario.issue}\n`;
+    feedbackPrompt += `- Final Score: ${finalScore}/100\n\n`;
+    
+    // Add the conversation flow
+    feedbackPrompt += `## Conversation Summary\n`;
+    let conversationIndex = 1;
+    
+    // Loop through the conversation chronologically
+    for (let i = 0; i < currentScenario.conversation.length; i++) {
+      const item = currentScenario.conversation[i];
+      if (!item || !item.role || !item.content) continue;
+      
+      try {
+        if (item.role === 'manager') {
+          feedbackPrompt += `\nManager (Statement ${conversationIndex}):\n${item.content}\n`;
+          conversationIndex++;
+        } else if (item.role === 'user') {
+          feedbackPrompt += `\nMy Response:\n${item.content}\n`;
+        } else if (item.role === 'feedback') {
+          feedbackPrompt += `\nRound Feedback:\n${item.content}\n`;
+          if (item.evs) {
+            feedbackPrompt += `Score for this round: ${item.evs}/10\n`;
+          }
+        } else if (item.role === 'final_evaluation') {
+          feedbackPrompt += `\nFinal Evaluation:\n${item.content}\n`;
+        }
+      } catch (err) {
+        console.error('Error processing conversation item:', err);
+        // Continue to next item
+      }
+    }
+    
+    // Add request for detailed feedback
+    feedbackPrompt += `\n## Feedback Request\n`;
+    feedbackPrompt += `Please provide detailed feedback on my performance in this practice scenario:\n`;
+    feedbackPrompt += `1. What I did well in handling this ${scenario.manager_type} manager\n`;
+    feedbackPrompt += `2. Where I could improve my ethical reasoning and responses\n`;
     feedbackPrompt += `3. Specific strategies for dealing with this type of ${scenario.manager_type} manager in the future\n`;
     feedbackPrompt += `4. Alternative responses that would have been more effective\n`;
+    feedbackPrompt += `5. Applicable ethical principles or guidelines that I should keep in mind\n`;
     
+    console.log('Generated feedback prompt of length:', feedbackPrompt.length);
     return feedbackPrompt;
   };
 
-  // Modify the existing Get Feedback function to use the detailed prompt
+  // Modify the existing Get Feedback function to use a simpler approach
   const handleGetFeedback = () => {
     const feedbackPrompt = prepareFeedbackPrompt();
     
     if (feedbackPrompt && currentScenario && currentScenario.scenario) {
-      console.log('Preparing practice feedback request');
+      console.log('Preparing practice feedback request, full prompt length:', feedbackPrompt.length);
       
-      // Store practice data with more details for better agent feedback
-      localStorage.setItem('practice_data', JSON.stringify({
-        managerType: currentScenario.scenario.manager_type,
-        concern: currentScenario.scenario.concern,
-        issue: currentScenario.scenario.issue,
-        finalScore: finalScore,
-        userChoices: currentScenario.conversation && Array.isArray(currentScenario.conversation) 
-          ? currentScenario.conversation.map(message => ({
-              text: message.content || '',
-              evs: message.role === 'feedback' && (message as any).evs !== undefined ? (message as any).evs : 0,
-              category: message.role || 'unknown'
-            }))
-          : [],
-        scenarioHistory: currentScenario.conversation || []
-      }));
-      
-      // Store the detailed feedback prompt
-      localStorage.setItem('feedbackRequest', feedbackPrompt);
-      
-      // Set a flag to indicate we're returning from practice with feedback
-      localStorage.setItem('practice_returning_with_feedback', 'true');
-      
-      console.log('Sending feedback request and returning to chat');
-      
-      // Immediately dispatch the event
-      window.dispatchEvent(new Event('practice-feedback-request'));
-      
-      // Return to chat after a short delay to ensure the feedback request is processed
-      setTimeout(() => {
-        console.log('Navigating back to chat window');
-        handleReturnToChat();
-      }, 800); // Longer delay to ensure the feedback request is processed and visible
+      try {
+        // Get the actual final evaluation message if it exists
+        const finalEvalMessage = currentScenario.conversation.find(m => m.role === 'final_evaluation');
+        // Extract the score from the final evaluation message using regex
+        // The pattern looks for "score is X/100" or similar text
+        const scorePattern = /score (?:is|was) (\d+)\/100/;
+        let scoreMatch = null;
+        if (finalEvalMessage) {
+          scoreMatch = finalEvalMessage.content.match(scorePattern);
+        }
+        
+        // Use the extracted score or fall back to the state's finalScore
+        const actualFinalScore = scoreMatch ? scoreMatch[1] : finalScore.toString();
+        
+        console.log('Using score extracted from final evaluation:', actualFinalScore);
+           
+        // Create user message for feedback with the actual score
+        const simplifiedFeedback = `I just completed a practice scenario with a ${currentScenario.scenario.manager_type} manager type about "${currentScenario.scenario.issue}". My ethical decision-making score was ${actualFinalScore}/100.`;
+        
+        console.log('Simplified feedback for chat display:', simplifiedFeedback);
+        console.log('Using actual score from final evaluation:', actualFinalScore);
+        
+        // Make sure the feedback prompt isn't too large to ensure reliable responses
+        const maxPromptLength = 12000; // Characters
+        let finalFeedbackPrompt = feedbackPrompt;
+        
+        if (feedbackPrompt.length > maxPromptLength) {
+          console.warn(`Feedback prompt is too large (${feedbackPrompt.length} chars). Trimming to ${maxPromptLength} chars.`);
+          finalFeedbackPrompt = feedbackPrompt.substring(0, maxPromptLength) + 
+            "\n\n[Note: This prompt was trimmed due to length. Please provide feedback based on the available information above.]";
+        }
+        
+        // Store both simplified feedback and complete prompt
+        const practiceData = {
+          managerType: currentScenario.scenario.manager_type,
+          concern: currentScenario.scenario.concern,
+          issue: currentScenario.scenario.issue,
+          finalScore: actualFinalScore,
+          completeFeedbackPrompt: finalFeedbackPrompt  // Store the possibly trimmed prompt
+        };
+        
+        console.log('Storing practice data with prompt length:', finalFeedbackPrompt.length);
+        localStorage.setItem('practice_data', JSON.stringify(practiceData));
+        
+        // Store the simplified feedback for display in chat
+        localStorage.setItem('feedbackRequest', simplifiedFeedback);
+        
+        console.log('Dispatching practice-feedback-request event');
+        
+        // Immediately dispatch the event to notify any listeners
+        window.dispatchEvent(new Event('practice-feedback-request'));
+        
+        // Give a short delay before navigating away to ensure the event is processed
+        setTimeout(() => {
+          console.log('Navigating back to chat window');
+          if (onExit) {
+            onExit();  // Call the onExit prop to navigate back to chat
+          } else {
+            // Fallback if onExit is not provided
+            window.location.href = '/';
+          }
+        }, 1000);  // Slightly longer timeout to ensure event is processed
+      } catch (error) {
+        console.error('Error preparing practice feedback:', error);
+        // Fall back to direct navigation
+        if (onExit) {
+          onExit();
+        }
+      }
+    } else {
+      console.error('Missing feedback prompt or scenario data', {
+        promptAvailable: !!feedbackPrompt,
+        scenarioAvailable: !!currentScenario,
+        scenarioDataAvailable: !!(currentScenario && currentScenario.scenario)
+      });
     }
   };
 
@@ -580,6 +637,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           // Create a fresh scenario with a new ID to ensure complete reset
           const freshScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
           freshScenario.scenario.id = 'custom-scenario-' + Date.now(); // Ensure unique ID
+          
+          // Initialize the conversation for the new scenario
+          freshScenario.conversation = [
+            {
+              role: 'user',
+              content: userQuery
+            } as UserMessage,
+            {
+              role: 'manager',
+              content: freshScenario.currentStatement || ''
+            } as ManagerMessage
+          ];
           
           // Update state with the new scenario
           setCurrentScenario(freshScenario);
@@ -616,12 +685,25 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setShowOptions(false);
       setFinalScore(0);
       
-      // Clear any localStorage values that might affect the new session
+      // Clear specific localStorage values that might affect a new session
+      // but keep feedback data if we're returning with feedback
+      const preserveFeedback = localStorage.getItem('practice_returning_with_feedback') === 'true';
+      console.log('Preserving feedback data:', preserveFeedback);
+      
       localStorage.removeItem('practice_selected_choice');
       localStorage.removeItem('practice_score');
       localStorage.removeItem('practice_round');
-      localStorage.removeItem('practice_feedback');
-      localStorage.removeItem('practice_final_score');
+      localStorage.removeItem('practice_returning_with_feedback');
+      
+      // Only clear these if we're not returning with feedback
+      if (!preserveFeedback) {
+        localStorage.removeItem('practice_feedback');
+        localStorage.removeItem('practice_final_score');
+        localStorage.removeItem('practice_user_query');
+        localStorage.removeItem('practice_manager_type');
+        localStorage.removeItem('practice_agent_response');
+        localStorage.removeItem('return_to_chat');
+      }
       
       console.log('Session reset complete');
       return true;
@@ -633,42 +715,28 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   };
 
   const handleReturnToChat = () => {
-    console.log('Return to Chat button clicked - attempting force navigation');
+    console.log('Return to Chat button clicked');
     
-    // Force clear localStorage items that might affect navigation
-    localStorage.removeItem('practice_user_query');
-    localStorage.removeItem('practice_manager_type');
-    localStorage.removeItem('practice_selected_choice');
-    localStorage.removeItem('practice_score');
-    localStorage.removeItem('practice_final_score');
-    localStorage.removeItem('practice_round');
-    localStorage.removeItem('practice_feedback');
+    // Check if we have feedback to send
+    const hasFeedback = finalReport && finalScore > 0;
     
-    // Set a flag in localStorage to indicate we're returning to chat
-    localStorage.setItem('return_to_chat', 'true');
-    
-    try {
-      // Attempt normal cleanup
+    if (hasFeedback) {
+      console.log('Returning to chat with feedback, not clearing feedback data');
+      // Set a flag to indicate we're returning with feedback
+      localStorage.setItem('practice_returning_with_feedback', 'true');
+    } else {
+      // Attempt normal cleanup if we're not returning with feedback
+      console.log('Returning to chat without feedback, doing normal cleanup');
       resetSession();
-      
-      // Try calling the onExit callback first
-      if (onExit) {
-        console.log('Calling onExit callback');
-        onExit();
-        
-        // As an extra measure, forcefully redirect after a short delay
-        setTimeout(() => {
-          console.log('Forcing navigation to home');
-          window.location.href = '/';
-        }, 300);
-      } else {
-        // If no onExit callback is provided, redirect immediately
-        console.log('No onExit callback provided, navigating directly');
-        window.location.href = '/';
-      }
-    } catch (error) {
-      console.error('Error in handleReturnToChat:', error);
-      // Force redirect as fallback for any errors
+    }
+    
+    // Call the onExit prop directly if provided
+    if (onExit) {
+      console.log('Calling onExit callback to return to chat');
+      onExit();
+    } else {
+      // Fallback if onExit isn't provided
+      console.log('No onExit callback provided, navigating directly');
       window.location.href = '/';
     }
   };
