@@ -14,9 +14,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ConversationContentResponseDTO {
-
-    private UUID conversationId;
+    private String id;
+    private String conversationId;
     private String userQuery;
     private String agentResponse;
-    private LocalDateTime createdAt;
+    private String createdAt;
+    private String role;
+    private String content;
 }

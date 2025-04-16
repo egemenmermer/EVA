@@ -25,7 +25,7 @@ export interface Conversation {
 export interface Message {
   id: string;
   role: Role;
-  content: string; // This will now store the raw agent response text
+  content: string;
   createdAt: string;
   conversationId: string;
   isLoading?: boolean;

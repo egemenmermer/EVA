@@ -99,23 +99,60 @@ export const useStore = create<Store>()(
       setUser: (user) => set({ user }),
       
       setCurrentConversation: (conversation) => {
-        if (conversation?.conversationId && conversation.conversationId.includes('mock-')) {
+        // Don't block draft conversations or new conversations
+        if (conversation?.conversationId && 
+            !conversation.isDraft && 
+            !conversation.conversationId.startsWith('draft-') && 
+            conversation.conversationId.includes('mock-')) {
           console.error('Attempted to set mock conversation:', conversation.conversationId);
           return;
         }
         
+        const currentConv = get().currentConversation;
+        
+        // Clear messages when:
+        // 1. Setting a new conversation (different ID)
+        // 2. Starting a new draft conversation
+        // 3. Current conversation is null
+        if (!currentConv || 
+            !conversation || 
+            currentConv.conversationId !== conversation.conversationId ||
+            (conversation && conversation.conversationId.startsWith('draft-'))) {
+          // Always clear messages when switching conversations
+          set({ messages: [] });
+          
+          // Log conversation change for debugging
+          console.log('Clearing messages, changing from', 
+            currentConv?.conversationId, 'to', conversation?.conversationId);
+        }
+        
         set({ currentConversation: conversation });
         
-        if (conversation?.conversationId) {
+        // Only store non-draft conversations in localStorage
+        if (conversation?.conversationId && 
+            !conversation.isDraft && 
+            !conversation.conversationId.startsWith('draft-')) {
           localStorage.setItem('current-conversation-id', conversation.conversationId);
+        } else if (conversation?.conversationId && conversation.conversationId.startsWith('draft-')) {
+          // Remove the stored conversation ID when switching to a draft conversation
+          localStorage.removeItem('current-conversation-id');
         }
       },
       
       addMessage: (message) => {
         const messages = get().messages;
+        const currentConv = get().currentConversation;
         
+        // Don't add messages if they don't match the current conversation
+        if (currentConv && message.conversationId !== currentConv.conversationId) {
+          console.log('Message conversation ID does not match current conversation, skipping...');
+          return;
+        }
+        
+        // Check for exact duplicates (same content, role, and ID)
         const isDuplicate = messages.some(
-          (m) => m.content === message.content && 
+          (m) => m.id === message.id && 
+                m.content === message.content && 
                 m.role === message.role && 
                 m.conversationId === message.conversationId
         );
@@ -128,16 +165,43 @@ export const useStore = create<Store>()(
         const updatedMessages = [...messages, message];
         set({ messages: updatedMessages });
         
-        if (message.conversationId) {
+        // Save messages to localStorage for non-draft conversations
+        if (message.conversationId && !message.conversationId.startsWith('draft-')) {
           try {
-            localStorage.setItem(`messages-${message.conversationId}`, JSON.stringify(updatedMessages.slice(-50)));
+            // Save with multiple key formats for better recovery
+            const messageData = JSON.stringify(updatedMessages.slice(-50));
+            localStorage.setItem(`messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`messages-${message.conversationId}`, messageData);
+            localStorage.setItem(`backup_messages_${message.conversationId}`, messageData);
           } catch (error) {
             console.error('Error saving messages to localStorage:', error);
           }
         }
       },
       
-      setMessages: (messages) => set({ messages }),
+      setMessages: (messages) => {
+        const currentConv = get().currentConversation;
+        
+        // Only update messages if they belong to the current conversation
+        if (currentConv && messages.length > 0 && 
+            messages[0].conversationId !== currentConv.conversationId) {
+          console.log('Messages do not match current conversation, skipping update...');
+          return;
+        }
+        
+        set({ messages });
+        
+        // Save to localStorage for non-draft conversations
+        if (currentConv?.conversationId && !currentConv.conversationId.startsWith('draft-')) {
+          try {
+            const messageData = JSON.stringify(messages.slice(-50));
+            localStorage.setItem(`messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`messages-${currentConv.conversationId}`, messageData);
+          } catch (error) {
+            console.error('Error saving messages to localStorage:', error);
+          }
+        }
+      },
       setManagerType: (managerType) => set({ managerType }),
       setTemperature: (temperature) => set({ temperature }),
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),

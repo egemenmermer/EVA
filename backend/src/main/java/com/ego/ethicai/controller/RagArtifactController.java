@@ -4,6 +4,7 @@ import com.ego.ethicai.dto.RagArtifactsRequestDTO;
 import com.ego.ethicai.dto.RagArtifactsResponseDTO;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.security.CurrentUser;
+import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.service.RagArtifactService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class RagArtifactController {
     @PostMapping("/rag-artifacts")
     public ResponseEntity<RagArtifactsResponseDTO> saveArtifacts(
             @RequestBody RagArtifactsRequestDTO request,
-            @CurrentUser User currentUser) {
+            @CurrentUser CustomUserDetails currentUser) {
         try {
             if (request == null || request.getConversationId() == null || request.getConversationId().isEmpty()) {
                 log.warn("Invalid request or conversation ID provided");
@@ -93,7 +94,7 @@ public class RagArtifactController {
     @GetMapping("/knowledge-artifacts/{conversationId}")
     public ResponseEntity<RagArtifactsResponseDTO> getArtifacts(
             @PathVariable String conversationId,
-            @CurrentUser User currentUser) {
+            @CurrentUser CustomUserDetails currentUser) {
         try {
             log.info("Retrieving RAG artifacts for conversation: {} by user: {}", 
                     conversationId, currentUser.getEmail());
@@ -167,7 +168,7 @@ public class RagArtifactController {
     @DeleteMapping("/knowledge-artifacts/{conversationId}")
     public ResponseEntity<Void> deleteArtifacts(
             @PathVariable UUID conversationId,
-            @CurrentUser User currentUser) {
+            @CurrentUser CustomUserDetails currentUser) {
         try {
             log.info("Deleting RAG artifacts for conversation: {} by user: {}", 
                     conversationId, currentUser.getEmail());

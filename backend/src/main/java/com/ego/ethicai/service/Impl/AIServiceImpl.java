@@ -3,90 +3,65 @@ package com.ego.ethicai.service.Impl;
 import com.ego.ethicai.dto.AIRequestDTO;
 import com.ego.ethicai.dto.AIResponseDTO;
 import com.ego.ethicai.service.AIService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ego.ethicai.service.AgentServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class AIServiceImpl implements AIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AIServiceImpl.class);
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private static final int MAX_RETRIES = 2;
-    private static final int TIMEOUT_SECONDS = 30;
 
-    public AIServiceImpl(WebClient.Builder webClientBuilder, 
-                        @Value("${ai.agent.url:http://localhost:5001}") String baseUrl) {
-        this.webClient = webClientBuilder
-            .baseUrl(baseUrl)
-            .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .build();
-        logger.info("Initialized AI Service with base URL: {}", baseUrl);
+    private final AgentServiceClient agentServiceClient;
+
+    @Autowired
+    public AIServiceImpl(AgentServiceClient agentServiceClient) {
+        this.agentServiceClient = agentServiceClient;
+        logger.info("AIServiceImpl initialized with AgentServiceClient");
     }
 
     @Override
     public AIResponseDTO getAIResponse(AIRequestDTO request) {
-        logger.debug("Requesting AI response for query with manager type: {}", request.getManagerType());
-        
         try {
-            // Create request body matching the agent's expected format
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("userQuery", request.getUserQuery());
-            requestBody.put("managerType", request.getManagerType().toString());
-            requestBody.put("conversationId", request.getConversationId());
+            logger.info("Sending request to agent service for query: '{}'", request.getUserQuery());
             
-            // Make request to agent
-            Map<String, Object> responseMap = webClient.post()
-                    .uri("/generate-response")
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                    .retryWhen(Retry.backoff(MAX_RETRIES, Duration.ofSeconds(1))
-                        .filter(throwable -> shouldRetry(throwable))
-                        .doBeforeRetry(retrySignal -> 
-                            logger.warn("Retrying AI request after error. Attempt: {}", 
-                                retrySignal.totalRetries() + 1)))
-                    .block();
-
-            if (responseMap != null && responseMap.containsKey("agentResponse")) {
-                return new AIResponseDTO((String) responseMap.get("agentResponse"));
-            } else {
-                logger.error("Invalid response format or null response from AI agent. Response: {}", responseMap);
-                throw new RuntimeException("Invalid response format from AI agent");
+            // Ensure the request has all needed fields
+            if (request.getUserQuery() == null || request.getUserQuery().isEmpty()) {
+                logger.error("User query is null or empty in AIServiceImpl.getAIResponse");
+                return AIResponseDTO.builder()
+                    .agentResponse("Error: No query was provided.")
+                    .build();
             }
             
-        } catch (WebClientResponseException ex) {
-            logger.error("AI service error: {} - {}", ex.getStatusCode(), ex.getResponseBodyAsString());
-            throw new RuntimeException("AI service error: " + ex.getMessage());
+            // Call the agent service
+            String agentResponse = agentServiceClient.getAgentResponse(
+                request.getManagerType(), 
+                request.getUserQuery(),
+                request.getConversationId()
+            );
+            
+            // Check if the response is valid
+            if (agentResponse == null || agentResponse.isEmpty()) {
+                logger.error("Received null or empty response from agent service");
+                return AIResponseDTO.builder()
+                    .agentResponse("Error: The AI agent did not provide a response.")
+                    .build();
+            }
+            
+            logger.info("Successfully received response from agent service");
+            
+            // Build and return the response DTO
+            return AIResponseDTO.builder()
+                .agentResponse(agentResponse)
+                .build();
+                
         } catch (Exception e) {
-            logger.error("Failed to get AI response", e);
-            throw new RuntimeException("Failed to get AI response: " + e.getMessage());
+            logger.error("Error getting response from AI agent: {}", e.getMessage(), e);
+            return AIResponseDTO.builder()
+                .agentResponse("Sorry, I'm having trouble connecting to my AI services right now. Please try again later.")
+                .build();
         }
-    }
-
-    private boolean shouldRetry(Throwable throwable) {
-        if (throwable instanceof WebClientResponseException) {
-            WebClientResponseException ex = (WebClientResponseException) throwable;
-            // Retry on 5xx server errors and specific 4xx errors
-            return ex.getStatusCode().is5xxServerError() || 
-                   ex.getStatusCode().value() == 429; // Too Many Requests
-        }
-        // Retry on connection errors
-        return true;
     }
 }

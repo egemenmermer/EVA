@@ -286,6 +286,23 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [finalScore, setFinalScore] = useState<number>(0);
   const navigate = useNavigate();
 
+  // Get original conversation ID from localStorage or props
+  const originalConversationId = useRef<string | null>(
+    localStorage.getItem('originalConversationId')
+  );
+  
+  // Track the original conversation ID when component mounts
+  useEffect(() => {
+    // If we don't have an original conversation ID yet, check localStorage
+    if (!originalConversationId.current) {
+      const storedId = localStorage.getItem('originalConversationId');
+      if (storedId) {
+        originalConversationId.current = storedId;
+        console.log('Retrieved original conversation ID:', storedId);
+      }
+    }
+  }, []);
+
   // Add scroll to bottom function
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -800,6 +817,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   };
 
+  // Store original conversation ID when entering practice mode
+  useEffect(() => {
+    // Get the conversation ID that was active when entering practice mode
+    const currentConvId = localStorage.getItem('current-conversation-id') || localStorage.getItem('currentConversationId');
+    if (currentConvId && !currentConvId.startsWith('practice-')) {
+      console.log('Storing original conversation ID:', currentConvId);
+      localStorage.setItem('originalConversationId', currentConvId);
+      // Also ensure it's stored in the ref for immediate access
+      originalConversationId.current = currentConvId;
+    }
+  }, []);
+  
   // Fix the submitFeedbackRequest function
   const submitFeedbackRequest = async () => {
     try {
@@ -837,38 +866,141 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           };
         }) : [];
       
-      const feedbackPrompt = `I've just completed a practice scenario with a ${managerType} manager about "${userQuery}". My ethical decision-making score was ${currentScore}/100. Can you provide detailed feedback on my performance?`;
+      // IMPORTANT: Create a SIMPLE prompt for user display
+      const userVisiblePrompt = `I've just completed a practice scenario with a ${managerType} manager about "${userQuery}". My ethical decision-making score was ${currentScore}/100. Can you provide detailed feedback on my performance?`;
       
-      localStorage.setItem('feedbackRequest', feedbackPrompt);
+      // Generate the detailed prompt for the backend only
+      const completeFeedbackPrompt = generateDetailedFeedbackPrompt(
+        userQuery, 
+        managerType, 
+        currentScore, 
+        currentScenario?.conversation || [] // Pass empty array if null
+      );
+      
+      // Store both prompts - the simple one for display, detailed one for API
+      localStorage.setItem('feedbackRequest', userVisiblePrompt);
+      localStorage.setItem('practice_feedback_prompt', completeFeedbackPrompt);
+      localStorage.setItem('practice_feedback_simple', userVisiblePrompt);
+      
+      // CRITICAL: Determine the correct original conversation ID from multiple possible sources
+      let originalConversationIdValue = localStorage.getItem('originalConversationId') || 
+                                    localStorage.getItem('current-conversation-id') || 
+                                    originalConversationId.current || 
+                                    conversationId;
+                                    
+      // Log all possible IDs for debugging
+      console.log('Conversation ID options:', {
+        'from originalConversationId localStorage': localStorage.getItem('originalConversationId'),
+        'from current-conversation-id': localStorage.getItem('current-conversation-id'),
+        'from originalConversationId.current': originalConversationId.current,
+        'from conversationId state': conversationId,
+        'final chosen ID': originalConversationIdValue
+      });
+      
+      // Ensure we're not using a practice conversation ID
+      if (originalConversationIdValue && originalConversationIdValue.startsWith('practice-')) {
+        console.warn('Original conversation ID appears to be a practice ID, searching for a better ID');
+        // Try to find a non-practice ID from other sources
+        const alternateId = localStorage.getItem('current-conversation-id') || 
+                           localStorage.getItem('currentConversationId');
+        if (alternateId && !alternateId.startsWith('practice-')) {
+          originalConversationIdValue = alternateId;
+          console.log('Found better conversation ID:', originalConversationIdValue);
+        }
+      }
+      
+      console.log('Using original conversation ID for feedback:', originalConversationIdValue);
+      
+      // Store the ID to use in the chat window - use BOTH formats for maximum compatibility
+      localStorage.setItem('currentConversationId', originalConversationIdValue);
+      localStorage.setItem('current-conversation-id', originalConversationIdValue);
+      
+      // Generate a message ID
+      const messageId = `user-practice-${Date.now()}`;
+      
+      // Create a properly formatted user message object with the SIMPLE prompt
+      const userMessage = {
+        id: messageId,
+        role: 'user',
+        content: userVisiblePrompt, // Use simple prompt for the visible message
+        conversationId: originalConversationIdValue,
+        createdAt: new Date().toISOString()
+      };
+      
+      // IMPORTANT: Try to get existing messages and APPEND to them, not replace
+      let existingMessages = [];
+      try {
+        // Check each possible storage format for existing messages
+        const storageKeys = [
+          `messages_${originalConversationIdValue}`,
+          `messages-${originalConversationIdValue}`,
+          `exact_messages_${originalConversationIdValue}`,
+          `backup_messages_${originalConversationIdValue}`
+        ];
+        
+        for (const key of storageKeys) {
+          const storedData = localStorage.getItem(key);
+          if (storedData) {
+            const parsedMessages = JSON.parse(storedData);
+            if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+              console.log(`Found ${parsedMessages.length} existing messages in ${key}`);
+              existingMessages = parsedMessages;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error reading existing messages:', e);
+      }
+      
+      // Check if there are existing messages to append to
+      if (existingMessages.length > 0) {
+        console.log('Appending feedback message to existing messages');
+        // Add the user message to existing messages
+        existingMessages.push(userMessage);
+      } else {
+        console.log('No existing messages found, creating new message array');
+        existingMessages = [userMessage];
+      }
+      
+      // Save the updated messages to all storage formats
+      const messagesJSON = JSON.stringify(existingMessages);
+      localStorage.setItem(`messages_${originalConversationIdValue}`, messagesJSON);
+      localStorage.setItem(`messages-${originalConversationIdValue}`, messagesJSON);
+      localStorage.setItem(`exact_messages_${originalConversationIdValue}`, messagesJSON);
+      localStorage.setItem(`backup_messages_${originalConversationIdValue}`, messagesJSON);
+      
+      // Store the complete practice data for the agent
       localStorage.setItem('practice_data', JSON.stringify({
         userQuery,
         managerType,
         finalScore: currentScore,
         responses: practiceResponses,
-        feedbackPrompt,
-        completeFeedbackPrompt: generateDetailedFeedbackPrompt(
-          userQuery, 
-          managerType, 
-          currentScore, 
-          practiceResponses
-        )
+        // Store BOTH prompts - user visible and backend complete
+        userVisiblePrompt: userVisiblePrompt,
+        feedbackPrompt: completeFeedbackPrompt,
+        messageId: messageId,
+        conversationId: originalConversationIdValue,
+        needNewConversation: false // Don't create a new conversation, use the original one
       }));
       
-      // Set flag for chat component
+      // Set the flag that we're transitioning from practice to chat
       localStorage.setItem('practice_to_chat', 'true');
+      localStorage.setItem('practice_message_preloaded', 'true');
+      localStorage.setItem('practice_use_simple_prompt', 'true'); // Flag to use simple prompt in UI
       
-      // Use safe event dispatching
+      // Force the use of the original conversation
+      localStorage.setItem('force_conversation_id', originalConversationIdValue);
+      
+      // Dispatch a custom event to notify that feedback is requested
       dispatchFeedbackEvent();
       
-      // Only call onExit if it exists
+      // Call the onExit callback to return to chat view
       if (onExit) {
         onExit();
       }
     } catch (error) {
-      console.error('Error in submitFeedbackRequest:', error);
-      if (onExit) {
-        onExit();
-      }
+      console.error('Error submitting feedback request:', error);
     }
   };
   
@@ -879,36 +1011,81 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const conversationId = localStorage.getItem('currentConversationId') || undefined;
       const userId = localStorage.getItem('userId') || 'anonymous';
       
+      // If conversationId is a draft ID, create a proper UUID-formatted ID
+      let validConversationId = conversationId;
+      if (conversationId && conversationId.startsWith('draft-')) {
+        // Generate a proper UUID for draft conversations
+        validConversationId = crypto.randomUUID();
+        console.log('Generated valid UUID for draft conversation:', validConversationId);
+      }
+      
       // Create data object
       const practiceScoreData = {
-        conversationId,
+        conversationId: validConversationId,
         userId,
         score
       };
       
       console.log('Submitting practice score:', practiceScoreData);
       
-      // Try to submit to backend with retries
+      // Store score locally first as a backup
+      storeScoreLocally(practiceScoreData, responses);
+      
+      // Try multiple endpoints with different formats for maximum compatibility
+      const endpoints = [
+        '/api/v1/practice-score/submit',   // Spring endpoint
+        '/api/practice-score'              // Alternative simpler endpoint
+      ];
+      
       let success = false;
       let attempts = 0;
-      const maxAttempts = 3;
       
-      while (!success && attempts < maxAttempts) {
+      // Try different endpoints and formats
+      for (const endpoint of endpoints) {
+        if (success) break;
+        
         try {
-          const response = await api.post('/api/practice-score', practiceScoreData);
-          console.log('Successfully submitted practice score:', response.data);
+          console.log(`Trying to submit score to ${endpoint}...`);
+          
+          // Try with fetch API for more control
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              score: score,
+              conversationId: validConversationId
+            }),
+          });
+          
+          if (response.ok) {
+            console.log(`Successfully submitted practice score to ${endpoint}`);
+            success = true;
+            break;
+          } else {
+            const errorText = await response.text();
+            console.error(`Failed to submit to ${endpoint}: ${response.status} ${errorText}`);
+          }
+        } catch (error) {
+          console.error(`Error submitting to ${endpoint}:`, error);
+        }
+        
+        attempts++;
+      }
+      
+      // Fallback to axios/api library if fetch attempts failed
+      if (!success) {
+        try {
+          console.log('Trying axios fallback...');
+          const response = await api.post('/api/v1/practice-score/submit', {
+            score: score,
+            conversationId: validConversationId
+          });
+          console.log('Successfully submitted practice score via axios:', response.data);
           success = true;
         } catch (error) {
-          attempts++;
-          console.error(`Failed to submit practice score (attempt ${attempts}/${maxAttempts}):`, error);
-          
-          if (attempts === maxAttempts) {
-            // Store score locally as fallback
-            storeScoreLocally(practiceScoreData, responses);
-          } else {
-            // Wait before retry
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
-          }
+          console.error('Axios fallback also failed:', error);
         }
       }
       
@@ -948,45 +1125,49 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     userQuery: string,
     managerType: string,
     finalScore: number,
-    responses: PracticeResponse[]
+    responses: Message[] // Correct type is Message[] from conversation
   ): string => {
     // Ensure we have valid inputs
     const safeUserQuery = userQuery || 'ethical dilemma';
     const safeManagerType = managerType || 'unknown';
-    const safeScore = Number.isNaN(finalScore) ? 0 : finalScore; 
-    const safeResponses = Array.isArray(responses) ? responses : [];
+    const safeScore = Number.isNaN(finalScore) ? 0 : finalScore;
+    // Use the correct type for responses
+    const safeResponses: Message[] = Array.isArray(responses) ? responses : [];
     
-    let detailedPrompt = `I've just completed a practice scenario with a ${safeManagerType} manager about "${safeUserQuery}". 
-My ethical decision-making score was ${safeScore}/100. 
+    let detailedPrompt = `I've just completed a practice scenario with a ${safeManagerType} manager about "${safeUserQuery}". \nMy ethical decision-making score was ${safeScore}/100. \n\nHere's a summary of my practice session:\n1. The ethical dilemma: ${safeUserQuery}\n2. My decisions during the practice:\n`;
 
-Here's a summary of my practice session:
-1. The ethical dilemma: ${safeUserQuery}
-2. My decisions during the practice:
-`;
+    let decisionCounter = 0;
+    // Iterate through the conversation to find manager -> user -> feedback sequences
+    for (let i = 0; i < safeResponses.length - 2; i++) {
+      const managerMsg = safeResponses[i];
+      const userMsg = safeResponses[i + 1];
+      const feedbackMsg = safeResponses[i + 2];
 
-    if (safeResponses.length > 0) {
-      // Add each practice response
-      safeResponses.forEach((response, index) => {
-        detailedPrompt += `
-   Q${index + 1}: ${response.question || 'No question recorded'}
-   My choice: ${response.userResponse || 'No response recorded'}
-   Score for this choice: ${response.score || 0}/10
-`;
-      });
-    } else {
-      // No responses available
-      detailedPrompt += `
-   No detailed responses available.`;
+      // Check if the sequence is correct
+      if (
+        managerMsg.role === 'manager' &&
+        userMsg.role === 'user' &&
+        feedbackMsg.role === 'feedback'
+      ) {
+        decisionCounter++;
+        // Safely cast feedbackMsg to access evs
+        const score = (feedbackMsg as FeedbackMessage).evs;
+        
+        detailedPrompt += `\n   Decision ${decisionCounter}:`;
+        detailedPrompt += `\n     Manager Prompt: ${managerMsg.content}`;
+        detailedPrompt += `\n     My Choice: ${userMsg.content}`;
+        detailedPrompt += `\n     Score: ${score !== undefined ? score : 'N/A'}/100\n`; // Assuming EVS is out of 100 now based on feedback structure
+        
+        // Skip the next two messages as they've been processed
+        i += 2;
+      }
     }
 
-    detailedPrompt += `
-Please analyze my ethical decision-making performance, highlighting:
-- The ethical principles I applied correctly
-- Any areas where I could have made better ethical choices
-- Specific feedback on my reasoning process
-- Practical advice for handling similar situations in the future
+    if (decisionCounter === 0) {
+      detailedPrompt += `\n   No valid decision sequences found in the practice session history.`;
+    }
 
-Can you provide detailed feedback on my performance?`;
+    detailedPrompt += `\n\nPlease analyze my ethical decision-making performance based *only* on the decisions listed above, highlighting:\n- The ethical principles I applied correctly\n- Any areas where I could have made better ethical choices\n- Specific feedback on my reasoning process\n- Practical advice for handling similar situations in the future\n\nCan you provide detailed feedback on my performance?`;
 
     return detailedPrompt;
   };

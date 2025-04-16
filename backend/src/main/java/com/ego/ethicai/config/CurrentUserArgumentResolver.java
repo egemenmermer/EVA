@@ -16,8 +16,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterAnnotation(CurrentUser.class) != null &&
-               parameter.getParameterType().equals(CustomUserDetails.class);
+        // Check if the parameter is annotated with @CurrentUser and is of type CustomUserDetails
+        return parameter.hasParameterAnnotation(CurrentUser.class) &&
+               parameter.getParameterType().isAssignableFrom(CustomUserDetails.class);
     }
 
     @Override
@@ -26,46 +27,60 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                   org.springframework.web.context.request.NativeWebRequest webRequest,
                                   org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
 
-        logger.debug("Resolving argument for parameter: {}", parameter.getParameterName());
-        
+        logger.debug("Attempting to resolve @CurrentUser for parameter: {}", parameter.getParameterName());
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        // Check if current user is required
         CurrentUser currentUserAnnotation = parameter.getParameterAnnotation(CurrentUser.class);
+        // Determine if a non-null user is explicitly required by the annotation
         boolean isRequired = currentUserAnnotation != null && currentUserAnnotation.required();
-        
-        logger.debug("User required: {}, Authentication present: {}", 
-                     isRequired, authentication != null && authentication.isAuthenticated());
-        
-        // If authentication is valid, return the user details
-        if (authentication != null && authentication.isAuthenticated() && 
-            !"anonymousUser".equals(authentication.getPrincipal())) {
+
+        logger.debug("Parameter type expected: {}", parameter.getParameterType().getName());
+        logger.debug("Annotation requires non-null user: {}", isRequired);
+
+        // Check if there is a valid, authenticated, non-anonymous user
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() != null &&
+            !"anonymousUser".equals(authentication.getPrincipal().toString())) {
+            
             Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetails) {
+            logger.debug("Authentication found. Principal type: {}", principal.getClass().getName());
+
+            // Check if the principal is the expected type
+            if (parameter.getParameterType().isAssignableFrom(principal.getClass())) {
+                // Cast should be safe due to isAssignableFrom check
                 CustomUserDetails userDetails = (CustomUserDetails) principal;
-                logger.debug("Resolved user details for email: {} with ID: {}", userDetails.getEmail(), userDetails.getId());
-                return userDetails;
+                logger.debug("Principal is CustomUserDetails. Returning user details for email: {} with ID: {}", 
+                             userDetails.getEmail(), userDetails.getId());
+                return userDetails; // Success case: Return the resolved user details
+            } else {
+                // Principal is not the expected type (e.g., String, different UserDetails implementation)
+                logger.warn("Principal type mismatch. Expected: {}, Actual: {}", 
+                           parameter.getParameterType().getName(), principal.getClass().getName());
+                if (isRequired) {
+                    logger.error("Error: Principal type mismatch, but user is required.");
+                    // Throw an exception because the required user could not be resolved correctly
+                    throw new ClassCastException("Authentication principal is not of expected type " + parameter.getParameterType().getName());
+                } else {
+                    logger.info("Principal type mismatch, but user is not required. Returning null.");
+                    return null; // Not required, principal wrong type, return null
+                }
             }
-            logger.warn("Principal is not an instance of CustomUserDetails: {}", 
-                       principal != null ? principal.getClass().getName() : "null");
-            
-            // If user is not required, return null instead of throwing exception
-            if (!isRequired) {
-                logger.info("User not required, returning null for non-CustomUserDetails principal");
-                return null;
+        } else {
+            // No valid authentication found or user is anonymous
+            String principalInfo = (authentication != null && authentication.getPrincipal() != null) ? 
+                                 authentication.getPrincipal().toString() : "null";
+            logger.warn("No valid authentication found (Authentication: {}, isAuthenticated: {}, Principal: {})",
+                    authentication,
+                    authentication != null ? authentication.isAuthenticated() : "N/A",
+                    principalInfo);
+                    
+            if (isRequired) {
+                logger.error("Error: No authenticated user found, but user is required.");
+                // Throw an exception because the required user is missing
+                throw new IllegalStateException("No authenticated user found for required @CurrentUser parameter");
+            } else {
+                logger.info("No authenticated user found, and user is not required. Returning null.");
+                return null; // Not required, no authentication, return null
             }
-            
-            throw new RuntimeException("Invalid authentication principal type");
         }
-        
-        // No authenticated user but it's not required
-        if (!isRequired) {
-            logger.info("No authenticated user found, but not required - returning null");
-            return null;
-        }
-        
-        // No authenticated user and it is required
-        logger.error("No authenticated user found and user is required");
-        throw new RuntimeException("No authenticated user found");
     }
 }

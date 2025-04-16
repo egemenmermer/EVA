@@ -4,11 +4,14 @@ import com.ego.ethicai.dto.ConversationResponseDTO;
 import com.ego.ethicai.entity.Conversation;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.enums.ManagerTypes;
+import com.ego.ethicai.repository.ConversationContentRepository;
 import com.ego.ethicai.repository.ConversationRepository;
+import com.ego.ethicai.repository.PracticeScoreRepository;
 import com.ego.ethicai.service.ConversationService;
 import com.ego.ethicai.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +23,12 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Autowired
+    private PracticeScoreRepository practiceScoreRepository;
+
+    @Autowired
+    private ConversationContentRepository conversationContentRepository;
 
     @Autowired
     private UserService userService;
@@ -114,7 +123,23 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    @Transactional
     public void deleteConversation(UUID conversationId) {
+        // Optional: Add verification here if needed to ensure the user owns the conversation
+        // Conversation conversation = conversationRepository.findById(conversationId)
+        //         .orElseThrow(() -> new RuntimeException("Conversation not found"));
+        // Verify ownership...
+        
+        // 1. Delete associated conversation content first
+        conversationContentRepository.deleteByConversationId(conversationId);
+        System.out.println("Deleted conversation content for conversation: " + conversationId);
+
+        // 2. Delete associated practice scores 
+        practiceScoreRepository.deleteByConversationId(conversationId);
+        System.out.println("Deleted practice scores for conversation: " + conversationId);
+        
+        // 3. Now delete the conversation
         conversationRepository.deleteById(conversationId);
+        System.out.println("Deleted conversation: " + conversationId);
     }
 }

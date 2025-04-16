@@ -195,9 +195,35 @@ export const Sidebar: React.FC<SidebarProps> = () => {
 
   // Listen for refresh events from ChatWindow
   useEffect(() => {
-    const handleRefreshEvent = () => {
+    const handleRefreshEvent = (event: Event) => {
       console.log('Sidebar: Received refresh-conversations event');
-      fetchConversations();
+      
+      // Get details from the event
+      const customEvent = event as CustomEvent;
+      const details = customEvent.detail;
+      
+      console.log('Refresh event details:', details);
+      
+      // Refresh the conversation list
+      fetchConversations().then(() => {
+        // If we have a conversation ID in the event, make sure it's selected
+        if (details?.conversationId && (!currentConversation || 
+            currentConversation.conversationId !== details.conversationId)) {
+          console.log('Setting current conversation from refresh event:', details.conversationId);
+          
+          // Create a minimal conversation object to update the current selection
+          const newConversation: Conversation = {
+            conversationId: details.conversationId,
+            title: details.title || 'New Conversation',
+            managerType: details.managerType || managerType,
+            createdAt: new Date().toISOString()
+          };
+          
+          // Update the current conversation selection
+          setCurrentConversation(newConversation);
+          localStorage.setItem('current-conversation-id', details.conversationId);
+        }
+      });
     };
     
     window.addEventListener('refresh-conversations', handleRefreshEvent);
@@ -205,7 +231,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     return () => {
       window.removeEventListener('refresh-conversations', handleRefreshEvent);
     };
-  }, []);
+  }, [currentConversation, managerType]);
   
   // Re-fetch conversations when current conversation changes
   useEffect(() => {
@@ -232,13 +258,13 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
 
-  const handleNewChat = async () => {
+  const handleNewChat = () => {
     try {
       const timestamp = new Date().toISOString();
       // Create a temporary draft conversation object
       const draftConversation: Conversation = {
         conversationId: `draft-${uuidv4()}`,
-        title: 'New Conversation',
+        title: 'New Chat',
         managerType: managerType,
         createdAt: timestamp,
         isDraft: true
@@ -246,17 +272,26 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       
       console.log('Creating draft conversation:', draftConversation);
       
-      // Clear messages first
+      // Clear any existing conversation state from localStorage
+      localStorage.removeItem('current-conversation-id');
+      
+      // Important: Clear messages from both Zustand store and local component state
       setMessages([]);
       
-      // Then set the new conversation
+      // Ensure we dispatch an event to update other components
+      const clearEvent = new CustomEvent('clear-messages', { 
+        detail: { conversationId: draftConversation.conversationId } 
+      });
+      window.dispatchEvent(clearEvent);
+      
+      // Set the new conversation - this should be the last step
       setCurrentConversation(draftConversation);
       
       // Close mobile sidebar if open
       setMobileOpen(false);
       
     } catch (err: any) {
-      console.error('Error creating new conversation:', err);
+      console.error('Error creating draft conversation:', err);
       setError('Failed to create conversation. Please try again.');
     }
   };
@@ -289,11 +324,19 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     console.log('Selected conversation:', mappedConversation.conversationId);
     setCurrentConversation(mappedConversation);
     localStorage.setItem('current-conversation-id', mappedConversation.conversationId);
+    
+    // Trigger a custom event to refresh the conversation messages
+    const refreshEvent = new CustomEvent('force-load-messages', { 
+      detail: { conversationId: mappedConversation.conversationId } 
+    });
+    window.dispatchEvent(refreshEvent);
+    
     setMobileOpen(false);
   };
 
   const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    e.preventDefault(); // Add this to prevent any bubbling
     
     try {
       console.log('Deleting conversation:', id);
@@ -303,6 +346,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         setCurrentConversation(null);
         // Also clear from localStorage
         localStorage.removeItem('current-conversation-id');
+        // Clear messages to prevent showing deleted conversation content
+        setMessages([]);
       }
       
       // Remove from local state first for immediate UI feedback
@@ -310,15 +355,35 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         prev.filter(conv => conv.conversationId !== id)
       );
       
-      // Clear messages from localStorage
-      localStorage.removeItem(`messages-${id}`);
+      // Clear all message formats from localStorage for complete cleanup
+      const keyFormats = [
+        `messages_${id}`,
+        `messages-${id}`,
+        `backup_messages_${id}`,
+        `backup-messages-${id}`,
+        `exact_messages_${id}`
+      ];
+      
+      keyFormats.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      console.log('Removed all message data from localStorage for conversation:', id);
       
       // API call to delete from server
       await conversationApi.deleteConversation(id);
       console.log('Conversation successfully deleted from server');
       
+      // Trigger a custom event to update other components
+      const deleteEvent = new CustomEvent('conversation-deleted', { 
+        detail: { conversationId: id } 
+      });
+      window.dispatchEvent(deleteEvent);
+      
       // Refetch to ensure UI is in sync with server
-      fetchConversations();
+      setTimeout(() => {
+        fetchConversations();
+      }, 500);
     } catch (err) {
       console.error('Failed to delete conversation:', err);
       // Refetch to ensure UI is in sync

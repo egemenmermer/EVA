@@ -5,6 +5,7 @@ import com.ego.ethicai.entity.ConversationContent;
 import com.ego.ethicai.entity.Feedback;
 import com.ego.ethicai.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,10 +20,14 @@ public interface ConversationContentRepository extends JpaRepository<Conversatio
     @Query("SELECT cc FROM ConversationContent cc WHERE cc.conversation.user.id = :userId")
     List<ConversationContent> findAllByUserId(@Param("userId") UUID userId);
     
-    Optional<Feedback> findByConversationId(UUID conversationId);
+    List<ConversationContent> findByConversationId(UUID conversationId);
     
     List<ConversationContent> findByConversation(Conversation conversation);
     
     @Query("SELECT cc FROM ConversationContent cc WHERE cc.conversation = :conversation AND cc.conversation.user.id = :userId")
     List<ConversationContent> findByConversationAndUserId(@Param("conversation") Conversation conversation, @Param("userId") UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM ConversationContent cc WHERE cc.conversation.id = :conversationId")
+    void deleteByConversationId(@Param("conversationId") UUID conversationId);
 }

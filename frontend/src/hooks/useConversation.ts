@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export const useConversation = (conversationId?: string) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { setCurrentConversation, messages, setMessages, addMessage } = useStore();
   const queryClient = useQueryClient();
 
@@ -20,17 +21,12 @@ export const useConversation = (conversationId?: string) => {
     queryFn: async () => {
       console.log('Fetching conversations from hook...');
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn('No token available, cannot fetch conversations');
-          return [];
-        }
-        
         const result = await conversationApi.getConversations();
         console.log('Fetched conversations in hook:', result?.length);
         return result;
       } catch (error) {
         console.error('Error fetching conversations in hook:', error);
+        setError('Failed to fetch conversations. Please try again.');
         return [];
       }
     },
@@ -39,142 +35,110 @@ export const useConversation = (conversationId?: string) => {
     staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 10000,
-    onError: (error: Error) => {
-      console.error('Error fetching conversations:', error);
-    }
+    refetchInterval: 10000
   });
-
-  // Periodically refresh conversations
-  useEffect(() => {
-    console.log('Setting up conversation refresh interval');
-    const intervalId = setInterval(() => {
-      console.log('Refresh interval triggered');
-      refetchConversations();
-    }, 5000); // Refresh every 5 seconds
-    
-    return () => clearInterval(intervalId);
-  }, [refetchConversations]);
-
-  // Force initial fetch
-  useEffect(() => {
-    // Short timeout to let things initialize
-    setTimeout(() => {
-      console.log('Forcing initial conversation fetch');
-      refetchConversations();
-    }, 500);
-  }, [refetchConversations]);
 
   // Get messages for current conversation
   const { data: fetchedMessages = [], refetch: refetchMessages } = useQuery({
     queryKey: ['messages', conversationId],
-    queryFn: () => conversationId ? conversationApi.getConversationMessages(conversationId) : Promise.resolve([]),
-    enabled: !!conversationId,
+    queryFn: async () => {
+      if (!conversationId) return [];
+      
+      try {
+        const messages = await conversationApi.getConversationMessages(conversationId);
+        console.log('Fetched messages for conversation:', conversationId, messages.length);
+        return messages;
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        setError('Failed to fetch messages. Please try again.');
+        return [];
+      }
+    },
+    enabled: !!conversationId && !conversationId.startsWith('draft-'),
     retry: 3,
     retryDelay: 1000,
     staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 10000,
-    onSuccess: (data) => {
-      if (data && Array.isArray(data)) {
-        console.log('Fetched messages:', data.length);
-        // Convert response data to Message type
-        const mappedMessages: Message[] = data.map((msg: ConversationContentResponseDTO): Message => ({
-          id: msg.id,
-          conversationId: msg.conversationId,
-          role: msg.role || (msg.userQuery ? 'user' : 'assistant'),
-          content: msg.content || msg.userQuery || msg.agentResponse || '',
-          createdAt: msg.createdAt
-        }));
-        setMessages(mappedMessages);
-      }
-    },
-    onError: (error: Error) => {
-      console.error('Error fetching messages:', error);
-    }
+    refetchInterval: 10000
   });
 
-  // Set messages in store when fetchedMessages changes
+  // Update messages in store when fetchedMessages changes
   useEffect(() => {
     if (fetchedMessages && fetchedMessages.length > 0) {
-      // Convert response data to Message type
-      const mappedMessages: Message[] = fetchedMessages.map((msg: ConversationContentResponseDTO): Message => ({
-        id: msg.id,
-        conversationId: msg.conversationId,
-        role: msg.role || (msg.userQuery ? 'user' : 'assistant'),
-        content: msg.content || msg.userQuery || msg.agentResponse || '',
-        createdAt: msg.createdAt
-      }));
-      setMessages(mappedMessages);
+      console.log('Setting messages in store:', fetchedMessages.length);
+      setMessages(fetchedMessages);
     }
   }, [fetchedMessages, setMessages]);
 
   // Start a new conversation
   const startConversationMutation = useMutation({
-    mutationFn: (managerType: ManagerType) => conversationApi.createConversation(managerType),
+    mutationFn: async (managerType: ManagerType) => {
+      try {
+        const response = await conversationApi.createConversation(managerType);
+        console.log('Started new conversation:', response);
+        return response;
+      } catch (error) {
+        console.error('Error starting conversation:', error);
+        setError('Failed to start new conversation. Please try again.');
+        throw error;
+      }
+    },
     onSuccess: (data) => {
-      console.log('Started new conversation:', data);
+      console.log('Setting new conversation:', data);
       setCurrentConversation(data);
       setMessages([]);
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      setTimeout(() => refetchConversations(), 300);
-    },
-    onError: (error: Error) => {
-      console.error('Error starting conversation:', error);
+      refetchConversations();
     }
   });
 
+  // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: string; userQuery: string }) => {
-      console.log('Sending message:', data);
-      
-      // Add user message to UI immediately
-      const userMessage: Message = {
-        id: uuidv4(),
-        conversationId: data.conversationId,
-        role: 'user',
-        content: data.userQuery,
-        createdAt: new Date().toISOString()
-      };
-      addMessage(userMessage);
-
       try {
-        // Make API call
+        console.log('Sending message:', data);
         const response = await conversationApi.sendMessage(data.conversationId, data.userQuery);
-        console.log('Received AI response:', response);
-        
-        // Add AI response to UI
-        const aiMessage: Message = {
-          id: uuidv4(),
-          conversationId: response.conversationId,
-          role: 'assistant',
-          content: response.agentResponse || '',
-          createdAt: new Date().toISOString()
-        };
-        addMessage(aiMessage);
-
+        console.log('Message sent successfully:', response);
         return response;
       } catch (error) {
         console.error('Error sending message:', error);
+        setError('Failed to send message. Please try again.');
         throw error;
       }
     },
     onMutate: () => {
       setIsLoading(true);
+      setError(null);
     },
     onSettled: () => {
       setIsLoading(false);
       if (conversationId) {
         refetchMessages();
       }
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    },
-    onError: (error: Error) => {
-      console.error('Error in message mutation:', error);
+      refetchConversations();
     }
   });
 
+  // Delete conversation mutation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      try {
+        await conversationApi.deleteConversation(conversationId);
+        console.log('Conversation deleted:', conversationId);
+      } catch (error) {
+        console.error('Error deleting conversation:', error);
+        setError('Failed to delete conversation. Please try again.');
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      refetchConversations();
+    }
+  });
+
+  // Helper functions
   const sendMessage = (data: { conversationId: string; userQuery: string }) => 
     sendMessageMutation.mutate(data);
 
@@ -191,21 +155,18 @@ export const useConversation = (conversationId?: string) => {
     });
   };
 
-  const deleteConversationMutation = useMutation({
-    mutationFn: (conversationId: string) => conversationApi.deleteConversation(conversationId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      setTimeout(() => refetchConversations(), 300);
-    }
-  });
+  const deleteConversation = (conversationId: string) =>
+    deleteConversationMutation.mutate(conversationId);
 
   return {
     conversations,
-    messages,
+    messages: fetchedMessages,
     isLoading,
+    error,
     sendMessage,
     startConversation,
-    deleteConversation: deleteConversationMutation.mutate,
-    refetchConversations
+    deleteConversation,
+    refetchConversations,
+    refetchMessages
   };
 }; 

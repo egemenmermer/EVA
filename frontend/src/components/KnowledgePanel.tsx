@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { getKnowledgeArtifacts, getConversationMessages, generateKnowledgeArtifacts } from '../services/api';
+import { getKnowledgeArtifacts, getConversationMessages } from '../services/api';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import './KnowledgePanel.css';
 import { useStore } from '../store/useStore';
@@ -54,7 +54,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   const { messages } = useStore();
   const prevConversationIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const lastMessageRef = useRef<string | null>(null);
 
   const maxRetries = 2;
   const retryDelay = 3000;
@@ -167,71 +166,44 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     }
   }, []);
 
-  const shouldGenerateForNewMessage = useCallback(() => {
-    if (messages.length === 0) return false;
-    
-    const lastMessage = messages[messages.length - 1];
-    
-    if (lastMessage.role !== 'user' || lastMessage.conversationId !== conversationId) {
-      return false;
-    }
-    
-    if (lastMessageRef.current !== lastMessage.content) {
-      lastMessageRef.current = lastMessage.content;
-      return true;
-    }
-    
-    return false;
-  }, [messages, conversationId]);
-
-  const fetchArtifacts = useCallback(async (skipCache: boolean = false, forceGenerate: boolean = false) => {
+  const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
     if (!conversationId) {
-      console.log("No conversation ID provided, cannot fetch artifacts");
+      addDebugLog("Fetch skipped: No conversation ID");
       setIsLoading(false);
       return;
     }
 
-    console.log(`fetchArtifacts called for ${conversationId}, skipCache=${skipCache}, hasAttemptedFetch=${hasAttemptedFetch}`);
+    addDebugLog(`fetchArtifacts called for ${conversationId}, skipCache=${skipCache}`);
 
-    if (hasAttemptedFetch && !skipCache && !forceGenerate) {
-      console.log(`Already attempted fetch for ${conversationId}, not fetching again`);
+    if (!skipCache && checkExistingArtifacts(conversationId)) {
+      addDebugLog(`Using cached artifacts for ${conversationId}`);
+      setHasAttemptedFetch(true);
       setIsLoading(false);
-      return;
-    }
-
-    if (!skipCache && !forceGenerate && checkExistingArtifacts(conversationId)) {
-      console.log(`Using cached artifacts for ${conversationId}`);
       return;
     }
 
     if (abortControllerRef.current) {
-      console.log("Aborting previous fetch request");
+      addDebugLog("Aborting previous fetch request");
       abortControllerRef.current.abort();
     }
     
     abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     
     setIsLoading(true);
     setError(null);
+    setGivenUp(false);
     
     try {
-      let response;
-      
-      if (forceGenerate || shouldGenerateForNewMessage()) {
-        console.log(`Starting direct generation for conversation ${conversationId}`);
-        response = await generateKnowledgeArtifacts(conversationId);
-        addDebugLog(`Generated new artifacts directly for new message`);
-      } else {
-        console.log(`Starting network fetch for conversation ${conversationId}`);
-        response = await getKnowledgeArtifacts(conversationId);
-      }
+      addDebugLog(`Starting network fetch for conversation ${conversationId}`);
+      const response = await getKnowledgeArtifacts(conversationId);
       
       if (conversationId !== prevConversationIdRef.current) {
-        console.log("Conversation changed during fetch, discarding results");
+        addDebugLog("Conversation changed during fetch, discarding results for " + conversationId);
         return;
       }
       
-      console.log(`Fetch successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
+      addDebugLog(`Fetch successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
       
       if (response) {
         setGuidelines(response.guidelines || []);
@@ -250,145 +222,87 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setDebugInfo(JSON.stringify(debugData, null, 2));
         
         setHasAttemptedFetch(true);
+        setRetryCount(0);
+      } else {
+        addDebugLog("API returned null or undefined response.");
+        setGuidelines([]);
+        setCaseStudies([]);
+        setHasAttemptedFetch(true);
       }
     } catch (err) {
-      console.error(`Error in fetchArtifacts for ${conversationId}:`, err);
-      
       if (err instanceof DOMException && err.name === "AbortError") {
-        console.log("Request was aborted");
+        addDebugLog("Fetch request was intentionally aborted for " + conversationId);
         return;
       }
       
-      setError("Failed to load guidelines and case studies");
+      console.error(`Error in fetchArtifacts for ${conversationId}:`, err);
+      addDebugLog(`Fetch error: ${err instanceof Error ? err.message : String(err)}`);
+      setError("Failed to load guidelines and case studies.");
       
       if (retryCount < maxRetries) {
-        console.log(`Will retry in ${retryDelay}ms (retry ${retryCount + 1}/${maxRetries})`);
+        addDebugLog(`Scheduling retry ${retryCount + 1}/${maxRetries} in ${retryDelay}ms`);
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
         }, retryDelay);
       } else {
+        addDebugLog(`Max retries reached for ${conversationId}. Giving up.`);
         setGivenUp(true);
       }
     } finally {
-      console.log(`Fetch attempt complete, setting isLoading=false`);
-      setIsLoading(false);
-      abortControllerRef.current = null;
-    }
-  }, [conversationId, hasAttemptedFetch, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef, shouldGenerateForNewMessage, addDebugLog]);
-
-  const generateArtifacts = useCallback(async () => {
-    if (!conversationId) return;
-    
-    console.log(`Manually generating artifacts for conversation ${conversationId}`);
-    
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
-    abortControllerRef.current = new AbortController();
-    
-    setIsLoading(true);
-    setError(null);
-    setGivenUp(false);
-    
-    try {
-      const response = await generateKnowledgeArtifacts(conversationId);
-      
-      if (conversationId !== prevConversationIdRef.current) {
-        console.log("Conversation changed during generation, discarding results");
-        return;
+      if (!signal.aborted) {
+        addDebugLog(`Fetch attempt complete for ${conversationId}, setting isLoading=false`);
+        setIsLoading(false);
       }
-      
-      console.log(`Generation successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
-      
-      setGuidelines(response.guidelines || []);
-      setCaseStudies(response.caseStudies || []);
-      
-      setExpandedGuidelines(new Set());
-      setExpandedCaseStudies(new Set());
-      
-      setHasAttemptedFetch(true);
-    } catch (err) {
-      console.error(`Error generating artifacts for ${conversationId}:`, err);
-      
-      if (err instanceof DOMException && err.name === "AbortError") {
-        console.log("Generation request was aborted");
-        return;
+      if (abortControllerRef.current && abortControllerRef.current.signal === signal) {
+          abortControllerRef.current = null;
       }
-      
-      setError("Failed to generate guidelines and case studies");
-    } finally {
-      console.log("Generation attempt complete");
-      setIsLoading(false);
-      abortControllerRef.current = null;
     }
-  }, [conversationId, prevConversationIdRef]);
+  }, [conversationId, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef, addDebugLog]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
       if (prevConversationIdRef.current) {
         addDebugLog(`Conversation changed from ${prevConversationIdRef.current} to ${conversationId}`);
-        resetState();
       }
+      resetState();
       prevConversationIdRef.current = conversationId;
     }
   }, [conversationId, addDebugLog, resetState]);
   
   useEffect(() => {
     if (isOpen && conversationId) {
-      const shouldLoadArtifacts = !hasAttemptedFetch || 
-        (guidelines.length === 0 && caseStudies.length === 0);
-      
-      if (shouldLoadArtifacts) {
-        console.log(`KnowledgePanel initializing for conversation: ${conversationId}`);
+      addDebugLog(`Panel opened or conversation ID changed to: ${conversationId}. Has attempted fetch: ${hasAttemptedFetch}`);
+      if (!hasAttemptedFetch) {
+        addDebugLog(`Initial fetch triggered for ${conversationId}`);
         setIsLoading(true);
+        const timer = setTimeout(() => {
+          fetchArtifacts(false);
+        }, initialDelay);
+        return () => clearTimeout(timer);
       } else {
-        console.log(`KnowledgePanel already has data for conversation: ${conversationId}`);
+        addDebugLog(`Fetch already attempted for ${conversationId}, skipping initial fetch.`);
         setIsLoading(false);
       }
     }
-  }, [conversationId, isOpen, hasAttemptedFetch, guidelines.length, caseStudies.length]);
-  
-  useEffect(() => {
-    if (!conversationId) return;
-
-    addDebugLog(`Setting up for conversation: ${conversationId}`);
-    prevConversationIdRef.current = conversationId;
-    
-    resetState();
-    
-    if (!checkExistingArtifacts(conversationId)) {
-      setIsLoading(true);
-      
-      const timer = setTimeout(() => {
-        fetchArtifacts();
-      }, initialDelay);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [conversationId, fetchArtifacts, resetState, checkExistingArtifacts, addDebugLog, initialDelay]);
+  }, [conversationId, isOpen, hasAttemptedFetch, fetchArtifacts, initialDelay, addDebugLog]);
   
   useEffect(() => {
     if (!conversationId || !isOpen) return;
     if (autoRefreshCount >= maxAutoRefreshes) {
-      addDebugLog(`Reached max auto refreshes (${maxAutoRefreshes}), stopping`);
+      addDebugLog(`Max auto-refreshes reached (${maxAutoRefreshes}).`);
       return;
     }
-    
-    const timer = setTimeout(() => {
-      if (guidelines.length === 0 && caseStudies.length === 0 && !error && !givenUp) {
-        addDebugLog(`Auto-refreshing artifacts (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
-        setAutoRefreshCount(prev => prev + 1);
-        fetchArtifacts(true);
-      }
-    }, autoRefreshInterval);
-    
-    return () => clearTimeout(timer);
-  }, [
-    isOpen, conversationId, guidelines.length, caseStudies.length,
-    autoRefreshCount, maxAutoRefreshes, autoRefreshInterval,
-    fetchArtifacts, givenUp, addDebugLog, isValidUuid, error
-  ]);
+
+    const shouldAutoRefresh = guidelines.length === 0 && caseStudies.length === 0;
+    if (shouldAutoRefresh) {
+        const timer = setTimeout(() => {
+            addDebugLog(`Auto-refreshing artifacts (${autoRefreshCount + 1}/${maxAutoRefreshes})`);
+            setAutoRefreshCount(prev => prev + 1);
+            fetchArtifacts(true);
+        }, autoRefreshInterval);
+        return () => clearTimeout(timer);
+    }
+  }, [isOpen, conversationId, guidelines.length, caseStudies.length, autoRefreshCount, maxAutoRefreshes, autoRefreshInterval, fetchArtifacts, givenUp, isLoading, error, addDebugLog]);
 
   useEffect(() => {
     if (showAllGuidelines === true) {
@@ -408,11 +322,8 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     }
   }, [showAllCaseStudies, caseStudies]);
 
-  // Notify parent when new knowledge is loaded
   useEffect(() => {
-    // Check if we have meaningful content
     if (guidelines.length > 0 || caseStudies.length > 0) {
-      // Notify parent component that we have new knowledge
       if (onNewKnowledge) {
         onNewKnowledge();
       }
@@ -535,14 +446,14 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         <div className="flex items-center gap-2">
           {isLoading && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
           <button
-            onClick={() => fetchArtifacts(true, true)}
+            onClick={() => fetchArtifacts(true)}
             className="p-1.5 text-gray-500 hover:text-blue-500 transition-colors"
             aria-label="Refresh knowledge artifacts"
             title="Refresh knowledge artifacts"
+            disabled={isLoading}
           >
             <RefreshCw className="h-4 w-4" />
           </button>
-          {/* Close button (visible on desktop) */}
           <button
             onClick={onClose}
             className="hidden md:block p-1.5 text-gray-500 hover:text-red-500 transition-colors"
@@ -554,7 +465,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         </div>
       </div>
 
-      {/* Debug info button - hidden in production */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 flex justify-between items-center">
           <button 
@@ -574,7 +484,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         </div>
       )}
 
-      {/* Debug log */}
       {showDebug && (
         <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono overflow-auto max-h-[200px]">
           <div className="mb-2">
@@ -601,37 +510,28 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       )}
 
       <div className="knowledge-content">
-        {isLoading ? (
+        {isLoading && !hasAttemptedFetch ? (
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Loading knowledge artifacts...</p>
-            {retryCount > 0 && (
-              <p className="retry-info">Retry attempt {retryCount}/{maxRetries}</p>
-            )}
           </div>
         ) : error ? (
           <div className="error-container">
+            <AlertCircle className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="error-message">{error}</p>
             {givenUp ? (
-              <div className="text-center mt-4">
-                <button 
-                  className="retry-button"
-                  onClick={() => generateArtifacts()}
-                >
-                  Generate Artifacts
-                </button>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  This will attempt to generate new artifacts for this conversation.
-                </p>
-              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Could not load artifacts after multiple retries.
+              </p>
             ) : (
               <button 
                 className="retry-button"
                 onClick={() => {
                   setRetryCount(0);
                   setGivenUp(false);
-                  fetchArtifacts(true, true);
+                  fetchArtifacts(true);
                 }}
+                disabled={isLoading}
               >
                 Retry
               </button>
@@ -686,20 +586,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
                 </div>
               )}
             </div>
-            
-            {guidelines.length === 0 && caseStudies.length === 0 && (
-              <div className="text-center mt-4">
-                <button 
-                  className="retry-button"
-                  onClick={() => generateArtifacts()}
-                >
-                  Generate Artifacts
-                </button>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  No artifacts found. Click to generate new ones.
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>

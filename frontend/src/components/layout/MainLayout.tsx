@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import PracticeModule from '../practice/PracticeModule';
 import './KnowledgePanelToggle.css';
+import { Message } from '@/types/conversation';
 
 // Format token to include Bearer prefix if needed
 const formatToken = (token: string | null): string | null => {
@@ -20,7 +21,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = () => {
-  const { darkMode, user, token, setUser, setToken } = useStore();
+  const { darkMode, user, token, setUser, setToken, currentConversation, setCurrentConversation } = useStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
@@ -28,6 +29,8 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const [showKnowledgePanel, setShowKnowledgePanel] = useState(false);
   // Track if new knowledge has been loaded (to add a pulse effect)
   const [hasNewKnowledge, setHasNewKnowledge] = useState(false);
+  // State for messages
+  const [storeMessages, setStoreMessages] = useState<Message[]>([]);
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
@@ -72,6 +75,43 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       });
     }
   }, [navigate, token, user, setUser, setToken]);
+
+  // Listen for conversation change events
+  useEffect(() => {
+    const handleConversationChangeEvent = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const details = customEvent.detail;
+      
+      if (details?.conversationId) {
+        console.log('MainLayout: Received conversation change event:', details);
+        
+        // Only update if the conversation ID has changed
+        if (!currentConversation || currentConversation.conversationId !== details.conversationId) {
+          console.log('Updating current conversation from event to:', details.conversationId);
+          
+          // Create minimum required conversation object
+          const newConversation = {
+            conversationId: details.conversationId,
+            title: details.title || 'New Conversation',
+            managerType: details.managerType || 'PUPPETEER',
+            createdAt: new Date().toISOString()
+          };
+          
+          // Update the current conversation
+          setCurrentConversation(newConversation);
+        }
+      }
+    };
+    
+    // Listen for both refresh events and new conversation events
+    window.addEventListener('refresh-conversations', handleConversationChangeEvent);
+    window.addEventListener('new-conversation', handleConversationChangeEvent);
+    
+    return () => {
+      window.removeEventListener('refresh-conversations', handleConversationChangeEvent);
+      window.removeEventListener('new-conversation', handleConversationChangeEvent);
+    };
+  }, [currentConversation, setCurrentConversation]);
 
   // Logout if we encounter an authentication error
   const handleAuthError = () => {
@@ -163,7 +203,12 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         >
           {/* Allow full width but with proper spacing */}
           <div className="w-full transition-all duration-300 px-4 mx-auto"> 
-            <ChatWindow showKnowledgePanel={showKnowledgePanel} />
+            <ChatWindow 
+              showKnowledgePanel={showKnowledgePanel}
+              currentConversation={currentConversation}
+              setStoreMessages={setStoreMessages}
+              storeMessages={storeMessages}
+            />
           </div>
         </main>
         

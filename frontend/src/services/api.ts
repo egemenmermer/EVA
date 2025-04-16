@@ -8,10 +8,13 @@ import type {
   SendMessageRequestDTO,
   FeedbackResponseDTO
 } from '@/types/api';
+import { Message } from '@/types/conversation';
 import { generateConversationTitle } from '@/utils/titleGenerator';
 import { v4 as uuid } from 'uuid';
 import { useStore } from '@/store/useStore';
 import api from './axiosConfig';
+import { agentApi, backendApi } from './axiosConfig';
+import { Conversation } from '@/types/conversation';
 
 // Default manager type to use for mock conversations
 const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
@@ -254,39 +257,77 @@ export const conversationApi = {
     debugRequest('GET', '/api/v1/conversation');
     
     try {
-      const response = await api.get<ConversationResponseDTO[]>('/api/v1/conversation');
+      // Ensure auth header is set
+      setAuthHeader();
+      
+      const response = await backendApi.get<ConversationResponseDTO[]>('/api/v1/conversation');
       const conversations = response.data;
       
       debugResponse('GET', '/api/v1/conversation', 200, conversations);
       
-      // If we received no conversations or an empty array, return mock data
+      // Return empty array if no conversations instead of mock data
       if (!conversations || (Array.isArray(conversations) && conversations.length === 0)) {
-        console.log('No conversations returned, falling back to mock data');
-        const currentManagerType = getManagerType();
-        return [createMockConversation(currentManagerType)];
+        console.log('No conversations found');
+        return [];
       }
       
-      // Otherwise, return the conversations from the API
       return conversations;
     } catch (error) {
       console.error('Error getting conversations:', error);
-      // Return mock data as fallback
-      const currentManagerType = getManagerType();
-      return [createMockConversation(currentManagerType)];
+      throw error; // Don't return mock data, let the UI handle the error
     }
   },
   
   createConversation: async (managerType: string): Promise<ConversationResponseDTO> => {
     try {
       console.log('Creating conversation with manager type:', managerType);
-      const response = await api.post<ConversationResponseDTO>('/api/v1/conversation', {
-        managerType
+      setAuthHeader();
+      
+      const response = await backendApi.post<ConversationResponseDTO>('/api/v1/conversation', {
+        managerType,
+        title: 'New Conversation' // Add a default title
       });
+      
       console.log('Created conversation:', response.data);
       return response.data;
     } catch (error) {
       console.error('Create conversation error:', error);
       throw error;
+    }
+  },
+  
+  getConversationMessages: async (conversationId: string): Promise<Message[]> => {
+    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
+    
+    try {
+      setAuthHeader();
+      
+      // Expecting an array of DTOs, each representing a single message
+      const response = await backendApi.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
+      
+      if (!Array.isArray(response.data)) {
+        console.error("Invalid response format: expected an array", response.data);
+        return [];
+      }
+      
+      // Map the DTOs directly to the Message format
+      const messages: Message[] = response.data.map(dto => ({
+        id: dto.id || uuid(), // Use ID from DTO if available
+        role: dto.role as 'user' | 'assistant', // Assert the role type
+        content: dto.content || dto.userQuery || dto.agentResponse || '', // Use content field primarily
+        conversationId: dto.conversationId,
+        createdAt: dto.createdAt || new Date().toISOString()
+      }));
+      
+      // Sort messages by createdAt just in case they are out of order
+      messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      
+      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, 200, messages);
+      return messages;
+    } catch (error) {
+      console.error(`Error getting messages for conversation ${conversationId}:`, error);
+      // Return empty array on error to prevent UI crashes
+      return []; 
     }
   },
   
@@ -298,131 +339,64 @@ export const conversationApi = {
     debugRequest('POST', '/api/v1/conversation/message', { conversationId, content, temperature });
     
     try {
+      setAuthHeader();
+      
       const payload = {
         conversationId,
-        content,
+        userQuery: content,
+        managerType: getManagerType(),
         temperature: temperature || 0.7
       };
 
       // Make the request to our agent
-      const response = await api.post('/api/v1/conversation/message', payload);
+      const response = await backendApi.post('/api/v1/conversation/message', payload);
       debugResponse('POST', '/api/v1/conversation/message', response.status, response.data);
       
-      // Log the complete response
-      console.log('Complete response from sendMessage:', JSON.stringify(response.data));
-      
-      return response.data; // New format will have messages array with loading indicator
-    } catch (error) {
-      console.error('Error calling sendMessage:', error);
-      
-      // Return a fallback response format with loading indicator
-      const timestamp = new Date().toISOString();
-      
-      return {
-        messages: [
-          {
-            id: generateId(),
-            conversationId,
-            role: 'assistant',
-            content: 'I encountered an error processing your request. Please try again.',
-            createdAt: timestamp,
-            isLoading: false
-          }
-        ]
-      };
-    }
-  },
-  
-  getConversationMessages: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
-    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
-    
-    try {
-      const response = await api.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
-      const messages = response.data;
-      
-      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, 200, messages);
-      return messages;
-    } catch (error) {
-      console.error(`Error getting messages for conversation ${conversationId}:`, error);
-      
-      // Try to get messages from localStorage as a last resort
-      try {
-        const savedMessages = localStorage.getItem(`messages-${conversationId}`);
-        if (savedMessages) {
-          return JSON.parse(savedMessages);
-        }
-      } catch (localStorageError) {
-        console.error('Error getting messages from localStorage:', localStorageError);
-      }
-      
-      // Return empty array if all else fails
-      return [];
-    }
-  },
-  
-  updateConversationTitle: async (conversationId: string, userQuery: string): Promise<string> => {
-    try {
-        console.log('Generating title for conversation:', conversationId);
-        
-        // Use a simple fallback title if the conversation is invalid or a draft
-        if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-            console.log('Using simple title for invalid/draft conversation');
-            return userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
-        }
-        
-        // Create a simple title from the first message
-        const simpleTitle = userQuery.length > 25 ? userQuery.substring(0, 25) + '...' : userQuery;
-        
-        try {
-            // Try to update the title on the backend
-            console.log('Updating title on backend:', simpleTitle);
-            const response = await api.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
-                title: simpleTitle
-            });
-            console.log('Title updated on backend:', response.data.title);
-            return response.data.title;
-        } catch (backendError) {
-            console.warn('Backend title update failed, using simple title:', backendError);
-            return simpleTitle;
-        }
-    } catch (error) {
-        console.error('Failed to generate/update title:', error);
-        return 'New Conversation';
-    }
-  },
-  
-  submitFeedback: async (
-    conversationId: string,
-    rating: number,
-    comment?: string
-  ): Promise<FeedbackResponseDTO> => {
-    try {
-      const response = await api.post<FeedbackResponseDTO>('/api/v1/feedback/submit', {
-        conversationId,
-        rating,
-        comment
-      });
       return response.data;
     } catch (error) {
-      console.error('Submit feedback error:', error);
+      console.error('Error calling sendMessage:', error);
+      throw error; // Let the UI handle the error
+    }
+  },
+  
+  updateConversationTitle: async (conversationId: string, title: string): Promise<string> => {
+    try {
+      console.log('Updating title for conversation:', conversationId);
+      setAuthHeader();
+      
+      // Don't update title for draft conversations
+      if (!conversationId || conversationId.startsWith('draft-')) {
+        return title;
+      }
+      
+      const response = await backendApi.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
+        title
+      });
+      
+      console.log('Title updated:', response.data.title);
+      return response.data.title;
+    } catch (error) {
+      console.error('Failed to update title:', error);
       throw error;
     }
   },
-
+  
   deleteConversation: async (conversationId: string): Promise<void> => {
     try {
       console.log('Deleting conversation:', conversationId);
+      setAuthHeader();
       
-      // Skip API call for invalid conversation IDs
-      if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock-')) {
-        console.log('Skipping backend delete for invalid conversationId:', conversationId);
-        return;
-      }
+      // Delete the conversation
+      await backendApi.delete(`/api/v1/conversation/${conversationId}`);
+      console.log('Successfully deleted conversation:', conversationId);
       
-      await api.delete(`/api/v1/conversation/${conversationId}`);
-      console.log('Conversation deleted successfully');
+      // Clear local storage for this conversation
+      localStorage.removeItem(`messages_${conversationId}`);
+      localStorage.removeItem(`messages-${conversationId}`);
+      localStorage.removeItem(`backup_messages_${conversationId}`);
+      localStorage.removeItem(`exact_messages_${conversationId}`);
     } catch (error) {
-      console.error('Failed to delete conversation:', error);
+      console.error('Error in deleteConversation:', error);
       throw error;
     }
   },
@@ -465,14 +439,17 @@ const generateId = () => {
   return crypto.randomUUID?.() || `msg-${Date.now()}`;
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const AGENT_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
 // Agent API calls
-export const createConversation = async () => {
+export const createConversation = async (title: string, managerType?: ManagerType) => {
   setAuthHeader();
-  const response = await axios.post(`${API_URL}/api/v1/conversation`);
+  const response = await axios.post(`${API_URL}/api/v1/conversation`, {
+    title,
+    managerType: managerType || getManagerType()
+  });
   return response.data;
 };
 
@@ -488,26 +465,47 @@ export const getConversationMessages = async (conversationId: string) => {
   return response.data;
 };
 
-export const sendMessage = async (conversationId: string, message: string, temperature: number) => {
-  setAuthHeader();
-  // For debugging - log exactly what we're sending
-  console.log("Sending message to API:", {
-    conversationId,
-    userQuery: message,
-    managerType: getManagerType(),
-    temperature
-  });
-  
-  const response = await axios.post(`${API_URL}/api/v1/conversation/message`, {
-    conversationId,
-    userQuery: message,
-    managerType: getManagerType(),
-    temperature
-  });
-  
-  // Log the response for debugging
-  console.log("API response:", response.data);
-  return response.data;
+export const sendMessage = async (
+  conversationId: string,
+  content: string,
+  managerType?: ManagerType,
+  temperature?: number
+) => {
+  try {
+    console.log(`Sending message to conversation ${conversationId}`);
+    
+    // Check if the conversation exists
+    const conversationExists = await checkConversationExists(conversationId);
+    
+    // If conversation doesn't exist, create a new one
+    if (!conversationExists) {
+      console.log(`Conversation ${conversationId} not found, creating a new one`);
+      const title = `Chat with ${managerType || 'EVA'}`;
+      const newConversation = await createConversation(title, managerType) as unknown as { conversationId: string };
+      console.log('Created new conversation:', newConversation);
+      conversationId = newConversation.conversationId;
+    }
+    
+    const payload = {
+      conversationId,
+      userQuery: content,
+      managerType: managerType || getManagerType(),
+      temperature: temperature || 0.7
+    };
+
+    console.log('Sending message payload:', payload);
+    
+    const response = await backendApi.post(
+      '/api/v1/conversation/message',
+      payload
+    );
+
+    console.log('Message sent, response:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
 };
 
 export const togglePracticeMode = async (conversationId: string, enter: boolean) => {
@@ -563,503 +561,115 @@ interface KnowledgeArtifactsResponse {
   }>;
 }
 
-// Function to save knowledge artifacts directly to the database
-const saveArtifactsToDatabase = async (
-  conversationId: string, 
-  guidelines: any[], 
-  caseStudies: any[]
-): Promise<boolean> => {
-  // Skip invalid conversation IDs
-  if (!conversationId || !conversationId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-    console.log(`Not saving artifacts for invalid UUID: ${conversationId}`);
-    return false;
-  }
-  
-  // Get the JWT token
-  const token = getToken();
-  if (!token) {
-    console.warn('No authentication token available for database save');
-    return false;
-  }
-  
-  // Set up headers with proper authentication
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': token
-  };
-  
-  console.log(`Saving artifacts to database for UUID: ${conversationId}`);
-  console.log(`Token (first 15 chars): ${token.substring(0, 15)}...`);
-  
-  // Create the request body - one consistent format for all endpoints
-  const requestBody = {
-    conversationId,
-    guidelines: guidelines || [],
-    caseStudies: caseStudies || [],
-    timestamp: new Date().toISOString()
-  };
-  
-  // Log the request body for debugging
-  console.log(`Request payload: ${JSON.stringify(requestBody).substring(0, 100)}...`);
-  
-  // Try POST to java backend /api/v1/knowledge-artifacts first
-  try {
-    console.log(`Attempting POST to /api/v1/knowledge-artifacts for ${conversationId}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    console.log(`POST to /api/v1/knowledge-artifacts response status: ${response.status}`);
-    
-    if (response.ok) {
-      console.log(`Successfully saved artifacts to database via POST to /api/v1/knowledge-artifacts`);
-      return true;
-    } else {
-      try {
-        const errorText = await response.text();
-        console.warn(`Failed to save via POST. Status: ${response.status}, Error: ${errorText}`);
-      } catch (e) {
-        console.warn(`Failed to save via POST. Status: ${response.status}`);
-      }
-      
-      if (response.status === 401) {
-        console.warn('Authentication error when saving. JWT token might be invalid. Token:', token.substring(0, 20) + '...');
-      }
-    }
-  } catch (error) {
-    console.error('Error saving to database via POST:', error);
-  }
-  
-  // If the first attempt failed, try PUT to a specific ID endpoint
-  try {
-    console.log(`Attempting PUT to /api/v1/knowledge-artifacts/${conversationId}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    console.log(`PUT to /api/v1/knowledge-artifacts/${conversationId} response status: ${response.status}`);
-    
-    if (response.ok) {
-      console.log(`Successfully saved artifacts to database via PUT to /api/v1/knowledge-artifacts/${conversationId}`);
-      return true;
-    } else {
-      try {
-        const errorText = await response.text();
-        console.warn(`Failed to save via PUT. Status: ${response.status}, Error: ${errorText}`);
-      } catch (e) {
-        console.warn(`Failed to save via PUT. Status: ${response.status}`);
-      }
-    }
-  } catch (error) {
-    console.error('Error saving to database via PUT:', error);
-  }
-  
-  // Try agent proxy endpoint as last resort
-  try {
-    console.log(`Attempting POST to /api/v1/rag-artifacts as last resort`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    console.log(`POST to /api/v1/rag-artifacts response status: ${response.status}`);
-    
-    if (response.ok) {
-      console.log(`Successfully saved artifacts to database via POST to /api/v1/rag-artifacts`);
-      return true;
-    } else {
-      try {
-        const errorText = await response.text();
-        console.warn(`Failed to save via agent proxy. Status: ${response.status}, Error: ${errorText}`);
-      } catch (e) {
-        console.warn(`Failed to save via agent proxy. Status: ${response.status}`);
-      }
-    }
-  } catch (error) {
-    console.error('Error saving to database via agent proxy:', error);
-  }
-  
-  console.error("All attempts to save to database failed");
-  return false;
-};
-
-// Update the generateKnowledgeArtifacts function to use the new save function
-export const generateKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
-  console.log(`Generating knowledge artifacts for conversation: ${conversationId}`);
-  
-  // Skip invalid conversation IDs
-  if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock')) {
-    console.log(`Not generating artifacts for invalid conversationId: ${conversationId}`);
-    return { guidelines: [], caseStudies: [] };
-  }
-  
-  // Check if conversationId is a valid UUID
-  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const isUuid = uuidPattern.test(conversationId);
-  
-  // Set up properly formatted authentication
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  
-  // Get token and ensure it's properly formatted with Bearer prefix
-  const token = getToken();
-  if (token) {
-    headers['Authorization'] = token;
-    console.log(`Using token for API call: ${token.substring(0, 15)}...`);
-  }
-  
-  try {
-    // First, try to get the last few messages for context
-    let messages: any[] = [];
-    
-    try {
-      // Only try to fetch messages if this is a valid UUID conversation
-      if (isUuid) {
-        console.log(`Fetching messages for context for UUID: ${conversationId}`);
-        const messageResponse = await fetch(`${API_URL}/api/v1/conversation/message/${conversationId}`, {
-          method: 'GET',
-          headers
-        });
-        
-        if (messageResponse.ok) {
-          const data = await messageResponse.json();
-          if (Array.isArray(data)) {
-            messages = data;
-            console.log(`Retrieved ${messages.length} messages for context`);
-          }
-        } else {
-          console.warn(`Failed to get messages, status: ${messageResponse.status}`);
-        }
-      } else {
-        console.log('Not fetching messages for non-UUID conversation ID');
-      }
-    } catch (messageError) {
-      console.warn('Error fetching messages for artifact generation:', messageError);
-    }
-    
-    // Now generate the artifacts
-    console.log(`Calling artifact generation endpoint for: ${conversationId}`);
-    
-    // Add a timeout for the request
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    // Extract the last message content or use a default if none available
-    const lastMessage = messages.length > 0 ? messages[messages.length - 1].content : null;
-    const messageContent = lastMessage || "Please generate relevant guidelines and case studies";
-    
-    // Build the request body
-    const requestBody = {
-      conversationId: conversationId,
-      message: messageContent
-    };
-    
-    // Make the API call to generate artifacts
-    const response = await fetch(`${AGENT_URL}/api/v1/generate-artifacts`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`Generation API returned status ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log(`Generation successful, received ${data.guidelines?.length || 0} guidelines and ${data.caseStudies?.length || 0} case studies`);
-    
-    // Cache the results in localStorage
-    try {
-      localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
-        ...data,
-        timestamp: new Date().toISOString()
-      }));
-      console.log(`Cached generated artifacts for ${conversationId}`);
-    } catch (cacheError) {
-      console.warn('Failed to cache artifacts to localStorage:', cacheError);
-    }
-    
-    // Save to the database if it's a valid UUID
-    if (isUuid && token) {
-      await saveArtifactsToDatabase(conversationId, data.guidelines, data.caseStudies);
-    } else {
-      console.log(`Not saving to database - ${!isUuid ? 'not a UUID' : 'no token available'}`);
-    }
-    
-    return data;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      console.error('Generation request timed out after 30 seconds');
-    } else {
-      console.error('Error generating knowledge artifacts:', error);
-    }
-    
-    // Check if there are cached results we can use as fallback
-    try {
-      const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
-      if (cachedData) {
-        const parsedCache = JSON.parse(cachedData);
-        if (parsedCache.guidelines && parsedCache.caseStudies) {
-          console.log(`Using cached artifacts as fallback after generation error for ${conversationId}`);
-          return {
-            guidelines: parsedCache.guidelines,
-            caseStudies: parsedCache.caseStudies
-          };
-        }
-      }
-    } catch (cacheError) {
-      console.warn('Failed to read cache after generation error:', cacheError);
-    }
-    
-    // Return empty data structure to prevent UI crashes
-    return {
-      guidelines: [],
-      caseStudies: []
-    };
-  }
-};
-
-// Update getKnowledgeArtifacts to use the new generation function as a last resort
+// UPDATED getKnowledgeArtifacts function
 export const getKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
   try {
-    // Skip invalid conversation IDs to avoid unnecessary network requests
+    // Skip invalid conversation IDs
     if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock')) {
       console.log(`Skipping knowledge artifacts fetch for invalid conversationId: ${conversationId}`);
       return { guidelines: [], caseStudies: [] };
     }
     
-    // Check local cache first to prevent redundant fetches
+    // Check local cache first
     try {
       const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
       if (cachedData) {
         const parsedCache = JSON.parse(cachedData);
         const cacheAge = new Date().getTime() - new Date(parsedCache.timestamp).getTime();
-        
-        // If cache is less than 10 minutes old and has content, use it
         if (cacheAge < 10 * 60 * 1000 && 
-            Array.isArray(parsedCache.guidelines) && parsedCache.guidelines.length > 0 &&
-            Array.isArray(parsedCache.caseStudies) && parsedCache.caseStudies.length > 0) {
+            (parsedCache.guidelines?.length > 0 || parsedCache.caseStudies?.length > 0)) { // Check if cache has any content
           console.log(`Using cached artifacts for ${conversationId}, cache age: ${Math.round(cacheAge/1000)}s`);
           return {
-            guidelines: parsedCache.guidelines,
-            caseStudies: parsedCache.caseStudies
+            guidelines: parsedCache.guidelines || [],
+            caseStudies: parsedCache.caseStudies || []
           };
         }
       }
     } catch (cacheError) {
-      console.warn('Failed to read from cache:', cacheError);
+      console.warn('Failed to read artifact cache:', cacheError);
     }
     
-    // Check if conversationId is in UUID format
+    // Validate UUID format
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const isUuid = uuidPattern.test(conversationId);
-    
-    // If not a UUID, skip the database fetch and go straight to generation
     if (!isUuid) {
-      console.log(`Conversation ID ${conversationId} is not in UUID format, using generation only`);
-      return await generateKnowledgeArtifacts(conversationId);
+        console.warn(`Cannot fetch artifacts for non-UUID conversation ID: ${conversationId}`);
+        // Do not call generateKnowledgeArtifacts here
+        return { guidelines: [], caseStudies: [] }; 
     }
-    
-    // Setup headers with proper authentication
+
+    // Setup headers with token
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
-    
-    // Get token and ensure it's properly formatted
     const token = getToken();
     if (token) {
       headers['Authorization'] = token;
-      console.log(`Using token for API call: ${token.substring(0, 15)}...`);
     } else {
-      console.warn('No authentication token available for database fetch');
-      // Without a token, we can't access the database, so go to generation
-      return await generateKnowledgeArtifacts(conversationId);
+      console.warn('No authentication token available for artifact fetch');
+      // Cannot fetch from backend without token
+      return { guidelines: [], caseStudies: [] }; 
     }
     
-    // First try to fetch from backend database (only if UUID and token available)
+    // Fetch from backend database
     console.log(`Fetching knowledge artifacts from database for UUID: ${conversationId}`);
+    const timestamp = new Date().getTime(); // Cache buster
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for fetch
     
     try {
-      // Add timestamp to prevent caching
-      const timestamp = new Date().getTime();
-      
-      // Add signal for abort capability
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-      
-      // Use the correct endpoint to match the Java backend
+      // Use the correct API_URL (pointing to backend 8443) and endpoint
       const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}?_=${timestamp}`, { 
         method: 'GET',
         headers,
         signal: controller.signal
       });
-      
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
-        console.log(`Database response status: ${response.status}`);
+        console.log(`Artifact fetch status: ${response.status}`);
         
-        if (data && 
-            Array.isArray(data.guidelines) && 
-            Array.isArray(data.caseStudies)) {
-          
-          // If the database returned content, use it
-          if (data.guidelines.length > 0 || data.caseStudies.length > 0) {
-            console.log(`Database returned ${data.guidelines.length} guidelines and ${data.caseStudies.length} case studies`);
-            
-            // Cache the results
+        if (data && Array.isArray(data.guidelines) && Array.isArray(data.caseStudies)) {
+            // Cache the results from backend
             try {
               localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
                 guidelines: data.guidelines || [],
                 caseStudies: data.caseStudies || [],
                 timestamp: new Date().toISOString()
               }));
-              console.log("Cached database response to localStorage");
             } catch (err) {
               console.warn('Failed to cache artifacts to localStorage');
             }
-            
             return {
               guidelines: data.guidelines || [],
               caseStudies: data.caseStudies || []
             };
-          }
-          
-          console.log('Database returned empty results, generating new artifacts');
+        } else {
+           console.warn('Received malformed artifact data from backend');
+           return { guidelines: [], caseStudies: [] }; // Return empty on malformed data
         }
-      } else if (response.status === 401) {
-        console.warn('Authentication error when fetching from database. Token might be invalid.');
       } else {
-        console.log(`Database API returned status ${response.status}`);
+        // Handle non-OK responses (like 404 if backend hasn't generated yet, or 401)
+        console.warn(`Backend artifact fetch failed: Status ${response.status}`);
+        // Do not call generateKnowledgeArtifacts here
+        return { guidelines: [], caseStudies: [] }; // Return empty on fetch error
       }
     } catch (error) {
+      clearTimeout(timeoutId); // Clear timeout in case of non-fetch error
       if (error instanceof DOMException && error.name === 'AbortError') {
-        console.log('Database fetch timed out after 3 seconds');
+        console.log('Artifact fetch timed out after 5 seconds');
       } else {
-        console.log('Error fetching from database API:', error);
+        console.error('Error fetching artifacts from backend API:', error);
       }
-    }
-    
-    // If database retrieval failed or returned empty data, generate new artifacts
-    console.log('Generating new artifacts');
-    const generatedData = await generateKnowledgeArtifacts(conversationId);
-
-    // If generation gave us artifacts and we have a valid UUID with token, try harder to save to database
-    if (generatedData && 
-        ((generatedData.guidelines && generatedData.guidelines.length > 0) || 
-         (generatedData.caseStudies && generatedData.caseStudies.length > 0)) && 
-        isUuid && token) {
-      console.log('Attempting multiple approaches to save artifacts to database');
-      
-      // Try up to three different approaches
-      
-      // 1. First approach: PUT to /knowledge-artifacts/{conversationId}
-      try {
-        console.log(`Trying PUT to /api/v1/knowledge-artifacts/${conversationId}`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({
-            guidelines: generatedData.guidelines || [],
-            caseStudies: generatedData.caseStudies || []
-          }),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          console.log('Successfully saved artifacts via PUT /knowledge-artifacts/{id}');
-        } else {
-          console.warn(`Failed with status ${response.status}, trying next approach`);
-        }
-      } catch (error) {
-        console.warn('Error with first save approach:', error);
-      }
-      
-      // 2. Second approach: POST to /rag-artifacts
-      try {
-        console.log('Trying POST to /api/v1/rag-artifacts');
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(`${API_URL}/api/v1/rag-artifacts`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            conversationId: conversationId,
-            guidelines: generatedData.guidelines || [],
-            caseStudies: generatedData.caseStudies || [],
-            timestamp: new Date().toISOString()
-          }),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          console.log('Successfully saved artifacts via POST to /rag-artifacts');
-        } else {
-          console.warn(`Failed with status ${response.status}, trying final approach`);
-        }
-      } catch (error) {
-        console.warn('Error with second save approach:', error);
-      }
-      
-      // 3. Final approach: Direct SQL API (if available)
-      try {
-        console.log('Trying direct SQL approach via the agent API');
-        // This is a hypothetical approach - would need a direct SQL endpoint
-        // Use the direct save function if it exists
-        await saveArtifactsToDatabase(conversationId, generatedData.guidelines, generatedData.caseStudies);
-      } catch (error) {
-        console.warn('Error with final save approach:', error);
-        console.error('All attempts to save to database failed');
-      }
+      // Do not call generateKnowledgeArtifacts here
+      return { guidelines: [], caseStudies: [] }; // Return empty on error
     }
 
-    return generatedData;
   } catch (error) {
+    // Catch any unexpected errors in the outer try
     console.error('Unexpected error in getKnowledgeArtifacts:', error);
-    // Return empty data to prevent UI crashes
-    return {
-      guidelines: [],
-      caseStudies: []
-    };
+    return { guidelines: [], caseStudies: [] };
   }
 };
 
@@ -1099,3 +709,14 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Helper function to check if a conversation exists
+export const checkConversationExists = async (conversationId: string): Promise<boolean> => {
+  try {
+    const response = await backendApi.get<Conversation>(`/api/v1/conversation/${conversationId}`);
+    return response?.data?.conversationId === conversationId;
+  } catch (error) {
+    console.error('Error checking conversation:', error);
+    return false;
+  }
+};
