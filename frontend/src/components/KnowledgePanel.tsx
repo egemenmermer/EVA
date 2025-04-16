@@ -223,6 +223,18 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         
         setHasAttemptedFetch(true);
         setRetryCount(0);
+        
+        if ((response.guidelines?.length === 0 || !response.guidelines) && 
+            (response.caseStudies?.length === 0 || !response.caseStudies)) {
+          addDebugLog("No artifacts found, will retry once after delay");
+          setTimeout(() => {
+            if (retryCount === 0) {
+              addDebugLog("Retrying artifact fetch");
+              setRetryCount(1);
+              fetchArtifacts(true);
+            }
+          }, 3000);
+        }
       } else {
         addDebugLog("API returned null or undefined response.");
         setGuidelines([]);
@@ -329,6 +341,19 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       }
     }
   }, [guidelines.length, caseStudies.length, onNewKnowledge]);
+
+  useEffect(() => {
+    if (conversationId && isOpen) {
+      addDebugLog(`Conversation changed to ${conversationId}, fetching artifacts`);
+      setIsLoading(true);
+      setGuidelines([]);
+      setCaseStudies([]);
+      localStorage.removeItem(`artifacts-${conversationId}`);
+      setTimeout(() => {
+        fetchArtifacts(true);
+      }, 500);
+    }
+  }, [conversationId]);
 
   const truncateText = (text: string, maxLength: number = 250): string => {
     if (!text) return '';

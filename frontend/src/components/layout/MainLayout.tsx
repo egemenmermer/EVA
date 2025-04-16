@@ -113,6 +113,35 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     };
   }, [currentConversation, setCurrentConversation]);
 
+  // Listen for refresh-conversations events which might indicate a new conversation
+  useEffect(() => {
+    const handleRefreshEvent = (event: CustomEvent) => {
+      console.log('Refresh event received in MainLayout', event.detail);
+      
+      // Check if the event contains a new conversation flag
+      // But don't automatically open the knowledge panel
+      if (event.detail?.isNewConversation) {
+        console.log('New conversation created, but keeping knowledge panel closed by default');
+        setHasNewKnowledge(true); // Just set the indicator that there's new knowledge
+          
+        // Auto-clear the pulse effect after 5 seconds
+        const timer = setTimeout(() => {
+          setHasNewKnowledge(false);
+        }, 5000);
+          
+        return () => clearTimeout(timer);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('refresh-conversations' as any, handleRefreshEvent as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('refresh-conversations' as any, handleRefreshEvent as EventListener);
+    };
+  }, [currentConversation]);
+
   // Logout if we encounter an authentication error
   const handleAuthError = () => {
     console.log('Authentication error detected, clearing token and redirecting to login');
@@ -126,6 +155,24 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const handleMainContentClick = () => {
     if (window.innerWidth < 768 && sidebarOpen) {
       setSidebarOpen(false);
+    }
+  };
+
+  // Add a function to handle knowledge panel toggle
+  const handleKnowledgePanelToggle = () => {
+    // Toggle the panel visibility
+    setShowKnowledgePanel(!showKnowledgePanel);
+    setHasNewKnowledge(false); // Clear pulse effect on click
+    
+    // If we're opening the panel and have a current conversation, trigger artifact fetching
+    if (!showKnowledgePanel && currentConversation?.conversationId) {
+      // We can use the conversation ID to fetch artifacts
+      console.log(`Opening knowledge panel - ensuring artifacts for conversation ${currentConversation.conversationId}`);
+      
+      // Force a refresh of the artifacts by removing them from localStorage
+      localStorage.removeItem(`artifacts-${currentConversation.conversationId}`);
+      
+      // The KnowledgePanel component will automatically try to fetch them
     }
   };
 
@@ -217,10 +264,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           {/* Knowledge Panel Toggle Button - Always visible */}
           <div className="hidden md:block">
             <button 
-              onClick={() => {
-                setShowKnowledgePanel(!showKnowledgePanel);
-                setHasNewKnowledge(false); // Clear pulse effect on click
-              }}
+              onClick={handleKnowledgePanelToggle}
               className={`knowledge-panel-toggle ${hasNewKnowledge && !showKnowledgePanel ? 'has-new-content' : ''}`}
               aria-label={showKnowledgePanel ? "Hide knowledge panel" : "Show knowledge panel"}
               style={{ right: showKnowledgePanel ? '320px' : '0' }}

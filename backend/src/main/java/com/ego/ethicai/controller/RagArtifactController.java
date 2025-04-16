@@ -95,67 +95,64 @@ public class RagArtifactController {
     public ResponseEntity<RagArtifactsResponseDTO> getArtifacts(
             @PathVariable String conversationId,
             @CurrentUser CustomUserDetails currentUser) {
+        final String operationId = UUID.randomUUID().toString().substring(0, 8);
+        log.info("[GetArtifactsController-{}] START - Received request for conversation: {} by user: {}", 
+                 operationId, conversationId, currentUser.getEmail());
+        
+        if (conversationId == null || conversationId.isEmpty()) {
+            log.warn("[GetArtifactsController-{}] WARN - Invalid conversation ID provided: null or empty", operationId);
+            // Return 400 Bad Request for invalid input - empty body or simple error DTO
+            return ResponseEntity.badRequest().build(); // Or return a DTO with just the ID if needed
+        }
+        
+        // Convert string to UUID, handling potential format issues
+        UUID conversationUuid;
         try {
-            log.info("Retrieving RAG artifacts for conversation: {} by user: {}", 
-                    conversationId, currentUser.getEmail());
+            conversationUuid = UUID.fromString(conversationId);
+            log.info("[GetArtifactsController-{}] Parsed conversation ID to UUID: {}", operationId, conversationUuid);
+        } catch (IllegalArgumentException e) {
+            log.warn("[GetArtifactsController-{}] WARN - Could not convert conversation ID to UUID: {}", operationId, conversationId);
+            // Return 400 Bad Request for invalid UUID format
+             return ResponseEntity.badRequest().build(); // Or return a DTO with just the ID if needed
+        }
+        
+        try {
+            log.info("[GetArtifactsController-{}] Calling RagArtifactService.getArtifacts for UUID: {}", operationId, conversationUuid);
+            List<RagArtifactsResponseDTO> serviceResponse = ragArtifactService.getArtifacts(conversationUuid);
             
-            if (conversationId == null || conversationId.isEmpty()) {
-                log.warn("Invalid conversation ID provided: null or empty");
-                return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
-                        .guidelines(List.of())
-                        .caseStudies(List.of())
-                        .build());
+            // Log the raw service response IMMEDIATELY
+            if (serviceResponse == null) {
+                 log.warn("[GetArtifactsController-{}] WARN - RagArtifactService returned null for UUID: {}", operationId, conversationUuid);
+                 // Treat null response as not found
+                 return ResponseEntity.notFound().build();
+            } else {
+                 log.info("[GetArtifactsController-{}] RagArtifactService returned list of size {} for UUID: {}", 
+                          operationId, serviceResponse.size(), conversationUuid);
             }
             
-            // Convert string to UUID, handling potential format issues
-            UUID conversationUuid;
-            try {
-                conversationUuid = UUID.fromString(conversationId);
-                log.debug("Successfully converted conversation ID to UUID: {}", conversationUuid);
-            } catch (IllegalArgumentException e) {
-                log.warn("Could not convert conversation ID to UUID: {}", conversationId);
-                log.debug("UUID conversion error: {}", e.getMessage());
-                // Return empty response for invalid UUID
-                return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
-                        .conversationId(conversationId)
-                        .guidelines(List.of())
-                        .caseStudies(List.of())
-                        .build());
-            }
-            
-            try {
-                List<RagArtifactsResponseDTO> response = ragArtifactService.getArtifacts(conversationUuid);
+            // Check if the list is empty or the DTO inside indicates no data was found
+            // The service now returns a list containing one DTO, even if empty, so check the content
+            if (serviceResponse.isEmpty() || 
+               (serviceResponse.get(0).getGuidelines().isEmpty() && serviceResponse.get(0).getCaseStudies().isEmpty())) {
                 
-                if (response.isEmpty()) {
-                    log.info("No artifacts found for conversation: {}", conversationId);
-                    return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
-                            .conversationId(conversationId)
-                            .guidelines(List.of())
-                            .caseStudies(List.of())
-                            .build());
-                }
-                
-                log.info("Successfully retrieved RAG artifacts for conversation: {}", conversationId);
-                return ResponseEntity.ok(response.get(0));
-            } catch (Exception e) {
-                log.error("Service error retrieving RAG artifacts for conversation {}: {}", 
-                        conversationId, e.getMessage(), e);
-                // Return empty collection instead of error to allow frontend to continue
-                return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
-                        .conversationId(conversationId)
-                        .guidelines(List.of())
-                        .caseStudies(List.of())
-                        .build());
+                log.info("[GetArtifactsController-{}] No artifacts found by service for conversation UUID: {}. Returning 404.", 
+                         operationId, conversationUuid);
+                // Return 404 Not Found if service explicitly returned empty
+                return ResponseEntity.notFound().build(); 
             }
+            
+            // If we have data, return it
+            RagArtifactsResponseDTO responseData = serviceResponse.get(0); // Assuming service returns list of 1
+            log.info("[GetArtifactsController-{}] SUCCESS - Returning {} guidelines and {} case studies for conversation UUID: {}", 
+                     operationId, responseData.getGuidelines().size(), responseData.getCaseStudies().size(), conversationUuid);
+            return ResponseEntity.ok(responseData);
+            
         } catch (Exception e) {
-            log.error("Unexpected error retrieving RAG artifacts for conversation {}: {}", 
-                    conversationId, e.getMessage(), e);
-            // Return empty collection instead of error to allow frontend to continue
-            return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
-                    .conversationId(conversationId)
-                    .guidelines(List.of())
-                    .caseStudies(List.of())
-                    .build());
+            log.error("[GetArtifactsController-{}] SERVICE ERROR - Error calling RagArtifactService for conversation {}: {}", 
+                      operationId, conversationId, e.getMessage(), e);
+            // Return 500 Internal Server Error for service layer exceptions
+            // Consider sending a generic error response without sensitive details
+            return ResponseEntity.internalServerError().build(); 
         }
     }
 

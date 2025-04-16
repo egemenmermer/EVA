@@ -332,6 +332,7 @@ async def start_conversation(
 )
 async def generate_response(
     query: Query,
+    background_tasks: BackgroundTasks,
     agent: LangChainAgent = Depends(get_agent)
 ) -> ConversationContentResponseDTO:
     """Generate a response to an ethical query - stateless version."""
@@ -373,6 +374,7 @@ async def generate_response(
         """
         
         # Make a direct call to the LLM
+        response_content = ""
         try:
             messages = [
                 SystemMessage(content=system_message),
@@ -380,54 +382,48 @@ async def generate_response(
             ]
             
             response = llm.invoke(messages)
-            content = response.content
-            logger.info(f"Generated response (first 50 chars): {content[:50]}...")
+            response_content = response.content # Store content
+            logger.info(f"Generated response (first 50 chars): {response_content[:50]}...")
             
-            # Create response DTO
-            response_dto = ConversationContentResponseDTO(
-                id=str(uuid.uuid4()),
-                conversationId=query.conversationId,
-                userQuery=query.userQuery,
-                agentResponse=content,
-                content=content,
-                role="assistant",
-                createdAt=datetime.utcnow().isoformat(),
-                inPracticeMode=False,
-                practiceScore=None
-            )
-            
-            # Start background task to update conversation title and fetch RAG artifacts
-            background_tasks = BackgroundTasks()
+        except Exception as llm_error:
+            logger.error(f"Error from LLM: {str(llm_error)}")
+            response_content = """I apologize, but I encountered an error generating a response. 
+            Please try asking your question again, or rephrase it slightly."""
+
+        # Create response DTO
+        response_dto = ConversationContentResponseDTO(
+            id=str(uuid.uuid4()),
+            conversationId=query.conversationId,
+            userQuery=query.userQuery,
+            agentResponse=response_content,
+            content=response_content, # Use stored content
+            role="assistant",
+            createdAt=datetime.utcnow().isoformat(),
+            inPracticeMode=False,
+            practiceScore=None
+        )
+        
+        # Add background task to the injected background_tasks object
+        # Only add task if LLM didn't error out and we have valid content
+        if response_content and "I apologize" not in response_content:
+            logger.info(f"Adding background task update_conversation_context for conv {query.conversationId}")
             background_tasks.add_task(
                 update_conversation_context,
                 query.conversationId,
                 query.userQuery,
-                content
+                response_content # Pass the actual response content
             )
-            
-            return response_dto
-            
-        except Exception as llm_error:
-            logger.error(f"Error from LLM: {str(llm_error)}")
-            content = """I apologize, but I encountered an error generating a response. 
-            Please try asking your question again, or rephrase it slightly."""
-            
-            return ConversationContentResponseDTO(
-                id=str(uuid.uuid4()),
-                conversationId=query.conversationId,
-                userQuery=query.userQuery,
-                agentResponse=content,
-                content=content,
-                role="assistant",
-                createdAt=datetime.utcnow().isoformat(),
-                inPracticeMode=False,
-                practiceScore=None
-            )
+        else:
+             logger.warning(f"Skipping background task due to LLM error or empty response for conv {query.conversationId}")
+        
+        # Return the DTO directly. FastAPI handles running tasks added to the dependency.
+        return response_dto
             
     except Exception as e:
         logger.error(f"Error generating response: {str(e)}")
         logger.error(traceback.format_exc())
         
+        # Return an error DTO, no background task will run here
         return ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=query.conversationId,
@@ -442,6 +438,7 @@ async def generate_response(
 
 async def update_conversation_context(conversation_id: str, user_query: str, agent_response: str):
     """Background task to update conversation context, title, and fetch RAG artifacts."""
+    logger.info(f"[Background Task START] update_conversation_context for conv {conversation_id}")
     try:
         # Get the authorization token
         auth_header = os.getenv("CURRENT_AUTH_TOKEN")
@@ -451,49 +448,46 @@ async def update_conversation_context(conversation_id: str, user_query: str, age
         }
         if auth_header:
             headers["Authorization"] = auth_header
+            logger.info(f"[Background Task] Using auth token: {auth_header[:20]}...")
+        else:
+            logger.warning("[Background Task] No auth token found in env for backend calls.")
+            # Depending on backend security, may need to handle this case
             
-        # Update conversation title if it's a new conversation
+        # 1. Update conversation title
         try:
             title = user_query[:50] + ("..." if len(user_query) > 50 else "")
+            logger.info(f"[Background Task] Attempting to update title for conv {conversation_id} to: '{title}'")
             async with httpx.AsyncClient() as client:
-                await client.post(
+                update_title_response = await client.post(
                     f"{BACKEND_BASE_URL}/api/v1/conversation/{conversation_id}/update-title",
                     json={"title": title},
-                    headers=headers
+                    headers=headers,
+                    timeout=5.0
                 )
+                update_title_response.raise_for_status() # Raise errors for bad responses
+                logger.info(f"[Background Task] Successfully updated title for conv {conversation_id}. Status: {update_title_response.status_code}")
+        except httpx.TimeoutException:
+             logger.warning(f"[Background Task] Timeout updating title for conv {conversation_id}")
+        except httpx.HTTPStatusError as http_err:
+             logger.warning(f"[Background Task] HTTP error updating title for conv {conversation_id}: {http_err.response.status_code} - {http_err.response.text[:100]}")
         except Exception as e:
-            logger.warning(f"Could not update conversation title: {str(e)}")
+            logger.warning(f"[Background Task] Could not update conversation title for conv {conversation_id}: {str(e)}")
             
-        # Fetch RAG artifacts in the background
+        # 2. Generate and save RAG artifacts
         try:
-            agent = get_agent()
-            artifacts = await generate_artifacts(
-                ArtifactGenerationRequest(
-                    query=user_query,
-                    max_guidelines=3,
-                    max_case_studies=2
-                ),
-                agent
-            )
-            
-            # Send artifacts to backend
-            if artifacts and (artifacts.guidelines or artifacts.caseStudies):
-                async with httpx.AsyncClient() as client:
-                    await client.post(
-                        f"{BACKEND_BASE_URL}/api/v1/rag-artifacts",
-                        json={
-                            "conversationId": conversation_id,
-                            "guidelines": [g.dict() for g in artifacts.guidelines],
-                            "caseStudies": [cs.dict() for cs in artifacts.caseStudies]
-                        },
-                        headers=headers
-                    )
+            logger.info(f"[Background Task] Calling generate_and_save_artifacts for conv {conversation_id}")
+            agent = get_agent() # Get a fresh agent instance for the background task
+            await generate_and_save_artifacts(agent, user_query, conversation_id, auth_header)
+            logger.info(f"[Background Task] Finished generate_and_save_artifacts call for conv {conversation_id}")
         except Exception as e:
-            logger.warning(f"Could not generate or save RAG artifacts: {str(e)}")
+            logger.error(f"[Background Task ERROR] Could not generate or save RAG artifacts for conv {conversation_id}: {str(e)}")
+            logger.error(traceback.format_exc())
             
     except Exception as e:
-        logger.error(f"Error in background task: {str(e)}")
+        logger.error(f"[Background Task FATAL] Error in update_conversation_context for conv {conversation_id}: {str(e)}")
         logger.error(traceback.format_exc())
+    finally:
+         logger.info(f"[Background Task END] update_conversation_context for conv {conversation_id}")
 
 @app.post("/practice-mode",
     response_model=ConversationContentResponseDTO,
@@ -1129,6 +1123,7 @@ async def send_message(
     request: Request,
     agent: LangChainAgent = Depends(get_agent)
 ):
+    """Handle message sending requests from the frontend."""
     try:
         body = await request.json()
         logger.info(f"Send message request received: {body}")
@@ -1141,7 +1136,7 @@ async def send_message(
                 status_code=401,
                 content={"error": "Unauthorized - No auth token provided"}
             )
-
+        
         # Save the authorization token for future use
         os.environ["CURRENT_AUTH_TOKEN"] = auth_header
         logger.info("Saved authorization token for backend communication")
@@ -1216,6 +1211,10 @@ async def send_message(
             except Exception as e:
                 logger.error(f"Error sending AI response to backend: {str(e)}")
                 # Continue even if backend save fails
+
+            # Start a background task to generate knowledge artifacts based on the user query
+            # This won't block the response to the frontend
+            asyncio.create_task(generate_and_save_artifacts(agent, user_query, conversation_id, auth_header))
 
             # Return both messages to the frontend
             return {
@@ -1296,430 +1295,181 @@ async def process_full_response(
         logger.error(f"Error in background processing: {str(e)}")
         logger.error(traceback.format_exc())
 
-@app.delete("/api/v1/conversation/message/{message_id}",
-    tags=["Frontend Compatibility"],
-    summary="Delete a message",
-    description="Deletes a specific message from a conversation"
-)
-async def delete_message(message_id: str, request: Request):
-    """Handle message deletion requests from the frontend."""
+async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, conversation_id: str, auth_header: str):
+    """Generate knowledge artifacts based on a user query and save them to the backend."""
     try:
-        # Extract the authorization header
-        auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            logger.error("No authorization header provided for message deletion")
-            return JSONResponse(
-                status_code=401,
-                content={"success": False, "error": "Unauthorized - No auth token provided"}
+        logger.info(f"[Artifact Generation START] for conversation: {conversation_id}")
+        
+        # Skip for invalid conversation IDs
+        if not conversation_id or conversation_id.startswith('draft-'):
+            logger.info(f"[Artifact Generation SKIP] for draft/invalid conversation: {conversation_id}")
+            return
+            
+        # Add logging for the user query to help debug
+        logger.info(f"[Artifact Generation] Generating artifacts for query: '{user_query[:100]}...' Conversation ID: {conversation_id}")
+        
+        # Generate artifacts
+        guidelines = []
+        case_studies = []
+        generation_error = None
+        try:
+            logger.info(f"[Artifact Generation] Calling agent.get_relevant_guidelines for conv {conversation_id}")
+            guidelines = agent.get_relevant_guidelines(
+                conversation_text=user_query,
+                max_results=3
             )
+            logger.info(f"[Artifact Generation] Got {len(guidelines)} guidelines for conv {conversation_id}")
+            
+            logger.info(f"[Artifact Generation] Calling agent.get_relevant_case_studies for conv {conversation_id}")
+            case_studies = agent.get_relevant_case_studies(
+                conversation_text=user_query,
+                max_results=2
+            )
+            logger.info(f"[Artifact Generation] Got {len(case_studies)} case studies for conv {conversation_id}")
+            
+            # Check if we got any artifacts - if not, log this clearly
+            if not guidelines and not case_studies:
+                logger.warning(f"[Artifact Generation WARNING] No artifacts generated for conv {conversation_id}. Vector store might be empty or query didn't match.")
+                # Add fallback artifacts if none were generated
+                guidelines = [{
+                    "id": str(uuid.uuid4()),
+                    "title": "Fallback: User Privacy Protection",
+                    "description": "Fallback: Always prioritize user privacy and obtain clear consent before collecting or processing personal data.",
+                    "source": "General Ethical Principles",
+                    "relevance": 0.95,
+                    "category": "Privacy"
+                }]
+                case_studies = [{
+                    "id": str(uuid.uuid4()),
+                    "title": "Fallback: Cambridge Analytica Data Scandal",
+                    "summary": "Fallback: Cambridge Analytica collected personal data from millions of Facebook users without consent for political targeting.",
+                    "outcome": "Fallback: Resulted in major regulatory changes and heightened awareness about data privacy.",
+                    "source": "Data Privacy Case Studies",
+                    "relevance": 0.9
+                }]
+                logger.info(f"[Artifact Generation] Added fallback artifacts for conv {conversation_id}")
+            
+        except Exception as gen_err:
+            generation_error = str(gen_err)
+            logger.error(f"[Artifact Generation ERROR] Error during artifact generation for conv {conversation_id}: {generation_error}")
+            logger.error(traceback.format_exc())
+            # Use fallbacks if generation failed
+            if not guidelines and not case_studies:
+                 guidelines = [{
+                    "id": str(uuid.uuid4()),
+                    "title": "Error Fallback: Privacy",
+                    "description": "Fallback due to generation error.",
+                    "source": "Error Fallback", "relevance": 0.5, "category": "Error"
+                 }]
+                 case_studies = []
+                 logger.info(f"[Artifact Generation] Added error fallback artifacts for conv {conversation_id}")
 
-        headers = {
-            "Accept": "application/json",
-            "Authorization": auth_header
-        }
-        
-        logger.info(f"Processing delete request for message: {message_id}")
-        
-        # Try to make a request to the Java backend
-        async with httpx.AsyncClient() as client:
+        # Format artifact data only if generation didn't completely fail or we have fallbacks
+        formatted_guidelines = []
+        formatted_case_studies = []
+        if guidelines or case_studies:
             try:
-                # Check if the Java backend endpoint exists
-                response = await client.delete(
-                    f"{BACKEND_BASE_URL}/api/v1/conversation/message/{message_id}",
-                    headers=headers,
-                    timeout=10.0
-                )
+                formatted_guidelines = [
+                    {
+                        "id": g.get('id', str(uuid.uuid4())), # Ensure ID exists
+                        "title": g.get('title', 'Untitled Guideline'),
+                        "description": g.get('description', ''),
+                        "source": g.get('source', 'Unknown Source'),
+                        "relevance": float(g.get('relevance', 0.0)), # Ensure float
+                        "category": g.get('category', 'General')
+                    } for g in guidelines
+                ]
                 
-                # Log response status for debugging
-                logger.info(f"Delete message response status: {response.status_code}")
-                
-                if response.status_code in [200, 204]:
-                    logger.info(f"Successfully deleted message ID: {message_id}")
-                    return {"success": True}
-                else:
-                    error_msg = f"Backend returned status {response.status_code}"
-                    try:
-                        response_text = response.text
-                        if response_text:
-                            logger.info(f"Delete message response body: {response_text}")
-                            try:
-                                error_msg += f" - {response.json()}"
-                            except json.JSONDecodeError:
-                                error_msg += f" - {response_text}"
-                    except Exception as e:
-                        logger.warning(f"Could not read response text: {str(e)}")
-                    
-                    logger.error(error_msg)
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"success": False, "error": error_msg}
-                    )
-                    
-            except httpx.TimeoutException:
-                logger.error(f"Timeout while deleting message {message_id}")
-                return JSONResponse(
-                    status_code=504,
-                    content={"success": False, "error": "Request timed out"}
-                )
-            except Exception as e:
-                logger.error(f"Error during message deletion: {str(e)}")
+                formatted_case_studies = [
+                    {
+                        "id": cs.get('id', str(uuid.uuid4())), # Ensure ID exists
+                        "title": cs.get('title', 'Untitled Case Study'),
+                        "summary": cs.get('summary', ''),
+                        "outcome": cs.get('outcome', ''),
+                        "source": cs.get('source', 'Unknown Source'),
+                        "relevance": float(cs.get('relevance', 0.0)) # Ensure float
+                    } for cs in case_studies
+                ]
+                logger.info(f"[Artifact Formatting] Formatted {len(formatted_guidelines)} guidelines and {len(formatted_case_studies)} case studies for conv {conversation_id}")
+            except Exception as format_err:
+                logger.error(f"[Artifact Formatting ERROR] Failed to format artifacts for conv {conversation_id}: {format_err}")
                 logger.error(traceback.format_exc())
-                return JSONResponse(
-                    status_code=500,
-                    content={"success": False, "error": f"Error during message deletion: {str(e)}"}
-                )
-                
-    except Exception as e:
-        error_msg = f"Error handling message deletion: {str(e)}"
-        logger.error(f"{error_msg}\n{traceback.format_exc()}")
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": error_msg}
-        )
-
-async def send_to_backend(conversation_id: str, message_id: str, content: str, role: str):
-    """Send a message to the backend API."""
-    try:
-        auth_header = os.getenv("BACKEND_AUTH_TOKEN")
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
-        if auth_header:
-            headers["Authorization"] = auth_header
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{BACKEND_BASE_URL}/api/v1/conversation/message",
-                headers=headers,
-                json={
-                    "conversationId": conversation_id,
-                    "messageId": message_id,
-                    "content": content,
-                    "role": role
-                }
-            )
-            response.raise_for_status()
-            logger.info(f"Successfully sent message to backend for conversation {conversation_id}")
-            return True
-    except Exception as e:
-        logger.error(f"Error sending message to backend: {str(e)}")
-        return False
-
-async def process_query_stateless(agent: LangChainAgent, query: str, conversation_id: str, temperature: float = 0.7) -> str:
-    """Process a query using the agent without maintaining conversation state."""
-    try:
-        # Create the LLM instance with the specified temperature
-        llm = ChatOpenAI(
-            model_name="gpt-3.5-turbo",
-            temperature=temperature,
-            openai_api_key=os.getenv('OPENAI_API_KEY')
-        )
-        
-        # Create a system prompt
-        system_message = """You are EVA, an empathetic and helpful Ethical AI assistant.
-        Your goal is to help users navigate complex ethical dilemmas in technology projects.
-        Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
-        Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
-
-        Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
-        Adopt a supportive and conversational tone.
-
-        After providing your guidance, always ask if they want to practice:
-        'Would you like to practice how to approach this situation? [Yes, practice] [No, not now]'
-        """
-        
-        # Make a direct call to the LLM
-        messages = [
-            SystemMessage(content=system_message),
-            HumanMessage(content=query)
-        ]
-        
-        response = llm.invoke(messages)
-        content = response.content
-        
-        # Start background task to generate artifacts
-        asyncio.create_task(
-            generate_artifacts(
-                ArtifactGenerationRequest(query=query),
-                agent
-            )
-        )
-        
-        return content
-        
-    except Exception as e:
-        logger.error(f"Error processing query: {str(e)}")
-        return "I apologize, but I encountered an error processing your request. Please try again."
-
-@app.post("/api/v1/conversation/{conversation_id}/update-title",
-    tags=["Frontend Compatibility"],
-    summary="Update conversation title",
-    description="Updates the title of a conversation"
-)
-async def update_conversation_title(conversation_id: str, request: Request):
-    """Proxy update conversation title request to the Java backend"""
-    try:
-        # Extract request body
-        request_body = await request.json()
-        title = request_body.get("title", "Untitled Conversation")
-        
-        # Extract the authorization header from the incoming request
-        auth_header = request.headers.get("Authorization")
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        
-        if auth_header:
-            headers["Authorization"] = auth_header
-        
-        # Make a request to the backend API
-        response = requests.post(
-            f"{BACKEND_BASE_URL}/api/v1/conversation/{conversation_id}/update-title",
-            json={"title": title},
-            headers=headers
-        )
-        
-        # Check if the request was successful
-        if response.status_code == 200:
-            updated_conversation = response.json()
-            logger.info(f"Successfully updated title for conversation ID: {conversation_id}")
-            return updated_conversation
+                # If formatting fails, we can't send anything
+                formatted_guidelines = []
+                formatted_case_studies = []
         else:
-            logger.error(f"Backend API error: {response.status_code} - {response.text}")
-            # If backend fails, return a basic success response
-            return {
-                "conversationId": conversation_id,
-                "title": title,
-                "updatedAt": datetime.utcnow().isoformat()
-            }
-    except Exception as e:
-        logger.error(f"Error updating conversation title: {str(e)}")
-        logger.error(traceback.format_exc())
-        # Return a basic success response if an exception occurs
-        return {
+             logger.warning(f"[Artifact Formatting] No guidelines or case studies available to format for conv {conversation_id}. Generation error was: {generation_error}")
+
+        # Only proceed if we have formatted artifacts
+        if not formatted_guidelines and not formatted_case_studies:
+            logger.error(f"[Artifact Sending SKIP] No formatted artifacts to send for conv {conversation_id}. Aborting send.")
+            return
+
+        # Prepare the request payload
+        artifact_payload = {
             "conversationId": conversation_id,
-            "title": request_body.get("title", "Untitled Conversation"),
-            "updatedAt": datetime.utcnow().isoformat()
+            "guidelines": formatted_guidelines,
+            "caseStudies": formatted_case_studies
         }
-
-@app.post("/generate-artifacts", 
-    response_model=ArtifactGenerationResponse,
-    tags=["Knowledge Base"],
-    summary="Generate knowledge artifacts for a query",
-    description="Performs RAG to find relevant guidelines and case studies for a given query."
-)
-async def generate_artifacts(
-    request: ArtifactGenerationRequest,
-    agent: LangChainAgent = Depends(get_agent)
-) -> ArtifactGenerationResponse:
-    """Generates relevant knowledge artifacts (guidelines, case studies) for a given query using RAG."""
-    try:
-        logger.info(f"Generating artifacts for query: '{request.query[:100]}...'")
         
-        guidelines = agent.get_relevant_guidelines(
-            conversation_text=request.query, 
-            max_results=request.max_guidelines
-        )
-        case_studies = agent.get_relevant_case_studies(
-            conversation_text=request.query, 
-            max_results=request.max_case_studies
-        )
-        logger.info(f"Retrieved {len(guidelines)} guidelines and {len(case_studies)} case studies.")
-
-        formatted_guidelines = [
-            ArtifactItem(
-                id=g.get('id', str(uuid.uuid4())),
-                title=g.get('title', 'Guideline'),
-                description=g.get('description'),
-                source=g.get('source', 'Unknown'),
-                relevance=g.get('relevance', 0.0),
-                category=g.get('category')
-            ) for g in guidelines
-        ]
-        formatted_case_studies = [
-            ArtifactItem(
-                id=cs.get('id', str(uuid.uuid4())),
-                title=cs.get('title', 'Case Study'),
-                summary=cs.get('summary'),
-                outcome=cs.get('outcome'),
-                source=cs.get('source', 'Unknown'),
-                relevance=cs.get('relevance', 0.0)
-            ) for cs in case_studies
-        ]
-
-        return ArtifactGenerationResponse(
-            guidelines=formatted_guidelines,
-            caseStudies=formatted_case_studies
-        )
-    except Exception as e:
-        logger.error(f"Error generating artifacts: {str(e)}")
-        logger.error(traceback.format_exc())
-        return ArtifactGenerationResponse(guidelines=[], caseStudies=[])
-
-@app.get("/api/v1/knowledge-artifacts/{conversation_id}",
-    tags=["Frontend Compatibility"],
-    summary="Get artifacts for a conversation",
-    description="Retrieves previously generated artifacts for a specific conversation"
-)
-async def get_conversation_artifacts(conversation_id: str, request: Request):
-    """Retrieve artifacts for a specific conversation."""
-    try:
-        # Extract the authorization header
-        auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            logger.error("No authorization header provided for artifacts request")
-            return JSONResponse(
-                status_code=401,
-                content={"error": "Unauthorized - No auth token provided"}
-            )
-
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": auth_header
-        }
-
-        logger.info(f"Retrieving artifacts for conversation ID: {conversation_id}")
+        # Show the endpoint being called
+        backend_endpoint = f"{BACKEND_BASE_URL}/api/v1/rag-artifacts"
+        logger.info(f"[Artifact Sending] Preparing to send artifacts to backend endpoint: {backend_endpoint} for conv {conversation_id}")
+        
+        # Send artifacts to backend
         async with httpx.AsyncClient() as client:
+            response = None
+            send_error = None
             try:
-                response = await client.get(
-                    f"{BACKEND_BASE_URL}/api/v1/knowledge-artifacts/{conversation_id}",
-                    headers=headers,
+                # Log the full request details for debugging
+                auth_header_preview = auth_header[:20] + "..." if auth_header else "None"
+                payload_preview = str(artifact_payload)[:200] + ("..." if len(str(artifact_payload)) > 200 else "")
+                logger.info(f"[Artifact Sending] Sending POST request for conv {conversation_id}. Auth: {auth_header_preview}. Payload Preview: {payload_preview}")
+                
+                response = await client.post(
+                    backend_endpoint,
+                    headers={
+                        "Authorization": auth_header,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    json=artifact_payload,
                     timeout=10.0
                 )
                 
-                # Log response status for debugging
-                logger.info(f"Artifacts response status: {response.status_code}")
+                # Log the response status immediately
+                logger.info(f"[Artifact Sending] Backend response status for conv {conversation_id}: {response.status_code}")
+
+                # Raise HTTP errors for bad responses (4xx or 5xx)
+                response.raise_for_status()
+
+                logger.info(f"[Artifact Sending SUCCESS] Successfully saved knowledge artifacts for conversation: {conversation_id}")
+                # Try to log the response content
+                try:
+                    content = response.json()
+                    logger.info(f"[Artifact Sending] Backend response content: {str(content)[:200]}...")
+                except Exception as json_err:
+                    logger.warning(f"[Artifact Sending] Could not parse backend response JSON for conv {conversation_id}: {json_err}")
+                    logger.warning(f"[Artifact Sending] Raw response text: {response.text[:200]}...")
+
+            except httpx.TimeoutException as timeout_err:
+                send_error = f"Timeout error: {timeout_err}"
+                logger.error(f"[Artifact Sending ERROR] Timeout while sending artifacts for conversation: {conversation_id}. Error: {send_error}")
+            except httpx.HTTPStatusError as http_err:
+                send_error = f"HTTP error: {http_err.response.status_code} - {http_err.response.text[:200]}"
+                logger.error(f"[Artifact Sending ERROR] HTTP error sending artifacts for conv {conversation_id}. Status: {http_err.response.status_code}. Response: {http_err.response.text[:500]}")
+                # Specific handling for 404 - maybe the endpoint changed?
+                if http_err.response.status_code == 404:
+                    logger.error(f"[Artifact Sending ERROR] Endpoint {backend_endpoint} returned 404. Check backend API path.")
+                    # You could add retry logic here if needed, but the original code already had some.
+                    # For now, just log the failure clearly.
+            except Exception as e:
+                send_error = f"General error: {e}"
+                logger.error(f"[Artifact Sending ERROR] Unexpected error sending artifacts to backend for conv {conversation_id}: {send_error}")
+                logger.error(traceback.format_exc())
                 
-                if response.status_code == 200:
-                    return response.json()
-                else:
-                    logger.error(f"Backend returned status {response.status_code} for artifacts request")
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"error": "Failed to retrieve artifacts"}
-                    )
-                    
-            except httpx.TimeoutException:
-                logger.error("Timeout while retrieving artifacts from backend")
-                return JSONResponse(
-                    status_code=504,
-                    content={"error": "Request timed out"}
-                )
-                
-    except Exception as e:
-        logger.error(f"Error in get_conversation_artifacts: {str(e)}")
-        logger.error(f"Traceback:\n{traceback.format_exc()}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": "Internal server error"}
-        )
-
-@app.post("/api/v1/auth/login",
-    tags=["Authentication"],
-    summary="User login",
-    description="Authenticates a user and returns a JWT token"
-)
-async def login(request: Request):
-    """Handle user login by proxying to the backend."""
-    try:
-        # Get the request body
-        body = await request.json()
-        
-        # Forward the login request to the backend
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{BACKEND_BASE_URL}/api/v1/auth/login",
-                json=body,
-                headers={
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                }
-            )
+        logger.info(f"[Artifact Generation END] Finished processing for conversation: {conversation_id}. Send error (if any): {send_error}")
             
-            # Log response status for debugging
-            logger.info(f"Login response status: {response.status_code}")
-            
-            # Return the backend response with the same status code
-            return JSONResponse(
-                status_code=response.status_code,
-                content=response.json() if response.text else {}
-            )
-            
-    except httpx.RequestError as e:
-        logger.error(f"Error connecting to backend during login: {str(e)}")
-        return JSONResponse(
-            status_code=502,
-            content={"error": "Could not connect to authentication service"}
-        )
-    except Exception as e:
-        logger.error(f"Login error: {str(e)}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": "Internal server error during login"}
-        )
-
-# Add a practice score endpoint
-@app.post("/api/v1/practice-score/submit",
-    response_model=FeedbackResponse,
-    tags=["Practice"],
-    summary="Submit practice score",
-    description="Submit a practice session score"
-)
-async def submit_practice_score(request: Request) -> FeedbackResponse:
-    """Submit a practice score."""
-    try:
-        # Parse request body
-        body = await request.json()
-        score = body.get("score", 0)
-        conversation_id = body.get("conversationId", "unknown")
-        
-        # Generate a unique ID for this feedback
-        feedback_id = str(uuid.uuid4())
-        
-        # Log the received data
-        logger.info(f"Received practice score: {score} for conversation: {conversation_id}")
-        
-        # Save score data locally
-        score_dir = Path("practice_scores")
-        score_dir.mkdir(exist_ok=True)
-        
-        score_file = score_dir / f"{feedback_id}.json"
-        with open(score_file, "w") as f:
-            json.dump({
-                "id": feedback_id,
-                "conversationId": conversation_id,
-                "score": score,
-                "timestamp": datetime.utcnow().isoformat()
-            }, f, indent=2)
-        
-        logger.info(f"Saved practice score {feedback_id}")
-        
-        return FeedbackResponse(feedbackId=feedback_id, success=True)
-    except Exception as e:
-        logger.error(f"Error submitting practice score: {str(e)}")
-        # Always return success to avoid frontend issues
-        return FeedbackResponse(
-            feedbackId=str(uuid.uuid4()), 
-            success=True
-        )
-
-# Also add a simpler version of the endpoint for compatibility
-@app.post("/api/practice-score",
-    response_model=FeedbackResponse,
-    tags=["Practice"],
-    summary="Submit practice score (simple endpoint)",
-    description="Alternative endpoint to submit a practice session score"
-)
-async def submit_practice_score_simple(request: Request) -> FeedbackResponse:
-    """Simple version of practice score submission."""
-    return await submit_practice_score(request)
-
-if __name__ == "__main__":
-    # Ensure logs directory exists
-    log_dir = Path('logs')
-    log_dir.mkdir(exist_ok=True)
-    
-    uvicorn.run("main:app", host="0.0.0.0", port=5001, reload=True, log_level="info") 
+    except Exception as outer_err:
+        logger.error(f"[Artifact Generation FATAL] Unhandled error in generate_and_save_artifacts for conv {conversation_id}: {outer_err}")
+        logger.error(traceback.format_exc())

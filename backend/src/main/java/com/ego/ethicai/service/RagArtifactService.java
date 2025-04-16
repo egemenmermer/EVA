@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,46 +36,70 @@ public class RagArtifactService {
     @Transactional
     public RagArtifactsResponseDTO saveArtifacts(RagArtifactsRequestDTO request) {
         String conversationIdStr = request.getConversationId();
-        UUID conversationUuid;
+        UUID conversationUuid = null;
+        final String operationId = UUID.randomUUID().toString().substring(0, 8); // Unique ID for this save operation
         
         try {
-            log.info("Processing request to save artifacts for conversation: {}", conversationIdStr);
+            log.info("[SaveArtifacts-{}] START - Processing request for conversation: {}", operationId, conversationIdStr);
             
             // Attempt to parse the String ID into a UUID
             try {
                 conversationUuid = UUID.fromString(conversationIdStr);
+                log.info("[SaveArtifacts-{}] Parsed conversation ID to UUID: {}", operationId, conversationUuid);
             } catch (IllegalArgumentException e) {
-                log.error("Invalid UUID format for conversation ID: {}", conversationIdStr, e);
-                throw new IllegalArgumentException("Invalid conversation ID format provided");
+                log.error("[SaveArtifacts-{}] ERROR - Invalid UUID format for conversation ID: {}", operationId, conversationIdStr, e);
+                // Return empty immediately if UUID is invalid, as we can't proceed
+                return RagArtifactsResponseDTO.builder()
+                        .conversationId(conversationIdStr)
+                        .guidelines(List.of())
+                        .caseStudies(List.of())
+                        .build();
             }
             
-            log.debug("Request contains {} guidelines and {} case studies", 
+            log.debug("[SaveArtifacts-{}] Request contains {} guidelines and {} case studies", operationId, 
                     request.getGuidelines() != null ? request.getGuidelines().size() : 0,
                     request.getCaseStudies() != null ? request.getCaseStudies().size() : 0);
             
+            // Final UUID for use in lambda/inner class
+            final UUID finalConversationUuid = conversationUuid;
+
+            // Add transaction synchronization to log commit/rollback
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCompletion(int status) {
+                    if (status == TransactionSynchronization.STATUS_COMMITTED) {
+                        log.info("[SaveArtifacts-{}] Transaction COMMITTED for conversation: {}", operationId, finalConversationUuid);
+                    } else if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
+                        log.warn("[SaveArtifacts-{}] Transaction ROLLED BACK for conversation: {}", operationId, finalConversationUuid);
+                    } else {
+                        log.warn("[SaveArtifacts-{}] Transaction completed with UNKNOWN status ({}) for conversation: {}", operationId, status, finalConversationUuid);
+                    }
+                }
+            });
+            
             // First delete any existing artifacts for this conversation
             try {
+                log.info("[SaveArtifacts-{}] Deleting existing artifacts for conversation: {}", operationId, conversationUuid);
                 ragArtifactRepository.deleteByConversationId(conversationUuid);
-                log.info("Deleted existing artifacts for conversation: {}", conversationUuid);
+                log.info("[SaveArtifacts-{}] Finished deleting existing artifacts for conversation: {}", operationId, conversationUuid);
             } catch (Exception e) {
-                log.warn("Could not delete existing artifacts: {}", e.getMessage());
-                // Continue with saving new artifacts
+                // Log delete error but continue, as save might still succeed
+                log.warn("[SaveArtifacts-{}] WARN - Could not delete existing artifacts for conv {}: {}. Proceeding with save.", 
+                         operationId, conversationUuid, e.getMessage());
             }
             
             List<RagArtifact> newArtifacts = new ArrayList<>();
             
-            // Process guidelines, ensuring conversationId is set correctly
+            // Process guidelines (ensure conversationUuid is final or effectively final for lambda)
             if (request.getGuidelines() != null) {
-                for (RagArtifactDTO guideline : request.getGuidelines()) {
+                request.getGuidelines().forEach(guideline -> {
                     try {
-                        // Check if artifactId is valid before building
                         if (guideline.getId() == null || guideline.getId().trim().isEmpty()) {
-                            log.warn("Skipping guideline artifact with null or empty ID for conversation: {}", conversationUuid);
-                            continue; // Skip this artifact
+                            log.warn("[SaveArtifacts-{}] Skipping guideline with null/empty ID for conv: {}", operationId, finalConversationUuid);
+                            return; // continue to next guideline in lambda
                         }
-
                         RagArtifact artifact = RagArtifact.builder()
-                                .conversationId(conversationUuid)
+                                .conversationId(finalConversationUuid) // Use final variable
                                 .artifactType(RagArtifact.ArtifactType.GUIDELINE)
                                 .artifactId(guideline.getId())
                                 .title(guideline.getTitle())
@@ -81,27 +108,23 @@ public class RagArtifactService {
                                 .category(guideline.getCategory())
                                 .relevance(guideline.getRelevance())
                                 .build();
-                        
                         newArtifacts.add(artifact);
                     } catch (Exception e) {
-                        log.error("Error processing guideline: {}", e.getMessage());
-                        // Continue with next guideline
+                        log.error("[SaveArtifacts-{}] ERROR processing guideline ID {}: {}", operationId, guideline.getId(), e.getMessage());
                     }
-                }
+                });
             }
             
             // Process case studies
             if (request.getCaseStudies() != null) {
-                for (RagArtifactDTO caseStudy : request.getCaseStudies()) {
-                    try {
-                        // Check if artifactId is valid
+                request.getCaseStudies().forEach(caseStudy -> {
+                     try {
                         if (caseStudy.getId() == null || caseStudy.getId().trim().isEmpty()) {
-                            log.warn("Skipping case study artifact with null or empty ID for conversation: {}", conversationUuid);
-                            continue; // Skip this artifact
+                            log.warn("[SaveArtifacts-{}] Skipping case study with null/empty ID for conv: {}", operationId, finalConversationUuid);
+                             return; // continue to next case study in lambda
                         }
-
                         RagArtifact artifact = RagArtifact.builder()
-                                .conversationId(conversationUuid)
+                                .conversationId(finalConversationUuid) // Use final variable
                                 .artifactType(RagArtifact.ArtifactType.CASE_STUDY)
                                 .artifactId(caseStudy.getId())
                                 .title(caseStudy.getTitle())
@@ -111,17 +134,15 @@ public class RagArtifactService {
                                 .summary(caseStudy.getSummary())
                                 .outcome(caseStudy.getOutcome())
                                 .build();
-                        
                         newArtifacts.add(artifact);
                     } catch (Exception e) {
-                        log.error("Error processing case study: {}", e.getMessage());
-                        // Continue with next case study
+                        log.error("[SaveArtifacts-{}] ERROR processing case study ID {}: {}", operationId, caseStudy.getId(), e.getMessage());
                     }
-                }
+                });
             }
             
             if (newArtifacts.isEmpty()) {
-                log.warn("No valid artifacts to save for conversation: {}", conversationUuid);
+                log.warn("[SaveArtifacts-{}] No valid artifacts to save for conversation: {}", operationId, conversationUuid);
                 return RagArtifactsResponseDTO.builder()
                         .conversationId(conversationUuid.toString())
                         .guidelines(List.of())
@@ -130,20 +151,39 @@ public class RagArtifactService {
             }
             
             // Save all artifacts
-            List<RagArtifact> savedArtifacts;
+            List<RagArtifact> savedArtifacts = null;
             try {
+                log.info("[SaveArtifacts-{}] Attempting to save {} artifacts for conversation: {}", operationId, newArtifacts.size(), conversationUuid);
                 savedArtifacts = ragArtifactRepository.saveAll(newArtifacts);
-                log.info("Successfully saved {} artifacts for conversation: {}", savedArtifacts.size(), conversationUuid);
+                // Log success *immediately* after saveAll returns, inside the try block
+                log.info("[SaveArtifacts-{}] SUCCESS - ragArtifactRepository.saveAll completed for conversation: {}. Saved count: {}", 
+                         operationId, conversationUuid, savedArtifacts != null ? savedArtifacts.size() : 0);
             } catch (Exception e) {
-                log.error("Error saving artifacts to database: {}", e.getMessage(), e);
-                throw e;
+                log.error("[SaveArtifacts-{}] DATABASE ERROR - Error during ragArtifactRepository.saveAll for conv {}: {}", 
+                          operationId, conversationUuid, e.getMessage(), e);
+                // Re-throw to ensure transaction rollback
+                throw new RuntimeException("Database error saving artifacts for conversation: " + conversationUuid, e);
             }
             
-            // Prepare response
-            return createResponseDTO(conversationUuid.toString(), savedArtifacts);
+            // Prepare response DTO (only if save succeeded)
+            RagArtifactsResponseDTO responseDTO = createResponseDTO(conversationUuid.toString(), savedArtifacts);
+            log.info("[SaveArtifacts-{}] END - Successfully prepared response for conversation: {}", operationId, conversationUuid);
+            return responseDTO;
+            
+        } catch (IllegalArgumentException e) {
+            // Already logged the UUID format error
+            // Return the pre-built empty response
+             return RagArtifactsResponseDTO.builder()
+                        .conversationId(conversationIdStr) // Use original string ID here
+                        .guidelines(List.of())
+                        .caseStudies(List.of())
+                        .build();
         } catch (Exception e) {
-            log.error("Unexpected error in saveArtifacts: {}", e.getMessage(), e);
-            throw e;
+            // Catch unexpected errors (including re-thrown DB error)
+            log.error("[SaveArtifacts-{}] UNEXPECTED ERROR in saveArtifacts for conv {}: {}", 
+                      operationId, conversationIdStr, e.getMessage(), e);
+            // Re-throw to ensure transaction rollback on any major error
+            throw new RuntimeException("Unexpected error saving artifacts for conversation: " + conversationIdStr, e);
         }
     }
 
@@ -265,24 +305,29 @@ public class RagArtifactService {
      */
     @Transactional(readOnly = true)
     public List<RagArtifactsResponseDTO> getArtifacts(UUID conversationId) {
-        log.info("Attempting to get artifacts for conversation: {}", conversationId);
+        final String operationId = UUID.randomUUID().toString().substring(0, 8);
+        log.info("[GetArtifacts-{}] START - Attempting to get artifacts for conversation UUID: {}", operationId, conversationId);
         if (conversationId == null) {
-            log.warn("getArtifacts called with null conversationId.");
+            log.warn("[GetArtifacts-{}] WARN - getArtifacts called with null conversationId.", operationId);
             return List.of(RagArtifactsResponseDTO.builder()
+                    .conversationId("null")
                     .guidelines(List.of())
                     .caseStudies(List.of())
                     .build());
         }
         
         String conversationIdStr = conversationId.toString();
+        List<RagArtifact> artifacts = null;
         try {
-            log.debug("Fetching RAG artifacts from repository for conversation UUID: {}", conversationId);
-            List<RagArtifact> artifacts = ragArtifactRepository.findByConversationId(conversationId);
-            log.info("Repository returned {} artifacts for conversation {}", artifacts.size(), conversationId);
+            log.info("[GetArtifacts-{}] Fetching RAG artifacts from repository for conversation UUID: {}", operationId, conversationId);
+            artifacts = ragArtifactRepository.findByConversationId(conversationId);
+            // Log count *immediately* after the call returns
+            int count = artifacts != null ? artifacts.size() : 0;
+            log.info("[GetArtifacts-{}] Repository returned {} raw artifacts for conversation UUID: {}", operationId, count, conversationId);
             
-            if (artifacts.isEmpty()) {
-                log.info("No artifacts found in database for conversation {}. Returning empty response.", conversationId);
-                // Return empty response DTO, but indicate the conversation ID it was for
+            if (artifacts == null || artifacts.isEmpty()) {
+                log.info("[GetArtifacts-{}] No artifacts found in database for conversation {}. Returning empty list.", operationId, conversationId);
+                // Return list containing one empty response DTO for clarity
                 return List.of(RagArtifactsResponseDTO.builder()
                                 .conversationId(conversationIdStr)
                                 .guidelines(List.of())
@@ -290,13 +335,17 @@ public class RagArtifactService {
                                 .build());
             }
             
-            // Create and return the response DTO
+            // Map results to DTO
             RagArtifactsResponseDTO responseDTO = createResponseDTO(conversationIdStr, artifacts);
-            log.info("Successfully prepared artifact response DTO for conversation {}: Guidelines={}, CaseStudies={}", 
-                     conversationId, responseDTO.getGuidelines().size(), responseDTO.getCaseStudies().size());
+            log.info("[GetArtifacts-{}] Successfully mapped {} artifacts to DTO for conversation {}: Guidelines={}, CaseStudies={}", 
+                     operationId, count, conversationId, responseDTO.getGuidelines().size(), responseDTO.getCaseStudies().size());
+            log.info("[GetArtifacts-{}] END - Returning response DTO for conversation UUID: {}", operationId, conversationId);
             return List.of(responseDTO);
+            
         } catch (Exception e) {
-            log.error("Error retrieving artifacts from repository for conversation {}: {}", conversationId, e.getMessage(), e);
+            log.error("[GetArtifacts-{}] DATABASE ERROR - Error retrieving artifacts from repository for conversation {}: {}", 
+                      operationId, conversationId, e.getMessage(), e);
+            // Return list containing one empty response DTO on error
             return List.of(RagArtifactsResponseDTO.builder()
                     .conversationId(conversationIdStr)
                     .guidelines(List.of())
