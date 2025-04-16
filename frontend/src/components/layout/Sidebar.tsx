@@ -14,6 +14,7 @@ import type { ConversationContentResponseDTO } from '@/types/api';
 import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot, BookOpen } from 'lucide-react';
 import { TemperatureControl } from '@/components/controls/TemperatureControl';
 import { v4 as uuidv4 } from 'uuid';
+import '../chat/scrollbar.css'; // Import the scrollbar CSS
 
 // Type for manager types - use the original enum values
 const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
@@ -511,7 +512,9 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       <TemperatureControl />
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto py-2 space-y-1">
+      <div 
+        className="flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar"
+      >
         {renderConversations()}
         {isLoading && (
           <div className="flex items-center justify-center h-6 mt-2">

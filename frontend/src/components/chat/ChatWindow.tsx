@@ -31,6 +31,9 @@ const styles = {
   },
 };
 
+// Add WebKit scrollbar styles
+import './scrollbar.css';
+
 // Extended ConversationContentResponseDTO with additional fields from backend
 interface ExtendedConversationDTO extends ConversationContentResponseDTO {
   userQuery?: string;
@@ -2015,13 +2018,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         <>
           {/* Enhanced styles for messages container */}
           <div 
-            className="flex-1 overflow-y-auto overflow-x-hidden px-4 w-full scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500 dark:hover:scrollbar-thumb-gray-500" 
+            className="flex-1 overflow-y-auto overflow-x-hidden px-4 w-full custom-scrollbar"
             ref={messagesContainerRef}
-            style={{
-              scrollbarWidth: 'thin',
-              // Use CSS variables or more specific selectors if direct style needed
-              // scrollbarColor: 'rgb(156 163 175) transparent' // Example for light mode
-            }}
           >
             <div className="w-full max-w-5xl mx-auto pt-6 pb-8">
               {error && (
