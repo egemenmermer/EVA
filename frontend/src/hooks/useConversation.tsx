@@ -39,7 +39,11 @@ export const useConversation = (conversationId?: string) => {
     },
     onSuccess: (data) => {
       console.log('Conversation created:', data);
-      setCurrentConversation(data);
+      // Set the isNew flag when creating a new conversation
+      setCurrentConversation({
+        ...data,
+        isNew: true // Mark as new conversation
+      });
       // Clear messages when starting new conversation
       setMessages([]);
       queryClient.invalidateQueries(['conversations']);

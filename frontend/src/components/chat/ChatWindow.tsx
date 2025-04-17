@@ -15,6 +15,8 @@ import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 import { getManagerType } from '@/services/api';
 import { sendMessage as apiSendMessage } from '@/services/api';
+import { agentApi } from '../../services/axiosConfig'; // Correct import path
+import { agentCreateConversation } from '@/services/api'; // Import the agent creation function
 
 // Add custom styles for message formatting
 const styles = {
@@ -167,6 +169,11 @@ const sendMessage = async (conversationId: string, userQuery: string, managerTyp
   }
 };
 
+// Define the expected structure of the agent's response
+interface AgentMessageResponse {
+  messages: Message[];
+}
+
 export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, currentConversation, setStoreMessages, storeMessages }) => {
   const { 
     setCurrentConversation,
@@ -175,7 +182,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     messages,
     setMessages,
     addMessage,
-    managerType
+    managerType,
+    user // Add user here if not already destructured
   } = useStore();
   
   const navigate = useNavigate();
@@ -601,7 +609,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   };
 
   // Simplify message handling to ensure user messages remain visible
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = useCallback(async (content: string) => {
     // Skip empty messages
     if (!content || !content.trim()) {
       return;
@@ -610,191 +618,177 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     // Set loading state
     setError(null);
     setLoading(true);
+    isMessageSending.current = true; // Track sending state
     
-    // Get the current conversation ID or create a draft one
-    let conversationId = currentConversation?.conversationId || `draft-${uuidv4()}`;
-    
+    let currentConv = currentConversation; // Work with a local copy
+    let conversationId = currentConv?.conversationId;
+    let isPersisted = currentConv?.isPersisted ?? false;
+
     try {
+      // --- Draft Conversation Handling --- 
+      if (!conversationId || conversationId.startsWith('draft-') || !isPersisted) {
+        console.log('Sending first message for a draft conversation. Creating on backend first...');
+
+        try {
+          const activeManagerType = managerType || 'PUPPETEER';
+          const persistedConvData = await agentCreateConversation(activeManagerType);
+          
+          if (!persistedConvData || !persistedConvData.conversationId) {
+            throw new Error('Agent did not return a valid conversation ID.');
+          }
+
+          conversationId = persistedConvData.conversationId;
+          isPersisted = true;
+          
+          const newPersistedConversation: Conversation = {
+            ...persistedConvData,
+            isDraft: false,
+            isPersisted: true,
+            managerType: persistedConvData.managerType || activeManagerType,
+            title: persistedConvData.title || 'New Chat'
+          };
+          setCurrentConversation(newPersistedConversation);
+          currentConv = newPersistedConversation;
+
+          console.log('Draft conversation successfully persisted with ID:', conversationId);
+          
+          triggerSidebarRefresh({ type: 'new-conversation', conversationId: conversationId });
+
+        } catch (createError: any) {
+          console.error('Failed to create/persist draft conversation on backend:', createError);
+          setError('Error saving conversation. Please try again.');
+          setLoading(false);
+          isMessageSending.current = false;
+          return;
+        }
+      }
+      // --- End Draft Conversation Handling ---
+      
+      if (!conversationId || !isPersisted) {
+         console.error('Cannot send message: No valid persisted conversation ID.');
+         setError('Cannot send message. Invalid conversation state.');
+         setLoading(false);
+         isMessageSending.current = false;
+         return;
+      }
+
       // IMPORTANT: Create a snapshot of the current messages to avoid state issues
       const currentMessagesSnapshot = [...storeMessages];
-      
+
       // 1. Create and immediately display the user message
-    const userMessage: Message = {
+      const userMessage: Message = {
         id: `user-${Date.now()}`,
         role: 'user' as Role,
         content: content,
-        conversationId: conversationId,
+        conversationId: conversationId, // Use the (potentially updated) real ID
         createdAt: new Date().toISOString()
       };
       
-      // Add to both message lists - append to existing messages
-      const updatedMessagesWithUser = [...currentMessagesSnapshot, userMessage];
-      setMessages(updatedMessagesWithUser);
-      setStoreMessages(updatedMessagesWithUser);
+      // Add to UI immediately - use functional update to ensure latest state
+      setStoreMessages(prev => [...prev, userMessage]);
       
       // Save to localStorage immediately to preserve user message
-      saveConversationState(conversationId, updatedMessagesWithUser);
+      saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
       
-      // 2. Add a loading message - append to the messages that already include the user message
+      // 2. Add a loading message
       const loadingMessage: Message = {
         id: `loading-${Date.now()}`,
         role: 'assistant' as Role,
         content: 'Thinking...',
-        conversationId: conversationId,
+        conversationId: conversationId, // Use the real ID
         createdAt: new Date().toISOString(),
-      isLoading: true
-    };
-    
-      // Add loading message to UI - make sure to use the latest state that includes the user message
-      const messagesWithoutLoading = messages.filter(m => 
-        m.role !== 'system' || !m.content.includes('loading'));
-        
-        // Make sure we don't have duplicate messages
-        const alreadyHasLoadingMessage = messagesWithoutLoading.some(
-          m => m.id === loadingMessage.id || 
-          (m.role === 'assistant' && m.content === loadingMessage.content)
-        );
-        
-        if (!alreadyHasLoadingMessage) {
-          // Add the loading message to the existing messages
-          setMessages([...messagesWithoutLoading, loadingMessage]);
-        } else {
-          // Just use the messages without loading indicators
-          setMessages(messagesWithoutLoading);
-        }
-      
-      // 3. Send message to the API
-      const activeManagerType = managerType || 'PUPPETEER' as ManagerType;
-      
-      interface ApiMessageResponse {
-        id?: string;
-        agentResponse?: string;
-        conversationId: string;
-        createdAt?: string;
-        role?: string;
-      }
-      
-      console.log('Sending message to API:', {
+        isLoading: true
+      };
+
+      // Add loading message to UI state
+      setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
+
+      // 3. Send message to the AGENT API (using the real conversationId)
+      const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
+            
+      console.log('Sending message to AGENT API:', {
         conversationId,
-        content,
-        activeManagerType,
+        userQuery: content,
+        managerType: activeManagerType,
         temperature
       });
       
-      const response = await apiSendMessage(
-            conversationId,
-        content,
-        activeManagerType,
-        temperature
-      ) as ApiMessageResponse;
-      
-      console.log('API response:', response);
-      
-      // 4. Handle new conversation creation if needed
-      if (response.conversationId && response.conversationId !== conversationId) {
-        console.log('Server created a new conversation:', response.conversationId);
-        conversationId = response.conversationId;
-        
-        // Update the current conversation
-        if (setCurrentConversation) {
-          const newConversation: Conversation = {
-            conversationId: conversationId,
-            title: 'New Conversation',
-            managerType: activeManagerType,
-            createdAt: new Date().toISOString()
-          };
-          setCurrentConversation(newConversation);
-          localStorage.setItem('current-conversation-id', conversationId);
-        }
-      }
-      
-      // 5. Create the agent response message
-      if (response.agentResponse) {
-        const agentMessage: Message = {
-          id: response.id || `assistant-${Date.now()}`,
-          role: 'assistant' as Role,
-          content: response.agentResponse,
+      const agentPayload = {
           conversationId: conversationId,
-          createdAt: response.createdAt || new Date().toISOString()
-        };
-        
-        // 6. Get current messages without loading indicators - take a new snapshot to be safe
-        const finalMessagesSnapshot = [...storeMessages].filter(m => !m.isLoading);
-        
-        // Make sure the user message is included
-        if (!finalMessagesSnapshot.some(m => m.role === 'user' && m.content === content)) {
-          finalMessagesSnapshot.push(userMessage);
-        }
-        
-        // Add the agent response
-        const finalUpdatedMessages = [...finalMessagesSnapshot, agentMessage];
-        
-        // Update UI and store
-        const messageListWithoutLoading = messages.filter(m => 
-          m.role !== 'system' || !m.content.includes('loading'));
-            
-            // Make sure we don't have duplicate messages
-            const hasAgentMessage = messageListWithoutLoading.some(
-              m => m.id === agentMessage.id || 
-              (m.role === 'assistant' && m.content === agentMessage.content)
-            );
-            
-            if (!hasAgentMessage) {
-              // Only add if not already present
-              setMessages([...messageListWithoutLoading, agentMessage]);
-        } else {
-              // Just remove the loading message
-              setMessages(messageListWithoutLoading);
-            }
-        setStoreMessages(finalUpdatedMessages);
-        
-        // Save to localStorage
-        saveConversationState(conversationId, finalUpdatedMessages);
-        
-        // Also save a backup copy of the messages
-        try {
-          const messagesJson = JSON.stringify(finalUpdatedMessages);
-          localStorage.setItem(`backup_messages_${conversationId}`, messagesJson);
-          localStorage.setItem(`exact_messages_${conversationId}`, messagesJson);
-          console.log('Created backup copies of messages');
-        } catch (e) {
-          console.error('Error creating backup copies:', e);
-        }
-        
-        // Log the state after processing
-        console.log('Final message count after processing feedback:', finalUpdatedMessages.length);
-        
-        // Refresh sidebar
-        triggerSidebarRefresh({
-          type: 'new-message',
-          conversationId: conversationId
-        });
-          } else {
-        // If no agent response, remove loading message but keep user message and all previous messages
-        const messagesWithoutLoading = storeMessages.filter(m => !m.isLoading);
-        setMessages(messagesWithoutLoading);
-        setStoreMessages(messagesWithoutLoading);
-        setError('Failed to get a response. Please try again.');
+          userQuery: content, 
+          managerType: activeManagerType,
+          temperature: temperature
+      };
+      
+      // Explicitly type the expected response
+      const agentResponse = await agentApi.post<AgentMessageResponse>('/api/v1/conversation/message', agentPayload);
+
+      const responseData = agentResponse.data;
+      console.log('Agent API response:', responseData);
+      
+      if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length === 0) {
+          console.error("Invalid response structure from agent: Missing or empty 'messages' array", responseData);
+          throw new Error("Invalid response structure from agent");
       }
+
+      const agentMessageFromResponse = responseData.messages.find((m: Message) => m.role === 'assistant');
+
+      if (!agentMessageFromResponse) {
+          console.error("No assistant message found in agent response", responseData);
+          throw new Error("No assistant message found in agent response");
+      }
+      
+      // The conversation ID should already be the correct persisted one here
+      
+      // Create the final agent message object for UI state
+      const agentMessage: Message = {
+        id: agentMessageFromResponse.id || `assistant-${Date.now()}`,
+        role: 'assistant' as Role,
+        content: agentMessageFromResponse.content,
+        conversationId: conversationId, // Use persisted ID
+        createdAt: agentMessageFromResponse.createdAt || new Date().toISOString()
+      };
+
+      // 6. Update UI: Remove loading, add agent message
+      // Use a temporary variable to hold the final list for saving
+      let finalMessagesForSave: Message[] = [];
+      setStoreMessages(prev => {
+          const messagesWithoutLoading = prev.filter(m => !m.isLoading);
+          // Ensure the user message is present (it should be)
+          const baseMessages = messagesWithoutLoading.some(m => m.id === userMessage.id) 
+                             ? messagesWithoutLoading 
+                             : [...messagesWithoutLoading, userMessage];
+          finalMessagesForSave = [...baseMessages, agentMessage];
+          return finalMessagesForSave;
+      });
+      
+      // Save final state to localStorage
+      saveConversationState(conversationId, finalMessagesForSave);
+
+      // Refresh sidebar if needed (title might be generated by backend)
+      triggerSidebarRefresh({
+        type: 'new-message',
+        conversationId: conversationId
+      });
+
     } catch (error) {
-      console.error('Message error:', error);
-      
-      // On error, just remove loading messages but keep user message and all previous messages
-      const messagesWithoutLoading = storeMessages.filter(m => !m.isLoading);
-      setMessages(messagesWithoutLoading);
-      setStoreMessages(messagesWithoutLoading);
-      
-      setError('Failed to send message. Please try again.');
+      console.error('Error sending message or processing agent response:', error);
+      // On error, remove loading message but keep user message
+      setStoreMessages(prev => prev.filter(m => !m.isLoading));
+      setError('Failed to send message or get response. Please try again.');
     } finally {
+      // Ensure loading state is always turned off
       setLoading(false);
+      isMessageSending.current = false;
     }
-  };
+  }, [currentConversation, storeMessages, temperature, managerType, setStoreMessages, setCurrentConversation, triggerSidebarRefresh]); // Added dependencies
 
   // Update the ref whenever handleSendMessage changes
   useEffect(() => {
-    handleSendMessageRef.current = handleSendMessage;
-  }, [storeMessages]);
-  
+    // This ref pattern is not strictly necessary with useCallback, but keep if used elsewhere
+    // handleSendMessageRef.current = handleSendMessage;
+  }, [handleSendMessage]); // Dependency is handleSendMessage itself
+
   // Add a function to retrieve practice history in the ChatWindow component
   const getPracticeHistory = () => {
     try {
@@ -1475,7 +1469,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.log('Clearing messages for deleted conversation');
         setMessages([]);
         setStoreMessages([]);
-        setError('This conversation has been deleted.');
+        // Remove the error message that was previously set
+        // setError('This conversation has been deleted.');
       }
     };
     
@@ -1868,8 +1863,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         
           {isUser && (
             <div className="flex-shrink-0 ml-2 bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
-              {/* First letter of user's name or a default icon */}
-              <span className="text-xs">{localStorage.getItem('firstName')?.charAt(0) || 'U'}</span>
+              {/* Get first letter of user's name from store, fallback to 'U' */}
+              <span className="text-xs">
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'} 
+              </span>
             </div>
           )}
         </div>
@@ -2021,7 +2018,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             className="flex-1 overflow-y-auto overflow-x-hidden px-4 w-full custom-scrollbar"
             ref={messagesContainerRef}
           >
-            <div className="w-full max-w-5xl mx-auto pt-6 pb-8">
+            {/* Reduced bottom padding from pb-8 to pb-4 */}
+            <div className="w-full max-w-5xl mx-auto pt-6 pb-4">
               {error && (
                 <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 flex items-center justify-between">
                   <div>{error}</div>

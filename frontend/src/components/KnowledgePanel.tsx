@@ -168,31 +168,36 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
 
   const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
     if (!conversationId) {
-      addDebugLog("Fetch skipped: No conversation ID");
+      addDebugLog("No conversation ID provided");
       setIsLoading(false);
+      setError("No conversation ID available");
       return;
     }
 
-    addDebugLog(`fetchArtifacts called for ${conversationId}, skipCache=${skipCache}`);
-
-    if (!skipCache && checkExistingArtifacts(conversationId)) {
-      addDebugLog(`Using cached artifacts for ${conversationId}`);
-      setHasAttemptedFetch(true);
-      setIsLoading(false);
-      return;
+    if (conversationId !== prevConversationIdRef.current) {
+      prevConversationIdRef.current = conversationId;
     }
 
-    if (abortControllerRef.current) {
-      addDebugLog("Aborting previous fetch request");
-      abortControllerRef.current.abort();
-    }
-    
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-    
     setIsLoading(true);
     setError(null);
-    setGivenUp(false);
+    
+    // Display detailed logs
+    addDebugLog(`Starting artifact fetch for conversation ${conversationId}`);
+    
+    // Check if forced refresh
+    if (skipCache) {
+      addDebugLog("Forced refresh, removing cached artifacts");
+      localStorage.removeItem(`artifacts-${conversationId}`);
+    } else {
+      // Check cache first (moved to component level for better feedback)
+      const hasCachedData = checkExistingArtifacts(conversationId);
+      if (hasCachedData) {
+        addDebugLog("Using cached artifacts");
+        setIsLoading(false);
+        setHasAttemptedFetch(true);
+        return;
+      }
+    }
     
     try {
       addDebugLog(`Starting network fetch for conversation ${conversationId}`);
@@ -203,7 +208,10 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         return;
       }
       
-      addDebugLog(`Fetch successful, received: guidelines=${response.guidelines?.length || 0}, caseStudies=${response.caseStudies?.length || 0}`);
+      const guidelineCount = response.guidelines?.length || 0;
+      const caseStudyCount = response.caseStudies?.length || 0;
+      
+      addDebugLog(`Fetch successful, received: guidelines=${guidelineCount}, caseStudies=${caseStudyCount}`);
       
       if (response) {
         setGuidelines(response.guidelines || []);
@@ -213,8 +221,8 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setExpandedCaseStudies(new Set());
         
         const debugData = {
-          guidelineCount: response.guidelines?.length || 0,
-          caseStudyCount: response.caseStudies?.length || 0,
+          guidelineCount,
+          caseStudyCount,
           conversationId,
           isUuid: isValidUuid(conversationId),
           timestamp: new Date().toISOString()
@@ -224,52 +232,66 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setHasAttemptedFetch(true);
         setRetryCount(0);
         
-        if ((response.guidelines?.length === 0 || !response.guidelines) && 
-            (response.caseStudies?.length === 0 || !response.caseStudies)) {
-          addDebugLog("No artifacts found, will retry once after delay");
-          setTimeout(() => {
-            if (retryCount === 0) {
-              addDebugLog("Retrying artifact fetch");
-              setRetryCount(1);
+        if (guidelineCount === 0 && caseStudyCount === 0) {
+          // No artifacts found - could be because they're being generated
+          addDebugLog("No artifacts found, waiting for generation to complete");
+          
+          // Show a helpful message instead of generic error
+          setError("Artifacts are being generated. This may take a moment.");
+          
+          // Auto-retry once after a delay to catch newly generated artifacts
+          if (retryCount < maxRetries) {
+            const nextRetryDelay = retryDelay * (retryCount + 1);
+            addDebugLog(`Will retry in ${nextRetryDelay/1000} seconds (retry #${retryCount + 1})`);
+            
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
               fetchArtifacts(true);
-            }
-          }, 3000);
+            }, nextRetryDelay);
+          } else {
+            // After max retries, stop showing the loading indicator
+            setIsLoading(false);
+            setGivenUp(true);
+          }
+        } else {
+          // We have artifacts, stop loading
+          setIsLoading(false);
+          setError(null);
+          setGivenUp(false);
         }
       } else {
-        addDebugLog("API returned null or undefined response.");
+        addDebugLog("API returned null or undefined response");
         setGuidelines([]);
         setCaseStudies([]);
         setHasAttemptedFetch(true);
+        setIsLoading(false);
+        setError("Failed to load artifacts. Please try again.");
       }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        addDebugLog("Fetch request was intentionally aborted for " + conversationId);
-        return;
-      }
+    } catch (error) {
+      setHasAttemptedFetch(true);
+      setIsLoading(false);
       
-      console.error(`Error in fetchArtifacts for ${conversationId}:`, err);
-      addDebugLog(`Fetch error: ${err instanceof Error ? err.message : String(err)}`);
-      setError("Failed to load guidelines and case studies.");
+      if (error instanceof Error) {
+        addDebugLog(`Fetch error: ${error.message}`);
+        setError(`Error loading artifacts: ${error.message}`);
+      } else {
+        addDebugLog(`Unknown fetch error`);
+        setError("Failed to load artifacts. Please try again.");
+      }
       
       if (retryCount < maxRetries) {
-        addDebugLog(`Scheduling retry ${retryCount + 1}/${maxRetries} in ${retryDelay}ms`);
+        const nextRetryDelay = retryDelay * (retryCount + 1);
+        addDebugLog(`Will retry in ${nextRetryDelay/1000} seconds (retry #${retryCount + 1})`);
+        
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
-        }, retryDelay);
+          fetchArtifacts(true);
+        }, nextRetryDelay);
       } else {
-        addDebugLog(`Max retries reached for ${conversationId}. Giving up.`);
         setGivenUp(true);
       }
-    } finally {
-      if (!signal.aborted) {
-        addDebugLog(`Fetch attempt complete for ${conversationId}, setting isLoading=false`);
-        setIsLoading(false);
-      }
-      if (abortControllerRef.current && abortControllerRef.current.signal === signal) {
-          abortControllerRef.current = null;
-      }
     }
-  }, [conversationId, checkExistingArtifacts, retryCount, maxRetries, retryDelay, isValidUuid, prevConversationIdRef, addDebugLog]);
+  }, [conversationId, retryCount, maxRetries, retryDelay, checkExistingArtifacts]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
@@ -341,19 +363,6 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       }
     }
   }, [guidelines.length, caseStudies.length, onNewKnowledge]);
-
-  useEffect(() => {
-    if (conversationId && isOpen) {
-      addDebugLog(`Conversation changed to ${conversationId}, fetching artifacts`);
-      setIsLoading(true);
-      setGuidelines([]);
-      setCaseStudies([]);
-      localStorage.removeItem(`artifacts-${conversationId}`);
-      setTimeout(() => {
-        fetchArtifacts(true);
-      }, 500);
-    }
-  }, [conversationId]);
 
   const truncateText = (text: string, maxLength: number = 250): string => {
     if (!text) return '';
@@ -466,7 +475,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     <div className="knowledge-panel-container">
       <div className="knowledge-panel-header flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Relevant Guidelines
+          Knowledge Panel
         </h2>
         <div className="flex items-center gap-2">
           {isLoading && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
@@ -534,7 +543,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         </div>
       )}
 
-      <div className="knowledge-content">
+      <div className="knowledge-content overflow-y-auto max-h-[calc(100vh-10.5rem)] custom-scrollbar pr-1">
         {isLoading && !hasAttemptedFetch ? (
           <div className="loading-container">
             <div className="loading-spinner"></div>
@@ -542,75 +551,88 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
           </div>
         ) : error ? (
           <div className="error-container">
-            <AlertCircle className="w-6 h-6 text-red-500 mx-auto mb-2" />
-            <p className="error-message">{error}</p>
-            {givenUp ? (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Could not load artifacts after multiple retries.
-              </p>
+            {error.includes("being generated") ? (
+              <>
+                <div className="loading-spinner"></div>
+                <p className="generating-message">{error}</p>
+                {retryCount > 0 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Attempt {retryCount + 1} of {maxRetries + 1}
+                  </p>
+                )}
+              </>
             ) : (
-              <button 
-                className="retry-button"
-                onClick={() => {
-                  setRetryCount(0);
-                  setGivenUp(false);
-                  fetchArtifacts(true);
-                }}
-                disabled={isLoading}
-              >
-                Retry
-              </button>
+              <>
+                <AlertCircle className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                <p className="error-message">{error}</p>
+                {givenUp ? (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Could not load artifacts after multiple retries.
+                  </p>
+                ) : (
+                  <button 
+                    className="retry-button"
+                    onClick={() => {
+                      setRetryCount(0);
+                      setGivenUp(false);
+                      fetchArtifacts(true);
+                    }}
+                    disabled={isLoading}
+                  >
+                    Retry
+                  </button>
+                )}
+              </>
             )}
+          </div>
+        ) : guidelines.length === 0 && caseStudies.length === 0 ? (
+          <div className="empty-state">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No knowledge artifacts found for this conversation.
+            </p>
+            <button 
+              className="refresh-button mt-4"
+              onClick={() => fetchArtifacts(true)}
+              disabled={isLoading}
+            >
+              Refresh
+            </button>
           </div>
         ) : (
           <>
-            <div className="guidelines-section">
-              <div className="flex justify-between items-center mb-2">
-                <h4>Relevant Guidelines</h4>
-                {guidelines.length > 0 && (
-                  <button 
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                    onClick={() => setShowAllGuidelines(!showAllGuidelines)}
+            {guidelines.length > 0 && (
+              <div className="guidelines-section">
+                <h4 className="section-title flex justify-between items-center">
+                  <span>Relevant Guidelines</span>
+                  <button
+                    onClick={() => setShowAllGuidelines(showAllGuidelines === null ? true : !showAllGuidelines)}
+                    className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    {showAllGuidelines === true ? 'Collapse All' : 'Expand All'}
+                    {showAllGuidelines ? 'Collapse All' : 'Expand All'}
                   </button>
-                )}
-              </div>
-              
-              {guidelines.length > 0 ? (
-                <div className="space-y-3">
+                </h4>
+                <div className="guidelines-list space-y-3">
                   {guidelines.map((guideline, index) => renderGuideline(guideline, index))}
                 </div>
-              ) : (
-                <div className="no-data">
-                  No relevant guidelines found
-                </div>
-              )}
-            </div>
-            
-            <div className="case-studies-section">
-              <div className="flex justify-between items-center mb-2">
-                <h4>Relevant Case Studies</h4>
-                {caseStudies.length > 0 && (
-                  <button 
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                    onClick={() => setShowAllCaseStudies(!showAllCaseStudies)}
-                  >
-                    {showAllCaseStudies === true ? 'Collapse All' : 'Expand All'}
-                  </button>
-                )}
               </div>
-              
-              {caseStudies.length > 0 ? (
-                <div className="space-y-3">
+            )}
+
+            {caseStudies.length > 0 && (
+              <div className="case-studies-section mt-6">
+                <h4 className="section-title flex justify-between items-center">
+                  <span>Relevant Case Studies</span>
+                  <button
+                    onClick={() => setShowAllCaseStudies(showAllCaseStudies === null ? true : !showAllCaseStudies)}
+                    className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    {showAllCaseStudies ? 'Collapse All' : 'Expand All'}
+                  </button>
+                </h4>
+                <div className="case-studies-list space-y-3">
                   {caseStudies.map((caseStudy, index) => renderCaseStudy(caseStudy, index))}
                 </div>
-              ) : (
-                <div className="no-data">
-                  No relevant case studies found
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>

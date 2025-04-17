@@ -21,7 +21,7 @@ export const GuidelinesPanel: React.FC<GuidelinesPanelProps> = ({ onClose, onNew
   }
   
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full">
       <div className="p-4">
         <KnowledgePanel 
           conversationId={currentConversation.conversationId} 

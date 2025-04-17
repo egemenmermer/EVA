@@ -8,8 +8,8 @@ import { HiPlus, HiOutlineTrash, HiLogout } from 'react-icons/hi';
 import { IoMdMenu } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { conversationApi } from '@/services/api';
-import type { ManagerType, Conversation } from '@/types';
+import { conversationApi, agentCreateConversation } from '@/services/api';
+import type { ManagerType, Conversation, User } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot, BookOpen } from 'lucide-react';
 import { TemperatureControl } from '@/components/controls/TemperatureControl';
@@ -118,14 +118,26 @@ const ProfileMenu = ({
 };
 
 export const Sidebar: React.FC<SidebarProps> = () => {
-  const { setCurrentConversation, currentConversation, managerType, setManagerType, user, darkMode, setMessages } = useStore();
+  const { 
+    user, 
+    managerType, 
+    setManagerType, 
+    temperature, 
+    setTemperature, 
+    darkMode, 
+    toggleDarkMode, 
+    currentConversation,
+    setCurrentConversation, 
+    setMessages, 
+    addMessage, 
+    setUser 
+  } = useStore();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
   
-  // State for direct fetched conversations
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,11 +165,12 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       const response = await conversationApi.getConversations();
       console.log('Fetched conversations:', response);
       
-      // Store fetched conversations after sanitizing and mapping to add isDraft property
+      // Store fetched conversations after sanitizing and mapping
       if (response && Array.isArray(response)) {
         const mappedConversations = response.map(conv => ({
           ...conv,
-          isDraft: false // All server conversations are not drafts
+          isDraft: false, // All server conversations are not drafts
+          isPersisted: true // Explicitly mark fetched conversations as persisted
         }));
         
         const sanitized = sanitizeConversations(mappedConversations);
@@ -259,42 +272,52 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
 
-  const handleNewChat = () => {
+  const handleNewChat = async () => {
+    // No need for loading state here, as it's purely local initially
+    setError(null);
     try {
-      const timestamp = new Date().toISOString();
-      // Create a temporary draft conversation object
+      console.log('Creating new DRAFT conversation locally...');
+      
+      // 1. Generate a local draft ID
+      const draftId = `draft-${uuidv4()}`;
+      const currentUserId = user?.id; // Get user ID from store state
+
+      // 2. Create a local Conversation object for the draft state
       const draftConversation: Conversation = {
-        conversationId: `draft-${uuidv4()}`,
-        title: 'New Chat',
-        managerType: managerType,
-        createdAt: timestamp,
-        isDraft: true
+        conversationId: draftId,
+        title: 'New Chat', // Default title for draft
+        managerType: managerType, // Use the currently selected manager type
+        createdAt: new Date().toISOString(),
+        isDraft: true,
+        isPersisted: false, // Mark as not saved to backend
+        userId: currentUserId, // Use the fetched user ID
+        lastMessage: undefined,
+        lastMessageDate: undefined,
       };
       
-      console.log('Creating draft conversation:', draftConversation);
+      console.log('Setting draft conversation in store:', draftConversation);
       
-      // Clear any existing conversation state from localStorage
-      localStorage.removeItem('current-conversation-id');
-      
-      // Important: Clear messages from both Zustand store and local component state
-      setMessages([]);
-      
-      // Ensure we dispatch an event to update other components
+      // 3. Clear messages from Zustand store and dispatch event
+      setMessages([]); // Clear message display
       const clearEvent = new CustomEvent('clear-messages', { 
-        detail: { conversationId: draftConversation.conversationId } 
+        detail: { conversationId: draftId } // Pass draft ID for potential context
       });
       window.dispatchEvent(clearEvent);
       
-      // Set the new conversation - this should be the last step
+      // 4. Set the new draft conversation in the store
       setCurrentConversation(draftConversation);
       
-      // Close mobile sidebar if open
+      // 5. Close mobile sidebar if open
       setMobileOpen(false);
       
+      // 6. Remove API call - Do NOT create on backend immediately
+      // No need to refresh conversation list from backend yet
+      
     } catch (err: any) {
-      console.error('Error creating draft conversation:', err);
-      setError('Failed to create conversation. Please try again.');
-    }
+      // Catch errors related to local state updates (less likely)
+      console.error('Error creating local draft conversation:', err);
+      setError('Failed to start new chat. Please try again.');
+    } 
   };
 
   const handleLogout = async () => {
@@ -335,61 +358,90 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     setMobileOpen(false);
   };
 
-  const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    e.preventDefault(); // Add this to prevent any bubbling
-    
-    try {
-      console.log('Deleting conversation:', id);
-      
-      // If it's the current conversation, clear it
-      if (currentConversation?.conversationId === id) {
-        setCurrentConversation(null);
-        // Also clear from localStorage
-        localStorage.removeItem('current-conversation-id');
-        // Clear messages to prevent showing deleted conversation content
-        setMessages([]);
-      }
-      
-      // Remove from local state first for immediate UI feedback
-      setDirectFetchedConversations(prev => 
-        prev.filter(conv => conv.conversationId !== id)
-      );
-      
-      // Clear all message formats from localStorage for complete cleanup
-      const keyFormats = [
-        `messages_${id}`,
-        `messages-${id}`,
-        `backup_messages_${id}`,
-        `backup-messages-${id}`,
-        `exact_messages_${id}`
-      ];
-      
-      keyFormats.forEach(key => {
-        localStorage.removeItem(key);
-      });
-      
-      console.log('Removed all message data from localStorage for conversation:', id);
-      
-      // API call to delete from server
-      await conversationApi.deleteConversation(id);
-      console.log('Conversation successfully deleted from server');
-      
-      // Trigger a custom event to update other components
-      const deleteEvent = new CustomEvent('conversation-deleted', { 
-        detail: { conversationId: id } 
-      });
-      window.dispatchEvent(deleteEvent);
-      
-      // Refetch to ensure UI is in sync with server
-      setTimeout(() => {
-        fetchConversations();
-      }, 500);
-    } catch (err) {
-      console.error('Failed to delete conversation:', err);
-      // Refetch to ensure UI is in sync
-      fetchConversations();
+  const handleDeleteConversation = async (e: React.MouseEvent, conversationToDelete: Conversation) => {
+    // --- ADDED LOG 1: Check parameters immediately --- 
+    console.log("[handleDeleteConversation ENTRY] Event:", e);
+    console.log("[handleDeleteConversation ENTRY] conversationToDelete object:", JSON.stringify(conversationToDelete)); // Stringify to see full structure
+
+    // --- ADD LOG 2: Check conversationId existence --- 
+    if (!conversationToDelete || !conversationToDelete.conversationId) {
+      console.error("[handleDeleteConversation ERROR] conversationToDelete or its ID is missing!", conversationToDelete);
+      return; // Stop execution if critical data is missing
     }
+    console.log('[handleDeleteConversation CHECK] conversationId exists:', conversationToDelete.conversationId);
+
+    // --- ADD LOG 3 --- 
+    console.log('[handleDeleteConversation] Clicked!', { conversationId: conversationToDelete?.conversationId });
+    
+    e.stopPropagation();
+    e.preventDefault(); 
+    
+    const id = conversationToDelete.conversationId; 
+    
+    // --- ADD LOG 4 --- 
+    console.log('[handleDeleteConversation] Conversation ID variable set:', id);
+    
+    // Ensure isPersisted check defaults correctly if undefined
+    // --- ADD LOG 5 --- 
+    const isPersisted = conversationToDelete.isPersisted === true;
+    console.log('[handleDeleteConversation] Is Persisted?:', isPersisted, '(from conversationToDelete.isPersisted:', conversationToDelete.isPersisted, ')');
+
+    // Store the list before optimistic update, in case we need to revert
+    const previousConversations = [...directFetchedConversations];
+
+    // Optimistically update UI first
+    setDirectFetchedConversations(prev => 
+      prev.filter(conv => conv.conversationId !== id)
+    );
+    
+    // Clear state if deleting current conversation
+    if (currentConversation?.conversationId === id) {
+      setCurrentConversation(null);
+      setMessages([]); // Make sure messages are cleared from store
+      localStorage.removeItem('current-conversation-id');
+    }
+    
+    // Clear related localStorage data
+    const keysToRemove = [
+      `messages_${id}`, `messages-${id}`,
+      `backup_messages_${id}`, `backup-messages-${id}`,
+      `exact_messages_${id}`, `artifacts-${id}`
+    ];
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    console.log(`Optimistic UI update and localStorage clear done for ${id}`);
+
+    // Dispatch delete event immediately so other components (like ChatWindow) can react
+    const deleteEvent = new CustomEvent('conversation-deleted', { 
+      detail: { conversationId: id } 
+    });
+    window.dispatchEvent(deleteEvent);
+
+    // Perform backend delete ONLY if persisted
+    // --- ADD LOG 6 --- 
+    console.log('[handleDeleteConversation] Checking if persisted before API call...');
+    if (isPersisted) {
+      // --- ADD LOG 7 --- 
+      console.log('[handleDeleteConversation] IS persisted. Attempting API call...');
+      try {
+        await conversationApi.deleteConversation(id); // Attempt backend delete
+        // --- ADD LOG 8 --- 
+        console.log('[handleDeleteConversation] API call successful for:', id);
+      } catch (err: any) {
+        // --- ADD LOG 9 --- 
+        console.error('[handleDeleteConversation] API call FAILED:', err);
+        setError(`Failed to delete: ${err.message || 'Server error'}. Reverting.`);
+        // If backend delete failed, revert optimistic UI update
+        console.log('Backend delete failed, reverting optimistic UI update.');
+        setDirectFetchedConversations(previousConversations);
+      }
+    } else {
+      // --- ADD LOG 10 --- 
+      console.log('[handleDeleteConversation] NOT persisted. Skipping API call.');
+    }
+    // --- ADD LOG 11 --- 
+    console.log('[handleDeleteConversation] Finished.');
   };
 
   const formatDate = (dateString: string) => {
@@ -454,9 +506,9 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             )}
           </div>
           
-          {/* Inline Delete Button - Always visible on hover */}
+          {/* --- MODIFIED Delete Button --- */}
           <button
-            onClick={(e) => handleDeleteConversation(e, conversation.conversationId)}
+            onClick={(e) => handleDeleteConversation(e, conversation)}
             className={`ml-2 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all ${
               currentConversation?.conversationId === conversation.conversationId
                 ? 'opacity-70'

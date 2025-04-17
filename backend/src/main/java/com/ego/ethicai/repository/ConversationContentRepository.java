@@ -22,6 +22,10 @@ public interface ConversationContentRepository extends JpaRepository<Conversatio
     
     List<ConversationContent> findByConversationId(UUID conversationId);
     
+    List<ConversationContent> findByConversationIdOrderByCreatedAtDesc(UUID conversationId);
+    
+    long countByConversationId(UUID conversationId);
+    
     List<ConversationContent> findByConversation(Conversation conversation);
     
     @Query("SELECT cc FROM ConversationContent cc WHERE cc.conversation = :conversation AND cc.conversation.user.id = :userId")

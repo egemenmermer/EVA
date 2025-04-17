@@ -25,26 +25,50 @@ public class RagArtifactController {
     private final RagArtifactService ragArtifactService;
 
     /**
-     * Save RAG artifacts for a conversation
+     * Save RAG artifacts for a conversation (Legacy Endpoint)
      *
      * @param request DTO containing artifacts to save
      * @return Response DTO with saved artifacts
      */
     @PostMapping("/rag-artifacts")
+    public ResponseEntity<RagArtifactsResponseDTO> saveArtifactsLegacy(
+            @RequestBody RagArtifactsRequestDTO request,
+            @CurrentUser CustomUserDetails currentUser) {
+        // Delegate to the common save method
+        return saveArtifactsCommon(request, currentUser, "/rag-artifacts");
+    }
+
+    /**
+     * Save RAG artifacts for a conversation (Primary Endpoint)
+     *
+     * @param request DTO containing artifacts to save
+     * @return Response DTO with saved artifacts
+     */
+    @PostMapping("/knowledge-artifacts")
     public ResponseEntity<RagArtifactsResponseDTO> saveArtifacts(
             @RequestBody RagArtifactsRequestDTO request,
             @CurrentUser CustomUserDetails currentUser) {
+        // Delegate to the common save method
+        return saveArtifactsCommon(request, currentUser, "/knowledge-artifacts");
+    }
+
+    // Common private method to handle artifact saving
+    private ResponseEntity<RagArtifactsResponseDTO> saveArtifactsCommon(
+            RagArtifactsRequestDTO request,
+            CustomUserDetails currentUser,
+            String endpointPath
+    ) {
         try {
             if (request == null || request.getConversationId() == null || request.getConversationId().isEmpty()) {
-                log.warn("Invalid request or conversation ID provided");
+                log.warn("Invalid request or conversation ID provided to {}", endpointPath);
                 return ResponseEntity.ok(RagArtifactsResponseDTO.builder()
                         .guidelines(List.of())
                         .caseStudies(List.of())
                         .build());
             }
             
-            log.info("Saving RAG artifacts for conversation: {} by user: {}", 
-                    request.getConversationId(), currentUser.getEmail());
+            log.info("Saving artifacts via {}: Conversation: {} by user: {}", 
+                    endpointPath, request.getConversationId(), currentUser.getEmail());
             
             // Validate conversation ID format
             String conversationId = request.getConversationId();
@@ -59,10 +83,10 @@ public class RagArtifactController {
             
             try {
                 RagArtifactsResponseDTO response = ragArtifactService.saveArtifacts(request);
-                log.info("Successfully saved RAG artifacts for conversation: {}", request.getConversationId());
+                log.info("Successfully saved artifacts for conversation: {}", request.getConversationId());
                 return ResponseEntity.ok(response);
             } catch (Exception e) {
-                log.error("Service error saving RAG artifacts for conversation {}: {}", 
+                log.error("Service error saving artifacts for conversation {}: {}", 
                         request.getConversationId(), e.getMessage(), e);
                 
                 // Return empty response instead of error
@@ -73,7 +97,7 @@ public class RagArtifactController {
                         .build());
             }
         } catch (Exception e) {
-            log.error("Unexpected error saving RAG artifacts: {}", e.getMessage(), e);
+            log.error("Unexpected error saving RAG artifacts via {}: {}", endpointPath, e.getMessage(), e);
             
             // Return empty response 
             String conversationId = request != null ? request.getConversationId() : null;

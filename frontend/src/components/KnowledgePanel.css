@@ -467,4 +467,50 @@
   .case-study-item p {
     font-size: 13px;
   }
+}
+
+.generating-message {
+  color: #4b5563;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.dark .generating-message {
+  color: #9ca3af;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  padding: 16px;
+  text-align: center;
+}
+
+.refresh-button {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dark .refresh-button {
+  background-color: #1f2937;
+  color: #d1d5db;
+  border: 1px solid #374151;
+}
+
+.refresh-button:hover {
+  background-color: #e5e7eb;
+}
+
+.dark .refresh-button:hover {
+  background-color: #374151;
 } 

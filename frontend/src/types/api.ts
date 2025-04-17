@@ -22,6 +22,7 @@ export interface ConversationResponseDTO {
   title: string;
   managerType: ManagerType;
   createdAt: string;
+  persisted?: boolean;
 }
 
 // Support both old and new message formats

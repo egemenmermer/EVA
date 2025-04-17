@@ -8,8 +8,10 @@ import com.ego.ethicai.service.ConversationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -79,8 +81,39 @@ public class ConversationController {
             @CurrentUser CustomUserDetails currentUser,
             @PathVariable UUID id) {
         logger.info("Deleting conversation with ID: {} for user: {}", id, currentUser.getEmail());
-        conversationService.deleteConversation(id);
-        return ResponseEntity.ok().build();
+        try {
+            // Optional: Add ownership check here before deleting
+            // boolean ownsConversation = conversationService.checkOwnership(id, currentUser.getId());
+            // if (!ownsConversation) {
+            //     logger.warn("User {} does not own conversation {}", currentUser.getEmail(), id);
+            //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            // }
+            
+            conversationService.deleteConversation(id);
+            logger.info("Successfully deleted conversation with ID: {}", id);
+            // Return 204 No Content on successful deletion
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            // Catch the specific exception from the service
+            logger.warn("Conversation not found for deletion with ID: {}. Details: {}", id, e.getMessage());
+            return ResponseEntity.notFound().build(); // Return 404 Not Found
+        } catch (EmptyResultDataAccessException e) {
+            // Keep this catch block in case other repository methods might throw it
+            logger.warn("Data access exception (possibly not found) during deletion for ID: {}", id);
+            return ResponseEntity.notFound().build(); // Return 404 Not Found
+        } catch (RuntimeException e) { // Catch potential RuntimeException from service
+            logger.error("Runtime error deleting conversation {}: {}", id, e.getMessage(), e);
+            // Check if the cause was the EntityNotFoundException to ensure 404
+            if (e.getCause() instanceof EntityNotFoundException || e instanceof EntityNotFoundException) {
+                logger.warn("Conversation not found (runtime exception wrapper) for deletion with ID: {}", id);
+                return ResponseEntity.notFound().build(); // Return 404
+            }    
+            return ResponseEntity.internalServerError().build(); // Return 500 otherwise
+        } catch (Exception e) {
+            // Catch other potential errors during deletion
+            logger.error("General error deleting conversation {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.internalServerError().build(); // Return 500
+        }
     }
     
     // Request class for updating conversation title

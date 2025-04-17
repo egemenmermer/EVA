@@ -15,6 +15,7 @@ import com.ego.ethicai.service.AgentServiceClient;
 import com.ego.ethicai.service.ConversationContentService;
 import com.ego.ethicai.service.ConversationService;
 import com.ego.ethicai.service.RagArtifactService;
+import com.ego.ethicai.dto.SaveMessageRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,28 +146,141 @@ public class ConversationContentController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /**
+     * NEW Endpoint: Specifically for the Agent to save a pre-generated message pair.
+     */
+    @PostMapping("/message/save")
+    public ResponseEntity<Void> saveAgentMessage(
+            @CurrentUser CustomUserDetails currentUser,
+            @RequestBody SaveMessageRequestDTO request) {
+                
+        logger.info("saveAgentMessage endpoint hit for conversationId: {} with role: {} by user: {}", 
+                   request.getConversationId(), request.getRole(), currentUser.getEmail());
+
+        try {
+            // Validate required fields
+            if (request.getConversationId() == null || 
+                request.getContent() == null || request.getContent().isEmpty() ||
+                request.getRole() == null || request.getRole().isEmpty()) {
+                logger.warn("Missing required fields in SaveMessageRequestDTO for conversation {}", request.getConversationId());
+                return ResponseEntity.badRequest().build();
+            }
+            
+            Conversation conversation = conversationService.getConversationEntityById(request.getConversationId())
+                    .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+            // Authorization check: Ensure conversation belongs to the logged-in user
+            if (!conversation.getUser().getId().equals(currentUser.getId())) {
+                logger.warn("Unauthorized attempt to save message to conversation {} by user {}", 
+                           request.getConversationId(), currentUser.getEmail());
+                return ResponseEntity.status(403).build(); // Forbidden
+            }
+
+            boolean messageSavedOrUpdated = false;
+
+            if ("user".equalsIgnoreCase(request.getRole())) {
+                // --- Title Update Logic --- 
+                try {
+                    long messageCount = conversationContentRepository.countByConversationId(conversation.getId());
+                    logger.debug("Existing message count for conversation {}: {}", conversation.getId(), messageCount);
+                    
+                    if (messageCount == 0) { 
+                         logger.info("First message for conversation {}. Updating title with query: '{}'...", conversation.getId(), request.getContent().substring(0, Math.min(request.getContent().length(), 30)));
+                         String newTitle = request.getContent();
+                         if (newTitle.length() > 100) { 
+                             newTitle = newTitle.substring(0, 97) + "...";
+                         }
+                         conversationService.updateConversationTitle(conversation.getId(), currentUser.getId(), newTitle);
+                         logger.info("Successfully updated title for conversation {}", conversation.getId());
+                    } else {
+                         logger.debug("Skipping title update for conversation {}. Message count: {}", 
+                                      conversation.getId(), messageCount);
+                    }
+                } catch (Exception titleUpdateEx) {
+                     logger.error("Error checking message count or updating title for conversation {}: {}", conversation.getId(), titleUpdateEx.getMessage(), titleUpdateEx);
+                }
+                // --- End Title Update --- 
+
+                // Save the user message
+                conversationContentService.saveMessage(conversation.getId(), request.getContent(), null);
+                messageSavedOrUpdated = true;
+                logger.info("Saved new user message content for conversation {}", conversation.getId());
+
+            } else if ("assistant".equalsIgnoreCase(request.getRole())) {
+                 // Try to update the last message entry if it was just a user query
+                 List<ConversationContent> existing = conversationContentRepository.findByConversationIdOrderByCreatedAtDesc(request.getConversationId());
+                 if (!existing.isEmpty()) {
+                     ConversationContent lastEntry = existing.get(0); // Get the latest entry
+                     if (lastEntry.getUserQuery() != null && lastEntry.getAgentResponse() == null) {
+                         lastEntry.setAgentResponse(request.getContent());
+                         conversationContentRepository.save(lastEntry);
+                         messageSavedOrUpdated = true;
+                         logger.info("Updated existing message pair with assistant response for conversation {}", request.getConversationId());
+                     } else {
+                         logger.warn("Could not find matching user query to update for assistant response. Conv: {}. Last entry had user: {}, agent: {}", 
+                                    request.getConversationId(), 
+                                    lastEntry.getUserQuery() != null, 
+                                    lastEntry.getAgentResponse() != null);
+                         // Decide how to handle this - maybe save separately? For now, we don't save.
+                     }
+                 } else {
+                      logger.warn("Received assistant response, but no prior messages found for conversation {}. Discarding.", request.getConversationId());
+                      // Don't save assistant response if there's no user query to pair it with
+                 }
+            } else {
+                logger.warn("Invalid role provided in SaveMessageRequestDTO: {}", request.getRole());
+                return ResponseEntity.badRequest().build();
+            }
+            
+            // Determine response status based on whether action was taken
+            if (messageSavedOrUpdated) {
+                 return ResponseEntity.status(201).build(); // 201 Created or 200 OK if updated
+            } else {
+                 // This might happen if assistant message arrived without a user query pair
+                 logger.info("No save/update action taken for request (role: {}) on conversation {}", request.getRole(), request.getConversationId());
+                 return ResponseEntity.ok().build(); // Return 200 OK as the request was processed, even if no DB change
+            }
+
+        } catch (RuntimeException e) {
+            logger.error("Error saving agent message for conversation {}: {}", request.getConversationId(), e.getMessage(), e);
+            // Distinguish between not found and other errors if needed
+            if (e.getMessage() != null && e.getMessage().contains("Conversation not found")) {
+                 return ResponseEntity.status(404).build(); // Not Found
+            }
+            return ResponseEntity.internalServerError().build();
+        } catch (Exception e) {
+            logger.error("Unexpected error saving agent message for conversation {}: {}", request.getConversationId(), e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     private List<ConversationContentResponseDTO> mapToResponseDTO(ConversationContent conversationContent) {
         List<ConversationContentResponseDTO> messages = new ArrayList<>();
         
-        // Add user message
-        messages.add(ConversationContentResponseDTO.builder()
-                .id(UUID.randomUUID().toString())
-                .conversationId(conversationContent.getConversation().getId().toString())
-                .role("user")
-                .content(conversationContent.getUserQuery())
-                .userQuery(conversationContent.getUserQuery())
-                .createdAt(conversationContent.getCreatedAt().toString())
-                .build());
+        // Add user message representation if userQuery exists
+        if (conversationContent.getUserQuery() != null && !conversationContent.getUserQuery().isEmpty()) {
+            messages.add(ConversationContentResponseDTO.builder()
+                    .id(conversationContent.getId().toString() + "-user") // Adjust ID slightly
+                    .conversationId(conversationContent.getConversation().getId().toString())
+                    .role("user")
+                    .content(conversationContent.getUserQuery())
+                    .userQuery(conversationContent.getUserQuery())
+                    .createdAt(conversationContent.getCreatedAt().toString())
+                    .build());
+        }
         
-        // Add assistant message
-        messages.add(ConversationContentResponseDTO.builder()
-                .id(UUID.randomUUID().toString())
-                .conversationId(conversationContent.getConversation().getId().toString())
-                .role("assistant")
-                .content(conversationContent.getAgentResponse())
-                .agentResponse(conversationContent.getAgentResponse())
-                .createdAt(conversationContent.getCreatedAt().toString())
-                .build());
+        // Add assistant message representation if agentResponse exists
+        if (conversationContent.getAgentResponse() != null && !conversationContent.getAgentResponse().isEmpty()) {
+            messages.add(ConversationContentResponseDTO.builder()
+                    .id(conversationContent.getId().toString() + "-assistant") // Adjust ID slightly
+                    .conversationId(conversationContent.getConversation().getId().toString())
+                    .role("assistant")
+                    .content(conversationContent.getAgentResponse())
+                    .agentResponse(conversationContent.getAgentResponse())
+                    // Use the same timestamp as the user query for the pair
+                    .createdAt(conversationContent.getCreatedAt().toString()) 
+                    .build());
+        }
         
         return messages;
     }

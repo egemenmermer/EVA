@@ -26,9 +26,9 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   // State to track if the knowledge panel should be visible on desktop
-  const [showKnowledgePanel, setShowKnowledgePanel] = useState(false);
+  const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   // Track if new knowledge has been loaded (to add a pulse effect)
-  const [hasNewKnowledge, setHasNewKnowledge] = useState(false);
+  const [hasNewKnowledge, setHasNewKnowledge] = useState<boolean>(false);
   // State for messages
   const [storeMessages, setStoreMessages] = useState<Message[]>([]);
 
@@ -142,6 +142,60 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     };
   }, [currentConversation]);
 
+  // Listen for conversation changes to manage knowledge panel state
+  useEffect(() => {
+    // When conversation changes, close the knowledge panel by default
+    if (currentConversation?.conversationId) {
+      // Only close panel on new conversation, not just any update
+      if (currentConversation.isNew || 
+          localStorage.getItem('lastOpenConversation') !== currentConversation.conversationId) {
+        
+        console.log('New conversation detected, closing knowledge panel');
+        setShowKnowledgePanel(false);
+        setHasNewKnowledge(false);
+        
+        // Track this conversation as last open
+        localStorage.setItem('lastOpenConversation', currentConversation.conversationId);
+        
+        // Clean up old artifact data
+        const previousConversationId = localStorage.getItem('lastOpenConversation');
+        if (previousConversationId && previousConversationId !== currentConversation.conversationId) {
+          localStorage.removeItem(`artifacts-${previousConversationId}`);
+        }
+        
+        // Always clear artifacts for the new conversation to ensure fresh data
+        localStorage.removeItem(`artifacts-${currentConversation.conversationId}`);
+      }
+    }
+  }, [currentConversation?.conversationId, currentConversation?.isNew]);
+
+  // Add specific event listener for deleted conversations
+  useEffect(() => {
+    const handleConversationDeleted = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const deletedId = customEvent.detail?.conversationId;
+      
+      console.log('Conversation deleted event received:', deletedId);
+      
+      // If current conversation was deleted, clear it
+      if (currentConversation?.conversationId === deletedId) {
+        setCurrentConversation(null);
+        setShowKnowledgePanel(false);
+      }
+      
+      // Always clear artifacts for deleted conversations
+      if (deletedId) {
+        localStorage.removeItem(`artifacts-${deletedId}`);
+      }
+    };
+    
+    window.addEventListener('conversation-deleted', handleConversationDeleted as EventListener);
+    
+    return () => {
+      window.removeEventListener('conversation-deleted', handleConversationDeleted as EventListener);
+    };
+  }, [currentConversation, setCurrentConversation]);
+
   // Logout if we encounter an authentication error
   const handleAuthError = () => {
     console.log('Authentication error detected, clearing token and redirecting to login');
@@ -173,6 +227,14 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       localStorage.removeItem(`artifacts-${currentConversation.conversationId}`);
       
       // The KnowledgePanel component will automatically try to fetch them
+    }
+  };
+
+  // Callback for when new knowledge is available
+  const handleNewKnowledge = () => {
+    // Only show the notification if the panel is closed
+    if (!showKnowledgePanel) {
+      setHasNewKnowledge(true);
     }
   };
 
@@ -216,9 +278,13 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         </button>
       </header>
       
-      <div className="flex-1 flex overflow-hidden relative">
+      {/* Explicitly calculate height to fill remaining viewport space */}
+      <div 
+        className="flex-1 flex overflow-hidden relative" 
+        style={{ height: 'calc(100vh - 4rem)' }} // Assuming mobile header height h-16 = 4rem
+      >
         {/* Left Sidebar - Responsive */}
-        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-30 w-[85%] sm:w-[320px] md:w-[260px] h-[calc(100%-4rem)] md:h-auto flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden transition-transform duration-300 ease-in-out`}>
+        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-30 w-[85%] sm:w-[320px] md:w-[260px] h-full flex-none flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden transition-transform duration-300 ease-in-out`}>
           {/* Close button on mobile */}
           <button 
             onClick={() => setSidebarOpen(false)} 
@@ -243,13 +309,12 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           />
         )}
         
-        {/* Main Chat Window - Takes full width when knowledge panel is closed */}
+        {/* Main Chat Window */}
         <main 
-          className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden transition-all duration-300"
+          className="flex-1 min-w-0 bg-white dark:bg-gray-900 flex justify-center overflow-hidden transition-all duration-300 h-full" 
           onClick={handleMainContentClick}
         >
-          {/* Allow full width but with proper spacing */}
-          <div className="w-full transition-all duration-300 px-4 mx-auto"> 
+          <div className="w-full transition-all duration-300 px-4 mx-auto h-full">
             <ChatWindow 
               showKnowledgePanel={showKnowledgePanel}
               currentConversation={currentConversation}
@@ -259,8 +324,8 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           </div>
         </main>
         
-        {/* Right Panel Container - Only allocated space in the flex layout when visible */}
-        <div className={`${showKnowledgePanel ? 'relative w-[320px]' : 'absolute right-0 w-0'} transition-all duration-300`}>
+        {/* Right Panel Container */}
+        <div className={`${showKnowledgePanel ? 'relative w-[320px]' : 'absolute right-0 w-0'} transition-all duration-300 h-full`}>
           {/* Knowledge Panel Toggle Button - Always visible */}
           <div className="hidden md:block">
             <button 
@@ -277,8 +342,8 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
             </button>
           </div>
           
-          {/* Right Panel - Responsive on mobile, controlled by showKnowledgePanel on desktop */}
-          <div className={`knowledge-panel ${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} ${showKnowledgePanel ? 'md:translate-x-0' : 'md:translate-x-full'} fixed md:relative right-0 top-16 md:top-0 z-40 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-auto flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+          {/* Actual Knowledge Panel */}
+          <div className={`knowledge-panel ${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} ${showKnowledgePanel ? 'md:translate-x-0' : 'md:translate-x-full'} fixed md:relative right-0 top-16 md:top-0 z-40 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-full flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
             {/* Close button on mobile */}
             <button 
               onClick={() => setGuidelinesOpen(false)} 
@@ -290,18 +355,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
             
             <GuidelinesPanel 
               onClose={() => setShowKnowledgePanel(false)} 
-              onNewKnowledge={() => {
-                if (!showKnowledgePanel) {
-                  setHasNewKnowledge(true);
-                  
-                  // Auto-clear the pulse effect after 5 seconds
-                  const timer = setTimeout(() => {
-                    setHasNewKnowledge(false);
-                  }, 5000);
-                  
-                  return () => clearTimeout(timer);
-                }
-              }}
+              onNewKnowledge={handleNewKnowledge}
             />
           </div>
         </div>

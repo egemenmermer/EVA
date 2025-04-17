@@ -384,17 +384,17 @@ export const conversationApi = {
   deleteConversation: async (conversationId: string): Promise<void> => {
     try {
       console.log('Deleting conversation:', conversationId);
-      setAuthHeader();
       
-      // Delete the conversation
+      // Send delete request directly to Java backend to ensure database deletion
       await backendApi.delete(`/api/v1/conversation/${conversationId}`);
-      console.log('Successfully deleted conversation:', conversationId);
+      console.log('Successfully deleted conversation from backend database:', conversationId);
       
       // Clear local storage for this conversation
       localStorage.removeItem(`messages_${conversationId}`);
       localStorage.removeItem(`messages-${conversationId}`);
       localStorage.removeItem(`backup_messages_${conversationId}`);
       localStorage.removeItem(`exact_messages_${conversationId}`);
+      localStorage.removeItem(`artifacts-${conversationId}`);
     } catch (error) {
       console.error('Error in deleteConversation:', error);
       throw error;
@@ -439,7 +439,7 @@ const generateId = () => {
   return crypto.randomUUID?.() || `msg-${Date.now()}`;
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 const AGENT_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
@@ -561,7 +561,7 @@ interface KnowledgeArtifactsResponse {
   }>;
 }
 
-// UPDATED getKnowledgeArtifacts function
+// UPDATED getKnowledgeArtifacts function with improved endpoint handling
 export const getKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
   try {
     // Skip invalid conversation IDs
@@ -570,104 +570,92 @@ export const getKnowledgeArtifacts = async (conversationId: string): Promise<Kno
       return { guidelines: [], caseStudies: [] };
     }
     
-    // Check local cache first
+    // First check local cache
     try {
       const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
       if (cachedData) {
         const parsedCache = JSON.parse(cachedData);
         const cacheAge = new Date().getTime() - new Date(parsedCache.timestamp).getTime();
-        if (cacheAge < 10 * 60 * 1000 && 
-            (parsedCache.guidelines?.length > 0 || parsedCache.caseStudies?.length > 0)) { // Check if cache has any content
+        // Use a shorter cache time (3 minutes) to ensure fresher data
+        if (cacheAge < 3 * 60 * 1000 && 
+            (parsedCache.guidelines?.length > 0 || parsedCache.caseStudies?.length > 0)) {
           console.log(`Using cached artifacts for ${conversationId}, cache age: ${Math.round(cacheAge/1000)}s`);
           return {
             guidelines: parsedCache.guidelines || [],
             caseStudies: parsedCache.caseStudies || []
           };
+        } else {
+          console.log(`Cache expired for ${conversationId}, fetching fresh data`);
+          // Don't return here, continue to fetch fresh data
         }
       }
     } catch (cacheError) {
       console.warn('Failed to read artifact cache:', cacheError);
+      // Continue to fetch from API
     }
     
-    // Validate UUID format
+    // Validate UUID format - required for backend API
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const isUuid = uuidPattern.test(conversationId);
     if (!isUuid) {
         console.warn(`Cannot fetch artifacts for non-UUID conversation ID: ${conversationId}`);
-        // Do not call generateKnowledgeArtifacts here
         return { guidelines: [], caseStudies: [] }; 
     }
 
-    // Setup headers with token
-    const headers: Record<string, string> = {
-      'Accept': 'application/json',
-    };
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = token;
-    } else {
-      console.warn('No authentication token available for artifact fetch');
-      // Cannot fetch from backend without token
-      return { guidelines: [], caseStudies: [] }; 
-    }
-    
-    // Fetch from backend database
-    console.log(`Fetching knowledge artifacts from database for UUID: ${conversationId}`);
+    // Fetch from backend database using backendApi instance
+    console.log(`Fetching knowledge artifacts for UUID: ${conversationId} from backend`);
     const timestamp = new Date().getTime(); // Cache buster
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for fetch
+    
+    // Define the endpoint relative to the backend base URL
+    const endpointPath = `/api/v1/knowledge-artifacts/${conversationId}`;
     
     try {
-      // Use the correct API_URL (pointing to backend 8443) and endpoint
-      const response = await fetch(`${API_URL}/api/v1/knowledge-artifacts/${conversationId}?_=${timestamp}`, { 
-        method: 'GET',
-        headers,
-        signal: controller.signal
+      // Use backendApi which already has the base URL (8443) and interceptors
+      const response = await backendApi.get<KnowledgeArtifactsResponse>(endpointPath, {
+        params: { _: timestamp } // Add cache buster as query param
       });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`Artifact fetch status: ${response.status}`);
+      
+      console.log(`Artifact fetch from backend: Status ${response.status}`);
+      
+      if (response.data && Array.isArray(response.data.guidelines) && Array.isArray(response.data.caseStudies)) {
+        // Cache the valid results
+        try {
+          localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
+            guidelines: response.data.guidelines || [],
+            caseStudies: response.data.caseStudies || [],
+            timestamp: new Date().toISOString()
+          }));
+          console.log(`Cached artifacts for ${conversationId}`);
+        } catch (err) {
+          console.warn('Failed to cache artifacts to localStorage');
+        }
         
-        if (data && Array.isArray(data.guidelines) && Array.isArray(data.caseStudies)) {
-            // Cache the results from backend
-            try {
-              localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
-                guidelines: data.guidelines || [],
-                caseStudies: data.caseStudies || [],
-                timestamp: new Date().toISOString()
-              }));
-            } catch (err) {
-              console.warn('Failed to cache artifacts to localStorage');
-            }
-            return {
-              guidelines: data.guidelines || [],
-              caseStudies: data.caseStudies || []
-            };
-        } else {
-           console.warn('Received malformed artifact data from backend');
-           return { guidelines: [], caseStudies: [] }; // Return empty on malformed data
+        // Return the successful data
+        return {
+          guidelines: response.data.guidelines || [],
+          caseStudies: response.data.caseStudies || []
+        };
+      } else {
+        console.warn(`Malformed artifact data from backend`, response.data);
+      }
+    } catch (error: any) {
+      // Axios errors have a response object
+      if (error.response) {
+        console.warn(`Backend artifact fetch failed with status ${error.response.status}`);
+        if (error.response.status === 404) {
+          console.log(`No artifacts found at backend endpoint ${endpointPath}.`);
         }
       } else {
-        // Handle non-OK responses (like 404 if backend hasn't generated yet, or 401)
-        console.warn(`Backend artifact fetch failed: Status ${response.status}`);
-        // Do not call generateKnowledgeArtifacts here
-        return { guidelines: [], caseStudies: [] }; // Return empty on fetch error
+        console.error(`Error fetching artifacts from backend endpoint ${endpointPath}:`, error);
       }
-    } catch (error) {
-      clearTimeout(timeoutId); // Clear timeout in case of non-fetch error
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        console.log('Artifact fetch timed out after 5 seconds');
-      } else {
-        console.error('Error fetching artifacts from backend API:', error);
-      }
-      // Do not call generateKnowledgeArtifacts here
-      return { guidelines: [], caseStudies: [] }; // Return empty on error
     }
+    
+    // If the fetch failed
+    console.warn(`Artifact fetch failed for ${conversationId}.`);
+    return { guidelines: [], caseStudies: [] };
 
   } catch (error) {
-    // Catch any unexpected errors in the outer try
+    // Catch any unexpected errors
     console.error('Unexpected error in getKnowledgeArtifacts:', error);
     return { guidelines: [], caseStudies: [] };
   }
@@ -710,13 +698,99 @@ axios.interceptors.response.use(
   }
 );
 
-// Helper function to check if a conversation exists
+// Keep the original checkConversationExists that calls the backend
 export const checkConversationExists = async (conversationId: string): Promise<boolean> => {
   try {
+    // Assuming backendApi is configured for the Java backend
     const response = await backendApi.get<Conversation>(`/api/v1/conversation/${conversationId}`);
+    // Check if the response data includes the conversationId, indicating it exists
     return response?.data?.conversationId === conversationId;
-  } catch (error) {
-    console.error('Error checking conversation:', error);
-    return false;
+  } catch (error: any) {
+    // If the error is a 404, the conversation doesn't exist
+    if (error.response && error.response.status === 404) {
+        return false;
+    }
+    // Log other errors but assume it might exist or there's another issue
+    console.error('Error checking conversation existence:', error);
+    return false; // Default to false on unexpected errors
   }
 };
+
+// --- NEW Agent Specific API Calls ---
+
+/**
+ * Calls the AGENT's endpoint to create a new conversation.
+ * The agent will attempt to create it in the backend database as well.
+ * 
+ * @param managerType The selected manager type.
+ * @returns ConversationResponseDTO including the 'persisted' flag.
+ */
+export const agentCreateConversation = async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
+  console.log(`Calling AGENT to create conversation with manager type: ${managerType}`);
+  setAuthHeader(); // Ensure auth header is set for the agent call
+  try {
+    const response = await agentApi.post<ConversationResponseDTO>('/api/v1/conversation', {
+      managerType,
+      // Agent might use userId from token, or we could pass it if needed
+      // title: 'New Conversation' // Agent will likely handle default title
+    });
+    console.log('Agent create conversation response:', response.data);
+    // Ensure persisted flag is handled, default to false if missing in response for safety
+    return { ...response.data, persisted: response.data.persisted ?? false }; 
+  } catch (error) {
+    console.error('Error calling agent to create conversation:', error);
+    // If agent call fails, maybe return a local non-persisted object?
+    // For now, re-throw to indicate failure.
+    throw error;
+  }
+};
+
+// --- Existing Standalone Functions (potentially refactor or remove if redundant) ---
+// Commenting out old functions that might be duplicates or call backend directly
+/*
+export const createConversation = async (title: string, managerType?: ManagerType) => {
+  setAuthHeader();
+  const response = await axios.post(`${API_URL}/api/v1/conversation`, {
+    title,
+    managerType: managerType || getManagerType()
+  });
+  return response.data;
+};
+
+export const getConversations = async () => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/api/v1/conversation`);
+  return response.data;
+};
+
+export const getConversationMessages = async (conversationId: string) => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/api/v1/conversation/message/${conversationId}`);
+  return response.data;
+};
+
+export const sendMessage = async (
+  conversationId: string,
+  content: string,
+  managerType?: ManagerType,
+  temperature?: number
+) => {
+  // ... implementation calling backend/agent ... 
+};
+
+export const togglePracticeMode = async (conversationId: string, enter: boolean) => {
+ // ... implementation ...
+};
+
+export const startScenario = async (conversationId: string, scenarioId: string) => {
+  // ... implementation ...
+};
+
+export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number) => {
+ // ... implementation ...
+};
+
+export const getAvailableScenarios = async () => {
+ // ... implementation ...
+};
+*/

@@ -77,16 +77,12 @@ public class RagArtifactService {
                 }
             });
             
-            // First delete any existing artifacts for this conversation
-            try {
-                log.info("[SaveArtifacts-{}] Deleting existing artifacts for conversation: {}", operationId, conversationUuid);
-                ragArtifactRepository.deleteByConversationId(conversationUuid);
-                log.info("[SaveArtifacts-{}] Finished deleting existing artifacts for conversation: {}", operationId, conversationUuid);
-            } catch (Exception e) {
-                // Log delete error but continue, as save might still succeed
-                log.warn("[SaveArtifacts-{}] WARN - Could not delete existing artifacts for conv {}: {}. Proceeding with save.", 
-                         operationId, conversationUuid, e.getMessage());
-            }
+            // Delete existing artifacts first. 
+            // If this fails, the @Transactional annotation ensures the whole operation rolls back,
+            // preventing the save of new artifacts and thus avoiding duplicates.
+            log.info("[SaveArtifacts-{}] Deleting existing artifacts for conversation: {}", operationId, conversationUuid);
+            ragArtifactRepository.deleteByConversationId(conversationUuid);
+            log.info("[SaveArtifacts-{}] Finished deleting existing artifacts for conversation: {}", operationId, conversationUuid);
             
             List<RagArtifact> newArtifacts = new ArrayList<>();
             

@@ -19,6 +19,7 @@ export interface Conversation {
   lastMessage?: string;
   lastMessageDate?: string;
   isDraft?: boolean;
+  isPersisted?: boolean;
 }
 
 export interface Message {

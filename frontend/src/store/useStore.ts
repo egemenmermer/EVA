@@ -24,6 +24,8 @@ export interface Conversation {
   lastMessageDate?: string;
   isDraft?: boolean;
   messages?: Message[]; // For UI state management
+  isNew?: boolean;     // Flag to indicate a newly created conversation
+  isPersisted?: boolean; // Flag to indicate if saved in backend DB
 }
 
 export interface User {
