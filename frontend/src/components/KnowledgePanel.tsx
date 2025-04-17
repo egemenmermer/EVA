@@ -167,36 +167,38 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, []);
 
   const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
-    if (!conversationId) {
-      addDebugLog("No conversation ID provided");
+    addDebugLog(`Fetch requested for ${conversationId}. Skip cache: ${skipCache}`);
+
+    if (!conversationId || conversationId.startsWith('draft-') || !isValidUuid(conversationId)) {
+      addDebugLog("Invalid or draft conversation ID, aborting fetch.");
+      setError("Cannot fetch artifacts for this conversation.");
       setIsLoading(false);
-      setError("No conversation ID available");
+      setGuidelines([]);
+      setCaseStudies([]);
       return;
     }
 
-    if (conversationId !== prevConversationIdRef.current) {
-      prevConversationIdRef.current = conversationId;
+    if (!skipCache) {
+      const hasCachedData = checkExistingArtifacts(conversationId);
+      if (hasCachedData) {
+        addDebugLog("Using valid cached artifacts. Fetch cycle complete.");
+        setIsLoading(false);
+        setError(null);
+        setHasAttemptedFetch(true);
+        return;
+      }
+      addDebugLog("Cache empty or invalid, proceeding to network fetch.");
     }
 
     setIsLoading(true);
     setError(null);
     
-    // Display detailed logs
     addDebugLog(`Starting artifact fetch for conversation ${conversationId}`);
     
-    // Check if forced refresh
-    if (skipCache) {
-      addDebugLog("Forced refresh, removing cached artifacts");
-      localStorage.removeItem(`artifacts-${conversationId}`);
-    } else {
-      // Check cache first (moved to component level for better feedback)
-      const hasCachedData = checkExistingArtifacts(conversationId);
-      if (hasCachedData) {
-        addDebugLog("Using cached artifacts");
-        setIsLoading(false);
-        setHasAttemptedFetch(true);
-        return;
-      }
+    if (conversationId !== prevConversationIdRef.current) {
+      addDebugLog("Conversation changed *before* network request. Aborting fetch for " + conversationId);
+      setIsLoading(false);
+      return;
     }
     
     try {
@@ -204,7 +206,8 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       const response = await getKnowledgeArtifacts(conversationId);
       
       if (conversationId !== prevConversationIdRef.current) {
-        addDebugLog("Conversation changed during fetch, discarding results for " + conversationId);
+        addDebugLog("Conversation changed *during* fetch, discarding results for " + conversationId);
+        setIsLoading(false);
         return;
       }
       
@@ -233,13 +236,10 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setRetryCount(0);
         
         if (guidelineCount === 0 && caseStudyCount === 0) {
-          // No artifacts found - could be because they're being generated
           addDebugLog("No artifacts found, waiting for generation to complete");
           
-          // Show a helpful message instead of generic error
           setError("Artifacts are being generated. This may take a moment.");
           
-          // Auto-retry once after a delay to catch newly generated artifacts
           if (retryCount < maxRetries) {
             const nextRetryDelay = retryDelay * (retryCount + 1);
             addDebugLog(`Will retry in ${nextRetryDelay/1000} seconds (retry #${retryCount + 1})`);
@@ -249,12 +249,10 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
               fetchArtifacts(true);
             }, nextRetryDelay);
           } else {
-            // After max retries, stop showing the loading indicator
             setIsLoading(false);
             setGivenUp(true);
           }
         } else {
-          // We have artifacts, stop loading
           setIsLoading(false);
           setError(null);
           setGivenUp(false);
@@ -290,8 +288,15 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
       } else {
         setGivenUp(true);
       }
+    } finally {
+      if (!error && !(retryCount < maxRetries)) {
+        setIsLoading(false);
+      }
+      if (error && retryCount >= maxRetries) {
+        setIsLoading(false);
+      }
     }
-  }, [conversationId, retryCount, maxRetries, retryDelay, checkExistingArtifacts]);
+  }, [conversationId, retryCount, maxRetries, retryDelay, checkExistingArtifacts, addDebugLog, isValidUuid]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
@@ -304,21 +309,21 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, [conversationId, addDebugLog, resetState]);
   
   useEffect(() => {
-    if (isOpen && conversationId) {
-      addDebugLog(`Panel opened or conversation ID changed to: ${conversationId}. Has attempted fetch: ${hasAttemptedFetch}`);
-      if (!hasAttemptedFetch) {
-        addDebugLog(`Initial fetch triggered for ${conversationId}`);
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-          fetchArtifacts(false);
-        }, initialDelay);
-        return () => clearTimeout(timer);
-      } else {
-        addDebugLog(`Fetch already attempted for ${conversationId}, skipping initial fetch.`);
-        setIsLoading(false);
-      }
+    if (isOpen && conversationId && !conversationId.startsWith('draft-') && 
+        guidelines.length === 0 && caseStudies.length === 0 && !isLoading && !error) {
+      
+      addDebugLog(`Triggering artifact fetch for ${conversationId} because panel is open and state is empty.`);
+      
+      setRetryCount(0);
+      setGivenUp(false);
+      
+      const timer = setTimeout(() => {
+        fetchArtifacts(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [conversationId, isOpen, hasAttemptedFetch, fetchArtifacts, initialDelay, addDebugLog]);
+  }, [isOpen, conversationId, guidelines.length, caseStudies.length, isLoading, error, fetchArtifacts, addDebugLog]);
   
   useEffect(() => {
     if (!conversationId || !isOpen) return;

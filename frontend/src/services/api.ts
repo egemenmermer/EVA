@@ -161,7 +161,7 @@ export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponseDTO> => {
     try {
       console.log('Attempting login for:', email);
-      const response = await api.post<LoginResponseDTO>('/api/v1/auth/login', { email, password });
+      const response = await backendApi.post<LoginResponseDTO>('/api/v1/auth/login', { email, password });
       console.log('Login successful:', response.data.userDetails.email);
       
       // Store token with Bearer prefix
@@ -190,7 +190,7 @@ export const authApi = {
   register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
     try {
       console.log('Attempting registration with:', { email, fullName });
-      const response = await api.post<RegisterResponseDTO>('/api/v1/auth/register', { 
+      const response = await backendApi.post<RegisterResponseDTO>('/api/v1/auth/register', { 
         email, 
         password, 
         fullName 
@@ -215,7 +215,7 @@ export const authApi = {
   activate: async (token: string): Promise<any> => {
     try {
       console.log('Activating account with token:', token.substring(0, 10) + '...');
-      const response = await api.post('/api/v1/auth/activate', { token });
+      const response = await backendApi.post('/api/v1/auth/activate', { token });
       console.log('Activation response:', response.data);
       return response.data;
     } catch (error: any) {
@@ -231,7 +231,7 @@ export const authApi = {
   oauth2Callback: async (provider: string, code: string): Promise<any> => {
     try {
       console.log(`Processing ${provider} OAuth callback`);
-      const response = await api.post(`/auth/oauth2/${provider}`, { code });
+      const response = await backendApi.post(`/auth/oauth2/${provider}`, { code });
       return response.data;
     } catch (error) {
       console.error('OAuth callback failed:', error);
