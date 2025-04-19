@@ -76,7 +76,7 @@ class BaseAgent(ABC):
             
             # Initialize LLM
             self.llm = ChatOpenAI(
-                model_name="gpt-3.5-turbo",
+                model_name="gpt-4o-mini",
                 temperature=temperature,
                 openai_api_key=openai_api_key
             )

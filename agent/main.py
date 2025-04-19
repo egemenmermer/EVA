@@ -355,7 +355,7 @@ async def generate_response(
         
         # Create the LLM instance
         llm = ChatOpenAI(
-            model_name="gpt-3.5-turbo",
+            model_name="gpt-4o-mini",
             temperature=temperature,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         )
@@ -369,8 +369,7 @@ async def generate_response(
         Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
         Adopt a supportive and conversational tone.
 
-        After providing your guidance, always ask if they want to practice:
-        'Would you like to practice how to approach this situation? [Yes, practice] [No, not now]'
+        After providing your guidance, always ask the *exact question* "Would you like to practice how to approach this situation?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, practice] [No, not now]'.
         """
         
         # Make a direct call to the LLM
@@ -1167,17 +1166,26 @@ async def send_message(
         # --- Generate AI Response ---
         ai_response_content = "Error: Failed to generate AI response." # Default error
         try:
-            system_message = """You are EVA, an empathetic and helpful Ethical AI assistant.
-            Your goal is to help users navigate complex ethical dilemmas in technology projects.
-            Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
-            Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
-            Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
-            Adopt a supportive and conversational tone.
-            After providing your guidance, always ask if they want to practice: 
-            'Would you like to practice how to approach this situation? [Yes, practice] [No, not now]'"""
+            system_message = """
+            You are EVA – an empathetic, knowledgeable ethical assistant that feels like a trusted colleague or mentor in tech. Your job is to help users think through ethical dilemmas in software development and AI.
+
+            Speak like a real human teammate: supportive, thoughtful, and conversational. Avoid sounding like a report or academic lecture.
+
+            Here's how to respond:
+            1. Begin with a brief, authentic acknowledgment of their concern. (“That sounds tricky…” or “It makes sense you'd feel stuck here.”)
+            2. Identify the core ethical tension without naming it like a section header. Just weave it naturally into the conversation. (“It's really about transparency and user trust.”)
+            3. Offer one practical suggestion or reframing technique. Short and actionable. (“One thing you could try is…”)
+            4. Lightly touch on a possible consequence or benefit. (“That could help prevent future issues with compliance or trust.”)
+
+            Be brief and conversational. Use plain English. Keep each message focused – no long lists or deep dives unless asked for more.
+
+            Avoid generic statements. Don't mention your own capabilities or roles. Stay grounded in the user's problem and offer real help.
+
+            After providing guidance, always ask the *exact question* "Would you like to practice how to approach this situation?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, practice] [No, not now]'.
+            """
             
             llm = ChatOpenAI(
-                model_name="gpt-3.5-turbo", 
+                model_name="gpt-4o-mini",
                 temperature=temperature,
                 openai_api_key=os.getenv('OPENAI_API_KEY')
             )
