@@ -4,7 +4,7 @@ WORKDIR /app
 # Copy package files and install dependencies
 # Use --frozen-lockfile for reproducible installs if package-lock.json is reliable
 COPY package.json package-lock.json* ./
-RUN npm install --frozen-lockfile
+RUN npm install
 # Copy the rest of the application code
 COPY . .
 # Set build-time environment variables (passed via 'args' in docker-compose)
