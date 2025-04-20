@@ -32,6 +32,7 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p /var/scratch/xuv668/model_cache \
     && mkdir -p /var/log/ethical-ai \
+    && mkdir -p /app/logs \
     && mkdir -p data/raw/guidelines \
     && mkdir -p data/raw/case_studies \
     && mkdir -p data/processed
