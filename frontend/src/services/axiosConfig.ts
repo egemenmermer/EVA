@@ -1,9 +1,4 @@
-import axios, {
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type AxiosResponse,
-  type InternalAxiosRequestConfig
-} from 'axios';
+import axios from 'axios';
 
 // Create two axios instances - one for the agent and one for direct backend access
 // Use environment variables for base URLs, with fallbacks
@@ -13,7 +8,8 @@ const backendBaseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:844
 console.log("Using Agent URL:", agentBaseURL); // Add console logs for debugging
 console.log("Using Backend URL:", backendBaseURL);
 
-const agentApi: AxiosInstance = axios.create({
+// Remove AxiosInstance type
+const agentApi = axios.create({
   baseURL: agentBaseURL,
   timeout: 15000,
   headers: {
@@ -22,7 +18,8 @@ const agentApi: AxiosInstance = axios.create({
   }
 });
 
-const backendApi: AxiosInstance = axios.create({
+// Remove AxiosInstance type
+const backendApi = axios.create({
   baseURL: backendBaseURL,
   timeout: 15000,
   headers: {
@@ -32,9 +29,11 @@ const backendApi: AxiosInstance = axios.create({
 });
 
 // Add a request interceptor to attach the authentication token to all requests
-const addAuthInterceptor = (instance: AxiosInstance): void => {
+// Remove AxiosInstance and void types
+const addAuthInterceptor = (instance) => {
   instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    // Remove InternalAxiosRequestConfig type
+    (config) => {
       // Get token from localStorage
       const token = localStorage.getItem('token');
       
@@ -91,9 +90,11 @@ addAuthInterceptor(agentApi);
 addAuthInterceptor(backendApi);
 
 // Add a response interceptor to handle errors
-const addErrorInterceptor = (instance: AxiosInstance): void => {
+// Remove AxiosInstance and void types
+const addErrorInterceptor = (instance) => {
   instance.interceptors.response.use(
-    (response: AxiosResponse) => {
+    // Remove AxiosResponse type
+    (response) => {
       return response;
     },
     (error: any) => {
