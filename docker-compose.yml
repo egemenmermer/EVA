@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15 # Use PostgreSQL version 15 as mentioned in README
+    container_name: eva_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres} # Use environment variable or default
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # Use environment variable or default
+      POSTGRES_DB: ${DB_NAME:-eva} # Use environment variable or default
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist database data
+    ports:
+      - "5432:5432" # Expose DB port (optional, for external access/debugging)
+    networks:
+      - eva_network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # We will create this Dockerfile
+    container_name: eva_backend
+    depends_on:
+      - db # Wait for the database to be ready
+    environment:
+      # Explicitly set variables needed by the application
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
+      JWT_SECRET: ${JWT_SECRET}
+      # Standard Spring Boot datasource vars
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      # Flyway credentials
+      SPRING_FLYWAY_ENABLED: ${FLYWAY_ENABLED:-true}
+      SPRING_FLYWAY_USER: ${DB_USER:-postgres}
+      SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD}
+      # Mail configuration
+      SPRING_MAIL_HOST: ${MAIL_HOST}
+      SPRING_MAIL_PORT: ${MAIL_PORT}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      MAIL_DEBUG: ${MAIL_DEBUG:-false}
+      # Pass other necessary vars like OAuth, OpenAI key if needed by backend
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+    ports:
+      - "8443:8443" # Expose backend port
+    networks:
+      - eva_network
+    volumes:
+      - backend_m2_cache:/root/.m2 # Cache Maven dependencies
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile # Assumes Dockerfile exists in agent/ - needs modification
+    container_name: eva_agent
+    depends_on:
+      - backend # Agent might need to communicate with backend
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY} # Get from .env file
+      BACKEND_URL: http://backend:8443 # Use service name and internal port
+      # Add other agent-specific env vars if needed from agent/.env
+    ports:
+      - "5001:5001" # Expose agent port
+    networks:
+      - eva_network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # We will create this Dockerfile
+      args: # Pass build arguments from root .env
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_AGENT_URL: ${VITE_AGENT_URL}
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+        # Pass OAuth client IDs if needed during build
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+    container_name: eva_frontend
+    ports:
+      - "5173:80" # Map host 5173 to container 80 (Nginx default)
+    depends_on:
+      - agent
+      - backend
+    networks:
+      - eva_network
+    restart: unless-stopped
+
+networks:
+  eva_network:
+    driver: bridge
+
+volumes:
+  postgres_data: # Define named volume for database persistence
+  backend_m2_cache: # Define named volume for Maven cache 

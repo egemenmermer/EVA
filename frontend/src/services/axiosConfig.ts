@@ -1,8 +1,20 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig
+} from 'axios';
 
 // Create two axios instances - one for the agent and one for direct backend access
-const agentApi = axios.create({
-  baseURL: 'http://localhost:5001',
+// Use environment variables for base URLs, with fallbacks
+const agentBaseURL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
+const backendBaseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
+
+console.log("Using Agent URL:", agentBaseURL); // Add console logs for debugging
+console.log("Using Backend URL:", backendBaseURL);
+
+const agentApi: AxiosInstance = axios.create({
+  baseURL: agentBaseURL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -10,8 +22,8 @@ const agentApi = axios.create({
   }
 });
 
-const backendApi = axios.create({
-  baseURL: 'http://localhost:8443',
+const backendApi: AxiosInstance = axios.create({
+  baseURL: backendBaseURL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -22,7 +34,7 @@ const backendApi = axios.create({
 // Add a request interceptor to attach the authentication token to all requests
 const addAuthInterceptor = (instance: AxiosInstance): void => {
   instance.interceptors.request.use(
-    (config: AxiosRequestConfig) => {
+    (config: InternalAxiosRequestConfig) => {
       // Get token from localStorage
       const token = localStorage.getItem('token');
       
