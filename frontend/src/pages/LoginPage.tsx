@@ -147,8 +147,8 @@ export const LoginPage: React.FC = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    console.log('!!! handleSubmit function CALLED !!!');
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log('!!! handleSubmit function CALLED via onClick !!!');
     e.preventDefault();
     console.log('handleSubmit: Default prevented.');
 
@@ -159,14 +159,11 @@ export const LoginPage: React.FC = () => {
 
     try {
       console.log('handleSubmit: Calling login hook function...');
-      await login(email, password); // Assume this sets token if successful
-      console.log('handleSubmit: Login hook successful, navigating...'); // Assume success if no error thrown
-      navigate('/dashboard', { replace: true }); // Navigate directly
+      await login(email, password);
+      console.log('handleSubmit: Login hook successful, navigating...');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      // Catch block still handles errors from login()
       console.error('handleSubmit: Caught error from login hook:', err);
-    } finally {
-      console.log('handleSubmit: Finally block executed.');
     }
   };
 
@@ -227,7 +224,7 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6">
           <div className="space-y-4 rounded-md">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -264,6 +261,7 @@ export const LoginPage: React.FC = () => {
           <div>
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={loading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
