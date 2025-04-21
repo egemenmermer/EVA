@@ -160,10 +160,8 @@ export const LoginPage: React.FC = () => {
     try {
       console.log('handleSubmit: Calling login hook function...');
       await login(email, password);
-      console.log('handleSubmit: Login hook function call completed (no error thrown).');
-
-      console.log('handleSubmit: Navigating to dashboard...');
-      navigate('/dashboard', { replace: true });
+      console.log('handleSubmit: Login hook function call completed.');
+      // navigate('/dashboard', { replace: true }); // Remove navigation here
     } catch (err) {
       console.error('handleSubmit: Caught error from login hook:', err);
     } finally {

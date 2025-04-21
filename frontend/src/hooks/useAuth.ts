@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/services/api';
 import { User } from '@/types';
 import { useStore } from '@/store/useStore';
@@ -12,6 +13,7 @@ const formatToken = (token: string): string => {
 
 export const useAuth = () => {
   const { user, setUser, setToken } = useStore();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +40,9 @@ export const useAuth = () => {
         localStorage.setItem('token', formattedToken);
       }
       
-      console.log('Login successful for:', response.userDetails.email);
+      console.log('Login successful in useAuth for:', response.userDetails.email);
+      console.log('Navigating to dashboard from useAuth...');
+      navigate('/dashboard', { replace: true });
       return response;
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || 'Login failed. Please try again.';
