@@ -160,10 +160,21 @@ export const LoginPage: React.FC = () => {
     try {
       console.log('handleSubmit: Calling login hook function...');
       await login(email, password);
-      console.log('handleSubmit: Login hook successful, navigating...');
-      navigate('/dashboard', { replace: true });
+      console.log('handleSubmit: Login hook function call completed (no error thrown).');
+
+      // Keep navigation commented out for testing
+      // const token = localStorage.getItem('token');
+      // if (!token) {
+      //   console.error('handleSubmit: No token found after login call.');
+      //   return;
+      // }
+      // console.log('handleSubmit: Navigating to dashboard...');
+      // navigate('/dashboard', { replace: true });
+      console.log('handleSubmit: (Navigation is commented out)'); // Add log
     } catch (err) {
       console.error('handleSubmit: Caught error from login hook:', err);
+    } finally {
+      console.log('handleSubmit: Finally block executed.');
     }
   };
 
@@ -260,7 +271,7 @@ export const LoginPage: React.FC = () => {
 
           <div>
             <button
-              type="submit"
+              type="button"
               onClick={handleSubmit}
               disabled={loading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
