@@ -129,9 +129,9 @@ export const LoginPage: React.FC = () => {
           // Clear any refresh counters
           sessionStorage.removeItem('login_refresh_count');
           
-          // Token is valid, redirect to dashboard
-          console.log('Token valid, redirecting to dashboard');
-          navigate('/dashboard', { replace: true });
+          // Token is valid, would redirect but navigation is commented out for test
+          console.log('Token valid, would redirect but navigation is commented out for test');
+          // navigate('/dashboard', { replace: true }); // <<< COMMENT THIS OUT
         } else {
           console.log('Token invalid, clearing and staying on login page');
           localStorage.removeItem('token');
@@ -152,31 +152,8 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     alert("handleSubmit reached after preventDefault!");
     console.log('handleSubmit: Default prevented.');
-
-    if (!email || !password) {
-      console.log('handleSubmit: Prevented - Email or password empty.');
-      return;
-    }
-
-    try {
-      console.log('handleSubmit: Calling login hook function...');
-      await login(email, password);
-      console.log('handleSubmit: Login hook function call completed (no error thrown).');
-
-      // Keep navigation commented out for testing
-      // const token = localStorage.getItem('token');
-      // if (!token) {
-      //   console.error('handleSubmit: No token found after login call.');
-      //   return;
-      // }
-      // console.log('handleSubmit: Navigating to dashboard...');
-      // navigate('/dashboard', { replace: true });
-      console.log('handleSubmit: (Navigation is commented out)'); // Add log
-    } catch (err) {
-      console.error('handleSubmit: Caught error from login hook:', err);
-    } finally {
-      console.log('handleSubmit: Finally block executed.');
-    }
+    // Keep login call commented out for now
+    console.log('handleSubmit: Reached end (alert test)');
   };
 
   const handleGoogleLogin = () => {
