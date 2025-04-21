@@ -150,6 +150,7 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log('!!! handleSubmit function CALLED via onClick !!!');
     e.preventDefault();
+    alert("handleSubmit reached after preventDefault!");
     console.log('handleSubmit: Default prevented.');
 
     if (!email || !password) {
