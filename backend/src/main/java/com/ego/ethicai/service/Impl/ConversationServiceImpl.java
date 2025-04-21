@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.ego.ethicai.dto.request.ConversationCreationRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,21 +44,31 @@ public class ConversationServiceImpl implements ConversationService {
     private RagArtifactRepository ragArtifactRepository;
 
     @Override
-    public ConversationResponseDTO startConversation(UUID userId, ManagerTypes managerType) {
-        User user = userService.findById(userId).orElseThrow(
-                () -> new RuntimeException("User not found"));
+    public ConversationResponseDTO startConversation(ConversationCreationRequest request) {
+        User user = userService.findById(request.getUserId()).orElseThrow(
+                () -> new RuntimeException("User not found with ID: " + request.getUserId()));
 
-        if (managerType == null) {
-            throw new RuntimeException("Manager type is required");
+        if (request.getManagerType() == null) {
+            throw new RuntimeException("Manager type is required in the request");
         }
 
         Conversation conversation = new Conversation();
         conversation.setUser(user);
-        conversation.setManagerType(managerType);
+        conversation.setManagerType(request.getManagerType());
         conversation.setCreatedAt(LocalDateTime.now());
-        conversation.setTitle("New conversation"); // Default title
+
+        String title = request.getTitle();
+        if (title != null && !title.trim().isEmpty()) {
+            log.info("Using provided title: {}", title);
+            conversation.setTitle(title);
+        } else {
+            String defaultTitle = "Chat on " + LocalDateTime.now().toLocalDate().toString();
+            log.info("No title provided, using default: {}", defaultTitle);
+            conversation.setTitle(defaultTitle);
+        }
 
         Conversation savedConversation = conversationRepository.save(conversation);
+        log.info("Saved new conversation with ID: {} and Title: {}", savedConversation.getId(), savedConversation.getTitle());
 
         return new ConversationResponseDTO(
                 savedConversation.getId(),
@@ -109,12 +120,10 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
         
-        // Verify the conversation belongs to the user
         if (!conversation.getUser().getId().equals(userId)) {
             throw new RuntimeException("Unauthorized access to conversation");
         }
         
-        // Update the title
         conversation.setTitle(title);
         conversation.setUpdatedAt(LocalDateTime.now());
         
@@ -134,57 +143,47 @@ public class ConversationServiceImpl implements ConversationService {
     public void deleteConversation(UUID conversationId) {
         log.info("[DELETE-{}] Attempting to delete conversation", conversationId);
         
-        // 1. Check if conversation exists first
         if (!conversationRepository.existsById(conversationId)) {
             log.warn("[DELETE-{}] Conversation not found. Cannot delete.", conversationId);
             throw new EntityNotFoundException("Conversation not found with id: " + conversationId);
         }
         log.debug("[DELETE-{}] Conversation found. Proceeding with deletion.", conversationId);
         
-        // 2. Delete associated conversation content
         try {
             log.info("[DELETE-{}] Attempting to delete associated conversation content...", conversationId);
             conversationContentRepository.deleteByConversationId(conversationId);
             log.info("[DELETE-{}] Successfully deleted associated conversation content.", conversationId);
         } catch (Exception e) {
             log.error("[DELETE-{}] Error deleting conversation content: {}", conversationId, e.getMessage(), e);
-            // Re-throwing to ensure transaction rollback if content deletion fails
             throw new RuntimeException("Failed to delete conversation content for id: " + conversationId, e);
         }
 
-        // 3. Delete associated practice scores
         try {
             log.info("[DELETE-{}] Attempting to delete associated practice scores...", conversationId);
             practiceScoreRepository.deleteByConversationId(conversationId);
             log.info("[DELETE-{}] Successfully deleted associated practice scores.", conversationId);
         } catch (Exception e) {
             log.error("[DELETE-{}] Error deleting practice scores: {}", conversationId, e.getMessage(), e);
-            // Re-throwing to ensure transaction rollback if score deletion fails
             throw new RuntimeException("Failed to delete practice scores for id: " + conversationId, e);
         }
         
-        // ADDED: Log right before artifact deletion attempt
         log.info("[DELETE-{}] Reached point right before attempting RAG artifact deletion.", conversationId); 
 
-        // 4. Delete associated RAG artifacts
         try {
             log.info("[DELETE-{}] Attempting to delete associated RAG artifacts...", conversationId);
             ragArtifactRepository.deleteByConversationId(conversationId);
             log.info("[DELETE-{}] Successfully deleted associated RAG artifacts.", conversationId);
         } catch (Exception e) {
             log.error("[DELETE-{}] Error deleting RAG artifacts: {}", conversationId, e.getMessage(), e);
-            // Re-throwing to ensure transaction rollback if artifact deletion fails
             throw new RuntimeException("Failed to delete RAG artifacts for id: " + conversationId, e);
         }
 
-        // 5. Now delete the conversation itself
         try {
             log.info("[DELETE-{}] Attempting to delete conversation entity...", conversationId);
             conversationRepository.deleteById(conversationId);
             log.info("[DELETE-{}] Successfully deleted conversation entity.", conversationId);
         } catch (Exception e) {
              log.error("[DELETE-{}] Error deleting conversation entity: {}", conversationId, e.getMessage(), e);
-             // Re-throw to ensure transaction rollback if the main deletion fails
              throw new RuntimeException("Failed to delete conversation entity with id: " + conversationId, e);
         }
         

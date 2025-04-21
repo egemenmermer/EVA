@@ -3,7 +3,7 @@ import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';
-import { conversationApi } from '@/services/api';
+import { conversationApi, saveMessage } from '@/services/api'; // Import saveMessage
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import PracticeModule from '../practice/PracticeModule';
@@ -17,6 +17,7 @@ import { getManagerType } from '@/services/api';
 import { sendMessage as apiSendMessage } from '@/services/api';
 import { agentApi } from '../../services/axiosConfig'; // Correct import path
 import { agentCreateConversation } from '@/services/api'; // Import the agent creation function
+import { v4 as uuid } from 'uuid';
 
 // Add custom styles for message formatting
 const styles = {
@@ -609,17 +610,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   };
 
   // Simplify message handling to ensure user messages remain visible
-  const handleSendMessage = useCallback(async (content: string) => {
-    // Skip empty messages
-    if (!content || !content.trim()) {
-      return;
+  const handleSendMessage = async (inputValue: string) => {
+    console.log("handleSendMessage called with input:", inputValue);
+    console.log("Current Conversation before send:", currentConversation);
+
+    // Trim the input value
+    const trimmedValue = inputValue.trim();
+    if (!trimmedValue) return;
+
+    // ** Get user ID from the store **
+    const userId = useStore.getState().user?.id;
+
+    // ** Add check for userId **
+    if (!userId) {
+      console.error("Cannot send message: User not authenticated.");
+      setError("You must be logged in to send messages.");
+      setLoading(false); // Ensure loading indicator is turned off
+      return; // Stop execution if no user ID
     }
-    
-    // Set loading state
+
+    isMessageSending.current = true;
+    setLoading(true); // Fix: Use setLoading
     setError(null);
-    setLoading(true);
-    isMessageSending.current = true; // Track sending state
-    
+
     let currentConv = currentConversation; // Work with a local copy
     let conversationId = currentConv?.conversationId;
     let isPersisted = currentConv?.isPersisted ?? false;
@@ -629,9 +642,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       if (!conversationId || conversationId.startsWith('draft-') || !isPersisted) {
         console.log('Sending first message for a draft conversation. Creating on backend first...');
 
+        // Generate title from the first message
+        const titleForNewConv = trimmedValue.substring(0, 35) + (trimmedValue.length > 35 ? '...' : '');
+        console.log(`Generated initial title: ${titleForNewConv}`);
+
         try {
           const activeManagerType = managerType || 'PUPPETEER';
-          const persistedConvData = await agentCreateConversation(activeManagerType);
+          // Pass the generated title to the agent creation call
+          const persistedConvData = await agentCreateConversation(
+            userId, // ** Pass the retrieved userId **
+            managerType, // Pass managerType from state
+            undefined // Explicitly pass undefined for title if none is provided
+          );
           
           if (!persistedConvData || !persistedConvData.conversationId) {
             throw new Error('Agent did not return a valid conversation ID.');
@@ -640,19 +662,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           conversationId = persistedConvData.conversationId;
           isPersisted = true;
           
+          // Create the new conversation object for the store, using the generated title
           const newPersistedConversation: Conversation = {
             ...persistedConvData,
+            conversationId: conversationId, 
             isDraft: false,
             isPersisted: true,
             managerType: persistedConvData.managerType || activeManagerType,
-            title: persistedConvData.title || 'New Chat'
+            title: titleForNewConv, // Use generated title immediately
+            createdAt: persistedConvData.createdAt || new Date().toISOString(),
           };
+          
+          // Set the current conversation state immediately
           setCurrentConversation(newPersistedConversation);
           currentConv = newPersistedConversation;
 
-          console.log('Draft conversation successfully persisted with ID:', conversationId);
+          console.log('Draft conversation successfully persisted with ID:', conversationId, 'and Title:', newPersistedConversation.title);
           
-          triggerSidebarRefresh({ type: 'new-conversation', conversationId: conversationId });
+          // Trigger sidebar refresh immediately with the new title
+          triggerSidebarRefresh({ 
+              type: 'new-conversation', 
+              conversationId: conversationId, 
+              title: newPersistedConversation.title 
+          });
 
         } catch (createError: any) {
           console.error('Failed to create/persist draft conversation on backend:', createError);
@@ -672,103 +704,129 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
          return;
       }
 
-      // IMPORTANT: Create a snapshot of the current messages to avoid state issues
-      const currentMessagesSnapshot = [...storeMessages];
+    // IMPORTANT: Create a snapshot of the current messages to avoid state issues
+    const currentMessagesSnapshot = [...storeMessages];
 
-      // 1. Create and immediately display the user message
-      const userMessage: Message = {
-        id: `user-${Date.now()}`,
-        role: 'user' as Role,
-        content: content,
+    // 1. Create and immediately display the user message
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user' as Role,
+      content: trimmedValue,
         conversationId: conversationId, // Use the (potentially updated) real ID
-        createdAt: new Date().toISOString()
-      };
-      
-      // Add to UI immediately - use functional update to ensure latest state
-      setStoreMessages(prev => [...prev, userMessage]);
-      
-      // Save to localStorage immediately to preserve user message
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add to UI immediately - use functional update to ensure latest state
+    setStoreMessages(prev => [...prev, userMessage]);
+    
+    // Save to localStorage immediately to preserve user message
       saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
-      
-      // 2. Add a loading message
-      const loadingMessage: Message = {
-        id: `loading-${Date.now()}`,
-        role: 'assistant' as Role,
-        content: 'Thinking...',
+    
+    // 2. Add a loading message
+    const loadingMessage: Message = {
+      id: `loading-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: 'Thinking...',
         conversationId: conversationId, // Use the real ID
-        createdAt: new Date().toISOString(),
-        isLoading: true
-      };
+      createdAt: new Date().toISOString(),
+      isLoading: true
+    };
 
-      // Add loading message to UI state
-      setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
+    // Add loading message to UI state
+    setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
 
       // 3. Send message to the AGENT API (using the real conversationId)
       const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
             
       console.log('Sending message to AGENT API:', {
         conversationId,
-        userQuery: content,
+        userQuery: trimmedValue,
         managerType: activeManagerType,
         temperature
       });
       
       const agentPayload = {
           conversationId: conversationId,
-          userQuery: content, 
+          userQuery: trimmedValue, 
           managerType: activeManagerType,
           temperature: temperature
       };
       
-      // Explicitly type the expected response
-      const agentResponse = await agentApi.post<AgentMessageResponse>('/api/v1/conversation/message', agentPayload);
+      // Explicitly type the expected response from the AGENT
+      // It should now return the IDs for both messages
+      interface AgentApiResponse {
+          messages: [
+              { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
+              { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
+          ]
+      }
+      
+      const agentResponse = await agentApi.post<AgentApiResponse>('/api/v1/conversation/message', agentPayload);
 
       const responseData = agentResponse.data;
-      console.log('Agent API response:', responseData);
+      console.log('Agent API response (includes message IDs):', responseData);
       
-      if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length === 0) {
-          console.error("Invalid response structure from agent: Missing or empty 'messages' array", responseData);
+      // Basic validation
+      if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length < 2) {
+          console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
           throw new Error("Invalid response structure from agent");
       }
 
-      const agentMessageFromResponse = responseData.messages.find((m: Message) => m.role === 'assistant');
+      // Extract messages and IDs from agent response
+      const userMessageFromAgent = responseData.messages.find(m => m.role === 'user');
+      const agentMessageFromAgent = responseData.messages.find(m => m.role === 'assistant');
 
-      if (!agentMessageFromResponse) {
-          console.error("No assistant message found in agent response", responseData);
-          throw new Error("No assistant message found in agent response");
+      if (!userMessageFromAgent || !agentMessageFromAgent || !userMessageFromAgent.id || !agentMessageFromAgent.id) {
+          console.error("Missing user or assistant message or their IDs in agent response", responseData);
+          throw new Error("Missing message data from agent response");
       }
       
-      // The conversation ID should already be the correct persisted one here
-      
-      // Create the final agent message object for UI state
-      const agentMessage: Message = {
-        id: agentMessageFromResponse.id || `assistant-${Date.now()}`,
-        role: 'assistant' as Role,
-        content: agentMessageFromResponse.content,
-        conversationId: conversationId, // Use persisted ID
-        createdAt: agentMessageFromResponse.createdAt || new Date().toISOString()
-      };
+      const finalUserMessage: Message = { ...userMessageFromAgent };
+      const finalAgentMessage: Message = { ...agentMessageFromAgent, isLoading: false }; // Ensure isLoading is false
 
-      // 6. Update UI: Remove loading, add agent message
-      // Use a temporary variable to hold the final list for saving
-      let finalMessagesForSave: Message[] = [];
-      setStoreMessages(prev => {
-          const messagesWithoutLoading = prev.filter(m => !m.isLoading);
-          // Ensure the user message is present (it should be)
-          const baseMessages = messagesWithoutLoading.some(m => m.id === userMessage.id) 
-                             ? messagesWithoutLoading 
-                             : [...messagesWithoutLoading, userMessage];
-          finalMessagesForSave = [...baseMessages, agentMessage];
-          return finalMessagesForSave;
-      });
+      // --- Update UI State --- 
+      // Get the current messages *before* adding the agent response,
+      // AND also filter out the *original* optimistic user message (using its temporary ID)
+      const messagesBeforeAgentResponse = storeMessages.filter(
+          m => m.id !== loadingMessage.id && m.id !== userMessage.id // Remove loading AND original user msg
+      );
       
-      // Save final state to localStorage
-      saveConversationState(conversationId, finalMessagesForSave);
+      // Update UI state to include the final user message (with ID from agent) AND the final agent message
+      setStoreMessages([...messagesBeforeAgentResponse, finalUserMessage, finalAgentMessage]); // Add BOTH back
+      let finalMessagesForLocalStorage = [...messagesBeforeAgentResponse, finalUserMessage, finalAgentMessage];
+      saveConversationState(conversationId, finalMessagesForLocalStorage);
+      // --- End UI State Update --- 
+      
+      // --- Save Messages to Backend --- 
+      // Now call the backend save endpoint for BOTH messages
+      try {
+        console.log('Calling backend to save user message');
+        await saveMessage({
+            conversationId: conversationId,
+            messageId: finalUserMessage.id,
+            content: finalUserMessage.content,
+            role: 'user'
+        });
+        console.log('Calling backend to save assistant message');
+        await saveMessage({
+            conversationId: conversationId,
+            messageId: finalAgentMessage.id,
+            content: finalAgentMessage.content,
+            role: 'assistant'
+        });
+      } catch (saveError) {
+         // Log error but don't necessarily block UI
+         console.error('Failed to save one or both messages to backend:', saveError);
+         // Optionally update UI to show a save error?
+         // setError('Failed to save message history.'); 
+      }
+      // --- End Save Messages --- 
 
-      // Refresh sidebar if needed (title might be generated by backend)
+      // Refresh sidebar (title update logic is now handled during conversation creation)
       triggerSidebarRefresh({
         type: 'new-message',
-        conversationId: conversationId
+        conversationId: conversationId,
+        title: currentConv?.title // Just use current title
       });
 
     } catch (error) {
@@ -781,7 +839,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       setLoading(false);
       isMessageSending.current = false;
     }
-  }, [currentConversation, storeMessages, temperature, managerType, setStoreMessages, setCurrentConversation, triggerSidebarRefresh]); // Added dependencies
+  };
 
   // Update the ref whenever handleSendMessage changes
   useEffect(() => {
@@ -1818,7 +1876,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     const shouldShowPracticeAgain = isAssistant && practiceScore > 0 && practiceScore < 100;
     
     return (
-      <div key={message.id || index} className="mb-6">
+      <div key={message.id || index} className="mb-4">
         {/* Message Bubble */}
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
           {!isUser && !isSystemMessage && (
@@ -1827,7 +1885,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             </div>
           )}
           
-          <div className={`${isUser ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' : isSystemMessage ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'} ${isAssistant ? 'practice-feedback' : ''}`}>
+          <div className={`${isUser ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' : isSystemMessage ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'} rounded-lg p-3 ${isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'} ${isAssistant ? 'practice-feedback' : ''}`}>
             {isLoading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
@@ -1835,7 +1893,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
             ) : (
-              <div className={`${isAssistant ? 'feedback-markdown' : 'message-content'} prose prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-lg prose-strong:font-semibold prose-p:mb-4 prose-p:leading-relaxed`}>
+              <div className={`${isAssistant ? 'feedback-markdown' : 'message-content'} prose prose-sm prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-base prose-strong:font-semibold prose-p:mb-1 prose-p:leading-relaxed`}>
                 <ReactMarkdown remarkPlugins={[]}>{displayContent}</ReactMarkdown>
           </div>
             )}
@@ -1853,15 +1911,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         
         {/* Render Extracted Option Buttons */}
         {isAssistant && extractedOptions.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2 ml-8"> 
+          <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
-              <button
+            <button
                 key={idx}
                 onClick={() => handleOptionClick(option)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
-              >
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs"
+            >
                 {option}
-              </button>
+            </button>
             ))}
           </div>
         )}

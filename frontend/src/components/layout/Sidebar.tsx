@@ -211,31 +211,56 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   useEffect(() => {
     const handleRefreshEvent = (event: Event) => {
       console.log('Sidebar: Received refresh-conversations event');
-      
-      // Get details from the event
       const customEvent = event as CustomEvent;
-      const details = customEvent.detail;
-      
+      const details = customEvent.detail; // Contains { type, conversationId, title, managerType }
       console.log('Refresh event details:', details);
-      
-      // Refresh the conversation list
+
+      // Optimistic UI Update for new conversations
+      if (details?.type === 'new-conversation' && details.conversationId && details.title) {
+        console.log('Optimistically adding new conversation to sidebar:', details.conversationId);
+        const newConvOptimistic: Conversation = {
+          conversationId: details.conversationId,
+          title: details.title,
+          managerType: details.managerType || managerType, // Use provided or default
+          createdAt: new Date().toISOString(), // Use current time as placeholder
+          isPersisted: true, // Assume it will be persisted
+          isDraft: false
+        };
+        
+        // Add to the beginning of the list for immediate visibility
+        setDirectFetchedConversations(prev => {
+          // Avoid adding duplicates if already present
+          if (prev.some(c => c.conversationId === newConvOptimistic.conversationId)) {
+            return prev;
+          }
+          return [newConvOptimistic, ...prev];
+        });
+        
+        // Also select this new conversation immediately
+        if (!currentConversation || currentConversation.conversationId !== newConvOptimistic.conversationId) {
+            setCurrentConversation(newConvOptimistic);
+            localStorage.setItem('current-conversation-id', newConvOptimistic.conversationId);
+        }
+      }
+
+      // Always fetch the full list to ensure consistency
       fetchConversations().then(() => {
-        // If we have a conversation ID in the event, make sure it's selected
+        // Existing logic to potentially re-select conversation after fetch (can likely be simplified now)
         if (details?.conversationId && (!currentConversation || 
             currentConversation.conversationId !== details.conversationId)) {
-          console.log('Setting current conversation from refresh event:', details.conversationId);
-          
-          // Create a minimal conversation object to update the current selection
-          const newConversation: Conversation = {
-            conversationId: details.conversationId,
-            title: details.title || 'New Conversation',
-            managerType: details.managerType || managerType,
-            createdAt: new Date().toISOString()
-          };
-          
-          // Update the current conversation selection
-          setCurrentConversation(newConversation);
-          localStorage.setItem('current-conversation-id', details.conversationId);
+            
+            // Find the fetched conversation to ensure we use the correct data from backend    
+            const fetchedConv = directFetchedConversations.find(c => c.conversationId === details.conversationId);
+            if (fetchedConv) {
+                console.log('Re-selecting conversation after fetch confirmation:', fetchedConv.conversationId);
+                setCurrentConversation(fetchedConv);
+            } else {
+                 console.warn('Could not find conversation from event details after fetch');
+                 // Optionally select the first conversation if the target one disappeared
+                 if (directFetchedConversations.length > 0 && !currentConversation) {
+                    setCurrentConversation(directFetchedConversations[0]);
+                 }
+            }
         }
       });
     };
@@ -245,7 +270,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     return () => {
       window.removeEventListener('refresh-conversations', handleRefreshEvent);
     };
-  }, [currentConversation, managerType]);
+  // Depend on fetchConversations to avoid stale closures, but be cautious of loops if fetchConversations changes often
+  }, [currentConversation, setCurrentConversation, managerType, fetchConversations]);
   
   // Re-fetch conversations when current conversation changes
   useEffect(() => {

@@ -2,6 +2,7 @@ package com.ego.ethicai.controller;
 
 import com.ego.ethicai.dto.ConversationRequestDTO;
 import com.ego.ethicai.dto.ConversationResponseDTO;
+import com.ego.ethicai.dto.request.ConversationCreationRequest;
 import com.ego.ethicai.security.CurrentUser;
 import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.service.ConversationService;
@@ -39,11 +40,13 @@ public class ConversationController {
     @PostMapping
     public ResponseEntity<ConversationResponseDTO> createConversation(
             @CurrentUser CustomUserDetails currentUser,
-            @RequestBody ConversationRequestDTO conversationRequestDTO) {
-        logger.info("Creating conversation with manager type: {} for user: {}", 
-                   conversationRequestDTO.getManagerType(), currentUser.getEmail());
-        ConversationResponseDTO response = conversationService.startConversation(
-            currentUser.getId(), conversationRequestDTO.getManagerType());
+            @RequestBody ConversationCreationRequest conversationRequest) {
+        logger.info("Creating conversation with manager type: {}, title: '{}' for user: {}", 
+                   conversationRequest.getManagerType(), 
+                   conversationRequest.getTitle(),
+                   currentUser.getEmail());
+        conversationRequest.setUserId(currentUser.getId());
+        ConversationResponseDTO response = conversationService.startConversation(conversationRequest);
         return ResponseEntity.ok(response);
     }
 

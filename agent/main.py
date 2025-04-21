@@ -350,12 +350,12 @@ async def generate_response(
         
         # Define system prompts
         initial_query_prompt = """You are EVA, an empathetic and helpful Ethical AI assistant.
-Your goal is to help users navigate complex ethical dilemmas in technology projects.
-Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
-Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
+        Your goal is to help users navigate complex ethical dilemmas in technology projects.
+        Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
+        Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
 
-Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
-Adopt a supportive and conversational tone.
+        Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
+        Adopt a supportive and conversational tone.
 
 After providing your guidance, always ask the *exact question* "Would you like to practice how to approach this situation?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, practice] [No, not now]'.
 """
@@ -970,14 +970,15 @@ async def create_conversation(
     request: Request,
     agent: LangChainAgent = Depends(get_agent)
 ):
-    """Create a new conversation with timeout handling"""
+    """Create a new conversation, passing title to backend if provided."""
     try:
         # Extract request body
         request_body = await request.json()
         
-        # Get manager type from request without hardcoding default
+        # Get manager type and OPTIONAL title from request
         manager_type = request_body.get("managerType")
         user_id = request_body.get("userId", "user-1")
+        initial_title = request_body.get("title") # Get the title sent by frontend
         
         # Save the authorization token for future use
         auth_header = request.headers.get("Authorization")
@@ -985,24 +986,23 @@ async def create_conversation(
             os.environ["CURRENT_AUTH_TOKEN"] = auth_header
             logger.info("Saved authorization token for backend communication")
         
-        # Log the received manager type for debugging
-        logger.info(f"Received manager type from frontend: {manager_type}")
+        # Log the received data
+        logger.info(f"Received manager type: {manager_type}, initial title: {initial_title}")
         
         # Generate a local conversation ID immediately
-        # We'll use this if the backend fails or times out
         local_conversation_id = str(uuid.uuid4())
         
         # Define a function to communicate with the backend
         async def create_backend_conversation():
             try:
-                # Format the request for the Java backend
+                # Format the request for the Java backend, INCLUDING THE TITLE
                 backend_request = {
                     "userId": user_id,
-                    "managerType": manager_type
+                    "managerType": manager_type,
+                    "title": initial_title # Pass the title here
                 }
                 
-                # Extract the authorization header from the incoming request
-                auth_header = request.headers.get("Authorization")
+                auth_header = request.headers.get("Authorization") # Re-get header just in case
                 headers = {
                     "Content-Type": "application/json", 
                     "Accept": "application/json"
@@ -1027,16 +1027,16 @@ async def create_conversation(
                 # Check if the request was successful
                 if response.status_code == 200:
                     conversation = response.json()
-                    logger.info(f"Created conversation with ID: {conversation.get('conversationId', 'unknown')} and manager type: {conversation.get('managerType')}")
+                    logger.info(f"Backend created conversation ID: {conversation.get('conversationId', 'unknown')}, Title: {conversation.get('title')}")
                     return conversation
                 else:
-                    logger.error(f"Backend API error: {response.status_code} - {response.text}")
+                    logger.error(f"Backend API error creating conversation: {response.status_code} - {response.text}")
                     return None
             except asyncio.TimeoutError:
                 logger.error("Timeout creating conversation in backend")
                 return None
             except Exception as e:
-                logger.error(f"Error communicating with backend: {str(e)}")
+                logger.error(f"Error communicating with backend to create conversation: {str(e)}")
                 return None
 
         try:
@@ -1132,31 +1132,28 @@ async def send_to_backend(conversation_id: str, message_id: str, content: str, r
 
 @app.post("/api/v1/conversation/message",
     tags=["Frontend Compatibility"],
-    summary="Send a message",
-    description="Sends a message in a conversation for the frontend"
+    summary="Send a message and get AI response",
+    description="Generates AI response and schedules artifact generation. Does NOT save messages."
 )
 async def send_message(
     request: Request,
     background_tasks: BackgroundTasks,
     agent: LangChainAgent = Depends(get_agent)
 ):
-    """Handle message sending requests from the frontend.
-
-    Generates AI response and saves BOTH messages to backend via dedicated endpoint.
-
-    """
+    """Handle message sending, generate AI response, schedule artifact generation."""
     try:
         body = await request.json()
-        logger.info(f"Send message request received: {body}")
+        logger.info(f"Send message request received (agent will only generate response): {body}")
         
         auth_header = request.headers.get("Authorization")
         if not auth_header:
-            logger.error("No authorization header provided for message")
-            return JSONResponse(status_code=401, content={"error": "Unauthorized - No auth token provided"})
-        
-        os.environ["CURRENT_AUTH_TOKEN"] = auth_header
-        logger.info("Saved authorization token for backend communication")
-        
+            logger.error("No authorization header provided for message generation")
+            # Store it for artifact generation anyway, but log the error
+            os.environ["CURRENT_AUTH_TOKEN"] = "" # Clear potential stale token
+        else:
+             os.environ["CURRENT_AUTH_TOKEN"] = auth_header
+             logger.info("Saved authorization token for artifact generation")
+
         conversation_id = body.get("conversationId")
         user_query = body.get("userQuery") 
         temperature = body.get("temperature", 0.7)
@@ -1165,11 +1162,12 @@ async def send_message(
             logger.error(f"Missing required fields: userQuery={user_query}, conversationId={conversation_id}")
             return JSONResponse(status_code=400, content={"error": "Missing required fields: userQuery or conversationId"})
         
+        # Generate IDs locally to return to frontend for its saving logic
         user_message_id = str(uuid.uuid4())
         assistant_message_id = str(uuid.uuid4())
         current_time = datetime.now(UTC).isoformat()
 
-        # --- Generate AI Response ---
+        # --- Generate AI Response --- 
         ai_response_content = "Error: Failed to generate AI response." # Default error
         try:
             system_message = """
@@ -1236,63 +1234,65 @@ async def send_message(
             ]
             
             llm_response = await llm.ainvoke(messages_for_llm)
-            ai_response_content = llm_response.content 
-            
-            logger.info(f"Generated response length: {len(ai_response_content)}")
-            logger.info(f"Response preview: {ai_response_content[:100]}...")
-
+            ai_response_content = llm_response.content
+            logger.info(f"Generated AI response for conv {conversation_id}")
         except Exception as e:
-            logger.error(f"Error generating AI response: {str(e)}")
+            logger.error(f"Error generating AI response for conv {conversation_id}: {str(e)}")
             logger.error(traceback.format_exc())
-            # ai_response_content remains the default error message
         # --- End AI Response Generation ---
 
-        # --- Send BOTH messages to Backend (New Dedicated Endpoint) ---
-        # Use background tasks so frontend doesn't wait for backend saves
-        background_tasks.add_task(send_to_backend, conversation_id, user_message_id, user_query, "user", auth_header)
-        # Only send AI response if it wasn't an error
-        if "Error:" not in ai_response_content: 
-             background_tasks.add_task(send_to_backend, conversation_id, assistant_message_id, ai_response_content, "assistant", auth_header)
-        # --- End Backend Sending ---
-
-        # --- Send RAG Artifacts Generation to Background ---
-        # Only generate artifacts if AI response was successful
+        # --- Send RAG Artifacts Generation to Background --- 
         if "Error:" not in ai_response_content:
             logger.info(f"Adding background task generate_and_save_artifacts for conv {conversation_id}")
-            background_tasks.add_task(generate_and_save_artifacts, agent, user_query, conversation_id, auth_header)
+            # Pass the auth_header explicitly if needed, or rely on the env var set above
+            background_tasks.add_task(generate_and_save_artifacts, agent, user_query, conversation_id, os.environ.get("CURRENT_AUTH_TOKEN", ""))
         else:
             logger.warning(f"Skipping artifact generation due to AI error for conv {conversation_id}")
-        # --- End RAG ---
+        # --- End RAG --- 
 
-        # --- Return immediate response to Frontend ---
-        # Return both the user message and the generated (or error) AI response
-        return {
+        # --- Return immediate response to Frontend --- 
+        # Return IDs and AI content; frontend will handle saving messages
+        response_payload = {
             "messages": [
                 {
-                    "id": user_message_id,
+                    "id": user_message_id, # Return ID for user message
                     "conversationId": conversation_id,
                     "role": "user",
                     "content": user_query,
                     "createdAt": current_time
                 },
                 {
-                    "id": assistant_message_id,
+                    "id": assistant_message_id, # Return ID for assistant message
                     "conversationId": conversation_id,
                     "role": "assistant",
-                    "content": ai_response_content, # Send the actual content or error message
+                    "content": ai_response_content, 
                     "createdAt": current_time,
-                    "isLoading": False # Indicate processing is done from agent's perspective
+                    "isLoading": False 
                 }
             ]
         }
+            
+        return response_payload
         # --- End Frontend Response ---
             
     except Exception as e:
-        logger.error(f"Critical error processing message request: {str(e)}")
+        logger.error(f"Critical error processing message request (agent generation): {str(e)}")
         logger.error(traceback.format_exc())
+        # Return error structure consistent with success response but with error content
         return JSONResponse(
             status_code=500,
-            content={"error": f"Internal server error processing message: {str(e)}"}
+            content={
+                 "messages": [
+                    {
+                        "id": str(uuid.uuid4()), # Generate dummy IDs
+                        "conversationId": body.get("conversationId", "unknown"),
+                        "role": "assistant",
+                        "content": f"Internal server error in agent: {str(e)}", 
+                        "createdAt": datetime.now(UTC).isoformat(),
+                        "isLoading": False 
+                    }
+                ]
+            }
         )
 
 async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, conversation_id: str, auth_header: str):
@@ -1456,7 +1456,7 @@ async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, co
                 except Exception as e:
                     # Catch any other unexpected errors
                     logger.error(f"[Artifact Sending ERROR] Unexpected error sending to {endpoint}: {e}\n{traceback.format_exc()}")
-
+            
             if not sent_successfully:
                 logger.error(f"[Artifact Sending FAILED] All endpoints failed for conversation {conversation_id}")
         

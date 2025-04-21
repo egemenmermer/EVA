@@ -720,81 +720,89 @@ export const checkConversationExists = async (conversationId: string): Promise<b
   }
 };
 
-// --- NEW Agent Specific API Calls ---
+// Define the expected response structure (including optional fields)
+interface CreateConversationResponse {
+  conversationId: string;
+  userId?: string;
+  title?: string;
+  managerType?: ManagerType; // Use imported ManagerType
+  createdAt?: string;
+  updatedAt?: string;
+  persisted?: boolean;
+}
 
 /**
- * Calls the AGENT's endpoint to create a new conversation.
- * The agent will attempt to create it in the backend database as well.
- * 
- * @param managerType The selected manager type.
- * @returns ConversationResponseDTO including the 'persisted' flag.
+ * Creates a new conversation via the agent service.
+ * @param managerType The manager persona to use for the conversation.
+ * @param title Optional initial title for the conversation.
+ * @returns A promise resolving to the conversation creation response.
  */
-export const agentCreateConversation = async (managerType: ManagerType): Promise<ConversationResponseDTO> => {
-  console.log(`Calling AGENT to create conversation with manager type: ${managerType}`);
-  setAuthHeader(); // Ensure auth header is set for the agent call
+export const agentCreateConversation = async (
+  userId: string,
+  managerType: ManagerType,
+  title?: string
+): Promise<CreateConversationResponse> => {
+  console.log(`Creating conversation via agent with manager type: ${managerType} and title: ${title}`);
   try {
-    const response = await agentApi.post<ConversationResponseDTO>('/api/v1/conversation', {
-      managerType,
-      // Agent might use userId from token, or we could pass it if needed
-      // title: 'New Conversation' // Agent will likely handle default title
-    });
-    console.log('Agent create conversation response:', response.data);
-    // Ensure persisted flag is handled, default to false if missing in response for safety
-    return { ...response.data, persisted: response.data.persisted ?? false }; 
+    // Ensure userId is provided
+    if (!userId) {
+        console.error("agentCreateConversation called without a userId!");
+        // Throw an error or return a specific error object if desired
+        // For now, let's proceed but log the error, relying on backend validation
+        // throw new Error("User ID is required to create a conversation with the agent.");
+    }
+
+    const payload = {
+      title: title || `New Conversation - ${new Date().toISOString()}`,
+      managerType: managerType || DEFAULT_MANAGER_TYPE,
+      userId: userId, // Use the passed userId
+    };
+
+    console.log("Attempting to create conversation with agent. Payload:", payload);
+
+    const response = await agentApi.post<CreateConversationResponse>('/api/v1/conversation', payload);
+    console.log('Conversation created via agent:', response.data);
+    // Ensure all necessary fields are handled, fall back where needed
+    return { 
+      conversationId: response.data.conversationId,
+      userId: response.data.userId, 
+      managerType: response.data.managerType || managerType, 
+      title: response.data.title || title, 
+      createdAt: response.data.createdAt,
+      updatedAt: response.data.updatedAt, 
+      persisted: response.data.persisted ?? false 
+    };
   } catch (error) {
-    console.error('Error calling agent to create conversation:', error);
-    // If agent call fails, maybe return a local non-persisted object?
-    // For now, re-throw to indicate failure.
-    throw error;
+    console.error('Error creating conversation via agent:', error);
+    // Re-throw the error so the caller can handle it
+    throw error; 
   }
 };
 
-// --- Existing Standalone Functions (potentially refactor or remove if redundant) ---
-// Commenting out old functions that might be duplicates or call backend directly
-/*
-export const createConversation = async (title: string, managerType?: ManagerType) => {
-  setAuthHeader();
-  const response = await axios.post(`${API_URL}/api/v1/conversation`, {
-    title,
-    managerType: managerType || getManagerType()
-  });
-  return response.data;
-};
+interface SaveMessagePayload {
+  conversationId: string;
+  messageId: string;
+  content: string;
+  role: 'user' | 'assistant';
+}
 
-export const getConversations = async () => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/api/v1/conversation`);
-  return response.data;
+/**
+ * Sends a single message to the backend for saving.
+ * Uses the dedicated /save endpoint.
+ */
+export const saveMessage = async (payload: SaveMessagePayload): Promise<void> => {
+  console.log(`Saving message ${payload.role} with ID ${payload.messageId} for conversation ${payload.conversationId}`);
+  try {
+    setAuthHeader(); // Ensure auth header is set
+    // Use backendApi which should be configured for the Java backend
+    const response = await backendApi.post('/api/v1/conversation/message/save', payload);
+    console.log(`Save message response status: ${response.status}`);
+    if (response.status < 200 || response.status >= 300) {
+        console.warn('Backend responded with non-success status for save message:', response.status, response.data);
+    }
+  } catch (error) {
+    console.error('Error saving message to backend:', payload, error);
+    // Decide if you want to re-throw or handle silently
+    // throw error; // Option: re-throw to let caller handle
+  }
 };
-
-export const getConversationMessages = async (conversationId: string) => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/api/v1/conversation/message/${conversationId}`);
-  return response.data;
-};
-
-export const sendMessage = async (
-  conversationId: string,
-  content: string,
-  managerType?: ManagerType,
-  temperature?: number
-) => {
-  // ... implementation calling backend/agent ... 
-};
-
-export const togglePracticeMode = async (conversationId: string, enter: boolean) => {
- // ... implementation ...
-};
-
-export const startScenario = async (conversationId: string, scenarioId: string) => {
-  // ... implementation ...
-};
-
-export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number) => {
- // ... implementation ...
-};
-
-export const getAvailableScenarios = async () => {
- // ... implementation ...
-};
-*/
