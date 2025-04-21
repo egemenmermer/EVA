@@ -24,6 +24,7 @@ services:
     depends_on:
       - db # Wait for the database to be ready
     environment:
+      FRONTEND_URL: ${DEPLOYED_FRONTEND_URL}
       # Explicitly set variables needed by the application
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
       JWT_SECRET: ${JWT_SECRET}
