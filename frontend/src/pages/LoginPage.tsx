@@ -150,10 +150,25 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log('!!! handleSubmit function CALLED via onClick !!!');
     e.preventDefault();
-    alert("handleSubmit reached after preventDefault!");
     console.log('handleSubmit: Default prevented.');
-    // Keep login call commented out for now
-    console.log('handleSubmit: Reached end (alert test)');
+
+    if (!email || !password) {
+      console.log('handleSubmit: Prevented - Email or password empty.');
+      return;
+    }
+
+    try {
+      console.log('handleSubmit: Calling login hook function...');
+      await login(email, password);
+      console.log('handleSubmit: Login hook function call completed (no error thrown).');
+
+      console.log('handleSubmit: Navigating to dashboard...');
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      console.error('handleSubmit: Caught error from login hook:', err);
+    } finally {
+      console.log('handleSubmit: Finally block executed.');
+    }
   };
 
   const handleGoogleLogin = () => {
