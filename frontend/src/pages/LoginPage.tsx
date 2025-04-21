@@ -148,15 +148,18 @@ export const LoginPage: React.FC = () => {
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('handleSubmit: Preventing default...'); 
     e.preventDefault();
     
     if (!email || !password) {
+      console.log('handleSubmit: Prevented - Email or password empty.'); 
       return;
     }
     
     try {
       console.log('Attempting login...');
       await login(email, password);
+      console.log('handleSubmit: Login hook function call completed (no error thrown).'); 
       
       // Get the token after login
       const token = localStorage.getItem('token');
@@ -169,6 +172,8 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
+    }finally {
+      console.log('handleSubmit: Finally block executed.'); 
     }
   };
 
