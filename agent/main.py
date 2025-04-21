@@ -1413,7 +1413,6 @@ async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, co
         }
         
         # Define the correct backend URL (ensure this is correct in your environment)
-        BACKEND_BASE_URL = os.environ.get('BACKEND_BASE_URL', 'http://localhost:8443')
         logger.info(f"[Artifact Generation] Using backend URL: {BACKEND_BASE_URL}")
         
         # Try multiple endpoints that match the frontend
