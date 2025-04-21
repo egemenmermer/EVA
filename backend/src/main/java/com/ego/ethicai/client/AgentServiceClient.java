@@ -24,7 +24,8 @@ public class AgentServiceClient implements com.ego.ethicai.service.AgentServiceC
 
     private final RestTemplate restTemplate;
 
-    @Value("${agent.service.url:http://localhost:5001}") // Get URL from application properties or default
+    // Use the property name matching application.properties
+    @Value("${ai.agent.url:http://localhost:5001}") 
     private String agentServiceUrl;
 
     // Inject RestTemplate - ensure a Bean is configured elsewhere

@@ -24,6 +24,7 @@ services:
     depends_on:
       - db # Wait for the database to be ready
     environment:
+      AI_AGENT_URL: ${AI_AGENT_URL:-http://agent:5001} # Read from .env, default to service name
       FRONTEND_URL: ${DEPLOYED_FRONTEND_URL}
       # Explicitly set variables needed by the application
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
