@@ -674,7 +674,7 @@ export const verifyToken = async (): Promise<boolean> => {
     const token = localStorage.getItem('token');
     if (!token) return false;
 
-    const response = await axios.get<TokenVerificationResponse>('/api/v1/auth/verify-token', {
+    const response = await backendApi.get<TokenVerificationResponse>('/api/v1/auth/verify-token', {
       headers: { Authorization: token }
     });
 
@@ -683,7 +683,7 @@ export const verifyToken = async (): Promise<boolean> => {
     console.error('Token verification failed:', error);
     return false;
   }
-}; 
+};
 
 // Initialize axios interceptors
 axios.interceptors.response.use(
