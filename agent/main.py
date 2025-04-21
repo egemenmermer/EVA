@@ -127,23 +127,11 @@ class ConversationContentResponseDTO(BaseModel):
 
 class Query(BaseModel):
     """Model for ethical queries."""
-    userQuery: str = Field(
-        ...,
-        description="The ethical question or scenario to analyze",
-        example="What are the ethical implications of using facial recognition?"
-    )
-    conversationId: str = Field(
-        ...,
-        description="The conversation identifier",
-        example="conv-123-456"
-    )
-    temperature: Optional[float] = Field(
-        None,
-        description="Temperature for response generation (0.0-1.0)",
-        example=0.7,
-        ge=0.0,
-        le=1.0
-    )
+    userQuery: str
+    conversationId: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    temperature: Optional[float] = 0.7
+    managerType: Optional[str] = None
+    request_type: Optional[str] = "initial_query"
 
 class PracticeModeRequest(BaseModel):
     """Model for entering/exiting practice mode."""
@@ -337,7 +325,7 @@ async def generate_response(
 ) -> ConversationContentResponseDTO:
     """Generate a response to an ethical query - stateless version."""
     try:
-        logger.info(f"Generating response for conversation ID: {query.conversationId}")
+        logger.info(f"Generating response for conversation ID: {query.conversationId} (Type: {query.request_type})")
         logger.info(f"User query: {query.userQuery[:50]}...")
         
         # Initialize default temperature
@@ -360,17 +348,35 @@ async def generate_response(
             openai_api_key=os.getenv('OPENAI_API_KEY')
         )
         
-        # Create a system prompt
-        system_message = """You are EVA, an empathetic and helpful Ethical AI assistant.
-        Your goal is to help users navigate complex ethical dilemmas in technology projects.
-        Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
-        Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
+        # Define system prompts
+        initial_query_prompt = """You are EVA, an empathetic and helpful Ethical AI assistant.
+Your goal is to help users navigate complex ethical dilemmas in technology projects.
+Provide thoughtful, nuanced guidance based on established ethical frameworks and principles.
+Focus on helping the user understand implications, consider different perspectives, and make informed decisions.
 
-        Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
-        Adopt a supportive and conversational tone.
+Keep your responses clear, concise, and easy to read. Use markdown for formatting where appropriate.
+Adopt a supportive and conversational tone.
 
-        After providing your guidance, always ask the *exact question* "Would you like to practice how to approach this situation?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, practice] [No, not now]'.
-        """
+After providing your guidance, always ask the *exact question* "Would you like to practice how to approach this situation?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, practice] [No, not now]'.
+"""
+
+        post_feedback_prompt = """You are EVA, an empathetic and helpful Ethical AI assistant.
+The user has just completed a practice scenario and is asking for feedback on their performance or score.
+Analyze their query and provide constructive, specific feedback on their ethical reasoning and decision-making demonstrated in the scenario they describe.
+Acknowledge their score if mentioned. Focus on areas for improvement and reinforcement of good practices.
+
+Keep your feedback clear, concise, and supportive. Use markdown for formatting.
+
+After providing the feedback, always ask the *exact question* "Do you feel ready to discuss this with your manager, or would you like to practice again?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, help draft email] [No, practice again]'.
+"""
+        
+        # Select system message based on request type
+        if query.request_type == "post_feedback":
+            system_message = post_feedback_prompt
+            logger.info("Using post-feedback prompt.")
+        else: # Default to initial query
+            system_message = initial_query_prompt
+            logger.info("Using initial query prompt.")
         
         # Make a direct call to the LLM
         response_content = ""
@@ -1167,7 +1173,7 @@ async def send_message(
         ai_response_content = "Error: Failed to generate AI response." # Default error
         try:
             system_message = """
-            You are EVA, an ethical AI assistant designed to guide technology professionals through ethical dilemmas in their projects. You operate under the EVA framework, utilizing RAG-based (Retrieval-Augmented Generation) methods to leverage an internal knowledge base, enhancing your responses’ accuracy and relevance.
+            You are EVA, an ethical AI assistant designed to guide technology professionals through ethical dilemmas in their projects. You operate under the EVA framework, utilizing RAG-based (Retrieval-Augmented Generation) methods to leverage an internal knowledge base, enhancing your responses' accuracy and relevance.
 
             Your Role
                 •	Advisor: Engage users in friendly, supportive conversations to help navigate ethical challenges in technology projects.
@@ -1182,11 +1188,11 @@ async def send_message(
                 •	Responses should be brief but insightful, expanding detail only upon user request.
 
             Interaction Workflow
-                •	Understand and clarify the user’s ethical dilemma or scenario clearly.
+                •	Understand and clarify the user's ethical dilemma or scenario clearly.
                 •	Discuss the ethical implications, including privacy, data protection, transparency, consent, and compliance.
                 •	Suggest practical approaches or solutions, balancing ethical considerations and business needs.
                 •	Proactively offer simulated practice sessions when appropriate:
-                •	“Would you like to practice how to approach this situation? [Yes, practice] [No, not now]”
+                •	"Would you like to practice how to approach this situation? [Yes, practice] [No, not now]"
 
             Tools and Techniques
                 •	Artifact Session (RAG-based): Generate responses and feedback utilizing an internal knowledge base.
@@ -1212,9 +1218,9 @@ async def send_message(
 
             Example Interaction
 
-            User: “I’m concerned about storing unnecessary user data.”
+            User: "I'm concerned about storing unnecessary user data."
 
-            EVA: “It’s great you’re considering the privacy implications. Storing unnecessary data can indeed create risks. Have you discussed alternative approaches with your team to minimize data collection? Would you like to practice addressing this with a simulated manager? [Yes, practice] [No, not now]”
+            EVA: "It's great you're considering the privacy implications. Storing unnecessary data can indeed create risks. Have you discussed alternative approaches with your team to minimize data collection? Would you like to practice addressing this with a simulated manager? [Yes, practice] [No, not now]"
 
             """
             

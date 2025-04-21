@@ -1714,30 +1714,68 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     return () => clearTimeout(timeoutId);
   }, [messages, currentConversation]);
 
+  // Add this function before renderMessage
+  const handleOptionClick = (optionText: string) => {
+    console.log('Option clicked:', optionText);
+    if (optionText.toLowerCase().includes('yes, practice') || optionText.toLowerCase().includes('practice again')) {
+      console.log('Triggering practice mode...');
+      const recentUserMessage = storeMessages.slice().reverse().find(m => m.role === 'user');
+      if (recentUserMessage && currentConversation) {
+        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+        localStorage.setItem('practice_user_query', recentUserMessage.content);
+        const activeManagerType = currentConversation?.managerType || 'PUPPETEER';
+        localStorage.setItem('practice_manager_type', activeManagerType);
+        setActiveManagerType(activeManagerType);
+        setPracticeMode(true);
+      } else {
+        console.error('Could not initiate practice: missing context.');
+        setError('Could not start practice mode. Missing conversation context.');
+      }
+    } else if (optionText.toLowerCase().includes('yes, help draft email')) {
+      console.log('Email draft requested - sending placeholder message.');
+      handleSendMessage('Okay, please help me draft an email about this.');
+    } else {
+      handleSendMessage(optionText);
+    }
+  };
+
   const renderMessage = (message: Message, index: number) => {
     const isUser = message.role === 'user';
     const isSystemMessage = message.role === 'system';
     const isAssistant = message.role === 'assistant';
     const isLoading = message.isLoading === true;
     
-    // Expand the condition for detecting practice feedback messages
-    // Check if this is a practice feedback response
-    const isPracticeFeedback = isAssistant && message.content && (
-      message.content.includes("ethical decision-making score") || 
-      message.content.includes("practice scenario") || 
-      message.content.includes("Ethical Principles Applied") ||
-      message.content.includes("Areas for Improvement") ||
-      message.content.includes("Your reasoning reflects") ||
-      // Look for patterns in the feedback response
-      (message.content.includes("ethical") && 
-       message.content.includes("score") && 
-       message.content.includes("performance")) ||
-      // Look for thank you messages after practice
-      (message.content.includes("Thank you for sharing your practice scenario") ||
-       (message.content.includes("practice") && 
-        message.content.includes("scenario") && 
-        message.content.includes("performance")))
-    );
+    // Initialize variables
+    let displayContent = '';
+    let extractedOptions: string[] = [];
+    const optionRegex = /\[(.*?)\]/g; // Regex to find [Option Text]
+    
+    if (typeof message.content === 'string') {
+      displayContent = message.content || 'No response content';
+      
+      // If assistant message, extract options and clean display content
+      if (isAssistant) {
+        const matches = [...displayContent.matchAll(optionRegex)];
+        if (matches.length > 0) {
+          extractedOptions = matches.map(match => match[1].trim());
+          displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+        }
+        // Additional cleanup (if regex misses something)
+        displayContent = displayContent
+          .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
+          .replace(/\s*\[Yes, help draft email\]\s*\[No, practice again\]\s*$/g, "")
+          .trim();
+        
+        // Formatting logic
+        displayContent = displayContent
+          .replace(/\.(\s+)/g, '.\n\n') // Replace period + space(s) with period + double newline
+          .replace(/\n{3,}/g, "\n\n") // Clean up excess newlines
+          .replace(/•(\s*)(\S)/g, "• $2") // Ensure space after bullet points
+          .replace(/(\d+\.)(\s*)(\S)/g, "$1 $3"); // Ensure space after numbered list items
+      }
+    } else {
+      displayContent = String(message.content || 'No response content');
+    }
     
     // Check if the message contains the practice prompt question
     const hasPracticePrompt = isAssistant && 
@@ -1754,92 +1792,34 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     // Get score value if this is a practice feedback message
     let practiceScore = 0;
-    if (isPracticeFeedback) {
-      const scoreMatch = message.content.match(/ethical decision-making score (?:was |is |of )(\d+)\/100/i);
+    if (isAssistant && displayContent && (
+      displayContent.includes("ethical decision-making score") || 
+      displayContent.includes("practice scenario") || 
+      displayContent.includes("Ethical Principles Applied") ||
+      displayContent.includes("Areas for Improvement") ||
+      displayContent.includes("Your reasoning reflects") ||
+      // Look for patterns in the feedback response
+      (displayContent.includes("ethical") && 
+       displayContent.includes("score") && 
+       displayContent.includes("performance")) ||
+      // Look for thank you messages after practice
+      (displayContent.includes("Thank you for sharing your practice scenario") ||
+       (displayContent.includes("practice") && 
+        displayContent.includes("scenario") && 
+        displayContent.includes("performance")))
+    )) {
+      const scoreMatch = displayContent.match(/ethical decision-making score (?:was |is |of )(\d+)\/100/i);
       if (scoreMatch && scoreMatch[1]) {
         practiceScore = parseInt(scoreMatch[1]);
       }
     }
     
     // Only show Practice Again button for feedback responses with scores less than 100
-    const shouldShowPracticeAgain = isPracticeFeedback && practiceScore > 0 && practiceScore < 100;
-    
-    // Format content for display
-    let displayContent = '';
-    
-    if (typeof message.content === 'string') {
-      displayContent = message.content || 'No response content';
-      
-      // If it's an assistant message with empty content, try to check for fallback content
-      if (isAssistant && !displayContent.trim()) {
-        console.warn('Empty content detected in assistant message, message ID:', message.id);
-      }
-      
-      // For messages with practice prompts, strip out the question
-    if (hasPracticePrompt) {
-      displayContent = message.content
-          .replace(/Would you like to practice this scenario with simulated manager responses\? \(yes\/no\)/g, "")
-          .replace(/Would you like to practice this scenario with simulated manager responses\?/g, "")
-          .replace(/Would practicing a discussion around this be helpful\?/g, "")
-        .replace(/\n*Would practicing a discussion.*be helpful\?/g, "")
-        .replace(/\n*Would you like to try a practice scenario.*\?/g, "")
-        .replace(/\n*Would you like to practice how to.*\?/g, "")
-        .replace(/\n*If needed, would you like to practice this scenario with simulated manager responses\?/g, "")
-        .trim();
-      }
-      
-      // Clean up practice option text that appears at the end of messages
-      if (isAssistant) {
-        // Remove practice option text that appears at the end
-        displayContent = displayContent
-          .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
-          .replace(/\s*\[Yes, practice\]$/g, "")
-          .replace(/\s*\[No, not now\]$/g, "")
-          .trim();
-
-        // Improve paragraph separation for better readability
-        displayContent = displayContent
-          // Add proper double line breaks between sentences that should be paragraphs
-          .replace(/\.(\s*)([A-Z])/g, ".\n\n$2")
-          // Remove excessive line breaks
-          .replace(/\n{3,}/g, "\n\n")
-          // Add space after bullet points for better formatting
-          .replace(/•(\S)/g, "• $1")
-          // Fix common formatting issues
-          .replace(/(\d+\.)(\S)/g, "$1 $2");
-      }
-    } else {
-      displayContent = String(message.content || 'No response content');
-    }
-
-    // Format practice feedback for better readability if this is a practice feedback message
-    if (isPracticeFeedback && typeof displayContent === 'string') {
-      // Add spacing between sections and make headings stand out
-      displayContent = displayContent
-        // Format section headers with proper spacing
-        .replace(/(\n|^)(Ethical Principles Applied|Areas for Improvement|Communication Engagement|Feedback on Reasoning Process|Practical Advice|Balancing Professional Obligations|Proactive Ethical Advocacy|Your reasoning reflects)(\s*:?)/g, 
-          '\n\n### $2$3')
-        // Add spacing before numbered items and make them bold
-        .replace(/(\n|^)([0-9]+\.\s+)([A-Z][a-z]+\s+[a-z]+\s+[A-Za-z\s]+)(:|\.)/g, 
-          '\n\n**$2$3**$4')
-        // Format subsections like "Concern for User Privacy:" with proper styling
-        .replace(/(\n|^)([A-Z][a-z]+\s+for\s+[A-Z][a-z]+\s+[A-Z][a-z]+)(:|\.)/g, 
-          '\n\n**$2**$3')
-        // Add spacing before bullet points
-        .replace(/(\n|^)(-\s+)/g, '\n$2')
-        // Ensure double line breaks before new sections that start with capitalized words
-        .replace(/(\n)([A-Z][a-z]+ [A-Za-z\s]+:)/g, '\n\n$2')
-        // Add proper spacing after section titles
-        .replace(/(###[^\n]+|^\s*[A-Z][^:\n]+:)(\s*)(\n?)/g, '$1\n')
-        // Add paragraph breaks for readability in longer text sections
-        .replace(/(\.)(\s+)([A-Z])/g, '$1\n\n$3')
-        // Remove excessive line breaks to clean up
-        .replace(/\n{3,}/g, '\n\n');
-    }
+    const shouldShowPracticeAgain = isAssistant && practiceScore > 0 && practiceScore < 100;
     
     return (
-      <div key={index} className="mb-6">
-        {/* Message content */}
+      <div key={message.id || index} className="mb-6">
+        {/* Message Bubble */}
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
           {!isUser && !isSystemMessage && (
             <div className="flex-shrink-0 mr-2">
@@ -1847,7 +1827,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             </div>
           )}
           
-          <div className={`${isUser ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' : isSystemMessage ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'} ${isPracticeFeedback ? 'practice-feedback' : ''}`}>
+          <div className={`${isUser ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' : isSystemMessage ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'} ${isAssistant ? 'practice-feedback' : ''}`}>
             {isLoading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
@@ -1855,7 +1835,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
             ) : (
-              <div className={`${isPracticeFeedback ? 'feedback-markdown' : 'message-content'} prose prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-lg prose-strong:font-semibold prose-p:mb-4 prose-p:leading-relaxed`}>
+              <div className={`${isAssistant ? 'feedback-markdown' : 'message-content'} prose prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-lg prose-strong:font-semibold prose-p:mb-4 prose-p:leading-relaxed`}>
                 <ReactMarkdown remarkPlugins={[]}>{displayContent}</ReactMarkdown>
           </div>
             )}
@@ -1871,25 +1851,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           )}
         </div>
         
-        {/* Practice buttons - moved outside of message bubble */}
-        {hasPracticePrompt && (
-          <div className="mt-3 flex gap-2 ml-8">
-            <button
-              onClick={() => handlePracticeResponse('yes')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
-            >
-              Yes, practice with simulated manager
-            </button>
-            <button
-              onClick={() => handlePracticeResponse('no')}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md transition-colors text-sm"
-            >
-              No, not now
-            </button>
+        {/* Render Extracted Option Buttons */}
+        {isAssistant && extractedOptions.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2 ml-8"> 
+            {extractedOptions.map((option, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleOptionClick(option)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
+              >
+                {option}
+              </button>
+            ))}
           </div>
         )}
         
-        {/* Practice Again button for practice feedback with score < 100 */}
+        {/* Practice Again Button for practice feedback with score < 100 */}
         {shouldShowPracticeAgain && (
           <div className="mt-3 flex justify-end">
             <button

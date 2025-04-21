@@ -334,9 +334,10 @@ export const conversationApi = {
   sendMessage: async (
     conversationId: string, 
     content: string,
-    temperature?: number
+    temperature?: number,
+    request_type?: string
   ): Promise<any> => {
-    debugRequest('POST', '/api/v1/conversation/message', { conversationId, content, temperature });
+    debugRequest('POST', '/api/v1/conversation/message', { conversationId, content, temperature, request_type });
     
     try {
       setAuthHeader();
@@ -345,7 +346,8 @@ export const conversationApi = {
         conversationId,
         userQuery: content,
         managerType: getManagerType(),
-        temperature: temperature || 0.7
+        temperature: temperature || 0.7,
+        request_type: request_type || "initial_query"
       };
 
       // Make the request to our agent
@@ -469,7 +471,8 @@ export const sendMessage = async (
   conversationId: string,
   content: string,
   managerType?: ManagerType,
-  temperature?: number
+  temperature?: number,
+  request_type?: string
 ) => {
   try {
     console.log(`Sending message to conversation ${conversationId}`);
@@ -490,7 +493,8 @@ export const sendMessage = async (
       conversationId,
       userQuery: content,
       managerType: managerType || getManagerType(),
-      temperature: temperature || 0.7
+      temperature: temperature || 0.7,
+      request_type: request_type || "initial_query"
     };
 
     console.log('Sending message payload:', payload);
