@@ -149,33 +149,24 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log('!!! handleSubmit function CALLED !!!');
-    console.log('handleSubmit: Preventing default...');
     e.preventDefault();
     console.log('handleSubmit: Default prevented.');
-    
+
     if (!email || !password) {
-      console.log('handleSubmit: Prevented - Email or password empty.'); 
+      console.log('handleSubmit: Prevented - Email or password empty.');
       return;
     }
-    
+
     try {
-      console.log('Attempting login...');
-      await login(email, password);
-      console.log('handleSubmit: Login hook function call completed (no error thrown).'); 
-      
-      // Get the token after login
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token received after login');
-        return;
-      }
-      
-      console.log('Login successful, redirecting to dashboard');
-      navigate('/dashboard', { replace: true });
+      console.log('handleSubmit: Calling login hook function...');
+      await login(email, password); // Assume this sets token if successful
+      console.log('handleSubmit: Login hook successful, navigating...'); // Assume success if no error thrown
+      navigate('/dashboard', { replace: true }); // Navigate directly
     } catch (err) {
-      console.error('Login error:', err);
-    }finally {
-      console.log('handleSubmit: Finally block executed.'); 
+      // Catch block still handles errors from login()
+      console.error('handleSubmit: Caught error from login hook:', err);
+    } finally {
+      console.log('handleSubmit: Finally block executed.');
     }
   };
 
