@@ -1425,46 +1425,47 @@ async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, co
         ]
         
         # Send artifacts to backend with retry logic for different endpoints
-        async with httpx.AsyncClient() as client:
-            success = False
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            sent_successfully = False
             
             for endpoint in endpoints:
+                logger.info(f"[Artifact Sending] Trying endpoint: {endpoint}")
                 try:
-                    logger.info(f"[Artifact Sending] Trying endpoint: {endpoint}")
-                    
-                    # Include conversation ID in the URL if not already in the payload
-                    if "{conversation_id}" in endpoint:
-                        actual_endpoint = endpoint.replace("{conversation_id}", conversation_id)
-                    else:
-                        actual_endpoint = endpoint
-                    
                     response = await client.post(
-                        actual_endpoint,
+                        endpoint,
+                        json=artifact_payload,
                         headers={
                             "Authorization": auth_header,
                             "Content-Type": "application/json",
                             "Accept": "application/json"
-                        },
-                        json=artifact_payload,
-                        timeout=15.0  # Extend timeout for larger payloads
+                        }
                     )
-                    
-                    # Check if success
-                    if response.status_code in (200, 201, 202, 204):
-                        logger.info(f"[Artifact Sending SUCCESS] Successfully sent artifacts via {actual_endpoint} - Status: {response.status_code}")
-                        success = True
-                        break
+                    response.raise_for_status() # Raise HTTPStatusError for bad responses (4xx or 5xx)
+                    logger.info(f"[Artifact Sending SUCCESS] Successfully sent to {endpoint}. Status: {response.status_code}")
+                    sent_successfully = True
+                    break # Exit loop on first successful send
+                except httpx.RequestError as exc:
+                    # More specific error logging
+                    if isinstance(exc, httpx.ConnectError):
+                        logger.error(f"[Artifact Sending ERROR] Failed to connect to {endpoint}: {exc}")
+                    elif isinstance(exc, httpx.TimeoutException):
+                        logger.error(f"[Artifact Sending ERROR] Timeout connecting to {endpoint}: {exc}")
                     else:
-                        logger.warning(f"[Artifact Sending WARN] Endpoint {actual_endpoint} returned {response.status_code}, trying next endpoint")
+                        logger.error(f"[Artifact Sending ERROR] Request error sending to {endpoint}: {exc}")
+                except httpx.HTTPStatusError as exc:
+                    logger.error(f"[Artifact Sending ERROR] HTTP error sending to {endpoint}: Status {exc.response.status_code} - {exc.response.text}")
                 except Exception as e:
-                    logger.error(f"[Artifact Sending ERROR] Failed to send to {endpoint}: {str(e)}")
-            
-            if not success:
+                    # Catch any other unexpected errors
+                    logger.error(f"[Artifact Sending ERROR] Unexpected error sending to {endpoint}: {e}\n{traceback.format_exc()}")
+
+            if not sent_successfully:
                 logger.error(f"[Artifact Sending FAILED] All endpoints failed for conversation {conversation_id}")
         
     except Exception as outer_err:
         logger.error(f"[Artifact Generation FATAL] Unhandled error in generate_and_save_artifacts for conv {conversation_id}: {outer_err}")
         logger.error(traceback.format_exc())
+
+    logger.info(f"[Artifact Generation END] for conversation: {conversation_id}")
 
 @app.delete("/api/v1/conversation/{conversation_id}",
     tags=["Frontend Compatibility"],
