@@ -273,7 +273,7 @@ export const App: React.FC = () => {
                   user && hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />
                 } 
               />
-              <Route path="/auth/activate" element={<ActivationPage />} />
+              <Route path="/activation" element={<ActivationPage />} />
               <Route path="/auth/google/callback" element={<OAuthCallback />} />
               <Route path="/auth/github/callback" element={<OAuthCallback />} />
               
