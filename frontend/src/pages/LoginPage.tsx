@@ -148,8 +148,10 @@ export const LoginPage: React.FC = () => {
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('handleSubmit: Preventing default...'); 
+    console.log('!!! handleSubmit function CALLED !!!');
+    console.log('handleSubmit: Preventing default...');
     e.preventDefault();
+    console.log('handleSubmit: Default prevented.');
     
     if (!email || !password) {
       console.log('handleSubmit: Prevented - Email or password empty.'); 
