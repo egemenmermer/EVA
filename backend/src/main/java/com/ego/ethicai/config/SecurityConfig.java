@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,6 +53,9 @@ public class SecurityConfig {
 
     @Value("${spring.mail.password}")
     private String mailPassword;
+
+    @Value("${cors.allowed.origins:http://localhost:5173,http://188.245.65.196:5173}") // Default includes both
+    private String allowedOrigins;
 
     public SecurityConfig(
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
@@ -126,7 +130,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://188.245.65.196:5173"));
+        // Split the comma-separated string from env var/default and trim whitespace
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                                     .map(String::trim)
+                                     .toList();
+        configuration.setAllowedOrigins(origins); // Use the list
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
@@ -135,8 +143,8 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
-        logger.info("Configured CORS with allowed origin: http://188.245.65.196:5173");
+
+        logger.info("Configured CORS with allowed origins: {}", origins); // Log the list
         return source;
     }
 
