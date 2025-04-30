@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Dispatch, SetStateAction, useCallback } from 'react';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
+import { EditDraftModal } from './EditDraftModal'; // Import the modal component
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';
 import { conversationApi, saveMessage } from '@/services/api'; // Import saveMessage
@@ -199,6 +200,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Add a ref to track if feedback is being processed
   const isProcessingFeedback = useRef(false);
+  
+  // State for Edit Draft Modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [draftToEdit, setDraftToEdit] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null); // Keep track of which message is being edited
   
   // Create a ref to the handleSendMessage function to use in the useEffect
   const handleSendMessageRef = useRef<(content: string) => Promise<void>>();
@@ -610,7 +616,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   };
 
   // Simplify message handling to ensure user messages remain visible
-  const handleSendMessage = async (inputValue: string) => {
+  const handleSendMessage = useCallback(async (inputValue: string) => {
     console.log("handleSendMessage called with input:", inputValue);
     console.log("Current Conversation before send:", currentConversation);
 
@@ -839,7 +845,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       setLoading(false);
       isMessageSending.current = false;
     }
-  };
+  }, [currentConversation, storeMessages, temperature, managerType, user, setStoreMessages, setCurrentConversation]); // Added dependencies
 
   // Update the ref whenever handleSendMessage changes
   useEffect(() => {
@@ -1773,7 +1779,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   }, [messages, currentConversation]);
 
   // Add this function before renderMessage
-  const handleOptionClick = (optionText: string) => {
+  const handleOptionClick = useCallback((optionText: string) => {
     console.log('Option clicked:', optionText);
     const lowerCaseOption = optionText.toLowerCase();
 
@@ -1828,9 +1834,61 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           handleSendMessage(optionText);
       }
     }
+  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        console.log('Email draft copied to clipboard');
+        handleSendMessage("Okay, I've copied the draft. Would you like to rehearse sending this message or prepare for possible replies from your boss?");
+      })
+      .catch(err => {
+        console.error('Failed to copy email draft: ', err);
+        setError('Failed to copy draft to clipboard.');
+      });
   };
 
-  const renderMessage = (message: Message, index: number) => {
+  // --- Modal Control Functions --- Define them here ---
+  const handleCloseEditModal = useCallback(() => {
+      setIsEditModalOpen(false);
+      setDraftToEdit(null);
+      setEditingMessageId(null);
+  }, []); // No dependencies needed for resetting state
+
+  const handleSaveEditedDraft = useCallback((editedContent: string) => {
+      handleCloseEditModal(); // Close modal first
+      console.log('Sending edited draft to agent...');
+      
+      // Remove the original draft message before sending the new one
+      if (editingMessageId) {
+          const messagesWithoutOriginalDraft = storeMessages.filter(m => m.id !== editingMessageId);
+          setStoreMessages(messagesWithoutOriginalDraft);
+          // No need to save state here, handleSendMessage will update and save
+      }
+
+      // Send the edited content as a new user message
+      const submissionPrompt = `Here is the edited version of the draft email:\n\n${editedContent}`;
+      handleSendMessage(submissionPrompt);
+  }, [editingMessageId, storeMessages, setStoreMessages, handleSendMessage, handleCloseEditModal]); // Added dependencies
+
+  // --- Component-Level Edit/Discard Handlers --- Define them here ---
+  const handleEditDraft = useCallback((messageId: string, draftContent: string) => {
+      console.log('Edit draft requested for message:', messageId);
+      setDraftToEdit(draftContent);
+      setEditingMessageId(messageId);
+      setIsEditModalOpen(true);
+  }, []); // No dependencies needed for setting state
+  
+  const handleDiscardDraft = useCallback((messageId: string | undefined) => {
+      if (!messageId) return;
+      console.log('Discarding draft message:', messageId);
+      const updatedMessages = storeMessages.filter(m => m.id !== messageId);
+      setStoreMessages(updatedMessages);
+      saveConversationState(currentConversation?.conversationId || '', updatedMessages);
+  }, [storeMessages, setStoreMessages, currentConversation]); // Added dependencies
+
+  // --- Message Rendering Logic ---
+  const renderMessage = useCallback((message: Message, index: number) => {
     const isUser = message.role === 'user';
     const isSystemMessage = message.role === 'system';
     const isAssistant = message.role === 'assistant';
@@ -1957,19 +2015,40 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         });
     };
 
-    const handleEditDraft = (draftContent: string) => {
-        console.log('Edit draft requested.');
-        // Simple approach: Send a message prompting user to edit in the input
-        // Add the draft content quoted in the follow-up message for context
-        const editPrompt = `Okay, please edit the following draft as needed and send it back:
-
----
-${draftContent}
----`;
-        handleSendMessage(editPrompt);
-        // We could also try setting the input value directly if we pass a setter function to ChatInput
+    // Updated to open the modal instead of sending a message
+    const handleEditDraft = (messageId: string, draftContent: string) => {
+        console.log('Edit draft requested for message:', messageId);
+        setDraftToEdit(draftContent);
+        setEditingMessageId(messageId); // Store the ID of the message being edited
+        setIsEditModalOpen(true);
     };
     
+    // Function to close the modal
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setDraftToEdit(null);
+        setEditingMessageId(null);
+    };
+
+    // Function to handle saving from the modal
+    const handleSaveEditedDraft = (editedContent: string) => {
+        handleCloseEditModal(); // Close modal first
+        console.log('Sending edited draft to agent...');
+        
+        // Remove the original draft message before sending the new one
+        if (editingMessageId) {
+            const messagesWithoutOriginalDraft = storeMessages.filter(m => m.id !== editingMessageId);
+            setStoreMessages(messagesWithoutOriginalDraft);
+            // No need to save state here, handleSendMessage will update and save
+            // saveConversationState(currentConversation?.conversationId || '', messagesWithoutOriginalDraft);
+        }
+
+        // Send the edited content as a new user message
+        // Prefixing to make it clear to the agent it's an edited version
+        const submissionPrompt = `Here is the edited version of the draft email:\n\n${editedContent}`;
+        handleSendMessage(submissionPrompt);
+    };
+
     const handleDiscardDraft = (messageId: string | undefined) => {
         if (!messageId) return;
         console.log('Discarding draft message:', messageId);
@@ -2073,7 +2152,7 @@ ${draftContent}
               Copy Email
             </button>
             <button
-              onClick={() => handleEditDraft(displayContent)} // Pass draft content
+              onClick={() => handleEditDraft(message.id || `edit-${index}`, displayContent)} // Pass message ID and draft content
               className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-colors text-xs"
             >
               Edit Further
@@ -2088,7 +2167,7 @@ ${draftContent}
         )}
       </div>
     );
-  };
+  }, [darkMode, user, handleOptionClick, handleCopyToClipboard, handleEditDraft, handleDiscardDraft]); // Added handlers as dependencies
 
   // Update the handlePracticeResponse function
   const handlePracticeResponse = (response: 'yes' | 'no') => {
@@ -2227,6 +2306,14 @@ ${draftContent}
           />
         </>
       )}
+
+      {/* Render the Edit Draft Modal conditionally */}
+      <EditDraftModal 
+        isOpen={isEditModalOpen}
+        initialContent={draftToEdit}
+        onSave={handleSaveEditedDraft}
+        onClose={handleCloseEditModal}
+      />
     </div>
   );
 }; 
