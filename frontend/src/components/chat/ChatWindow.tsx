@@ -1775,12 +1775,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   // Add this function before renderMessage
   const handleOptionClick = (optionText: string) => {
     console.log('Option clicked:', optionText);
-    if (optionText.toLowerCase().includes('yes, practice') || optionText.toLowerCase().includes('practice again')) {
+    const lowerCaseOption = optionText.toLowerCase();
+
+    if (lowerCaseOption.includes('yes, practice') || lowerCaseOption.includes('practice again')) {
       console.log('Triggering practice mode...');
       const recentUserMessage = storeMessages.slice().reverse().find(m => m.role === 'user');
       if (recentUserMessage && currentConversation) {
         localStorage.setItem('originalConversationId', currentConversation.conversationId);
-        localStorage.setItem('practice_user_query', recentUserMessage.content);
+        // Also store the original problem statement if available
+        const originalProblem = storeMessages.find(m => m.role === 'user' && m.id?.startsWith('user-'))?.content;
+        if (originalProblem) {
+             localStorage.setItem('practice_original_problem', originalProblem);
+        }
+        localStorage.setItem('practice_user_query', recentUserMessage.content); // Keep last user message too
         const activeManagerType = currentConversation?.managerType || 'PUPPETEER';
         localStorage.setItem('practice_manager_type', activeManagerType);
         setActiveManagerType(activeManagerType);
@@ -1789,11 +1796,37 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Could not initiate practice: missing context.');
         setError('Could not start practice mode. Missing conversation context.');
       }
-    } else if (optionText.toLowerCase().includes('yes, help draft email')) {
-      console.log('Email draft requested - sending placeholder message.');
-      handleSendMessage('Okay, please help me draft an email about this.');
+    } else if (lowerCaseOption.includes('yes, create a draft email')) { // Updated condition check
+      console.log('Draft email requested. Sending request to agent...');
+      // Construct a specific prompt for the agent
+      // We might want to include context like the original problem or summary
+      const originalProblem = localStorage.getItem('practice_original_problem') || 
+                              storeMessages.find(m => m.role === 'user' && !m.content.startsWith('Okay, please help'))?.content || 
+                              'the ethical dilemma discussed'; // Fallback context
+                              
+      const draftRequestPrompt = `Please help me draft an email to my boss about ${originalProblem}. Include ethical framing and suggest alternatives or a meeting.`;
+      
+      // Call handleSendMessage with the specific prompt
+      handleSendMessage(draftRequestPrompt);
+
+    } else if (lowerCaseOption.includes('no, not now')) {
+        console.log('User chose not to proceed for now.');
+        // Optionally send a message or just do nothing, letting the conversation continue elsewhere
+        // handleSendMessage("Okay, let me know if you change your mind."); 
     } else {
-      handleSendMessage(optionText);
+      // Handle other generic button clicks if any
+      // Check if it's a rehearsal option click
+      if (lowerCaseOption.startsWith('practice responding to a')) {
+          console.log('Rehearsal option selected:', optionText);
+          const replyType = lowerCaseOption.includes('negative') ? 'negative' : 'positive';
+          // Get context for the agent (original problem)
+          const originalProblem = localStorage.getItem('practice_original_problem') || 'the ethical dilemma discussed';
+          const rehearsalRequest = `Okay, please simulate a ${replyType} reply from my boss regarding the email about ${originalProblem}.`;
+          handleSendMessage(rehearsalRequest);
+      } else {
+          // Fallback for other button types
+          handleSendMessage(optionText);
+      }
     }
   };
 
@@ -1806,31 +1839,60 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     // Initialize variables
     let displayContent = '';
     let extractedOptions: string[] = [];
+    let isEmailDraft = false; // Flag for email drafts
+    let isRehearsalPrompt = false; // Flag for rehearsal prompts
     const optionRegex = /\[(.*?)\]/g; // Regex to find [Option Text]
     
     if (typeof message.content === 'string') {
       displayContent = message.content || 'No response content';
       
-      // If assistant message, extract options and clean display content
+      // If assistant message, perform checks and cleanup
       if (isAssistant) {
-        const matches = [...displayContent.matchAll(optionRegex)];
-        if (matches.length > 0) {
-          extractedOptions = matches.map(match => match[1].trim());
-          displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
-        }
-        // Additional cleanup (if regex misses something)
-        displayContent = displayContent
-          .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
-          .replace(/\s*\[Yes, help draft email\]\s*\[No, practice again\]\s*$/g, "")
-          .trim();
-        
-        // Formatting logic
-        displayContent = displayContent
-          .replace(/\.(\s+)/g, '.\n\n') // Replace period + space(s) with period + double newline
-          .replace(/\n{3,}/g, "\n\n") // Clean up excess newlines
-          .replace(/•(\s*)(\S)/g, "• $2") // Ensure space after bullet points
-          .replace(/(\d+\.)(\s*)(\S)/g, "$1 $3"); // Ensure space after numbered list items
-      }
+          // Check BEFORE cleaning/formatting
+          const lowerContent = displayContent.toLowerCase();
+          
+          // Check for Email Draft
+          isEmailDraft = 
+              (lowerContent.includes('subject:') && lowerContent.includes('dear')) ||
+              lowerContent.includes('draft email:') ||
+              lowerContent.includes('here\'s a draft') ||
+              (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
+              
+          // Check for Rehearsal Prompt
+          isRehearsalPrompt = 
+              lowerContent.includes('okay, let\'s rehearse') &&
+              lowerContent.includes('which type of reply');
+          
+          // Extract bracketed options if NOT an email draft
+          // For rehearsal prompts, the options are specific, handle them separately
+          if (!isEmailDraft) {
+             const matches = [...displayContent.matchAll(optionRegex)];
+             if (matches.length > 0) {
+               // Filter out rehearsal-specific options if this is the rehearsal prompt
+               const optionsToExtract = isRehearsalPrompt 
+                   ? matches.filter(m => m[1].toLowerCase().includes('practice responding to a'))
+                   : matches;
+               extractedOptions = optionsToExtract.map(match => match[1].trim());
+               // Clean the display content, removing *all* matched options
+               displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+             }
+             // Additional cleanup
+             displayContent = displayContent
+               .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
+               .replace(/\s*\[Yes, create a draft email.*?\]\s*\[Not now\]\s*$/g, "") // Cleanup draft prompt buttons
+               // Don't clean up rehearsal options here, they were removed above if present
+               .trim();
+             
+             // Formatting logic for regular messages
+             if (!isRehearsalPrompt) { // Don't apply special formatting to rehearsal prompt text
+                 displayContent = displayContent
+                   .replace(/\.(\s+)/g, '.\n\n') // Period + spaces -> double newline
+                   .replace(/\n{3,}/g, "\n\n") // Reduce excess newlines
+                   .replace(/•(\s*)(\S)/g, "• $2") // Ensure space after bullets
+                   .replace(/(\d+\.)(\s*)(\S)/g, "$1 $3"); // Ensure space after numbered lists
+             }
+          }
+      } 
     } else {
       displayContent = String(message.content || 'No response content');
     }
@@ -1850,6 +1912,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     // Get score value if this is a practice feedback message
     let practiceScore = 0;
+    let isPracticeFeedback = false; // Flag to identify feedback messages
     if (isAssistant && displayContent && (
       displayContent.includes("ethical decision-making score") || 
       displayContent.includes("practice scenario") || 
@@ -1866,15 +1929,57 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         displayContent.includes("scenario") && 
         displayContent.includes("performance")))
     )) {
+      isPracticeFeedback = true; // Mark this as a feedback message
+      // Corrected Regex: Escaped the forward slash properly
       const scoreMatch = displayContent.match(/ethical decision-making score (?:was |is |of )(\d+)\/100/i);
       if (scoreMatch && scoreMatch[1]) {
         practiceScore = parseInt(scoreMatch[1]);
       }
     }
     
-    // Only show Practice Again button for feedback responses with scores less than 100
-    const shouldShowPracticeAgain = isAssistant && practiceScore > 0 && practiceScore < 100;
+    // Determine which buttons to show
+    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt;
+    const showEmailDraftActionButtons = isAssistant && isEmailDraft; // Show email actions if it IS a draft
+    const showRehearsalOptionButtons = isAssistant && isRehearsalPrompt && extractedOptions.length > 0; // Show rehearsal buttons if it's the prompt
     
+    // --- Action Button Handlers ---
+    const handleCopyToClipboard = (text: string) => {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          console.log('Email draft copied to clipboard');
+          // Optionally show a temporary confirmation message (e.g., using a toast library)
+          // Consider triggering Phase 5 prompt here
+          handleSendMessage("Okay, I've copied the draft. Would you like to rehearse sending this message or prepare for possible replies from your boss?");
+        })
+        .catch(err => {
+          console.error('Failed to copy email draft: ', err);
+          setError('Failed to copy draft to clipboard.'); // Show error to user
+        });
+    };
+
+    const handleEditDraft = (draftContent: string) => {
+        console.log('Edit draft requested.');
+        // Simple approach: Send a message prompting user to edit in the input
+        // Add the draft content quoted in the follow-up message for context
+        const editPrompt = `Okay, please edit the following draft as needed and send it back:
+
+---
+${draftContent}
+---`;
+        handleSendMessage(editPrompt);
+        // We could also try setting the input value directly if we pass a setter function to ChatInput
+    };
+    
+    const handleDiscardDraft = (messageId: string | undefined) => {
+        if (!messageId) return;
+        console.log('Discarding draft message:', messageId);
+        const updatedMessages = storeMessages.filter(m => m.id !== messageId);
+        setStoreMessages(updatedMessages);
+        saveConversationState(currentConversation?.conversationId || '', updatedMessages);
+        // Optionally send a confirmation or just remove silently
+        // handleSendMessage("Draft discarded.");
+    };
+
     return (
       <div key={message.id || index} className="mb-4">
         {/* Message Bubble */}
@@ -1909,8 +2014,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           )}
         </div>
         
-        {/* Render Extracted Option Buttons */}
-        {isAssistant && extractedOptions.length > 0 && (
+        {/* Render Extracted Option Buttons (e.g., Yes/No for practice) */}
+        {isAssistant && extractedOptions.length > 0 && !showDraftEmailPromptButtons && !showRehearsalOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
             <button
@@ -1923,43 +2028,61 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             ))}
           </div>
         )}
-        
-        {/* Practice Again Button for practice feedback with score < 100 */}
-        {shouldShowPracticeAgain && (
-          <div className="mt-3 flex justify-end">
+
+        {/* Action Phase Prompt Buttons (Ask user if they want a draft) */}
+        {showDraftEmailPromptButtons && (
+          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
+            <div className="w-full text-sm text-gray-600 dark:text-gray-400 mb-1">Would you like to take action now?</div>
             <button
-              onClick={() => {
-                // Save the current conversation ID as original
-                if (currentConversation && currentConversation.conversationId) {
-                  console.log('Saving original conversation ID for Practice Again:', currentConversation.conversationId);
-                  localStorage.setItem('originalConversationId', currentConversation.conversationId);
-                }
-                
-                // Get the saved practice data
-                const practiceData = localStorage.getItem('practice_data');
-                if (practiceData) {
-                  try {
-                    const parsedData = JSON.parse(practiceData);
-                    const managerType = parsedData.managerType || "PUPPETEER";
-                    
-                    // Set up for practice module
-                    localStorage.setItem('practice_manager_type', managerType);
-                    setActiveManagerType(managerType);
-                    
-                    // Enter practice mode
-                    setPracticeMode(true);
-                  } catch (e) {
-                    console.error('Error parsing practice data for retry:', e);
-                  }
-                } else {
-                  // Fallback if no data found
-                  setActiveManagerType('PUPPETEER');
-                  setPracticeMode(true);
-                }
-              }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
+              onClick={() => handleOptionClick("Yes, create a draft email to my boss")}
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors text-xs"
             >
-              Practice Again
+              Yes, create a draft email to my boss
+            </button>
+            <button
+              onClick={() => handleOptionClick("No, not now")} // Or handle differently if needed
+              className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-xs"
+            >
+              Not now
+            </button>
+          </div>
+        )}
+
+        {/* Rehearsal Option Buttons */}
+        {showRehearsalOptionButtons && (
+            <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
+                {extractedOptions.map((option, idx) => (
+                    <button
+                        key={`rehearse-${idx}`}
+                        onClick={() => handleOptionClick(option)} // Use existing handler
+                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-xs"
+                    >
+                        {option}
+                    </button>
+                ))}
+            </div>
+        )}
+
+        {/* Email Draft Action Buttons (Copy, Edit, Discard) */}
+        {showEmailDraftActionButtons && (
+          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
+            <button
+              onClick={() => handleCopyToClipboard(displayContent)} // Pass the draft content
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs"
+            >
+              Copy Email
+            </button>
+            <button
+              onClick={() => handleEditDraft(displayContent)} // Pass draft content
+              className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-colors text-xs"
+            >
+              Edit Further
+            </button>
+             <button
+              onClick={() => handleDiscardDraft(message.id)} // Pass message ID
+              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
+            >
+              Discard
             </button>
           </div>
         )}
