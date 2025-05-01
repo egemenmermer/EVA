@@ -1831,8 +1831,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           handleSendMessage(rehearsalRequest);
       } else {
           // Fallback for other button types
-          handleSendMessage(optionText);
-      }
+      handleSendMessage(optionText);
+    }
     }
   }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
 
@@ -1924,33 +1924,33 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           // Extract bracketed options if NOT an email draft
           // For rehearsal prompts, the options are specific, handle them separately
           if (!isEmailDraft) {
-             const matches = [...displayContent.matchAll(optionRegex)];
-             if (matches.length > 0) {
+        const matches = [...displayContent.matchAll(optionRegex)];
+        if (matches.length > 0) {
                // Filter out rehearsal-specific options if this is the rehearsal prompt
                const optionsToExtract = isRehearsalPrompt 
                    ? matches.filter(m => m[1].toLowerCase().includes('practice responding to a'))
                    : matches;
                extractedOptions = optionsToExtract.map(match => match[1].trim());
                // Clean the display content, removing *all* matched options
-               displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
-             }
+          displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+        }
              // Additional cleanup
-             displayContent = displayContent
-               .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
+        displayContent = displayContent
+          .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
                .replace(/\s*\[Yes, create a draft email.*?\]\s*\[Not now\]\s*$/g, "") // Cleanup draft prompt buttons
                // Don't clean up rehearsal options here, they were removed above if present
-               .trim();
-             
+          .trim();
+        
              // Formatting logic for regular messages
              if (!isRehearsalPrompt) { // Don't apply special formatting to rehearsal prompt text
-                 displayContent = displayContent
+        displayContent = displayContent
                    .replace(/\.(\s+)/g, '.\n\n') // Period + spaces -> double newline
                    .replace(/\n{3,}/g, "\n\n") // Reduce excess newlines
                    .replace(/•(\s*)(\S)/g, "• $2") // Ensure space after bullets
                    .replace(/(\d+\.)(\s*)(\S)/g, "$1 $3"); // Ensure space after numbered lists
              }
           }
-      } 
+      }
     } else {
       displayContent = String(message.content || 'No response content');
     }
@@ -2058,7 +2058,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         // Optionally send a confirmation or just remove silently
         // handleSendMessage("Draft discarded.");
     };
-
+    
     return (
       <div key={message.id || index} className="mb-4">
         {/* Message Bubble */}
@@ -2107,7 +2107,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             ))}
           </div>
         )}
-
+        
         {/* Action Phase Prompt Buttons (Ask user if they want a draft) */}
         {showDraftEmailPromptButtons && (
           <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
