@@ -367,7 +367,7 @@ Acknowledge their score if mentioned. Focus on areas for improvement and reinfor
 
 Keep your feedback clear, concise, and supportive. Use markdown for formatting.
 
-After providing the feedback, always ask the *exact question* "Do you feel ready to discuss this with your manager, or would you like to practice again?" and then, clearly separated (e.g., on a new line if possible), include the text '[Yes, help draft email] [No, practice again]'.
+After providing the feedback, always ask the *exact question* "Do you feel ready to discuss this with your manager, or would you like to practice again? [Yes, help draft email] [No, practice again]"
 """
         
         # Select system message based on request type
@@ -1203,7 +1203,7 @@ async def send_message(
             • Highlight areas of strength clearly.
             • Suggest improvements and alternative actions tactfully.
             • Enable smooth transition back to regular conversation after scenario practices.
-            • After providing feedback, ask: "Would you like to take action now? [Yes, create a draft email to my boss] [Not now]"
+            • After providing feedback, ask: "Do you feel ready to discuss this with your manager, or would you like to practice again? [Yes, help draft email] [No, practice again]"
 
             Memory and Context Management
             • Record user preferences, previous scenarios, and performance scores proactively to maintain context across interactions.

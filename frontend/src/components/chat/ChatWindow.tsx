@@ -1783,17 +1783,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     console.log('Option clicked:', optionText);
     const lowerCaseOption = optionText.toLowerCase();
 
+    // Updated condition: Look for 'practice again' OR 'no, practice again'
     if (lowerCaseOption.includes('yes, practice') || lowerCaseOption.includes('practice again')) {
       console.log('Triggering practice mode...');
       const recentUserMessage = storeMessages.slice().reverse().find(m => m.role === 'user');
       if (recentUserMessage && currentConversation) {
         localStorage.setItem('originalConversationId', currentConversation.conversationId);
-        // Also store the original problem statement if available
         const originalProblem = storeMessages.find(m => m.role === 'user' && m.id?.startsWith('user-'))?.content;
         if (originalProblem) {
              localStorage.setItem('practice_original_problem', originalProblem);
         }
-        localStorage.setItem('practice_user_query', recentUserMessage.content); // Keep last user message too
+        localStorage.setItem('practice_user_query', recentUserMessage.content);
         const activeManagerType = currentConversation?.managerType || 'PUPPETEER';
         localStorage.setItem('practice_manager_type', activeManagerType);
         setActiveManagerType(activeManagerType);
@@ -1802,39 +1802,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Could not initiate practice: missing context.');
         setError('Could not start practice mode. Missing conversation context.');
       }
-    } else if (lowerCaseOption.includes('yes, create a draft email')) { // Updated condition check
+    // Updated condition: Look for 'create a draft' OR 'help draft'
+    } else if (lowerCaseOption.includes('create a draft') || lowerCaseOption.includes('help draft')) {
       console.log('Draft email requested. Sending request to agent...');
-      // Construct a specific prompt for the agent
-      // We might want to include context like the original problem or summary
       const originalProblem = localStorage.getItem('practice_original_problem') || 
                               storeMessages.find(m => m.role === 'user' && !m.content.startsWith('Okay, please help'))?.content || 
-                              'the ethical dilemma discussed'; // Fallback context
-                              
+                              'the ethical dilemma discussed';
       const draftRequestPrompt = `Please help me draft an email to my boss about ${originalProblem}. Include ethical framing and suggest alternatives or a meeting.`;
-      
-      // Call handleSendMessage with the specific prompt
       handleSendMessage(draftRequestPrompt);
 
     } else if (lowerCaseOption.includes('no, not now')) {
         console.log('User chose not to proceed for now.');
-        // Optionally send a message or just do nothing, letting the conversation continue elsewhere
-        // handleSendMessage("Okay, let me know if you change your mind."); 
-    } else {
-      // Handle other generic button clicks if any
-      // Check if it's a rehearsal option click
-      if (lowerCaseOption.startsWith('practice responding to a')) {
+        // Optionally send a confirmation or do nothing
+        // handleSendMessage("Okay, let me know if you change your mind or need the draft later.");
+    } else if (lowerCaseOption.startsWith('practice responding to a')) {
           console.log('Rehearsal option selected:', optionText);
           const replyType = lowerCaseOption.includes('negative') ? 'negative' : 'positive';
-          // Get context for the agent (original problem)
           const originalProblem = localStorage.getItem('practice_original_problem') || 'the ethical dilemma discussed';
           const rehearsalRequest = `Okay, please simulate a ${replyType} reply from my boss regarding the email about ${originalProblem}.`;
           handleSendMessage(rehearsalRequest);
-      } else {
-          // Fallback for other button types
+    } else {
+          // Fallback for any other button types not explicitly handled
       handleSendMessage(optionText);
     }
-    }
-  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
+  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Keep dependencies updated
 
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
