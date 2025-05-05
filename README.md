@@ -56,6 +56,7 @@ The system offers an interactive environment where software engineers can practi
 - OpenAI GPT-4 for language processing
 - LangChain for AI framework
 - LangChain Community and FAISS for vector search
+- Redis for conversation memory management
 - Uvicorn for ASGI server
 
 ### Backend (Java)
@@ -81,6 +82,7 @@ The system offers an interactive environment where software engineers can practi
 - Java JDK 17+
 - Node.js 18+
 - PostgreSQL 15+
+- Redis Server (See Agent setup)
 
 ### Environment Setup
 
@@ -104,7 +106,14 @@ The system offers an interactive environment where software engineers can practi
    # Configure environment
    mkdir -p logs
    cp .env.example .env  # If .env.example exists
-   # Edit .env to add your OpenAI API key
+   # Edit .env to add your OpenAI API key and Redis URL if needed
+   
+   # Install and start Redis (Example for macOS using Homebrew)
+   # If Redis is not installed:
+   brew install redis 
+   # Start Redis service (runs in background)
+   brew services start redis
+   # Alternatively, run manually in a separate terminal: redis-server
    
    # Run the application
    python -m uvicorn main:app --reload --port 5001 --log-level info
@@ -174,6 +183,7 @@ cd agent
 OPENAI_API_KEY=your_openai_api_key
 MODEL_NAME=gpt-4
 BACKEND_URL=http://localhost:8443
+REDIS_URL=redis://localhost:6379/0 # Optional: Defaults to localhost if not set
 ```
 
 ### Backend (application.properties)

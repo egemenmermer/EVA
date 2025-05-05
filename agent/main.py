@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Header, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, Dict, List, Any, Union, Literal
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -19,6 +19,8 @@ import concurrent.futures
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain.chat_models import ChatOpenAI
 from fastapi.responses import JSONResponse
+import redis
+from langchain.memory import ConversationBufferMemory
 
 # Load environment variables
 load_dotenv()
@@ -38,6 +40,15 @@ logger = logging.getLogger(__name__)
 BACKEND_BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8443")
 BACKEND_API_KEY = os.getenv("BACKEND_API_KEY", "")  # If needed for authentication
 
+# Initialize Redis connection for conversation memory
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+try:
+    redis_client = redis.from_url(REDIS_URL)
+    logger.info(f"Connected to Redis at {REDIS_URL}")
+except Exception as e:
+    logger.error(f"Failed to connect to Redis: {str(e)}. Using fallback memory.")
+    redis_client = None
+
 # Initialize FastAPI app with detailed documentation
 app = FastAPI(
     title="Ethical AI Decision-Making API",
@@ -55,6 +66,122 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+class ConversationMemory:
+    """Manages conversation memory storage and retrieval."""
+    
+    def __init__(self, redis_client=None, expiry_seconds=86400):  # Default 24-hour expiry
+        self.redis_client = redis_client
+        self.expiry_seconds = expiry_seconds
+        self.fallback_storage = {}  # In-memory fallback if Redis unavailable
+    
+    def get_conversation_key(self, conversation_id: str) -> str:
+        """Create a Redis key for the conversation."""
+        return f"conversation:{conversation_id}:history"
+    
+    def save_exchange(self, conversation_id: str, user_message: str, assistant_message: str) -> bool:
+        """Save a conversation exchange to memory."""
+        try:
+            exchange = {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "user": user_message,
+                "assistant": assistant_message
+            }
+            
+            if self.redis_client:
+                # Get existing history
+                key = self.get_conversation_key(conversation_id)
+                existing_data = self.redis_client.get(key)
+                
+                if existing_data:
+                    history = json.loads(existing_data)
+                else:
+                    history = []
+                
+                # Append new exchange and save
+                history.append(exchange)
+                self.redis_client.setex(
+                    key, 
+                    self.expiry_seconds,
+                    json.dumps(history)
+                )
+            else:
+                # Fallback to in-memory storage
+                if conversation_id not in self.fallback_storage:
+                    self.fallback_storage[conversation_id] = []
+                self.fallback_storage[conversation_id].append(exchange)
+            
+            logger.info(f"Saved conversation exchange for {conversation_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving conversation exchange: {str(e)}")
+            return False
+    
+    def get_history(self, conversation_id: str, max_turns: int = 10) -> List[Dict[str, str]]:
+        """Retrieve conversation history for a conversation."""
+        try:
+            if self.redis_client:
+                key = self.get_conversation_key(conversation_id)
+                data = self.redis_client.get(key)
+                
+                if data:
+                    history = json.loads(data)
+                    # Return the most recent exchanges up to max_turns
+                    return history[-max_turns:] if max_turns > 0 else history
+                return []
+            else:
+                # Fallback to in-memory storage
+                history = self.fallback_storage.get(conversation_id, [])
+                return history[-max_turns:] if max_turns > 0 else history
+        except Exception as e:
+            logger.error(f"Error retrieving conversation history: {str(e)}")
+            return []
+    
+    def format_for_prompt(self, conversation_id: str, max_turns: int = 5) -> str:
+        """Format conversation history for inclusion in a prompt."""
+        history = self.get_history(conversation_id, max_turns)
+        if not history:
+            return ""
+        
+        formatted = "Previous conversation:\n"
+        for exchange in history:
+            formatted += f"User: {exchange.get('user', '')}\n"
+            formatted += f"Assistant: {exchange.get('assistant', '')}\n\n"
+        
+        return formatted
+    
+    def clear_history(self, conversation_id: str) -> bool:
+        """Clear conversation history."""
+        try:
+            if self.redis_client:
+                key = self.get_conversation_key(conversation_id)
+                self.redis_client.delete(key)
+            else:
+                if conversation_id in self.fallback_storage:
+                    del self.fallback_storage[conversation_id]
+            
+            logger.info(f"Cleared conversation history for {conversation_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error clearing conversation history: {str(e)}")
+            return False
+    
+    def get_langchain_memory(self, conversation_id: str) -> ConversationBufferMemory:
+        """Get a LangChain ConversationBufferMemory object for the conversation."""
+        from langchain_core.messages import AIMessage, HumanMessage
+        
+        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        
+        # Load history from storage into memory
+        history = self.get_history(conversation_id)
+        for exchange in history:
+            memory.chat_memory.add_user_message(exchange.get('user', ''))
+            memory.chat_memory.add_ai_message(exchange.get('assistant', ''))
+        
+        return memory
+
+# Initialize the conversation memory manager
+conversation_memory = ConversationMemory(redis_client)
 
 class StartConversationRequest(BaseModel):
     """Model for starting a new conversation."""
@@ -230,6 +357,12 @@ class ArtifactGenerationResponse(BaseModel):
     guidelines: List[ArtifactItem]
     caseStudies: List[ArtifactItem]
 
+class PracticeScorePayload(BaseModel):
+    conversationId: str
+    managerType: str
+    score: int
+    decisions: List[Dict[str, Any]] # Or a more specific model if available
+
 def get_agent():
     """Create a new agent instance for each request to avoid state sharing."""
     try:
@@ -294,10 +427,14 @@ async def start_conversation(
     request: StartConversationRequest,
     agent: LangChainAgent = Depends(get_agent)
 ) -> ConversationResponseDTO:
-    """Start a new conversation - stateless version."""
+    """Start a new conversation - initializes memory."""
     try:
         # Generate a unique ID instead of using agent state
         conversation_id = str(uuid.uuid4())
+        
+        # Clear any existing conversation memory for this ID
+        conversation_memory.clear_history(conversation_id)
+        logger.info(f"Initialized conversation memory for ID: {conversation_id}")
         
         # Get the time now
         now = datetime.utcnow().isoformat()
@@ -323,7 +460,7 @@ async def generate_response(
     background_tasks: BackgroundTasks,
     agent: LangChainAgent = Depends(get_agent)
 ) -> ConversationContentResponseDTO:
-    """Generate a response to an ethical query - stateless version."""
+    """Generate a response to an ethical query - with memory between calls."""
     try:
         logger.info(f"Generating response for conversation ID: {query.conversationId} (Type: {query.request_type})")
         logger.info(f"User query: {query.userQuery[:50]}...")
@@ -378,6 +515,12 @@ After providing the feedback, always ask the *exact question* "Do you feel ready
             system_message = initial_query_prompt
             logger.info("Using initial query prompt.")
         
+        # Retrieve conversation history and append to system message
+        conversation_context = conversation_memory.format_for_prompt(query.conversationId)
+        if conversation_context:
+            logger.info(f"Retrieved conversation history for {query.conversationId}")
+            system_message = f"{system_message}\n\n{conversation_context}"
+        
         # Make a direct call to the LLM
         response_content = ""
         try:
@@ -389,6 +532,13 @@ After providing the feedback, always ask the *exact question* "Do you feel ready
             response = llm.invoke(messages)
             response_content = response.content # Store content
             logger.info(f"Generated response (first 50 chars): {response_content[:50]}...")
+            
+            # Save the exchange to conversation memory
+            conversation_memory.save_exchange(
+                query.conversationId,
+                query.userQuery,
+                response_content
+            )
             
         except Exception as llm_error:
             logger.error(f"Error from LLM: {str(llm_error)}")
@@ -1269,17 +1419,35 @@ async def send_message(
         selected_system_prompt = default_system_prompt
         lower_user_query = user_query.lower()
         
+        # Check for specific flows first
         if lower_user_query.startswith("please help me draft an email"): 
             selected_system_prompt = email_draft_prompt
             logger.info(f"Using email draft prompt for conv {conversation_id}")
         elif lower_user_query.startswith("okay, i've copied the draft."):
             selected_system_prompt = rehearsal_prompt
             logger.info(f"Using rehearsal prompt for conv {conversation_id}")
-        elif lower_user_query.startswith("okay, please simulate a"): # Check for simulation request
+        elif lower_user_query.startswith("okay, please simulate a"): 
             selected_system_prompt = simulate_reply_prompt
             logger.info(f"Using simulate reply prompt for conv {conversation_id}")
+        # ADD CHECK: Detect post-practice feedback summary
+        elif (
+            "practice scenario" in lower_user_query and 
+            ("completed" in lower_user_query or "finished" in lower_user_query) and
+            ("score was" in lower_user_query or "decision-making score" in lower_user_query)
+        ):
+             selected_system_prompt = post_feedback_prompt # Use the correct prompt
+             logger.info(f"Using post-feedback prompt for conv {conversation_id}")
         else:
+             # Fallback to default
              logger.info(f"Using default system prompt for conv {conversation_id}")
+
+        # --- Retrieve conversation history ---
+        conversation_context = conversation_memory.format_for_prompt(conversation_id)
+        if conversation_context:
+            logger.info(f"Retrieved conversation history for {conversation_id}")
+            selected_system_prompt = f"{selected_system_prompt}\n\n{conversation_context}"
+        else:
+            logger.info(f"No conversation history found for {conversation_id}")
 
         # --- Generate AI Response --- 
         ai_response_content = "Error: Failed to generate AI response." # Default error
@@ -1298,6 +1466,11 @@ async def send_message(
             llm_response = await llm.ainvoke(messages_for_llm)
             ai_response_content = llm_response.content
             logger.info(f"Generated AI response for conv {conversation_id} using relevant prompt.")
+            
+            # Save to conversation memory
+            conversation_memory.save_exchange(conversation_id, user_query, ai_response_content)
+            logger.info(f"Saved conversation exchange to memory for {conversation_id}")
+            
         except Exception as e:
             logger.error(f"Error generating AI response for conv {conversation_id}: {str(e)}")
             logger.error(traceback.format_exc())
@@ -1534,7 +1707,7 @@ async def generate_and_save_artifacts(agent: LangChainAgent, user_query: str, co
     description="Deletes a conversation and its messages"
 )
 async def delete_conversation(conversation_id: str, request: Request):
-    """Proxy delete conversation request to the Java backend"""
+    """Proxy delete conversation request to the Java backend and clear memory."""
     try:
         # Extract the authorization header from the incoming request
         auth_header = request.headers.get("Authorization")
@@ -1546,6 +1719,10 @@ async def delete_conversation(conversation_id: str, request: Request):
             headers["Authorization"] = auth_header
         
         logger.info(f"Processing delete request for conversation: {conversation_id}")
+        
+        # Clear conversation memory
+        conversation_memory.clear_history(conversation_id)
+        logger.info(f"Cleared conversation memory for ID: {conversation_id}")
         
         # Make a request to the backend API
         try:
@@ -1574,3 +1751,25 @@ async def delete_conversation(conversation_id: str, request: Request):
         logger.error(traceback.format_exc())
         # Return empty dict with 500 error status
         return JSONResponse(content={}, status_code=500)
+
+@app.post("/api/v1/practice-score/submit",
+    tags=["Frontend Compatibility"],
+    summary="Submit practice score data",
+    description="Receives practice score details from the frontend (currently just logs it)."
+)
+async def submit_practice_score(
+    request: Request,
+    payload: PracticeScorePayload
+):
+    """Handle submission of practice scenario scores."""
+    try:
+        logger.info(f"Received practice score submission for conv {payload.conversationId}")
+        logger.debug(f"Practice score payload: {payload.dict()}")
+        
+        # TODO: Implement actual saving logic if needed (e.g., to database or Redis)
+        
+        return JSONResponse(status_code=200, content={"message": "Practice score received successfully"})
+    except Exception as e:
+        logger.error(f"Error processing practice score submission for conv {payload.conversationId}: {e}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal server error processing practice score")
