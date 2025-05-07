@@ -1,0 +1,110 @@
+/* Animations for the practice module */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes highlightFeedback {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  
+  30% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+  
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Optimized animation for feedback to prevent spacing issues */
+@keyframes feedbackAppear {
+  0% {
+    opacity: 0;
+    max-height: 0;
+  }
+  
+  20% {
+    opacity: 0.5;
+    max-height: 500px;
+  }
+  
+  100% {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.5s ease-out;
+}
+
+.feedback-transition {
+  transition: all 0.3s ease;
+}
+
+.feedback-appear {
+  animation: feedbackAppear 0.6s ease-out forwards;
+  overflow: hidden;
+}
+
+/* Compact messaging styles to reduce spacing */
+.message-compact {
+  margin-bottom: 0.5rem;
+}
+
+.message-compact + .message-compact {
+  margin-top: -0.25rem;
+}
+
+/* Prevent content jumping during feedback display */
+.feedback-container {
+  min-height: 0;
+  transition: min-height 0.3s ease-out;
+}
+
+.feedback-active {
+  min-height: 100px;
+}
+
+/* Final feedback styling */
+.feedback-final {
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+  position: relative;
+  min-height: 120px;
+  padding-bottom: 0.5rem;
+}
+
+.feedback-final::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.05), transparent);
+} 

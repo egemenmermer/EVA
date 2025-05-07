@@ -1,5 +1,5 @@
 export type ManagerType = 'PUPPETEER' | 'DILUTER' | 'CAMOUFLAGER' | 'FUNCTION' | 'NO_TOOLS';
-export type Role = 'user' | 'assistant' | 'system';
+export type Role = 'user' | 'assistant' | 'system' | 'practice-assistant';
 
 export interface User {
   id: string;
@@ -29,6 +29,8 @@ export interface Message {
   createdAt: string;
   conversationId: string;
   isLoading?: boolean;
+  isRehearsalRequest?: boolean;
+  isRehearsalOptions?: boolean;
 }
 
 export interface Feedback {

@@ -2,10 +2,28 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import api from '../../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
+import './practice.css'; // Import the CSS file for animations
+
+// Import manager icons
+import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
+import puppeteerDarkPng from '@/assets/manager-icons/puppeteer-manager-dark.png';
+import diluterLightPng from '@/assets/manager-icons/diluter-manager-light.png';
+import diluterDarkPng from '@/assets/manager-icons/diluter-manager-dark.png';
+import camouflagerLightPng from '@/assets/manager-icons/camouflager-manager-light.png';
+import camouflagerDarkPng from '@/assets/manager-icons/camouflager-manager-dark.png';
+
+// SVG fallbacks if needed
+import puppeteerLightSvg from '@/assets/manager-icons/puppeteer-manager-light.svg';
+import puppeteerDarkSvg from '@/assets/manager-icons/puppeteer-manager-dark.svg';
+import diluterLightSvg from '@/assets/manager-icons/diluter-manager-light.svg';
+import diluterDarkSvg from '@/assets/manager-icons/diluter-manager-dark.svg';
+import camouflagerLightSvg from '@/assets/manager-icons/camouflager-manager-light.svg';
+import camouflagerDarkSvg from '@/assets/manager-icons/camouflager-manager-dark.svg';
 
 interface BaseMessage {
   role: string;
   content: string;
+  isTyping?: boolean;
 }
 
 interface FeedbackMessage extends BaseMessage {
@@ -284,6 +302,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [finalReport, setFinalReport] = useState<boolean>(false);
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const [finalScore, setFinalScore] = useState<number>(0);
+  const [currentFeedback, setCurrentFeedback] = useState<string>(''); // Track current feedback to force re-renders
   const navigate = useNavigate();
 
   // Get original conversation ID from localStorage or props
@@ -312,6 +331,17 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [currentScenario?.conversation]);
+
+  // Add an additional effect to handle scrolling after feedback is shown
+  useEffect(() => {
+    if (currentFeedback) {
+      // Use a short timeout to ensure the feedback has rendered
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [currentFeedback]);
 
   // Initialize with a custom scenario based on the user's query
   useEffect(() => {
@@ -349,7 +379,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const handleChoice = async (choiceIndex: number) => {
     if (!currentScenario) return;
     
-    setLoading(true);
+    // Don't set loading for the entire UI, just show a loading indicator for the current choice
+    const selectedChoice = currentScenario.currentChoices[choiceIndex];
+    
     try {
       // Record the current state before we update
       const currentChoices = {...currentScenario.scenario};
@@ -387,92 +419,169 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       currentChoices.userScore = (currentChoices.userScore || 0) + roundScore;
       currentChoices.scoreCount = (currentChoices.scoreCount || 0) + 1;
       
-      // Add messages to conversation history
-      const updatedConversation = [
+      // First, add only the user message to the conversation
+      const userMessageOnly = [
         ...currentScenario.conversation,
         { role: 'user', content: userChoice } as UserMessage,
       ];
       
+      // Update the state to show only the user's message first
+      setCurrentScenario({
+        ...currentScenario,
+        conversation: userMessageOnly
+      });
+      
+      // Scroll to show the new user message
+      setTimeout(scrollToBottom, 50);
+      
+      // Now prepare the full updated conversation that will include manager response
+      const updatedConversation = [...userMessageOnly];
+      
       if (!evaluation.is_complete) {
-        // If not complete, add the feedback and continue
-        updatedConversation.push({ 
-          role: 'feedback', 
-          content: evaluation.feedback,
-          evs: roundScore 
-        } as FeedbackMessage);
-        
-        updatedConversation.push({
-          role: 'manager',
-          content: evaluation.next_statement || ''
-        } as ManagerMessage);
-        
-        // Fix the feedback type issue
-        setFeedback({
-          feedback: evaluation.feedback,
-          evs: roundScore,
-          is_complete: false,
-          next_statement: evaluation.next_statement,
-          available_choices: evaluation.available_choices
-        });
-        
-        // Update the current scenario
-        setCurrentScenario({
-          ...currentScenario,
-          scenario: currentChoices,
-          conversation: updatedConversation,
-          currentStatement: evaluation.next_statement || null,
-          currentChoices: evaluation.available_choices || [],
-          currentStep: currentScenario.currentStep + 1
-        });
+        // Set a timeout to simulate the manager thinking
+        setTimeout(() => {
+          // Add the manager's typing indicator
+          const typingIndicator = {
+            role: 'manager',
+            content: '...',
+            isTyping: true
+          };
+          
+          // Show typing indicator
+          setCurrentScenario(prevState => ({
+            ...prevState!,
+            conversation: [...userMessageOnly, typingIndicator as any]
+          }));
+          
+          // Scroll to show typing indicator
+          setTimeout(scrollToBottom, 50);
+          
+          // After a delay, show the manager's response and feedback
+          setTimeout(() => {
+            // If not complete, add the feedback and continue
+            updatedConversation.push({ 
+              role: 'feedback', 
+              content: evaluation.feedback,
+              evs: roundScore 
+            } as FeedbackMessage);
+            
+            updatedConversation.push({
+              role: 'manager',
+              content: evaluation.next_statement || ''
+            } as ManagerMessage);
+            
+            // Fix the feedback type issue
+            setFeedback({
+              feedback: evaluation.feedback,
+              evs: roundScore,
+              is_complete: false,
+              next_statement: evaluation.next_statement,
+              available_choices: evaluation.available_choices
+            });
+            
+            // Update the current feedback state to force animation refresh
+            setCurrentFeedback(`${evaluation.feedback}-${roundScore}-${Date.now()}`);
+            
+            // Update the current scenario
+            setCurrentScenario({
+              ...currentScenario,
+              scenario: currentChoices,
+              conversation: updatedConversation,
+              currentStatement: evaluation.next_statement || null,
+              currentChoices: evaluation.available_choices || [],
+              currentStep: currentScenario.currentStep + 1
+            });
+            
+            // Manually trigger scroll after state update
+            setTimeout(scrollToBottom, 100);
+          }, 1500); // Show the response after 1.5 seconds
+        }, 800); // Start typing after 0.8 seconds
       } else {
-        // Practice session complete - add feedback
-        updatedConversation.push({ 
-          role: 'feedback', 
-          content: evaluation.feedback,
-          evs: roundScore 
-        } as FeedbackMessage);
-        
-        // Add final evaluation
-        if (evaluation.final_report) {
-          // Calculate final score properly
-          const totalScore = currentChoices.userScore || 0;
-          const scoreCount = currentChoices.scoreCount || 1;
+        // For the final round, also use delays
+        setTimeout(() => {
+          // Add the manager's typing indicator for the final response
+          const typingIndicator = {
+            role: 'manager',
+            content: '...',
+            isTyping: true
+          };
           
-          // Calculate average score from individual round scores
-          const averageScore = Math.round(totalScore / scoreCount);
+          // Show typing indicator
+          setCurrentScenario(prevState => ({
+            ...prevState!,
+            conversation: [...userMessageOnly, typingIndicator as any]
+          }));
           
-          // Create a final evaluation message with the correct score
-          const finalEvalContent = `Your ethical decision-making score is ${averageScore}/100. ${
-            averageScore >= 80 
-              ? 'You demonstrated excellent ethical judgment!' 
-              : averageScore >= 50 
-                ? 'You showed good awareness of ethical principles.' 
-                : 'Consider being more assertive in upholding ethical standards.'
-          }`;
+          // Scroll to show typing indicator
+          setTimeout(scrollToBottom, 50);
           
-          updatedConversation.push({
-            role: 'final_evaluation',
-            content: finalEvalContent
-          } as FinalEvaluationMessage);
-          
-          // Store the final score for feedback
-          localStorage.setItem('practice_final_score', averageScore.toString());
-          setFinalScore(averageScore);
-        }
-        
-        // Show completion status
-        setCurrentScenario({
-          ...currentScenario,
-          scenario: currentChoices,
-          conversation: updatedConversation,
-          currentStatement: null,
-          currentChoices: [],
-          currentStep: currentScenario.currentStep + 1
-        });
-        
-        setFinalReport(true);
-        setShowOptions(true);
+          // After a delay, show the final feedback
+          setTimeout(() => {
+            // Practice session complete - add feedback
+            updatedConversation.push({ 
+              role: 'feedback', 
+              content: evaluation.feedback,
+              evs: roundScore 
+            } as FeedbackMessage);
+            
+            // Update the current feedback state to force animation refresh for the final feedback
+            // Using a special marker for final feedback
+            setCurrentFeedback(`${evaluation.feedback}-${roundScore}-final-${Date.now()}`);
+            
+            // Add final evaluation
+            if (evaluation.final_report) {
+              // Calculate final score properly
+              const totalScore = currentChoices.userScore || 0;
+              const scoreCount = currentChoices.scoreCount || 1;
+              
+              // Calculate average score from individual round scores
+              const averageScore = Math.round(totalScore / scoreCount);
+              
+              // Create a final evaluation message with the correct score
+              const finalEvalContent = `Your ethical decision-making score is ${averageScore}/100. ${
+                averageScore >= 80 
+                  ? 'You demonstrated excellent ethical judgment!' 
+                  : averageScore >= 50 
+                    ? 'You showed good awareness of ethical principles.' 
+                    : 'Consider being more assertive in upholding ethical standards.'
+              }`;
+              
+              updatedConversation.push({
+                role: 'final_evaluation',
+                content: finalEvalContent
+              } as FinalEvaluationMessage);
+              
+              // Store the final score for feedback
+              localStorage.setItem('practice_final_score', averageScore.toString());
+              setFinalScore(averageScore);
+            }
+            
+            // Show completion status
+            setCurrentScenario({
+              ...currentScenario,
+              scenario: currentChoices,
+              conversation: updatedConversation,
+              currentStatement: null,
+              currentChoices: [],
+              currentStep: currentScenario.currentStep + 1
+            });
+            
+            // Set final report state after a short delay to ensure smooth transition
+            setTimeout(() => {
+              // Then set final report and options
+              setFinalReport(true);
+              setShowOptions(true);
+              // Ensure we scroll to the bottom to show the final report
+              setTimeout(scrollToBottom, 100);
+            }, 800);
+          }, 1500); // Show the final response after 1.5 seconds
+        }, 800); // Start typing after 0.8 seconds
       }
+      
+      // Scroll to the updated content after a short delay
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     } catch (err: any) {
       console.error("Error processing choice:", err);
       setError("Failed to process your choice. Please try again.");
@@ -668,15 +777,15 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const getMessageStyle = (role: string) => {
     switch (role) {
       case 'manager':
-        return 'p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg';
+        return 'p-3 pl-5 bg-amber-50/70 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-none max-w-[80%] mr-auto relative mt-3';
       case 'user':
-        return 'p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg';
+        return 'p-3 bg-blue-50/70 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-800/30 rounded-2xl rounded-tr-none max-w-[80%] ml-auto';
       case 'feedback':
-        return 'p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg';
+        return 'p-3 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-2';
       case 'final_evaluation':
-        return 'p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg';
+        return 'p-3 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3';
       default:
-        return 'p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg';
+        return 'p-3 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 rounded-lg';
     }
   };
 
@@ -1204,6 +1313,49 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     return calculatedScore;
   }, [currentScenario]);
 
+  // Function to get the appropriate manager icon based on manager type and dark mode
+  const getManagerIcon = (managerType: string | undefined, isDarkMode: boolean = false) => {
+    const type = managerType?.toUpperCase() || 'PUPPETEER';
+    
+    switch (type) {
+      case 'PUPPETEER':
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+      case 'DILUTER':
+        return isDarkMode ? diluterDarkPng : diluterLightPng;
+      case 'CAMOUFLAGER':
+        return isDarkMode ? camouflagerDarkPng : camouflagerLightPng;
+      default:
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+    }
+  };
+
+  // Detect dark mode
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Check if dark mode is enabled
+  useEffect(() => {
+    // Check if the user has dark mode preference set
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Check if the document has a class that indicates dark mode
+    const htmlElement = document.documentElement;
+    const hasDarkClass = htmlElement.classList.contains('dark');
+    
+    // Set dark mode state based on user preference or document class
+    setIsDarkMode(darkModeMediaQuery.matches || hasDarkClass);
+    
+    // Add listener for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches || hasDarkClass);
+    };
+    
+    darkModeMediaQuery.addEventListener('change', handleChange);
+    
+    return () => {
+      darkModeMediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
   if (!currentScenario && !scenarioId) {
     // Show loading indicator or scenario list
     return (
@@ -1305,43 +1457,130 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-4">
-          {currentScenario?.scenario && (
-            <div className="mb-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-sm">
-                <strong>Ethical Concern:</strong> {currentScenario.scenario.concern}
-              </p>
-              <p className="text-sm">
-                <strong>Manager Type:</strong> {currentScenario.scenario.manager_type}
-              </p>
-              <p className="text-sm italic mt-2">
-                {currentScenario.scenario.manager_description}
-              </p>
-            </div>
-          )}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 pb-36">
+            {currentScenario?.scenario && (
+              <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
+                <p className="text-sm">
+                  <strong>Ethical Concern:</strong> {currentScenario.scenario.concern}
+                </p>
+                <p className="text-sm">
+                  <strong>Manager Type:</strong> {currentScenario.scenario.manager_type}
+                </p>
+                <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
+                  {currentScenario.scenario.manager_description}
+                </p>
+              </div>
+            )}
 
-          {currentScenario?.conversation && currentScenario.conversation.length > 0 ? (
-            <div className="space-y-4 mb-4">
-              {currentScenario.conversation.map((message, index) => (
-                <div
-                  key={index}
-                  className={getMessageStyle(message.role)}
-                >
-                  {message.role === 'manager' && <strong>Manager:</strong>}
-                  {message.role === 'user' && <strong>You:</strong>}
-                  {message.role === 'feedback' && <strong>Feedback:</strong>}
-                  <div className="mt-1">{message.content}</div>
-                  {message.role === 'feedback' && (message as FeedbackMessage).evs !== undefined && (
-                    <div className="mt-2 text-sm">
-                      Ethical Value Score: {(message as FeedbackMessage).evs}
+            {currentScenario?.conversation && currentScenario.conversation.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {currentScenario.conversation.map((message, index) => {
+                  // Skip feedback messages as they'll be shown in the sticky section instead
+                  if (message.role === 'feedback') {
+                    return null;
+                  }
+                  
+                  // Get the next message for better spacing decisions
+                  const nextMessage = currentScenario.conversation[index + 1];
+                  const isFollowedByFeedback = nextMessage?.role === 'feedback';
+                  const prevMessage = index > 0 ? currentScenario.conversation[index - 1] : null;
+                  const isSameRoleAsPrev = prevMessage?.role === message.role;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`
+                        ${isFollowedByFeedback ? 'mb-0 pb-0' : 'mb-2'}
+                        ${isSameRoleAsPrev ? 'message-compact' : ''}
+                      `}
+                    >
+                      {/* Normal conversation messages */}
+                      {(message.role === 'manager' || message.role === 'user') && (
+                        <div className={message.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start ml-12'}>
+                          <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center ${isSameRoleAsPrev ? 'hidden' : ''}`}>
+                            {message.role === 'manager' ? null : 'You'}
+                          </div>
+                          <div className={getMessageStyle(message.role)}>
+                            {message.role === 'manager' && !isSameRoleAsPrev && (
+                              <div className="absolute -left-12 -top-5">
+                                <div className="relative w-16 h-16 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                                  <img 
+                                    src={getManagerIcon(currentScenario?.scenario?.manager_type, isDarkMode)} 
+                                    alt="Manager" 
+                                    className="w-14 h-14 object-cover" 
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {/* Show typing indicator for manager messages with isTyping flag */}
+                            {message.role === 'manager' && (message as any).isTyping ? (
+                              <div className="flex items-center space-x-1 pl-1">
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                              </div>
+                            ) : (
+                              <div className="pl-1">{message.content}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  );
+                })}
+                
+                {/* Show final score card if completed */}
+                {showOptions && (
+                  <div ref={messagesEndRef} />
+                )}
+                
+                {!showOptions && <div ref={messagesEndRef} />}
+              </div>
+            ) : (
+              <div className="p-4 bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200/80 dark:border-amber-800/30 rounded-lg mb-4">
+                <p>No conversation history yet.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Fixed sections at the bottom - first feedback, then practice complete or choices */}
+          <div className="sticky bottom-0 border-t border-gray-200/80 dark:border-gray-700/30 z-10">
+            {/* Feedback section above the response options - appears when feedback exists */}
+            {currentScenario?.conversation && currentScenario.conversation.some(msg => msg.role === 'feedback') && (
+              <div 
+                key={`feedback-wrapper-${currentFeedback || Date.now()}`} 
+                className={`mb-0 pb-0 feedback-container ${finalReport ? 'feedback-final pt-3' : 'feedback-active'}`}
+              >
+                <div className={`${finalReport ? 'bg-white/95 dark:bg-gray-900/95' : 'bg-white dark:bg-gray-900'} feedback-transition pb-0`}>
+                  {currentScenario.conversation
+                    .filter(msg => msg.role === 'feedback')
+                    .slice(-1)
+                    .map((feedbackMsg, index) => (
+                      <div 
+                        key={`feedback-${currentFeedback || ((feedbackMsg as FeedbackMessage).evs + '-' + Date.now())}`} 
+                        className="p-3 pb-1 feedback-appear"
+                      >
+                        <div className="flex flex-col items-center">
+                          <div className={`${getMessageStyle('feedback')} animate-slideIn mb-0 max-w-full ${finalReport ? 'border-indigo-300 dark:border-indigo-700' : ''}`}>
+                            <div>{feedbackMsg.content}</div>
+                            {(feedbackMsg as FeedbackMessage).evs !== undefined && (
+                              <div className="mt-1 text-sm text-indigo-700 dark:text-indigo-300 font-medium">
+                                Ethical Value Score: {(feedbackMsg as FeedbackMessage).evs}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              ))}
-              
-              {/* Show final score card if completed */}
-              {showOptions && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              </div>
+            )}
+
+            {/* Practice Complete section when practice is complete */}
+            {showOptions && (
+              <div className="bg-white/90 dark:bg-gray-900/90 pt-2 pb-3 px-3 shadow-sm backdrop-blur-sm">
+                <div className="p-3 bg-blue-50/70 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-800/30 rounded-lg mt-2">
                   <h3 className="text-lg font-semibold mb-2">Practice Complete</h3>
                   
                   {/* Display the final score - always use the calculated finalScore */}
@@ -1364,40 +1603,41 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                     {/* Always show Practice Again button, regardless of score */}
                     <button
                       onClick={handlePracticeAgain}
-                      className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
                     >
                       Practice Again
                     </button>
                   </div>
                 </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-          ) : (
-            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-4">
-              <p>No conversation history yet.</p>
-            </div>
-          )}
-            
-          {/* Current choices */}
-          {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && (
-            <div className="mt-4 sticky bottom-0 bg-white dark:bg-gray-900 pt-4">
-              <h3 className="text-lg font-semibold mb-2">How do you respond?</h3>
-              <div className="space-y-2">
-                {currentScenario.currentChoices.map((choice, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleChoice(index)}
-                    className="w-full text-left p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-                    disabled={loading}
-                  >
-                    {choice}
-                  </button>
-                ))}
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Create a sticky footer for the choices when options are available */}
+            {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && (
+              <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm">
+                <h3 className="text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">How do you respond?</h3>
+                <div className="space-y-1.5 mb-1">
+                  {currentScenario.currentChoices.map((choice, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleChoice(index)}
+                      className="w-full text-left p-2.5 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-colors text-sm"
+                      disabled={loading}
+                    >
+                      {choice}
+                      {loading && (
+                        <span className="ml-2 inline-flex">
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                          <span className="ml-1 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                          <span className="ml-1 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

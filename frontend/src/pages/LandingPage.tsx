@@ -1,11 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
+// Import manager icons
+import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
+import puppeteerDarkPng from '@/assets/manager-icons/puppeteer-manager-dark.png';
+import diluterLightPng from '@/assets/manager-icons/diluter-manager-light.png';
+import diluterDarkPng from '@/assets/manager-icons/diluter-manager-dark.png';
+import camouflagerLightPng from '@/assets/manager-icons/camouflager-manager-light.png';
+import camouflagerDarkPng from '@/assets/manager-icons/camouflager-manager-dark.png';
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useStore();
+  
+  // State to track dark mode
+  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+  
+  // Listen for dark mode changes
+  useEffect(() => {
+    const darkModeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setIsDarkMode(document.documentElement.classList.contains('dark'));
+        }
+      });
+    });
+    
+    darkModeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => darkModeObserver.disconnect();
+  }, []);
+  
+  // Function to get the appropriate manager icon based on manager type and dark mode
+  const getManagerIcon = (managerType: string, isDarkMode: boolean = false) => {
+    const type = managerType.toUpperCase();
+    
+    switch (type) {
+      case 'PUPPETEER':
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+      case 'DILUTER':
+        return isDarkMode ? diluterDarkPng : diluterLightPng;
+      case 'CAMOUFLAGER':
+        return isDarkMode ? camouflagerDarkPng : camouflagerLightPng;
+      default:
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+    }
+  };
   
   // Debug check to prevent any refresh loops
   useEffect(() => {

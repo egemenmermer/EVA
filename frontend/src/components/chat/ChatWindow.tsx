@@ -19,6 +19,8 @@ import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx'; // Exam
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 import { Button } from "@/components/ui/button"; // Reverted to alias path
+import { cn } from "@/lib/utils";
+import logoSvg from "@/assets/logo.svg";
 
 SyntaxHighlighter.registerLanguage('jsx', jsx); // Register languages you need
 SyntaxHighlighter.registerLanguage('javascript', jsx); // Assuming js is similar or use 'javascript' language import
@@ -943,9 +945,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               (!userMessageId || m.id !== userMessageId) // Only filter if userMessageId exists
       );
       
+      // Also filter out any other assistant loading messages that might be present
+      const messagesWithoutAnyLoading = messagesBeforeAgentResponse.filter(m => !m.isLoading);
+      
       // Update UI state to include the final user message (with ID from agent) AND the final agent message
-      setStoreMessages([...messagesBeforeAgentResponse, finalUserMessage, finalAgentMessage]); // Add BOTH back
-      let finalMessagesForLocalStorage = [...messagesBeforeAgentResponse, finalUserMessage, finalAgentMessage];
+      setStoreMessages([...messagesWithoutAnyLoading, finalUserMessage, finalAgentMessage]); // Add BOTH back
+      let finalMessagesForLocalStorage = [...messagesWithoutAnyLoading, finalUserMessage, finalAgentMessage];
       saveConversationState(conversationId, finalMessagesForLocalStorage);
       // --- End UI State Update --- 
       
@@ -1938,7 +1943,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     return () => clearTimeout(timeoutId);
   }, [messages, currentConversation]);
 
-  // Add this function before renderMessage
+  // Find and modify the handleOptionClick function
   const handleOptionClick = useCallback((optionText: string) => {
     console.log('Option clicked:', optionText);
     const lowerCaseOption = optionText.toLowerCase();
@@ -1964,6 +1969,132 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         setError('Could not start practice mode. Missing conversation context.');
       }
     } 
+    // For "Practice responding to a positive/negative reply" options
+    else if (lowerCaseOption.includes('practice responding to a')) {
+      // Create a simplified user message
+      const isPositive = lowerCaseOption.includes('positive');
+      const replyType = isPositive ? 'positive' : 'negative';
+      const userFriendlyMessage = `Yes, simulate a ${replyType} reply.`;
+      
+      // Create a user message with just the display text
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user' as Role,
+        content: userFriendlyMessage,
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isLoading: false
+      };
+      
+      // Add this message to the UI
+      const updatedMessages = [...storeMessages, userMessage];
+      setStoreMessages(updatedMessages);
+      
+      // Save to conversation state
+      if (currentConversation?.conversationId) {
+        saveConversationState(currentConversation.conversationId, updatedMessages);
+      }
+      
+      // Set a loading message to show the user something is happening
+      const loadingMessage: Message = {
+        id: `assistant-loading-${Date.now()}`,
+        role: 'assistant' as Role,
+        content: 'Thinking about a simulated response...',
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isLoading: true
+      };
+      
+      // Add a small delay before showing the loading indicator to ensure UI updates
+      setTimeout(() => {
+        setStoreMessages(prev => [...prev, loadingMessage]);
+        setLoading(true); // Set global loading state to true
+        
+        // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
+        setTimeout(() => {
+          // Create a more detailed prompt that includes clear instructions for formatting
+          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. 
+Start your response with "Sure! Here's a simulated ${replyType} reply your boss might send:" 
+Then on a new line start with "Subject: Re: " followed by the email subject. 
+Format the rest like a real email reply with greeting, body, and signature.`;
+          
+          // Send this prompt directly to the API without displaying it in the UI
+          if (currentConversation) {
+            // Use the API function directly to bypass UI message creation
+            api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
+              conversationId: currentConversation.conversationId,
+              userQuery: detailedPrompt,
+              managerType: currentConversation.managerType,
+              temperature: temperature || 0.7
+            })
+            .then((response) => {
+              // Add a slight delay before removing the loading message to ensure it's visible
+              setTimeout(() => {
+                // Remove the loading message
+                setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
+                setLoading(false); // Set global loading state back to false
+                
+                // Create a properly typed assistant message from the response
+                if (response.data && response.data.messages && response.data.messages.length > 0) {
+                  // Get the last message from the response (should be the assistant's response)
+                  const lastMessage = response.data.messages[response.data.messages.length - 1];
+                  
+                  // Create a well-formed assistant message
+                  const assistantMessage: Message = {
+                    id: lastMessage.id || `assistant-${Date.now()}`,
+                    role: 'assistant' as Role,
+                    content: lastMessage.content || '',
+                    conversationId: currentConversation.conversationId,
+                    createdAt: lastMessage.createdAt || new Date().toISOString()
+                  };
+                  
+                  // Only add the AI response to the UI, not the prompt
+                  setStoreMessages(prevMessages => [...prevMessages, assistantMessage]);
+                  
+                  // Save updated conversation state
+                  if (currentConversation?.conversationId) {
+                    saveConversationState(
+                      currentConversation.conversationId, 
+                      [...storeMessages, userMessage, assistantMessage]
+                    );
+                  }
+    } else {
+                  // If we couldn't get a proper response, show an error
+                  const errorMessage: Message = {
+                    id: `assistant-${Date.now()}`,
+                    role: 'assistant' as Role,
+                    content: 'Sorry, I was unable to generate a response. Please try again.',
+                    conversationId: currentConversation.conversationId,
+                    createdAt: new Date().toISOString()
+                  };
+                  
+                  setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
+                }
+              }, 600); // Ensure loading indicator is visible for at least 600ms
+            })
+            .catch(err => {
+              setLoading(false);
+              // Remove the loading message
+              setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
+              
+              console.error('Error getting rehearsal response:', err);
+              setError('Failed to get rehearsal response');
+              
+              // Show an error message in the UI
+              const errorMessage: Message = {
+                id: `assistant-${Date.now()}`,
+                role: 'assistant' as Role,
+                content: 'Sorry, there was an error generating the response. Please try again.',
+                conversationId: currentConversation.conversationId,
+                createdAt: new Date().toISOString()
+              };
+              
+              setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
+            });
+          }
+        }, 500);
+      }, 100); // Small delay to ensure UI state is updated
+    }
     // For "Yes, help draft email" options - FIX THIS SECTION
     else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
       console.log('Draft email requested');
@@ -2003,7 +2134,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       
       detailedPrompt += ` Please include a proper subject line, greeting, and professional closing. Focus on communicating the ethical concern clearly and professionally without mentioning any practice scenarios or scores.`;
       
-      // Create a user message with just the display text
+      // First, save the detailed prompt for the API to use, but don't show it to the user
+      localStorage.setItem('email_draft_detailed_prompt', detailedPrompt);
+      
+      // Create a user message with just the simple display text
       const emailRequestMessage: Message = {
         id: `user-${Date.now()}`,
         role: 'user' as Role,
@@ -2020,13 +2154,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         saveConversationState(currentConversation.conversationId, [...storeMessages, emailRequestMessage]);
       }
       
+      // Set a loading message to show the user something is happening
+      const loadingMessage: Message = {
+        id: `assistant-loading-${Date.now()}`,
+        role: 'assistant' as Role,
+        content: 'Drafting your email...',
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isLoading: true
+      };
+      
       // To prevent UI flashing, add a small delay before sending the API request
       // This ensures the simplified message gets rendered first
       setTimeout(() => {
+        // Add the loading message to show activity
+        setStoreMessages(prev => [...prev, loadingMessage]);
+        setLoading(true); // Set global loading state
+        
         // The skipUserMessageUI parameter is important - it tells handleSendMessage not to add another user message
         // since we already added our simplified version
         handleSendMessage(detailedPrompt, true);
-      }, 50);
+      }, 100);
     } 
     // For other options, keep the existing handling
     else {
@@ -2034,63 +2182,45 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       if (lowerCaseOption.includes('no, not now') || lowerCaseOption.includes('not now')) {
       console.log('User chose not to proceed for now.');
       }
-      else if (lowerCaseOption.startsWith('practice responding to a')) {
-      console.log('Rehearsal option selected:', optionText);
-      const replyType = lowerCaseOption.includes('negative') ? 'negative' : 'positive';
-        
-        // Get context from various sources
-      const originalProblem = localStorage.getItem('practice_original_problem') || 
-                            storeMessages.find(m => m.role === 'user' && !m.content.toLowerCase().includes('simulate'))?.content ||
-                            'the ethical concern we discussed';
-                             
-        // Find the most recent draft email if available
-        const recentDraft = storeMessages.filter(m => 
-          m.role === 'assistant' && 
-          (m.content.toLowerCase().includes('subject:') || m.content.toLowerCase().includes('draft email'))
-        ).pop()?.content;
-        
-        // Show an extremely minimal request message in the UI
-        const displayMessage = `Yes, simulate a ${replyType} reply.`;
-        
-        // Create the actual detailed request for the API with the full context
-        const fullRehearsalRequest = recentDraft 
-          ? `Please simulate a ${replyType} reply from my boss regarding this email I sent:\n\n${recentDraft}`
-          : `Please simulate a ${replyType} reply from my boss regarding my email about ${originalProblem}.`;
-        
-        // Create a user message with just the display text
-        const rehearsalUserMessage: Message = {
-          id: `user-${Date.now()}`,
-          role: 'user' as Role,
-          content: displayMessage,
-          conversationId: currentConversation?.conversationId || '',
-          createdAt: new Date().toISOString()
-        };
-        
-        // Add the simplified message to the UI
-        setStoreMessages(prev => [...prev, rehearsalUserMessage]);
-        
-        // Save to localStorage
-        if (currentConversation?.conversationId) {
-          saveConversationState(currentConversation.conversationId, [...storeMessages, rehearsalUserMessage]);
-        }
-        
-        // Then send the complete context to the API without updating UI again
-        setTimeout(() => {
-          // Direct API call with full context but skip adding to UI since we already added our custom message
-          handleSendMessage(fullRehearsalRequest, true);
-        }, 50);
-      }
       else {
       handleSendMessage(optionText);
-      }
     }
-  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]);
+    }
+  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
 
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
       .then(() => {
         console.log('Email draft copied to clipboard');
-        handleSendMessage("Email copied. Would you like to practice with a reply?");
+        
+        // Instead of using handleSendMessage, directly add a user message to the UI
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user' as Role,
+          content: "I've copied the email, can we rehearse on how my manager might respond to it?",
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+          // Add a property to mark this as a special message type
+          isRehearsalRequest: true
+        };
+        
+        // Create an agent response immediately with the rehearsal options
+        const agentResponse: Message = {
+          id: `agent-rehearsal-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: "Would you like to practice with:",
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+          isRehearsalOptions: true
+        };
+        
+        // Update UI with both messages
+        setStoreMessages(prev => [...prev, userMessage, agentResponse]);
+        
+        // Save to localStorage to preserve state
+        if (currentConversation?.conversationId) {
+          saveConversationState(currentConversation.conversationId, [...storeMessages, userMessage, agentResponse]);
+        }
       })
       .catch(err => {
         console.error('Failed to copy email draft: ', err);
@@ -2288,9 +2418,34 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   // --- Message Rendering Logic ---
   const renderMessage = useCallback((message: Message, index: number) => {
     const isUser = message.role === 'user';
+    // Use let instead of const to allow reassignment
+    let isAssistant = message.role === 'assistant';
     const isSystemMessage = message.role === 'system';
-    const isAssistant = message.role === 'assistant';
     const isLoading = message.isLoading === true;
+    
+    // Simplify detailed email draft requests for display
+    if (isUser && message.content && typeof message.content === 'string') {
+      const content = message.content;
+      if (content.includes('professional email') && 
+          content.includes('manager') && 
+          content.includes('ethical concern') &&
+          content.length > 100) {
+        
+        // This is the detailed prompt - replace it with simple version
+        message = {
+          ...message,
+          content: "Please draft an email about this ethical concern."
+        };
+      }
+    }
+    
+    // Use type safety - compare with string literals 
+    let isPracticeAssistant = message.role === 'assistant' && message.content?.includes('practice-assistant');
+    
+    // For rendering purposes, treat practice-assistant same as assistant
+    if (isPracticeAssistant) {
+      isAssistant = true;
+    }
     
     const currentMessageActiveSectionKey = activeMessageFeedbackSection[message.id || ''];
     
@@ -2558,8 +2713,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 lowerContent.includes('here\'s a draft') ||
                 (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
             isRehearsalPrompt = 
-                lowerContent.includes('okay, let\'s rehearse') &&
-                lowerContent.includes('which type of reply');
+                (lowerContent.includes('okay, let\'s rehearse') && lowerContent.includes('which type of reply')) ||
+                lowerContent.includes('can we rehearse on how my manager might respond') || 
+                lowerContent.includes('would you like to practice with a reply') ||
+                message.isRehearsalRequest === true;
             extractedOptions = []; 
             if (!isEmailDraft && !isRehearsalPrompt) {
                 const matches = [...rawContent.matchAll(optionRegex)];
@@ -2575,6 +2732,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                         .map(match => match[1].trim());
                      displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
                  }
+                // If no options were extracted but this is a rehearsal prompt, add default options
+                if (extractedOptions.length === 0 || message.isRehearsalRequest === true) {
+                    extractedOptions = [
+                        "Practice responding to a positive reply",
+                        "Practice responding to a negative reply"
+                    ];
+                }
             }
             
             // For email drafts, format the content with better styling 
@@ -2598,9 +2762,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       rawContentForActions = displayContent; 
     }
     
+    // Check if this message contains a simulated reply
+    const isSimulatedEmailReply = rawContentForActions.includes("simulated") && rawContentForActions.includes("reply your boss might send:");
+
+    // Update the email draft condition
+    isEmailDraft = isAssistant && (rawContentForActions.includes('Subject:') && (rawContentForActions.includes('Dear') || rawContentForActions.includes('[Your Name]')));
+    
     const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback;
-    const showEmailDraftActionButtons = isAssistant && isEmailDraft;
-    const showRehearsalOptionButtons = isAssistant && isRehearsalPrompt && extractedOptions.length > 0;
+    // Only show email draft action buttons for regular drafts, not simulated replies
+    const showEmailDraftActionButtons = isAssistant && isEmailDraft && !isSimulatedEmailReply;
+    const showRehearsalOptionButtons = message.isRehearsalOptions === true;
     const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && extractedOptions.length > 0;
 
     const markdownComponents: ReactMarkdownOptions['components'] = {
@@ -2689,10 +2860,33 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
 
                     {/* Use the renderSections helper to display unique sections */}
                     {renderSections(parsedDetailedFeedbackSections, message.id, currentMessageActiveSectionKey)}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
               // --- End Feedback Display Structure ---
+            ) : message.isRehearsalOptions ? (
+              // Special rendering for rehearsal options message
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="mb-3 font-medium">{message.content}</p>
+                <div className="flex gap-2 mt-2">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                    onClick={() => handleOptionClick("Practice responding to a positive reply")} 
+                    className="text-xs h-auto py-2 px-3 bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
+                    >
+                    <span className="mr-1">😊</span> Positive reply
+                    </Button>
+                    <Button 
+                    variant="destructive" 
+                      size="sm" 
+                    onClick={() => handleOptionClick("Practice responding to a negative reply")} 
+                    className="text-xs h-auto py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white transition-colors duration-200"
+                    >
+                    <span className="mr-1">😠</span> Negative reply
+                    </Button>
+                  </div>
+                </div>
             ) : (
               // Regular message display (non-feedback)
               <div className={`message-content prose prose-sm dark:prose-invert max-w-none`}>
@@ -2714,30 +2908,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         {isPracticeFeedback && (
           <div className="mt-1 ml-10 py-2">
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-              Do you feel ready to discuss this with your manager, or would you like to practice again?
-            </p>
+                    Do you feel ready to discuss this with your manager, or would you like to practice again?
+                  </p>
             <div className="flex flex-wrap gap-1.5">
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={() => handleOptionClick("Yes, help draft email")} 
-                className="text-xs h-auto py-1.5 px-2.5 bg-blue-600 hover:bg-blue-700 transition-colors duration-200 "
-              >
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={() => handleOptionClick("Yes, help draft email")} 
+                      className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200 "
+                    >
                 <span className="mr-1 text-xs">📝</span> Yes, help draft email
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleOptionClick("[No, practice again]")} 
-                className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 border-gray-300/60 dark:border-gray-700/60"
-              >
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleOptionClick("[No, practice again]")} 
+                      className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 border-gray-300/60 dark:border-gray-700/60"
+                    >
                 <span className="mr-1 text-xs">🔄</span> No, practice again
-              </Button>
-            </div>
-          </div>
-        )}
+                    </Button>
+                  </div>
+              </div>
+            )}
 
-        {/* Generic Option Buttons (Non-Feedback) */}
+        {/* Generic Option Buttons (Non-Feedback) */} 
         {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
@@ -2745,7 +2939,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             ))}
           </div>
         )}
-
+  
         {/* Conditional Rendering: ONLY show these if NOT practice feedback */}
         {!isPracticeFeedback && showDraftEmailPromptButtons && (
           <div className="mt-3 flex flex-wrap gap-2 ml-7 items-center">
@@ -2756,34 +2950,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             <Button variant="outline" size="sm" onClick={() => handleOptionClick("Not now")} className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200">
               <span className="mr-1">⏱️</span> Not now
             </Button>
-          </div>
-        )}
-
-        {/* Rehearsal Option Buttons */}
-        {showRehearsalOptionButtons && (
-          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
-            <div className="flex gap-1.5">
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={() => handleOptionClick("Practice responding to a positive reply")} 
-                className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
-              >
-                <span className="mr-1">😊</span> Positive reply
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={() => handleOptionClick("Practice responding to a negative reply")} 
-                className="text-xs h-auto py-1.5 px-2.5 bg-amber-600 hover:bg-amber-700 text-white transition-colors duration-200"
-              >
-                <span className="mr-1">😠</span> Negative reply
-              </Button>
             </div>
-          </div>
         )}
 
-        {/* Email Draft Action Buttons */}
+        {/* Email Draft Action Buttons */} 
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">
