@@ -23,6 +23,7 @@ import camouflagerDarkSvg from '@/assets/manager-icons/camouflager-manager-dark.
 interface BaseMessage {
   role: string;
   content: string;
+  isTyping?: boolean;
 }
 
 interface FeedbackMessage extends BaseMessage {
@@ -418,106 +419,163 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       currentChoices.userScore = (currentChoices.userScore || 0) + roundScore;
       currentChoices.scoreCount = (currentChoices.scoreCount || 0) + 1;
       
-      // Add messages to conversation history
-      const updatedConversation = [
+      // First, add only the user message to the conversation
+      const userMessageOnly = [
         ...currentScenario.conversation,
         { role: 'user', content: userChoice } as UserMessage,
       ];
       
+      // Update the state to show only the user's message first
+      setCurrentScenario({
+        ...currentScenario,
+        conversation: userMessageOnly
+      });
+      
+      // Scroll to show the new user message
+      setTimeout(scrollToBottom, 50);
+      
+      // Now prepare the full updated conversation that will include manager response
+      const updatedConversation = [...userMessageOnly];
+      
       if (!evaluation.is_complete) {
-        // If not complete, add the feedback and continue
-        updatedConversation.push({ 
-          role: 'feedback', 
-          content: evaluation.feedback,
-          evs: roundScore 
-        } as FeedbackMessage);
-        
-        updatedConversation.push({
-          role: 'manager',
-          content: evaluation.next_statement || ''
-        } as ManagerMessage);
-        
-        // Fix the feedback type issue
-        setFeedback({
-          feedback: evaluation.feedback,
-          evs: roundScore,
-          is_complete: false,
-          next_statement: evaluation.next_statement,
-          available_choices: evaluation.available_choices
-        });
-        
-        // Update the current feedback state to force animation refresh
-        setCurrentFeedback(`${evaluation.feedback}-${roundScore}-${Date.now()}`);
-        
-        // Update the current scenario
-        setCurrentScenario({
-          ...currentScenario,
-          scenario: currentChoices,
-          conversation: updatedConversation,
-          currentStatement: evaluation.next_statement || null,
-          currentChoices: evaluation.available_choices || [],
-          currentStep: currentScenario.currentStep + 1
-        });
-        
-        // Manually trigger scroll after state update
-        setTimeout(scrollToBottom, 100);
-      } else {
-        // Practice session complete - add feedback
-        updatedConversation.push({ 
-          role: 'feedback', 
-          content: evaluation.feedback,
-          evs: roundScore 
-        } as FeedbackMessage);
-        
-        // Update the current feedback state to force animation refresh for the final feedback
-        setCurrentFeedback(`${evaluation.feedback}-${roundScore}-final-${Date.now()}`);
-        
-        // Add final evaluation
-        if (evaluation.final_report) {
-          // Calculate final score properly
-          const totalScore = currentChoices.userScore || 0;
-          const scoreCount = currentChoices.scoreCount || 1;
-          
-          // Calculate average score from individual round scores
-          const averageScore = Math.round(totalScore / scoreCount);
-          
-          // Create a final evaluation message with the correct score
-          const finalEvalContent = `Your ethical decision-making score is ${averageScore}/100. ${
-            averageScore >= 80 
-              ? 'You demonstrated excellent ethical judgment!' 
-              : averageScore >= 50 
-                ? 'You showed good awareness of ethical principles.' 
-                : 'Consider being more assertive in upholding ethical standards.'
-          }`;
-          
-          updatedConversation.push({
-            role: 'final_evaluation',
-            content: finalEvalContent
-          } as FinalEvaluationMessage);
-          
-          // Store the final score for feedback
-          localStorage.setItem('practice_final_score', averageScore.toString());
-          setFinalScore(averageScore);
-        }
-        
-        // Show completion status
-        setCurrentScenario({
-          ...currentScenario,
-          scenario: currentChoices,
-          conversation: updatedConversation,
-          currentStatement: null,
-          currentChoices: [],
-          currentStep: currentScenario.currentStep + 1
-        });
-        
-        // Set final report state after a short delay to ensure smooth transition
+        // Set a timeout to simulate the manager thinking
         setTimeout(() => {
-          // Then set final report and options
-          setFinalReport(true);
-          setShowOptions(true);
-          // Ensure we scroll to the bottom to show the final report
-          setTimeout(scrollToBottom, 100);
-        }, 800);
+          // Add the manager's typing indicator
+          const typingIndicator = {
+            role: 'manager',
+            content: '...',
+            isTyping: true
+          };
+          
+          // Show typing indicator
+          setCurrentScenario(prevState => ({
+            ...prevState!,
+            conversation: [...userMessageOnly, typingIndicator as any]
+          }));
+          
+          // Scroll to show typing indicator
+          setTimeout(scrollToBottom, 50);
+          
+          // After a delay, show the manager's response and feedback
+          setTimeout(() => {
+            // If not complete, add the feedback and continue
+            updatedConversation.push({ 
+              role: 'feedback', 
+              content: evaluation.feedback,
+              evs: roundScore 
+            } as FeedbackMessage);
+            
+            updatedConversation.push({
+              role: 'manager',
+              content: evaluation.next_statement || ''
+            } as ManagerMessage);
+            
+            // Fix the feedback type issue
+            setFeedback({
+              feedback: evaluation.feedback,
+              evs: roundScore,
+              is_complete: false,
+              next_statement: evaluation.next_statement,
+              available_choices: evaluation.available_choices
+            });
+            
+            // Update the current feedback state to force animation refresh
+            setCurrentFeedback(`${evaluation.feedback}-${roundScore}-${Date.now()}`);
+            
+            // Update the current scenario
+            setCurrentScenario({
+              ...currentScenario,
+              scenario: currentChoices,
+              conversation: updatedConversation,
+              currentStatement: evaluation.next_statement || null,
+              currentChoices: evaluation.available_choices || [],
+              currentStep: currentScenario.currentStep + 1
+            });
+            
+            // Manually trigger scroll after state update
+            setTimeout(scrollToBottom, 100);
+          }, 1500); // Show the response after 1.5 seconds
+        }, 800); // Start typing after 0.8 seconds
+      } else {
+        // For the final round, also use delays
+        setTimeout(() => {
+          // Add the manager's typing indicator for the final response
+          const typingIndicator = {
+            role: 'manager',
+            content: '...',
+            isTyping: true
+          };
+          
+          // Show typing indicator
+          setCurrentScenario(prevState => ({
+            ...prevState!,
+            conversation: [...userMessageOnly, typingIndicator as any]
+          }));
+          
+          // Scroll to show typing indicator
+          setTimeout(scrollToBottom, 50);
+          
+          // After a delay, show the final feedback
+          setTimeout(() => {
+            // Practice session complete - add feedback
+            updatedConversation.push({ 
+              role: 'feedback', 
+              content: evaluation.feedback,
+              evs: roundScore 
+            } as FeedbackMessage);
+            
+            // Update the current feedback state to force animation refresh for the final feedback
+            // Using a special marker for final feedback
+            setCurrentFeedback(`${evaluation.feedback}-${roundScore}-final-${Date.now()}`);
+            
+            // Add final evaluation
+            if (evaluation.final_report) {
+              // Calculate final score properly
+              const totalScore = currentChoices.userScore || 0;
+              const scoreCount = currentChoices.scoreCount || 1;
+              
+              // Calculate average score from individual round scores
+              const averageScore = Math.round(totalScore / scoreCount);
+              
+              // Create a final evaluation message with the correct score
+              const finalEvalContent = `Your ethical decision-making score is ${averageScore}/100. ${
+                averageScore >= 80 
+                  ? 'You demonstrated excellent ethical judgment!' 
+                  : averageScore >= 50 
+                    ? 'You showed good awareness of ethical principles.' 
+                    : 'Consider being more assertive in upholding ethical standards.'
+              }`;
+              
+              updatedConversation.push({
+                role: 'final_evaluation',
+                content: finalEvalContent
+              } as FinalEvaluationMessage);
+              
+              // Store the final score for feedback
+              localStorage.setItem('practice_final_score', averageScore.toString());
+              setFinalScore(averageScore);
+            }
+            
+            // Show completion status
+            setCurrentScenario({
+              ...currentScenario,
+              scenario: currentChoices,
+              conversation: updatedConversation,
+              currentStatement: null,
+              currentChoices: [],
+              currentStep: currentScenario.currentStep + 1
+            });
+            
+            // Set final report state after a short delay to ensure smooth transition
+            setTimeout(() => {
+              // Then set final report and options
+              setFinalReport(true);
+              setShowOptions(true);
+              // Ensure we scroll to the bottom to show the final report
+              setTimeout(scrollToBottom, 100);
+            }, 800);
+          }, 1500); // Show the final response after 1.5 seconds
+        }, 800); // Start typing after 0.8 seconds
       }
       
       // Scroll to the updated content after a short delay
@@ -1455,16 +1513,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                                 </div>
                               </div>
                             )}
-                            <div className="pl-1">{message.content}</div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Final evaluation messages */}
-                      {message.role === 'final_evaluation' && (
-                        <div className="flex flex-col items-center">
-                          <div className={getMessageStyle(message.role)}>
-                            <div>{message.content}</div>
+                            {/* Show typing indicator for manager messages with isTyping flag */}
+                            {message.role === 'manager' && (message as any).isTyping ? (
+                              <div className="flex items-center space-x-1 pl-1">
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                              </div>
+                            ) : (
+                              <div className="pl-1">{message.content}</div>
+                            )}
                           </div>
                         </div>
                       )}
