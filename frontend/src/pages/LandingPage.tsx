@@ -1,11 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
+// Import manager icons
+import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
+import puppeteerDarkPng from '@/assets/manager-icons/puppeteer-manager-dark.png';
+import diluterLightPng from '@/assets/manager-icons/diluter-manager-light.png';
+import diluterDarkPng from '@/assets/manager-icons/diluter-manager-dark.png';
+import camouflagerLightPng from '@/assets/manager-icons/camouflager-manager-light.png';
+import camouflagerDarkPng from '@/assets/manager-icons/camouflager-manager-dark.png';
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useStore();
+  
+  // State to track dark mode
+  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+  
+  // Listen for dark mode changes
+  useEffect(() => {
+    const darkModeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setIsDarkMode(document.documentElement.classList.contains('dark'));
+        }
+      });
+    });
+    
+    darkModeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => darkModeObserver.disconnect();
+  }, []);
+  
+  // Function to get the appropriate manager icon based on manager type and dark mode
+  const getManagerIcon = (managerType: string, isDarkMode: boolean = false) => {
+    const type = managerType.toUpperCase();
+    
+    switch (type) {
+      case 'PUPPETEER':
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+      case 'DILUTER':
+        return isDarkMode ? diluterDarkPng : diluterLightPng;
+      case 'CAMOUFLAGER':
+        return isDarkMode ? camouflagerDarkPng : camouflagerLightPng;
+      default:
+        return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
+    }
+  };
   
   // Debug check to prevent any refresh loops
   useEffect(() => {
@@ -117,7 +162,7 @@ export const LandingPage: React.FC = () => {
                 1. Pick a Manager Type
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                EVA can simulate different managerial styles to help you practice handling various scenarios.
+                EVA can simulate different managerial styles to help you practice handling various scenarios. Choose the manager personality you want to practice with.
               </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
@@ -125,7 +170,26 @@ export const LandingPage: React.FC = () => {
                 2. Practice & Get Feedback
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Engage with EVA's realistic simulations, respond to multiple-choice prompts, and receive immediate feedback.
+                Engage with EVA's realistic simulations, respond to multiple-choice prompts, and receive immediate feedback. Your decisions are scored based on ethical principles.
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-8">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                3. Receive Detailed Analysis
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                After completing a scenario, receive a comprehensive analysis of your ethical decision-making, including strengths and areas for improvement.
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                4. Apply Your Knowledge
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Take what you've learned back to your real-world workplace, equipped with practical strategies for ethical advocacy in challenging situations.
               </p>
             </div>
           </div>
@@ -137,11 +201,20 @@ export const LandingPage: React.FC = () => {
             </h3>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-red-500">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                <div className="flex items-center justify-center mb-5">
+                  <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-700 p-1 border-2 border-red-500 overflow-hidden">
+                    <img 
+                      src={getManagerIcon('PUPPETEER', isDarkMode)} 
+                      alt="Puppeteer Manager" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 text-center">
                   Puppeteer
                 </h4>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Controls project flow to nudge developers into unethical decisions.
+                  Controls project flow to nudge developers into unethical decisions through direct orders, intimidation, and creating environments where ethical violations feel necessary.
                 </p>
                 <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
                   <li>Uses manipulative tactics to influence team members</li>
@@ -151,11 +224,20 @@ export const LandingPage: React.FC = () => {
               </div>
               
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-yellow-500">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                <div className="flex items-center justify-center mb-5">
+                  <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-700 p-1 border-2 border-yellow-500 overflow-hidden">
+                    <img 
+                      src={getManagerIcon('DILUTER', isDarkMode)} 
+                      alt="Diluter Manager" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 text-center">
                   Diluter
                 </h4>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Weakens ethical concerns by making them seem less important.
+                  Weakens ethical concerns by systematically minimizing their importance or urgency, suggesting they're not applicable in the current context.
                 </p>
                 <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
                   <li>Minimizes the significance of ethical problems</li>
@@ -165,11 +247,20 @@ export const LandingPage: React.FC = () => {
               </div>
               
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-blue-500">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                <div className="flex items-center justify-center mb-5">
+                  <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-700 p-1 border-2 border-blue-500 overflow-hidden">
+                    <img 
+                      src={getManagerIcon('CAMOUFLAGER', isDarkMode)} 
+                      alt="Camouflager Manager" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 text-center">
                   Camouflager
                 </h4>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Hides ethical concerns in bureaucracy or misleading language.
+                  Disguises unethical requests as standard business practices or hides problematic aspects behind technical language and euphemisms.
                 </p>
                 <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 list-disc pl-5">
                   <li>Obscures ethical issues with complex jargon</li>
@@ -189,28 +280,77 @@ export const LandingPage: React.FC = () => {
             Why Practice with EVA?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Realistic Ethical Dilemmas
-              </h3>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Knowledge-Based
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Scenarios based on real-life case studies and industry guidelines.
+                Practice based on ACM, IEEE guidelines, GDPR standards, and comprehensive ethical frameworks.
               </p>
             </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Interactive Feedback
-              </h3>
+            
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <Target className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Multiple Manager Types
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Instantly understand your strengths and areas for improvement.
+                Experience different managerial approaches to ethical challenges and develop adaptable response strategies.
               </p>
             </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Adaptability
-              </h3>
+            
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Interactive Learning
+                </h3>
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
-                Experience various manager personalities to prepare for diverse workplace interactions.
+                Receive real-time feedback and scoring on your ethical decision-making process and choices.
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mt-8">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Ethical Reasoning Framework
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Learn established ethical principles and reasoning techniques applicable to real-world situations.
+              </p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <Rocket className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  AI-Powered Guidance
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Access intelligent, contextual responses powered by state-of-the-art large language models.
+              </p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mb-4">
+                <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Performance Tracking
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Monitor and improve your ethical reasoning skills over time with detailed performance metrics.
               </p>
             </div>
           </div>
@@ -221,52 +361,41 @@ export const LandingPage: React.FC = () => {
       <div className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Features
+            How It Helps You Grow
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-              <div className="flex items-center mb-4">
-                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Knowledge-Powered
-                </h3>
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+              EVA provides a safe space to practice ethical decision-making before facing real-world scenarios. By engaging with different manager types and ethical dilemmas, you'll develop:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-6 mt-8">
+              <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-left">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ethical Advocacy Skills</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">Learn practical strategies for advocating ethical positions in challenging workplace environments.</p>
+                </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                Backed by ACM, IEEE guidelines, GDPR compliance standards, and peer-reviewed research.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-              <div className="flex items-center mb-4">
-                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  AI-Driven
-                </h3>
+              
+              <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-left">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ethical Confidence</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">Build the confidence to address ethical concerns professionally and effectively.</p>
+                </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                Utilizes cutting-edge language models combined with retrieval-augmented generation.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-              <div className="flex items-center mb-4">
-                <Target className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Scenario Diversity
-                </h3>
+              
+              <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-left">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ethical Language</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">Develop a vocabulary for discussing ethical issues within technical contexts.</p>
+                </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                Wide range of cases across privacy and feasibility ethics, thoroughly vetted and relevant.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-              <div className="flex items-center mb-4">
-                <Rocket className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Easy & Interactive
-                </h3>
+              
+              <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-left">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Future-Ready Skills</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">Prepare for an industry increasingly focused on responsible technology development.</p>
+                </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                Simple UI, animated interactions, and immediate scoring.
-              </p>
             </div>
           </div>
         </div>
