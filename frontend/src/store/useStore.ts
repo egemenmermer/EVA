@@ -12,6 +12,8 @@ export interface Message {
   createdAt: string;
   conversationId: string;
   isLoading?: boolean;
+  isRehearsalRequest?: boolean;
+  isRehearsalOptions?: boolean;
 }
 
 export interface Conversation {
