@@ -4,21 +4,24 @@ import { ChatInput } from './ChatInput';
 import { EditDraftModal } from './EditDraftModal'; // Import the modal component
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';
-import { conversationApi, saveMessage } from '@/services/api'; // Import saveMessage
+import { conversationApi, saveMessage, getManagerType, sendMessage as apiSendMessage, agentCreateConversation } from '@/services/api'; // Import saveMessage, getManagerType, sendMessage, and agentCreateConversation
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import PracticeModule from '../practice/PracticeModule';
 import { BookOpen, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/axiosConfig';
-import ReactMarkdown from 'react-markdown';
+import api, { agentApi } from '../../services/axiosConfig'; // Restored agentApi
+import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'; // Import Options
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"; // Changed to relative path
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'; // Corrected import for PrismLight
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Import oneDark style
+import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx'; // Example: register language
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
-import { getManagerType } from '@/services/api';
-import { sendMessage as apiSendMessage } from '@/services/api';
-import { agentApi } from '../../services/axiosConfig'; // Correct import path
-import { agentCreateConversation } from '@/services/api'; // Import the agent creation function
-import { v4 as uuid } from 'uuid';
+import { Button } from "@/components/ui/button"; // Reverted to alias path
+
+SyntaxHighlighter.registerLanguage('jsx', jsx); // Register languages you need
+SyntaxHighlighter.registerLanguage('javascript', jsx); // Assuming js is similar or use 'javascript' language import
 
 // Add custom styles for message formatting
 const styles = {
@@ -33,6 +36,19 @@ const styles = {
     marginLeft: '1.5rem',
     position: 'relative',
   },
+  feedbackContent: {
+    '& p': {
+      marginBottom: '0.75rem',
+    },
+    '& .ml-4': {
+      marginLeft: '1rem',
+      display: 'flex',
+      alignItems: 'flex-start',
+    },
+    '& strong': {
+      fontWeight: '600',
+    },
+  }
 };
 
 // Add WebKit scrollbar styles
@@ -176,6 +192,16 @@ interface AgentMessageResponse {
   messages: Message[];
 }
 
+// Define a type for the expanded sections state
+interface ExpandedSectionsState {
+  [messageId: string]: string[]; // messageId maps to an array of expanded section keys for that message
+}
+
+// Define a type for the active feedback section state
+interface ActiveFeedbackSectionState {
+  [messageId: string]: string | null; // messageId maps to the key of the active section or null
+}
+
 export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, currentConversation, setStoreMessages, storeMessages }) => {
   const { 
     setCurrentConversation,
@@ -215,6 +241,117 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Track if a message is being sent to prevent auto-recovery
   const isMessageSending = useRef(false);
+
+  // State for managing expanded accordion sections for ALL messages
+  const [expandedMessageSections, setExpandedMessageSections] = useState<ExpandedSectionsState>({});
+  const [activeMessageFeedbackSection, setActiveMessageFeedbackSection] = useState<ActiveFeedbackSectionState>({});
+
+  // Add useEffect for feedback content styling
+  useEffect(() => {
+    // Add custom CSS for feedback formatting
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      .feedback-content p {
+        margin-bottom: 0.75rem;
+        color: inherit;
+      }
+      .feedback-content ul, 
+      .feedback-content ol {
+        margin-left: 0;
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+      }
+      .feedback-content ul {
+        list-style-type: disc;
+      }
+      .feedback-content ol {
+        list-style-type: decimal;
+      }
+      .feedback-content li {
+        margin-bottom: 0.25rem;
+        color: inherit;
+        display: list-item;
+        padding-left: 0.25rem;
+      }
+      .feedback-content ul li::marker {
+        content: "•";
+        font-size: 1.2em;
+      }
+      .feedback-content strong {
+        font-weight: 600;
+        color: inherit;
+      }
+      .feedback-content em {
+        font-style: italic;
+        color: inherit;
+      }
+      .dark .feedback-content p,
+      .dark .feedback-content li,
+      .dark .feedback-content {
+        color: #e2e8f0;
+      }
+      .dark .feedback-content strong {
+        color: #ffffff;
+      }
+      .light .feedback-content p,
+      .light .feedback-content li,
+      .light .feedback-content {
+        color: #1a202c;
+      }
+      .light .feedback-content strong {
+        color: #000000;
+      }
+      .introduction-text {
+        color: inherit;
+      }
+      .dark .introduction-text {
+        color: #e2e8f0;
+      }
+      .light .introduction-text {
+        color: #1a202c;
+      }
+      .summary-content {
+        color: inherit;
+      }
+      .dark .summary-content {
+        color: #e2e8f0;
+      }
+      .light .summary-content {
+        color: #1a202c;
+      }
+    `;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      // Clean up on unmount
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+
+  // Toggle function for accordion items (will be replaced or repurposed for new design)
+  const toggleMessageSection = (messageId: string, sectionKey: string) => {
+    // For the new design, this will set the active section
+    setActiveMessageFeedbackSection(prev => ({
+      ...prev,
+      [messageId]: prev[messageId] === sectionKey ? null : sectionKey, // Toggle active section
+    }));
+  };
+
+  // This handler might not be needed if we move away from Accordion's onValueChange
+  const handleMessageAccordionValueChange = (messageId: string, value: string | string[] | undefined) => {
+    // If we are using simple buttons, this might be deprecated.
+    // For now, let's assume it might still be used if a single section is shown/hidden.
+    let newActiveSection: string | null = null;
+    if (typeof value === 'string') {
+      newActiveSection = value;
+    } else if (Array.isArray(value) && value.length > 0) {
+      newActiveSection = value[0]; // If multiple, just take the first for active display
+    }
+    setActiveMessageFeedbackSection(prev => ({
+      ...prev,
+      [messageId]: newActiveSection,
+    }));
+  };
 
   // Set the ref value whenever loading changes
   useEffect(() => {
@@ -616,7 +753,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   };
 
   // Simplify message handling to ensure user messages remain visible
-  const handleSendMessage = useCallback(async (inputValue: string) => {
+  const handleSendMessage = useCallback(async (inputValue: string, skipUserMessageUI: boolean = false) => {
     console.log("handleSendMessage called with input:", inputValue);
     console.log("Current Conversation before send:", currentConversation);
 
@@ -713,7 +850,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     // IMPORTANT: Create a snapshot of the current messages to avoid state issues
     const currentMessagesSnapshot = [...storeMessages];
 
-    // 1. Create and immediately display the user message
+    // Create user message variable outside the if block so it's accessible throughout the function
+    let userMessageId: string | undefined;
+    
+    // 1. Create and immediately display the user message, unless skipUserMessageUI is true
+    if (!skipUserMessageUI) {
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user' as Role,
@@ -721,12 +862,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         conversationId: conversationId, // Use the (potentially updated) real ID
       createdAt: new Date().toISOString()
     };
+      
+      // Store the ID for later reference
+      userMessageId = userMessage.id;
     
     // Add to UI immediately - use functional update to ensure latest state
     setStoreMessages(prev => [...prev, userMessage]);
     
     // Save to localStorage immediately to preserve user message
       saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
+    }
     
     // 2. Add a loading message
     const loadingMessage: Message = {
@@ -794,7 +939,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       // Get the current messages *before* adding the agent response,
       // AND also filter out the *original* optimistic user message (using its temporary ID)
       const messagesBeforeAgentResponse = storeMessages.filter(
-          m => m.id !== loadingMessage.id && m.id !== userMessage.id // Remove loading AND original user msg
+          m => m.id !== loadingMessage.id && 
+              (!userMessageId || m.id !== userMessageId) // Only filter if userMessageId exists
       );
       
       // Update UI state to include the final user message (with ID from agent) AND the final agent message
@@ -867,7 +1013,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
   };
 
-  // Update the chat window to handle practice feedback with a new conversation when needed
+  // Complete replacement of the handlePracticeFeedbackRequest function with proper structure
     const handlePracticeFeedbackRequest = async () => {
     // Set processing flag at the very beginning
       isProcessingFeedback.current = true;
@@ -942,7 +1088,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 existingManager = existingConvData.managerType || existingManager;
                 existingCreatedAt = existingConvData.createdAt || existingCreatedAt;
               }
-            } catch (e) { console.error('Error parsing conversations:', e); }
+            } catch (e) { 
+              console.error('Error parsing conversations:', e); 
+            }
           }
           
           console.log('Setting current conversation to original ID:', conversationId);
@@ -1012,66 +1160,61 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           console.log('Sending detailed practice feedback directly to API...');
           try {
             const activeManagerType = practiceManagerType || managerType || 'PUPPETEER' as ManagerType;
-            
-            // Set loading state
             setLoading(true);
             
-            // Call the API directly
             console.log('Calling API with detailed practice feedback prompt');
+            console.log("Feedback API Prompt Content:", apiPrompt);
+            
             const response = await apiSendMessage(
               conversationId, 
-              apiPrompt || '',  // Ensure non-null string
+              apiPrompt || '',
               activeManagerType,
-              temperature
-            ) as {
-              id?: string;
-              agentResponse?: string;
-              conversationId: string;
-              createdAt?: string;
-            };
-            
-            console.log('API response for practice feedback received from backend', response);
-            
-            // Now manually process the response and update state
-            if (response && response.agentResponse) {
-              // Create the agent response message
+              temperature,
+              "post_feedback"
+            ) as any;
+
+            console.log('Raw Practice feedback API response object:', JSON.stringify(response, null, 2));
+            console.log('Practice feedback API response received:', response);
+
+            // Process the response
+            if (response && response.messages && Array.isArray(response.messages) && response.messages.length > 1) {
+              // Look for the assistant's message in the messages array
+              const assistantMessage = response.messages.find(m => m.role === 'assistant');
+              
+              if (assistantMessage && assistantMessage.content) {
+                // Found assistant message with content - use this instead of response.agentResponse
                 const agentMessage: Message = {
-                id: response.id || `assistant-${Date.now()}`,
+                  id: assistantMessage.id || `assistant-${Date.now()}`,
                   role: 'assistant' as Role,
-                content: response.agentResponse,
+                  content: assistantMessage.content,
                 conversationId: conversationId,
-                createdAt: response.createdAt || new Date().toISOString()
+                  createdAt: assistantMessage.createdAt || new Date().toISOString()
               };
               
               console.log('Practice feedback agent message:', agentMessage);
               
-              // Use the messages list that includes the user request as the base
               const baseMessages = messagesWithUserRequest.filter(m => !m.isLoading);
               console.log('Base messages count (including user request):', baseMessages.length);
               
-              // Ensure we don't add a duplicate agent message
               const hasAgentResponseAlready = baseMessages.some(m => m.id === agentMessage.id);
-              
               let finalMessages;
+                
               if (!hasAgentResponseAlready) {
                 console.log('Appending new agent feedback response message');
                 finalMessages = [...baseMessages, agentMessage];
               } else {
                 console.log('Agent feedback response already exists, not appending duplicate');
-                finalMessages = baseMessages; // Use the list without the duplicate
+                  finalMessages = baseMessages;
               }
               
-              // Direct update state without using functional form
               console.log('Setting final messages count:', finalMessages.length);
               setMessages(finalMessages);
               setStoreMessages(finalMessages);
               
-              // Save to localStorage immediately in multiple formats for redundancy
               saveConversationState(conversationId, finalMessages);
               localStorage.setItem(`exact_messages_${conversationId}`, JSON.stringify(finalMessages));
               localStorage.setItem(`backup_messages_${conversationId}`, JSON.stringify(finalMessages));
               
-              // Dispatch message update events
               try {
                 const updateEvent = new CustomEvent('messages-updated', {
                   detail: { conversationId: conversationId }
@@ -1091,19 +1234,34 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               localStorage.removeItem('force_conversation_id');
           localStorage.removeItem('practice_data');
             } else {
-              console.error('No agent response content found in practice feedback API response');
-              setError('Failed to get feedback response content. Please try again.');
-              // Clean up flags even if response content failed
+                // Messages exist but no assistant message with content found
+                console.error('No assistant message with content found in the messages array:', response.messages);
+                setError('Could not extract feedback content from response. Please try again.');
+                
+                // Clean up flags
               localStorage.removeItem('practice_to_chat');
               localStorage.removeItem('practice_feedback_prompt');
               localStorage.removeItem('practice_feedback_simple');
           localStorage.removeItem('feedbackRequest');
               localStorage.removeItem('force_conversation_id');
         }
-            
-      } catch (error) {
-            console.error('Error sending practice feedback to API:', error);
+            } else {
+              // Invalid or incomplete response structure
+              console.error('Invalid or incomplete practice feedback API response structure:', response);
+              setError('Received an invalid response format. Please try again.');
+              
+              // Clean up flags
+              localStorage.removeItem('practice_to_chat');
+              localStorage.removeItem('practice_feedback_prompt');
+              localStorage.removeItem('practice_feedback_simple');
+              localStorage.removeItem('feedbackRequest');
+              localStorage.removeItem('force_conversation_id');
+            }
+          } catch (apiError) {
+            // Handle API call errors
+            console.error('Error sending practice feedback to API:', apiError);
             setError('Failed to get feedback response. Please try again.');
+            
             // Clean up flags on error
             localStorage.removeItem('practice_to_chat');
             localStorage.removeItem('practice_feedback_prompt');
@@ -1111,27 +1269,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             localStorage.removeItem('feedbackRequest');
             localStorage.removeItem('force_conversation_id');
       } finally {
+            // Always reset loading state
         setLoading(false);
-            // Reset processing flag here AFTER all updates
-        isProcessingFeedback.current = false;
-            console.log('Set isProcessingFeedback to false after API call completion');
           }
           
-          console.log('Practice feedback request processing finished');
-        } else {
+          console.log('Practice feedback request processing finished for displayPrompt path');
+        } else { // No display prompt
           console.error('No display prompt available, cannot process feedback request');
-          // Clean up flags
-          isProcessingFeedback.current = false; // Reset flag here too
+          
+          // Clean up flags if there's no prompt to proceed
           localStorage.removeItem('practice_to_chat');
           localStorage.removeItem('practice_feedback_prompt');
           localStorage.removeItem('practice_feedback_simple');
           localStorage.removeItem('feedbackRequest');
           localStorage.removeItem('force_conversation_id');
         }
-      } // End of if (practiceToChat === 'true')
+      } else { // practiceToChat !== 'true'
+        console.log('practice_to_chat was not true. No feedback request processed.');
+      }
     } catch (error) {
+      // Handle any unexpected errors in the overall process
       console.error('Error in handlePracticeFeedbackRequest:', error);
       setError('An error occurred while processing feedback.');
+      
       // Clean up flags on outer error
       localStorage.removeItem('practice_to_chat');
       localStorage.removeItem('practice_feedback_prompt');
@@ -1783,15 +1943,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     console.log('Option clicked:', optionText);
     const lowerCaseOption = optionText.toLowerCase();
 
-    // Updated condition: Look for 'practice again' OR 'no, practice again'
+    // For "Practice again" or "Yes, practice" options
     if (lowerCaseOption.includes('yes, practice') || lowerCaseOption.includes('practice again')) {
       console.log('Triggering practice mode...');
       const recentUserMessage = storeMessages.slice().reverse().find(m => m.role === 'user');
       if (recentUserMessage && currentConversation) {
         localStorage.setItem('originalConversationId', currentConversation.conversationId);
+        // Store original problem - find the first substantial user message in the conversation
         const originalProblem = storeMessages.find(m => m.role === 'user' && m.id?.startsWith('user-'))?.content;
         if (originalProblem) {
-             localStorage.setItem('practice_original_problem', originalProblem);
+          localStorage.setItem('practice_original_problem', originalProblem);
         }
         localStorage.setItem('practice_user_query', recentUserMessage.content);
         const activeManagerType = currentConversation?.managerType || 'PUPPETEER';
@@ -1802,36 +1963,134 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Could not initiate practice: missing context.');
         setError('Could not start practice mode. Missing conversation context.');
       }
-    // Updated condition: Look for 'create a draft' OR 'help draft'
-    } else if (lowerCaseOption.includes('create a draft') || lowerCaseOption.includes('help draft')) {
-      console.log('Draft email requested. Sending request to agent...');
+    } 
+    // For "Yes, help draft email" options - FIX THIS SECTION
+    else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
+      console.log('Draft email requested');
+      
+      // Find the original ethical issue/concern that started the conversation
+      const originalMessages = storeMessages.filter(m => m.role === 'user');
+      let originalEthicalIssue = '';
+      
+      // Try to find the first substantial user message that's likely about the ethical issue
+      if (originalMessages.length > 0) {
+        // Look for the first message that doesn't mention "practice" or "draft"
+        for (const msg of originalMessages) {
+          if (!msg.content.toLowerCase().includes('practice') && 
+              !msg.content.toLowerCase().includes('draft') &&
+              !msg.content.toLowerCase().includes('simulate') &&
+              msg.content.length > 15) {
+            originalEthicalIssue = msg.content;
+            break;
+          }
+        }
+        
+        // If we couldn't find a specific message, use the first substantial message
+        if (!originalEthicalIssue && originalMessages.length > 0) {
+          originalEthicalIssue = originalMessages[0].content;
+        }
+      }
+      
+      // Create a very simplified message for display in the UI
+      const displayMessage = "Please draft an email about this ethical concern.";
+      
+      // Create a more detailed request for the API focused on the original ethical issue
+      let detailedPrompt = `Please draft me a professional email to my manager about an ethical concern I'm facing at work.`;
+      
+      if (originalEthicalIssue) {
+        detailedPrompt += ` The ethical issue is regarding: "${originalEthicalIssue.substring(0, 200)}..."`;
+      }
+      
+      detailedPrompt += ` Please include a proper subject line, greeting, and professional closing. Focus on communicating the ethical concern clearly and professionally without mentioning any practice scenarios or scores.`;
+      
+      // Create a user message with just the display text
+      const emailRequestMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user' as Role,
+        content: displayMessage,
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString()
+      };
+      
+      // Immediately add the simplified message to the UI state for rendering
+      setStoreMessages(prev => [...prev, emailRequestMessage]);
+      
+      // Save current UI state to localStorage to prevent loss during transitions
+      if (currentConversation?.conversationId) {
+        saveConversationState(currentConversation.conversationId, [...storeMessages, emailRequestMessage]);
+      }
+      
+      // To prevent UI flashing, add a small delay before sending the API request
+      // This ensures the simplified message gets rendered first
+      setTimeout(() => {
+        // The skipUserMessageUI parameter is important - it tells handleSendMessage not to add another user message
+        // since we already added our simplified version
+        handleSendMessage(detailedPrompt, true);
+      }, 50);
+    } 
+    // For other options, keep the existing handling
+    else {
+      // Existing code for other options
+      if (lowerCaseOption.includes('no, not now') || lowerCaseOption.includes('not now')) {
+      console.log('User chose not to proceed for now.');
+      }
+      else if (lowerCaseOption.startsWith('practice responding to a')) {
+      console.log('Rehearsal option selected:', optionText);
+      const replyType = lowerCaseOption.includes('negative') ? 'negative' : 'positive';
+        
+        // Get context from various sources
       const originalProblem = localStorage.getItem('practice_original_problem') || 
-                              storeMessages.find(m => m.role === 'user' && !m.content.startsWith('Okay, please help'))?.content || 
-                              'the ethical dilemma discussed';
-      const draftRequestPrompt = `Please help me draft an email to my boss about ${originalProblem}. Include ethical framing and suggest alternatives or a meeting.`;
-      handleSendMessage(draftRequestPrompt);
-
-    } else if (lowerCaseOption.includes('no, not now')) {
-        console.log('User chose not to proceed for now.');
-        // Optionally send a confirmation or do nothing
-        // handleSendMessage("Okay, let me know if you change your mind or need the draft later.");
-    } else if (lowerCaseOption.startsWith('practice responding to a')) {
-          console.log('Rehearsal option selected:', optionText);
-          const replyType = lowerCaseOption.includes('negative') ? 'negative' : 'positive';
-          const originalProblem = localStorage.getItem('practice_original_problem') || 'the ethical dilemma discussed';
-          const rehearsalRequest = `Okay, please simulate a ${replyType} reply from my boss regarding the email about ${originalProblem}.`;
-          handleSendMessage(rehearsalRequest);
-    } else {
-          // Fallback for any other button types not explicitly handled
+                            storeMessages.find(m => m.role === 'user' && !m.content.toLowerCase().includes('simulate'))?.content ||
+                            'the ethical concern we discussed';
+                             
+        // Find the most recent draft email if available
+        const recentDraft = storeMessages.filter(m => 
+          m.role === 'assistant' && 
+          (m.content.toLowerCase().includes('subject:') || m.content.toLowerCase().includes('draft email'))
+        ).pop()?.content;
+        
+        // Show an extremely minimal request message in the UI
+        const displayMessage = `Yes, simulate a ${replyType} reply.`;
+        
+        // Create the actual detailed request for the API with the full context
+        const fullRehearsalRequest = recentDraft 
+          ? `Please simulate a ${replyType} reply from my boss regarding this email I sent:\n\n${recentDraft}`
+          : `Please simulate a ${replyType} reply from my boss regarding my email about ${originalProblem}.`;
+        
+        // Create a user message with just the display text
+        const rehearsalUserMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user' as Role,
+          content: displayMessage,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Add the simplified message to the UI
+        setStoreMessages(prev => [...prev, rehearsalUserMessage]);
+        
+        // Save to localStorage
+        if (currentConversation?.conversationId) {
+          saveConversationState(currentConversation.conversationId, [...storeMessages, rehearsalUserMessage]);
+        }
+        
+        // Then send the complete context to the API without updating UI again
+        setTimeout(() => {
+          // Direct API call with full context but skip adding to UI since we already added our custom message
+          handleSendMessage(fullRehearsalRequest, true);
+        }, 50);
+      }
+      else {
       handleSendMessage(optionText);
+      }
     }
-  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Keep dependencies updated
+  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]);
 
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
       .then(() => {
         console.log('Email draft copied to clipboard');
-        handleSendMessage("Okay, I've copied the draft. Would you like to rehearse sending this message or prepare for possible replies from your boss?");
+        handleSendMessage("Email copied. Would you like to practice with a reply?");
       })
       .catch(err => {
         console.error('Failed to copy email draft: ', err);
@@ -1860,7 +2119,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       // Send the edited content as a new user message
       const submissionPrompt = `Here is the edited version of the draft email:\n\n${editedContent}`;
       handleSendMessage(submissionPrompt);
-  }, [editingMessageId, storeMessages, setStoreMessages, handleSendMessage, handleCloseEditModal]); // Added dependencies
+  }, [editingMessageId, storeMessages, setStoreMessages, handleSendMessage, handleCloseEditModal]);
 
   // --- Component-Level Edit/Discard Handlers --- Define them here ---
   const handleEditDraft = useCallback((messageId: string, draftContent: string) => {
@@ -1878,6 +2137,154 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       saveConversationState(currentConversation?.conversationId || '', updatedMessages);
   }, [storeMessages, setStoreMessages, currentConversation]); // Added dependencies
 
+  // Add this function somewhere before the renderMessage function
+  const formatMessageContent = (content: string): string => {
+    if (!content) return '';
+    
+    // Ensure proper bullet point formatting
+    let formatted = content;
+    
+    // Remove debug labels and redundant section headers
+    formatted = formatted.replace(/^Introductory Paragraph:?\s*/i, '');
+    formatted = formatted.replace(/^Detailed Feedback:?\s*/i, '');
+    formatted = formatted.replace(/Detailed Feedback:\s*$/im, '');
+    formatted = formatted.replace(/^"Detailed Feedback:"\s*/im, '');
+    formatted = formatted.replace(/Detailed Feedback\s*$/im, '');
+    formatted = formatted.replace(/\*+"?Detailed Feedback:?"?\s*/g, ''); // Remove *Detailed Feedback:
+    formatted = formatted.replace(/"\*?Detailed Feedback:?\*?"\s*/g, ''); // Handle quoted version
+    
+    // First, clean up any existing HTML tags to avoid duplication
+    formatted = formatted.replace(/<\/?strong>/g, '');
+    formatted = formatted.replace(/<\/?em>/g, '');
+    
+    // Format markdown-style headings with double asterisks
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Clean up any remaining Markdown-style formatting
+    formatted = formatted.replace(/\*([^*\s][^*]*[^*\s])\*/g, '<em>$1</em>');
+    
+    // Improved formatting for decision points
+    formatted = formatted.replace(
+      /(Decision \d+):\s*([^\n]+)/g, 
+      '<strong>$1:</strong> $2'
+    );
+    
+    // Format section headings
+    formatted = formatted.replace(
+      /^(Strengths|Areas for Improvement|Reasoning Process|Practical Advice for the Future|Detailed Feedback)(?:\s*:)?/gm,
+      '<strong>$1:</strong>'
+    );
+    
+    // Remove standalone asterisks and bullet points AFTER handling formatting
+    formatted = formatted.replace(/^\s*\*\*\s*/gm, ''); // Remove ** at beginning of lines
+    formatted = formatted.replace(/^\s*\*\s*$/gm, ''); // Remove isolated asterisks on their own lines
+    formatted = formatted.replace(/^\s*•\s*$/gm, ''); // Remove isolated bullet points on their own lines
+    formatted = formatted.replace(/\s\*\s/g, ' '); // Remove asterisks surrounded by spaces
+    formatted = formatted.replace(/\*$/gm, ''); // Remove asterisks at end of lines
+
+    // IMPORTANT: Preserve and convert bullet points
+    // First mark all potential bullet points with a special marker to prevent interference with other regex
+    formatted = formatted
+      // Convert dash bullet points to the marker
+      .replace(/^[ \t]*-[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Convert asterisk bullet points to the marker
+      .replace(/^[ \t]*\*[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Convert standard bullet points to the marker
+      .replace(/^[ \t]*•[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Also handle numbered lists
+      .replace(/^[ \t]*(\d+)\.[ \t]+(.+)$/gm, '••NUMBER••$1••$2');
+    
+    // Now process bullet points into proper HTML lists
+    let lines = formatted.split('\n');
+    let inList = false;
+    let inNumberedList = false;
+    let processedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Check if this line is a bullet point
+      if (line.includes('••BULLET••')) {
+        if (!inList) {
+          // Start a new list
+          processedLines.push('<ul>');
+          inList = true;
+        }
+        
+        // Close any open numbered list
+        if (inNumberedList) {
+          processedLines.push('</ol>');
+          inNumberedList = false;
+        }
+        
+        // Add as list item (extract content from the marker)
+        const itemContent = line.replace('••BULLET••', '').trim();
+        processedLines.push(`  <li>${itemContent}</li>`);
+      } 
+      // Check if this line is a numbered list item
+      else if (line.includes('••NUMBER••')) {
+        if (!inNumberedList) {
+          // Start a new numbered list
+          processedLines.push('<ol>');
+          inNumberedList = true;
+        }
+        
+        // Close any open bullet list
+        if (inList) {
+          processedLines.push('</ul>');
+          inList = false;
+        }
+        
+        // Extract number and content
+        const parts = line.split('••');
+        const number = parts[1];
+        const itemContent = parts[2] || '';
+        processedLines.push(`  <li>${itemContent}</li>`);
+      }
+      else {
+        // Not a list item - close any open lists
+        if (inList) {
+          processedLines.push('</ul>');
+          inList = false;
+        }
+        if (inNumberedList) {
+          processedLines.push('</ol>');
+          inNumberedList = false;
+        }
+        
+        // Add the line as normal if it's not empty
+        if (line.trim()) {
+          processedLines.push(line);
+        }
+      }
+    }
+    
+    // Close any open lists at the end
+    if (inList) {
+      processedLines.push('</ul>');
+    }
+    if (inNumberedList) {
+      processedLines.push('</ol>');
+    }
+    
+    // Join the processed lines back together
+    formatted = processedLines.join('\n');
+    
+    // Now add paragraph tags for better spacing
+    formatted = formatted.replace(/\n\n+/g, '</p><p>');
+    
+    // Make any scoring or metrics bold
+    formatted = formatted.replace(/(\d+\/\d+|score of \d+)/gi, '<strong>$1</strong>');
+    
+    // Wrap in paragraph tags for proper spacing
+    formatted = '<p>' + formatted + '</p>';
+    
+    // Fix any doubled paragraph tags
+    formatted = formatted.replace(/<\/p><p><\/p><p>/g, '</p><p>');
+    
+    return formatted;
+  };
+
   // --- Message Rendering Logic ---
   const renderMessage = useCallback((message: Message, index: number) => {
     const isUser = message.role === 'user';
@@ -1885,198 +2292,416 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     const isAssistant = message.role === 'assistant';
     const isLoading = message.isLoading === true;
     
+    const currentMessageActiveSectionKey = activeMessageFeedbackSection[message.id || ''];
+    
     // Initialize variables
     let displayContent = '';
+    let rawContentForActions = message.content || 'No response content';
     let extractedOptions: string[] = [];
-    let isEmailDraft = false; // Flag for email drafts
-    let isRehearsalPrompt = false; // Flag for rehearsal prompts
-    const optionRegex = /\[(.*?)\]/g; // Regex to find [Option Text]
+    let isEmailDraft = false;
+    let isRehearsalPrompt = false;
+    let isPracticeFeedback = false;
+    
+    // Variables for the new feedback structure
+    let introductoryText = '';
+    let overallSummaryTitle = ''; // e.g., "Summary of Feedback"
+    let overallSummaryContent = '';
+    let detailedFeedbackMainTitle = 'Detailed Feedback'; // Static or could be parsed
+    let parsedDetailedFeedbackSections: { title: string; content: string; key: string; emoji?: string; originalHeading?: string; }[] = [];
+    
+    const optionRegex = /\[(.*?)\]/g; // Simplified regex for single brackets
     
     if (typeof message.content === 'string') {
-      displayContent = message.content || 'No response content';
+      const rawContent = message.content || 'No response content';
+      rawContentForActions = rawContent;
+      displayContent = rawContent; // Default to raw content
       
-      // If assistant message, perform checks and cleanup
       if (isAssistant) {
-          // Check BEFORE cleaning/formatting
-          const lowerContent = displayContent.toLowerCase();
-          
-          // Check for Email Draft
-          isEmailDraft = 
-              (lowerContent.includes('subject:') && lowerContent.includes('dear')) ||
-              lowerContent.includes('draft email:') ||
-              lowerContent.includes('here\'s a draft') ||
-              (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
-              
-          // Check for Rehearsal Prompt
-          isRehearsalPrompt = 
-              lowerContent.includes('okay, let\'s rehearse') &&
-              lowerContent.includes('which type of reply');
-          
-          // Extract bracketed options if NOT an email draft
-          // For rehearsal prompts, the options are specific, handle them separately
-          if (!isEmailDraft) {
-        const matches = [...displayContent.matchAll(optionRegex)];
-        if (matches.length > 0) {
-               // Filter out rehearsal-specific options if this is the rehearsal prompt
-               const optionsToExtract = isRehearsalPrompt 
-                   ? matches.filter(m => m[1].toLowerCase().includes('practice responding to a'))
-                   : matches;
-               extractedOptions = optionsToExtract.map(match => match[1].trim());
-               // Clean the display content, removing *all* matched options
-          displayContent = displayContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+        const lowerContent = rawContent.toLowerCase();
+        // More lenient check for practice feedback - look for key markers that indicate this is feedback
+        const hasSummaryMarker = rawContent.includes("Summary of Feedback") || rawContent.includes("summary of feedback");
+        const hasDetailedMarker = rawContent.includes("Detailed Feedback") || rawContent.includes("detailed feedback");
+        const hasStrengthsMarker = rawContent.includes("Strengths") || rawContent.includes("strengths");
+        const hasAreasMarker = rawContent.includes("Areas for Improvement") || rawContent.includes("areas for improvement");
+        const hasReasoningMarker = rawContent.includes("Reasoning Process") || rawContent.includes("reasoning process");
+        const hasAdviceMarker = rawContent.includes("Practical Advice") || rawContent.includes("practical advice");
+        const hasScoreMarker = rawContent.includes("score of") || /\d+\/\d+/.test(rawContent);
+        const hasActionPrompt = rawContent.includes("Do you feel ready") || rawContent.includes("Would you like to practice again");
+
+        // More lenient detection that checks for multiple feedback indicators
+        isPracticeFeedback = (hasStrengthsMarker && hasAreasMarker) || 
+                            (hasDetailedMarker && (hasStrengthsMarker || hasAreasMarker)) ||
+                            (hasSummaryMarker && (hasStrengthsMarker || hasAreasMarker || hasReasoningMarker)) ||
+                            (hasScoreMarker && (hasStrengthsMarker || hasAreasMarker)) ||
+                            (hasReasoningMarker && hasAdviceMarker) ||
+                            (hasActionPrompt && (hasStrengthsMarker || hasAreasMarker));
+
+        if (isPracticeFeedback) {
+            console.log("[renderMessage] Detected practice feedback for message:", message.id);
+            try {
+                // Initialize section containers
+                parsedDetailedFeedbackSections = [];
+                
+                // Define expected section headings with more variations for better matching
+                const sectionDefinitions = [
+                    { 
+                        heading: "Strengths", 
+                        alternateHeadings: ["Strengths:", "**Strengths**", "**Strengths:**", "* Strengths", "Strength"],
+                        key: "strengths", 
+                        emoji: "💪" 
+                    },
+                    { 
+                        heading: "Areas for Improvement", 
+                        alternateHeadings: ["Areas for Improvement:", "**Areas for Improvement**", "**Areas for Improvement:**", 
+                                           "Weaknesses:", "**Weaknesses**", "* Areas for Improvement", "Improvement"],
+                        key: "improvement", 
+                        emoji: "📈" 
+                    },
+                    { 
+                        heading: "Reasoning Process", 
+                        alternateHeadings: ["Reasoning Process:", "**Reasoning Process**", "**Reasoning Process:**", 
+                                           "Reasoning:", "**Reasoning**", "* Reasoning Process", "Your reasoning"],
+                        key: "reasoning", 
+                        emoji: "🧠" 
+                    },
+                    { 
+                        heading: "Practical Advice for the Future", 
+                        alternateHeadings: ["Practical Advice for the Future:", "**Practical Advice**", "**Practical Advice:**", 
+                                           "Advice:", "**Advice**", "Future Steps:", "Practical Advice:", "* Practical Advice",
+                                           "In similar situations"],
+                        key: "advice", 
+                        emoji: "🛠️" 
+                    }
+                ];
+                
+                const contentToParse = rawContent
+                  .replace(/Detailed Feedback:?\s*$/im, '')
+                  .replace(/^"Detailed Feedback:"\s*/im, '')
+                  .replace(/^Detailed Feedback:?\s*/im, '')
+                  .replace(/\*+"?Detailed Feedback:?"?\s*/g, '') // Remove *Detailed Feedback:
+                  .replace(/"\*?Detailed Feedback:?\*?"\s*/g, '') // Handle quoted version
+                  .replace(/^\s*\*\*\s*/gm, '') // Remove ** at beginning of lines
+                  .replace(/^\s*\*\s*$/gm, '') // Remove standalone asterisks
+                  .replace(/^\s*•\s*$/gm, ''); // Remove standalone bullet points
+                
+                // Identify introductory content - anything before the first section heading
+                let introText = "";
+                let restOfContent = contentToParse;
+                
+                // Find the first occurrence of any section heading
+                const firstSectionIndex = Math.min(
+                    ...sectionDefinitions.flatMap(def => 
+                        [def.heading, ...def.alternateHeadings].map(heading => {
+                            const idx = contentToParse.indexOf(heading);
+                            return idx !== -1 ? idx : Infinity;
+                        })
+                    )
+                );
+
+                if (firstSectionIndex !== Infinity) {
+                    introText = contentToParse.substring(0, firstSectionIndex).trim();
+                    // Clean up any debug headers or stray asterisks in the intro text
+                    introText = introText.replace(/^Introductory Paragraph:?\s*/i, '');
+                    introText = introText.replace(/^\*+\s*/m, '');
+                    introText = introText.replace(/\s\*\s/g, ' ');
+                    restOfContent = contentToParse.substring(firstSectionIndex);
+                    }
+                   
+                // Extract summary from intro if present
+                let summaryText = "";
+                const summaryStartMarker = "Summary of Feedback:";
+                const summaryIndex = introText.indexOf(summaryStartMarker);
+                
+                    if (summaryIndex !== -1) {
+                    // Extract everything from summary marker to end of intro
+                    summaryText = introText.substring(summaryIndex + summaryStartMarker.length).trim();
+                    // Update intro to exclude summary
+                    introText = introText.substring(0, summaryIndex).trim();
+                    } else {
+                    // Try alternative markers
+                    const altSummaryMarkers = ["Overall,", "In summary,", "To summarize,"];
+                    for (const marker of altSummaryMarkers) {
+                        const altIndex = introText.indexOf(marker);
+                        if (altIndex !== -1) {
+                            // Found an alternative summary marker
+                            summaryText = introText.substring(altIndex).trim();
+                            introText = introText.substring(0, altIndex).trim();
+                            break;
+                        }
+                    }
+                }
+                
+                // Set intro and summary content
+                introductoryText = introText;
+                overallSummaryTitle = "Summary of Feedback";
+                overallSummaryContent = summaryText || "Your feedback highlights specific strengths and areas for improvement in your ethical decision-making.";
+                
+                // Process each section in the remaining content
+                for (const sectionDef of sectionDefinitions) {
+                    let sectionContent = "";
+                    const allHeadings = [sectionDef.heading, ...sectionDef.alternateHeadings];
+                            
+                    // Try to find the section in the content
+                    for (const heading of allHeadings) {
+                        const sectionIndex = restOfContent.indexOf(heading);
+                        if (sectionIndex !== -1) {
+                            // Found the section heading
+                            const sectionStart = sectionIndex + heading.length;
+                            let sectionEnd = restOfContent.length;
+                            
+                            // Look for the next section heading
+                            const otherHeadings = sectionDefinitions
+                                .filter(def => def.key !== sectionDef.key)
+                                .flatMap(def => [def.heading, ...def.alternateHeadings]);
+                                
+                            for (const nextHeading of otherHeadings) {
+                                const nextIndex = restOfContent.indexOf(nextHeading, sectionStart);
+                                if (nextIndex !== -1 && nextIndex < sectionEnd) {
+                                    sectionEnd = nextIndex;
+                                }
+                            }
+                            
+                            // Also check for conclusion markers
+                            const conclusionMarkers = [
+                                "Concluding Action Prompt:", 
+                                "Do you feel ready", 
+                                "Would you like to practice again"
+                            ];
+                            
+                            for (const marker of conclusionMarkers) {
+                                const markerIndex = restOfContent.indexOf(marker, sectionStart);
+                                if (markerIndex !== -1 && markerIndex < sectionEnd) {
+                                    sectionEnd = markerIndex;
+                                    }
+                                }
+                                
+                            // Extract the section content
+                            sectionContent = restOfContent.substring(sectionStart, sectionEnd).trim();
+
+                            // Clean up the section content right when it's extracted
+                            sectionContent = sectionContent
+                              // Remove initial asterisks that often appear in the content
+                              .replace(/^\*+\s*/m, '')
+                              // Clean up any stray/standalone asterisks
+                              .replace(/\s\*\s/g, ' ')
+                              .replace(/^\*\s/gm, '')
+                              .replace(/\*$/gm, '')
+                              .trim();
+
+                            break;
+                        }
+                    }
+                    
+                    // Add section with content or placeholder
+                            parsedDetailedFeedbackSections.push({
+                                title: `${sectionDef.emoji} ${sectionDef.heading}`,
+                                originalHeading: sectionDef.heading,
+                        // Just store the raw cleaned content - formatting will happen at render time
+                        content: sectionContent || `No specific information available for ${sectionDef.heading}.`,
+                                key: sectionDef.key,
+                                emoji: sectionDef.emoji
+                            });
+                        }
+                
+                // Make sure we have all required sections
+                if (parsedDetailedFeedbackSections.length === 0) {
+                    // Fallback: create basic sections if none were found
+                    sectionDefinitions.forEach(def => {
+                             parsedDetailedFeedbackSections.push({
+                            title: `${def.emoji} ${def.heading}`,
+                            originalHeading: def.heading,
+                            content: `Section content could not be extracted.`,
+                            key: def.key,
+                            emoji: def.emoji
+                            });
+                        });
+                    }
+                
+                // Sort sections in the correct order
+                     parsedDetailedFeedbackSections.sort((a, b) => 
+                        sectionDefinitions.findIndex(s => s.key === a.key) - 
+                        sectionDefinitions.findIndex(s => s.key === b.key)
+                    );
+
+                // Log successful parsing
+                console.log("[renderMessage] Successfully parsed feedback with sections:", 
+                    parsedDetailedFeedbackSections.map(s => s.key));
+                
+            } catch (parseError) {
+                console.error("[renderMessage] Error parsing feedback content:", parseError);
+                // On error, fallback to rendering as normal message but flag as feedback for button display
+                displayContent = rawContent;
+                
+                // Create basic sections since parsing failed
+                const basicSections = [
+                    { heading: "Strengths", key: "strengths", emoji: "💪" },
+                    { heading: "Areas for Improvement", key: "improvement", emoji: "📈" },
+                    { heading: "Reasoning Process", key: "reasoning", emoji: "🧠" },
+                    { heading: "Practical Advice", key: "advice", emoji: "🛠️" }
+                ];
+                
+                // Still create sections for UI, with generic content
+                parsedDetailedFeedbackSections = basicSections.map(section => ({
+                    title: `${section.emoji} ${section.heading}`,
+                    originalHeading: section.heading,
+                    content: `Unable to extract detailed content for this section.`,
+                    key: section.key,
+                    emoji: section.emoji
+                }));
+            }
+        } else { 
+            // Not practice feedback, or failed initial detection
+            const lowerContent = rawContent.toLowerCase();
+            isEmailDraft = 
+                (lowerContent.includes('subject:') && lowerContent.includes('dear')) ||
+                lowerContent.includes('draft email:') ||
+                lowerContent.includes('here\'s a draft') ||
+                (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
+            isRehearsalPrompt = 
+                lowerContent.includes('okay, let\'s rehearse') &&
+                lowerContent.includes('which type of reply');
+            extractedOptions = []; 
+            if (!isEmailDraft && !isRehearsalPrompt) {
+                const matches = [...rawContent.matchAll(optionRegex)];
+                if (matches.length > 0) {
+                    extractedOptions = matches.map(match => match[1].trim());
+                    displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+                }
+            } else if (isRehearsalPrompt) {
+                 const matches = [...rawContent.matchAll(optionRegex)];
+                 if (matches.length > 0) {
+                    extractedOptions = matches
+                        .filter(m => m[1].toLowerCase().includes('practice responding to a'))
+                        .map(match => match[1].trim());
+                     displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+                 }
+            }
+            
+            // For email drafts, format the content with better styling 
+            if (isEmailDraft) {
+                try {
+                    // Try to extract subject line
+                    const subjectMatch = rawContent.match(/Subject:([^\n]*)/i);
+                    const subjectLine = subjectMatch ? subjectMatch[1].trim() : "Draft Email";
+                    
+                    // Format the display content with better styling
+                    displayContent = rawContent;
+                } catch (e) {
+                    console.error("Error formatting email draft:", e);
+                    displayContent = rawContent; // Fallback to original content
+                 }
+            }
         }
-             // Additional cleanup
-        displayContent = displayContent
-          .replace(/\s*\[Yes,\s*practice\]\s*\[No,\s*not now\]\s*$/g, "")
-               .replace(/\s*\[Yes, create a draft email.*?\]\s*\[Not now\]\s*$/g, "") // Cleanup draft prompt buttons
-               // Don't clean up rehearsal options here, they were removed above if present
-          .trim();
-        
-             // Formatting logic for regular messages
-             if (!isRehearsalPrompt) { // Don't apply special formatting to rehearsal prompt text
-        displayContent = displayContent
-                   .replace(/\.(\s+)/g, '.\n\n') // Period + spaces -> double newline
-                   .replace(/\n{3,}/g, "\n\n") // Reduce excess newlines
-                   .replace(/•(\s*)(\S)/g, "• $2") // Ensure space after bullets
-                   .replace(/(\d+\.)(\s*)(\S)/g, "$1 $3"); // Ensure space after numbered lists
-             }
-          }
       }
     } else {
       displayContent = String(message.content || 'No response content');
+      rawContentForActions = displayContent; 
     }
     
-    // Check if the message contains the practice prompt question
-    const hasPracticePrompt = isAssistant && 
-      typeof message.content === 'string' && (
-      message.content.includes("Would you like to practice this scenario with simulated manager responses?") ||
-      message.content.includes("Would practicing a discussion around this be helpful?") ||
-      message.content.includes("Would practicing a discussion") ||
-      message.content.includes("Would you like to practice how to") ||
-      message.content.includes("Would you like to try a practice scenario") ||
-      (message.content.includes("practice this scenario") && message.content.includes("simulated manager")) ||
-      message.content.includes("Would it help to discuss it with your team first?") ||
-      message.content.includes("Have you considered bringing up these concerns")
-    );
-    
-    // Get score value if this is a practice feedback message
-    let practiceScore = 0;
-    let isPracticeFeedback = false; // Flag to identify feedback messages
-    if (isAssistant && displayContent && (
-      displayContent.includes("ethical decision-making score") || 
-      displayContent.includes("practice scenario") || 
-      displayContent.includes("Ethical Principles Applied") ||
-      displayContent.includes("Areas for Improvement") ||
-      displayContent.includes("Your reasoning reflects") ||
-      // Look for patterns in the feedback response
-      (displayContent.includes("ethical") && 
-       displayContent.includes("score") && 
-       displayContent.includes("performance")) ||
-      // Look for thank you messages after practice
-      (displayContent.includes("Thank you for sharing your practice scenario") ||
-       (displayContent.includes("practice") && 
-        displayContent.includes("scenario") && 
-        displayContent.includes("performance")))
-    )) {
-      isPracticeFeedback = true; // Mark this as a feedback message
-      // Corrected Regex: Escaped the forward slash properly
-      const scoreMatch = displayContent.match(/ethical decision-making score (?:was |is |of )(\d+)\/100/i);
-      if (scoreMatch && scoreMatch[1]) {
-        practiceScore = parseInt(scoreMatch[1]);
-      }
-    }
-    
-    // Determine which buttons to show
-    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt;
-    const showEmailDraftActionButtons = isAssistant && isEmailDraft; // Show email actions if it IS a draft
-    const showRehearsalOptionButtons = isAssistant && isRehearsalPrompt && extractedOptions.length > 0; // Show rehearsal buttons if it's the prompt
-    
-    // --- Action Button Handlers ---
-    const handleCopyToClipboard = (text: string) => {
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          console.log('Email draft copied to clipboard');
-          // Optionally show a temporary confirmation message (e.g., using a toast library)
-          // Consider triggering Phase 5 prompt here
-          handleSendMessage("Okay, I've copied the draft. Would you like to rehearse sending this message or prepare for possible replies from your boss?");
-        })
-        .catch(err => {
-          console.error('Failed to copy email draft: ', err);
-          setError('Failed to copy draft to clipboard.'); // Show error to user
-        });
-    };
+    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback;
+    const showEmailDraftActionButtons = isAssistant && isEmailDraft;
+    const showRehearsalOptionButtons = isAssistant && isRehearsalPrompt && extractedOptions.length > 0;
+    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && extractedOptions.length > 0;
 
-    // Updated to open the modal instead of sending a message
-    const handleEditDraft = (messageId: string, draftContent: string) => {
-        console.log('Edit draft requested for message:', messageId);
-        setDraftToEdit(draftContent);
-        setEditingMessageId(messageId); // Store the ID of the message being edited
-        setIsEditModalOpen(true);
-    };
-    
-    // Function to close the modal
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
-        setDraftToEdit(null);
-        setEditingMessageId(null);
-    };
-
-    // Function to handle saving from the modal
-    const handleSaveEditedDraft = (editedContent: string) => {
-        handleCloseEditModal(); // Close modal first
-        console.log('Sending edited draft to agent...');
-        
-        // Remove the original draft message before sending the new one
-        if (editingMessageId) {
-            const messagesWithoutOriginalDraft = storeMessages.filter(m => m.id !== editingMessageId);
-            setStoreMessages(messagesWithoutOriginalDraft);
-            // No need to save state here, handleSendMessage will update and save
-            // saveConversationState(currentConversation?.conversationId || '', messagesWithoutOriginalDraft);
-        }
-
-        // Send the edited content as a new user message
-        // Prefixing to make it clear to the agent it's an edited version
-        const submissionPrompt = `Here is the edited version of the draft email:\n\n${editedContent}`;
-        handleSendMessage(submissionPrompt);
-    };
-
-    const handleDiscardDraft = (messageId: string | undefined) => {
-        if (!messageId) return;
-        console.log('Discarding draft message:', messageId);
-        const updatedMessages = storeMessages.filter(m => m.id !== messageId);
-        setStoreMessages(updatedMessages);
-        saveConversationState(currentConversation?.conversationId || '', updatedMessages);
-        // Optionally send a confirmation or just remove silently
-        // handleSendMessage("Draft discarded.");
+    const markdownComponents: ReactMarkdownOptions['components'] = {
+        code({ node, inline, className, children, ...props }: any) { 
+            const match = /language-(\w+)/.exec(className || '');
+            return !inline && match ? (
+                <SyntaxHighlighter
+                    style={oneDark}
+                    language={match[1]}
+                    PreTag="div"
+                    {...props}
+                >
+                    {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+            ) : (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            );
+        },
     };
     
     return (
       <div key={message.id || index} className="mb-4">
-        {/* Message Bubble */}
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
           {!isUser && !isSystemMessage && (
             <div className="flex-shrink-0 mr-2">
               <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-6 h-6" />
             </div>
           )}
-          
-          <div className={`${isUser ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' : isSystemMessage ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'} rounded-lg p-3 ${isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'} ${isAssistant ? 'practice-feedback' : ''}`}>
+          <div 
+            className={`${
+              isUser 
+                ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' 
+                : isSystemMessage 
+                  ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' 
+                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+            } rounded-lg p-3 text-sm ${
+              isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'
+            }`}
+          >
             {isLoading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
-            ) : (
-              <div className={`${isAssistant ? 'feedback-markdown' : 'message-content'} prose prose-sm prose-headings:text-blue-700 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:text-base prose-strong:font-semibold prose-p:mb-1 prose-p:leading-relaxed`}>
-                <ReactMarkdown remarkPlugins={[]}>{displayContent}</ReactMarkdown>
+            ) : isPracticeFeedback ? (
+              // --- Feedback Display Structure ---
+              <div className="practice-feedback-container">
+                {/* Introductory Paragraph in a styled container */}
+                {introductoryText && (
+                  <div className={`prose prose-sm dark:prose-invert max-w-none mb-3 p-3 bg-gray-50/10 dark:bg-gray-800/30 rounded-md border border-gray-200/30 dark:border-gray-700/50 ${darkMode ? 'dark' : 'light'}`}>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: formatMessageContent(introductoryText)
+                      }}
+                      className="feedback-content introduction-text"
+                    />
           </div>
             )}
+
+                {/* Summary of Feedback section */}
+                {overallSummaryTitle && (
+                  <div className="mb-4">
+                    <h3 className="font-medium text-base mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                      <span className="mr-2 text-sm">📋</span>{overallSummaryTitle}
+                    </h3>
+                    <div className={`prose prose-sm dark:prose-invert max-w-none p-3 bg-blue-50/10 dark:bg-blue-900/10 border border-blue-100/30 dark:border-blue-800/30 rounded-md ${darkMode ? 'dark' : 'light'}`}>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: formatMessageContent(overallSummaryContent)
+                        }}
+                        className="feedback-content summary-content"
+                      />
         </div>
-        
+                  </div>
+                )}
+
+                {/* Detailed Feedback Section with Expandable Areas */}
+                {parsedDetailedFeedbackSections.length > 0 && (
+                  <div className="my-3">
+                    <h3 className="font-medium text-base mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                      <span className="mr-2 text-sm">🔍</span>{detailedFeedbackMainTitle}
+                    </h3>
+
+                    {/* Use the renderSections helper to display unique sections */}
+                    {renderSections(parsedDetailedFeedbackSections, message.id, currentMessageActiveSectionKey)}
+                  </div>
+                )}
+              </div>
+              // --- End Feedback Display Structure ---
+            ) : (
+              // Regular message display (non-feedback)
+              <div className={`message-content prose prose-sm dark:prose-invert max-w-none`}>
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[]}>{displayContent}</ReactMarkdown>
+              </div>
+            )}
+          </div>
           {isUser && (
             <div className="flex-shrink-0 ml-2 bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
-              {/* Get first letter of user's name from store, fallback to 'U' */}
               <span className="text-xs">
                 {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'} 
               </span>
@@ -2084,81 +2709,100 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           )}
         </div>
         
-        {/* Render Extracted Option Buttons (e.g., Yes/No for practice) */}
-        {isAssistant && extractedOptions.length > 0 && !showDraftEmailPromptButtons && !showRehearsalOptionButtons && (
+        {/* --- Buttons Area --- */}
+        {/* Practice Feedback Action Buttons - Now moved outside the message */}
+        {isPracticeFeedback && (
+          <div className="mt-1 ml-10 py-2">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+              Do you feel ready to discuss this with your manager, or would you like to practice again?
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => handleOptionClick("Yes, help draft email")} 
+                className="text-xs h-auto py-1.5 px-2.5 bg-blue-600 hover:bg-blue-700 transition-colors duration-200 "
+              >
+                <span className="mr-1 text-xs">📝</span> Yes, help draft email
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleOptionClick("[No, practice again]")} 
+                className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 border-gray-300/60 dark:border-gray-700/60"
+              >
+                <span className="mr-1 text-xs">🔄</span> No, practice again
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Generic Option Buttons (Non-Feedback) */}
+        {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
-            <button
-                key={idx}
-                onClick={() => handleOptionClick(option)}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs"
-            >
-                {option}
-            </button>
+                <Button key={idx} variant="outline" size="sm" onClick={() => handleOptionClick(option)} className="text-xs h-auto py-1.5 px-2.5">{option}</Button>
             ))}
           </div>
         )}
-        
-        {/* Action Phase Prompt Buttons (Ask user if they want a draft) */}
-        {showDraftEmailPromptButtons && (
-          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
-            <div className="w-full text-sm text-gray-600 dark:text-gray-400 mb-1">Would you like to take action now?</div>
-            <button
-              onClick={() => handleOptionClick("Yes, create a draft email to my boss")}
-              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors text-xs"
-            >
-              Yes, create a draft email to my boss
-            </button>
-            <button
-              onClick={() => handleOptionClick("No, not now")} // Or handle differently if needed
-              className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-xs"
-            >
-              Not now
-            </button>
+
+        {/* Conditional Rendering: ONLY show these if NOT practice feedback */}
+        {!isPracticeFeedback && showDraftEmailPromptButtons && (
+          <div className="mt-3 flex flex-wrap gap-2 ml-7 items-center">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mr-2 mb-1 sm:mb-0">Would you like to take action now?</p>
+            <Button variant="default" size="sm" onClick={() => handleOptionClick("Yes, create a draft email to my boss")} className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200">
+              <span className="mr-1">📝</span> Yes, create draft...
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleOptionClick("Not now")} className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200">
+              <span className="mr-1">⏱️</span> Not now
+            </Button>
           </div>
         )}
 
         {/* Rehearsal Option Buttons */}
         {showRehearsalOptionButtons && (
-            <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
-                {extractedOptions.map((option, idx) => (
-                    <button
-                        key={`rehearse-${idx}`}
-                        onClick={() => handleOptionClick(option)} // Use existing handler
-                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-xs"
-                    >
-                        {option}
-                    </button>
-                ))}
+          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
+            <div className="flex gap-1.5">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => handleOptionClick("Practice responding to a positive reply")} 
+                className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
+              >
+                <span className="mr-1">😊</span> Positive reply
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => handleOptionClick("Practice responding to a negative reply")} 
+                className="text-xs h-auto py-1.5 px-2.5 bg-amber-600 hover:bg-amber-700 text-white transition-colors duration-200"
+              >
+                <span className="mr-1">😠</span> Negative reply
+              </Button>
             </div>
+          </div>
         )}
 
-        {/* Email Draft Action Buttons (Copy, Edit, Discard) */}
+        {/* Email Draft Action Buttons */}
         {showEmailDraftActionButtons && (
-          <div className="mt-3 flex flex-wrap gap-1.5 ml-7">
-            <button
-              onClick={() => handleCopyToClipboard(displayContent)} // Pass the draft content
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs"
-            >
-              Copy Email
-            </button>
-            <button
-              onClick={() => handleEditDraft(message.id || `edit-${index}`, displayContent)} // Pass message ID and draft content
-              className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-colors text-xs"
-            >
-              Edit Further
-            </button>
-             <button
-              onClick={() => handleDiscardDraft(message.id)} // Pass message ID
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
-            >
-              Discard
-            </button>
+          <div className="mt-3 ml-7">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
+                <span className="mr-1">📋</span> Copy Email
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleEditDraft(message.id || `edit-${index}`, rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
+                <span className="mr-1">✏️</span> Edit Further
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => handleDiscardDraft(message.id)} className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200">
+                <span className="mr-1">🗑️</span> Discard
+              </Button>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly, or edit it further before sending.</p>
           </div>
         )}
       </div>
     );
-  }, [darkMode, user, handleOptionClick, handleCopyToClipboard, handleEditDraft, handleDiscardDraft]); // Added handlers as dependencies
+  }, [darkMode, user, handleOptionClick, handleCopyToClipboard, handleEditDraft, handleDiscardDraft, activeMessageFeedbackSection, toggleMessageSection]); // Removed expandedMessageSections and handleMessageAccordionValueChange, added activeMessageFeedbackSection and toggleMessageSection
 
   // Update the handlePracticeResponse function
   const handlePracticeResponse = (response: 'yes' | 'no') => {
@@ -2229,6 +2873,63 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
   };
 
+  // Helper function to render feedback sections while avoiding duplicates
+  const renderSections = (sections: any[], messageId: string | undefined, currentActiveSectionKey: string | null) => {
+    // Create a map to track which section keys we've already seen
+    const seenKeys = new Map();
+    
+    // Filter out duplicate sections based on key
+    const uniqueSections = sections.filter(section => {
+      if (seenKeys.has(section.key)) {
+        return false;
+      }
+      seenKeys.set(section.key, true);
+      return true;
+    });
+
+    return (
+      <>
+        {/* Buttons row */}
+        <div className="grid grid-cols-2 gap-1.5 mb-3">
+          {uniqueSections.map((section) => (
+            <Button
+              key={section.key}
+              variant={currentActiveSectionKey === section.key ? "default" : "outline"}
+              size="sm"
+              onClick={() => messageId && toggleMessageSection(messageId, section.key)}
+              className={`text-xs h-auto py-2 px-3 w-full text-left justify-start font-medium transition-all duration-200 
+                ${currentActiveSectionKey === section.key 
+                  ? 'bg-blue-500/80 dark:bg-blue-600/80 text-white dark:text-white border-blue-400 dark:border-blue-500' 
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 border-gray-300/50 dark:border-gray-700/50'}`}
+            >
+              <span className="mr-1.5 text-sm">{section.emoji}</span> {section.originalHeading || section.title}
+            </Button>
+          ))}
+        </div>
+
+        {/* Expanded content area */}
+        {currentActiveSectionKey && (
+          <div className="mt-2 mb-3 w-full border border-gray-200/50 dark:border-gray-700/50 rounded-md overflow-hidden bg-gray-50/10 dark:bg-gray-800/20 col-span-2 animate-fadeIn">
+            <div className="p-3">
+              <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                <span className="mr-1.5 text-base">{uniqueSections.find(s => s.key === currentActiveSectionKey)?.emoji}</span> 
+                <span>{uniqueSections.find(s => s.key === currentActiveSectionKey)?.originalHeading}</span>
+              </h4>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                <div 
+                  dangerouslySetInnerHTML={{
+                    __html: formatMessageContent(uniqueSections.find(s => s.key === currentActiveSectionKey)?.content || '')
+                  }}
+                  className={`feedback-content ${darkMode ? 'dark' : 'light'}`}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   // Render practice module or chat interface based on practice mode state
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
@@ -2241,12 +2942,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         </div>
       ) : (
         <>
-          {/* Enhanced styles for messages container */}
           <div 
             className="flex-1 overflow-y-auto overflow-x-hidden px-4 w-full custom-scrollbar"
             ref={messagesContainerRef}
           >
-            {/* Reduced bottom padding from pb-8 to pb-4 */}
             <div className="w-full max-w-5xl mx-auto pt-6 pb-4">
               {error && (
                 <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 flex items-center justify-between">
@@ -2255,20 +2954,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                     {/* @ts-ignore - we know this exists when needed */}
                     {window.retryButton && window.retryButton}
                   {!currentConversation?.conversationId.startsWith('draft-') && (
-                    <button 
+                    <Button 
+                      variant="outline" 
+                      size="sm"
                       onClick={fetchMessages}
-                        className="ml-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      className="ml-2 text-xs h-auto py-1.5 px-2.5"
                     >
                       Refresh
-                    </button>
+                    </Button>
                   )}
                   </div>
                 </div>
               )}
-              {/* Render all messages - this already handles loading states for individual messages */}
               {storeMessages.map((message, index) => renderMessage(message, index))}
               
-              {/* Only show this loading indicator if we don't have any messages with isLoading set */}
               {loading && !storeMessages.some(msg => msg.isLoading) && (
                 <div className="flex justify-start mb-4">
                   <div className="flex-shrink-0 mr-2">
@@ -2283,7 +2982,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                   </div>
                 </div>
               )}
-              {/* Extra space at the bottom to make sure new messages are visible */}
               <div className="h-4"></div>
               <div ref={messagesEndRef} className="pt-2"></div>
             </div>
@@ -2298,7 +2996,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         </>
       )}
 
-      {/* Render the Edit Draft Modal conditionally */}
       <EditDraftModal 
         isOpen={isEditModalOpen}
         initialContent={draftToEdit}

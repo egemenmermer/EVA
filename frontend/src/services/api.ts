@@ -351,7 +351,7 @@ export const conversationApi = {
       };
 
       // Make the request to our agent
-      const response = await backendApi.post('/api/v1/conversation/message', payload);
+      const response = await agentApi.post('/api/v1/conversation/message', payload);
       debugResponse('POST', '/api/v1/conversation/message', response.status, response.data);
       
       return response.data;
@@ -499,7 +499,7 @@ export const sendMessage = async (
 
     console.log('Sending message payload:', payload);
     
-    const response = await backendApi.post(
+    const response = await agentApi.post(
       '/api/v1/conversation/message',
       payload
     );
