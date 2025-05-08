@@ -15,4 +15,6 @@ public class ConversationContentRequestDTO {
 
     private UUID conversationId;
     private String userQuery;
+    private Boolean includeHistory;
+    private Integer historyLimit;
 }

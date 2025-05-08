@@ -22,5 +22,7 @@ public class SaveMessageRequestDTO {
     private String content;        // Required: The actual text content
     private String role;           // Required: "user" or "assistant"
     private String createdAt;      // Optional: Agent can provide timestamp
+    private Boolean includeHistory;
+    private Integer historyLimit;
 
 } 

@@ -16,9 +16,12 @@ public interface AgentServiceClient {
      * @param managerType The type of manager to use
      * @param userQuery The user's query text
      * @param conversationId The UUID of the conversation
+     * @param includeHistory Whether to include conversation history
+     * @param historyLimit How many previous messages to include
      * @return The agent's response text or an error message
      */
-    String getAgentResponse(ManagerTypes managerType, String userQuery, UUID conversationId);
+    String getAgentResponse(ManagerTypes managerType, String userQuery, UUID conversationId, 
+                           Boolean includeHistory, Integer historyLimit);
     
     /**
      * Generate artifacts related to a query

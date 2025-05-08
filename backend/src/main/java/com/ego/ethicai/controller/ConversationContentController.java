@@ -97,12 +97,26 @@ public class ConversationContentController {
         boolean success = false;
 
         try {
-            // Get AI response
-            AIResponseDTO aiResponse = aiService.getAIResponse(new AIRequestDTO(
+            // Extract history parameters from request
+            Boolean includeHistory = request.getIncludeHistory();
+            Integer historyLimit = request.getHistoryLimit();
+            
+            logger.debug("History parameters from request - includeHistory: {}, historyLimit: {}", 
+                    includeHistory, historyLimit);
+                    
+            // Build request with history parameters
+            AIRequestDTO aiRequest = new AIRequestDTO(
                 conversation.getManagerType(),
                 request.getUserQuery(),
                 conversation.getId()
-            ));
+            );
+            
+            // Set history parameters if provided
+            aiRequest.setIncludeHistory(includeHistory);
+            aiRequest.setHistoryLimit(historyLimit);
+            
+            // Get AI response with history context
+            AIResponseDTO aiResponse = aiService.getAIResponse(aiRequest);
 
             if (aiResponse != null && aiResponse.getAgentResponse() != null && !aiResponse.getAgentResponse().isEmpty()) {
                 agentResponseContent = aiResponse.getAgentResponse();

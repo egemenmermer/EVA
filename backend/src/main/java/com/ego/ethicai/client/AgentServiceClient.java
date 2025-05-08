@@ -35,17 +35,29 @@ public class AgentServiceClient implements com.ego.ethicai.service.AgentServiceC
     }
 
     @Override
-    public String getAgentResponse(ManagerTypes managerType, String userQuery, UUID conversationId) {
+    public String getAgentResponse(ManagerTypes managerType, String userQuery, UUID conversationId, 
+                                  Boolean includeHistory, Integer historyLimit) {
         String url = agentServiceUrl + "/generate-response";
         log.info("Sending request to Agent service for response at URL: {}", url);
         log.debug("Requesting response for query (first 100 chars): {}", 
                 userQuery.length() > 100 ? userQuery.substring(0, 100) + "..." : userQuery);
+        log.debug("History parameters - includeHistory: {}, historyLimit: {}", 
+                includeHistory, historyLimit);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("userQuery", userQuery);
         requestBody.put("managerType", managerType.toString());
         requestBody.put("conversationId", conversationId.toString());
         requestBody.put("temperature", 0.7); // Default temperature
+        
+        // Add history parameters if provided
+        if (includeHistory != null) {
+            requestBody.put("includeHistory", includeHistory);
+        }
+        
+        if (historyLimit != null) {
+            requestBody.put("historyLimit", historyLimit);
+        }
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

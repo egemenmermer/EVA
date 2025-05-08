@@ -56,6 +56,54 @@ const styles = {
 // Add WebKit scrollbar styles
 import './scrollbar.css';
 
+// Add animation styles
+const animationStyles = `
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .message-enter-user {
+    animation: fadeInRight 0.3s ease-out forwards;
+  }
+
+  .message-enter-assistant {
+    animation: fadeInLeft 0.3s ease-out forwards;
+  }
+
+  .loading-animation {
+    animation: fadeSlideIn 0.2s ease-out forwards;
+  }
+`;
+
 // Extended ConversationContentResponseDTO with additional fields from backend
 interface ExtendedConversationDTO extends ConversationContentResponseDTO {
   userQuery?: string;
@@ -339,6 +387,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         color: #1a202c;
       }
     `;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      // Clean up on unmount
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+
+  // Add useEffect for animation styles
+  useEffect(() => {
+    // Add animation styles to document head
+    const styleEl = document.createElement('style');
+    styleEl.textContent = animationStyles;
     document.head.appendChild(styleEl);
     
     return () => {
@@ -876,44 +937,44 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         }))
       });
 
-      // IMPORTANT: Create a snapshot of the current messages to avoid state issues
-      const currentMessagesSnapshot = [...storeMessages];
+    // IMPORTANT: Create a snapshot of the current messages to avoid state issues
+    const currentMessagesSnapshot = [...storeMessages];
 
       // Create user message variable outside the if block so it's accessible throughout the function
       let userMessageId: string | undefined;
       
       // 1. Create and immediately display the user message, unless skipUserMessageUI is true
       if (!skipUserMessageUI) {
-        const userMessage: Message = {
-          id: `user-${Date.now()}`,
-          role: 'user' as Role,
-          content: trimmedValue,
-          conversationId: conversationId, // Use the (potentially updated) real ID
-          createdAt: new Date().toISOString()
-        };
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user' as Role,
+      content: trimmedValue,
+        conversationId: conversationId, // Use the (potentially updated) real ID
+      createdAt: new Date().toISOString()
+    };
         
         // Store the ID for later reference
         userMessageId = userMessage.id;
-      
-        // Add to UI immediately - use functional update to ensure latest state
-        setStoreMessages(prev => [...prev, userMessage]);
-      
-        // Save to localStorage immediately to preserve user message
-        saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
+    
+    // Add to UI immediately - use functional update to ensure latest state
+    setStoreMessages(prev => [...prev, userMessage]);
+    
+    // Save to localStorage immediately to preserve user message
+      saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
       }
-      
-      // 2. Add a loading message
-      const loadingMessage: Message = {
-        id: `loading-${Date.now()}`,
-        role: 'assistant' as Role,
-        content: 'Thinking...',
+    
+    // 2. Add a loading message
+    const loadingMessage: Message = {
+      id: `loading-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: 'Thinking...',
         conversationId: conversationId, // Use the real ID
-        createdAt: new Date().toISOString(),
-        isLoading: true
-      };
+      createdAt: new Date().toISOString(),
+      isLoading: true
+    };
 
-      // Add loading message to UI state
-      setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
+    // Add loading message to UI state
+    setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
 
       // 3. Send message to the AGENT API (using the real conversationId)
       const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
@@ -926,9 +987,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       });
       
       const agentPayload = {
-        conversationId: conversationId,
-        userQuery: trimmedValue, 
-        managerType: activeManagerType,
+          conversationId: conversationId,
+          userQuery: trimmedValue, 
+          managerType: activeManagerType,
         temperature: temperature,
         includeHistory: true, // Add this parameter to request full history
         historyLimit: 20 // Request more history for better context
@@ -937,10 +998,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       // Explicitly type the expected response from the AGENT
       // It should now return the IDs for both messages
       interface AgentApiResponse {
-        messages: [
-          { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
-          { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
-        ]
+          messages: [
+              { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
+              { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
+          ]
       }
       
       const agentResponse = await agentApi.post<AgentApiResponse>('/api/v1/conversation/message', agentPayload);
@@ -953,8 +1014,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       
       // Basic validation
       if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length < 2) {
-        console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
-        throw new Error("Invalid response structure from agent");
+          console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
+          throw new Error("Invalid response structure from agent");
       }
 
       // Extract messages and IDs from agent response
@@ -2289,10 +2350,33 @@ Format the rest like a real email reply with greeting, body, and signature.`;
       // Existing code for other options
       if (lowerCaseOption.includes('no, not now') || lowerCaseOption.includes('not now')) {
         console.log('User chose not to proceed for now.');
+        
+        // Create a user message to show in the chat
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user' as Role,
+          content: optionText,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Add the user message to the UI first
+        setStoreMessages(prev => [...prev, userMessage]);
+        
+        // Save to localStorage if we have a valid conversation ID
+        if (currentConversation?.conversationId) {
+          saveConversationState(currentConversation.conversationId, [...storeMessages, userMessage]);
+        }
+        
+        // Now send the message through the normal flow to get a contextual response
+        // Use setTimeout to ensure the user message is rendered first
+        setTimeout(() => {
+          handleSendMessage(optionText, true); // Pass true to skip adding user message again
+        }, 100);
       }
       else {
-        handleSendMessage(optionText);
-      }
+      handleSendMessage(optionText);
+    }
       isProcessingOption.current = false;
     }
   }, [storeMessages, currentConversation, managerType, temperature, setStoreMessages, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
@@ -2531,6 +2615,13 @@ Format the rest like a real email reply with greeting, body, and signature.`;
     let isAssistant = message.role === 'assistant';
     const isSystemMessage = message.role === 'system';
     const isLoading = message.isLoading === true;
+    
+    // Determine animation class based on message type
+    const animationClass = isLoading 
+      ? 'loading-animation' 
+      : isUser 
+        ? 'message-enter-user' 
+        : 'message-enter-assistant';
     
     // Simplify detailed email draft requests for display
     if (isUser && message.content && typeof message.content === 'string') {
@@ -2920,7 +3011,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
                   : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
             } rounded-lg p-3 text-sm ${
               isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[70%]' : 'max-w-[75%]'
-            }`}
+            } ${animationClass}`}
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
@@ -3045,7 +3136,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
               </div>
             )}
 
-        {/* Generic Option Buttons (Non-Feedback) */}
+        {/* Generic Option Buttons (Non-Feedback) */} 
         {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
@@ -3067,7 +3158,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
             </div>
         )}
 
-        {/* Email Draft Action Buttons */}
+        {/* Email Draft Action Buttons */} 
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">
@@ -3076,9 +3167,6 @@ Format the rest like a real email reply with greeting, body, and signature.`;
               </Button>
               <Button variant="outline" size="sm" onClick={() => handleEditDraft(message.id || `edit-${index}`, rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
                 <span className="mr-1">✏️</span> Edit Further
-              </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDiscardDraft(message.id)} className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200">
-                <span className="mr-1">🗑️</span> Discard
               </Button>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly, or edit it further before sending.</p>

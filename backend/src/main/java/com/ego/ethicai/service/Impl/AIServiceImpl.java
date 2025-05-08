@@ -35,11 +35,29 @@ public class AIServiceImpl implements AIService {
                     .build();
             }
             
-            // Call the agent service
+            // Set default values for includeHistory and historyLimit if they're null
+            Boolean includeHistory = request.getIncludeHistory();
+            if (includeHistory == null) {
+                includeHistory = true; // Default to true to maintain context
+                logger.debug("Setting default includeHistory=true for request");
+            }
+            
+            Integer historyLimit = request.getHistoryLimit();
+            if (historyLimit == null) {
+                historyLimit = 20; // Default to 20 messages for context
+                logger.debug("Setting default historyLimit=20 for request");
+            }
+            
+            logger.debug("Using history parameters: includeHistory={}, historyLimit={}", 
+                        includeHistory, historyLimit);
+            
+            // Call the agent service with history parameters
             String agentResponse = agentServiceClient.getAgentResponse(
                 request.getManagerType(), 
                 request.getUserQuery(),
-                request.getConversationId()
+                request.getConversationId(),
+                includeHistory,
+                historyLimit
             );
             
             // Check if the response is valid

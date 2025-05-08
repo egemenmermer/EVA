@@ -82,39 +82,32 @@ class ConversationMemory:
     def save_exchange(self, conversation_id: str, user_message: str, assistant_message: str) -> bool:
         """Save a conversation exchange to memory."""
         try:
+            # Generate a timestamp for this exchange
+            timestamp = datetime.now().isoformat()
+            
+            # Create the exchange object with timestamp
             exchange = {
-                "timestamp": datetime.now(UTC).isoformat(),
                 "user": user_message,
-                "assistant": assistant_message
+                "assistant": assistant_message,
+                "timestamp": timestamp
             }
             
-            if self.redis_client:
-                # Get existing history
-                key = self.get_conversation_key(conversation_id)
-                existing_data = self.redis_client.get(key)
-                
-                if existing_data:
-                    history = json.loads(existing_data)
-                else:
-                    history = []
-                
-                # Append new exchange and save
-                history.append(exchange)
-                self.redis_client.setex(
-                    key, 
-                    self.expiry_seconds,
-                    json.dumps(history)
-                )
-            else:
-                # Fallback to in-memory storage
-                if conversation_id not in self.fallback_storage:
-                    self.fallback_storage[conversation_id] = []
-                self.fallback_storage[conversation_id].append(exchange)
+            history_key = self.get_conversation_key(conversation_id)
+            existing_history = self.redis_client.get(history_key)
             
-            logger.info(f"Saved conversation exchange for {conversation_id}")
+            if existing_history:
+                history = json.loads(existing_history)
+            else:
+                history = []
+                
+            history.append(exchange)
+            
+            # Save the updated history
+            self.redis_client.set(history_key, json.dumps(history))
+            logger.info(f"Saved conversation exchange for {conversation_id} at {timestamp}")
             return True
         except Exception as e:
-            logger.error(f"Error saving conversation exchange: {str(e)}")
+            logger.error(f"Error saving exchange: {str(e)}")
             return False
     
     def get_history(self, conversation_id: str, max_turns: int = 10) -> List[Dict[str, str]]:
@@ -137,16 +130,24 @@ class ConversationMemory:
             logger.error(f"Error retrieving conversation history: {str(e)}")
             return []
     
-    def format_for_prompt(self, conversation_id: str, max_turns: int = 5) -> str:
+    def format_for_prompt(self, conversation_id: str, max_turns: int = 20) -> str:
         """Format conversation history for inclusion in a prompt."""
         history = self.get_history(conversation_id, max_turns)
         if not history:
             return ""
         
-        formatted = "Previous conversation:\n"
-        for exchange in history:
-            formatted += f"User: {exchange.get('user', '')}\n"
-            formatted += f"Assistant: {exchange.get('assistant', '')}\n\n"
+        # Reverse the history to put most recent conversations last (chronological order)
+        history = history[::-1]
+        
+        formatted = "===== CONVERSATION HISTORY (CHRONOLOGICAL ORDER) =====\n\n"
+        
+        # Add each exchange with clear formatting and timestamps if available
+        for i, exchange in enumerate(history):
+            exchange_num = i + 1
+            timestamp = exchange.get('timestamp', 'unknown time')
+            formatted += f"EXCHANGE {exchange_num} (Time: {timestamp}):\n"
+            formatted += f"USER: {exchange.get('user', '')}\n"
+            formatted += f"ASSISTANT: {exchange.get('assistant', '')}\n\n"
         
         return formatted
     
@@ -259,6 +260,8 @@ class Query(BaseModel):
     temperature: Optional[float] = 0.7
     managerType: Optional[str] = None
     request_type: Optional[str] = "initial_query"
+    includeHistory: Optional[bool] = True
+    historyLimit: Optional[int] = 20
 
 class PracticeModeRequest(BaseModel):
     """Model for entering/exiting practice mode."""
@@ -470,6 +473,8 @@ async def generate_response(
         logger.info(f"User query: {query.userQuery[:50]}...")
         
         temperature = 0.7
+        include_history = True 
+        history_limit = 20  # Default history limit
         
         if hasattr(query, "temperature") and query.temperature is not None:
             try:
@@ -479,6 +484,21 @@ async def generate_response(
                     logger.info(f"Using temperature from request: {temperature}")
             except (ValueError, TypeError):
                 logger.warning(f"Invalid temperature value provided: {query.temperature}. Using default {temperature}.")
+                pass
+                
+        # Extract history parameters if available
+        if hasattr(query, "includeHistory") and query.includeHistory is not None:
+            include_history = query.includeHistory
+            logger.info(f"Using includeHistory from request: {include_history}")
+            
+        if hasattr(query, "historyLimit") and query.historyLimit is not None:
+            try:
+                limit_value = int(query.historyLimit)
+                if limit_value > 0:
+                    history_limit = limit_value
+                    logger.info(f"Using historyLimit from request: {history_limit}")
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid historyLimit value provided: {query.historyLimit}. Using default {history_limit}.")
                 pass
         
         # Create the LLM instance
@@ -537,46 +557,79 @@ Your feedback MUST be structured *exactly* as follows, using these *exact litera
             system_message = initial_query_prompt
             logger.info("Using initial query prompt.")
         
-        conversation_context = conversation_memory.format_for_prompt(query.conversationId)
-        if conversation_context:
-            logger.info(f"Retrieved conversation history for {query.conversationId}")
-            system_message = f"{system_message}\n\n{conversation_context}"
+        # Retrieve conversation history if enabled
+        conversation_context = ""
+        if include_history:
+            conversation_context = conversation_memory.format_for_prompt(query.conversationId, history_limit)
+            if conversation_context:
+                logger.info(f"Retrieved conversation history for {query.conversationId} with limit {history_limit}")
+                # Don't append to system message - create a separate message for history
+            else:
+                logger.info(f"No conversation history found for {query.conversationId}")
+        else:
+            logger.info(f"Skipping conversation history for {query.conversationId} as includeHistory=False")
         
         response_content = ""
         try:
-            messages = [
-                SystemMessage(content=system_message),
-                HumanMessage(content=query.userQuery)
-            ]
+            # Create messages array with system prompt first
+            messages = [SystemMessage(content=system_message)]
             
-            response = await llm.ainvoke(messages)
-            response_content = response.content 
-            logger.info(f"Generated response (first 50 chars): {response_content[:50]}...")
+            # Add conversation history as a SEPARATE message between system and user
+            if conversation_context:
+                # Use a separate system message specifically for history
+                history_message = SystemMessage(content=f"""
+===== IMPORTANT CONVERSATION HISTORY =====
+The following is your conversation history with this user.
+You MUST reference relevant details from this history in your response.
+You MUST acknowledge information they've previously shared.
+
+{conversation_context}
+
+===== END OF CONVERSATION HISTORY =====
+""")
+                messages.append(history_message)
+                logger.info(f"Added conversation history as separate message for {query.conversationId}")
+            
+            # Add the user query as the final message
+            messages.append(HumanMessage(content=query.userQuery))
+            
+            # Get the response
+            llm = ChatOpenAI(
+                temperature=temperature,
+                model_name="gpt-4o-mini",
+                openai_api_key=os.getenv('OPENAI_API_KEY')
+            )
+            
+            # Call the LLM with ainvoke since this is an async route
+            ai_response = await llm.ainvoke(messages)
+            ai_response_content = ai_response.content
+            logger.info(f"Generated AI response for conv {query.conversationId} using relevant prompt.")
             
             conversation_memory.save_exchange(
                 query.conversationId,
                 query.userQuery,
-                response_content
+                ai_response_content
             )
             
-        except Exception as llm_error:
-            logger.error(f"Error from LLM: {str(llm_error)}")
-            response_content = """I apologize, but I encountered an error generating a response. 
-            Please try asking your question again, or rephrase it slightly."""
+        except Exception as e:
+            logger.error(f"Error generating AI response for conv {query.conversationId}: {str(e)}")
+            logger.error(traceback.format_exc())
+            # Explicitly set error content if LLM call fails
+            ai_response_content = f"Error: Failed to generate AI response due to: {str(e)}" 
 
         response_dto = ConversationContentResponseDTO(
             id=str(uuid.uuid4()),
             conversationId=query.conversationId,
             userQuery=query.userQuery,
-            agentResponse=response_content,
+            agentResponse=ai_response_content,
             role="assistant",
-            content=response_content,
+            content=ai_response_content,
             createdAt=datetime.utcnow().isoformat(),
             inPracticeMode=False,
             practiceScore=None
         )
         
-        if response_content and "I apologize" not in response_content:
+        if ai_response_content and "I apologize" not in ai_response_content:
             logger.info(f"Adding background task generate_artifacts_only for conv {query.conversationId}")
             background_tasks.add_task(
                 generate_artifacts_only, 
@@ -1317,11 +1370,16 @@ async def send_message(
     body = await request.json()
     logger.info(f"Request body: {body}")
 
+    # Extract request parameters
     conversation_id = body.get("conversationId")
     user_query = body.get("userQuery")
     manager_type = body.get("managerType") # Included for consistency, though agent might have its own
     temperature = body.get("temperature", 0.7)
     request_type = body.get("request_type", "initial_query") # Default to initial_query
+    include_history = body.get("includeHistory", True)  # Default to True
+    history_limit = body.get("historyLimit", 20)  # Default to 20 turns of history
+
+    logger.info(f"History parameters: includeHistory={include_history}, historyLimit={history_limit}")
 
     # Generate unique IDs for user and assistant messages for frontend tracking
     user_message_id = str(uuid.uuid4())
@@ -1509,12 +1567,16 @@ Your task is to:
              logger.info(f"Using default system prompt for conv {conversation_id}")
 
         # --- Retrieve conversation history ---
-        conversation_context = conversation_memory.format_for_prompt(conversation_id)
-        if conversation_context:
-            logger.info(f"Retrieved conversation history for {conversation_id}")
-            selected_system_prompt = f"{selected_system_prompt}\n\n{conversation_context}"
+        conversation_context = ""
+        if include_history:
+            conversation_context = conversation_memory.format_for_prompt(conversation_id, history_limit)
+            if conversation_context:
+                logger.info(f"Retrieved conversation history for {conversation_id} with limit {history_limit}")
+                # Don't append to system message - create a separate message for history
+            else:
+                logger.info(f"No conversation history found for {conversation_id}")
         else:
-            logger.info(f"No conversation history found for {conversation_id}")
+            logger.info(f"Skipping conversation history for {conversation_id} as includeHistory=False")
 
         # --- Generate AI Response --- 
         ai_response_content = "Error: Failed to generate AI response." # Default error
@@ -1525,13 +1587,31 @@ Your task is to:
                 openai_api_key=os.getenv('OPENAI_API_KEY')
             )
             
-            messages_for_llm = [
-                SystemMessage(content=selected_system_prompt),
-                HumanMessage(content=user_query) # Pass the original user query for context
-            ]
+            # Create messages array with system prompt first
+            messages = [SystemMessage(content=selected_system_prompt)]
             
-            llm_response = await llm.ainvoke(messages_for_llm)
-            ai_response_content = llm_response.content
+            # Add conversation history as a SEPARATE message between system and user
+            if conversation_context:
+                # Use a separate system message specifically for history
+                history_message = SystemMessage(content=f"""
+===== IMPORTANT CONVERSATION HISTORY =====
+The following is your conversation history with this user.
+You MUST reference relevant details from this history in your response.
+You MUST acknowledge information they've previously shared.
+
+{conversation_context}
+
+===== END OF CONVERSATION HISTORY =====
+""")
+                messages.append(history_message)
+                logger.info(f"Including conversation history as separate message for {conversation_id}")
+            
+            # Add the user query as the final message
+            messages.append(HumanMessage(content=user_query))
+            
+            # Call the LLM with ainvoke since this is an async route
+            ai_response = await llm.ainvoke(messages)
+            ai_response_content = ai_response.content
             logger.info(f"Generated AI response for conv {conversation_id} using relevant prompt.")
             
             # Save to conversation memory
@@ -1846,3 +1926,131 @@ async def submit_practice_score(
         logger.error(f"Error processing practice score submission for conv {payload.conversationId}: {e}")
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal server error processing practice score")
+
+@app.post("/api/v1/conversation/generate-response", response_model=ConversationContentResponseDTO)
+async def generate_response(query: Query):
+    """Generate a response to a user query using the specified model."""
+    try:
+        logger.info(f"Generating response for conversation ID: {query.conversationId} (Type: {query.request_type})")
+        logger.info(f"User query: {query.userQuery[:50]}...")
+        
+        temperature = 0.7
+        include_history = True 
+        history_limit = 20  # Default history limit
+        
+        if hasattr(query, "temperature") and query.temperature is not None:
+            try:
+                temp_value = float(query.temperature)
+                if 0 <= temp_value <= 1:
+                    temperature = temp_value
+                    logger.info(f"Using temperature from request: {temperature}")
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid temperature value provided: {query.temperature}. Using default {temperature}.")
+                pass
+        
+        if hasattr(query, "includeHistory") and query.includeHistory is not None:
+            include_history = query.includeHistory
+            logger.info(f"Using includeHistory from request: {include_history}")
+        
+        if hasattr(query, "historyLimit") and query.historyLimit is not None:
+            try:
+                history_limit = int(query.historyLimit)
+                logger.info(f"Using historyLimit from request: {history_limit}")
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid historyLimit value provided: {query.historyLimit}. Using default {history_limit}.")
+                pass
+        
+        # Determine system message based on request type
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        selected_model = "gpt-4o-mini"
+        
+        # For direct API calls, we use a standard system prompt
+        system_message = DEFAULT_SYSTEM_PROMPT 
+        
+        request_type = query.request_type
+        if request_type == "follow_up":
+            system_message = FOLLOW_UP_PROMPT
+        elif request_type == "post_practice":
+            system_message = POST_PRACTICE_PROMPT
+        elif request_type == "post_feedback":
+            system_message = POST_FEEDBACK_PROMPT
+        elif request_type == "elaborate_context":
+            system_message = ELABORATE_CONTEXT_PROMPT
+        else: 
+            system_message = initial_query_prompt
+            logger.info("Using initial query prompt.")
+        
+        # Retrieve conversation history if enabled
+        conversation_context = ""
+        if include_history:
+            conversation_context = conversation_memory.format_for_prompt(query.conversationId, history_limit)
+            if conversation_context:
+                logger.info(f"Retrieved conversation history for {query.conversationId} with limit {history_limit}")
+            else:
+                logger.info(f"No conversation history found for {query.conversationId}")
+        else:
+            logger.info(f"Skipping conversation history for {query.conversationId} as includeHistory=False")
+        
+        response_content = ""
+        try:
+            # Create messages array with system prompt first
+            messages = [SystemMessage(content=system_message)]
+            
+            # Add conversation history as a SEPARATE message between system and user
+            if conversation_context:
+                # Use a separate system message specifically for history
+                history_message = SystemMessage(content=f"""
+===== IMPORTANT CONVERSATION HISTORY =====
+The following is your conversation history with this user.
+You MUST reference relevant details from this history in your response.
+You MUST acknowledge information they've previously shared.
+
+{conversation_context}
+
+===== END OF CONVERSATION HISTORY =====
+""")
+                messages.append(history_message)
+                logger.info(f"Added conversation history as separate message for {query.conversationId}")
+            
+            # Add the user query as the final message
+            messages.append(HumanMessage(content=query.userQuery))
+            
+            # Get the response
+            llm = ChatOpenAI(
+                temperature=temperature,
+                model_name=selected_model,
+                openai_api_key=openai_api_key
+            )
+            
+            # Call the LLM with ainvoke since this is an async route
+            ai_response = await llm.ainvoke(messages)
+            ai_response_content = ai_response.content
+            logger.info(f"Generated AI response for conv {query.conversationId} using relevant prompt.")
+            
+            conversation_memory.save_exchange(
+                query.conversationId,
+                query.userQuery,
+                ai_response_content
+            )
+            logger.info(f"Saved conversation exchange to memory for {query.conversationId}")
+        
+        except Exception as e:
+            logger.error(f"Error generating AI response for conv {query.conversationId}: {str(e)}")
+            logger.error(traceback.format_exc())
+            # Explicitly set error content if LLM call fails
+            ai_response_content = f"Error: Failed to generate AI response due to: {str(e)}"
+        
+        response_dto = ConversationContentResponseDTO(
+            content=ai_response_content,
+            artifacts=[]
+        )
+        
+        return response_dto
+    
+    except Exception as e:
+        logger.error(f"Error generating response: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error generating response: {str(e)}"
+        )
