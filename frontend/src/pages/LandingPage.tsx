@@ -110,16 +110,35 @@ export const LandingPage: React.FC = () => {
 <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
   {/* Sticky Header with Start Button */}
   <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-md z-50">
-    <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white">EVA: Ethical Virtual Assistant</h1>
+  <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <h1 className="text-xl font-bold text-gray-900 dark:text-white">EVA: Ethical Virtual Assistant</h1>
+    <div className="flex gap-4">
+      <a
+        href="https://example.com/pre-survey"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="px-8 py-4 text-lg font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
+      >
+        Pre-survey
+      </a>
       <button
         onClick={handleGetStarted}
         className="px-8 py-4 text-lg font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
       >
         Start Practicing
       </button>
+      <a
+        href="https://example.com/post-survey"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="px-8 py-4 text-lg font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
+      >
+        Post-survey
+      </a>
     </div>
   </div>
+</div>
+
 
   {/* Spacer to offset fixed header */}
   <div className="pt-24" />
