@@ -322,23 +322,60 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   }, []);
 
-  // Add scroll to bottom function
+  // Fix the scrolling function to ensure it works consistently but with gentler movement
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      try {
+        // Directly scroll to the messages end ref with gentler behavior
+        messagesEndRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest' // Less aggressive scrolling
+        });
+        
+        console.log("Direct scroll executed");
+        
+        // Also try a fallback scroll approach with the parent
+        const container = messagesEndRef.current.parentElement;
+        if (container) {
+          console.log("Also scrolling container");
+          
+          // Calculate a gentler scroll position (not all the way to the bottom)
+          const targetPosition = messagesEndRef.current.offsetTop - container.clientHeight * 0.7;
+          
+          // Force scroll with a timeout to ensure DOM has updated
+          setTimeout(() => {
+            container.scrollTo({
+              top: targetPosition > 0 ? targetPosition : 0,
+              behavior: 'smooth'
+            });
+          }, 50);
+        }
+      } catch (err) {
+        console.error("Scrolling failed:", err);
+      }
+    } else {
+      console.warn("messagesEndRef.current is null");
+    }
   };
 
   // Use useEffect to scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
+    // Add a small delay to ensure rendering is complete
+    const timer = setTimeout(() => {
+      console.log("Message change detected, scrolling...");
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [currentScenario?.conversation]);
 
   // Add an additional effect to handle scrolling after feedback is shown
   useEffect(() => {
     if (currentFeedback) {
-      // Use a short timeout to ensure the feedback has rendered
+      // Use a slightly longer timeout to ensure the feedback has rendered
       const timer = setTimeout(() => {
+        console.log("Feedback change detected, scrolling...");
         scrollToBottom();
-      }, 200);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [currentFeedback]);
@@ -431,8 +468,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         conversation: userMessageOnly
       });
       
-      // Scroll to show the new user message
-      setTimeout(scrollToBottom, 50);
+      // Force scroll after user's message
+      setTimeout(() => {
+        console.log("User message added, scrolling...");
+        scrollToBottom();
+      }, 100);
       
       // Now prepare the full updated conversation that will include manager response
       const updatedConversation = [...userMessageOnly];
@@ -453,8 +493,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             conversation: [...userMessageOnly, typingIndicator as any]
           }));
           
-          // Scroll to show typing indicator
-          setTimeout(scrollToBottom, 50);
+          // Force scroll for typing indicator
+          setTimeout(() => {
+            console.log("Typing indicator added, scrolling...");
+            scrollToBottom();
+          }, 50);
           
           // After a delay, show the manager's response and feedback
           setTimeout(() => {
@@ -492,8 +535,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               currentStep: currentScenario.currentStep + 1
             });
             
-            // Manually trigger scroll after state update
-            setTimeout(scrollToBottom, 100);
+            // Force scroll for manager response and feedback
+            setTimeout(() => {
+              console.log("Manager response added, scrolling...");
+              scrollToBottom();
+            }, 200);
           }, 1500); // Show the response after 1.5 seconds
         }, 800); // Start typing after 0.8 seconds
       } else {
@@ -512,8 +558,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             conversation: [...userMessageOnly, typingIndicator as any]
           }));
           
-          // Scroll to show typing indicator
-          setTimeout(scrollToBottom, 50);
+          // Force scroll for final typing indicator
+          setTimeout(() => {
+            console.log("Final typing indicator, scrolling...");
+            scrollToBottom();
+          }, 50);
           
           // After a delay, show the final feedback
           setTimeout(() => {
@@ -571,17 +620,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               // Then set final report and options
               setFinalReport(true);
               setShowOptions(true);
-              // Ensure we scroll to the bottom to show the final report
-              setTimeout(scrollToBottom, 100);
+              
+              // Force scroll for final report
+              setTimeout(() => {
+                console.log("Final report shown, scrolling...");
+                scrollToBottom();
+              }, 100);
             }, 800);
           }, 1500); // Show the final response after 1.5 seconds
         }, 800); // Start typing after 0.8 seconds
       }
-      
-      // Scroll to the updated content after a short delay
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
     } catch (err: any) {
       console.error("Error processing choice:", err);
       setError("Failed to process your choice. Please try again.");
@@ -781,7 +829,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       case 'user':
         return 'p-3 bg-blue-50/70 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-800/30 rounded-2xl rounded-tr-none max-w-[80%] ml-auto';
       case 'feedback':
-        return 'p-3 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-2';
+        return 'p-2 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-1 text-sm'; // Smaller padding and font
       case 'final_evaluation':
         return 'p-3 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3';
       default:
@@ -1458,7 +1506,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         </div>
       ) : (
         <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 pb-36">
+          <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
             {currentScenario?.scenario && (
               <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
                 <p className="text-sm">
@@ -1474,7 +1522,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             )}
 
             {currentScenario?.conversation && currentScenario.conversation.length > 0 ? (
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2 mb-2">
                 {currentScenario.conversation.map((message, index) => {
                   // Skip feedback messages as they'll be shown in the sticky section instead
                   if (message.role === 'feedback') {
@@ -1501,7 +1549,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                           <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center ${isSameRoleAsPrev ? 'hidden' : ''}`}>
                             {message.role === 'manager' ? null : 'You'}
                           </div>
-                          <div className={getMessageStyle(message.role)}>
+                          <div className={getMessageStyle(message.role)} data-role={message.role}>
                             {message.role === 'manager' && !isSameRoleAsPrev && (
                               <div className="absolute -left-12 -top-5">
                                 <div className="relative w-16 h-16 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
@@ -1530,12 +1578,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                   );
                 })}
                 
-                {/* Show final score card if completed */}
-                {showOptions && (
-                  <div ref={messagesEndRef} />
-                )}
+                {/* Add an empty div with minimal height for scrolling target */}
+                <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
                 
-                {!showOptions && <div ref={messagesEndRef} />}
+                {/* Show final score card if completed */}
+                {showOptions && finalReport && (
+                  <div className="mt-2">
+                    <h3 className="text-lg font-semibold">Practice Complete</h3>
+                    <p>Your ethical decision-making score is {finalScore}/100.</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="p-4 bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200/80 dark:border-amber-800/30 rounded-lg mb-4">
@@ -1550,7 +1602,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             {currentScenario?.conversation && currentScenario.conversation.some(msg => msg.role === 'feedback') && (
               <div 
                 key={`feedback-wrapper-${currentFeedback || Date.now()}`} 
-                className={`mb-0 pb-0 feedback-container ${finalReport ? 'feedback-final pt-3' : 'feedback-active'}`}
+                className={`mb-0 pb-0 feedback-container ${finalReport ? 'feedback-final pt-1' : 'feedback-active'}`}
               >
                 <div className={`${finalReport ? 'bg-white/95 dark:bg-gray-900/95' : 'bg-white dark:bg-gray-900'} feedback-transition pb-0`}>
                   {currentScenario.conversation
@@ -1559,13 +1611,13 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                     .map((feedbackMsg, index) => (
                       <div 
                         key={`feedback-${currentFeedback || ((feedbackMsg as FeedbackMessage).evs + '-' + Date.now())}`} 
-                        className="p-3 pb-1 feedback-appear"
+                        className="p-2 feedback-appear"
                       >
                         <div className="flex flex-col items-center">
                           <div className={`${getMessageStyle('feedback')} animate-slideIn mb-0 max-w-full ${finalReport ? 'border-indigo-300 dark:border-indigo-700' : ''}`}>
                             <div>{feedbackMsg.content}</div>
                             {(feedbackMsg as FeedbackMessage).evs !== undefined && (
-                              <div className="mt-1 text-sm text-indigo-700 dark:text-indigo-300 font-medium">
+                              <div className="mt-1 text-xs text-indigo-700 dark:text-indigo-300 font-medium">
                                 Ethical Value Score: {(feedbackMsg as FeedbackMessage).evs}
                               </div>
                             )}

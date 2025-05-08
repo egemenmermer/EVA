@@ -160,13 +160,25 @@ interface SendMessageParams {
   temperature: number;
 }
 
+// Enhance the sendMessage function to include more message history
 const sendMessage = async (conversationId: string, userQuery: string, managerType: ManagerType, temperature: number) => {
   try {
+    // Log the request parameters for debugging
+    console.log('SendMessage API call with params:', {
+      conversationId,
+      messageLength: userQuery.length,
+      managerType,
+      temperature
+    });
+
+    // Add extra request parameter to include more context
     const response = await api.post<MessageResponse>('/api/v1/conversation/message', {
       conversationId,
       userQuery,
       managerType,
-      temperature: temperature || 0.7
+      temperature: temperature || 0.7,
+      includeHistory: true, // Add this parameter to request full history
+      historyLimit: 20 // Request at least 20 previous messages for context
     });
 
     if (!response.data) {
@@ -228,6 +240,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Add a ref to track if feedback is being processed
   const isProcessingFeedback = useRef(false);
+  
+  // Add state to track if we're currently processing an email draft request
+  const [isDraftingEmail, setIsDraftingEmail] = useState(false);
+  // Ref to prevent multiple clicks
+  const isProcessingOption = useRef(false);
   
   // State for Edit Draft Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -849,44 +866,54 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
          return;
       }
 
-    // IMPORTANT: Create a snapshot of the current messages to avoid state issues
-    const currentMessagesSnapshot = [...storeMessages];
+      // Add debug logging for conversation tracking
+      console.log("Message history tracking:", {
+        conversationId,
+        existingMessages: storeMessages.length,
+        messagePreview: storeMessages.slice(-3).map(m => ({
+          role: m.role,
+          preview: m.content.substring(0, 30) + (m.content.length > 30 ? '...' : '')
+        }))
+      });
 
-    // Create user message variable outside the if block so it's accessible throughout the function
-    let userMessageId: string | undefined;
-    
-    // 1. Create and immediately display the user message, unless skipUserMessageUI is true
-    if (!skipUserMessageUI) {
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user' as Role,
-      content: trimmedValue,
-        conversationId: conversationId, // Use the (potentially updated) real ID
-      createdAt: new Date().toISOString()
-    };
+      // IMPORTANT: Create a snapshot of the current messages to avoid state issues
+      const currentMessagesSnapshot = [...storeMessages];
+
+      // Create user message variable outside the if block so it's accessible throughout the function
+      let userMessageId: string | undefined;
       
-      // Store the ID for later reference
-      userMessageId = userMessage.id;
-    
-    // Add to UI immediately - use functional update to ensure latest state
-    setStoreMessages(prev => [...prev, userMessage]);
-    
-    // Save to localStorage immediately to preserve user message
-      saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
-    }
-    
-    // 2. Add a loading message
-    const loadingMessage: Message = {
-      id: `loading-${Date.now()}`,
-      role: 'assistant' as Role,
-      content: 'Thinking...',
+      // 1. Create and immediately display the user message, unless skipUserMessageUI is true
+      if (!skipUserMessageUI) {
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user' as Role,
+          content: trimmedValue,
+          conversationId: conversationId, // Use the (potentially updated) real ID
+          createdAt: new Date().toISOString()
+        };
+        
+        // Store the ID for later reference
+        userMessageId = userMessage.id;
+      
+        // Add to UI immediately - use functional update to ensure latest state
+        setStoreMessages(prev => [...prev, userMessage]);
+      
+        // Save to localStorage immediately to preserve user message
+        saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
+      }
+      
+      // 2. Add a loading message
+      const loadingMessage: Message = {
+        id: `loading-${Date.now()}`,
+        role: 'assistant' as Role,
+        content: 'Thinking...',
         conversationId: conversationId, // Use the real ID
-      createdAt: new Date().toISOString(),
-      isLoading: true
-    };
+        createdAt: new Date().toISOString(),
+        isLoading: true
+      };
 
-    // Add loading message to UI state
-    setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
+      // Add loading message to UI state
+      setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
 
       // 3. Send message to the AGENT API (using the real conversationId)
       const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
@@ -899,30 +926,35 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       });
       
       const agentPayload = {
-          conversationId: conversationId,
-          userQuery: trimmedValue, 
-          managerType: activeManagerType,
-          temperature: temperature
+        conversationId: conversationId,
+        userQuery: trimmedValue, 
+        managerType: activeManagerType,
+        temperature: temperature,
+        includeHistory: true, // Add this parameter to request full history
+        historyLimit: 20 // Request more history for better context
       };
       
       // Explicitly type the expected response from the AGENT
       // It should now return the IDs for both messages
       interface AgentApiResponse {
-          messages: [
-              { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
-              { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
-          ]
+        messages: [
+          { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
+          { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
+        ]
       }
       
       const agentResponse = await agentApi.post<AgentApiResponse>('/api/v1/conversation/message', agentPayload);
 
+      // Log response for debugging
+      console.log('Agent API response received, messages length:', 
+        agentResponse.data?.messages?.length || 0);
+
       const responseData = agentResponse.data;
-      console.log('Agent API response (includes message IDs):', responseData);
       
       // Basic validation
       if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length < 2) {
-          console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
-          throw new Error("Invalid response structure from agent");
+        console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
+        throw new Error("Invalid response structure from agent");
       }
 
       // Extract messages and IDs from agent response
@@ -1944,8 +1976,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   }, [messages, currentConversation]);
 
   // Find and modify the handleOptionClick function
-  const handleOptionClick = useCallback((optionText: string) => {
+  const handleOptionClick = useCallback((optionText: string, event?: React.MouseEvent) => {
+    // Prevent event propagation if event is provided
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     console.log('Option clicked:', optionText);
+    
+    // If already processing an option, don't allow another click
+    if (isProcessingOption.current) {
+      console.log('Already processing an option, ignoring this click');
+      return;
+    }
+    
+    // Set processing flag
+    isProcessingOption.current = true;
+    
     const lowerCaseOption = optionText.toLowerCase();
 
     // For "Practice again" or "Yes, practice" options
@@ -1968,6 +2016,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Could not initiate practice: missing context.');
         setError('Could not start practice mode. Missing conversation context.');
       }
+      isProcessingOption.current = false;
     } 
     // For "Practice responding to a positive/negative reply" options
     else if (lowerCaseOption.includes('practice responding to a')) {
@@ -2024,8 +2073,10 @@ Format the rest like a real email reply with greeting, body, and signature.`;
             api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
               conversationId: currentConversation.conversationId,
               userQuery: detailedPrompt,
-              managerType: currentConversation.managerType,
-              temperature: temperature || 0.7
+              managerType: currentConversation.managerType || managerType,
+              temperature: temperature || 0.7,
+              includeHistory: true, // Add this to ensure context is preserved
+              historyLimit: 20 // Request more history for better context
             })
             .then((response) => {
               // Add a slight delay before removing the loading message to ensure it's visible
@@ -2094,10 +2145,14 @@ Format the rest like a real email reply with greeting, body, and signature.`;
           }
         }, 500);
       }, 100); // Small delay to ensure UI state is updated
+      isProcessingOption.current = false;
     }
     // For "Yes, help draft email" options - FIX THIS SECTION
     else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
-      console.log('Draft email requested');
+      console.log('Draft email requested - setting isDraftingEmail state');
+      
+      // Set state flag to indicate email drafting is in progress
+      setIsDraftingEmail(true);
       
       // Find the original ethical issue/concern that started the conversation
       const originalMessages = storeMessages.filter(m => m.role === 'user');
@@ -2146,15 +2201,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
         createdAt: new Date().toISOString()
       };
       
-      // Immediately add the simplified message to the UI state for rendering
-      setStoreMessages(prev => [...prev, emailRequestMessage]);
-      
-      // Save current UI state to localStorage to prevent loss during transitions
-      if (currentConversation?.conversationId) {
-        saveConversationState(currentConversation.conversationId, [...storeMessages, emailRequestMessage]);
-      }
-      
-      // Set a loading message to show the user something is happening
+      // Create a loading message
       const loadingMessage: Message = {
         id: `assistant-loading-${Date.now()}`,
         role: 'assistant' as Role,
@@ -2164,29 +2211,91 @@ Format the rest like a real email reply with greeting, body, and signature.`;
         isLoading: true
       };
       
-      // To prevent UI flashing, add a small delay before sending the API request
-      // This ensures the simplified message gets rendered first
-      setTimeout(() => {
-        // Add the loading message to show activity
-        setStoreMessages(prev => [...prev, loadingMessage]);
-        setLoading(true); // Set global loading state
-        
-        // The skipUserMessageUI parameter is important - it tells handleSendMessage not to add another user message
-        // since we already added our simplified version
-        handleSendMessage(detailedPrompt, true);
+      // IMPORTANT: Update UI in a single operation to avoid flicker
+      // Add both the user request and loading message in one update
+      setStoreMessages(prev => [...prev, emailRequestMessage, loadingMessage]);
+      setLoading(true); // Set global loading state
+      
+      // Save current UI state to localStorage to prevent loss during transitions
+      if (currentConversation?.conversationId) {
+        saveConversationState(currentConversation.conversationId, 
+          [...storeMessages, emailRequestMessage, loadingMessage]);
+      }
+      
+      // IMPORTANT: Call API directly instead of going through handleSendMessage
+      console.log('Calling API directly with detailed prompt');
+      
+      // Add a small delay to ensure UI has been updated before API call
+      setTimeout(async () => {
+        try {
+          // Skip handleSendMessage entirely and call the API directly
+          if (!currentConversation || !currentConversation.conversationId) {
+            throw new Error('No valid conversation ID');
+          }
+          
+          // Use api.post instead of handleSendMessage to avoid UI state changes
+          const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
+            conversationId: currentConversation.conversationId,
+            userQuery: detailedPrompt,
+            managerType: currentConversation.managerType || managerType,
+            temperature: temperature || 0.7,
+            includeHistory: true, // Add this to ensure context is preserved
+            historyLimit: 20 // Request more history for better context
+          });
+          
+          // Remove the loading message
+          setStoreMessages(prev => prev.filter(m => !m.isLoading));
+          
+          // If we have a valid response, add it to the UI
+          if (response.data && response.data.messages && response.data.messages.length > 0) {
+            // Get the assistant's message (last one in array)
+            const assistantResponse = response.data.messages[response.data.messages.length - 1];
+            
+            // Create a properly formatted message object
+            const newAssistantMessage: Message = {
+              id: assistantResponse.id || `assistant-${Date.now()}`,
+              role: 'assistant' as Role,
+              content: assistantResponse.content,
+              conversationId: currentConversation.conversationId,
+              createdAt: assistantResponse.createdAt || new Date().toISOString()
+            };
+            
+            // Add the new assistant message to the UI
+            setStoreMessages(prev => [...prev.filter(m => !m.isLoading), newAssistantMessage]);
+            
+            // Save the updated conversation
+            saveConversationState(currentConversation.conversationId, 
+              [...storeMessages.filter(m => !m.isLoading), emailRequestMessage, newAssistantMessage]);
+          } else {
+            // Handle error case
+            console.error('Invalid response from API', response);
+            setError('Failed to get email draft. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error getting email draft:', error);
+          // Remove loading message
+          setStoreMessages(prev => prev.filter(m => !m.isLoading));
+          setError('Failed to get email draft. Please try again.');
+        } finally {
+          // Clear states
+          setLoading(false);
+          setIsDraftingEmail(false);
+          isProcessingOption.current = false;
+        }
       }, 100);
     } 
     // For other options, keep the existing handling
     else {
       // Existing code for other options
       if (lowerCaseOption.includes('no, not now') || lowerCaseOption.includes('not now')) {
-      console.log('User chose not to proceed for now.');
+        console.log('User chose not to proceed for now.');
       }
       else {
-      handleSendMessage(optionText);
+        handleSendMessage(optionText);
+      }
+      isProcessingOption.current = false;
     }
-    }
-  }, [storeMessages, currentConversation, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
+  }, [storeMessages, currentConversation, managerType, temperature, setStoreMessages, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
 
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
@@ -2810,7 +2919,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
                   ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' 
                   : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
             } rounded-lg p-3 text-sm ${
-              isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[85%]' : 'max-w-[90%]'
+              isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[70%]' : 'max-w-[75%]'
             }`}
           >
             {isLoading ? (
@@ -2914,15 +3023,20 @@ Format the rest like a real email reply with greeting, body, and signature.`;
                     <Button 
                       variant="default" 
                       size="sm" 
-                      onClick={() => handleOptionClick("Yes, help draft email")} 
-                      className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200 "
+                      onClick={(e) => {
+                        // Pass the event to prevent propagation
+                        handleOptionClick("Yes, help draft email", e);
+                      }} 
+                      disabled={isDraftingEmail || loading}
+                      className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200"
                     >
                 <span className="mr-1 text-xs">📝</span> Yes, help draft email
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => handleOptionClick("[No, practice again]")} 
+                      onClick={(e) => handleOptionClick("[No, practice again]", e)} 
+                      disabled={isDraftingEmail || loading}
                       className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 border-gray-300/60 dark:border-gray-700/60"
                     >
                 <span className="mr-1 text-xs">🔄</span> No, practice again
@@ -2931,7 +3045,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
               </div>
             )}
 
-        {/* Generic Option Buttons (Non-Feedback) */} 
+        {/* Generic Option Buttons (Non-Feedback) */}
         {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
@@ -2953,7 +3067,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
             </div>
         )}
 
-        {/* Email Draft Action Buttons */} 
+        {/* Email Draft Action Buttons */}
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">

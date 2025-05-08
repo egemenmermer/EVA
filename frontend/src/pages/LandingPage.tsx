@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket } from 'lucide-react';
+import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
 // Import manager icons
@@ -11,12 +11,44 @@ import diluterDarkPng from '@/assets/manager-icons/diluter-manager-dark.png';
 import camouflagerLightPng from '@/assets/manager-icons/camouflager-manager-light.png';
 import camouflagerDarkPng from '@/assets/manager-icons/camouflager-manager-dark.png';
 
+// Import logo
+import logoLight from '@/assets/logo-light.png';
+import logoDark from '@/assets/logo-dark.png';
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useStore();
   
   // State to track dark mode
   const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+  
+  // State for the About section tabs
+  const [activeAboutTab, setActiveAboutTab] = useState(0);
+  
+  // About section content
+  const aboutContent = [
+    {
+      title: "Research Background",
+      content: "This prototype was developed as part of a comprehensive master's thesis investigating the role of conversational agents in facilitating ethical decision-making processes. The primary objective is to provide software developers with a controlled, interactive environment to rehearse and refine their ethical reasoning capabilities."
+    },
+    {
+      title: "Addressing Challenges",
+      content: "Contemporary software teams frequently encounter multifaceted ethical challenges related to privacy concerns, algorithmic bias, and responsible AI implementation. Despite the significance of these issues, developers often lack adequate resources, time, or confidence to address them effectively. EVA bridges this gap by meticulously simulating realistic team dynamics and delivering structured feedback."
+    },
+    {
+      title: "Research Impact",
+      content: "Through sophisticated simulation of team interactions and provision of detailed analytical feedback, EVA prepares users for navigating real-world conversations where ethical considerations might otherwise be overlooked. This tool constitutes a critical component of a broader research initiative evaluating the impact of conversational agents on developer confidence, ethical awareness, and argumentation efficacy."
+    }
+  ];
+  
+  // Auto-rotate tabs every 5 seconds
+  useEffect(() => {
+    const tabInterval = setInterval(() => {
+      setActiveAboutTab(prev => (prev + 1) % aboutContent.length);
+    }, 5000);
+    
+    return () => clearInterval(tabInterval);
+  }, []);
   
   // Listen for dark mode changes
   useEffect(() => {
@@ -35,6 +67,11 @@ export const LandingPage: React.FC = () => {
     
     return () => darkModeObserver.disconnect();
   }, []);
+  
+  // Toggle dark mode function
+  const toggleDarkMode = () => {
+    document.documentElement.classList.toggle('dark');
+  };
   
   // Function to get the appropriate manager icon based on manager type and dark mode
   const getManagerIcon = (managerType: string, isDarkMode: boolean = false) => {
@@ -108,122 +145,328 @@ export const LandingPage: React.FC = () => {
   
   return (
 <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-  {/* Sticky Header with Start Button */}
-  <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-md z-50">
-    <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white">EVA: Ethical Virtual Assistant</h1>
-      <button
-        onClick={handleGetStarted}
-        className="px-8 py-4 text-lg font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
-      >
-        Start Practicing
-      </button>
+  {/* Modern Header with Logo */}
+  <header className="fixed top-0 left-0 right-0 backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 shadow-sm z-50 border-b border-gray-200 dark:border-gray-700">
+    <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div className="flex items-center space-x-2">
+        <img 
+          src={isDarkMode ? logoDark : logoLight} 
+          alt="EVA Logo" 
+          className="h-8 md:h-10 w-auto"
+        />
+        <h1 className="text-xl font-medium text-gray-900 dark:text-white hidden sm:block">
+          Ethical Virtual Assistant
+        </h1>
+      </div>
+      <div className="flex items-center space-x-4">
+        <button 
+          onClick={toggleDarkMode}
+          className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+          aria-label="Toggle dark mode"
+        >
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+        <button
+          onClick={handleGetStarted}
+          className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md flex items-center"
+        >
+          Start Practicing <ChevronRight size={16} className="ml-1" />
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 
   {/* Spacer to offset fixed header */}
-  <div className="pt-24" />
+  <div className="pt-16 md:pt-20" />
 
-  {/* Hero Section */}
-  <div className="container mx-auto px-4 py-20 text-center">
-    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-      Practice Ethical Decision-Making in Software Development
-    </h2>
-    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-      EVA is a research prototype that helps you explore realistic ethical challenges in workplace scenarios guided by simulated manager attitudes.
-    </p>
-  </div>
-
-{/* About the Project */}
-<div className="bg-white dark:bg-gray-800 py-16 px-4">
-  <div className="max-w-3xl mx-auto text-center">
-    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About This Project</h3>
-    <div className="text-gray-600 dark:text-gray-300 text-lg space-y-6">
-      <p>
-        This prototype was developed as part of a master's thesis on the role of conversational agents in supporting ethical decision-making. 
-        The goal is to let software developers rehearse ethical reasoning in a controlled, interactive setting.
-      </p>
-      <p>
-        Software teams often face ethical challenges related to privacy, bias, and responsible AI. However, developers may lack the time, tools, or confidence to address them effectively. 
-        EVA helps by simulating realistic team dynamics and offering structured feedback, supporting users in practicing ethical advocacy and improving their argumentation strategies.
-      </p>
-      <p>
-        By simulating team dynamics and offering structured feedback, EVA helps users prepare for real-world conversations where ethical concerns might otherwise be overlooked. 
-        The tool is part of a research project evaluating how such agents impact confidence, awareness, and argumentation in software development settings.
-      </p>
-    </div>
-  </div>
-</div>
-
-
-  {/* Scenario Preview */}
-  <div className="bg-gray-50 dark:bg-gray-900 py-16 px-4">
-    <div className="max-w-4xl mx-auto">
-      <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-12">Features</h3>
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow">
-          <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Realistic Scenarios</h4>
-          <p className="text-gray-600 dark:text-gray-300">
-            Engage with short scenarios based on real-world software development challenges.
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow">
-          <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Manager Types</h4>
-          <p className="text-gray-600 dark:text-gray-300">
-            Practice with different manager styles to strengthen your ability to argue in diverse situations.          
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow">
-          <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Instant Feedback</h4>
-          <p className="text-gray-600 dark:text-gray-300">
-            Receive immediate, reflective feedback on your decisions after each scenario.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* Manager Types Section */}
-  <div className="bg-white dark:bg-gray-800 py-16 px-4">
+  {/* Hero Section - More modern with asymmetric layout */}
+  <section className="container mx-auto px-4 py-16 md:py-24">
     <div className="max-w-5xl mx-auto">
-      <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">
-        Simulated Manager Types
-      </h3>
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow border-t-4 border-red-500">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Puppeteer</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Uses subtle control and pressure to push toward ethically questionable decisions.
+      <div className="grid md:grid-cols-5 gap-8 items-center">
+        <div className="md:col-span-3">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 text-left">
+            Practice Ethical Decision-Making in Software Development
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+            EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.
           </p>
         </div>
-        <div className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow border-t-4 border-yellow-500">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Diluter</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Downplays or rationalizes ethical issues to reduce their perceived importance.
-          </p>
-        </div>
-        <div className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow border-t-4 border-blue-500">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Camouflager</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Obscures ethical problems in jargon, process, or ambiguity.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
-            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Terms of Use</a>
-            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</a>
-            <a href="https://github.com/yourusername/eva" className="hover:text-blue-600 dark:hover:text-blue-400">GitHub</a>
-            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Documentation</a>
+        <div className="md:col-span-2 flex justify-center md:justify-end">
+          <div className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-xs">
+            <img 
+              src={isDarkMode ? logoDark : logoLight} 
+              alt="EVA Showcase" 
+              className="w-full h-auto rounded-xl"
+            />
           </div>
         </div>
-      </footer>
+      </div>
     </div>
+  </section>
+
+  {/* About the Project - Now with Tabs and Modern Card */}
+  <section className="bg-white dark:bg-gray-800 py-16 px-4">
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-md overflow-hidden">
+        <div className="p-6 md:p-8">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">About This Project</h3>
+          <div className="mb-6 flex justify-center space-x-3">
+            {aboutContent.map((tab, index) => (
+              <button 
+                key={index}
+                onClick={() => setActiveAboutTab(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === activeAboutTab 
+                    ? 'bg-blue-600 transform scale-125' 
+                    : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+                aria-label={`View ${tab.title}`}
+              />
+            ))}
+          </div>
+          <div className="text-gray-600 dark:text-gray-300 text-lg relative min-h-[180px]">
+            {aboutContent.map((tab, index) => (
+              <div 
+                key={index} 
+                className={`absolute top-0 left-0 w-full transition-opacity duration-500 ${
+                  index === activeAboutTab ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                }`}
+              >
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-left">{tab.title}</h4>
+                <p className="leading-relaxed text-left">{tab.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Manager Types Section - More modern with better spacing */}
+  <section className="bg-gray-50 dark:bg-gray-900 py-16 px-4">
+    <div className="max-w-6xl mx-auto">
+      <h3 className="text-2xl font-bold text-left md:text-center text-gray-900 dark:text-white mb-10">
+        Simulated Manager Types
+      </h3>
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-red-500">
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 border-2 border-red-500 overflow-hidden">
+              <img 
+                src={getManagerIcon('PUPPETEER', isDarkMode)} 
+                alt="Puppeteer Manager" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Puppeteer</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+            Strategically orchestrates project workflows to subtly guide developers toward ethically questionable decisions through authoritative directives, psychological pressure tactics, and cultivating environments where ethical compromises appear inevitable.
+          </p>
+          <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Employs sophisticated influence strategies</li>
+            <li>Creates systemic pressure on ethical boundaries</li>
+            <li>Implements calculated information control mechanisms</li>
+          </ul>
+        </div>
+        <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-yellow-500">
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 border-2 border-yellow-500 overflow-hidden">
+              <img 
+                src={getManagerIcon('DILUTER', isDarkMode)} 
+                alt="Diluter Manager" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Diluter</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+            Methodically diminishes ethical considerations through systematic trivialization of their significance or urgency, presenting persuasive arguments that ethical frameworks are inapplicable within current operational contexts.
+          </p>
+          <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Employs strategic minimization of ethical implications</li>
+            <li>Constructs sophisticated rationalizations for questionable practices</li>
+            <li>Implements calculated risk understatement techniques</li>
+          </ul>
+        </div>
+        <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-blue-500">
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 border-2 border-blue-500 overflow-hidden">
+              <img 
+                src={getManagerIcon('CAMOUFLAGER', isDarkMode)} 
+                alt="Camouflager Manager" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Camouflager</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+            Artfully conceals ethically problematic directives beneath established business methodologies or obscures questionable elements through intricate technical terminology and sophisticated linguistic constructions.
+          </p>
+          <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Implements complex linguistic obfuscation strategies</li>
+            <li>Creates sophisticated ambiguity around ethical responsibilities</li>
+            <li>Employs advanced misdirection techniques for ethical concerns</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Features Section - More modern with better layout */}
+  <section className="bg-white dark:bg-gray-800 py-16 px-4">
+    <div className="max-w-6xl mx-auto">
+      <h3 className="text-2xl font-bold text-left md:text-center text-gray-900 dark:text-white mb-10">Features</h3>
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg mr-4">
+              <BookOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Knowledge-Based</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Access comprehensive ethical guidelines based on established ACM, IEEE standards and GDPR compliance frameworks.
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Professional standards integration</li>
+            <li>Industry-recognized compliance guidance</li>
+            <li>Contextual learning resources</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg mr-4">
+              <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">AI-Powered Guidance</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Experience intelligent, contextual responses powered by advanced language models that adapt to your decisions.        
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>GPT-powered conversational agents</li>
+            <li>Adaptive response generation</li>
+            <li>Realistic manager simulations</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg mr-4">
+              <Target className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Tracking</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Monitor and improve your ethical reasoning skills with detailed analytics and progress metrics.
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Multidimensional performance analysis</li>
+            <li>Progress visualization</li>
+            <li>Skill development recommendations</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg mr-4">
+              <div className="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-600 dark:text-yellow-400">
+                  <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/>
+                  <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
+                </svg>
+              </div>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Interactive Practice</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Engage in scenario-based interactive exercises designed to build ethical decision-making skills through practice.
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Realistic workplace scenarios</li>
+            <li>Real-time feedback system</li>
+            <li>Incrementally challenging situations</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg mr-4">
+              <div className="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600 dark:text-red-400">
+                  <path d="m21 9-9-7-9 7v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9z"/>
+                  <polyline points="3 10 12 17 21 10"/>
+                </svg>
+              </div>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Ethical Reasoning</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Learn and apply strategic advocacy approaches with a comprehensive ethical reasoning framework.
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>Direct confrontation techniques</li>
+            <li>Persuasive rhetoric strategies</li>
+            <li>Process-based advocacy methods</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center mb-4">
+            <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg mr-4">
+              <div className="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600 dark:text-indigo-400">
+                  <path d="M8 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>
+                  <path d="M18 12H8"/>
+                  <path d="M12 16H8"/>
+                  <path d="M12 8H8"/>
+                  <circle cx="16" cy="16" r="2"/>
+                  <path d="M19 10a2 2 0 0 0-2-2"/>
+                  <path d="M21 13a4 4 0 0 0-4-4"/>
+                </svg>
+              </div>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Secure Platform</h4>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
+            Practice with confidence on a secure platform featuring JWT authentication and OAuth integration.
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
+            <li>JWT-based authentication</li>
+            <li>Google OAuth integration</li>
+            <li>Comprehensive dark mode support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Footer - More modern with better spacing */}
+  <footer className="bg-gray-50 dark:bg-gray-900 py-10 border-t border-gray-200 dark:border-gray-800">
+    <div className="container mx-auto px-4">
+      <div className="flex justify-between items-center flex-col sm:flex-row mb-6">
+        <div className="flex items-center mb-4 sm:mb-0">
+          <img 
+            src={isDarkMode ? logoDark : logoLight} 
+            alt="EVA Logo" 
+            className="h-8 w-auto mr-3" 
+          />
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Ethical Virtual Assistant</span>
+        </div>
+        <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Terms of Use</a>
+          <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Contact</a>
+          <a href="https://github.com/yourusername/eva" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">GitHub</a>
+        </div>
+      </div>
+      <div className="text-center text-xs text-gray-500 dark:text-gray-500">
+        © {new Date().getFullYear()} Ethical Virtual Assistant. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</div>
   );
 }; 
