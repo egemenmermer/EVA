@@ -212,11 +212,36 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
   }, [isTyping, isAnimating, lastMessage]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use requestAnimationFrame to ensure scrolling happens after render
+    requestAnimationFrame(() => {
+      if (messagesEndRef.current) {
+        // Use scrollIntoView with smooth scrolling, but only when needed
+        const container = messagesEndRef.current.parentElement;
+        if (container) {
+          const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+          
+          // Only do smooth scrolling if we're already near the bottom
+          if (isAtBottom) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            // If user has scrolled up, don't auto-scroll to avoid disruption
+            // Just make a subtle indicator that new content is available
+            messagesEndRef.current.scrollIntoView({ behavior: 'auto', block: 'end' });
+          }
+        } else {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Add a small delay to ensure DOM has updated before scrolling
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages, displayedText]);
 
   // Get the content to display for a message
@@ -236,7 +261,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
   };
 
   return (
-    <div className="flex flex-col space-y-4 p-4 overflow-y-auto scrollbar-thin h-full">
+    <div className="flex flex-col space-y-3 p-4 overflow-y-auto scrollbar-thin h-full">
       {messages.length === 0 && !loading ? (
         <div className="flex items-center justify-center h-full">
           <div className="text-center text-gray-500 dark:text-gray-400">
@@ -249,11 +274,24 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           const shouldAnimate = shouldAnimateMessage(message);
           const messageContent = getMessageContent(message);
           const isSystemMsg = message.isSystemMessage === true;
+          
+          // Check if this is a feedback message (ones that usually appear after responses)
+          const isFeedbackMsg = message.role === 'assistant' && 
+                               (message.content.includes('Ethical Value Score') || 
+                                message.content.startsWith('This response fails') ||
+                                message.content.startsWith('Excellent response'));
+          
+          // Determine if next message is feedback to reduce padding
+          const isBeforeFeedback = index < messages.length - 1 && 
+                                  messages[index + 1].role === 'assistant' && 
+                                  (messages[index + 1].content.includes('Ethical Value Score') || 
+                                   messages[index + 1].content.startsWith('This response fails') ||
+                                   messages[index + 1].content.startsWith('Excellent response'));
 
           // Skip typing animation for system messages
           if (isSystemMsg) {
             return (
-              <div key={message.id || index} className="flex justify-center my-2 px-2">
+              <div key={message.id || index} className="flex justify-center my-1 px-2">
                 <div className="max-w-[95%] bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 text-sm text-yellow-800 dark:text-yellow-200">
                   {message.content}
                 </div>
@@ -264,7 +302,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           return (
             <div
               key={message.id || index}
-              className={`w-full py-3 sm:py-4 px-2 sm:px-1`}
+              className={`w-full ${isFeedbackMsg ? 'py-1 mt-0' : isBeforeFeedback ? 'pb-1' : 'py-2 sm:py-3'} px-2 sm:px-1`}
             >
               {message.role === 'assistant' ? (
                 // Assistant message - left side
@@ -286,38 +324,41 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
                         Manager ({managerType})
                       </div>
                     )}
-                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none break-words bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-gray-800 dark:text-gray-200">
-                      <ReactMarkdown
-                        components={{
-                          code(props) {
-                            const { children, className } = props;
-                            const match = /language-(\w+)/.exec(className || '');
-                            
-                            if (!match) {
-                              return <code className={className}>{children}</code>;
-                            }
-                            
-                            return (
-                              <SyntaxHighlighter
-                                style={oneDark as any}
-                                language={match[1]}
-                                PreTag="div"
-                                className="text-sm sm:text-base overflow-auto max-w-full"
-                              >
-                                {String(children).replace(/\n$/, '')}
-                              </SyntaxHighlighter>
-                            );
-                          }
-                        }}
-                      >
-                        {messageContent}
-                      </ReactMarkdown>
-                      {isMessageLoading(message) && (
-                        <div className="flex items-center space-x-1 mt-1">
-                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce"></span>
-                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                          <span className="h-1.5 w-1.5 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                    {/* Fixed height container to prevent layout shifts during typing */}
+                    <div className={`prose prose-sm sm:prose-base dark:prose-invert max-w-none break-words bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-gray-800 dark:text-gray-200 ${isFeedbackMsg ? 'border-t-2 border-blue-500 dark:border-blue-600 mt-0' : 'min-h-[3rem]'} relative`}>
+                      {/* If loading, show typing indicator in a fixed position at the bottom */}
+                      {isMessageLoading(message) ? (
+                        <div className="flex items-center space-x-1 absolute bottom-3 left-3">
+                          <span className="h-2 w-2 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce"></span>
+                          <span className="h-2 w-2 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                          <span className="h-2 w-2 bg-blue-400 dark:bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                         </div>
+                      ) : (
+                        <ReactMarkdown
+                          components={{
+                            code(props) {
+                              const { children, className } = props;
+                              const match = /language-(\w+)/.exec(className || '');
+                              
+                              if (!match) {
+                                return <code className={className}>{children}</code>;
+                              }
+                              
+                              return (
+                                <SyntaxHighlighter
+                                  style={oneDark as any}
+                                  language={match[1]}
+                                  PreTag="div"
+                                  className="text-sm sm:text-base overflow-auto max-w-full"
+                                >
+                                  {String(children).replace(/\n$/, '')}
+                                </SyntaxHighlighter>
+                              );
+                            }
+                          }}
+                        >
+                          {messageContent}
+                        </ReactMarkdown>
                       )}
                     </div>
                   </div>
@@ -334,7 +375,7 @@ export const MessageList: React.FC<Props> = ({ messages, loading, practiceMode =
           );
         })
       )}
-      <div ref={messagesEndRef} />
+      <div ref={messagesEndRef} style={{ height: 1 }} />
     </div>
   );
 }; 
