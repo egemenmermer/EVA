@@ -1,28 +1,47 @@
 """
 Patch script for fixing Pydantic ForwardRef._evaluate issue with Python 3.12
-This patch adds the missing recursive_guard parameter to the _evaluate method.
+This patch handles the recursive_guard parameter properly when Python 3.12 passes it.
 """
 
-import types
+import inspect
 import typing
-from typing import Any, Dict, ForwardRef, Optional, Set, cast
+from typing import Any, ForwardRef
 
 # Store original _evaluate method
 original_evaluate = ForwardRef._evaluate
 
-# Fixed version that properly handles the recursive_guard parameter
-def patched_evaluate(self, globalns, localns, recursive_guard=None):
+# Inspect the number of parameters the original method accepts
+sig = inspect.signature(original_evaluate)
+param_count = len(sig.parameters)
+
+def patched_evaluate(self, globalns, localns, *args, **kwargs):
     """
-    Modified _evaluate method that handles the recursive_guard parameter correctly.
+    Patched _evaluate method that correctly handles the recursive_guard parameter
+    for both Python 3.12 (which passes it) and earlier versions (which don't).
+    
+    This wrapper properly handles both positional and keyword arguments.
     """
-    # Just pass along to the original without adding another recursive_guard
-    # The recursive_guard will come from the caller in Python 3.12
+    # For Python 3.12, typing._eval_type calls this with 4 parameters:
+    # _evaluate(globalns, localns, type_params, recursive_guard=recursive_guard)
+    # We need to ensure we don't pass recursive_guard twice
+
+    # If we got both positional and keyword recursive_guard, handle it
+    if 'recursive_guard' in kwargs and len(args) >= 1:
+        # Use just the keyword argument, ignoring the positional one
+        return original_evaluate(self, globalns, localns, kwargs['recursive_guard'])
+    
+    # Otherwise, forward all arguments as received
     try:
-        return original_evaluate(self, globalns, localns, recursive_guard)
+        return original_evaluate(self, globalns, localns, *args, **kwargs)
     except TypeError as e:
-        # Handle the case for earlier Python versions that don't expect recursive_guard
+        # If it fails because recursive_guard wasn't expected, try without it
         if "got an unexpected keyword argument 'recursive_guard'" in str(e):
-            return original_evaluate(self, globalns, localns)
+            # Remove recursive_guard from kwargs and try again
+            kwargs_copy = kwargs.copy()
+            if 'recursive_guard' in kwargs_copy:
+                del kwargs_copy['recursive_guard']
+            return original_evaluate(self, globalns, localns, *args, **kwargs_copy)
+        # For any other errors, let them propagate
         raise
 
 # Apply the patch directly to ForwardRef._evaluate
@@ -42,8 +61,8 @@ try:
             """Modified version of evaluate_forwardref that works with Python 3.12"""
             if not localns:
                 localns = {}
-            # Use our patched evaluate method which handles the recursive_guard
-            return type_._evaluate(globalns, localns, set())
+            # Call patched _evaluate which handles recursive_guard properly
+            return type_._evaluate(globalns, localns)
         
         pydantic.typing.evaluate_forwardref = patched_evaluate_forwardref
         print("✅ Successfully patched Pydantic's evaluate_forwardref")
