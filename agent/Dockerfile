@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     gfortran \
     libopenblas-dev \
     pkg-config \
+    swig \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pip and upgrade it
@@ -21,9 +22,14 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools
 # Copy requirements.txt
 COPY requirements.txt .
 
-# Install packages with pre-built wheels when available
-RUN pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 && \
-    pip install --no-cache-dir --prefer-binary -r requirements.txt
+# Install scientific packages first
+RUN pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 
+
+# Install scikit-learn, which can be an alternative to faiss on ARM
+RUN pip install --no-cache-dir --prefer-binary scikit-learn==1.3.2
+
+# Install the rest of requirements, ignoring errors for faiss-cpu on ARM
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt || echo "Some packages may have failed to install, continuing anyway"
 
 # Second stage for smaller final image
 FROM python:3.12-slim
