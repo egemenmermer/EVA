@@ -1,66 +1,72 @@
-fastapi>=0.68.0,<0.69.0
-pydantic>=1.8.0,<2.0.0
-uvicorn>=0.15.0,<0.16.0
-python-dotenv>=0.19.0,<0.20.0
-aiokafka>=0.7.2,<0.8.0
-httpx>=0.23.0,<1.0.0
-requests>=2.27.1,<2.28.0
-langchain>=0.1.0
-langchain-community>=0.0.17
-langchain-core>=0.1.21
-openai>=1.3.7
-tiktoken>=0.5.2
-faiss-cpu>=1.7.4
-regex>=2023.6.3
-numpy>=1.24.3
+# Core Requirements
+fastapi==0.68.2
+pydantic==1.10.13
+uvicorn==0.15.0
+python-dotenv==0.19.2
+aiokafka==0.7.2
+httpx==0.23.0
+requests==2.27.1
 
-# Use prebuilt scipy to avoid compile issues
-scipy>=1.11.0,<1.13.0
+# LangChain and OpenAI
+langchain==0.1.0
+langchain-community==0.0.17
+langchain-core==0.1.21
+openai==1.3.7
+tiktoken==0.5.2
 
-python-multipart>=0.0.6
-redis>=5.0.1
+# Vector database
+faiss-cpu==1.7.4
 
-# Dependencies for web scraping
-beautifulsoup4>=4.11.1
-lxml>=4.9.1
+# Text processing
+regex==2023.6.3
+numpy==1.24.3
+scipy==1.11.4
 
-# Development dependencies
-pytest>=7.0.0,<7.1.0
-pytest-asyncio>=0.18.3,<0.19.0
-pytest-cov>=3.0.0,<3.1.0
-mypy>=0.942,<0.943
-black>=22.3.0,<22.4.0
-isort>=5.10.1,<5.11.0
-flake8>=4.0.1,<4.1.0
-pyyaml>=6.0.0,<7.0.0
+# API utilities
+python-multipart==0.0.6
+redis==5.0.1
 
-# PDF processing
-pypdf>=3.17.1
-unstructured>=0.11.0
-pdf2image>=1.16.3
-pillow>=10.1.0
+# Web scraping
+beautifulsoup4==4.11.2
+lxml==4.9.3
 
-# Documentation parsing
-docx2txt>=0.8
-python-pptx>=0.6.21
+# Development dependencies - commenting out to reduce build time
+# pytest==7.0.1
+# pytest-asyncio==0.18.3
+# pytest-cov==3.0.0
+# mypy==0.942
+# black==22.3.0
+# isort==5.10.1
+# flake8==4.0.1
+# pyyaml==6.0.1
+
+# Document processing
+pypdf==3.17.1
+unstructured==0.11.0
+pdf2image==1.16.3
+pillow==10.1.0
+
+# File parsing
+docx2txt==0.8
+python-pptx==0.6.21
 
 # Data processing
-pandas>=2.1.2
-scikit-learn>=1.3.2
+pandas==2.1.2
+scikit-learn==1.3.2
 
 # Web dependency for async operations
-aiohttp>=3.9.1
+aiohttp==3.9.1
 
 # Spreadsheet handling
-openpyxl>=3.1.2
+openpyxl==3.1.2
 
-# Natural language processing
-spacy>=3.7.2
+# Natural language processing - using a simple version to avoid complex dependencies
+spacy==3.7.2
 
 # Serialization
-msgpack>=1.0.7
-cloudpickle>=3.0.0
+msgpack==1.0.7
+cloudpickle==3.0.0
 
 # Utilities
-tqdm>=4.66.1
-tenacity>=8.2.3
+tqdm==4.66.1
+tenacity==8.2.3

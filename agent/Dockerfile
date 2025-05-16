@@ -4,7 +4,7 @@ FROM python:3.12-slim as builder
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including Fortran compiler
+# Install system dependencies including Fortran compiler and other required libraries
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -12,19 +12,32 @@ RUN apt-get update && apt-get install -y \
     git \
     gfortran \
     libopenblas-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install pip and upgrade it
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools
+
+# Install core scientific packages first (helps with dependency resolution)
+RUN pip install --no-cache-dir numpy==1.24.3 scipy==1.11.4
+
+# Copy and install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Second stage
+# Second stage for smaller final image
 FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy only necessary files from builder
+# Install only runtime dependencies needed for the application
+RUN apt-get update && apt-get install -y \
+    curl \
+    libopenblas-base \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python environment from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
@@ -42,7 +55,7 @@ RUN mkdir -p /var/scratch/xuv668/model_cache \
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+ENV PORT=5001
 
 # Set up logging
 RUN touch /var/log/ethical-ai/app.log \
@@ -59,11 +72,11 @@ RUN useradd -m -u 1000 appuser \
 USER appuser
 
 # Expose port
-EXPOSE 8000
+EXPOSE 5001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:5001/health || exit 1
 
 # Start application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5001", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5001"]
