@@ -7,45 +7,49 @@ import types
 import typing
 from typing import Any, Dict, ForwardRef, Optional, Set, cast
 
-# This is the patched version of the evaluate_forwardref function from pydantic/typing.py
-def patched_evaluate_forwardref(type_, globalns, localns):
-    """
-    Modified version of evaluate_forwardref that handles Python 3.12 compatibility
-    by adding the required recursive_guard parameter.
-    """
-    if not localns:
-        localns = {}
-    return cast(Any, type_)._evaluate(globalns, localns, set(), recursive_guard=set())
+# Store original _evaluate method
+original_evaluate = ForwardRef._evaluate
 
-# Apply the patch to the Pydantic typing module
-try:
-    import pydantic.typing
-    if hasattr(pydantic.typing, 'evaluate_forwardref'):
-        # Store the original function in case we need to restore it
-        original_evaluate_forwardref = pydantic.typing.evaluate_forwardref
-        # Apply our patched version
-        pydantic.typing.evaluate_forwardref = patched_evaluate_forwardref
-        print("✅ Successfully applied patch for Pydantic ForwardRef with Python 3.12")
-    else:
-        print("⚠️ Failed to patch Pydantic: evaluate_forwardref function not found")
-except ImportError:
-    print("⚠️ Failed to patch Pydantic: module not found")
-
-# Also patch the ForwardRef._evaluate method directly
-try:
-    original_evaluate = ForwardRef._evaluate
-    
-    def new_evaluate(self, globalns, localns, recursive_guard=None):
-        """
-        Modified _evaluate method that handles the recursive_guard parameter.
-        """
-        if recursive_guard is None:
-            recursive_guard = set()
+# Fixed version that properly handles the recursive_guard parameter
+def patched_evaluate(self, globalns, localns, recursive_guard=None):
+    """
+    Modified _evaluate method that handles the recursive_guard parameter correctly.
+    """
+    # Just pass along to the original without adding another recursive_guard
+    # The recursive_guard will come from the caller in Python 3.12
+    try:
         return original_evaluate(self, globalns, localns, recursive_guard)
-    
-    ForwardRef._evaluate = new_evaluate
+    except TypeError as e:
+        # Handle the case for earlier Python versions that don't expect recursive_guard
+        if "got an unexpected keyword argument 'recursive_guard'" in str(e):
+            return original_evaluate(self, globalns, localns)
+        raise
+
+# Apply the patch directly to ForwardRef._evaluate
+try:
+    ForwardRef._evaluate = patched_evaluate
     print("✅ Successfully patched ForwardRef._evaluate for Python 3.12 compatibility")
 except (AttributeError, TypeError) as e:
     print(f"⚠️ Failed to patch ForwardRef._evaluate: {e}")
+
+# Also try to patch Pydantic's evaluate_forwardref function if it exists
+try:
+    import pydantic.typing
+    if hasattr(pydantic.typing, 'evaluate_forwardref'):
+        original_evaluate_forwardref = pydantic.typing.evaluate_forwardref
+        
+        def patched_evaluate_forwardref(type_, globalns, localns):
+            """Modified version of evaluate_forwardref that works with Python 3.12"""
+            if not localns:
+                localns = {}
+            # Use our patched evaluate method which handles the recursive_guard
+            return type_._evaluate(globalns, localns, set())
+        
+        pydantic.typing.evaluate_forwardref = patched_evaluate_forwardref
+        print("✅ Successfully patched Pydantic's evaluate_forwardref")
+    else:
+        print("⚠️ Pydantic's evaluate_forwardref function not found")
+except ImportError:
+    print("⚠️ Failed to import Pydantic module")
 
 print("✓ Pydantic compatibility patches applied") 
