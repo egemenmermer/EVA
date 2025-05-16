@@ -63,7 +63,7 @@ services:
       - backend_logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8443/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8443/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -92,7 +92,7 @@ services:
       - agent_data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 5
