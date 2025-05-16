@@ -19,8 +19,8 @@ faiss-cpu==1.7.4
 
 # Text processing
 regex==2023.6.3
-numpy==1.24.3
-scipy==1.11.4
+numpy==1.26.4
+scipy==1.13.0
 
 # API utilities
 python-multipart==0.0.6
