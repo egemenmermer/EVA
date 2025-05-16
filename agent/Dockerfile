@@ -18,12 +18,11 @@ RUN apt-get update && apt-get install -y \
 # Install pip and upgrade it
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools
 
-# Install core scientific packages first (helps with dependency resolution)
-RUN pip install --no-cache-dir numpy==1.24.3 scipy==1.11.4
-
 # Copy and install requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Use --no-build-isolation to prevent pip from trying to build the packages from source
+RUN pip install --no-cache-dir --prefer-binary --no-build-isolation -r requirements.txt
 
 # Second stage for smaller final image
 FROM python:3.12-slim
