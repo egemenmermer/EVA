@@ -34,7 +34,7 @@
 *.war
 
 **/agent_config.json
-**/*_config.json
+**/*_config .json
 **/*.config.json
 secrets.json
 **/secrets/
