@@ -158,6 +158,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                path.startsWith("/api-docs") ||
                path.startsWith("/api/v1/practice-score") ||
                path.contains("practice-score") ||
+               path.startsWith("/api/debug") ||
                request.getMethod().equals("OPTIONS");
                
         logger.debug("Path {} should be excluded from filtering: {}", path, shouldExclude);
