@@ -1,7 +1,8 @@
 # Core Requirements
-fastapi==0.68.2
-pydantic==1.10.13
-uvicorn==0.15.0
+fastapi==0.103.1
+pydantic==2.4.2
+pydantic-core==2.10.1
+uvicorn==0.23.2
 python-dotenv==0.19.2
 aiokafka==0.7.2
 httpx==0.23.0
