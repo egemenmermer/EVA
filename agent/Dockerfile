@@ -40,7 +40,7 @@ WORKDIR /app
 # Install only runtime dependencies needed for the application
 RUN apt-get update && apt-get install -y \
     curl \
-    libopenblas-base \
+    libopenblas0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python environment from builder
