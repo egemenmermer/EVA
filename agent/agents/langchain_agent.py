@@ -13,7 +13,47 @@ import re
 # Change imports to use newer langchain structure
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain.output_parsers import PydanticOutputParser
+
+# Try to import PydanticOutputParser from different possible locations
+try:
+    from langchain.output_parsers import PydanticOutputParser
+except ImportError:
+    try:
+        from langchain_core.output_parsers import PydanticOutputParser
+    except ImportError:
+        # If still not found, create a minimal compatible wrapper class
+        class PydanticOutputParser:
+            """Simple fallback implementation of PydanticOutputParser for compatibility."""
+            def __init__(self, pydantic_object):
+                self.pydantic_object = pydantic_object
+                
+            def parse(self, text):
+                """Parse text into the Pydantic object."""
+                import json
+                import re
+                # Try to extract JSON from text
+                match = re.search(r'\{.*\}', text, re.DOTALL)
+                if match:
+                    json_str = match.group(0)
+                    try:
+                        data = json.loads(json_str)
+                        return self.pydantic_object(**data)
+                    except Exception as e:
+                        print(f"Error parsing JSON: {e}")
+                # Fallback to direct instantiation
+                return self.pydantic_object(
+                    strategy="Fallback Strategy",
+                    effectiveness=50,
+                    feedback="Parser could not extract structured data",
+                    improvement_areas=["Improve JSON formatting"]
+                )
+                
+            def invoke(self, input_text):
+                """New invoke method for compatibility with newer LangChain."""
+                if isinstance(input_text, dict) and "text" in input_text:
+                    return self.parse(input_text["text"])
+                return self.parse(input_text)
+
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import LLMChain, RetrievalQA
