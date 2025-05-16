@@ -247,19 +247,6 @@ If experiencing login or authentication problems:
    - Java: Google Java Style
    - TypeScript: ESLint + Prettier
 
-## Deployment
-
-### Docker (Optional)
-Docker support is available for containerized deployment:
-
-```bash
-# Build containers
-docker-compose build
-
-# Start all services
-docker-compose up -d
-```
-
 ## Contributing
 
 1. Fork the repository

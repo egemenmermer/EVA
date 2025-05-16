@@ -2,46 +2,45 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15 # Use PostgreSQL version 15 as mentioned in README
+    image: postgres:15
     container_name: eva_db
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres} # Use environment variable or default
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # Use environment variable or default
-      POSTGRES_DB: ${DB_NAME:-eva} # Use environment variable or default
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-eva}
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist database data
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432" # Expose DB port (optional, for external access/debugging)
+      - "${DB_PORT:-5432}:5432"
     networks:
       - eva_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile # We will create this Dockerfile
+      dockerfile: Dockerfile
     container_name: eva_backend
     depends_on:
-      - db # Wait for the database to be ready
+      db:
+        condition: service_healthy
     environment:
-      AI_AGENT_URL: ${AI_AGENT_URL:-http://agent:5001} # Read from .env, default to service name
-      FRONTEND_URL: ${DEPLOYED_FRONTEND_URL}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS} # Read from root .env
-
-      # Explicitly set variables needed by the application
+      AI_AGENT_URL: ${AI_AGENT_URL:-http://agent:5001}
+      FRONTEND_URL: ${DEPLOYED_FRONTEND_URL:-http://frontend}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
-      JWT_SECRET: ${JWT_SECRET}
-      # Standard Spring Boot datasource vars
+      JWT_SECRET: ${JWT_SECRET:-devsecretkey}
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      
-      # Flyway credentials
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
       SPRING_FLYWAY_ENABLED: ${FLYWAY_ENABLED:-true}
       SPRING_FLYWAY_USER: ${DB_USER:-postgres}
-      SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD}
-
-      # Mail configuration
+      SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD:-password}
       SPRING_MAIL_HOST: ${MAIL_HOST}
       SPRING_MAIL_PORT: ${MAIL_PORT}
       SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
@@ -49,67 +48,90 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       MAIL_DEBUG: ${MAIL_DEBUG:-false}
-      # Explicitly set OAuth2 properties for Spring Security
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      # Pass other necessary vars like original OAuth, OpenAI key if needed by backend
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
     ports:
-      - "8443:8443" # Expose backend port
+      - "${BACKEND_PORT:-8443}:8443"
     networks:
       - eva_network
     volumes:
-      - backend_m2_cache:/root/.m2 # Cache Maven dependencies
+      - backend_m2_cache:/root/.m2
+      - backend_logs:/app/logs
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   agent:
     build:
       context: ./agent
-      dockerfile: Dockerfile # Assumes Dockerfile exists in agent/ - needs modification
+      dockerfile: Dockerfile
     container_name: eva_agent
     depends_on:
-      - backend # Agent might need to communicate with backend
+      backend:
+        condition: service_healthy
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY} # Get from .env file
-      BACKEND_URL: http://backend:8443 # Use service name and internal port
-      # Add other agent-specific env vars if needed from agent/.env
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      BACKEND_URL: ${BACKEND_URL:-http://backend:8443}
+      PORT: 5001
+      PYTHONUNBUFFERED: 1
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "5001:5001" # Expose agent port
+      - "${AGENT_PORT:-5001}:5001"
     networks:
       - eva_network
+    volumes:
+      - agent_logs:/var/log/ethical-ai
+      - agent_data:/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile # We will create this Dockerfile
-      args: # Pass build arguments from root .env
-        VITE_API_URL: ${VITE_API_URL}
-        VITE_AGENT_URL: ${VITE_AGENT_URL}
-        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
-        # Pass OAuth client IDs if needed during build
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_AGENT_URL: ${VITE_AGENT_URL:-/agent}
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-/api}
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
     container_name: eva_frontend
     ports:
-      - "5173:80" # Map host 5173 to container 80 (Nginx default)
+      - "${FRONTEND_PORT:-80}:80"
     depends_on:
-      - agent
-      - backend
+      agent:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     networks:
       - eva_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   eva_network:
     driver: bridge
 
 volumes:
-  postgres_data: # Define named volume for database persistence
-  backend_m2_cache: # Define named volume for Maven cache 
+  postgres_data:
+  backend_m2_cache:
+  backend_logs:
+  agent_logs:
+  agent_data: 
