@@ -32,11 +32,11 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Copy only necessary files from builder
+# Copy Python packages from builder stage
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Install required system packages for runtime
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libopenblas0 \
     && rm -rf /var/lib/apt/lists/*
@@ -44,17 +44,18 @@ RUN apt-get update && apt-get install -y \
 # Copy application code
 COPY . .
 
-# Create necessary directories
+# Create required directories
 RUN mkdir -p /app/data/stored_vectors
 RUN mkdir -p /app/data/embeddings
 RUN mkdir -p /app/data/documents
+RUN mkdir -p /app/logs
 
 # Expose port for API
 EXPOSE 5001
 
-# Set health check
+# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl --fail http://localhost:5001/health || exit 1
 
-# Command to run the application with the wrapper
+# Command to run on container start
 CMD ["uvicorn", "main_wrapper:app", "--host", "0.0.0.0", "--port", "5001"]
