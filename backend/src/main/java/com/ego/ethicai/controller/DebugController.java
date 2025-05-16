@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/debug")
+@RequestMapping("/debug")
 public class DebugController {
 
     @Autowired

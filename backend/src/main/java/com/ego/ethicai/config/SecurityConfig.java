@@ -97,7 +97,7 @@ public class SecurityConfig {
                                 "/error",
                                 "/api/v1/practice-score/**",
                                 "/api/v1/practice-score/submit",
-                                "/api/debug/**"
+                                "/debug/**"
                         )
                         .permitAll()
                         .anyRequest()
