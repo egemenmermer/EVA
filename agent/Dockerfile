@@ -39,6 +39,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libopenblas0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy application code

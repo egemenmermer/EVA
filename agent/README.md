@@ -46,12 +46,12 @@ FastAPI automatically generates API documentation, available at:
 To verify the agent is running properly, you can use:
 
 ```bash
-curl http://localhost:5001/api/health
+curl http://localhost:5001/health
 ```
 
 The response should be:
 ```json
-{"status":"ok","message":"Agent API is running"}
+{"status":"healthy","timestamp":"2025-05-16T13:56:14.000000"}
 ```
 
 ## Environment Variables
