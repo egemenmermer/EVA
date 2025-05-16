@@ -12,7 +12,8 @@ import re
 
 # Change imports to use newer langchain structure
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import LLMChain, RetrievalQA
