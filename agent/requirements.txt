@@ -13,6 +13,10 @@ tiktoken>=0.5.2
 faiss-cpu>=1.7.4
 regex>=2023.6.3
 numpy>=1.24.3
+
+# Use prebuilt scipy to avoid compile issues
+scipy>=1.11.0,<1.13.0
+
 python-multipart>=0.0.6
 redis>=5.0.1
 
