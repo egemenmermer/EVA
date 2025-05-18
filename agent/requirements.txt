@@ -1,7 +1,7 @@
 # Core Requirements
 fastapi==0.109.2
-pydantic>=2.7.4
-pydantic-core>=2.16.2
+pydantic==2.7.4
+pydantic-core==2.16.2
 typing-extensions==4.9.0
 uvicorn==0.27.1
 python-dotenv==0.19.2
@@ -9,14 +9,14 @@ aiokafka==0.7.2
 httpx==0.23.0
 requests==2.27.1
 
-# LangChain and OpenAI
-langchain>=0.2.0
-langchain-community>=0.2.0
-langchain-core>=0.2.0
-langchain-openai>=0.1.0
-langchain-text-splitters>=0.2.0
-openai>=1.10.0
-tiktoken>=0.5.0
+# LangChain and OpenAI - specific versions known to work together
+langchain==0.3.0
+langchain-community==0.3.0
+langchain-core==0.3.0
+langchain-openai==0.1.5
+langchain-text-splitters==0.3.0
+openai==1.32.0
+tiktoken==0.6.0
 
 # Text processing - installed via conda
 # numpy==1.26.4
