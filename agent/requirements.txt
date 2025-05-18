@@ -19,8 +19,8 @@ langchain-chroma
 openai==1.10.0
 tiktoken==0.5.2
 
-# Vector database - FAISS is installed in the Dockerfile
-# faiss-cpu==1.7.3  # This is installed directly in the Dockerfile
+# Vector database - FAISS is built from source in the Dockerfile
+# faiss-cpu==1.7.4
 
 # Text processing
 regex==2023.6.3

@@ -4,7 +4,7 @@ FROM python:3.12-slim as builder
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for building FAISS and other packages
+# Install system dependencies for building FAISS
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -26,8 +26,15 @@ COPY requirements.txt .
 # Install NumPy and SciPy first
 RUN pip install --no-cache-dir --prefer-binary numpy==1.26.4 scipy==1.13.0
 
-# Install FAISS via pip with binaries (use a specific version known to work on ARM64)
-RUN pip install --no-cache-dir faiss-cpu==1.7.3
+# Clone FAISS and build from source for ARM64
+RUN git clone --depth 1 --branch v1.7.4 https://github.com/facebookresearch/faiss.git && \
+    cd faiss && \
+    cmake -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=ON -DCMAKE_BUILD_TYPE=Release \
+          -DFAISS_OPT_LEVEL=generic -DPython_EXECUTABLE=$(which python) && \
+    make -C build -j$(nproc) faiss && \
+    make -C build -j$(nproc) swigfaiss && \
+    cd build/faiss/python && \
+    pip install .
 
 # Install other requirements (excluding faiss-cpu which is installed above)
 RUN grep -v "faiss-cpu" requirements.txt > temp_requirements.txt && \
