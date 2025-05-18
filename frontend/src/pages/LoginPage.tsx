@@ -93,7 +93,7 @@ const ConnectionStatus: React.FC = () => {
 };
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('egemenmermer@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();

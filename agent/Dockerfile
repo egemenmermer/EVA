@@ -49,6 +49,7 @@ RUN mkdir -p /app/data/stored_vectors
 RUN mkdir -p /app/data/embeddings
 RUN mkdir -p /app/data/documents
 RUN mkdir -p /app/data/processed
+RUN mkdir -p /app/logs
 
 # Set environment variables
 ENV PYTHONPATH=/app
