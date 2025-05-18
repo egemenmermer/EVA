@@ -18,26 +18,27 @@ langchain-text-splitters>=0.1.0
 openai==1.10.0
 tiktoken==0.5.2
 
-# Text processing
-regex==2023.6.3
-# numpy and scipy will be installed via conda
+# Text processing - installed via conda
+# numpy==1.26.4
+# scipy==1.13.0
+# regex==2023.6.3
 
 # API utilities
 python-multipart==0.0.6
 redis==5.0.1
 
-# Web scraping
-beautifulsoup4==4.11.2
-lxml==4.9.3
+# Web scraping - installed via conda
+# lxml==4.9.3
+# beautifulsoup4==4.11.2 
 
-# Document processing
+# Document processing - pillow installed via conda
 pypdf==3.17.1
 unstructured==0.11.0
 pdf2image==1.16.3
-pillow==10.1.0
+# pillow==10.1.0
 
 # File parsing
 docx2txt==0.8
 python-pptx==0.6.21
 
-# Note: FAISS, NumPy and SciPy will be installed via conda
+# Note: FAISS, NumPy, SciPy, Pillow, lxml, and regex will be installed via conda
