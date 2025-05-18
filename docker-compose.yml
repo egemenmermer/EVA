@@ -21,6 +21,22 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: eva_redis
+    restart: unless-stopped
+    networks:
+      - eva_network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   backend:
     build:
       context: ./backend
@@ -77,12 +93,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       BACKEND_URL: ${BACKEND_URL:-http://backend:8443}
       PORT: 5001
       PYTHONUNBUFFERED: 1
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "${AGENT_PORT:-5001}:5001"
     networks:
@@ -135,4 +154,5 @@ volumes:
   backend_m2_cache:
   backend_logs:
   agent_logs:
-  agent_data: 
+  agent_data:
+  redis_data: 

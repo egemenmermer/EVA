@@ -22,9 +22,17 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools
 # Copy requirements.txt
 COPY requirements.txt .
 
-# Install packages with pre-built wheels when available
-RUN pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 && \
-    pip install --no-cache-dir --prefer-binary -r requirements.txt
+# Explicitly install FAISS first, with special handling for ARM64
+RUN MACHINE_TYPE=$(uname -m) && \
+    pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 && \
+    if [ "$MACHINE_TYPE" = "aarch64" ]; then \
+        pip install --no-cache-dir faiss-cpu==1.7.4; \
+    else \
+        pip install --no-cache-dir faiss-cpu==1.7.4; \
+    fi
+
+# Install remaining packages
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # Second stage for smaller final image
 FROM python:3.12-slim

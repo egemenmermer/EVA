@@ -20,6 +20,8 @@ tiktoken==0.5.2
 
 # Vector database - use prebuilt wheel
 faiss-cpu==1.7.4; platform_machine != "aarch64" 
+# For ARM64 architecture
+faiss-cpu==1.7.4; platform_machine == "aarch64" 
 
 # Text processing
 regex==2023.6.3
