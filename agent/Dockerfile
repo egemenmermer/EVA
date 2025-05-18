@@ -4,7 +4,7 @@ FROM python:3.12-slim as builder
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including Fortran compiler and other required libraries
+# Install system dependencies for building FAISS and other packages
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libopenblas-dev \
     pkg-config \
     swig \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pip and upgrade it
@@ -25,16 +26,13 @@ COPY requirements.txt .
 # Install NumPy and SciPy first
 RUN pip install --no-cache-dir --prefer-binary numpy==1.26.4 scipy==1.13.0
 
-# Install FAISS - use pre-built wheel for ARM64
-RUN MACHINE_TYPE=$(uname -m) && \
-    if [ "$MACHINE_TYPE" = "aarch64" ]; then \
-        pip install --no-cache-dir --index-url https://pypi.anaconda.org/pytorch/simple faiss-cpu; \
-    else \
-        pip install --no-cache-dir faiss-cpu==1.7.4; \
-    fi
+# Install FAISS via pip with binaries (use a specific version known to work on ARM64)
+RUN pip install --no-cache-dir faiss-cpu==1.7.3
 
-# Install other requirements
-RUN pip install --no-cache-dir -r requirements.txt
+# Install other requirements (excluding faiss-cpu which is installed above)
+RUN grep -v "faiss-cpu" requirements.txt > temp_requirements.txt && \
+    pip install --no-cache-dir -r temp_requirements.txt && \
+    rm temp_requirements.txt
 
 # Create smaller final image
 FROM python:3.12-slim
@@ -45,6 +43,7 @@ WORKDIR /app
 # Install required system libraries
 RUN apt-get update && apt-get install -y \
     libopenblas-base \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python packages from builder stage
@@ -53,6 +52,12 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY . .
+
+# Create required directories
+RUN mkdir -p /app/data/stored_vectors
+RUN mkdir -p /app/data/embeddings
+RUN mkdir -p /app/data/documents
+RUN mkdir -p /app/logs
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

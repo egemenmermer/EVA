@@ -15,11 +15,12 @@ langchain-community
 langchain-core
 langchain-openai
 langchain-text-splitters
+langchain-chroma
 openai==1.10.0
 tiktoken==0.5.2
 
-# FAISS is installed in Dockerfile, not here
-# Do not include faiss-cpu here
+# Vector database - FAISS is installed in the Dockerfile
+# faiss-cpu==1.7.3  # This is installed directly in the Dockerfile
 
 # Text processing
 regex==2023.6.3
