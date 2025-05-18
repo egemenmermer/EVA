@@ -10,17 +10,13 @@ httpx==0.23.0
 requests==2.27.1
 
 # LangChain and OpenAI
-langchain
-langchain-community
-langchain-core
-langchain-openai
-langchain-text-splitters
-langchain-chroma
+langchain>=0.1.0
+langchain-community>=0.1.0
+langchain-core>=0.1.0
+langchain-openai>=0.1.0
+langchain-text-splitters>=0.1.0
 openai==1.10.0
 tiktoken==0.5.2
-
-# Vector database - FAISS is built from source in the Dockerfile
-# faiss-cpu==1.7.4
 
 # Text processing
 regex==2023.6.3
@@ -34,11 +30,6 @@ redis==5.0.1
 # Web scraping
 beautifulsoup4==4.11.2
 lxml==4.9.3
-
-# Development dependencies - commented out for production
-# pytest==7.3.1
-# pytest-asyncio==0.21.0
-# httpx==0.23.0
 
 # Document processing
 pypdf==3.17.1
@@ -60,7 +51,7 @@ aiohttp==3.9.1
 # Spreadsheet handling
 openpyxl==3.1.2
 
-# Natural language processing - using a simple version to avoid complex dependencies
+# Natural language processing
 spacy==3.7.2
 
 # Serialization

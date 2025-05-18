@@ -1,61 +1,28 @@
-# Use multi-stage build for smaller final image
-FROM python:3.12-slim as builder
-
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies for building FAISS
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    git \
-    gfortran \
-    libopenblas-dev \
-    pkg-config \
-    swig \
-    cmake \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install pip and upgrade it
-RUN pip install --no-cache-dir --upgrade pip wheel setuptools
-
-# Copy requirements.txt
-COPY requirements.txt .
-
-# Install NumPy and SciPy first
-RUN pip install --no-cache-dir --prefer-binary numpy==1.26.4 scipy==1.13.0
-
-# Clone FAISS and build from source for ARM64
-RUN git clone --depth 1 --branch v1.7.4 https://github.com/facebookresearch/faiss.git && \
-    cd faiss && \
-    cmake -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=ON -DCMAKE_BUILD_TYPE=Release \
-          -DFAISS_OPT_LEVEL=generic -DPython_EXECUTABLE=$(which python) && \
-    make -C build -j$(nproc) faiss && \
-    make -C build -j$(nproc) swigfaiss && \
-    cd build/faiss/python && \
-    pip install .
-
-# Install other requirements (excluding faiss-cpu which is installed above)
-RUN grep -v "faiss-cpu" requirements.txt > temp_requirements.txt && \
-    pip install --no-cache-dir -r temp_requirements.txt && \
-    rm temp_requirements.txt
-
-# Create smaller final image
+# Use a base image with Python 3.12
 FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install required system libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libopenblas-base \
+    build-essential \
     curl \
+    git \
+    libopenblas-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python packages from builder stage
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Copy only requirements.txt first (for better caching)
+COPY requirements.txt .
+
+# Install core numeric packages first
+RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.13.0
+
+# Install FAISS from PyPI for ARM64
+RUN pip install --no-cache-dir faiss-cpu==1.7.3
+
+# Install remaining dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
