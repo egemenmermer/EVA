@@ -20,8 +20,7 @@ tiktoken==0.5.2
 
 # Text processing
 regex==2023.6.3
-numpy==1.26.4
-scipy==1.13.0
+# numpy and scipy will be installed via conda
 
 # API utilities
 python-multipart==0.0.6
@@ -41,4 +40,4 @@ pillow==10.1.0
 docx2txt==0.8
 python-pptx==0.6.21
 
-# Note: FAISS will be installed via conda
+# Note: FAISS, NumPy and SciPy will be installed via conda

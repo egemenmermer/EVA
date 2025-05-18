@@ -20,9 +20,9 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh 
 # Add conda to path
 ENV PATH /opt/conda/bin:$PATH
 
-# Create a conda environment and install FAISS
+# Create a conda environment and install FAISS, NumPy and SciPy
 RUN conda create -n faiss_env python=3.12 -y \
-    && conda install -n faiss_env -c conda-forge faiss -y
+    && conda install -n faiss_env -c conda-forge faiss numpy=1.26.4 scipy=1.13.0 -y
 
 # Copy requirements.txt
 COPY requirements.txt .
