@@ -4,26 +4,30 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including SWIG for FAISS
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
-    libopenblas-dev \
-    swig \
-    pkg-config \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements.txt first (for better caching)
+# Install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O /tmp/miniconda.sh \
+    && bash /tmp/miniconda.sh -b -p /opt/conda \
+    && rm /tmp/miniconda.sh
+
+# Add conda to path
+ENV PATH /opt/conda/bin:$PATH
+
+# Create a conda environment and install FAISS
+RUN conda create -n faiss_env python=3.12 -y \
+    && conda install -n faiss_env -c conda-forge faiss -y
+
+# Copy requirements.txt
 COPY requirements.txt .
 
-# Install core numeric packages first
-RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.13.0
-
-# Install FAISS from PyPI for ARM64
-RUN pip install --no-cache-dir faiss-cpu==1.7.3
-
-# Install remaining dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
@@ -33,19 +37,12 @@ COPY . .
 RUN mkdir -p /app/data/stored_vectors
 RUN mkdir -p /app/data/embeddings
 RUN mkdir -p /app/data/documents
-RUN mkdir -p /app/logs
+RUN mkdir -p /app/data/processed
 
 # Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    REDIS_URL=redis://redis:6379/0
+ENV PYTHONPATH=/app
+ENV PATH /opt/conda/envs/faiss_env/bin:$PATH
+ENV LD_LIBRARY_PATH /opt/conda/envs/faiss_env/lib:$LD_LIBRARY_PATH
 
-# Expose port
-EXPOSE 5001
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl --fail http://localhost:5001/health || exit 1
-
-# Command to run on container start
-CMD ["uvicorn", "main_wrapper:app", "--host", "0.0.0.0", "--port", "5001"]
+# Run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

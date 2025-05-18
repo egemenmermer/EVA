@@ -20,8 +20,8 @@ tiktoken==0.5.2
 
 # Text processing
 regex==2023.6.3
-numpy==1.26.4  # Updated for Python 3.12 compatibility
-scipy==1.13.0  # Updated for Python 3.12 compatibility
+numpy==1.26.4
+scipy==1.13.0
 
 # API utilities
 python-multipart==0.0.6
@@ -41,23 +41,4 @@ pillow==10.1.0
 docx2txt==0.8
 python-pptx==0.6.21
 
-# Data processing
-pandas==2.1.2
-scikit-learn==1.3.2
-
-# Web dependency for async operations
-aiohttp==3.9.1
-
-# Spreadsheet handling
-openpyxl==3.1.2
-
-# Natural language processing
-spacy==3.7.2
-
-# Serialization
-msgpack==1.0.7
-cloudpickle==3.0.0
-
-# Utilities
-tqdm==4.66.1
-tenacity==8.2.3
+# Note: FAISS will be installed via conda
