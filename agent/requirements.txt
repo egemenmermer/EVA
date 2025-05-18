@@ -12,7 +12,7 @@ requests==2.27.1
 # LangChain and OpenAI
 langchain==0.2.11
 langchain-community==0.2.11
-langchain-core==0.2.11
+langchain-core>=0.2.23,<0.3.0
 langchain-openai==0.1.11
 langchain-text-splitters==0.2.4
 openai==1.10.0
