@@ -18,10 +18,8 @@ langchain-text-splitters
 openai==1.10.0
 tiktoken==0.5.2
 
-# Vector database - use prebuilt wheel
-faiss-cpu==1.7.4; platform_machine != "aarch64" 
-# For ARM64 architecture
-faiss-cpu==1.7.4; platform_machine == "aarch64" 
+# FAISS is installed in Dockerfile, not here
+# Do not include faiss-cpu here
 
 # Text processing
 regex==2023.6.3
@@ -36,15 +34,10 @@ redis==5.0.1
 beautifulsoup4==4.11.2
 lxml==4.9.3
 
-# Development dependencies - commenting out to reduce build time
-# pytest==7.0.1
-# pytest-asyncio==0.18.3
-# pytest-cov==3.0.0
-# mypy==0.942
-# black==22.3.0
-# isort==5.10.1
-# flake8==4.0.1
-# pyyaml==6.0.1
+# Development dependencies - commented out for production
+# pytest==7.3.1
+# pytest-asyncio==0.21.0
+# httpx==0.23.0
 
 # Document processing
 pypdf==3.17.1

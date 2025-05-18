@@ -22,44 +22,44 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools
 # Copy requirements.txt
 COPY requirements.txt .
 
-# Explicitly install FAISS first, with special handling for ARM64
+# Install NumPy and SciPy first
+RUN pip install --no-cache-dir --prefer-binary numpy==1.26.4 scipy==1.13.0
+
+# Install FAISS - use pre-built wheel for ARM64
 RUN MACHINE_TYPE=$(uname -m) && \
-    pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 && \
     if [ "$MACHINE_TYPE" = "aarch64" ]; then \
-        pip install --no-cache-dir faiss-cpu==1.7.4; \
+        pip install --no-cache-dir --index-url https://pypi.anaconda.org/pytorch/simple faiss-cpu; \
     else \
         pip install --no-cache-dir faiss-cpu==1.7.4; \
     fi
 
-# Install remaining packages
-RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
+# Install other requirements
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Second stage for smaller final image
+# Create smaller final image
 FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
+# Install required system libraries
+RUN apt-get update && apt-get install -y \
+    libopenblas-base \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy Python packages from builder stage
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    libopenblas0 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy application code
 COPY . .
 
-# Create required directories
-RUN mkdir -p /app/data/stored_vectors
-RUN mkdir -p /app/data/embeddings
-RUN mkdir -p /app/data/documents
-RUN mkdir -p /app/logs
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    REDIS_URL=redis://redis:6379/0
 
-# Expose port for API
+# Expose port
 EXPOSE 5001
 
 # Health check
