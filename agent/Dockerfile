@@ -4,12 +4,14 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including SWIG for FAISS
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
     libopenblas-dev \
+    swig \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only requirements.txt first (for better caching)
