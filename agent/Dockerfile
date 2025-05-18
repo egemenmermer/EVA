@@ -37,7 +37,9 @@ RUN conda create -n faiss_env python=3.12 -y \
 COPY requirements.txt .
 
 # Install Python dependencies, skip those installed by conda
-RUN pip install --no-cache-dir $(grep -v "faiss\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt)
+# Exclude comment lines and empty lines
+RUN grep -v "^#\|^$\|faiss\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
+    pip install --no-cache-dir -r filtered_requirements.txt
 
 # Copy application code
 COPY . .
