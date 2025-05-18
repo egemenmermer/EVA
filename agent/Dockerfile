@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     wget \
+    libxml2-dev \
+    libxslt-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Miniconda
