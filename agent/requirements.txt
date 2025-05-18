@@ -1,7 +1,7 @@
 # Core Requirements
 fastapi==0.109.2
-pydantic==2.6.1
-pydantic-core==2.16.2
+pydantic>=2.7.4
+pydantic-core>=2.16.2
 typing-extensions==4.9.0
 uvicorn==0.27.1
 python-dotenv==0.19.2
@@ -10,11 +10,11 @@ httpx==0.23.0
 requests==2.27.1
 
 # LangChain and OpenAI
-langchain>=0.1.0
-langchain-community>=0.1.0
-langchain-core>=0.1.0
-langchain-openai>=0.1.0
-langchain-text-splitters>=0.1.0
+langchain==0.2.11
+langchain-community==0.2.11
+langchain-core==0.2.11
+langchain-openai==0.1.11
+langchain-text-splitters==0.2.4
 openai==1.10.0
 tiktoken==0.5.2
 
