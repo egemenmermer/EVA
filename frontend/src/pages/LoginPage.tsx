@@ -93,11 +93,24 @@ const ConnectionStatus: React.FC = () => {
 };
 
 export const LoginPage: React.FC = () => {
+  // Force email field to be empty on every render
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Clear any browser autofill on mount
+  useEffect(() => {
+    // Force the email field to be empty after the component mounts
+    setTimeout(() => {
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput && emailInput.value) {
+        emailInput.value = '';
+        setEmail('');
+      }
+    }, 100);
+  }, []);
   
   // Check authentication status only once on mount
   useEffect(() => {
@@ -232,15 +245,28 @@ export const LoginPage: React.FC = () => {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email address
               </label>
+              {/* Add a hidden honeypot input to trick browsers into auto-filling this instead */}
+              <input 
+                type="email" 
+                name="email_fake" 
+                id="email_fake" 
+                style={{display: 'none'}} 
+                tabIndex={-1} 
+                autoComplete="email" 
+              />
               <input
                 id="email"
-                name="email"
+                name="user_email" /* Changed name to avoid browser autofill matching */
                 type="email"
-                autoComplete="email"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your email"
               />
             </div>
             <div>
