@@ -11,7 +11,7 @@ import uuid
 # Configuration
 BACKEND_URL = "http://localhost:8443"
 AGENT_URL = "http://localhost:5001"
-EMAIL = "egemenmermer@gmail.com"
+EMAIL = "test@example.com"
 PASSWORD = "12345678"
 TEST_QUERY = "Does AI require ethical oversight?"
 

@@ -70,8 +70,8 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       console.log('Token exists but no user, creating placeholder user');
       setUser({
         id: 'layout-recovery',
-        email: 'egemenmermer@gmail.com',
-        fullName: 'Egemen Mermer'
+        email: '',
+        fullName: 'User'
       });
     }
   }, [navigate, token, user, setUser, setToken]);
