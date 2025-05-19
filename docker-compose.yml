@@ -103,7 +103,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "${AGENT_PORT:-5001}:5001"
+      - "${AGENT_PORT:-5001}:8000"
     networks:
       - eva_network
     volumes:
