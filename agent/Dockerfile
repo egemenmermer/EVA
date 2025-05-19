@@ -14,31 +14,9 @@ RUN apt-get update && apt-get install -y \
     libxslt-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O /tmp/miniconda.sh \
-    && bash /tmp/miniconda.sh -b -p /opt/conda \
-    && rm /tmp/miniconda.sh
-
-# Add conda to path
-ENV PATH /opt/conda/bin:$PATH
-
-# Create a conda environment and install dependencies
-RUN conda create -n faiss_env python=3.12 -y \
-    && conda install -n faiss_env -c conda-forge \
-    faiss \
-    numpy=1.26.4 \
-    scipy=1.13.0 \
-    pillow=10.1.0 \
-    lxml \
-    regex \
-    -y
-
-# Copy requirements.txt
-COPY requirements.txt .
-
-# Install Python dependencies, skip those installed by conda
+# Install Python dependencies
 # Exclude comment lines and empty lines
-RUN grep -v "^#\|^$\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
+RUN grep -v "^#\|^$\\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
     pip install --no-cache-dir -r filtered_requirements.txt
 
 # Copy application code
@@ -53,8 +31,6 @@ RUN mkdir -p /app/logs
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV PATH /opt/conda/envs/faiss_env/bin:$PATH
-ENV LD_LIBRARY_PATH /opt/conda/envs/faiss_env/lib:$LD_LIBRARY_PATH
 
 # Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
