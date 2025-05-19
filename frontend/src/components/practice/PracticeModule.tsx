@@ -419,6 +419,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     // Don't set loading for the entire UI, just show a loading indicator for the current choice
     const selectedChoice = currentScenario.currentChoices[choiceIndex];
     
+    setLoading(true); // Set loading to true at the start of processing the choice
+    
     try {
       // Record the current state before we update
       const currentChoices = {...currentScenario.scenario};

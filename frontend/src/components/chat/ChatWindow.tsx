@@ -3413,7 +3413,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               variant={currentActiveSectionKey === section.key ? "default" : "outline"}
               size="sm"
               onClick={() => messageId && toggleMessageSection(messageId, section.key)}
-              disabled={loading} // Disable buttons while loading
               className={`text-xs h-auto py-2 px-3 w-full text-left justify-start font-medium transition-all duration-200 
                 ${currentActiveSectionKey === section.key 
                   ? 'bg-blue-500/80 dark:bg-blue-600/80 text-white dark:text-white border-blue-400 dark:border-blue-500' 
