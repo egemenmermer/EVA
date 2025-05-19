@@ -43,3 +43,4 @@ python-pptx
 
 # Note: FAISS, numpy, scipy, pillow, lxml and regex are installed via conda
 # These are commented out since they're installed in the conda environment
+faiss-cpu
