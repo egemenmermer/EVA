@@ -863,7 +863,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
 
     // CRITICAL FIX: Add validation for current conversation state
     // Check if we need to recover the conversation state
-    if (localStorage.getItem('originalConversationId') && (!currentConversation || !currentConversation.conversationId)) {
+    if (localStorage.getItem('originalConversationId') && (!currentConversation || !currentConversation.conversationId || currentConversation.conversationId.startsWith('draft-'))) {
       const originalConversationId = localStorage.getItem('originalConversationId');
       console.log('Attempting to recover conversation from originalConversationId:', originalConversationId);
       
@@ -896,14 +896,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Failed to recover conversation:', err);
       }
     }
-    
-    // Add debug logging here
-    console.log("DEBUG: handleSendMessage - State before new conversation check:", {
-      currentConversation: currentConversation, // Log the original state variable
-      currentConvLocal: currentConv, // Log the local copy
-      conversationId: conversationId, // Log the determined ID
-      isPersisted: isPersisted // Log the determined persisted status
-    });
     
     // Now continue with the rest of the function using the potentially updated currentConv, conversationId, etc.
     try {
@@ -1039,7 +1031,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       
       // Additional check for originalConversationId in localStorage (important for simulation/practice flows)
       const originalConversationId = localStorage.getItem('originalConversationId');
-      if (originalConversationId && (!conversationId || conversationId.startsWith('draft-'))) {
+      if (originalConversationId && (conversationId === undefined || conversationId === null || conversationId.startsWith('draft-'))) {
         console.log('Found originalConversationId in localStorage. Using it instead of:', conversationId);
         
         try {
@@ -1071,6 +1063,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           console.error('Failed to recover conversation from originalConversationId:', err);
           // Continue with current values, don't return/exit
         }
+      }
+      
+      // Special handling for "how would I respond" type questions after simulations
+      if (trimmedValue.toLowerCase().includes('how would i respond') && 
+          localStorage.getItem('originalConversationId') === conversationId) {
+        console.log('Detected "how would I respond" question after simulation - ensuring same conversation context');
+        // No need to do anything special, the prior code fixes ensure we use the same conversation ID
       }
       
       console.log('Sending message to AGENT API:', {
@@ -1904,12 +1903,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       console.log('Setting current-conversation-id in localStorage:', currentConversation.conversationId);
       localStorage.setItem('current-conversation-id', currentConversation.conversationId);
       
-      // IMPROVEMENT: Clean up originalConversationId if it doesn't match current conversation
+      // DO NOT clean up originalConversationId automatically, as we need it for context recovery
+      // Instead, only clear it if explicitly switching to a different conversation (not for same conversation updates)
       const originalConversationId = localStorage.getItem('originalConversationId');
-      if (originalConversationId && originalConversationId !== currentConversation.conversationId) {
-        console.log('Cleaning up originalConversationId that no longer matches current conversation');
+      const lastKnownConversationId = localStorage.getItem('last-known-conversation-id');
+      
+      if (lastKnownConversationId && 
+          lastKnownConversationId !== currentConversation.conversationId && 
+          originalConversationId && 
+          originalConversationId !== currentConversation.conversationId) {
+        console.log('Switching conversations, cleaning up originalConversationId');
         localStorage.removeItem('originalConversationId');
       }
+      
+      // Always track last known conversation ID for comparison
+      localStorage.setItem('last-known-conversation-id', currentConversation.conversationId);
     }
     
     // Return cleanup function to remove localStorage items when component unmounts
@@ -2284,6 +2292,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                       ...currentConversation,
                       isPersisted: true // Ensure this is marked as persisted
                     });
+                    
+                    // Also update the original conversation ID in localStorage for recovery
+                    localStorage.setItem('originalConversationId', currentConversation.conversationId);
+                    console.log('Updated originalConversationId in localStorage after simulation:', currentConversation.conversationId);
                   }
 
                   // Only add the AI response to the UI, not the prompt
