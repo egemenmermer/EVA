@@ -38,7 +38,7 @@ COPY requirements.txt .
 
 # Install Python dependencies, skip those installed by conda
 # Exclude comment lines and empty lines
-RUN grep -v "^#\|^$\|faiss\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
+RUN grep -v "^#\|^$\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
     pip install --no-cache-dir -r filtered_requirements.txt
 
 # Copy application code
