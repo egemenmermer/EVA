@@ -107,7 +107,7 @@ services:
     networks:
       - eva_network
     volumes:
-      - agent_logs:/var/log/ethical-ai
+      - agent_logs:/app/logs
       - agent_data:/app/data
     restart: unless-stopped
     healthcheck:
@@ -154,5 +154,5 @@ volumes:
   backend_m2_cache:
   backend_logs:
   agent_logs:
-  agent_data:
+  agent_data: 
   redis_data: 
