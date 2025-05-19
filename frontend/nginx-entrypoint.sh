@@ -63,7 +63,7 @@ if [ -f "/etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem" ] && [ -f "/etc/let
 
         # Proxy agent requests
         location /agent/ {
-            proxy_pass http://agent:5001/;
+            proxy_pass http://agent:8000/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection 'upgrade';
