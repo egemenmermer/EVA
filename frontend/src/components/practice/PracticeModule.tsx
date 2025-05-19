@@ -295,6 +295,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [currentScenario, setCurrentScenario] = useState<ScenarioState | null>(null);
   const [loading, setLoading] = useState(false);
+  const [processingChoice, setProcessingChoice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<ResponseFeedback | null>(null);
   const [conversationId, setConversationId] = useState<string>('practice-' + Math.random().toString(36).substring(7));
@@ -302,7 +303,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [finalReport, setFinalReport] = useState<boolean>(false);
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const [finalScore, setFinalScore] = useState<number>(0);
-  const [currentFeedback, setCurrentFeedback] = useState<string>(''); // Track current feedback to force re-renders
+  const [currentFeedback, setCurrentFeedback] = useState<string>('');
   const navigate = useNavigate();
 
   // Get original conversation ID from localStorage or props
@@ -416,8 +417,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const handleChoice = async (choiceIndex: number) => {
     if (!currentScenario) return;
     
-    // Don't set loading for the entire UI, just show a loading indicator for the current choice
-    const selectedChoice = currentScenario.currentChoices[choiceIndex];
+    // Set processing state to disable buttons during animation
+    setProcessingChoice(true);
     
     try {
       // Record the current state before we update
@@ -535,6 +536,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               currentStep: currentScenario.currentStep + 1
             });
             
+            // End processing state after everything is updated
+            setProcessingChoice(false);
+            
             // Force scroll for manager response and feedback
             setTimeout(() => {
               console.log("Manager response added, scrolling...");
@@ -615,6 +619,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               currentStep: currentScenario.currentStep + 1
             });
             
+            // End processing state before showing final report options
+            setProcessingChoice(false);
+            
             // Set final report state after a short delay to ensure smooth transition
             setTimeout(() => {
               // Then set final report and options
@@ -633,8 +640,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     } catch (err: any) {
       console.error("Error processing choice:", err);
       setError("Failed to process your choice. Please try again.");
+      setProcessingChoice(false); // Make sure to reset processing state on error
     } finally {
-      setLoading(false);
+      setLoading(false); // Keep this to ensure loading is reset
     }
   };
 
@@ -1673,11 +1681,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                     <button
                       key={index}
                       onClick={() => handleChoice(index)}
-                      className="w-full text-left p-2.5 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-colors text-sm"
-                      disabled={loading}
+                      className={`w-full text-left p-2.5 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-colors text-sm ${processingChoice ? 'cursor-not-allowed opacity-60' : ''}`}
+                      disabled={loading || processingChoice}
                     >
                       {choice}
-                      {loading && (
+                      {processingChoice && (
                         <span className="ml-2 inline-flex">
                           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
                           <span className="ml-1 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
