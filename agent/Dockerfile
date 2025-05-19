@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     libxslt-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy requirements.txt
+COPY requirements.txt .
+
 # Install Python dependencies
 # Exclude comment lines and empty lines
 RUN grep -v "^#\|^$\\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
