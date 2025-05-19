@@ -542,6 +542,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               console.log("Manager response added, scrolling...");
               scrollToBottom();
             }, 200);
+            
+            setLoading(false); // Set loading to false here after the response is fully rendered
           }, 1500); // Show the response after 1.5 seconds
         }, 800); // Start typing after 0.8 seconds
       } else {
@@ -629,14 +631,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                 scrollToBottom();
               }, 100);
             }, 800);
+            
+            setLoading(false); // Set loading to false here after the final response is fully rendered
           }, 1500); // Show the final response after 1.5 seconds
         }, 800); // Start typing after 0.8 seconds
       }
     } catch (err: any) {
       console.error("Error processing choice:", err);
       setError("Failed to process your choice. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
