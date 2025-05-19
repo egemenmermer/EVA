@@ -2801,6 +2801,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     let isEmailDraft = false;
     let isRehearsalPrompt = false;
     let isPracticeFeedback = false;
+    let isSimulatedManagerReply = false;
     
     // Variables for the new feedback structure
     let introductoryText = '';
