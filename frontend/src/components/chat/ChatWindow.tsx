@@ -3144,7 +3144,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               </div>
             )}
 
-        // Generic Option Buttons (Non-Feedback)
         {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
@@ -3166,7 +3165,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             </div>
         )}
 
-        // Email Draft Action Buttons
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">
