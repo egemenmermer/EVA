@@ -2096,15 +2096,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         isLoading: false
       };
       
-      // Add this message to the UI
-      const updatedMessages = [...storeMessages, userMessage];
-      setStoreMessages(updatedMessages);
-      
-      // Save to conversation state
-      if (currentConversation?.conversationId) {
-        saveConversationState(currentConversation.conversationId, updatedMessages);
-      }
-      
+      // Add this message to the UI immediately
+      // Use functional update to ensure we have the latest state before adding
+      setStoreMessages(prev => {
+          const updatedMessages = [...prev, userMessage];
+          // Save to conversation state immediately to preserve user message
+          if (currentConversation?.conversationId) {
+              saveConversationState(currentConversation.conversationId, updatedMessages);
+          }
+          return updatedMessages;
+      });
+
       // Set a loading message to show the user something is happening
       const loadingMessage: Message = {
         id: `assistant-loading-${Date.now()}`,
@@ -2114,25 +2116,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         createdAt: new Date().toISOString(),
         isLoading: true
       };
-      
+
       // Add a small delay before showing the loading indicator to ensure UI updates
       setTimeout(() => {
         setStoreMessages(prev => [...prev, loadingMessage]);
         setLoading(true); // Set global loading state to true
-        
+
         // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
         setTimeout(() => {
           // Create a more detailed prompt that includes clear instructions for formatting
-          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. 
-Start your response with "Sure! Here's a simulated ${replyType} reply your boss might send:" 
-Then on a new line start with "Subject: Re: " followed by the email subject. 
-Format the rest like a real email reply with greeting, body, and signature.`;
-          
+          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature.`;
+
           // Send this prompt directly to the API without displaying it in the UI
-          if (currentConversation) {
+          if (currentConversation && currentConversation.conversationId) { // Ensure currentConversation and its ID exist
             // Use the API function directly to bypass UI message creation
+            // Ensure conversationId is correctly passed in the payload
+            console.log('Sending simulated reply with conversationId:', currentConversation.conversationId); // Added log
             api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
-              conversationId: currentConversation.conversationId,
+              conversationId: currentConversation.conversationId, // Use the existing conversation ID
               userQuery: detailedPrompt,
               managerType: currentConversation.managerType || managerType,
               temperature: temperature || 0.7,
@@ -2145,41 +2146,40 @@ Format the rest like a real email reply with greeting, body, and signature.`;
                 // Remove the loading message
                 setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
                 setLoading(false); // Set global loading state back to false
-                
+
                 // Create a properly typed assistant message from the response
                 if (response.data && response.data.messages && response.data.messages.length > 0) {
                   // Get the last message from the response (should be the assistant's response)
                   const lastMessage = response.data.messages[response.data.messages.length - 1];
-                  
+
                   // Create a well-formed assistant message
                   const assistantMessage: Message = {
                     id: lastMessage.id || `assistant-${Date.now()}`,
                     role: 'assistant' as Role,
                     content: lastMessage.content || '',
-                    conversationId: currentConversation.conversationId,
+                    conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                     createdAt: lastMessage.createdAt || new Date().toISOString()
                   };
-                  
+
                   // Only add the AI response to the UI, not the prompt
-                  setStoreMessages(prevMessages => [...prevMessages, assistantMessage]);
-                  
-                  // Save updated conversation state
-                  if (currentConversation?.conversationId) {
-                    saveConversationState(
-                      currentConversation.conversationId, 
-                      [...storeMessages, userMessage, assistantMessage]
-                    );
-                  }
+                  // Use functional update to ensure latest state
+                  setStoreMessages(prevMessages => {
+                      const updatedMessages = [...prevMessages, assistantMessage];
+                       // Save updated conversation state
+                      saveConversationState(currentConversation.conversationId, updatedMessages);
+                      return updatedMessages;
+                  });
+
     } else {
                   // If we couldn't get a proper response, show an error
                   const errorMessage: Message = {
                     id: `assistant-${Date.now()}`,
                     role: 'assistant' as Role,
                     content: 'Sorry, I was unable to generate a response. Please try again.',
-                    conversationId: currentConversation.conversationId,
+                    conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                     createdAt: new Date().toISOString()
                   };
-                  
+
                   setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
                 }
               }, 600); // Ensure loading indicator is visible for at least 600ms
@@ -2188,25 +2188,33 @@ Format the rest like a real email reply with greeting, body, and signature.`;
               setLoading(false);
               // Remove the loading message
               setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
-              
+
               console.error('Error getting rehearsal response:', err);
               setError('Failed to get rehearsal response');
-              
+
               // Show an error message in the UI
               const errorMessage: Message = {
                 id: `assistant-${Date.now()}`,
                 role: 'assistant' as Role,
                 content: 'Sorry, there was an error generating the response. Please try again.',
-                conversationId: currentConversation.conversationId,
+                conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                 createdAt: new Date().toISOString()
               };
-              
+
               setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
+            })
+            .finally(() => { // Add finally block here
+                isProcessingOption.current = false; // Reset processing flag
             });
+          } else {
+            console.error('Cannot send simulated reply: No current conversation ID.');
+            setError('Cannot send simulated reply. Please start a new chat.');
+            setLoading(false);
+            isProcessingOption.current = false; // Reset processing flag
           }
         }, 500);
       }, 100); // Small delay to ensure UI state is updated
-      isProcessingOption.current = false;
+      // isProcessingOption.current = false; // Removed from here to move into finally block
     }
     // For "Yes, help draft email" options - FIX THIS SECTION
     else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
@@ -2245,7 +2253,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
       let detailedPrompt = `Please draft me a professional email to my manager about an ethical concern I'm facing at work.`;
       
       if (originalEthicalIssue) {
-        detailedPrompt += ` The ethical issue is regarding: "${originalEthicalIssue.substring(0, 200)}..."`;
+        detailedPrompt += ` The ethical issue is regarding: \\"${originalEthicalIssue.substring(0, 200)}...\\"`;
       }
       
       detailedPrompt += ` Please include a proper subject line, greeting, and professional closing. Focus on communicating the ethical concern clearly and professionally without mentioning any practice scenarios or scores.`;
@@ -3136,7 +3144,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
               </div>
             )}
 
-        {/* Generic Option Buttons (Non-Feedback) */} 
+        // Generic Option Buttons (Non-Feedback)
         {showGenericOptionButtons && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
@@ -3158,7 +3166,7 @@ Format the rest like a real email reply with greeting, body, and signature.`;
             </div>
         )}
 
-        {/* Email Draft Action Buttons */} 
+        // Email Draft Action Buttons
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">
