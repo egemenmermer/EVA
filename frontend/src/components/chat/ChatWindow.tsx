@@ -856,10 +856,48 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setLoading(true); // Fix: Use setLoading
     setError(null);
 
+    // Initialize local variables first
     let currentConv = currentConversation; // Work with a local copy
     let conversationId = currentConv?.conversationId;
     let isPersisted = currentConv?.isPersisted ?? false;
 
+    // CRITICAL FIX: Add validation for current conversation state
+    // Check if we need to recover the conversation state
+    if (localStorage.getItem('originalConversationId') && (!currentConversation || !currentConversation.conversationId)) {
+      const originalConversationId = localStorage.getItem('originalConversationId');
+      console.log('Attempting to recover conversation from originalConversationId:', originalConversationId);
+      
+      try {
+        // Try to fetch the conversation from the API
+        const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
+        if (response.data) {
+          // Restore the conversation
+          console.log('Recovered conversation from API:', response.data);
+          
+          // Update currentConv with recovered data
+          currentConv = {
+            conversationId: response.data.id,
+            title: response.data.title || 'Recovered Conversation',
+            managerType: response.data.managerType || 'PUPPETEER',
+            createdAt: response.data.createdAt || new Date().toISOString(),
+            isPersisted: true
+          };
+          
+          // Update conversationId and isPersisted
+          conversationId = currentConv.conversationId;
+          isPersisted = true;
+          
+          // Also update the store
+          setCurrentConversation({...currentConv});
+          
+          console.log('Successfully restored conversation state');
+        }
+      } catch (err) {
+        console.error('Failed to recover conversation:', err);
+      }
+    }
+    
+    // Now continue with the rest of the function using the potentially updated currentConv, conversationId, etc.
     try {
       // --- Draft Conversation Handling --- 
       // IMPORTANT FIX: Only create a new conversation if we truly don't have one
@@ -989,6 +1027,42 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       if (currentConv && currentConv.conversationId && conversationId !== currentConv.conversationId) {
         console.log('Detected conversation ID mismatch. Correcting from:', conversationId, 'to:', currentConv.conversationId);
         conversationId = currentConv.conversationId;
+      }
+      
+      // Additional check for originalConversationId in localStorage (important for simulation/practice flows)
+      const originalConversationId = localStorage.getItem('originalConversationId');
+      if (originalConversationId && (!conversationId || conversationId.startsWith('draft-'))) {
+        console.log('Found originalConversationId in localStorage. Using it instead of:', conversationId);
+        
+        try {
+          // Try to retrieve the conversation from backend
+          const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
+          if (response.data && response.data.id) {
+            console.log('Successfully retrieved original conversation from API:', response.data.id);
+            
+            // Update our conversation ID
+            conversationId = response.data.id;
+            isPersisted = true;
+            
+            // Update the current conversation in the store for future messages
+            const recoveredConversation = {
+              conversationId: response.data.id,
+              title: response.data.title || 'Recovered Conversation',
+              managerType: response.data.managerType || activeManagerType,
+              isPersisted: true,
+              createdAt: response.data.createdAt || new Date().toISOString()
+            };
+            
+            // Update the store and local working copy
+            setCurrentConversation(recoveredConversation);
+            currentConv = recoveredConversation;
+            
+            console.log('Successfully restored conversation state for messaging');
+          }
+        } catch (err) {
+          console.error('Failed to recover conversation from originalConversationId:', err);
+          // Continue with current values, don't return/exit
+        }
       }
       
       console.log('Sending message to AGENT API:', {
@@ -1821,7 +1895,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
       console.log('Setting current-conversation-id in localStorage:', currentConversation.conversationId);
       localStorage.setItem('current-conversation-id', currentConversation.conversationId);
+      
+      // IMPROVEMENT: Clean up originalConversationId if it doesn't match current conversation
+      const originalConversationId = localStorage.getItem('originalConversationId');
+      if (originalConversationId && originalConversationId !== currentConversation.conversationId) {
+        console.log('Cleaning up originalConversationId that no longer matches current conversation');
+        localStorage.removeItem('originalConversationId');
+      }
     }
+    
+    // Return cleanup function to remove localStorage items when component unmounts
+    return () => {
+      // Only clean up if this is a non-draft conversation
+      if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+        localStorage.removeItem('current-conversation-id');
+      }
+    };
   }, [currentConversation?.conversationId]);
 
   // Add an additional useEffect to ensure message persistence
@@ -2098,6 +2187,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       const replyType = isPositive ? 'positive' : 'negative';
       const userFriendlyMessage = `Yes, simulate a ${replyType} reply.`;
       
+      // IMPROVEMENT: Store the conversation ID for later recovery
+      if (currentConversation && currentConversation.conversationId) {
+        console.log('Storing original conversation ID before simulation:', currentConversation.conversationId);
+        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+      }
+      
       // Create a user message with just the display text
       const userMessage: Message = {
         id: `user-${Date.now()}`,
@@ -2172,6 +2267,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                     conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                     createdAt: lastMessage.createdAt || new Date().toISOString()
                   };
+
+                  // CRITICAL FIX: Make sure we preserve the current conversation in state after simulation
+                  // This ensures that any follow-up messages will use the same conversation
+                  if (currentConversation && currentConversation.conversationId) {
+                    // Re-apply the existing conversation to the store to ensure it's active
+                    setCurrentConversation({
+                      ...currentConversation,
+                      isPersisted: true // Ensure this is marked as persisted
+                    });
+                  }
 
                   // Only add the AI response to the UI, not the prompt
                   // Use functional update to ensure latest state
@@ -3394,4 +3499,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       />
     </div>
   );
-}; 
+};
