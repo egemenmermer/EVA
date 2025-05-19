@@ -897,6 +897,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       }
     }
     
+    // Add debug logging here
+    console.log("DEBUG: handleSendMessage - State before new conversation check:", {
+      currentConversation: currentConversation, // Log the original state variable
+      currentConvLocal: currentConv, // Log the local copy
+      conversationId: conversationId, // Log the determined ID
+      isPersisted: isPersisted // Log the determined persisted status
+    });
+    
     // Now continue with the rest of the function using the potentially updated currentConv, conversationId, etc.
     try {
       // --- Draft Conversation Handling --- 
