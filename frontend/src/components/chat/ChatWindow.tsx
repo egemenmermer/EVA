@@ -2248,7 +2248,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
         setTimeout(() => {
           // Create a more detailed prompt that includes clear instructions for formatting
-          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature.`;
+          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature. \\nDo not include any practice instructions, buttons, or options like [Yes, practice] or [No, not now] in your response.`;
 
           // Send this prompt directly to the API without displaying it in the UI
           if (currentConversation && currentConversation.conversationId) { // Ensure currentConversation and its ID exist
@@ -2801,7 +2801,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     let isEmailDraft = false;
     let isRehearsalPrompt = false;
     let isPracticeFeedback = false;
-    let isSimulatedManagerReply = false;
     
     // Variables for the new feedback structure
     let introductoryText = '';
@@ -3109,16 +3108,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
     
     // Check if this message contains a simulated reply
-    const isSimulatedEmailReply = rawContentForActions.includes("simulated") && rawContentForActions.includes("reply your boss might send:");
+    const isSimulatedEmailReply = rawContentForActions.includes("simulated") && 
+      (rawContentForActions.includes("reply your boss might send:") || 
+       rawContentForActions.toLowerCase().includes("here's a simulated"));
 
     // Update the email draft condition
     isEmailDraft = isAssistant && (rawContentForActions.includes('Subject:') && (rawContentForActions.includes('Dear') || rawContentForActions.includes('[Your Name]')));
     
-    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback;
+    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback && !isSimulatedEmailReply;
     // Only show email draft action buttons for regular drafts, not simulated replies
     const showEmailDraftActionButtons = isAssistant && isEmailDraft && !isSimulatedEmailReply;
     const showRehearsalOptionButtons = message.isRehearsalOptions === true;
-    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && extractedOptions.length > 0;
+    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && !isSimulatedEmailReply && extractedOptions.length > 0;
 
     const markdownComponents: ReactMarkdownOptions['components'] = {
         code({ node, inline, className, children, ...props }: any) { 
@@ -3251,7 +3252,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         
         {/* --- Buttons Area --- */}
         {/* Practice Feedback Action Buttons - Now moved outside the message */}
-        {isPracticeFeedback && (
+        {isPracticeFeedback && !isSimulatedEmailReply && (
           <div className="mt-1 ml-10 py-2">
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                     Do you feel ready to discuss this with your manager, or would you like to practice again?
@@ -3282,7 +3283,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               </div>
             )}
 
-        {showGenericOptionButtons && (
+        {showGenericOptionButtons && !isSimulatedEmailReply && (
           <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
             {extractedOptions.map((option, idx) => (
                 <Button key={idx} variant="outline" size="sm" onClick={() => handleOptionClick(option)} className="text-xs h-auto py-1.5 px-2.5">{option}</Button>
@@ -3291,7 +3292,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         )}
   
         {/* Conditional Rendering: ONLY show these if NOT practice feedback */}
-        {!isPracticeFeedback && showDraftEmailPromptButtons && (
+        {!isPracticeFeedback && showDraftEmailPromptButtons && !isSimulatedEmailReply && (
           <div className="mt-3 flex flex-wrap gap-2 ml-7 items-center">
             <p className="text-xs text-gray-600 dark:text-gray-400 mr-2 mb-1 sm:mb-0">Would you like to take action now?</p>
             <Button variant="default" size="sm" onClick={() => handleOptionClick("Yes, create a draft email to my boss")} className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200">
