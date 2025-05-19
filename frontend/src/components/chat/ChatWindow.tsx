@@ -862,7 +862,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
 
     try {
       // --- Draft Conversation Handling --- 
-      if (!conversationId || conversationId.startsWith('draft-') || !isPersisted) {
+      // IMPORTANT FIX: Only create a new conversation if we truly don't have one
+      // Check if we actually need a new conversation (not just if conversationId exists)
+      if ((!conversationId || conversationId.startsWith('draft-') || !isPersisted) && 
+          !(currentConv && currentConv.conversationId && !currentConv.conversationId.startsWith('draft-'))) {
         console.log('Sending first message for a draft conversation. Creating on backend first...');
 
         // Generate title from the first message
@@ -916,6 +919,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           isMessageSending.current = false;
           return;
         }
+      } else {
+        // IMPROVEMENT: Add logging for when we're using an existing conversation
+        console.log('Using existing conversation with ID:', conversationId, 'Maintaining conversation context');
       }
       // --- End Draft Conversation Handling ---
       
@@ -979,6 +985,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       // 3. Send message to the AGENT API (using the real conversationId)
       const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
             
+      // IMPROVEMENT: Extra check to confirm we're using the correct conversation ID
+      if (currentConv && currentConv.conversationId && conversationId !== currentConv.conversationId) {
+        console.log('Detected conversation ID mismatch. Correcting from:', conversationId, 'to:', currentConv.conversationId);
+        conversationId = currentConv.conversationId;
+      }
+      
       console.log('Sending message to AGENT API:', {
         conversationId,
         userQuery: trimmedValue,
