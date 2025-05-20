@@ -30,7 +30,7 @@ public class ConversationContent {
     @Column(name = "user_query", nullable = false)
     private String userQuery;
 
-    @Column(name = "agent_response", nullable = false, length = 5000)
+    @Column(name = "agent_response", nullable = true, length = 5000)
     private String agentResponse;
 
     @Column(name = "created_at", nullable = false)

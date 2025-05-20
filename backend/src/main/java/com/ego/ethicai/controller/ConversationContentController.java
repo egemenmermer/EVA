@@ -231,15 +231,18 @@ public class ConversationContentController {
                          messageSavedOrUpdated = true;
                          logger.info("Updated existing message pair with assistant response for conversation {}", request.getConversationId());
                      } else {
-                         logger.warn("Could not find matching user query to update for assistant response. Conv: {}. Last entry had user: {}, agent: {}", 
-                                    request.getConversationId(), 
-                                    lastEntry.getUserQuery() != null, 
-                                    lastEntry.getAgentResponse() != null);
-                         // Decide how to handle this - maybe save separately? For now, we don't save.
+                         logger.warn("Could not find matching user query to update for assistant response. Creating new entry with null userQuery for conv: {}", request.getConversationId());
+                         // Create a new message entry with null userQuery
+                         conversationContentService.saveMessage(conversation.getId(), "", request.getContent());
+                         messageSavedOrUpdated = true;
+                         logger.info("Created new entry with null userQuery for assistant response in conversation {}", request.getConversationId());
                      }
                  } else {
-                      logger.warn("Received assistant response, but no prior messages found for conversation {}. Discarding.", request.getConversationId());
-                      // Don't save assistant response if there's no user query to pair it with
+                      logger.warn("No prior messages found for conversation {}. Creating new entry with empty user query.", request.getConversationId());
+                      // Create a new entry with empty user query
+                      conversationContentService.saveMessage(conversation.getId(), "", request.getContent());
+                      messageSavedOrUpdated = true;
+                      logger.info("Created new entry with empty user query for assistant response in conversation {}", request.getConversationId());
                  }
             } else {
                 logger.warn("Invalid role provided in SaveMessageRequestDTO: {}", request.getRole());
