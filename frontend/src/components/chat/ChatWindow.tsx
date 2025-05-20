@@ -1071,7 +1071,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.log('Detected "how would I respond" question after simulation - ensuring same conversation context');
         // No need to do anything special, the prior code fixes ensure we use the same conversation ID
       }
-      
+            
       console.log('Sending message to AGENT API:', {
         conversationId,
         userQuery: trimmedValue,
@@ -2224,12 +2224,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       setStoreMessages(prev => {
           const updatedMessages = [...prev, userMessage];
           // Save to conversation state immediately to preserve user message
-          if (currentConversation?.conversationId) {
-              saveConversationState(currentConversation.conversationId, updatedMessages);
-          }
+      if (currentConversation?.conversationId) {
+        saveConversationState(currentConversation.conversationId, updatedMessages);
+      }
           return updatedMessages;
       });
-
+      
       // Set a loading message to show the user something is happening
       const loadingMessage: Message = {
         id: `assistant-loading-${Date.now()}`,
@@ -2239,17 +2239,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         createdAt: new Date().toISOString(),
         isLoading: true
       };
-
+      
       // Add a small delay before showing the loading indicator to ensure UI updates
       setTimeout(() => {
         setStoreMessages(prev => [...prev, loadingMessage]);
         setLoading(true); // Set global loading state to true
-
+        
         // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
         setTimeout(() => {
           // Create a more detailed prompt that includes clear instructions for formatting
           const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature. \\nDo not include any practice instructions, buttons, or options like [Yes, practice] or [No, not now] in your response.`;
-
+          
           // Send this prompt directly to the API without displaying it in the UI
           if (currentConversation && currentConversation.conversationId) { // Ensure currentConversation and its ID exist
             // Use the API function directly to bypass UI message creation
@@ -2269,12 +2269,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 // Remove the loading message
                 setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
                 setLoading(false); // Set global loading state back to false
-
+                
                 // Create a properly typed assistant message from the response
                 if (response.data && response.data.messages && response.data.messages.length > 0) {
                   // Get the last message from the response (should be the assistant's response)
                   const lastMessage = response.data.messages[response.data.messages.length - 1];
-
+                  
                   // Create a well-formed assistant message
                   const assistantMessage: Message = {
                     id: lastMessage.id || `assistant-${Date.now()}`,
@@ -2283,7 +2283,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                     conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                     createdAt: lastMessage.createdAt || new Date().toISOString()
                   };
-
+                  
                   // CRITICAL FIX: Make sure we preserve the current conversation in state after simulation
                   // This ensures that any follow-up messages will use the same conversation
                   if (currentConversation && currentConversation.conversationId) {
@@ -2292,7 +2292,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                       ...currentConversation,
                       isPersisted: true // Ensure this is marked as persisted
                     });
-                    
+                  
                     // Also update the original conversation ID in localStorage for recovery
                     localStorage.setItem('originalConversationId', currentConversation.conversationId);
                     console.log('Updated originalConversationId in localStorage after simulation:', currentConversation.conversationId);
@@ -2316,7 +2316,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                     conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                     createdAt: new Date().toISOString()
                   };
-
+                  
                   setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
                 }
               }, 600); // Ensure loading indicator is visible for at least 600ms
@@ -2325,10 +2325,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               setLoading(false);
               // Remove the loading message
               setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
-
+              
               console.error('Error getting rehearsal response:', err);
               setError('Failed to get rehearsal response');
-
+              
               // Show an error message in the UI
               const errorMessage: Message = {
                 id: `assistant-${Date.now()}`,
@@ -2337,7 +2337,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                 conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
                 createdAt: new Date().toISOString()
               };
-
+              
               setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
             })
             .finally(() => { // Add finally block here
@@ -3521,4 +3521,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       />
     </div>
   );
-};
+}; 

@@ -34,20 +34,29 @@ public class ConversationContentServiceImpl implements ConversationContentServic
     @Override
     @Transactional
     public void saveMessage(UUID conversationId, String userQuery, String agentResponse) {
-        logger.debug("Saving message for conversation: {}", conversationId);
-        
-        Conversation conversation = conversationService.getConversationEntityById(conversationId)
-                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+        logger.info("Start saving message for conversation: {}", conversationId);
+        try {
+            logger.debug("Fetching conversation entity with ID: {}", conversationId);
+            Conversation conversation = conversationService.getConversationEntityById(conversationId)
+                    .orElseThrow(() -> new RuntimeException("Conversation not found"));
+            logger.debug("Conversation entity found: {}", conversation.getId());
 
-        ConversationContent conversationContent = ConversationContent.builder()
-                .conversation(conversation)
-                .userQuery(userQuery)
-                .agentResponse(agentResponse)
-                .createdAt(LocalDateTime.now())
-                .build();
+            logger.debug("Creating ConversationContent entity...");
+            ConversationContent conversationContent = ConversationContent.builder()
+                    .conversation(conversation)
+                    .userQuery(userQuery)
+                    .agentResponse(agentResponse)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            logger.debug("ConversationContent entity created.");
 
-        conversationContentRepository.save(conversationContent);
-        logger.debug("Message saved successfully for conversation: {}", conversationId);
+            logger.debug("Saving ConversationContent entity to repository...");
+            conversationContentRepository.save(conversationContent);
+            logger.info("Message saved successfully for conversation: {}", conversationId);
+        } catch (Exception e) {
+            logger.error("Error saving message for conversation {}: {}", conversationId, e.getMessage(), e);
+            throw e; // Re-throw the exception to ensure transaction rollback
+        }
     }
 
     @Override
