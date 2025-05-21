@@ -1,0 +1,59 @@
+/* Manager Icons styles to ensure visibility in both light and dark mode */
+
+.manager-icon-container {
+  /* Use a shadow for better contrast around the icon */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: white; /* Light background for dark icons in light mode */
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* In dark mode, use a darker background for light icons */
+:root.dark .manager-icon-container,
+html.dark .manager-icon-container {
+  background-color: #2d3748; /* Dark gray background for light icons */
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure the icon has proper size and positioning */
+.manager-icon {
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* Add specific styling for different manager types */
+[data-role="manager"] {
+  position: relative;
+}
+
+/* Specific styles for each manager type in light mode */
+.puppeteer-icon {
+  border-color: rgba(179, 0, 0, 0.3);
+}
+
+.diluter-icon {
+  border-color: rgba(0, 102, 204, 0.3);
+}
+
+.camouflager-icon {
+  border-color: rgba(0, 153, 0, 0.3);
+}
+
+/* Ensure proper contrast for icon containers in dark mode */
+.dark .manager-icon-container,
+:root.dark .manager-icon-container {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Ensure the text container has enough contrast with the background */
+[data-role="manager"].dark {
+  background-color: rgba(30, 30, 30, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+} 

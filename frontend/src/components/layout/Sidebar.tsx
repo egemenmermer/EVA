@@ -321,11 +321,50 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       const draftId = `draft-${uuidv4()}`;
       const currentUserId = user?.id; // Get user ID from store state
 
+      // Get the current managerType from localStorage practice module if available
+      const practiceManagerType = localStorage.getItem('practice_manager_type');
+      
+      // Normalize manager types for consistent comparison
+      const normalizedPracticeManagerType = practiceManagerType ? practiceManagerType.toUpperCase().trim() : null;
+      const normalizedStoreManagerType = managerType ? managerType.toUpperCase().trim() : null;
+      
+      // Validate the manager type is one of the allowed values
+      const validManagerTypes = ['PUPPETEER', 'DILUTER', 'CAMOUFLAGER'];
+      
+      // Use practice_manager_type if it's valid, otherwise use store managerType
+      let selectedManagerType;
+      if (normalizedPracticeManagerType && validManagerTypes.includes(normalizedPracticeManagerType)) {
+        selectedManagerType = normalizedPracticeManagerType;
+      } else if (normalizedStoreManagerType && validManagerTypes.includes(normalizedStoreManagerType)) {
+        selectedManagerType = normalizedStoreManagerType;
+      } else {
+        selectedManagerType = 'PUPPETEER'; // Default fallback
+      }
+      
+      // Log detailed debugging info
+      console.log('Manager type selection (NEW CHAT):', {
+        'From practice module (raw)': practiceManagerType,
+        'From practice module (normalized)': normalizedPracticeManagerType,
+        'From store (raw)': managerType,
+        'From store (normalized)': normalizedStoreManagerType,
+        'Selected for new chat': selectedManagerType,
+        'Is valid manager type': validManagerTypes.includes(selectedManagerType)
+      });
+      
+      // Ensure the store is updated with the chosen manager type
+      if (selectedManagerType !== normalizedStoreManagerType) {
+        console.log(`Updating global store manager type to ${selectedManagerType}`);
+        setManagerType(selectedManagerType as ManagerType);
+      }
+      
+      // Always update localStorage to ensure consistency
+      localStorage.setItem('practice_manager_type', selectedManagerType);
+      
       // 2. Create a local Conversation object for the draft state
       const draftConversation: Conversation = {
         conversationId: draftId,
         title: 'New Chat', // Default title for draft
-        managerType: managerType, // Use the currently selected manager type
+        managerType: selectedManagerType as ManagerType, // Use the selected manager type
         createdAt: new Date().toISOString(),
         isDraft: true,
         isPersisted: false, // Mark as not saved to backend
@@ -348,15 +387,10 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       
       // 5. Close mobile sidebar if open
       setMobileOpen(false);
-      
-      // 6. Remove API call - Do NOT create on backend immediately
-      // No need to refresh conversation list from backend yet
-      
-    } catch (err: any) {
-      // Catch errors related to local state updates (less likely)
-      console.error('Error creating local draft conversation:', err);
-      setError('Failed to start new chat. Please try again.');
-    } 
+    } catch (error) {
+      console.error('Error creating new draft conversation:', error);
+      setError('Failed to create a new conversation. Please try again.');
+    }
   };
 
   const handleLogout = async () => {
@@ -561,6 +595,26 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       ));
   };
 
+  // Add useEffect to initialize manager type from localStorage
+  useEffect(() => {
+    // Get manager type from localStorage if available
+    const storedManagerType = localStorage.getItem('practice_manager_type');
+    if (storedManagerType) {
+      // Validate the manager type is one of the allowed values
+      const validManagerTypes = ['PUPPETEER', 'DILUTER', 'CAMOUFLAGER'];
+      const normalizedType = storedManagerType.toUpperCase().trim();
+      
+      if (validManagerTypes.includes(normalizedType) && normalizedType !== managerType) {
+        console.log(`Initializing manager type from localStorage: ${normalizedType}`);
+        setManagerType(normalizedType as ManagerType);
+      }
+    } else if (managerType) {
+      // If no value in localStorage but we have a store value, save it to localStorage
+      console.log(`No manager type in localStorage, saving current store value: ${managerType}`);
+      localStorage.setItem('practice_manager_type', managerType);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* New Chat Button only (practice button removed) */}
@@ -588,7 +642,20 @@ export const Sidebar: React.FC<SidebarProps> = () => {
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-200'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
-              onClick={() => setManagerType(type.type)}
+              onClick={() => {
+                // Set manager type in global store
+                setManagerType(type.type);
+                
+                // Also save to localStorage for practice module and other components
+                localStorage.setItem('practice_manager_type', type.type);
+                
+                console.log(`Manager type changed to ${type.type}, updated in global store and localStorage`);
+                
+                // If we're in a current conversation, update its manager type on the next API call
+                if (currentConversation) {
+                  console.log(`Current conversation will use manager type ${type.type} for future messages`);
+                }
+              }}
             >
               <div className="w-5 h-5 flex items-center justify-center mr-2">
                 {type.icon}
