@@ -97,6 +97,9 @@ const createScenarioFromUserQuery = (userQuery: string, managerType: string): Sc
   const normalizedManagerType = (managerType || '').toUpperCase().trim();
   console.log(`createScenarioFromUserQuery: normalized manager type from '${managerType}' to '${normalizedManagerType}'`);
   
+  // Always save normalized manager type to localStorage to ensure consistency
+  localStorage.setItem('practice_manager_type', normalizedManagerType);
+  
   // Create manager description based on type
   const managerDescription = getManagerDescription(normalizedManagerType);
   
@@ -169,6 +172,13 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
   // Normalize manager type to uppercase and trim for consistency
   const normalizedManagerType = (managerType || '').toUpperCase().trim();
   console.log(`evaluateChoice: Normalized manager type '${managerType}' to '${normalizedManagerType}'`);
+  
+  // Double-check localStorage consistency when evaluating choices
+  const storedManagerType = localStorage.getItem('practice_manager_type');
+  if (storedManagerType !== normalizedManagerType) {
+    console.warn(`Manager type mismatch detected - localStorage: '${storedManagerType}', current: '${normalizedManagerType}'. Updating localStorage.`);
+    localStorage.setItem('practice_manager_type', normalizedManagerType);
+  }
   
   // Map of optimal choice indices for each manager type
   const optimalChoices: {[key: string]: number} = {
@@ -442,6 +452,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     
     console.log(`Manager type changed to: ${managerType}`);
     
+    // Always save the manager type to localStorage whenever it changes
+    localStorage.setItem('practice_manager_type', managerType.toUpperCase().trim());
+    
     // Don't reset if there's no current scenario yet (initialization phase)
     if (!currentScenario) return;
     
@@ -467,9 +480,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     
     setCurrentScenario(customScenario);
     setLoading(false);
-    
-    // Save the manager type to localStorage
-    localStorage.setItem('practice_manager_type', managerType);
     
     // Reset other state
     setFeedback(null);
@@ -764,7 +774,24 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         try {
           // Create a new scenario with the same parameters
           const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
-          const effectiveManagerType = managerType || localStorage.getItem('practice_manager_type') || 'PUPPETEER';
+          
+          // Important: Prioritize the current manager type from props or current scenario over localStorage
+          // This ensures we use the most recently selected manager type
+          let effectiveManagerType;
+          
+          if (managerType) {
+            // If a managerType prop is provided, use it (from parent component)
+            effectiveManagerType = managerType;
+            console.log('Using manager type from props:', managerType);
+          } else if (currentScenario?.scenario?.manager_type) {
+            // Otherwise use the current scenario's manager type if available
+            effectiveManagerType = currentScenario.scenario.manager_type;
+            console.log('Using manager type from current scenario:', currentScenario.scenario.manager_type);
+          } else {
+            // Fall back to localStorage or default
+            effectiveManagerType = localStorage.getItem('practice_manager_type') || 'PUPPETEER';
+            console.log('Using manager type from localStorage or default:', effectiveManagerType);
+          }
           
           console.log('Creating new scenario with:', { userQuery, effectiveManagerType });
           
@@ -786,6 +813,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           
           // Add a reset marker to identify this is a new practice session
           localStorage.setItem('practice_is_new_session', 'true');
+          
+          // Ensure the manager type is saved to localStorage (overwrites any previous value)
+          localStorage.setItem('practice_manager_type', freshScenario.scenario.manager_type);
           
           // Update state with the new scenario
           setCurrentScenario(freshScenario);
@@ -843,9 +873,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         localStorage.removeItem('practice_feedback');
         localStorage.removeItem('practice_final_score');
         localStorage.removeItem('practice_user_query');
-        localStorage.removeItem('practice_manager_type');
         localStorage.removeItem('practice_agent_response');
         localStorage.removeItem('return_to_chat');
+        
+        // Intentionally NOT removing practice_manager_type to preserve user's selection
+        // localStorage.removeItem('practice_manager_type');
       }
       
       console.log('Session reset complete');
