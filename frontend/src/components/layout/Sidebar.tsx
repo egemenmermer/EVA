@@ -40,6 +40,7 @@ const ProfileMenu = ({
 }) => {
   // Get dark mode state from store
   const { darkMode } = useStore();
+  const navigate = useNavigate();
   
   // Create portal to render outside the sidebar
   return ReactDOM.createPortal(
@@ -76,6 +77,18 @@ const ProfileMenu = ({
             {user?.email || 'user@example.com'}
           </p>
         </div>
+        
+        {/* Admin Analytics Link - Only shown to admin users */}
+        {user?.role === 'admin' && (
+          <button 
+            onClick={() => navigate('/admin/analytics')}
+            className="flex w-full items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Admin Analytics
+          </button>
+        )}
+        
         <a 
           href="https://github.com/egemenmermer/Thesis"
           target="_blank"

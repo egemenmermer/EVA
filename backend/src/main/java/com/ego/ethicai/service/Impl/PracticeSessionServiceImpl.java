@@ -70,6 +70,18 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         return practiceSessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Practice session not found with ID: " + id));
     }
+
+    @Override
+    public List<PracticeSessionResponseDTO> getAllPracticeSessions() {
+        List<PracticeSession> sessions = practiceSessionRepository.findAll();
+        
+        // Sort by createdAt in descending order (most recent first)
+        sessions.sort((s1, s2) -> s2.getCreatedAt().compareTo(s1.getCreatedAt()));
+        
+        return sessions.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
     
     // Helper method to map entity to response DTO
     private PracticeSessionResponseDTO mapToResponseDTO(PracticeSession entity) {

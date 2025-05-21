@@ -12,6 +12,7 @@ import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore, type Conversation } from '@/store/useStore';
 import { conversationApi, verifyToken } from '@/services/api';
 import { ResetButton } from '@/components/ResetButton';
+import AdminAnalytics from '@/pages/AdminAnalytics';
 
 // Configure the query client with better defaults for reliable data fetching
 const queryClient = new QueryClient({
@@ -257,6 +258,15 @@ export const App: React.FC = () => {
                 element={
                   // Only redirect if we are certain user is not authenticated
                   user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
+                } 
+              />
+              <Route 
+                path="/admin/analytics" 
+                element={
+                  // Only accessible to admin users
+                  user && hasToken ? (
+                    user.role === 'admin' ? <AdminAnalytics /> : <Navigate to="/dashboard" replace />
+                  ) : <Navigate to="/login" replace />
                 } 
               />
               <Route 

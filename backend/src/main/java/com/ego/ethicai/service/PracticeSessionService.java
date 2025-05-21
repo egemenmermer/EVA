@@ -11,4 +11,5 @@ public interface PracticeSessionService {
     PracticeSessionResponseDTO savePracticeSession(PracticeSessionRequestDTO requestDTO);
     List<PracticeSessionResponseDTO> getPracticeSessionsByUserId(UUID userId);
     PracticeSession getPracticeSessionEntityById(UUID id);
+    List<PracticeSessionResponseDTO> getAllPracticeSessions();
 } 

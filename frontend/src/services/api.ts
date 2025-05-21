@@ -830,3 +830,14 @@ export const savePracticeSession = async (
     throw error;
   }
 };
+
+export const getPracticeSessions = async () => {
+  try {
+    setAuthHeader();
+    const response = await backendApi.get('/api/v1/practice/all');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching practice sessions:', error);
+    throw error;
+  }
+};

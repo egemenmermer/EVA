@@ -5,6 +5,8 @@ import com.ego.ethicai.dto.practice.PracticeSessionResponseDTO;
 import com.ego.ethicai.security.CurrentUser;
 import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.service.PracticeSessionService;
+import com.ego.ethicai.service.UserService;
+import com.ego.ethicai.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class PracticeController {
 
     private final PracticeSessionService practiceSessionService;
+    private final UserService userService;
 
     @PostMapping("/save")
     public ResponseEntity<PracticeSessionResponseDTO> savePracticeSession(
@@ -80,6 +83,30 @@ public class PracticeController {
         } catch (Exception e) {
             log.error("Error retrieving practice session: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PracticeSessionResponseDTO>> getAllPracticeSessions(@CurrentUser CustomUserDetails currentUser) {
+        // Check if user exists and is authenticated
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // Get user from service
+        try {
+            User user = userService.getUserByEmail(currentUser.getEmail());
+            
+            // Check for admin role
+            if (user == null || !user.getRole().equalsIgnoreCase("admin")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            List<PracticeSessionResponseDTO> sessions = practiceSessionService.getAllPracticeSessions();
+            return ResponseEntity.ok(sessions);
+        } catch (Exception e) {
+            log.error("Error retrieving practice sessions: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 } 

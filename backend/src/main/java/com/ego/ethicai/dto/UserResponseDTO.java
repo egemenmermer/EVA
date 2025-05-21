@@ -17,6 +17,6 @@ public class UserResponseDTO {
     private String fullName;
     private LocalDateTime lastLogin;
     private LocalDateTime updatedAt;
-
+    private String role;
 
 }

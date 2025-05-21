@@ -9,6 +9,7 @@ export interface LoginResponseDTO {
     fullName: string;
     lastLogin?: string;
     updatedAt?: string;
+    role?: string;
   };
 }
 

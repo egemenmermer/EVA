@@ -40,6 +40,9 @@ public class User {
     @Column(name = "full_name", nullable = true)
     private String fullName;
 
+    @Column(name = "role", nullable = false)
+    private String role = "user"; // Default role is "user"
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

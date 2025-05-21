@@ -45,7 +45,8 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getFullName(),
                 user.getLastLogin(),
-                user.getUpdatedAt()
+                user.getUpdatedAt(),
+                user.getRole()
         );
     }
 
@@ -122,7 +123,8 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getFullName(),
                 user.getLastLogin(),
-                user.getUpdatedAt()
+                user.getUpdatedAt(),
+                user.getRole()
         );
     }
 
