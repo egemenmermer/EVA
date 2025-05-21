@@ -1,2 +1,2 @@
-ALTER TABLE practice_sessions
-ADD COLUMN score INTEGER;
+-- Score column already exists, this is a placeholder migration
+SELECT 1;
