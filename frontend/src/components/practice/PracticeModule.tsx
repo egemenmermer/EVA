@@ -427,10 +427,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     
     // Save the manager type to localStorage for use in other components
     localStorage.setItem('practice_manager_type', effectiveManagerType);
+    localStorage.setItem('practice_user_query', userQuery);
     
     // Clean up
     return () => {
-      localStorage.removeItem('practice_user_query');
       localStorage.removeItem('practice_agent_response');
     };
   }, []); // Run only on initial mount
@@ -1173,10 +1173,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       
       // CRITICAL: Determine the correct original conversation ID from multiple possible sources
       let originalConversationIdValue = localStorage.getItem('originalConversationId') || 
-                                     localStorage.getItem('current-conversation-id') || 
-                                     originalConversationId.current || 
-                                     conversationId;
-                                   
+                                    localStorage.getItem('current-conversation-id') || 
+                                    originalConversationId.current || 
+                                    conversationId;
+                                    
       // Log all possible IDs for debugging
       console.log('Conversation ID options:', {
         'from originalConversationId localStorage': localStorage.getItem('originalConversationId'),
@@ -1292,7 +1292,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       console.error('Error submitting feedback request:', error);
     }
   };
-
+  
   // Fix submitPracticeScore function to properly handle types
   const submitPracticeScore = async (score: number, responses: PracticeResponse[]) => {
     try {
@@ -1517,25 +1517,43 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Check if dark mode is enabled
   useEffect(() => {
-    // Check if the user has dark mode preference set
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // Check if the document has a class that indicates dark mode
-    const htmlElement = document.documentElement;
-    const hasDarkClass = htmlElement.classList.contains('dark');
-    
-    // Set dark mode state based on user preference or document class
-    setIsDarkMode(darkModeMediaQuery.matches || hasDarkClass);
-    
-    // Add listener for changes
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches || hasDarkClass);
+    // Function to check dark mode status from document class
+    const checkDarkMode = () => {
+      const htmlElement = document.documentElement;
+      const hasDarkClass = htmlElement.classList.contains('dark');
+      setIsDarkMode(hasDarkClass);
     };
     
-    darkModeMediaQuery.addEventListener('change', handleChange);
+    // Initial check
+    checkDarkMode();
+    
+    // Set up a mutation observer to detect dark mode class changes
+    const darkModeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          checkDarkMode();
+        }
+      });
+    });
+    
+    darkModeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    // Also check for system preference changes
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      if (!document.documentElement.classList.contains('dark') && e.matches) {
+        setIsDarkMode(true);
+      }
+    };
+    
+    darkModeMediaQuery.addEventListener('change', handleMediaChange);
     
     return () => {
-      darkModeMediaQuery.removeEventListener('change', handleChange);
+      darkModeObserver.disconnect();
+      darkModeMediaQuery.removeEventListener('change', handleMediaChange);
     };
   }, []);
 
@@ -1687,11 +1705,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                           <div className={getMessageStyle(message.role)} data-role={message.role}>
                             {message.role === 'manager' && !isSameRoleAsPrev && (
                               <div className="absolute -left-12 -top-5">
-                                <div className="relative w-16 h-16 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                                <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
                                   <img 
                                     src={getManagerIcon(currentScenario?.scenario?.manager_type, isDarkMode)} 
                                     alt="Manager" 
-                                    className="w-14 h-14 object-cover" 
+                                    className="w-14 h-14 object-cover manager-icon" 
                                   />
                                 </div>
                               </div>

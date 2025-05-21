@@ -37,21 +37,21 @@ public class ConversationContentServiceImpl implements ConversationContentServic
         logger.info("Start saving message for conversation: {}", conversationId);
         try {
             logger.debug("Fetching conversation entity with ID: {}", conversationId);
-            Conversation conversation = conversationService.getConversationEntityById(conversationId)
-                    .orElseThrow(() -> new RuntimeException("Conversation not found"));
+        Conversation conversation = conversationService.getConversationEntityById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
             logger.debug("Conversation entity found: {}", conversation.getId());
 
             logger.debug("Creating ConversationContent entity...");
-            ConversationContent conversationContent = ConversationContent.builder()
-                    .conversation(conversation)
-                    .userQuery(userQuery)
-                    .agentResponse(agentResponse)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+        ConversationContent conversationContent = ConversationContent.builder()
+                .conversation(conversation)
+                .userQuery(userQuery)
+                .agentResponse(agentResponse)
+                .createdAt(LocalDateTime.now())
+                .build();
             logger.debug("ConversationContent entity created.");
 
             logger.debug("Saving ConversationContent entity to repository...");
-            conversationContentRepository.save(conversationContent);
+        conversationContentRepository.save(conversationContent);
             logger.info("Message saved successfully for conversation: {}", conversationId);
         } catch (Exception e) {
             logger.error("Error saving message for conversation {}: {}", conversationId, e.getMessage(), e);
