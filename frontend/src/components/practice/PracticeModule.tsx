@@ -1012,6 +1012,63 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         });
         
         await submitPracticeScore(finalScore, practiceResponses);
+
+        // Save the practice session to the backend
+        try {
+          // Get the user ID from localStorage
+          let userId = null;
+          try {
+            const evaStore = localStorage.getItem('eva-store');
+            if (evaStore) {
+              const parsedStore = JSON.parse(evaStore);
+              userId = parsedStore?.state?.user?.id;
+            }
+          } catch (e) {
+            console.error('Error parsing eva-store from localStorage:', e);
+          }
+
+          console.log('Retrieved userId from localStorage (eva-store):' + userId);
+          
+          if (userId) {
+            try {
+              // Import the API service
+              const { savePracticeSession } = await import('../../services/api');
+
+              console.log('Attempting to save practice session with data:', {
+                userId: userId,
+                managerType: currentScenario.scenario.manager_type,
+                scenarioId: currentScenario.scenario.id || null,
+                selectedChoices: practiceResponses.map(r => r.userResponse),
+                score: finalScore,
+              });
+
+              // Save to backend
+              const response = await savePracticeSession(
+                userId,
+                currentScenario.scenario.manager_type,
+                currentScenario.scenario.id || null,
+                practiceResponses.map(r => r.userResponse),
+                finalScore
+              );
+
+              console.log('Practice session saved successfully:', response);
+
+            } catch (apiError) {
+              console.error('API call to save practice session failed:', apiError);
+              // Log specific error details if available
+              if (apiError.response) {
+                console.error('Error response data:', apiError.response.data);
+                console.error('Error response status:', apiError.response.status);
+              } else if (apiError.request) {
+                console.error('Error request made but no response received:', apiError.request);
+              } else {
+                console.error('Other API error:', apiError.message);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error saving practice session:', e);
+        }
       }
       
       // Set feedback request in localStorage
@@ -1049,10 +1106,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       
       // CRITICAL: Determine the correct original conversation ID from multiple possible sources
       let originalConversationIdValue = localStorage.getItem('originalConversationId') || 
-                                    localStorage.getItem('current-conversation-id') || 
-                                    originalConversationId.current || 
-                                    conversationId;
-                                    
+                                     localStorage.getItem('current-conversation-id') || 
+                                     originalConversationId.current || 
+                                     conversationId;
+                                   
       // Log all possible IDs for debugging
       console.log('Conversation ID options:', {
         'from originalConversationId localStorage': localStorage.getItem('originalConversationId'),
@@ -1168,7 +1225,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       console.error('Error submitting feedback request:', error);
     }
   };
-  
+
   // Fix submitPracticeScore function to properly handle types
   const submitPracticeScore = async (score: number, responses: PracticeResponse[]) => {
     try {

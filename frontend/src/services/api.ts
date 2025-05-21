@@ -806,3 +806,27 @@ export const saveMessage = async (payload: SaveMessagePayload): Promise<void> =>
     // throw error; // Option: re-throw to let caller handle
   }
 };
+
+export const savePracticeSession = async (
+  userId: string,
+  managerType: string,
+  scenarioId: string | null,
+  selectedChoices: string[],
+  score?: number
+) => {
+  try {
+    setAuthHeader();
+    const response = await backendApi.post('/api/v1/practice/save', {
+      userId,
+      managerType,
+      scenarioId: scenarioId || undefined,
+      selectedChoices,
+      timestamp: new Date().toISOString(),
+      score
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error saving practice session:', error);
+    throw error;
+  }
+};
