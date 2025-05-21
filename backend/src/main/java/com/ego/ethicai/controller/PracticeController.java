@@ -2,16 +2,18 @@ package com.ego.ethicai.controller;
 
 import com.ego.ethicai.dto.practice.PracticeSessionRequestDTO;
 import com.ego.ethicai.dto.practice.PracticeSessionResponseDTO;
+import com.ego.ethicai.entity.User;
+import com.ego.ethicai.enums.AccountTypes;
 import com.ego.ethicai.security.CurrentUser;
 import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.service.PracticeSessionService;
 import com.ego.ethicai.service.UserService;
-import com.ego.ethicai.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -87,25 +89,13 @@ public class PracticeController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<PracticeSessionResponseDTO>> getAllPracticeSessions(@CurrentUser CustomUserDetails currentUser) {
-        // Check if user exists and is authenticated
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        
-        // Get user from service
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<PracticeSessionResponseDTO>> getAllPracticeSessions() {
         try {
-            User user = userService.getUserByEmail(currentUser.getEmail());
-            
-            // Check for admin role
-            if (user == null || !user.getRole().equalsIgnoreCase("admin")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            
             List<PracticeSessionResponseDTO> sessions = practiceSessionService.getAllPracticeSessions();
             return ResponseEntity.ok(sessions);
         } catch (Exception e) {
-            log.error("Error retrieving practice sessions: {}", e.getMessage());
+            log.error("Error retrieving all practice sessions: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

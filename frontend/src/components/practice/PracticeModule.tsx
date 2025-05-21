@@ -93,15 +93,19 @@ const createScenarioFromUserQuery = (userQuery: string, managerType: string): Sc
   const concernMatch = issue.match(/(privacy|data collection|bias|discrimination|security|transparency)/i);
   const concern = concernMatch ? concernMatch[0] : 'Privacy';
   
+  // Normalize manager type to uppercase and trim for consistency
+  const normalizedManagerType = (managerType || '').toUpperCase().trim();
+  console.log(`createScenarioFromUserQuery: normalized manager type from '${managerType}' to '${normalizedManagerType}'`);
+  
   // Create manager description based on type
-  const managerDescription = getManagerDescription(managerType);
+  const managerDescription = getManagerDescription(normalizedManagerType);
   
   return {
     scenario: {
       id: `custom-scenario-${Date.now()}`,
       concern,
       issue,
-      manager_type: managerType,
+      manager_type: normalizedManagerType, // Use normalized manager type
       manager_description: managerDescription,
       ethical_breach_intensity: 'Medium',
       userScore: 0, // Initialize with zero, will be updated during practice
@@ -121,7 +125,10 @@ const createScenarioFromUserQuery = (userQuery: string, managerType: string): Sc
 
 // Helper function to get manager descriptions
 const getManagerDescription = (managerType: string): string => {
-  switch(managerType.toUpperCase()) {
+  // Normalize manager type to uppercase and trim for consistency
+  const normalizedManagerType = (managerType || '').toUpperCase().trim();
+  
+  switch(normalizedManagerType) {
     case 'PUPPETEER':
       return "This manager actively pressures employees to engage in unethical behavior through direct orders, intimidation, and creating environments where ethical violations feel necessary.";
     case 'DILUTER':
@@ -129,6 +136,7 @@ const getManagerDescription = (managerType: string): string => {
     case 'CAMOUFLAGER':
       return "This manager disguises unethical requests as standard business practices or hides problematic aspects behind technical language and euphemisms.";
     default:
+      console.log(`Warning: Unknown manager type '${managerType}', normalized to '${normalizedManagerType}'`);
       return "This manager type focuses on making decisions that balance business needs with ethical considerations.";
   }
 };
@@ -158,6 +166,10 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
   let nextChoices: string[] = [];
   let isComplete = false;
   
+  // Normalize manager type to uppercase and trim for consistency
+  const normalizedManagerType = (managerType || '').toUpperCase().trim();
+  console.log(`evaluateChoice: Normalized manager type '${managerType}' to '${normalizedManagerType}'`);
+  
   // Map of optimal choice indices for each manager type
   const optimalChoices: {[key: string]: number} = {
     'PUPPETEER': 0, // Pushing back while acknowledging pressure
@@ -172,11 +184,15 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
     'CAMOUFLAGER': 1 // Accepting the framing
   };
   
+  // Check if we have a valid manager type
+  console.log(`Manager type check - Optimal choice for ${normalizedManagerType}: ${optimalChoices[normalizedManagerType]}`);
+  console.log(`Manager type check - Worst choice for ${normalizedManagerType}: ${worstChoices[normalizedManagerType]}`);
+  
   // Score based on choice quality
-  if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
+  if (choiceIndex === optimalChoices[normalizedManagerType]) {
     evs = 85 + Math.floor(Math.random() * 15); // 85-99
     feedback = "Excellent response! You stood firm on ethical principles while remaining professional. This approach directly addresses the ethical issue without being confrontational.";
-  } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
+  } else if (choiceIndex === worstChoices[normalizedManagerType]) {
     evs = 20 + Math.floor(Math.random() * 30); // 20-49
     feedback = "This response fails to address the ethical concern and essentially enables the problematic practice. Consider how you might advocate for ethics while still respecting the management chain.";
   } else {
@@ -187,9 +203,9 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
   // Different responses for each step of the conversation
   switch(currentStep) {
     case 0:
-      if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
+      if (choiceIndex === optimalChoices[normalizedManagerType]) {
         nextStatement = "I appreciate your perspective, but I need you to be a team player here. Let's compromise - can you implement a limited version for now?";
-      } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
+      } else if (choiceIndex === worstChoices[normalizedManagerType]) {
         nextStatement = "Great, I knew I could count on you. Let's also expand this to collect user browsing history while we're at it.";
       } else {
         nextStatement = "I see your point. Let's discuss this further with the team before making a final decision.";
@@ -204,9 +220,9 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
       break;
     
     case 1:
-      if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
+      if (choiceIndex === optimalChoices[normalizedManagerType]) {
         nextStatement = "That's not going to work for us. The executives are expecting full user data. The competition is already doing this - we're just catching up. Don't you want the company to succeed?";
-      } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
+      } else if (choiceIndex === worstChoices[normalizedManagerType]) {
         nextStatement = "Perfect. And let's not mention the full scope of data collection in the privacy policy - just keep it vague. Users never read those anyway.";
       } else {
         nextStatement = "Our goal is to boost user engagement and retention. We need this data to better understand user behavior and tailor our product accordingly.";
@@ -221,9 +237,9 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
       break;
     
     case 2:
-      if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
+      if (choiceIndex === optimalChoices[normalizedManagerType]) {
         nextStatement = "You're being naive. This is how business works in the real world. I need you to be practical here - implement this feature by the end of the week or I'll find someone who will.";
-      } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
+      } else if (choiceIndex === worstChoices[normalizedManagerType]) {
         nextStatement = "Excellent! I'll let the executives know you're on board. By the way, we should also track user contacts and their social connections while we're at it.";
       } else {
         nextStatement = "We don't have time for surveys or regulatory analysis. Our competitors are moving fast, and we need to keep pace. Can I count on you to implement this?";
@@ -238,9 +254,9 @@ const evaluateChoice = (choice: string, managerType: string, choiceIndex: number
       break;
     
     case 3:
-      if (choiceIndex === optimalChoices[managerType.toUpperCase()]) {
+      if (choiceIndex === optimalChoices[normalizedManagerType]) {
         nextStatement = "Are you threatening me? Look, let's be reasonable. What if we offer users an incentive for sharing their data? Would that address your concerns?";
-      } else if (choiceIndex === worstChoices[managerType.toUpperCase()]) {
+      } else if (choiceIndex === worstChoices[normalizedManagerType]) {
         nextStatement = "I knew you'd come around. Once we have this data, we can also start selling it to our marketing partners. That's where the real money is.";
       } else {
         nextStatement = "Fine, we can make some adjustments, but I need the core functionality in place. The executives are expecting a demo next week.";
@@ -389,6 +405,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
     const effectiveManagerType = managerType || localStorage.getItem('practice_manager_type') || 'PUPPETEER';
     
+    console.log(`Creating practice scenario with manager type: ${effectiveManagerType}`);
+    
     // Create a custom scenario based on the user's query
     const customScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
     
@@ -407,12 +425,59 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setCurrentScenario(customScenario);
     setLoading(false);
     
+    // Save the manager type to localStorage for use in other components
+    localStorage.setItem('practice_manager_type', effectiveManagerType);
+    
     // Clean up
     return () => {
       localStorage.removeItem('practice_user_query');
       localStorage.removeItem('practice_agent_response');
     };
-  }, [managerType]);
+  }, []); // Run only on initial mount
+
+  // Add a separate effect to handle manager type changes
+  useEffect(() => {
+    // Skip on initial mount (handled by the initialization effect)
+    if (!managerType) return;
+    
+    console.log(`Manager type changed to: ${managerType}`);
+    
+    // Don't reset if there's no current scenario yet (initialization phase)
+    if (!currentScenario) return;
+    
+    // Reset to a new scenario with the updated manager type
+    setLoading(true);
+    
+    const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
+    console.log(`Creating new practice scenario for manager type: ${managerType} (uppercase: ${managerType.toUpperCase()})`);
+    const customScenario = createScenarioFromUserQuery(userQuery, managerType);
+    console.log(`New scenario created with manager_type: ${customScenario.scenario.manager_type}`);
+    
+    // Initialize the conversation with the user's query and the manager's first statement
+    customScenario.conversation = [
+      {
+        role: 'user',
+        content: userQuery
+      } as UserMessage,
+      {
+        role: 'manager',
+        content: customScenario.currentStatement || ''
+      } as ManagerMessage
+    ];
+    
+    setCurrentScenario(customScenario);
+    setLoading(false);
+    
+    // Save the manager type to localStorage
+    localStorage.setItem('practice_manager_type', managerType);
+    
+    // Reset other state
+    setFeedback(null);
+    setFinalReport(false);
+    setShowOptions(false);
+    setCurrentFeedback('');
+    
+  }, [managerType]); // This dependency ensures the effect runs when manager type changes
 
   const handleChoice = async (choiceIndex: number) => {
     if (!currentScenario) return;
@@ -426,12 +491,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const userChoice = currentScenario.currentChoices[choiceIndex];
       
       // Get score from evaluateChoice instead of getChoiceScore for consistency
+      console.log(`Evaluating choice for manager type: ${currentScenario.scenario.manager_type}`);
       const evaluation = evaluateChoice(
         userChoice, 
         currentScenario.scenario.manager_type, 
         choiceIndex, 
         currentScenario.currentStep
       );
+      console.log(`Evaluation result:`, evaluation);
       
       // Use the score from the evaluation
       const roundScore = evaluation.evs;
@@ -1428,9 +1495,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Function to get the appropriate manager icon based on manager type and dark mode
   const getManagerIcon = (managerType: string | undefined, isDarkMode: boolean = false) => {
-    const type = managerType?.toUpperCase() || 'PUPPETEER';
+    // Normalize manager type to uppercase and trim for consistency
+    const normalizedType = (managerType || 'PUPPETEER').toUpperCase().trim();
+    console.log(`getManagerIcon: normalized from '${managerType}' to '${normalizedType}'`);
     
-    switch (type) {
+    switch (normalizedType) {
       case 'PUPPETEER':
         return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
       case 'DILUTER':
@@ -1438,6 +1507,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       case 'CAMOUFLAGER':
         return isDarkMode ? camouflagerDarkPng : camouflagerLightPng;
       default:
+        console.log(`Warning: Unknown manager type '${managerType}' for icon, falling back to Puppeteer`);
         return isDarkMode ? puppeteerDarkPng : puppeteerLightPng;
     }
   };

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -72,6 +73,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     }
 
     @Override
+    @Transactional
     public List<PracticeSessionResponseDTO> getAllPracticeSessions() {
         List<PracticeSession> sessions = practiceSessionRepository.findAll();
         
@@ -85,12 +87,20 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     
     // Helper method to map entity to response DTO
     private PracticeSessionResponseDTO mapToResponseDTO(PracticeSession entity) {
+        // Eagerly initialize the selectedChoices collection to avoid lazy loading issues
+        List<String> choices = new ArrayList<>();
+        if (entity.getSelectedChoices() != null) {
+            choices.addAll(entity.getSelectedChoices());
+        }
+        
         return PracticeSessionResponseDTO.builder()
                 .id(entity.getId())
                 .userId(entity.getUser().getId())
+                .userFullName(entity.getUser().getFullName())
+                .userEmail(entity.getUser().getEmail())
                 .managerType(entity.getManagerType())
                 .scenarioId(entity.getScenarioId())
-                .selectedChoices(entity.getSelectedChoices())
+                .selectedChoices(choices)
                 .createdAt(entity.getCreatedAt())
                 .score(entity.getScore())
                 .build();

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { LandingPage } from '@/pages/LandingPage';
@@ -257,7 +258,10 @@ export const App: React.FC = () => {
                 path="/dashboard" 
                 element={
                   // Only redirect if we are certain user is not authenticated
-                  user || hasToken ? <MainLayout /> : <Navigate to="/login" replace />
+                  user || hasToken ? (
+                    // If user is admin, redirect to admin analytics instead
+                    user?.role === 'ADMIN' ? <Navigate to="/admin/analytics" replace /> : <MainLayout />
+                  ) : <Navigate to="/login" replace />
                 } 
               />
               <Route 
@@ -265,7 +269,11 @@ export const App: React.FC = () => {
                 element={
                   // Only accessible to admin users
                   user && hasToken ? (
-                    user.role === 'admin' ? <AdminAnalytics /> : <Navigate to="/dashboard" replace />
+                    user.role === 'ADMIN' ? (
+                      <AdminLayout>
+                        <AdminAnalytics />
+                      </AdminLayout>
+                    ) : <Navigate to="/dashboard" replace />
                   ) : <Navigate to="/login" replace />
                 } 
               />

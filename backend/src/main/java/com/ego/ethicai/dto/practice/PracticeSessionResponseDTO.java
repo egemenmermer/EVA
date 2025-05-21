@@ -16,6 +16,8 @@ import java.util.UUID;
 public class PracticeSessionResponseDTO {
     private UUID id;
     private UUID userId;
+    private String userFullName;
+    private String userEmail;
     private String managerType;
     private String scenarioId;
     private List<String> selectedChoices;

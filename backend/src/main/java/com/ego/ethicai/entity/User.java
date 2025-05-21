@@ -1,5 +1,6 @@
 package com.ego.ethicai.entity;
 
+import com.ego.ethicai.enums.AccountTypes;
 import com.ego.ethicai.enums.AuthProvider;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -40,8 +41,18 @@ public class User {
     @Column(name = "full_name", nullable = true)
     private String fullName;
 
-    @Column(name = "role", nullable = false)
-    private String role = "user"; // Default role is "user"
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, columnDefinition = "VARCHAR(20)")
+    private AccountTypes role = AccountTypes.USER; // Default role is "user"
+
+    // Helper method for setting the role that handles case conversion
+    public void setRole(String roleStr) {
+        try {
+            this.role = AccountTypes.valueOf(roleStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            this.role = AccountTypes.USER; // Default to USER if invalid
+        }
+    }
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

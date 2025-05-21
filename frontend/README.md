@@ -1,18 +1,45 @@
-# Ethical AI Frontend
+# EVA - Ethical Virtual Assistant Frontend
 
-React-based frontend for the Ethical AI Decision-Making Assistant.
+Frontend application for the EVA ethical AI project.
 
-## Getting Started
+## New Dependencies for Admin Analytics
 
-1. Install dependencies:
+The admin analytics dashboard uses the following visualization libraries:
+
+- **chart.js**: JavaScript charting library that supports various chart types
+- **react-chartjs-2**: React components for Chart.js
+
+These dependencies must be installed in both development and production environments.
+
+### Installation
+
 ```bash
-npm install
+# Install dependencies
+npm install chart.js react-chartjs-2 --save
 ```
 
-2. Start the development server:
+### Docker Deployment
+
+The Chart.js dependencies are included in the package.json and will be automatically installed during the Docker build process.
+
+## Running the Application
+
 ```bash
-npm start
+# Development mode
+npm run dev
+
+# Build for production
+npm run build
 ```
+
+## Admin Analytics Features
+
+The admin analytics dashboard provides:
+- Overview of practice session metrics
+- Visualization of manager type distribution
+- Average score by manager type
+- Detailed session logs
+- Export capabilities for reports
 
 ## Project Structure
 
