@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { authApi } from '@/services/api';
 import { Loader2, X, ArrowRight, ArrowLeft, CheckCircle, Shield, Target, Eye } from 'lucide-react';
@@ -188,6 +188,18 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [determinedManagerType, setDeterminedManagerType] = useState<string | null>(null);
 
+  // Reset state when modal opens, especially for retakes
+  useEffect(() => {
+    if (isOpen) {
+      setStep('explanation');
+      setCurrentQuestionIndex(0);
+      setResponses({});
+      setLoading(false);
+      setError(null);
+      setDeterminedManagerType(null);
+    }
+  }, [isOpen, isRetake]);
+
   // Function to get the appropriate manager icon based on manager type and dark mode
   const getManagerIcon = (managerType: string, isDarkMode: boolean = false) => {
     const type = managerType.toUpperCase();
@@ -217,6 +229,7 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
     setCurrentQuestionIndex(0);
     setResponses({});
     setError(null);
+    setDeterminedManagerType(null);
   };
 
   const handleResponseChange = (score: number) => {
