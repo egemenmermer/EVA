@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { GuidelinesPanel } from '../guidelines/GuidelinesPanel';
+import { ManagerTypeQuizModal } from '../modals/ManagerTypeQuizModal';
 import { useStore } from '@/store/useStore';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -31,6 +32,9 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const [hasNewKnowledge, setHasNewKnowledge] = useState<boolean>(false);
   // State for messages
   const [storeMessages, setStoreMessages] = useState<Message[]>([]);
+  // State for manager type quiz modal
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [isQuizRetake, setIsQuizRetake] = useState(false);
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
@@ -75,6 +79,34 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       });
     }
   }, [navigate, token, user, setUser, setToken]);
+
+  // Check if user needs to take manager type quiz
+  useEffect(() => {
+    if (user && !user.managerTypePreference && !showQuizModal) {
+      console.log('User has not taken manager type quiz, showing modal');
+      setShowQuizModal(true);
+    } else if (user && user.managerTypePreference && !showQuizModal) {
+      console.log('User has manager type preference:', user.managerTypePreference);
+      // Don't automatically close if modal is currently open - let it handle its own closing
+      // setShowQuizModal(false);
+    }
+  }, [user, showQuizModal]);
+
+  // Listen for retake quiz events from sidebar
+  useEffect(() => {
+    const handleShowQuizModal = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Received show-manager-quiz event:', customEvent.detail);
+      setIsQuizRetake(customEvent.detail?.isRetake || false);
+      setShowQuizModal(true);
+    };
+
+    window.addEventListener('show-manager-quiz', handleShowQuizModal);
+
+    return () => {
+      window.removeEventListener('show-manager-quiz', handleShowQuizModal);
+    };
+  }, []);
 
   // Listen for conversation change events
   useEffect(() => {
@@ -238,6 +270,11 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     }
   };
 
+  const handleCloseQuizModal = () => {
+    setShowQuizModal(false);
+    setIsQuizRetake(false);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">
       {/* Header - Responsive padding */}
@@ -369,6 +406,14 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           />
         )}
       </div>
+
+      {/* Manager Type Quiz Modal */}
+      <ManagerTypeQuizModal
+        isOpen={showQuizModal}
+        onClose={handleCloseQuizModal}
+        isRetake={isQuizRetake}
+        isRequired={!user?.managerTypePreference}
+      />
     </div>
   );
 }; 

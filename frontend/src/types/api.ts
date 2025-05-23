@@ -10,6 +10,7 @@ export interface LoginResponseDTO {
     lastLogin?: string;
     updatedAt?: string;
     role?: string;
+    managerTypePreference?: string;
   };
 }
 
@@ -45,9 +46,14 @@ export interface SendMessageRequestDTO {
 }
 
 export interface FeedbackResponseDTO {
-  id: string;
+  id: number;
   conversationId: string;
+  userFeedback: string;
   rating: number;
-  comment?: string;
   submittedAt: string;
+}
+
+export interface ActivationResponseDTO {
+  message: string;
+  activatedAt?: string;
 } 

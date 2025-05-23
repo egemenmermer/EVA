@@ -16,16 +16,10 @@ import { TemperatureControl } from '@/components/controls/TemperatureControl';
 import { v4 as uuidv4 } from 'uuid';
 import '../chat/scrollbar.css'; // Import the scrollbar CSS
 
-// Type for manager types - use the original enum values
-const managerTypes: { type: ManagerType; icon: React.ReactNode; label: string }[] = [
-  { type: 'PUPPETEER', icon: null, label: 'Puppeteer' },
-  { type: 'DILUTER', icon: null, label: 'Diluter' },
-  { type: 'CAMOUFLAGER', icon: null, label: 'Camouflager' },
-];
-
 // Type for the Sidebar component props
 interface SidebarProps {
-  // showPracticeLink prop removed
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 // Profile Menu component to be rendered in a portal
@@ -89,6 +83,20 @@ const ProfileMenu = ({
           </button>
         )}
         
+        {/* Retake Manager Type Quiz Option */}
+        <button 
+          onClick={() => {
+            // Emit event to trigger quiz modal instead of navigating
+            window.dispatchEvent(new CustomEvent('show-manager-quiz', { detail: { isRetake: true } }));
+            // Close the menu by simulating a click outside
+            document.dispatchEvent(new MouseEvent('mousedown'));
+          }}
+          className="flex w-full items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <Bot className="mr-2 h-4 w-4" />
+          Retake Manager Type Quiz
+        </button>
+        
         <a 
           href="https://github.com/egemenmermer/Thesis"
           target="_blank"
@@ -130,32 +138,25 @@ const ProfileMenu = ({
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = () => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const { 
     user, 
-    managerType, 
-    setManagerType, 
-    temperature, 
-    setTemperature, 
     darkMode, 
     toggleDarkMode, 
+    managerType, 
     currentConversation,
-    setCurrentConversation, 
-    setMessages, 
-    addMessage, 
-    setUser 
+    setCurrentConversation,
+    clearMessages 
   } = useStore();
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-  const profileButtonRef = useRef<HTMLDivElement>(null);
   
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLDivElement>(null);
 
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
@@ -220,80 +221,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Listen for refresh events from ChatWindow
-  useEffect(() => {
-    const handleRefreshEvent = (event: Event) => {
-      console.log('Sidebar: Received refresh-conversations event');
-      const customEvent = event as CustomEvent;
-      const details = customEvent.detail; // Contains { type, conversationId, title, managerType }
-      console.log('Refresh event details:', details);
-
-      // Optimistic UI Update for new conversations
-      if (details?.type === 'new-conversation' && details.conversationId && details.title) {
-        console.log('Optimistically adding new conversation to sidebar:', details.conversationId);
-        const newConvOptimistic: Conversation = {
-          conversationId: details.conversationId,
-          title: details.title,
-          managerType: details.managerType || managerType, // Use provided or default
-          createdAt: new Date().toISOString(), // Use current time as placeholder
-          isPersisted: true, // Assume it will be persisted
-          isDraft: false
-        };
-        
-        // Add to the beginning of the list for immediate visibility
-        setDirectFetchedConversations(prev => {
-          // Avoid adding duplicates if already present
-          if (prev.some(c => c.conversationId === newConvOptimistic.conversationId)) {
-            return prev;
-          }
-          return [newConvOptimistic, ...prev];
-        });
-        
-        // Also select this new conversation immediately
-        if (!currentConversation || currentConversation.conversationId !== newConvOptimistic.conversationId) {
-            setCurrentConversation(newConvOptimistic);
-            localStorage.setItem('current-conversation-id', newConvOptimistic.conversationId);
-        }
-      }
-
-      // Always fetch the full list to ensure consistency
-      fetchConversations().then(() => {
-        // Existing logic to potentially re-select conversation after fetch (can likely be simplified now)
-        if (details?.conversationId && (!currentConversation || 
-            currentConversation.conversationId !== details.conversationId)) {
-            
-            // Find the fetched conversation to ensure we use the correct data from backend    
-            const fetchedConv = directFetchedConversations.find(c => c.conversationId === details.conversationId);
-            if (fetchedConv) {
-                console.log('Re-selecting conversation after fetch confirmation:', fetchedConv.conversationId);
-                setCurrentConversation(fetchedConv);
-            } else {
-                 console.warn('Could not find conversation from event details after fetch');
-                 // Optionally select the first conversation if the target one disappeared
-                 if (directFetchedConversations.length > 0 && !currentConversation) {
-                    setCurrentConversation(directFetchedConversations[0]);
-                 }
-            }
-        }
-      });
-    };
-    
-    window.addEventListener('refresh-conversations', handleRefreshEvent);
-    
-    return () => {
-      window.removeEventListener('refresh-conversations', handleRefreshEvent);
-    };
-  // Depend on fetchConversations to avoid stale closures, but be cautious of loops if fetchConversations changes often
-  }, [currentConversation, setCurrentConversation, managerType, fetchConversations]);
-  
-  // Re-fetch conversations when current conversation changes
-  useEffect(() => {
-    if (currentConversation && !currentConversation.isDraft) {
-      console.log('Sidebar: Current conversation changed, refreshing conversation list');
-      fetchConversations();
-    }
-  }, [currentConversation]);
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -312,81 +239,53 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   }, [showProfileMenu]);
 
   const handleNewChat = async () => {
-    // No need for loading state here, as it's purely local initially
+    // Create draft conversation with user's determined manager type
     setError(null);
     try {
       console.log('Creating new DRAFT conversation locally...');
       
-      // 1. Generate a local draft ID
-      const draftId = `draft-${uuidv4()}`;
-      const currentUserId = user?.id; // Get user ID from store state
+      const currentUserId = user?.id;
+      if (!currentUserId) {
+        console.error('No user ID found. Cannot create conversation.');
+        setError('User not found. Please log in again.');
+        return;
+      }
 
-      // Get the current managerType from localStorage practice module if available
-      const practiceManagerType = localStorage.getItem('practice_manager_type');
+      const draftId = `draft-${uuidv4()}`;
       
-      // Normalize manager types for consistent comparison
-      const normalizedPracticeManagerType = practiceManagerType ? practiceManagerType.toUpperCase().trim() : null;
-      const normalizedStoreManagerType = managerType ? managerType.toUpperCase().trim() : null;
+      // Use the user's determined manager type, or default to PUPPETEER
+      const selectedManagerType = user?.managerTypePreference || 'PUPPETEER';
       
-      // Validate the manager type is one of the allowed values
-      const validManagerTypes = ['PUPPETEER', 'DILUTER', 'CAMOUFLAGER'];
-      
-      // Use practice_manager_type if it's valid, otherwise use store managerType
-      let selectedManagerType;
-      if (normalizedPracticeManagerType && validManagerTypes.includes(normalizedPracticeManagerType)) {
-        selectedManagerType = normalizedPracticeManagerType;
-      } else if (normalizedStoreManagerType && validManagerTypes.includes(normalizedStoreManagerType)) {
-        selectedManagerType = normalizedStoreManagerType;
-      } else {
-        selectedManagerType = 'PUPPETEER'; // Default fallback
-      }
-      
-      // Log detailed debugging info
-      console.log('Manager type selection (NEW CHAT):', {
-        'From practice module (raw)': practiceManagerType,
-        'From practice module (normalized)': normalizedPracticeManagerType,
-        'From store (raw)': managerType,
-        'From store (normalized)': normalizedStoreManagerType,
-        'Selected for new chat': selectedManagerType,
-        'Is valid manager type': validManagerTypes.includes(selectedManagerType)
-      });
-      
-      // Ensure the store is updated with the chosen manager type
-      if (selectedManagerType !== normalizedStoreManagerType) {
-        console.log(`Updating global store manager type to ${selectedManagerType}`);
-        setManagerType(selectedManagerType as ManagerType);
-      }
-      
-      // Always update localStorage to ensure consistency
+      // Store in localStorage for practice module
       localStorage.setItem('practice_manager_type', selectedManagerType);
       
-      // 2. Create a local Conversation object for the draft state
+      // Create a local Conversation object for the draft state
       const draftConversation: Conversation = {
         conversationId: draftId,
         title: 'New Chat', // Default title for draft
-        managerType: selectedManagerType as ManagerType, // Use the selected manager type
+        managerType: selectedManagerType as ManagerType,
         createdAt: new Date().toISOString(),
         isDraft: true,
         isPersisted: false, // Mark as not saved to backend
-        userId: currentUserId, // Use the fetched user ID
+        userId: currentUserId,
         lastMessage: undefined,
         lastMessageDate: undefined,
       };
       
       console.log('Setting draft conversation in store:', draftConversation);
       
-      // 3. Clear messages from Zustand store and dispatch event
-      setMessages([]); // Clear message display
+      // Clear messages from Zustand store and dispatch event
+      clearMessages();
       const clearEvent = new CustomEvent('clear-messages', { 
         detail: { conversationId: draftId } // Pass draft ID for potential context
       });
       window.dispatchEvent(clearEvent);
       
-      // 4. Set the new draft conversation in the store
+      // Set the new draft conversation in the store
       setCurrentConversation(draftConversation);
       
-      // 5. Close mobile sidebar if open
-      setMobileOpen(false);
+      // Close mobile sidebar if open
+      if (onClose) onClose();
     } catch (error) {
       console.error('Error creating new draft conversation:', error);
       setError('Failed to create a new conversation. Please try again.');
@@ -413,7 +312,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     // Ensure all fields are present with defaults
     const mappedConversation: Conversation = {
       ...conversation,
-      title: conversation.title || 'Untitled Conversation',
       createdAt: conversation.createdAt || timestamp,
       lastMessageDate: conversation.lastMessageDate || conversation.createdAt || timestamp
     };
@@ -428,36 +326,25 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     });
     window.dispatchEvent(refreshEvent);
     
-    setMobileOpen(false);
+    if (onClose) onClose();
   };
 
   const handleDeleteConversation = async (e: React.MouseEvent, conversationToDelete: Conversation) => {
-    // --- ADDED LOG 1: Check parameters immediately --- 
-    console.log("[handleDeleteConversation ENTRY] Event:", e);
-    console.log("[handleDeleteConversation ENTRY] conversationToDelete object:", JSON.stringify(conversationToDelete)); // Stringify to see full structure
+    console.log("[handleDeleteConversation ENTRY] conversationToDelete object:", JSON.stringify(conversationToDelete));
 
-    // --- ADD LOG 2: Check conversationId existence --- 
     if (!conversationToDelete || !conversationToDelete.conversationId) {
       console.error("[handleDeleteConversation ERROR] conversationToDelete or its ID is missing!", conversationToDelete);
-      return; // Stop execution if critical data is missing
+      return;
     }
-    console.log('[handleDeleteConversation CHECK] conversationId exists:', conversationToDelete.conversationId);
-
-    // --- ADD LOG 3 --- 
-    console.log('[handleDeleteConversation] Clicked!', { conversationId: conversationToDelete?.conversationId });
     
     e.stopPropagation();
     e.preventDefault(); 
     
-    const id = conversationToDelete.conversationId; 
-    
-    // --- ADD LOG 4 --- 
+    const id = conversationToDelete.conversationId;
     console.log('[handleDeleteConversation] Conversation ID variable set:', id);
     
-    // Ensure isPersisted check defaults correctly if undefined
-    // --- ADD LOG 5 --- 
     const isPersisted = conversationToDelete.isPersisted === true;
-    console.log('[handleDeleteConversation] Is Persisted?:', isPersisted, '(from conversationToDelete.isPersisted:', conversationToDelete.isPersisted, ')');
+    console.log('[handleDeleteConversation] Is Persisted?:', isPersisted);
 
     // Store the list before optimistic update, in case we need to revert
     const previousConversations = [...directFetchedConversations];
@@ -470,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     // Clear state if deleting current conversation
     if (currentConversation?.conversationId === id) {
       setCurrentConversation(null);
-      setMessages([]); // Make sure messages are cleared from store
+      clearMessages();
       localStorage.removeItem('current-conversation-id');
     }
     
@@ -492,17 +379,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     window.dispatchEvent(deleteEvent);
 
     // Perform backend delete ONLY if persisted
-    // --- ADD LOG 6 --- 
-    console.log('[handleDeleteConversation] Checking if persisted before API call...');
     if (isPersisted) {
-      // --- ADD LOG 7 --- 
-      console.log('[handleDeleteConversation] IS persisted. Attempting API call...');
       try {
-        await conversationApi.deleteConversation(id); // Attempt backend delete
-        // --- ADD LOG 8 --- 
+        await conversationApi.deleteConversation(id);
         console.log('[handleDeleteConversation] API call successful for:', id);
       } catch (err: any) {
-        // --- ADD LOG 9 --- 
         console.error('[handleDeleteConversation] API call FAILED:', err);
         setError(`Failed to delete: ${err.message || 'Server error'}. Reverting.`);
         // If backend delete failed, revert optimistic UI update
@@ -510,10 +391,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         setDirectFetchedConversations(previousConversations);
       }
     } else {
-      // --- ADD LOG 10 --- 
       console.log('[handleDeleteConversation] NOT persisted. Skipping API call.');
     }
-    // --- ADD LOG 11 --- 
     console.log('[handleDeleteConversation] Finished.');
   };
 
@@ -532,7 +411,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     setShowProfileMenu(!showProfileMenu);
   };
 
-  // Render conversations with loading state
   const renderConversations = () => {
     if (error) {
       return (
@@ -579,7 +457,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             )}
           </div>
           
-          {/* --- MODIFIED Delete Button --- */}
           <button
             onClick={(e) => handleDeleteConversation(e, conversation)}
             className={`ml-2 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all ${
@@ -595,29 +472,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       ));
   };
 
-  // Add useEffect to initialize manager type from localStorage
-  useEffect(() => {
-    // Get manager type from localStorage if available
-    const storedManagerType = localStorage.getItem('practice_manager_type');
-    if (storedManagerType) {
-      // Validate the manager type is one of the allowed values
-      const validManagerTypes = ['PUPPETEER', 'DILUTER', 'CAMOUFLAGER'];
-      const normalizedType = storedManagerType.toUpperCase().trim();
-      
-      if (validManagerTypes.includes(normalizedType) && normalizedType !== managerType) {
-        console.log(`Initializing manager type from localStorage: ${normalizedType}`);
-        setManagerType(normalizedType as ManagerType);
-      }
-    } else if (managerType) {
-      // If no value in localStorage but we have a store value, save it to localStorage
-      console.log(`No manager type in localStorage, saving current store value: ${managerType}`);
-      localStorage.setItem('practice_manager_type', managerType);
-    }
-  }, []);
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* New Chat Button only (practice button removed) */}
       <div className="flex flex-col p-3 gap-2">
         <button
           onClick={handleNewChat}
@@ -628,44 +484,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         </button>
       </div>
 
-      {/* Manager Type Selector - unchanged */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Manager Type
-        </label>
-        <div className="flex flex-col gap-1">
-          {managerTypes.map((type) => (
-            <button
-              key={type.type}
-              className={`flex items-center p-2 rounded-md transition-colors ${
-                managerType === type.type
-                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-200'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-              onClick={() => {
-                // Set manager type in global store
-                setManagerType(type.type);
-                
-                // Also save to localStorage for practice module and other components
-                localStorage.setItem('practice_manager_type', type.type);
-                
-                console.log(`Manager type changed to ${type.type}, updated in global store and localStorage`);
-                
-                // If we're in a current conversation, update its manager type on the next API call
-                if (currentConversation) {
-                  console.log(`Current conversation will use manager type ${type.type} for future messages`);
-                }
-              }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center mr-2">
-                {type.icon}
-              </div>
-              <span>{type.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      
       {/* Temperature Control */}
       <TemperatureControl />
 
@@ -702,7 +520,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           <button
             onClick={() => {
               console.log('Dark mode toggle clicked, current state:', darkMode);
-              useStore.getState().toggleDarkMode();
+              toggleDarkMode();
             }}
             className="p-3 rounded-md bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors relative group"
             aria-label="Toggle dark mode"

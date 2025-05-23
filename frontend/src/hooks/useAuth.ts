@@ -41,8 +41,11 @@ export const useAuth = () => {
       }
       
       console.log('Login successful in useAuth for:', response.userDetails.email);
-      console.log('Navigating to dashboard from useAuth...');
+      
+      // Always navigate to dashboard after login, the modal will show if needed
+      console.log('Navigating to dashboard, quiz modal will show if needed');
       navigate('/dashboard', { replace: true });
+      
       return response;
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || 'Login failed. Please try again.';

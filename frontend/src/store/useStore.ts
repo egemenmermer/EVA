@@ -35,6 +35,7 @@ export interface User {
   email: string;
   fullName: string;
   role?: string; // Optional property for admin/user role
+  managerTypePreference?: string;
 }
 
 interface Store {

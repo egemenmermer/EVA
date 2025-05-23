@@ -68,6 +68,27 @@ public class User {
     @Column(name = "activated_at", nullable = true)
     private LocalDateTime activatedAt;
 
+    @Column(name = "provider_id", nullable = true)
+    private String providerId;
+
+    // New field to store manager type preference from quiz
+    @Column(name = "manager_type_preference", nullable = true)
+    private String managerTypePreference;
+
+    // Helper method to set manager type preference
+    public void setManagerTypePreference(String managerType) {
+        if (managerType != null) {
+            String normalized = managerType.toUpperCase().trim();
+            if (normalized.equals("PUPPETEER") || normalized.equals("DILUTER") || normalized.equals("CAMOUFLAGER")) {
+                this.managerTypePreference = normalized;
+            } else {
+                this.managerTypePreference = null;
+            }
+        } else {
+            this.managerTypePreference = null;
+        }
+    }
+
 }
 
 

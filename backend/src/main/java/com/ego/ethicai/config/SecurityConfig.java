@@ -97,6 +97,7 @@ public class SecurityConfig {
                                 "/error",
                                 "/api/v1/practice-score/**",
                                 "/api/v1/practice-score/submit",
+                                "/api/v1/manager-type-quiz/**",
                                 "/debug/**"
                         )
                         .permitAll()

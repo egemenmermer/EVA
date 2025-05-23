@@ -46,7 +46,8 @@ public class UserServiceImpl implements UserService {
                 user.getFullName(),
                 user.getLastLogin(),
                 user.getUpdatedAt(),
-                user.getRole()
+                user.getRole(),
+                user.getManagerTypePreference()
         );
     }
 
@@ -124,7 +125,8 @@ public class UserServiceImpl implements UserService {
                 user.getFullName(),
                 user.getLastLogin(),
                 user.getUpdatedAt(),
-                user.getRole()
+                user.getRole(),
+                user.getManagerTypePreference()
         );
     }
 

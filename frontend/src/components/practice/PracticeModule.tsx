@@ -348,8 +348,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [currentFeedback, setCurrentFeedback] = useState<string>('');
   const navigate = useNavigate();
   
-  // Access the global store to sync manager type
-  const { setManagerType: setGlobalManagerType } = useStore();
+  // Access the global store to get user's manager type preference
+  const { user, setManagerType: setGlobalManagerType } = useStore();
 
   // Get original conversation ID from localStorage or props
   const originalConversationId = useRef<string | null>(
@@ -430,34 +430,33 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   useEffect(() => {
     setLoading(true);
     
-    // Try to get the user query and manager type from props or localStorage
+    // Try to get the user query from localStorage
     const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
     
-    // Prioritize manager types and normalize/validate them
-    let rawManagerType = managerType || localStorage.getItem('practice_manager_type') || 'PUPPETEER';
-    let normalizedManagerType = rawManagerType.toUpperCase().trim();
+    // Use the user's determined manager type preference from the quiz
+    let effectiveManagerType = user?.managerTypePreference || 'PUPPETEER';
     
-    // Ensure we're using a valid manager type
+    // Normalize and validate the manager type
+    effectiveManagerType = effectiveManagerType.toUpperCase().trim();
     const validManagerTypes = ['PUPPETEER', 'DILUTER', 'CAMOUFLAGER'];
-    if (!validManagerTypes.includes(normalizedManagerType)) {
-      console.warn(`Invalid manager type "${normalizedManagerType}" specified, defaulting to PUPPETEER`);
-      normalizedManagerType = 'PUPPETEER';
+    if (!validManagerTypes.includes(effectiveManagerType)) {
+      console.warn(`Invalid manager type "${effectiveManagerType}" from user preference, defaulting to PUPPETEER`);
+      effectiveManagerType = 'PUPPETEER';
     }
     
-    console.log(`Creating practice scenario with manager type: ${normalizedManagerType} (original: ${rawManagerType})`);
-    console.log(`Manager type sources - from props: ${managerType}, from localStorage: ${localStorage.getItem('practice_manager_type')}`);
+    console.log(`Creating practice scenario with user's manager type preference: ${effectiveManagerType}`);
     
     // Create a custom scenario based on the user's query, using the normalized manager type
-    const customScenario = createScenarioFromUserQuery(userQuery, normalizedManagerType);
+    const customScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
     
     // Verify the scenario's manager type matches what we passed
-    if (customScenario.scenario.manager_type !== normalizedManagerType) {
-      console.error(`Manager type mismatch - we passed: ${normalizedManagerType}, scenario has: ${customScenario.scenario.manager_type}`);
+    if (customScenario.scenario.manager_type !== effectiveManagerType) {
+      console.error(`Manager type mismatch - we passed: ${effectiveManagerType}, scenario has: ${customScenario.scenario.manager_type}`);
     }
     
     // Sync with global store to ensure consistency
-    setGlobalManagerType(normalizedManagerType as any);
-    console.log(`Updated global store manager type to: ${normalizedManagerType}`);
+    setGlobalManagerType(effectiveManagerType as any);
+    console.log(`Updated global store manager type to: ${effectiveManagerType}`);
     
     // Initialize the conversation with the user's query and the manager's first statement
     customScenario.conversation = [
@@ -475,7 +474,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setLoading(false);
     
     // Save the manager type to localStorage for use in other components
-    localStorage.setItem('practice_manager_type', normalizedManagerType);
+    localStorage.setItem('practice_manager_type', effectiveManagerType);
     localStorage.setItem('practice_user_query', userQuery);
     
     // Clean up
@@ -486,26 +485,22 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Add a separate effect to handle manager type changes
   useEffect(() => {
+    // Skip if no user preference is set yet
+    if (!user?.managerTypePreference) return;
+    
     // Skip on initial mount (handled by the initialization effect)
-    if (!managerType) return;
-    
-    console.log(`Manager type changed to: ${managerType}`);
-    
-    // Always save the manager type to localStorage whenever it changes
-    localStorage.setItem('practice_manager_type', managerType.toUpperCase().trim());
-    
-    // Update the global store to keep it in sync
-    setGlobalManagerType(managerType.toUpperCase().trim() as any);
-    
-    // Don't reset if there's no current scenario yet (initialization phase)
     if (!currentScenario) return;
     
-    // Reset to a new scenario with the updated manager type
+    console.log(`User manager type preference changed to: ${user.managerTypePreference}`);
+    
+    // Reset to a new scenario with the updated manager type preference
     setLoading(true);
     
     const userQuery = localStorage.getItem('practice_user_query') || 'I am concerned about collecting user location data even though it is not required for our application';
-    console.log(`Creating new practice scenario for manager type: ${managerType} (uppercase: ${managerType.toUpperCase()})`);
-    const customScenario = createScenarioFromUserQuery(userQuery, managerType);
+    const effectiveManagerType = user.managerTypePreference.toUpperCase().trim();
+    
+    console.log(`Creating new practice scenario for user preference: ${effectiveManagerType}`);
+    const customScenario = createScenarioFromUserQuery(userQuery, effectiveManagerType);
     console.log(`New scenario created with manager_type: ${customScenario.scenario.manager_type}`);
     
     // Initialize the conversation with the user's query and the manager's first statement
@@ -523,13 +518,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setCurrentScenario(customScenario);
     setLoading(false);
     
+    // Update localStorage for consistency
+    localStorage.setItem('practice_manager_type', effectiveManagerType);
+    
     // Reset other state
     setFeedback(null);
     setFinalReport(false);
     setShowOptions(false);
     setCurrentFeedback('');
     
-  }, [managerType, setGlobalManagerType]); // Add setGlobalManagerType to dependencies
+  }, [user?.managerTypePreference, setGlobalManagerType, currentScenario]); // Depend on user's manager type preference
 
   const handleChoice = async (choiceIndex: number) => {
     if (!currentScenario) return;

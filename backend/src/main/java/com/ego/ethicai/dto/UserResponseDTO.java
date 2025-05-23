@@ -19,5 +19,6 @@ public class UserResponseDTO {
     private LocalDateTime lastLogin;
     private LocalDateTime updatedAt;
     private AccountTypes role;
+    private String managerTypePreference;
 
 }

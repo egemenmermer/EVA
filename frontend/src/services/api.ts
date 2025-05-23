@@ -6,7 +6,8 @@ import type {
   ConversationResponseDTO,
   ConversationContentResponseDTO,
   SendMessageRequestDTO,
-  FeedbackResponseDTO
+  FeedbackResponseDTO,
+  ActivationResponseDTO
 } from '@/types/api';
 import { Message } from '@/types/conversation';
 import { generateConversationTitle } from '@/utils/titleGenerator';
@@ -212,7 +213,7 @@ export const authApi = {
     localStorage.removeItem('token');
   },
   
-  activate: async (token: string): Promise<any> => {
+  activate: async (token: string): Promise<ActivationResponseDTO> => {
     try {
       console.log('Activating account with token:', token.substring(0, 10) + '...');
       const response = await backendApi.post('/api/v1/auth/activate', { token });
@@ -228,15 +229,27 @@ export const authApi = {
     }
   },
   
-  oauth2Callback: async (provider: string, code: string): Promise<any> => {
+  oauth2Callback: async (provider: string, code: string): Promise<{ token: string; user: any }> => {
     try {
       console.log(`Processing ${provider} OAuth callback`);
-      const response = await backendApi.post(`/auth/oauth2/${provider}`, { code });
+      const response = await backendApi.post(`/auth/oauth2/${provider}/callback`, { code });
       return response.data;
     } catch (error) {
       console.error('OAuth callback failed:', error);
       throw error;
     }
+  },
+
+  submitManagerTypeQuiz: async (quizData: {
+    userId: string;
+    responses: Array<{
+      questionId: number;
+      score: number;
+      managerTypeSignal: string;
+    }>;
+  }): Promise<{ determinedManagerType: string; message: string; success: boolean }> => {
+    const response = await backendApi.post('/api/v1/manager-type-quiz/submit', quizData);
+    return response.data;
   }
 };
 

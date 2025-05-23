@@ -72,7 +72,8 @@ public class AuthServiceImpl implements AuthService {
                 user.getFullName(),
                 user.getLastLogin(),
                 user.getUpdatedAt(),
-                user.getRole()
+                user.getRole(),
+                user.getManagerTypePreference()
         ));
     }
 
