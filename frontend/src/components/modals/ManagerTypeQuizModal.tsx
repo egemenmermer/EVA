@@ -27,66 +27,66 @@ const quizQuestions: QuizQuestion[] = [
   // Puppeteer questions (manipulation/pressure)
   {
     id: 1,
-    question: "How often does your manager use emotional manipulation to get what they want?",
+    question: "Using emotional manipulation to get what they want.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 2,
-    question: "How frequently does your manager make you feel guilty for disagreeing with them?",
+    question: "Making you feel guilty for disagreeing with them.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 3,
-    question: "How often does your manager pressure you to go along with decisions by threatening consequences?",
+    question: "Pressuring you to agree by implying negative consequences.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 4,
-    question: "How frequently does your manager use their authority to force compliance rather than persuasion?",
+    question: "Forcing compliance by using their authority instead of reasoning.",
     managerTypeSignal: 'PUPPETEER'
   },
-  
+
   // Diluter questions (minimization)
   {
     id: 5,
-    question: "How often does your manager dismiss ethical concerns as 'not a big deal'?",
+    question: "Dismissing ethical concerns as 'not a big deal.'",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 6,
-    question: "How frequently does your manager minimize the importance of following company policies?",
+    question: "Minimizing the importance of following company policies.",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 7,
-    question: "How often does your manager downplay potential risks or negative consequences?",
+    question: "Downplaying potential risks or negative consequences.",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 8,
-    question: "How frequently does your manager brush off employee concerns as overreacting?",
+    question: "Brushing off employee concerns as overreacting.",
     managerTypeSignal: 'DILUTER'
   },
-  
+
   // Camouflager questions (jargon/complexity)
   {
     id: 9,
-    question: "How often does your manager use complex jargon to avoid direct answers about ethical issues?",
+    question: "Using complex jargon to avoid clear answers about ethics.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 10,
-    question: "How frequently does your manager make simple ethical decisions unnecessarily complicated?",
+    question: "Making simple ethical issues unnecessarily complicated.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 11,
-    question: "How often does your manager hide behind company policies to avoid taking responsibility?",
+    question: "Hiding behind company policies to avoid taking responsibility.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 12,
-    question: "How frequently does your manager use technical language to confuse rather than clarify issues?",
+    question: "Using technical language to confuse rather than clarify.",
     managerTypeSignal: 'CAMOUFLAGER'
   }
 ];
@@ -374,18 +374,10 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
                   Welcome to the Manager Type Assessment
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  This quick assessment will help us understand your manager's behavioral style 
-                  and personalize your ethical decision-making practice experience.
+                  This brief assessment helps us classify your manager's behavioral style based on research into organizational ethics and leadership dynamics.
+                  Your responses will inform a tailored simulation designed to reflect realistic ethical challenges in software development.
+                  The assessment consists of 12 statements. For each one, please indicate how often your manager displays the described behavior.
                 </p>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">What to expect:</h4>
-                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                    <li>• 12 questions about your manager's behavior</li>
-                    <li>• Each question takes about 10 seconds to answer</li>
-                    <li>• Your responses help us create realistic practice scenarios</li>
-                    <li>• Total time: approximately 2-3 minutes</li>
-                  </ul>
-                </div>
               </div>
               <button
                 onClick={handleStartQuiz}
@@ -403,10 +395,7 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Question {currentQuestionIndex + 1} of {quizQuestions.length}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {Math.round(progress)}% complete
+                    {currentQuestionIndex + 1} of {quizQuestions.length}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -417,6 +406,11 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
                 </div>
               </div>
 
+              {/* Instruction */}
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Please select how often your manager behaves in the following way.
+              </p>
+
               {/* Question */}
               <div className="mb-8">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
@@ -424,7 +418,8 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
                 </h3>
 
                 {/* Response options */}
-                <div className="grid grid-cols-1 gap-3">
+                {/* Response options */}
+                <div className="grid grid-cols-5 gap-3">
                   {scaleLabels.map((label, index) => (
                     <label 
                       key={index}
@@ -442,9 +437,8 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
                         onChange={() => handleResponseChange(index)}
                         className="sr-only"
                       />
-                      <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center justify-center w-full">
                         <span className="font-medium">{label}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">({index})</span>
                       </div>
                     </label>
                   ))}

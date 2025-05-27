@@ -16,70 +16,72 @@ interface QuizResponse {
   managerTypeSignal: string;
 }
 
+const quizInstruction = "Please select how often your manager behaves in the following ways.";
+
 const quizQuestions: QuizQuestion[] = [
   // Puppeteer questions (manipulation/pressure)
   {
     id: 1,
-    question: "How often does your manager use emotional manipulation to get what they want?",
+    question: "Using emotional manipulation to get what they want.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 2,
-    question: "How frequently does your manager make you feel guilty for disagreeing with them?",
+    question: "Making you feel guilty for disagreeing with them.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 3,
-    question: "How often does your manager pressure you to go along with decisions by threatening consequences?",
+    question: "Pressuring you to agree by implying negative consequences.",
     managerTypeSignal: 'PUPPETEER'
   },
   {
     id: 4,
-    question: "How frequently does your manager use their authority to force compliance rather than persuasion?",
+    question: "Forcing compliance by using their authority instead of reasoning.",
     managerTypeSignal: 'PUPPETEER'
   },
-  
+
   // Diluter questions (minimization)
   {
     id: 5,
-    question: "How often does your manager dismiss ethical concerns as 'not a big deal'?",
+    question: "Dismissing ethical concerns as 'not a big deal.'",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 6,
-    question: "How frequently does your manager minimize the importance of following company policies?",
+    question: "Minimizing the importance of following company policies.",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 7,
-    question: "How often does your manager downplay potential risks or negative consequences?",
+    question: "Downplaying potential risks or negative consequences.",
     managerTypeSignal: 'DILUTER'
   },
   {
     id: 8,
-    question: "How frequently does your manager brush off employee concerns as overreacting?",
+    question: "Brushing off employee concerns as overreacting.",
     managerTypeSignal: 'DILUTER'
   },
-  
+
   // Camouflager questions (jargon/complexity)
   {
     id: 9,
-    question: "How often does your manager use complex jargon to avoid direct answers about ethical issues?",
+    question: "Using complex jargon to avoid clear answers about ethics.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 10,
-    question: "How frequently does your manager make simple ethical decisions unnecessarily complicated?",
+    question: "Making simple ethical issues unnecessarily complicated.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 11,
-    question: "How often does your manager hide behind company policies to avoid taking responsibility?",
+    question: "Hiding behind company policies to avoid taking responsibility.",
     managerTypeSignal: 'CAMOUFLAGER'
   },
   {
     id: 12,
-    question: "How frequently does your manager use technical language to confuse rather than clarify issues?",
+    question: "Using technical language to confuse rather than clarify.",
     managerTypeSignal: 'CAMOUFLAGER'
   }
 ];
@@ -172,10 +174,13 @@ export const ManagerTypeQuiz: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
               {isRetake ? 'Retake Manager Type Assessment' : 'Manager Type Assessment'}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Please answer the following questions about your manager's behavior to help us personalize your practice experience.
-            </p>
             
+            <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto text-sm">
+              This brief assessment helps us classify your manager’s behavioral style based on research into organizational ethics and leadership dynamics.
+              Your responses will inform a tailored simulation designed to reflect realistic ethical challenges in software development.
+              The assessment consists of 12 statements. For each one, please indicate how often your manager displays the described behavior.
+            </p>
+
             {/* Progress bar */}
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
@@ -184,7 +189,7 @@ export const ManagerTypeQuiz: React.FC = () => {
               ></div>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              {Object.keys(responses).length} of {quizQuestions.length} questions completed
+              {Object.keys(responses).length} of {quizQuestions.length}
             </p>
           </div>
           
@@ -195,17 +200,22 @@ export const ManagerTypeQuiz: React.FC = () => {
           )}
           
           <form onSubmit={handleSubmit} className="space-y-8">
+
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Please select how often your manager behaves in the following ways.
+            </p>
+
             {quizQuestions.map((question) => (
               <div key={question.id} className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                   {question.id}. {question.question}
                 </h3>
-                
-                <div className="grid grid-cols-5 gap-2">
+
+                <div className="flex justify-between gap-2">
                   {scaleLabels.map((label, index) => (
-                    <label 
+                    <label
                       key={index}
-                      className={`flex flex-col items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-center justify-center w-full p-3 border rounded-lg cursor-pointer text-sm font-medium transition-colors text-center ${
                         responses[question.id] === index
                           ? 'bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-300'
                           : 'bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
@@ -219,13 +229,13 @@ export const ManagerTypeQuiz: React.FC = () => {
                         onChange={() => handleResponseChange(question.id, index)}
                         className="sr-only"
                       />
-                      <span className="text-sm font-medium text-center">{label}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">({index})</span>
+                      {label}
                     </label>
                   ))}
                 </div>
               </div>
             ))}
+
             
             <div className="flex justify-between items-center pt-6">
               <button
