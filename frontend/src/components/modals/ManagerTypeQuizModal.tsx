@@ -381,10 +381,9 @@ export const ManagerTypeQuizModal: React.FC<ManagerTypeQuizModalProps> = ({
               </div>
               <button
                 onClick={handleStartQuiz}
-                className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center mx-auto"
-              >
+                className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md flex items-center mx-auto"
+                >
                 Start Assessment
-                <ArrowRight className="h-4 w-4 ml-2" />
               </button>
             </div>
           )}
