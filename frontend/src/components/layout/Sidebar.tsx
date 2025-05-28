@@ -147,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     toggleDarkMode, 
     managerType, 
     currentConversation,
-    setCurrentConversation,
+    setCurrentConversation, 
     clearMessages 
   } = useStore();
   
@@ -340,7 +340,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     e.stopPropagation();
     e.preventDefault(); 
     
-    const id = conversationToDelete.conversationId;
+    const id = conversationToDelete.conversationId; 
     console.log('[handleDeleteConversation] Conversation ID variable set:', id);
     
     const isPersisted = conversationToDelete.isPersisted === true;
@@ -483,7 +483,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span>New Chat</span>
         </button>
       </div>
-
+      
       {/* Temperature Control */}
       <TemperatureControl />
 

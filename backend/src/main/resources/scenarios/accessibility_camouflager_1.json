@@ -1,0 +1,503 @@
+{
+  "id": "accessibility_camouflager_1",
+  "title": "Screen Reader Accessibility",
+  "description": "Your company is launching new features without proper screen reader support. The manager uses technical jargon and bureaucratic language to disguise unethical requests.",
+  "issue": "Accessibility",
+  "manager_type": "CAMOUFLAGER",
+  "starting_statement_id": "stmt_1",
+  "statements": {
+    "stmt_1": {
+      "text": "We need to implement our new Universal User Experience initiative. This involves deploying streamlined interface optimization for standard user interaction patterns through conventional usability implementation protocols. It's all documented in our User Experience Standards framework.",
+      "user_choices": [
+        {
+          "choice": "The Universal User Experience initiative sounds comprehensive. I'll review the standards and implement the system.",
+          "category": "Framework Acceptance",
+          "EVS": 20,
+          "leads_to": "stmt_2a"
+        },
+        {
+          "choice": "Can you explain what 'standard user interaction patterns' means for accessibility?",
+          "category": "Clarification Request",
+          "EVS": 60,
+          "leads_to": "stmt_2b"
+        },
+        {
+          "choice": "Before implementing interface changes, I need to understand the accessibility implications.",
+          "category": "Accessibility Focus",
+          "EVS": 80,
+          "leads_to": "stmt_2c"
+        },
+        {
+          "choice": "I need clear documentation about screen reader compatibility in this framework.",
+          "category": "Screen Reader Inquiry",
+          "EVS": 85,
+          "leads_to": "stmt_2d"
+        }
+      ]
+    },
+    "stmt_2a": {
+      "text": "Excellent! The next phase involves deploying our Optimized Interface Efficiency Protocol which leverages mainstream user workflow optimization through conventional interaction modalities. This eliminates non-standard accessibility requirements to achieve maximum interface performance per our Technical Standards documentation.",
+      "user_choices": [
+        {
+          "choice": "Interface efficiency through mainstream optimization sounds like a solid approach.",
+          "category": "Efficiency Focus",
+          "EVS": 15,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "What does 'eliminating non-standard accessibility requirements' actually mean?",
+          "category": "Elimination Clarification",
+          "EVS": 45,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Non-standard accessibility requirements are actually essential features for users with disabilities.",
+          "category": "Accessibility Defense",
+          "EVS": 75,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "I cannot support eliminating accessibility features, regardless of how it's described.",
+          "category": "Feature Protection",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2b": {
+      "text": "Standard user interaction patterns refer to optimal user engagement leveraging conventional input methodologies and visual interface processing. This approach prioritizes efficient development cycles through mainstream user experience optimization rather than specialized accommodation implementations.",
+      "user_choices": [
+        {
+          "choice": "Prioritizing mainstream users and efficient development makes business sense.",
+          "category": "Mainstream Priority",
+          "EVS": 25,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "What about users who can't use conventional input methods or visual processing?",
+          "category": "Alternative Methods",
+          "EVS": 55,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Specialized accommodations aren't optional - they're necessary for equal access.",
+          "category": "Equal Access Requirement",
+          "EVS": 75,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "I need specific information about how this framework handles screen reader users.",
+          "category": "Screen Reader Specifics",
+          "EVS": 80,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2c": {
+      "text": "Accessibility implications are addressed through our Compliance Optimization Matrix which implements regulatory alignment protocols via efficient resource allocation frameworks. The system maintains legal conformity standards through streamlined implementation pathways documented in our Accessibility Compliance Framework.",
+      "user_choices": [
+        {
+          "choice": "If it maintains legal conformity, that should address accessibility requirements.",
+          "category": "Legal Conformity",
+          "EVS": 30,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "I'd like to review the specific accessibility compliance framework document.",
+          "category": "Document Review",
+          "EVS": 65,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Legal conformity is the minimum - users need actual functional accessibility.",
+          "category": "Functional Requirement",
+          "EVS": 80,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "I need to verify that screen readers are specifically supported, not just legally compliant.",
+          "category": "Screen Reader Verification",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2d": {
+      "text": "Screen reader compatibility is managed through our Adaptive Interface Protocol which leverages industry-standard accommodation frameworks to ensure optimal user experience distribution across various user segments while maintaining operational efficiency per our Interface Management Standards.",
+      "user_choices": [
+        {
+          "choice": "Industry-standard accommodation frameworks should ensure proper screen reader support.",
+          "category": "Standard Accommodation",
+          "EVS": 25,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "What specific screen reader features does this adaptive interface actually provide?",
+          "category": "Feature Specifics",
+          "EVS": 60,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Optimal user experience should include full accessibility, not limited accommodation.",
+          "category": "Full Accessibility",
+          "EVS": 80,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "I need to test the actual screen reader compatibility, not just read about frameworks.",
+          "category": "Practical Testing",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_3a": {
+      "text": "Perfect! Now we implement Phase 3: our Enhanced Performance Interface which eliminates redundant accessibility overhead through optimized visual presentation layers. This approach maximizes interface responsiveness by removing complex assistive technology integration requirements per our Performance Guidelines.",
+      "user_choices": [
+        {
+          "choice": "Eliminating overhead and maximizing performance sounds like good engineering.",
+          "category": "Performance Focus",
+          "EVS": 10,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Assistive technology integration isn't overhead - it's essential functionality.",
+          "category": "Essential Functionality",
+          "EVS": 50,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Removing assistive technology support excludes users with disabilities completely.",
+          "category": "Exclusion Recognition",
+          "EVS": 75,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "I cannot implement interfaces that eliminate accessibility for users with disabilities.",
+          "category": "Accessibility Refusal",
+          "EVS": 90,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3b": {
+      "text": "The documentation provides comprehensive technical implementation details, but for operational efficiency, we should focus on deployment rather than extensive specification analysis. The interface architecture follows industry-validated methodologies through our Technical Implementation Board process.",
+      "user_choices": [
+        {
+          "choice": "Industry-validated methodologies should be sufficient without detailed analysis.",
+          "category": "Methodology Trust",
+          "EVS": 20,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "I need to understand the accessibility specifications before deployment.",
+          "category": "Specification Understanding",
+          "EVS": 60,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Industry methodologies often ignore accessibility - I need specific verification.",
+          "category": "Industry Skepticism",
+          "EVS": 75,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "I will not deploy interfaces without understanding their accessibility impact.",
+          "category": "Impact Understanding",
+          "EVS": 85,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3c": {
+      "text": "The characterization of 'exclusion' is misaligned with our optimization framework objectives. Our interface system provides enhanced user experience through efficient resource utilization validated by our User Experience Matrix and approved through our Technical-Legal Integration Protocol.",
+      "user_choices": [
+        {
+          "choice": "If it's validated and approved, then my exclusion concerns were probably misplaced.",
+          "category": "Validation Trust",
+          "EVS": 25,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Enhanced user experience should enhance experience for all users, including those with disabilities.",
+          "category": "Universal Enhancement",
+          "EVS": 65,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Efficient resource utilization cannot justify excluding accessibility features.",
+          "category": "Resource Ethics",
+          "EVS": 80,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "I need to review these validations specifically for accessibility impact.",
+          "category": "Accessibility Validation",
+          "EVS": 85,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3d": {
+      "text": "Direct accessibility impact assessment would require extensive technical documentation review which could significantly delay deployment timeline optimization. Our Project Efficiency Framework recommends leveraging established validation protocols rather than redundant accessibility analysis for maximum operational effectiveness.",
+      "user_choices": [
+        {
+          "choice": "Timeline optimization is important. I'll trust the established validation protocols.",
+          "category": "Timeline Priority",
+          "EVS": 20,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Some delays are acceptable to ensure we don't exclude users with disabilities.",
+          "category": "Inclusion Priority",
+          "EVS": 60,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Accessibility analysis isn't redundant - it's essential for inclusive design.",
+          "category": "Essential Analysis",
+          "EVS": 80,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "I will not deploy any interface without understanding its accessibility implications.",
+          "category": "Deployment Refusal",
+          "EVS": 90,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_4a": {
+      "text": "Excellent! Final deployment: our Streamlined User Interface Architecture which eliminates non-essential interface elements including alternative input accommodations and specialized display requirements. This creates optimal user engagement through our Visual-Primary Experience Protocol for maximum market appeal.",
+      "user_choices": [
+        {
+          "choice": "Streamlined interfaces with visual-primary focus should have strong market appeal.",
+          "category": "Market Appeal",
+          "EVS": 5,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "Alternative input accommodations aren't non-essential - they're required for accessibility.",
+          "category": "Accommodation Requirement",
+          "EVS": 40,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Visual-primary design excludes users who are blind or have visual impairments.",
+          "category": "Visual Exclusion",
+          "EVS": 75,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "I cannot support deploying interfaces that eliminate accessibility accommodations.",
+          "category": "Accommodation Protection",
+          "EVS": 90,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4b": {
+      "text": "Your commitment to inclusion demonstrates appropriate diligence. Perhaps we can implement a Modified Interface Architecture with Selective Accommodation Protocols to address stakeholder concerns while maintaining operational efficiency through our Balanced Development Framework.",
+      "user_choices": [
+        {
+          "choice": "A balanced framework with selective accommodations sounds like a reasonable approach.",
+          "category": "Selective Balance",
+          "EVS": 45,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "What would selective accommodation protocols actually include for screen readers?",
+          "category": "Protocol Details",
+          "EVS": 65,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Accommodation shouldn't be selective - all users need equal access to interface features.",
+          "category": "Equal Access",
+          "EVS": 80,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "I need comprehensive accessibility, not selective accommodations that might exclude users.",
+          "category": "Comprehensive Need",
+          "EVS": 85,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4c": {
+      "text": "Your perspective on accessibility integration is noted. We can implement a Graduated Accessibility Framework through our User-Inclusive Design Protocol which balances accessibility requirements with performance optimization through our Stakeholder Integration Matrix.",
+      "user_choices": [
+        {
+          "choice": "Balancing accessibility with performance through graduated frameworks seems reasonable.",
+          "category": "Performance Balance",
+          "EVS": 40,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "How does this framework actually ensure screen readers work with our interface?",
+          "category": "Screen Reader Function",
+          "EVS": 70,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "User-inclusive design means including all users, not balancing them against performance.",
+          "category": "True Inclusion",
+          "EVS": 85,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "Accessibility requirements shouldn't be balanced away - they should be fully implemented.",
+          "category": "Full Implementation",
+          "EVS": 90,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4d": {
+      "text": "I appreciate your methodical approach to accessibility impact verification. Perhaps we should consult with our Technical Advisory Committee to develop an Alternative Interface Strategy that addresses your verification requirements through our Comprehensive Assessment Protocol.",
+      "user_choices": [
+        {
+          "choice": "Consulting with the technical committee for an alternative strategy sounds appropriate.",
+          "category": "Committee Consultation",
+          "EVS": 50,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "I want to be involved in ensuring the assessment includes real accessibility testing.",
+          "category": "Testing Involvement",
+          "EVS": 75,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Any alternative strategy must prioritize full accessibility over performance optimization.",
+          "category": "Accessibility Priority",
+          "EVS": 85,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "Let's design a truly accessible interface instead of finding ways to avoid accessibility.",
+          "category": "Accessibility Design",
+          "EVS": 95,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_5a": {
+      "text": "Perfect! Our Integrated Interface Strategy combines all discussed protocols into a Comprehensive User Experience System that maximizes interface efficiency while maintaining regulatory compliance through our Multi-Protocol Integration Framework. The system launches with optimized visual-primary design and minimal accommodation overhead.",
+      "user_choices": [
+        {
+          "choice": "The integrated system with optimized design and compliance sounds well-planned.",
+          "category": "System Integration",
+          "EVS": 20,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I want to review the minimal accommodation features before launch.",
+          "category": "Accommodation Review",
+          "EVS": 50,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Minimal accommodation overhead means inadequate support for users with disabilities.",
+          "category": "Inadequate Support",
+          "EVS": 75,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I cannot support launching a system that minimizes accessibility accommodations.",
+          "category": "Launch Opposition",
+          "EVS": 85,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5b": {
+      "text": "Thank you for your patience with the technical complexity. Let me be more direct: we want to build a fast, visually appealing interface that meets basic legal requirements for accessibility without the complexity of comprehensive screen reader support. We'll include minimal accommodations that satisfy compliance audits.",
+      "user_choices": [
+        {
+          "choice": "Fast, appealing interfaces with basic legal compliance sounds practical.",
+          "category": "Practical Compliance",
+          "EVS": 30,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Users with disabilities deserve more than minimal accommodations that just satisfy audits.",
+          "category": "Beyond Minimal",
+          "EVS": 70,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Comprehensive screen reader support isn't complexity - it's basic accessibility.",
+          "category": "Basic Accessibility",
+          "EVS": 85,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I won't help build interfaces that provide only minimal accessibility to pass audits.",
+          "category": "Audit Refusal",
+          "EVS": 90,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5c": {
+      "text": "You're absolutely right to cut through the technical language. I've been overcomplicating this because I know accessibility is important. Let's design an interface that truly works for everyone, including full screen reader support and comprehensive accessibility features. It's what we should have been planning from the start.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can move forward with a truly inclusive interface design.",
+          "category": "Inclusive Design",
+          "EVS": 85,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Let's build interfaces that users with disabilities would actually want to use.",
+          "category": "User-Centered Design",
+          "EVS": 90,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Comprehensive accessibility will make our interface better for all users.",
+          "category": "Universal Improvement",
+          "EVS": 95,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for prioritizing accessibility as a fundamental design principle.",
+          "category": "Fundamental Principle",
+          "EVS": 100,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5d": {
+      "text": "You're completely right, and I apologize for trying to obscure our accessibility responsibilities with technical jargon. Your insistence on real accessibility has made me realize how we were planning to exclude users with disabilities. Let's start over with a design that puts accessibility at the center, not the margins.",
+      "user_choices": [
+        {
+          "choice": "I appreciate your honesty and commitment to starting over with accessibility-centered design.",
+          "category": "Accessibility-Centered",
+          "EVS": 90,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Let's design interfaces that demonstrate accessibility can enhance, not hinder, great design.",
+          "category": "Enhanced Design",
+          "EVS": 95,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Starting with accessibility at the center will create interfaces that truly serve everyone.",
+          "category": "Universal Service",
+          "EVS": 100,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for recognizing that accessibility should never be marginalized in design decisions.",
+          "category": "Central Recognition",
+          "EVS": 100,
+          "leads_to": "end"
+        }
+      ]
+    }
+  }
+} 

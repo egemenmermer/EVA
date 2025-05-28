@@ -1,0 +1,503 @@
+{
+  "id": "accessibility_diluter_1",
+  "title": "Screen Reader Accessibility",
+  "description": "Your company is launching new features without proper screen reader support. The manager minimizes and downplays accessibility concerns.",
+  "issue": "Accessibility",
+  "manager_type": "DILUTER",
+  "starting_statement_id": "stmt_1",
+  "statements": {
+    "stmt_1": {
+      "text": "I heard you have some concerns about screen reader support for our new features? Look, it's really not a huge deal - most users don't need screen readers anyway. And there are plenty of browser extensions and tools that can help with that stuff. It's pretty standard to launch first and add accessibility later.",
+      "user_choices": [
+        {
+          "choice": "You're right, most users probably don't need screen readers, so it's not urgent.",
+          "category": "Majority Focus",
+          "EVS": 25,
+          "leads_to": "stmt_2a"
+        },
+        {
+          "choice": "Even if it's a minority, users with visual impairments deserve equal access to our features.",
+          "category": "Equal Access",
+          "EVS": 65,
+          "leads_to": "stmt_2b"
+        },
+        {
+          "choice": "Launching without accessibility excludes an important part of our user base.",
+          "category": "Inclusion Concern",
+          "EVS": 80,
+          "leads_to": "stmt_2c"
+        },
+        {
+          "choice": "We should ensure screen reader compatibility is built in from the start, not added later.",
+          "category": "Built-in Accessibility",
+          "EVS": 85,
+          "leads_to": "stmt_2d"
+        }
+      ]
+    },
+    "stmt_2a": {
+      "text": "Exactly! And honestly, the users who do need screen readers are probably already used to working around these kinds of issues. They have their own tools and workarounds. We shouldn't assume they need us to solve everything for them. It's really just a matter of priorities.",
+      "user_choices": [
+        {
+          "choice": "That's true, they probably have their own solutions for accessibility issues.",
+          "category": "Self-Solution Assumption",
+          "EVS": 20,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "Users shouldn't have to work around accessibility issues - that's our responsibility.",
+          "category": "Developer Responsibility",
+          "EVS": 60,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Making users find workarounds instead of providing proper support is discriminatory.",
+          "category": "Discrimination Recognition",
+          "EVS": 80,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "Good design means all users can access features without needing workarounds.",
+          "category": "Universal Design",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2b": {
+      "text": "Equal access is a nice ideal, but let's be realistic about our constraints. We have limited development time and budget. Adding screen reader support would probably delay our launch by weeks, and honestly, most accessibility features barely get used. It's just not cost-effective.",
+      "user_choices": [
+        {
+          "choice": "If accessibility features don't get much use, maybe they're not that important.",
+          "category": "Usage Justification",
+          "EVS": 25,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "Low usage might be because we haven't made features accessible enough yet.",
+          "category": "Accessibility Barrier",
+          "EVS": 55,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Cost-effectiveness shouldn't be measured by excluding users with disabilities.",
+          "category": "Inclusive Value",
+          "EVS": 75,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "Building accessibility from the start is more cost-effective than retrofitting later.",
+          "category": "Proactive Efficiency",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2c": {
+      "text": "Important part of our user base? I mean, statistically speaking, we're talking about a very small percentage. And most companies our size don't prioritize accessibility until they're much larger. It's really more of a nice-to-have than a requirement at our stage.",
+      "user_choices": [
+        {
+          "choice": "You're right, we should focus on features that affect the majority of users first.",
+          "category": "Majority Priority",
+          "EVS": 30,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "Small percentages still represent real people who deserve access to our product.",
+          "category": "Human Impact",
+          "EVS": 60,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "Company size doesn't excuse excluding users with disabilities from our products.",
+          "category": "Size Independence",
+          "EVS": 80,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "Accessibility should be a requirement, not a nice-to-have, regardless of company size.",
+          "category": "Fundamental Requirement",
+          "EVS": 90,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_2d": {
+      "text": "Built in from the start sounds ideal, but it's really not practical with our current workflow. Adding accessibility considerations would slow down every development cycle. Most of our competitors ship first and optimize later. We can always patch in accessibility features in a future update.",
+      "user_choices": [
+        {
+          "choice": "If competitors aren't prioritizing accessibility, maybe we shouldn't either.",
+          "category": "Competitive Parity",
+          "EVS": 25,
+          "leads_to": "stmt_3a"
+        },
+        {
+          "choice": "We could implement basic accessibility without significantly slowing development.",
+          "category": "Basic Implementation",
+          "EVS": 55,
+          "leads_to": "stmt_3b"
+        },
+        {
+          "choice": "We could differentiate ourselves by being more accessible than competitors.",
+          "category": "Competitive Advantage",
+          "EVS": 80,
+          "leads_to": "stmt_3c"
+        },
+        {
+          "choice": "Proper accessibility integration doesn't slow development when planned correctly.",
+          "category": "Planning Integration",
+          "EVS": 85,
+          "leads_to": "stmt_3d"
+        }
+      ]
+    },
+    "stmt_3a": {
+      "text": "Good, I'm glad you see it practically. Now, there is one thing - the design team wants to use some really innovative UI elements that would be tricky to make accessible anyway. Complex animations, gesture controls, that sort of thing. It's cutting-edge stuff that really sets us apart.",
+      "user_choices": [
+        {
+          "choice": "Cutting-edge UI innovations are important for standing out in the market.",
+          "category": "Innovation Priority",
+          "EVS": 20,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "We can use innovative UI while still providing accessible alternatives.",
+          "category": "Alternative Provision",
+          "EVS": 50,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Innovation shouldn't come at the cost of excluding users with disabilities.",
+          "category": "Inclusive Innovation",
+          "EVS": 75,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "Truly innovative design considers accessibility as a core feature, not an afterthought.",
+          "category": "Accessible Innovation",
+          "EVS": 85,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3b": {
+      "text": "Responsibility, barriers, basic implementation - look, I appreciate that you care about this stuff, but we're not a nonprofit. At the end of the day, we need to focus on features that drive engagement and revenue. Accessibility is more of a compliance thing than a business driver.",
+      "user_choices": [
+        {
+          "choice": "You're right, we need to focus on business drivers rather than compliance items.",
+          "category": "Business Focus",
+          "EVS": 25,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Accessibility can be both ethically right and good for business.",
+          "category": "Ethical Business",
+          "EVS": 65,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Accessible products often have better usability for all users, driving more engagement.",
+          "category": "Universal Benefits",
+          "EVS": 80,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "Treating accessibility as just compliance misses the business value of inclusive design.",
+          "category": "Business Value Recognition",
+          "EVS": 85,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3c": {
+      "text": "Discrimination, inclusion, competitive advantage - those are pretty strong words. Look, we're not trying to exclude anyone. It's just a matter of resource allocation. There are lots of important features competing for development time, and accessibility isn't exactly at the top of user requests.",
+      "user_choices": [
+        {
+          "choice": "If users aren't requesting accessibility, maybe it's not as important as other features.",
+          "category": "Request Priority",
+          "EVS": 30,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Users with disabilities might not be able to request features they can't access.",
+          "category": "Access Barrier Recognition",
+          "EVS": 70,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Resource allocation should include consideration for users with disabilities.",
+          "category": "Inclusive Allocation",
+          "EVS": 80,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "Lack of accessibility requests often indicates we haven't reached those users yet.",
+          "category": "Market Gap Recognition",
+          "EVS": 85,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_3d": {
+      "text": "Planning, integration, requirements - you're making this sound more complicated than it needs to be. Most accessibility guidelines are really just suggestions anyway. And honestly, the legal requirements are pretty vague. We'd probably be fine with minimal effort.",
+      "user_choices": [
+        {
+          "choice": "If the legal requirements are vague, minimal effort is probably sufficient.",
+          "category": "Minimal Compliance",
+          "EVS": 30,
+          "leads_to": "stmt_4a"
+        },
+        {
+          "choice": "Accessibility guidelines exist for good reasons, even if they're not always enforced.",
+          "category": "Guideline Purpose",
+          "EVS": 65,
+          "leads_to": "stmt_4b"
+        },
+        {
+          "choice": "Good accessibility goes beyond minimum legal requirements.",
+          "category": "Beyond Compliance",
+          "EVS": 80,
+          "leads_to": "stmt_4c"
+        },
+        {
+          "choice": "We should aim for excellent accessibility, not just minimal legal compliance.",
+          "category": "Excellence Standard",
+          "EVS": 90,
+          "leads_to": "stmt_4d"
+        }
+      ]
+    },
+    "stmt_4a": {
+      "text": "Exactly! So let's go with the innovative UI and worry about accessibility later. We can always add some basic alt text and call it a day. Most users won't even notice the difference, and we'll have a much more engaging product for our main audience.",
+      "user_choices": [
+        {
+          "choice": "Focusing on the main audience with innovative UI makes business sense.",
+          "category": "Main Audience Focus",
+          "EVS": 15,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "Basic alt text isn't sufficient accessibility - we need proper implementation.",
+          "category": "Proper Implementation",
+          "EVS": 45,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Engaging products should be engaging for all users, not just some.",
+          "category": "Universal Engagement",
+          "EVS": 75,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "I can't support launching features that exclude users with disabilities.",
+          "category": "Exclusion Refusal",
+          "EVS": 85,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4b": {
+      "text": "Ethical business, universal benefits, alternatives - I get it, you want to do the right thing. But honestly, the accessibility market is pretty niche. How about we just add a note that users can contact support if they need help with accessibility? That covers our bases without slowing development.",
+      "user_choices": [
+        {
+          "choice": "A support contact for accessibility issues seems like a reasonable compromise.",
+          "category": "Support Solution",
+          "EVS": 35,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "Support contacts don't replace the need for accessible design.",
+          "category": "Design Requirement",
+          "EVS": 65,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Users shouldn't need special support to access basic features.",
+          "category": "Equal Access Principle",
+          "EVS": 80,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "Proper accessibility implementation serves users better than support workarounds.",
+          "category": "Implementation Priority",
+          "EVS": 85,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4c": {
+      "text": "Universal benefits, inclusive design, business value - you're really passionate about this. But let's be honest, adding comprehensive accessibility would probably triple our development time. And for what? A market segment that might not even use our product anyway.",
+      "user_choices": [
+        {
+          "choice": "Tripling development time for an uncertain market doesn't seem worth it.",
+          "category": "Time Investment Concern",
+          "EVS": 30,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "Good accessibility doesn't triple development time when done properly.",
+          "category": "Efficient Accessibility",
+          "EVS": 65,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "People with disabilities are potential users we're currently excluding.",
+          "category": "Market Expansion",
+          "EVS": 80,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "Accessible design makes products better for everyone, not just users with disabilities.",
+          "category": "Universal Design Benefits",
+          "EVS": 90,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_4d": {
+      "text": "Excellence, guidelines, market gaps - you're making this sound like accessibility is some kind of business opportunity. Look, maybe we can compromise. We'll add basic keyboard navigation and leave it at that. Simple, straightforward, doesn't complicate the UI too much.",
+      "user_choices": [
+        {
+          "choice": "Basic keyboard navigation seems like a reasonable middle ground.",
+          "category": "Middle Ground",
+          "EVS": 45,
+          "leads_to": "stmt_5a"
+        },
+        {
+          "choice": "Keyboard navigation is important, but we also need screen reader support.",
+          "category": "Comprehensive Need",
+          "EVS": 70,
+          "leads_to": "stmt_5b"
+        },
+        {
+          "choice": "Accessibility is a business opportunity - it expands our potential user base.",
+          "category": "Business Opportunity",
+          "EVS": 85,
+          "leads_to": "stmt_5c"
+        },
+        {
+          "choice": "Comprehensive accessibility includes much more than just keyboard navigation.",
+          "category": "Full Accessibility",
+          "EVS": 90,
+          "leads_to": "stmt_5d"
+        }
+      ]
+    },
+    "stmt_5a": {
+      "text": "Perfect! I'm glad we found a practical approach. Let's go with basic keyboard support and the contact support option. That should cover us legally while keeping development simple and focused on our core user experience. Best of both worlds.",
+      "user_choices": [
+        {
+          "choice": "Basic keyboard support and support contact seems like good coverage.",
+          "category": "Basic Coverage",
+          "EVS": 35,
+          "leads_to": "end"
+        },
+        {
+          "choice": "We should also include screen reader labels for essential interface elements.",
+          "category": "Essential Labels",
+          "EVS": 60,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach still excludes many users who need proper accessibility features.",
+          "category": "Exclusion Concern",
+          "EVS": 75,
+          "leads_to": "end"
+        },
+        {
+          "choice": "We need comprehensive accessibility, not just minimal legal coverage.",
+          "category": "Comprehensive Accessibility",
+          "EVS": 85,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5b": {
+      "text": "I appreciate your persistence on this accessibility thing. Look, how about we allocate some time next quarter to do a proper accessibility audit and add more features then? That way we can launch on schedule now and improve accessibility when we have more bandwidth.",
+      "user_choices": [
+        {
+          "choice": "A proper accessibility audit next quarter sounds like a good plan.",
+          "category": "Future Planning",
+          "EVS": 50,
+          "leads_to": "end"
+        },
+        {
+          "choice": "We should implement basic accessibility now and expand it next quarter.",
+          "category": "Phased Approach",
+          "EVS": 70,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Delaying accessibility excludes users from our initial launch unnecessarily.",
+          "category": "Launch Inclusion",
+          "EVS": 80,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Accessibility should be part of this launch, not postponed to next quarter.",
+          "category": "Current Priority",
+          "EVS": 90,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5c": {
+      "text": "You know what, you've made some good points about accessibility being a market opportunity. Maybe I've been thinking about this too narrowly. Let's build in proper accessibility features from the start. It might take a bit longer, but it's probably the right thing to do.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can approach accessibility as a market opportunity.",
+          "category": "Market Opportunity",
+          "EVS": 80,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Building accessibility from the start will make our product more inclusive.",
+          "category": "Inclusive Development",
+          "EVS": 90,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach will help us serve all users effectively from day one.",
+          "category": "Universal Service",
+          "EVS": 95,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for recognizing the value of accessible design.",
+          "category": "Value Recognition",
+          "EVS": 95,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_5d": {
+      "text": "I have to admit, your arguments about universal design and business value have really opened my eyes. You're right that accessible products are better for everyone. Let's do this properly - comprehensive accessibility features that make our product truly inclusive. It's what we should have been planning all along.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work on building truly inclusive and accessible features.",
+          "category": "Inclusive Excitement",
+          "EVS": 90,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Comprehensive accessibility will make our product stand out in the market.",
+          "category": "Market Differentiation",
+          "EVS": 95,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This decision shows real commitment to serving all users equally.",
+          "category": "Equal Service Commitment",
+          "EVS": 100,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for embracing accessibility as a core part of good product design.",
+          "category": "Core Design Recognition",
+          "EVS": 100,
+          "leads_to": "end"
+        }
+      ]
+    }
+  }
+} 

@@ -536,26 +536,41 @@ export const togglePracticeMode = async (conversationId: string, enter: boolean)
 
 export const startScenario = async (conversationId: string, scenarioId: string) => {
   setAuthHeader();
-  const response = await axios.post(`${API_URL}/practice/scenarios/start`, {
-    conversation_id: conversationId,
-    scenario_id: scenarioId
+  const response = await axios.post(`${API_URL}/scenarios/${scenarioId}/start`, {
+    sessionId: conversationId
   });
   return response.data;
 };
 
-export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number) => {
+export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number, currentStatementId: string) => {
   setAuthHeader();
-  const response = await axios.post(`${API_URL}/practice/scenarios/respond`, {
-    conversation_id: conversationId,
-    scenario_id: scenarioId,
-    choice_index: choiceIndex
+  const response = await axios.post(`${API_URL}/scenarios/${scenarioId}/next`, {
+    sessionId: conversationId,
+    choiceIndex: choiceIndex,
+    currentStatementId: currentStatementId
   });
   return response.data;
 };
 
 export const getAvailableScenarios = async () => {
   setAuthHeader();
-  const response = await axios.get(`${API_URL}/practice/scenarios`);
+  const response = await axios.get(`${API_URL}/scenarios`);
+  return response.data;
+};
+
+export const suggestScenarioForQuery = async (userQuery: string) => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/scenarios/suggest`, {
+    params: { userQuery }
+  });
+  return response.data;
+};
+
+export const getScenarioFeedback = async (scenarioId: string, sessionId: string) => {
+  setAuthHeader();
+  const response = await axios.get(`${API_URL}/scenarios/${scenarioId}/feedback`, {
+    params: { sessionId }
+  });
   return response.data;
 };
 
