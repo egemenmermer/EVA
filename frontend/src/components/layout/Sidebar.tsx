@@ -213,12 +213,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     // Initial fetch
     fetchConversations();
     
-    // Refresh less frequently - once per minute
+    // Reduce refresh frequency for better responsiveness - every 30 seconds instead of 60
     const interval = setInterval(() => {
       fetchConversations();
-    }, 60000); // 1 minute
+    }, 30000); // 30 seconds
     
     return () => clearInterval(interval);
+  }, []);
+
+  // Add event listener for refresh-conversations events to update sidebar immediately
+  useEffect(() => {
+    const handleRefreshConversations = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Sidebar received refresh-conversations event:', customEvent.detail);
+      
+      // Trigger immediate refresh when we get this event
+      fetchConversations();
+    };
+
+    window.addEventListener('refresh-conversations', handleRefreshConversations);
+    
+    return () => {
+      window.removeEventListener('refresh-conversations', handleRefreshConversations);
+    };
   }, []);
 
   useEffect(() => {

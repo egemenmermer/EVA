@@ -313,10 +313,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   const [expandedMessageSections, setExpandedMessageSections] = useState<ExpandedSectionsState>({});
   const [activeMessageFeedbackSection, setActiveMessageFeedbackSection] = useState<ActiveFeedbackSectionState>({});
 
-  // Add feedback request tracking
-  const feedbackRequestInProgress = useRef<string | null>(null);
-  const feedbackProcessingTimestamp = useRef<number>(0);
-
   // Add useEffect for feedback content styling
   useEffect(() => {
     // Add custom CSS for feedback formatting
@@ -1502,7 +1498,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
   };
 
-  // Add a listener for the practice-feedback-request event
+  // Check for practice feedback on mount (only place where practice feedback should be handled)
   useEffect(() => {
     const handlePracticeFeedbackEvent = () => {
       console.log('🎯 Practice feedback event received, triggering feedback request handler');
@@ -1511,11 +1507,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     window.addEventListener('practice-feedback-request', handlePracticeFeedbackEvent);
     
-    // Check for practice feedback request on component mount
+    // Check for practice feedback request on component mount - single source of truth
     const practiceToChat = localStorage.getItem('practice_to_chat');
-    if (practiceToChat === 'true') {
+    if (practiceToChat === 'true' && !isProcessingFeedback.current) {
       console.log('Found practice_to_chat flag on mount, processing feedback request');
-        handlePracticeFeedbackRequest();
+      // Set flag immediately to prevent duplicate processing
+      isProcessingFeedback.current = true;
+      handlePracticeFeedbackRequest();
     }
     
     return () => {
@@ -1523,313 +1521,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     };
   }, []);
 
+  // REMOVED: Removed the second useEffect that was causing duplicate practice feedback processing
+  // All practice feedback should be handled in the mount useEffect above
+
   // Check for practice feedback request from localStorage
   useEffect(() => {
-    // Skip check if feedback is already processing
-    if (isProcessingFeedback.current) {
-      console.log('Practice feedback check skipped: feedback is processing');
-      return;
-    }
-    
-    // Check if we have a practice_to_chat flag
-    const practiceToChat = localStorage.getItem('practice_to_chat');
-    const feedbackPrompt = localStorage.getItem('feedbackRequest') || localStorage.getItem('practice_feedback_prompt');
-    
-    // IMPORTANT: Check multiple sources for the conversation ID
-    const forcedConversationId = localStorage.getItem('force_conversation_id');
-    const feedbackConversationId = forcedConversationId || 
-                              localStorage.getItem('originalConversationId') || 
-                              localStorage.getItem('current-conversation-id') || 
-                              localStorage.getItem('currentConversationId');
-    
-    console.log('Practice feedback check in useEffect:', {
-      practiceToChat,
-      currentConversationId: currentConversation?.conversationId,
-      feedbackConversationId,
-      forcedConversationId,
-      hasFeedbackPrompt: !!feedbackPrompt
-    });
-    
-    // Add duplicate request prevention
-    const now = Date.now();
-    const requestKey = `${feedbackConversationId}_${practiceToChat}`;
-    
-    // Prevent duplicate requests within 5 seconds
-    if (feedbackRequestInProgress.current === requestKey && 
-        (now - feedbackProcessingTimestamp.current) < 5000) {
-      console.log('⚠️ Preventing duplicate feedback request for:', requestKey);
-      return;
-    }
-    
-    if (practiceToChat === 'true' && feedbackPrompt && feedbackConversationId) {
-      console.log('⚠️ Detected practice feedback request in useEffect, using conversation:', feedbackConversationId);
-      
-      // Mark this request as in progress
-      feedbackRequestInProgress.current = requestKey;
-      feedbackProcessingTimestamp.current = now;
-      isProcessingFeedback.current = true;
-
-      // Important: Set current conversation if needed, but try to preserve existing info
-      if (!currentConversation || currentConversation.conversationId !== feedbackConversationId) {
-        console.log('Switching to feedback conversation:', feedbackConversationId);
-        
-        // Get existing conversation data from localStorage if available
-        const conversationsJSON = localStorage.getItem('conversations');
-        let existingTitle = "Practice Feedback";
-        let existingManagerType = (localStorage.getItem('practice_manager_type') || getManagerType()) as ManagerType;
-        let existingCreatedAt = new Date().toISOString();
-        
-        if (conversationsJSON) {
-          try {
-            const conversations = JSON.parse(conversationsJSON);
-            const existingConversation = conversations.find((conv: any) => 
-              conv.conversationId === feedbackConversationId
-            );
-            
-            if (existingConversation) {
-              console.log('Found existing conversation data:', existingConversation);
-              existingTitle = existingConversation.title || existingTitle;
-              existingManagerType = existingConversation.managerType || existingManagerType;
-              existingCreatedAt = existingConversation.createdAt || existingCreatedAt;
-            }
-          } catch (e) {
-            console.error('Error parsing conversations from localStorage:', e);
-          }
-        }
-        
-        // Set the current conversation with preserved data when possible
-      setCurrentConversation({
-        conversationId: feedbackConversationId,
-          title: existingTitle,
-          managerType: existingManagerType,
-          createdAt: existingCreatedAt
-        });
-      }
-      
-      // First load any existing messages for this conversation - don't clear messages
-      const existingMessages = loadConversationState(feedbackConversationId) || [];
-      console.log('Existing conversation messages:', existingMessages.length);
-      
-      // Try to load pre-created feedback message from localStorage
-      const exactSavedMessages = localStorage.getItem(`exact_messages_${feedbackConversationId}`);
-      let feedbackMessage = null;
-      
-      if (exactSavedMessages) {
-        try {
-          const parsedMessages = JSON.parse(exactSavedMessages);
-          if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
-            // Extract just the feedback message (the last one)
-            feedbackMessage = parsedMessages[parsedMessages.length - 1];
-            console.log('Found feedback message in localStorage:', feedbackMessage);
-          }
-        } catch (parseErr) {
-          console.error('Error parsing saved messages for practice feedback:', parseErr);
-        }
-      }
-      
-      if (!feedbackMessage) {
-        // Create a new feedback message
-        feedbackMessage = {
-        id: uuidv4(),
-        role: 'user' as Role,
-        content: feedbackPrompt,
-        conversationId: feedbackConversationId,
-        createdAt: new Date().toISOString()
-      };
-        console.log('Created new feedback message:', feedbackMessage);
-      }
-      
-      // IMPORTANT: Don't rebuild entire message list, just add to existing messages
-      // First check if we already have these messages in the UI
-      if (messages.length === 0) {
-        // Only load existing messages if we don't have any
-        setMessages(existingMessages);
-        setStoreMessages(existingMessages);
-      }
-      
-      // Check if feedback message already exists in current messages
-      const feedbackExists = messages.some(m => 
-        m.role === 'user' && 
-        m.content.includes('ethical decision-making score') && 
-        m.content.includes('provide detailed feedback')
-      );
-      
-      // Only add feedback message if it doesn't already exist
-      if (!feedbackExists) {
-        console.log('Adding feedback message to existing UI messages');
-        // Add feedback message to existing messages, not replace
-        const updatedMessages = [...messages, feedbackMessage];
-        setMessages(updatedMessages);
-        setStoreMessages(updatedMessages);
-        
-        // Add a loading message
-        const loadingMessage: Message = {
-          id: `loading-feedback-${Date.now()}`,
-          role: 'assistant',
-          content: 'Thinking...',
-          conversationId: feedbackConversationId,
-          createdAt: new Date().toISOString(),
-          isLoading: true
-        };
-        
-        // Add loading message to the UI
-        const loadMessagesWithoutLoading = messages.filter(m => 
-          m.role !== 'system' || !m.content.includes('loading'));
-            
-            // Make sure we don't have duplicate messages
-            const hasLoadingMsg = loadMessagesWithoutLoading.some(
-              m => m.id === loadingMessage.id || 
-              (m.role === 'assistant' && m.content === loadingMessage.content)
-            );
-            
-            if (!hasLoadingMsg) {
-              // Only add if not already present
-              setMessages([...loadMessagesWithoutLoading, loadingMessage]);
-            } else {
-              // Just remove the loading message
-              setMessages(loadMessagesWithoutLoading);
-            }
-        setStoreMessages(updatedMessages);
-        
-        // Save to localStorage to prevent loss
-        saveConversationState(feedbackConversationId, updatedMessages);
-        
-        // IMPORTANT: Send the feedback request with a more direct approach
-        setTimeout(async () => {
-          try {
-          console.log('Sending practice feedback prompt to API');
-            
-            // Get the practice manager type from localStorage or use default
-            const practiceManagerType = localStorage.getItem('practice_manager_type') as ManagerType | null;
-            
-            // We'll manually create the API call without going through the handleSendMessage function
-            const activeManagerType = practiceManagerType || managerType || 'PUPPETEER' as ManagerType;
-            
-            // Get the detailed API prompt from localStorage
-            const detailedPrompt = localStorage.getItem('practice_feedback_prompt');
-            const simplePrompt = localStorage.getItem('practice_feedback_simple') || localStorage.getItem('feedbackRequest');
-            
-            // Use whatever prompt is available
-            const apiPromptText = detailedPrompt || simplePrompt || feedbackMessage.content || '';
-            
-            console.log('Using API prompt with length:', apiPromptText.length);
-            
-            // Call the agent API using the same function as regular chat messages
-            if (apiPromptText) {
-              // Directly call the API to ensure the detailed data is sent
-              const response = await apiSendMessage(
-                feedbackConversationId,
-                apiPromptText || '',
-                activeManagerType,
-                temperature || 0.7
-              ) as {
-                id?: string;
-                agentResponse?: string;
-                conversationId: string;
-                createdAt?: string;
-              };
-              
-              console.log('Practice feedback API response received:', response);
-              
-              if (response && response.agentResponse) {
-                // Create the agent response message
-                const agentMessage: Message = {
-                  id: response.id || `assistant-${Date.now()}`,
-                  role: 'assistant' as Role,
-                  content: response.agentResponse,
-                  conversationId: feedbackConversationId,
-                  createdAt: response.createdAt || new Date().toISOString()
-                };
-                
-                // IMPORTANT: Log the agent message
-                console.log('Practice feedback agent message (secondary):', agentMessage);
-                
-                // IMPORTANT: Use storeMessages as the base for appending
-                const baseMessages = storeMessages.filter(m => !m.isLoading);
-                
-                // Log the base messages count
-                console.log('Base messages count (from storeMessages) (secondary):', baseMessages.length);
-                
-                // If base messages are empty, try recovery
-                let finalBaseMessages = baseMessages;
-                if (finalBaseMessages.length === 0) {
-                  const recoveredMessages = loadConversationState(feedbackConversationId);
-                  if (recoveredMessages && recoveredMessages.length > 0) {
-                    console.log('Recovered messages again just before setting final state (secondary):', recoveredMessages.length);
-                    finalBaseMessages = recoveredMessages;
-                  }
-                }
-                
-                // Ensure we don't add a duplicate agent message
-                const hasAgentResponseAlready = finalBaseMessages.some(m => m.id === agentMessage.id);
-                
-                let finalMessages;
-                if (!hasAgentResponseAlready) {
-                  console.log('Appending new agent feedback response message (secondary)');
-                  finalMessages = [...finalBaseMessages, agentMessage];
-                } else {
-                  console.log('Agent feedback response already exists, not appending duplicate (secondary)');
-                  finalMessages = finalBaseMessages; // Use the list without the duplicate
-                }
-                
-                // IMPORTANT: Direct update state
-                console.log('Setting final messages count (secondary):', finalMessages.length);
-                setMessages(finalMessages);
-                setStoreMessages(finalMessages);
-                
-                // Save to localStorage immediately
-                saveConversationState(feedbackConversationId, finalMessages);
-                localStorage.setItem(`exact_messages_${feedbackConversationId}`, JSON.stringify(finalMessages));
-                localStorage.setItem(`backup_messages_${feedbackConversationId}`, JSON.stringify(finalMessages));
-                
-                // Refresh sidebar
-                triggerSidebarRefresh({
-                  type: 'new-message',
-                  conversationId: feedbackConversationId
-                });
-                
-                // Clean up practice data
-                localStorage.removeItem('practice_data');
-                localStorage.removeItem('practice_feedback_prompt');
-                localStorage.removeItem('practice_feedback_simple');
-                localStorage.removeItem('feedbackRequest');
-              } else {
-                console.error('Failed to get agent response for practice feedback (secondary)');
-                setError('Failed to get feedback. Please try again.');
-              }
-            } else {
-              console.error('No API prompt available, cannot send practice feedback');
-              setError('Failed to get feedback response. Please try again.');
-            }
-          } catch (error) {
-            console.error('Error sending practice feedback:', error);
-            
-            // If error, remove loading messages but keep user message
-            const messagesWithoutLoading = storeMessages.filter(m => !m.isLoading);
-            setMessages(messagesWithoutLoading);
-            setStoreMessages(messagesWithoutLoading);
-            
-            setError('Failed to get feedback response. Please try again.');
-          } finally {
-            // Clean up flags regardless of success or failure
-          isProcessingFeedback.current = false;
-          localStorage.removeItem('practice_to_chat');
-          localStorage.removeItem('practice_feedback_prompt');
-            localStorage.removeItem('practice_feedback_simple');
-            localStorage.removeItem('force_conversation_id');
-          }
-        }, 100);
-      } else {
-        console.log('Feedback message already exists in UI, not adding duplicate');
-        // Still clean up flags
-        isProcessingFeedback.current = false;
-        localStorage.removeItem('practice_to_chat');
-        localStorage.removeItem('practice_feedback_prompt');
-        localStorage.removeItem('practice_feedback_simple');
-        localStorage.removeItem('force_conversation_id');
-      }
-    }
+    // REMOVED: Large duplicate practice feedback processing logic
+    // Practice feedback is now handled only in the mount useEffect above to prevent duplicates
+    // This useEffect now only monitors dependencies without triggering practice feedback
+    console.log('useEffect dependency update - practice feedback handled in mount useEffect only');
   }, [currentConversation?.conversationId, messages.length, storeMessages.length]);
+
+  // REMOVED: Second duplicate useEffect for practice-feedback-request event listener
+  // This was causing the duplication - only one event listener should exist
 
   // Add a listener for forced message loading
   useEffect(() => {
