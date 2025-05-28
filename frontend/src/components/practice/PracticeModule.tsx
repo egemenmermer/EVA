@@ -189,6 +189,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   } | null>(null);
   const [processingChoice, setProcessingChoice] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
+  const [showInfoModal, setShowInfoModal] = useState(false); // Add state for info modal
+  const [activeTab, setActiveTab] = useState<'soft' | 'rhetoric'>('soft'); // Add state for active tab
   
   const { user, setManagerType: setGlobalManagerType } = useStore();
   const navigate = useNavigate();
@@ -693,11 +695,6 @@ Please analyze this practice session using the EVA Tactic Taxonomy framework:
 - Performance Level: ${currentScenario.sessionSummary?.performanceLevel}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
 
-**Decision Patterns:**
-${Object.entries(currentScenario.sessionSummary?.tacticCounts || {})
-  .map(([tactic, count]: [string, any]) => `- ${tactic}: ${count} times`)
-  .join('\n')}
-
 **Choice History:**
 ${currentScenario.sessionSummary?.choiceHistory.map((choice, index) => 
   `${index + 1}. ${choice} (Category: ${currentScenario.sessionSummary?.categoryHistory[index]}, EVS: ${currentScenario.sessionSummary?.evsHistory[index]})`
@@ -791,9 +788,6 @@ Please provide detailed feedback in the following format:
                 role: 'final_evaluation',
                 content: `🎯 **Performance Analysis**\n\n` +
                         `**Overall Score**: ${response.data.averageEvs?.toFixed(1)}/100 (${response.data.performanceLevel})\n\n` +
-                        `**Decision Patterns**:\n${Object.entries(response.data.tacticCounts || {})
-                          .map(([tactic, count]: [string, any]) => `• ${tactic}: ${count} times`)
-                          .join('\n')}\n\n` +
                         `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
                         `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
               } as FinalEvaluationMessage
@@ -887,12 +881,22 @@ Please provide detailed feedback in the following format:
         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
           {onExit && (
-            <button
-              onClick={handleReturnToChat}
-              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              Return to Chat
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="px-3 py-2 text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center space-x-1"
+                title="About Manager Tactics"
+              >
+                <span>ℹ️</span>
+                <span>Argumentation Tactics</span>
+              </button>
+              <button
+                onClick={handleReturnToChat}
+                className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                Return to Chat
+              </button>
+            </div>
           )}
         </div>
         
@@ -948,12 +952,21 @@ Please provide detailed feedback in the following format:
           )}
         </div>
         {onExit && (
-          <button
-            onClick={handleReturnToChat}
-            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            Return to Chat
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="px-3 py-2 text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center space-x-1"
+              title="About Manager Tactics"
+            >
+              <span>Argumentation Tactics</span>
+            </button>
+            <button
+              onClick={handleReturnToChat}
+              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Return to Chat
+            </button>
+          </div>
         )}
       </div>
 
@@ -1074,13 +1087,13 @@ Please provide detailed feedback in the following format:
                 <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
                   <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
                   
-                  {/* Total Score Display */}
-                  <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                  {/* Compact Total Score Display */}
+                  <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                       {finalScore}/100
-                              </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Total EVS Score</div>
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total EVS Score</div>
+                    <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                       finalScore >= 80 
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                         : finalScore >= 60
@@ -1088,66 +1101,30 @@ Please provide detailed feedback in the following format:
                         : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                     }`}>
                       {finalScore >= 80 ? 'Excellent' : finalScore >= 60 ? 'Good' : 'Needs Improvement'}
-                          </div>
-                        </div>
+                    </div>
+                  </div>
                   
-                  {currentScenario?.sessionSummary && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                        <div>
-                          <p><strong>Scenario:</strong> {currentScenario.sessionSummary.scenarioTitle || 'Unknown'}</p>
-                          <p><strong>Issue Type:</strong> {currentScenario.sessionSummary.issue || 'Unknown'}</p>
-                      </div>
-                        <div>
-                          <p><strong>Total Steps:</strong> {currentScenario.sessionSummary.choiceHistory?.length || 0}</p>
-                          <p><strong>Manager Type:</strong> {currentScenario.sessionSummary.managerType || 'Unknown'}</p>
-                        </div>
-                      </div>
-
-                      {/* Simplified Decision Pattern Summary */}
-                      <div className="mb-4 p-3 bg-white/50 dark:bg-gray-800/30 rounded-lg">
-                        <h4 className="font-medium text-sm mb-2">Decision Patterns:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {currentScenario.sessionSummary.tacticCounts && Object.entries(currentScenario.sessionSummary.tacticCounts).map(([tactic, count]: [string, any]) => (
-                            <span key={tactic} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
-                              {tactic}: {count}
-                            </span>
-                    ))}
-                </div>
-              </div>
-                    </>
-                  )}
-                  
-                  {/* Always show feedback options when session is complete */}
-                  <div className="flex flex-col space-y-2">
+                  {/* Compact button layout - side by side */}
+                  <div className="flex space-x-3">
                     <button
                       onClick={handleGetFeedbackFromEVA}
                       disabled={loading}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
                     >
                       <span>🤖</span>
                       <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
                     </button>
                     
-                    <div className="flex space-x-2">
                     <button
                       onClick={handlePracticeAgain}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2"
                     >
-                        🔄 Practice Again
+                      <span>🔄</span>
+                      <span>Practice Again</span>
                     </button>
-                      {onExit && (
-                        <button
-                          onClick={handleReturnToChat}
-                          className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                        >
-                          💬 Return to Chat
-                        </button>
-                      )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
             </div>
 
             {/* Show choices if available and scenario is not complete */}
@@ -1236,6 +1213,141 @@ Please provide detailed feedback in the following format:
       {error && (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
           {error}
+        </div>
+      )}
+
+      {/* Info Modal */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">EVA Tactic Taxonomy</h2>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-gray-600 dark:text-gray-300 mb-6">
+                <p>The EVA (Ethical Violation Analysis) Tactic Taxonomy provides a comprehensive framework for ethical decision-making in workplace situations. These 24 tactics are divided into two main categories.</p>
+              </div>
+
+              {/* Tab Navigation */}
+              <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('soft')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'soft'
+                      ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  🟡 Soft Resistance Tactics (12)
+                </button>
+                <button
+                  onClick={() => setActiveTab('rhetoric')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'rhetoric'
+                      ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                  }`}
+                >
+                  🔵 Rhetorical Tactics (12)
+                </button>
+              </div>
+
+              {/* Soft Resistance Tab */}
+              {activeTab === 'soft' && (
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                    <h3 className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-2">Soft Resistance Tactics</h3>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                      Subtle strategies to redirect, delay, or ethically influence decisions within existing power structures, without direct confrontation.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {[
+                      { name: "Shifting Scope", description: "Redirect the project's focus to ethically preferable areas." },
+                      { name: "Delaying", description: "Postpone decisions or actions to buy time or avoid immediate unethical choices." },
+                      { name: "Documenting Dissent", description: "Log or record disagreement for accountability or transparency." },
+                      { name: "Reframing", description: "Reinterpret the problem in ethical or user-centered terms." },
+                      { name: "Appealing to External Standards", description: "Cite external ethics codes, laws, or professional standards." },
+                      { name: "Making It Visible", description: "Draw attention to hidden or glossed-over ethical issues." },
+                      { name: "Adding Friction", description: "Subtly slow down unethical decisions by adding small procedural barriers." },
+                      { name: "Creating Alternatives", description: "Suggest other design or engineering solutions that reduce harm." },
+                      { name: "Redirecting Conversations", description: "Steer dialogue toward user well-being or ethical risk." },
+                      { name: "Asking Questions", description: "Use inquiry to expose flaws or raise concerns without confronting." },
+                      { name: "Withholding Full Implementation", description: "Implement partially to reduce harm while meeting demands." },
+                      { name: "Testing Loopholes", description: "Find gaps in policy that allow more ethical action without violating rules." }
+                    ].map((tactic, index) => (
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800/50">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{tactic.name}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{tactic.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rhetorical Tab */}
+              {activeTab === 'rhetoric' && (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                    <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-2">Rhetorical Tactics</h3>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                      Overt persuasive strategies to justify ethical or user-centered decisions to stakeholders using logical argument and moral reasoning.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {[
+                      { name: "Appealing to Organizational Values", description: "Refer to company mission or ethics to support your view." },
+                      { name: "Citing Institutional Authority", description: "Reference respected sources (e.g. legal, compliance, leadership)." },
+                      { name: "Referencing Laws or Regulations", description: "Mention GDPR, ADA, or relevant compliance rules." },
+                      { name: "Presenting User Data", description: "Use metrics, A/B tests, or research to support your argument." },
+                      { name: "Referencing Best Practices", description: "Cite UX or design guidelines (e.g. Nielsen heuristics, WCAG)." },
+                      { name: "Constructing Hypothetical Scenarios", description: "Paint realistic future situations to predict consequences." },
+                      { name: "Drawing Analogies", description: "Compare to familiar systems/decisions to make logic clearer." },
+                      { name: "Evoking Empathy", description: "Appeal to user emotions, especially around harm or exclusion." },
+                      { name: "Emphasizing Harm or Risk", description: "Focus on what could go wrong or harm users." },
+                      { name: "Citing Public Backlash", description: "Reference reputational risk or public sentiment." },
+                      { name: "Personal Moral Appeals", description: "Use your own ethical compass as a base of authority." },
+                      { name: "Sarcastic Ridicule", description: "Rare; discredit unethical logic using irony or sarcasm." }
+                    ].map((tactic, index) => (
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800/50">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{tactic.name}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{tactic.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mt-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>How to Use:</strong> In practice scenarios, try to identify which tactics would be most effective for each situation. Your Ethical Violation Score (EVS) reflects how well you apply these tactics to navigate challenging ethical decisions in the workplace.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
