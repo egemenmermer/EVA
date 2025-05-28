@@ -37,6 +37,9 @@ const addAuthInterceptor = (instance) => {
       // Get token from localStorage
       const token = localStorage.getItem('token');
       
+      // Enhanced debug logging for specific endpoints
+      const isPracticeEndpoint = config.url?.includes('/practice');
+      
       // Ensure headers object exists
       config.headers = config.headers || {};
       
@@ -51,7 +54,14 @@ const addAuthInterceptor = (instance) => {
           localStorage.setItem('token', formattedToken);
         }
         
-        if (process.env.NODE_ENV === 'development') {
+        // Always log for practice endpoints
+        if (isPracticeEndpoint) {
+          const tokenStart = formattedToken.substring(0, 15);
+          const tokenEnd = formattedToken.length > 20 ? formattedToken.substring(formattedToken.length - 5) : '';
+          console.log(`Request to practice endpoint: ${config.url}`);
+          console.log(`Auth token for practice request: ${tokenStart}...${tokenEnd}`);
+          console.log(`Full headers for practice request:`, config.headers);
+        } else if (process.env.NODE_ENV === 'development') {
           const tokenStart = formattedToken.substring(0, 15);
           const tokenEnd = formattedToken.length > 20 ? formattedToken.substring(formattedToken.length - 5) : '';
           console.log(`Request with auth token: ${config.url}, token: ${tokenStart}...${tokenEnd}`);
@@ -74,6 +84,11 @@ const addAuthInterceptor = (instance) => {
           }
         } catch (e) {
           console.error('Error attempting to recover token:', e);
+        }
+        
+        // Alert about missing token for practice endpoints
+        if (isPracticeEndpoint) {
+          console.error(`No authentication token found for practice endpoint: ${config.url}`);
         }
       }
       

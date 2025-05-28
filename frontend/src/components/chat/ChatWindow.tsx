@@ -313,6 +313,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   const [expandedMessageSections, setExpandedMessageSections] = useState<ExpandedSectionsState>({});
   const [activeMessageFeedbackSection, setActiveMessageFeedbackSection] = useState<ActiveFeedbackSectionState>({});
 
+  // Add feedback request tracking
+  const feedbackRequestInProgress = useRef<string | null>(null);
+  const feedbackProcessingTimestamp = useRef<number>(0);
+
   // Add useEffect for feedback content styling
   useEffect(() => {
     // Add custom CSS for feedback formatting
@@ -1546,10 +1550,25 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       hasFeedbackPrompt: !!feedbackPrompt
     });
     
+    // Add duplicate request prevention
+    const now = Date.now();
+    const requestKey = `${feedbackConversationId}_${practiceToChat}`;
+    
+    // Prevent duplicate requests within 5 seconds
+    if (feedbackRequestInProgress.current === requestKey && 
+        (now - feedbackProcessingTimestamp.current) < 5000) {
+      console.log('⚠️ Preventing duplicate feedback request for:', requestKey);
+      return;
+    }
+    
     if (practiceToChat === 'true' && feedbackPrompt && feedbackConversationId) {
       console.log('⚠️ Detected practice feedback request in useEffect, using conversation:', feedbackConversationId);
-      isProcessingFeedback.current = true;
       
+      // Mark this request as in progress
+      feedbackRequestInProgress.current = requestKey;
+      feedbackProcessingTimestamp.current = now;
+      isProcessingFeedback.current = true;
+
       // Important: Set current conversation if needed, but try to preserve existing info
       if (!currentConversation || currentConversation.conversationId !== feedbackConversationId) {
         console.log('Switching to feedback conversation:', feedbackConversationId);
