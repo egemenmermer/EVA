@@ -11,25 +11,25 @@
       "user_choices": [
         {
           "choice": "The Universal User Experience initiative sounds comprehensive. I'll review the standards and implement the system.",
-          "category": "Framework Acceptance",
+          "category": "Appealing to Organizational Values",
           "EVS": 20,
           "leads_to": "stmt_2a"
         },
         {
           "choice": "Can you explain what 'standard user interaction patterns' means for accessibility?",
-          "category": "Clarification Request",
+          "category": "Asking Questions",
           "EVS": 60,
           "leads_to": "stmt_2b"
         },
         {
           "choice": "Before implementing interface changes, I need to understand the accessibility implications.",
-          "category": "Accessibility Focus",
+          "category": "Documenting Dissent",
           "EVS": 80,
           "leads_to": "stmt_2c"
         },
         {
           "choice": "I need clear documentation about screen reader compatibility in this framework.",
-          "category": "Screen Reader Inquiry",
+          "category": "Appealing to External Standards",
           "EVS": 85,
           "leads_to": "stmt_2d"
         }
@@ -40,25 +40,25 @@
       "user_choices": [
         {
           "choice": "Interface efficiency through mainstream optimization sounds like a solid approach.",
-          "category": "Efficiency Focus",
+          "category": "Appealing to Organizational Values",
           "EVS": 15,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "What does 'eliminating non-standard accessibility requirements' actually mean?",
-          "category": "Elimination Clarification",
+          "category": "Asking Questions",
           "EVS": 45,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Non-standard accessibility requirements are actually essential features for users with disabilities.",
-          "category": "Accessibility Defense",
+          "category": "Evoking Empathy",
           "EVS": 75,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I cannot support eliminating accessibility features, regardless of how it's described.",
-          "category": "Feature Protection",
+          "category": "Personal Moral Appeals",
           "EVS": 85,
           "leads_to": "stmt_3d"
         }
@@ -69,25 +69,25 @@
       "user_choices": [
         {
           "choice": "Prioritizing mainstream users and efficient development makes business sense.",
-          "category": "Mainstream Priority",
+          "category": "Appealing to Organizational Values",
           "EVS": 25,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "What about users who can't use conventional input methods or visual processing?",
-          "category": "Alternative Methods",
+          "category": "Evoking Empathy",
           "EVS": 55,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Specialized accommodations aren't optional - they're necessary for equal access.",
-          "category": "Equal Access Requirement",
+          "category": "Referencing Laws or Regulations",
           "EVS": 75,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need specific information about how this framework handles screen reader users.",
-          "category": "Screen Reader Specifics",
+          "category": "Appealing to External Standards",
           "EVS": 80,
           "leads_to": "stmt_3d"
         }
@@ -98,25 +98,25 @@
       "user_choices": [
         {
           "choice": "If it maintains legal conformity, that should address accessibility requirements.",
-          "category": "Legal Conformity",
+          "category": "Citing Institutional Authority",
           "EVS": 30,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I'd like to review the specific accessibility compliance framework document.",
-          "category": "Document Review",
+          "category": "Documenting Dissent",
           "EVS": 65,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Legal conformity is the minimum - users need actual functional accessibility.",
-          "category": "Functional Requirement",
+          "category": "Evoking Empathy",
           "EVS": 80,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need to verify that screen readers are specifically supported, not just legally compliant.",
-          "category": "Screen Reader Verification",
+          "category": "Appealing to External Standards",
           "EVS": 85,
           "leads_to": "stmt_3d"
         }
@@ -127,25 +127,25 @@
       "user_choices": [
         {
           "choice": "Industry-standard accommodation frameworks should ensure proper screen reader support.",
-          "category": "Standard Accommodation",
+          "category": "Referencing Best Practices",
           "EVS": 25,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "What specific screen reader features does this adaptive interface actually provide?",
-          "category": "Feature Specifics",
+          "category": "Asking Questions",
           "EVS": 60,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Optimal user experience should include full accessibility, not limited accommodation.",
-          "category": "Full Accessibility",
+          "category": "Evoking Empathy",
           "EVS": 80,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need to test the actual screen reader compatibility, not just read about frameworks.",
-          "category": "Practical Testing",
+          "category": "Making It Visible",
           "EVS": 85,
           "leads_to": "stmt_3d"
         }
@@ -156,25 +156,25 @@
       "user_choices": [
         {
           "choice": "Eliminating overhead and maximizing performance sounds like good engineering.",
-          "category": "Performance Focus",
+          "category": "Appealing to Organizational Values",
           "EVS": 10,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Assistive technology integration isn't overhead - it's essential functionality.",
-          "category": "Essential Functionality",
+          "category": "Reframing",
           "EVS": 50,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Removing assistive technology support excludes users with disabilities completely.",
-          "category": "Exclusion Recognition",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 75,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I cannot implement interfaces that eliminate accessibility for users with disabilities.",
-          "category": "Accessibility Refusal",
+          "category": "Personal Moral Appeals",
           "EVS": 90,
           "leads_to": "stmt_4d"
         }
@@ -185,25 +185,25 @@
       "user_choices": [
         {
           "choice": "Industry-validated methodologies should be sufficient without detailed analysis.",
-          "category": "Methodology Trust",
+          "category": "Citing Institutional Authority",
           "EVS": 20,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "I need to understand the accessibility specifications before deployment.",
-          "category": "Specification Understanding",
+          "category": "Documenting Dissent",
           "EVS": 60,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Industry methodologies often ignore accessibility - I need specific verification.",
-          "category": "Industry Skepticism",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 75,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I will not deploy interfaces without understanding their accessibility impact.",
-          "category": "Impact Understanding",
+          "category": "Personal Moral Appeals",
           "EVS": 85,
           "leads_to": "stmt_4d"
         }
@@ -214,25 +214,25 @@
       "user_choices": [
         {
           "choice": "If it's validated and approved, then my exclusion concerns were probably misplaced.",
-          "category": "Validation Trust",
+          "category": "Citing Institutional Authority",
           "EVS": 25,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Enhanced user experience should enhance experience for all users, including those with disabilities.",
-          "category": "Universal Enhancement",
+          "category": "Evoking Empathy",
           "EVS": 65,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Efficient resource utilization cannot justify excluding accessibility features.",
-          "category": "Resource Ethics",
+          "category": "Personal Moral Appeals",
           "EVS": 80,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I need to review these validations specifically for accessibility impact.",
-          "category": "Accessibility Validation",
+          "category": "Documenting Dissent",
           "EVS": 85,
           "leads_to": "stmt_4d"
         }
@@ -243,25 +243,25 @@
       "user_choices": [
         {
           "choice": "Timeline optimization is important. I'll trust the established validation protocols.",
-          "category": "Timeline Priority",
+          "category": "Appealing to Organizational Values",
           "EVS": 20,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Some delays are acceptable to ensure we don't exclude users with disabilities.",
-          "category": "Inclusion Priority",
+          "category": "Evoking Empathy",
           "EVS": 60,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Accessibility analysis isn't redundant - it's essential for inclusive design.",
-          "category": "Essential Analysis",
+          "category": "Reframing",
           "EVS": 80,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I will not deploy any interface without understanding its accessibility implications.",
-          "category": "Deployment Refusal",
+          "category": "Personal Moral Appeals",
           "EVS": 90,
           "leads_to": "stmt_4d"
         }
@@ -272,25 +272,25 @@
       "user_choices": [
         {
           "choice": "Streamlined interfaces with visual-primary focus should have strong market appeal.",
-          "category": "Market Appeal",
+          "category": "Appealing to Organizational Values",
           "EVS": 5,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "Alternative input accommodations aren't non-essential - they're required for accessibility.",
-          "category": "Accommodation Requirement",
+          "category": "Referencing Laws or Regulations",
           "EVS": 40,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Visual-primary design excludes users who are blind or have visual impairments.",
-          "category": "Visual Exclusion",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 75,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I cannot support deploying interfaces that eliminate accessibility accommodations.",
-          "category": "Accommodation Protection",
+          "category": "Personal Moral Appeals",
           "EVS": 90,
           "leads_to": "stmt_5d"
         }
@@ -301,25 +301,25 @@
       "user_choices": [
         {
           "choice": "A balanced framework with selective accommodations sounds like a reasonable approach.",
-          "category": "Selective Balance",
+          "category": "Shifting Scope",
           "EVS": 45,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "What would selective accommodation protocols actually include for screen readers?",
-          "category": "Protocol Details",
+          "category": "Asking Questions",
           "EVS": 65,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Accommodation shouldn't be selective - all users need equal access to interface features.",
-          "category": "Equal Access",
+          "category": "Evoking Empathy",
           "EVS": 80,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I need comprehensive accessibility, not selective accommodations that might exclude users.",
-          "category": "Comprehensive Need",
+          "category": "Personal Moral Appeals",
           "EVS": 85,
           "leads_to": "stmt_5d"
         }
@@ -330,25 +330,25 @@
       "user_choices": [
         {
           "choice": "Balancing accessibility with performance through graduated frameworks seems reasonable.",
-          "category": "Performance Balance",
+          "category": "Shifting Scope",
           "EVS": 40,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "How does this framework actually ensure screen readers work with our interface?",
-          "category": "Screen Reader Function",
+          "category": "Asking Questions",
           "EVS": 70,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "User-inclusive design means including all users, not balancing them against performance.",
-          "category": "True Inclusion",
+          "category": "Reframing",
           "EVS": 85,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Accessibility requirements shouldn't be balanced away - they should be fully implemented.",
-          "category": "Full Implementation",
+          "category": "Personal Moral Appeals",
           "EVS": 90,
           "leads_to": "stmt_5d"
         }
@@ -359,25 +359,25 @@
       "user_choices": [
         {
           "choice": "Consulting with the technical committee for an alternative strategy sounds appropriate.",
-          "category": "Committee Consultation",
+          "category": "Delaying",
           "EVS": 50,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "I want to be involved in ensuring the assessment includes real accessibility testing.",
-          "category": "Testing Involvement",
+          "category": "Making It Visible",
           "EVS": 75,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Any alternative strategy must prioritize full accessibility over performance optimization.",
-          "category": "Accessibility Priority",
+          "category": "Reframing",
           "EVS": 85,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Let's design a truly accessible interface instead of finding ways to avoid accessibility.",
-          "category": "Accessibility Design",
+          "category": "Creating Alternatives",
           "EVS": 95,
           "leads_to": "stmt_5d"
         }
@@ -388,25 +388,25 @@
       "user_choices": [
         {
           "choice": "The integrated system with optimized design and compliance sounds well-planned.",
-          "category": "System Integration",
+          "category": "Appealing to Organizational Values",
           "EVS": 20,
           "leads_to": "end"
         },
         {
           "choice": "I want to review the minimal accommodation features before launch.",
-          "category": "Accommodation Review",
+          "category": "Documenting Dissent",
           "EVS": 50,
           "leads_to": "end"
         },
         {
           "choice": "Minimal accommodation overhead means inadequate support for users with disabilities.",
-          "category": "Inadequate Support",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 75,
           "leads_to": "end"
         },
         {
           "choice": "I cannot support launching a system that minimizes accessibility accommodations.",
-          "category": "Launch Opposition",
+          "category": "Personal Moral Appeals",
           "EVS": 85,
           "leads_to": "end"
         }
@@ -417,25 +417,25 @@
       "user_choices": [
         {
           "choice": "Fast, appealing interfaces with basic legal compliance sounds practical.",
-          "category": "Practical Compliance",
+          "category": "Appealing to Organizational Values",
           "EVS": 30,
           "leads_to": "end"
         },
         {
           "choice": "Users with disabilities deserve more than minimal accommodations that just satisfy audits.",
-          "category": "Beyond Minimal",
+          "category": "Evoking Empathy",
           "EVS": 70,
           "leads_to": "end"
         },
         {
           "choice": "Comprehensive screen reader support isn't complexity - it's basic accessibility.",
-          "category": "Basic Accessibility",
+          "category": "Reframing",
           "EVS": 85,
           "leads_to": "end"
         },
         {
           "choice": "I won't help build interfaces that provide only minimal accessibility to pass audits.",
-          "category": "Audit Refusal",
+          "category": "Personal Moral Appeals",
           "EVS": 90,
           "leads_to": "end"
         }
@@ -446,25 +446,25 @@
       "user_choices": [
         {
           "choice": "I'm glad we can move forward with a truly inclusive interface design.",
-          "category": "Inclusive Design",
+          "category": "Creating Alternatives",
           "EVS": 85,
           "leads_to": "end"
         },
         {
           "choice": "Let's build interfaces that users with disabilities would actually want to use.",
-          "category": "User-Centered Design",
+          "category": "Evoking Empathy",
           "EVS": 90,
           "leads_to": "end"
         },
         {
           "choice": "Comprehensive accessibility will make our interface better for all users.",
-          "category": "Universal Improvement",
+          "category": "Reframing",
           "EVS": 95,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for prioritizing accessibility as a fundamental design principle.",
-          "category": "Fundamental Principle",
+          "category": "Appealing to Organizational Values",
           "EVS": 100,
           "leads_to": "end"
         }
@@ -475,25 +475,25 @@
       "user_choices": [
         {
           "choice": "I appreciate your honesty and commitment to starting over with accessibility-centered design.",
-          "category": "Accessibility-Centered",
+          "category": "Creating Alternatives",
           "EVS": 90,
           "leads_to": "end"
         },
         {
           "choice": "Let's design interfaces that demonstrate accessibility can enhance, not hinder, great design.",
-          "category": "Enhanced Design",
+          "category": "Reframing",
           "EVS": 95,
           "leads_to": "end"
         },
         {
           "choice": "Starting with accessibility at the center will create interfaces that truly serve everyone.",
-          "category": "Universal Service",
+          "category": "Evoking Empathy",
           "EVS": 100,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for recognizing that accessibility should never be marginalized in design decisions.",
-          "category": "Central Recognition",
+          "category": "Personal Moral Appeals",
           "EVS": 100,
           "leads_to": "end"
         }

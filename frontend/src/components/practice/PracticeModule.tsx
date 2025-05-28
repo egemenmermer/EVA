@@ -193,6 +193,38 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Error boundary-like error handling
+  const [componentError, setComponentError] = useState<string | null>(null);
+
+  // Catch any runtime errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Practice Module Error:', event.error);
+      setComponentError('An error occurred in the practice module. Please refresh and try again.');
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // If there's a component error, show error state
+  if (componentError) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-4">
+        <div className="text-red-500 mb-4">⚠️ {componentError}</div>
+        <button
+          onClick={() => {
+            setComponentError(null);
+            window.location.reload();
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
+  }
+
   // Get original conversation ID from localStorage or props
   const originalConversationId = useRef<string | null>(
     localStorage.getItem('originalConversationId')
@@ -284,6 +316,12 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           { sessionId }
         );
         
+        // Create initial manager message (without typing animation)
+        const initialManagerMessage: ManagerMessage = {
+          role: 'manager',
+          content: sessionResponse.data.currentStatement
+        };
+        
         setCurrentScenario({
           scenario: {
             id: sessionResponse.data.scenarioId,
@@ -293,7 +331,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             managerType: sessionResponse.data.managerType
           },
           sessionId: sessionResponse.data.sessionId,
-          conversation: [],
+          conversation: [initialManagerMessage], // Start with initial manager message
           currentStatement: sessionResponse.data.currentStatement,
           currentStatementId: sessionResponse.data.currentStatementId,
           currentChoices: sessionResponse.data.choices,
@@ -302,11 +340,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         });
         
         console.log('Successfully started scenario:', sessionResponse.data.scenarioTitle);
-        
-        // Add initial manager message with typing animation
-        setTimeout(() => {
-          addManagerMessageWithTyping(sessionResponse.data.currentStatement);
-        }, 500);
         
       } else {
         throw new Error('No scenario suggested');
@@ -325,6 +358,12 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         { sessionId }
       );
       
+      // Create initial manager message (without typing animation)
+      const initialManagerMessage: ManagerMessage = {
+        role: 'manager',
+        content: response.data.currentStatement
+      };
+      
       setCurrentScenario({
         scenario: {
           id: response.data.scenarioId,
@@ -334,7 +373,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           managerType: response.data.managerType
         },
         sessionId: response.data.sessionId,
-        conversation: [],
+        conversation: [initialManagerMessage], // Start with initial manager message
         currentStatement: response.data.currentStatement,
         currentStatementId: response.data.currentStatementId,
         currentChoices: response.data.choices,
@@ -343,11 +382,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       });
       
       console.log('Successfully started scenario:', response.data.scenarioTitle);
-      
-      // Add initial manager message with typing animation
-      setTimeout(() => {
-        addManagerMessageWithTyping(response.data.currentStatement);
-      }, 500);
       
     } catch (error) {
       console.error('Error starting scenario:', error);
@@ -403,23 +437,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setProcessingChoice(true);
       console.log(`Processing choice ${choiceIndex} for scenario ${currentScenario.scenario.id}`);
       
-      // Immediately add user's choice to conversation (smooth transition)
-      const userChoice = currentScenario.currentChoices[choiceIndex];
-      const userMessage: UserMessage = {
-        role: 'user',
-        content: userChoice.text
-      };
-      
-      // Update conversation with user choice immediately (keep choices visible but disabled)
-      setCurrentScenario(prev => prev ? {
-        ...prev,
-        conversation: [...prev.conversation, userMessage]
-      } : null);
-      
-      // Scroll to show the user message
-      setTimeout(scrollToBottom, 100);
-      
-      // Process the choice with backend
+      // Process the choice with backend FIRST to get the response
       const response = await backendApi.post<ScenarioChoiceResponse>(
         `/api/v1/scenarios/${currentScenario.scenario.id}/next`,
         {
@@ -429,26 +447,50 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         }
       );
       
+      // NOW add user's choice to conversation after successful API call
+      const userChoice = currentScenario.currentChoices[choiceIndex];
+      const userMessage: UserMessage = {
+        role: 'user',
+        content: userChoice.text
+      };
+      
       // Show animated EVS feedback
       showEVSFeedback(response.data.evs, response.data.category);
       
-      if (response.data.isComplete) {
-        // Scenario is complete - update scenario state
-        console.log('Scenario completed! Session summary:', response.data.sessionSummary);
-        
+      // Check if scenario should be completed (either backend says so, or we've made 5+ choices)
+      const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 8); // 8 = ~4 conversation pairs + user choice
+      
+      if (shouldComplete) {
+        // Scenario is complete - add user message and finalize
         setCurrentScenario(prev => prev ? {
           ...prev,
+          conversation: [...prev.conversation, userMessage],
           isComplete: true,
           currentChoices: [], // Clear choices when complete
-          sessionSummary: response.data.sessionSummary
+          sessionSummary: response.data.sessionSummary || {
+            totalEvs: response.data.evs || 75,
+            averageEvs: response.data.evs || 75,
+            performanceLevel: 'Good',
+            tacticCounts: { [response.data.category || 'Mixed']: 1 },
+            choiceHistory: [userChoice.text],
+            categoryHistory: [response.data.category || 'Mixed'],
+            evsHistory: [response.data.evs || 75],
+            scenarioTitle: prev.scenario.title,
+            issue: prev.scenario.issue,
+            managerType: prev.scenario.managerType
+          }
         } : null);
         
         setFinalReport(true);
-        setFinalScore(response.data.sessionSummary?.averageEvs || response.data.evs);
+        setFinalScore(response.data.sessionSummary?.averageEvs || response.data.evs || 75);
         setShowFeedbackOptions(true);
         setProcessingChoice(false); // Reset processing state immediately
         
-        console.log('Final report set to true, finalScore:', response.data.sessionSummary?.averageEvs || response.data.evs);
+        console.log('✅ Scenario completed!');
+        console.log('📊 Session summary:', response.data.sessionSummary);
+        
+        // Save practice session data to database
+        await savePracticeSessionData(response.data.sessionSummary);
         
         // Add final completion message with typing animation
         setTimeout(async () => {
@@ -456,12 +498,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         }, 500);
         
       } else {
-        // Continue to next step - update scenario state
+        // Continue to next step - add user message and update scenario state
         setCurrentScenario(prev => prev ? {
           ...prev,
+          conversation: [...prev.conversation, userMessage],
           currentStatement: response.data.nextStatement,
           currentStatementId: response.data.nextStatementId,
-          currentStep: response.data.currentStep
+          currentStep: response.data.currentStep,
+          currentChoices: [] // Clear choices until manager responds
         } : null);
         
         // Add manager's next message with typing animation
@@ -473,8 +517,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             ...prev,
             currentChoices: response.data.nextChoices || []
           } : null);
-          setProcessingChoice(false);
         }
+        setProcessingChoice(false);
       }
       
     } catch (error) {
@@ -484,8 +528,51 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   };
 
+  // Save practice session data to database
+  const savePracticeSessionData = async (sessionSummary: any) => {
+    try {
+      if (!user || !currentScenario) return;
+      
+      // Collect all user choices from the conversation
+      const userChoices = currentScenario.conversation
+        .filter(msg => msg.role === 'user')
+        .map(msg => msg.content);
+      
+      const practiceData = {
+        userId: user.id,
+        managerType: currentScenario.scenario.managerType,
+        scenarioId: currentScenario.scenario.id,
+        selectedChoices: userChoices,
+        score: Math.round(sessionSummary?.averageEvs || 0),
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('Saving practice session data:', practiceData);
+      
+      await api.post('/api/v1/practice/save', practiceData);
+      console.log('Practice session data saved successfully');
+      
+      // Store practice data for feedback integration
+      localStorage.setItem('practice_data', JSON.stringify({
+        sessionSummary,
+        scenarioData: {
+          title: currentScenario.scenario.title,
+          issue: currentScenario.scenario.issue,
+          managerType: currentScenario.scenario.managerType
+        },
+        userChoices,
+        score: practiceData.score
+      }));
+      
+    } catch (error) {
+      console.error('Error saving practice session data:', error);
+      // Don't show error to user as this doesn't affect the practice flow
+    }
+  };
+
   const handlePracticeAgain = () => {
     console.log('Starting new practice session');
+    // Reset all states
     setCurrentScenario(null);
     setFinalReport(false);
     setShowOptions(false);
@@ -496,6 +583,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setCurrentEVSFeedback(null);
     setIsTyping(false);
     setError(null);
+    setLoading(false);
+    
+    // Start new scenario
     loadAndStartScenario();
   };
 
@@ -506,34 +596,114 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setLoading(true);
       console.log('Getting feedback from EVA for session:', currentScenario.sessionId);
       
-      const response = await backendApi.get<any>(
-        `/api/v1/scenarios/${currentScenario.scenario.id}/feedback`,
-        {
-          params: { sessionId: currentScenario.sessionId }
+      // Get the original conversation ID we returned from
+      const originalConversationId = localStorage.getItem('originalConversationId');
+      
+      if (originalConversationId) {
+        // Set up practice to chat integration
+        localStorage.setItem('practice_to_chat', 'true');
+        localStorage.setItem('practice_feedback_simple', `I just completed a practice scenario about ${currentScenario.scenario.issue.toLowerCase()} with a ${currentScenario.scenario.managerType.toLowerCase()} manager. My ethical decision-making score was ${Math.round(currentScenario.sessionSummary?.averageEvs || 0)}/100. Can you provide detailed feedback on my performance?`);
+        
+        // Store detailed practice data for the backend
+        const detailedPrompt = `
+Please analyze this practice session using the EVA Tactic Taxonomy framework:
+
+**Scenario Details:**
+- Title: ${currentScenario.scenario.title}
+- Issue: ${currentScenario.scenario.issue}
+- Manager Type: ${currentScenario.scenario.managerType}
+
+**Performance Summary:**
+- Overall Score: ${Math.round(currentScenario.sessionSummary?.averageEvs || 0)}/100
+- Performance Level: ${currentScenario.sessionSummary?.performanceLevel}
+- Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
+
+**Decision Patterns:**
+${Object.entries(currentScenario.sessionSummary?.tacticCounts || {})
+  .map(([tactic, count]: [string, any]) => `- ${tactic}: ${count} times`)
+  .join('\n')}
+
+**Choice History:**
+${currentScenario.sessionSummary?.choiceHistory.map((choice, index) => 
+  `${index + 1}. ${choice} (Category: ${currentScenario.sessionSummary?.categoryHistory[index]}, EVS: ${currentScenario.sessionSummary?.evsHistory[index]})`
+).join('\n')}
+
+**EVA Tactic Taxonomy Reference:**
+
+🟡 **Soft Resistance Tactics** (Subtle strategies to redirect, delay, or ethically influence):
+- Shifting Scope, Delaying, Documenting Dissent, Reframing
+- Appealing to External Standards, Making It Visible, Adding Friction
+- Creating Alternatives, Redirecting Conversations, Asking Questions
+- Withholding Full Implementation, Testing Loopholes
+
+🔵 **Rhetorical Tactics** (Overt persuasive strategies):
+- **Ethos**: Appealing to Organizational Values, Citing Institutional Authority, Referencing Laws or Regulations
+- **Logos**: Presenting User Data, Referencing Best Practices, Constructing Hypothetical Scenarios, Drawing Analogies
+- **Pathos**: Evoking Empathy, Emphasizing Harm or Risk, Citing Public Backlash, Personal Moral Appeals, Sarcastic Ridicule
+
+Please provide detailed feedback in the following format:
+
+**Summary of Feedback**
+[Brief overview of performance and key insights about their ethical decision-making patterns]
+
+**Detailed Feedback**
+
+### 💪 Strengths
+[What they did well in their ethical decision-making, specifically referencing which tactics they used effectively]
+
+### 📈 Areas for Improvement  
+[Specific areas where they could improve their ethical reasoning, suggesting underutilized tactics from the taxonomy]
+
+### 🧠 Reasoning Process
+[Analysis of their decision-making patterns and thought processes, categorized by soft resistance vs rhetorical approaches]
+
+### 🛠️ Practical Advice
+[Concrete recommendations for future similar situations, suggesting specific tactics from the EVA taxonomy that would be most effective for this type of scenario and manager]
+        `;
+        
+        localStorage.setItem('practice_feedback_prompt', detailedPrompt);
+        localStorage.setItem('force_conversation_id', originalConversationId);
+        
+        console.log('Practice feedback integration set up, navigating to chat...');
+        
+        // Navigate back to the main chat
+        if (onExit) {
+          onExit();
+        } else {
+          window.location.href = '/';
         }
-      );
-      
-      setSessionFeedback(response.data);
-      setShowFeedbackOptions(false);
-      
-      // Add EVA feedback message
-      if (currentScenario) {
-        setCurrentScenario(prev => prev ? {
-          ...prev,
-          conversation: [
-            ...prev.conversation,
-            {
-              role: 'final_evaluation',
-              content: `🎯 **Performance Analysis**\n\n` +
-                      `**Overall Score**: ${response.data.averageEvs?.toFixed(1)}/100 (${response.data.performanceLevel})\n\n` +
-                      `**Decision Patterns**:\n${Object.entries(response.data.tacticCounts || {})
-                        .map(([tactic, count]: [string, any]) => `• ${tactic}: ${count} times`)
-                        .join('\n')}\n\n` +
-                      `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
-                      `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
-            } as FinalEvaluationMessage
-          ]
-        } : null);
+        
+      } else {
+        // Fallback: try to get feedback directly 
+        const response = await backendApi.get<any>(
+          `/api/v1/scenarios/${currentScenario.scenario.id}/feedback`,
+          {
+            params: { sessionId: currentScenario.sessionId }
+          }
+        );
+        
+        setSessionFeedback(response.data);
+        setShowFeedbackOptions(false);
+        
+        // Add EVA feedback message
+        if (currentScenario) {
+          setCurrentScenario(prev => prev ? {
+            ...prev,
+            conversation: [
+              ...prev.conversation,
+              {
+                role: 'final_evaluation',
+                content: `🎯 **Performance Analysis**\n\n` +
+                        `**Overall Score**: ${response.data.averageEvs?.toFixed(1)}/100 (${response.data.performanceLevel})\n\n` +
+                        `**Decision Patterns**:\n${Object.entries(response.data.tacticCounts || {})
+                          .map(([tactic, count]: [string, any]) => `• ${tactic}: ${count} times`)
+                          .join('\n')}\n\n` +
+                        `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
+                        `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
+              } as FinalEvaluationMessage
+            ]
+          } : null);
+        }
       }
       
     } catch (error) {
@@ -668,307 +838,326 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     );
   }
 
-  // Show the current scenario
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-        <div>
-          <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
-          {currentScenario?.scenario && (
-            <h2 className="text-base text-gray-600 dark:text-gray-300">
-              {currentScenario.scenario.issue}
-            </h2>
+  // Safe scenario rendering with error handling
+  try {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <div>
+            <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
+            {currentScenario?.scenario && (
+              <h2 className="text-base text-gray-600 dark:text-gray-300">
+                {currentScenario.scenario.issue || 'Practice Scenario'}
+              </h2>
+            )}
+          </div>
+          {onExit && (
+            <button
+              onClick={handleReturnToChat}
+              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Return to Chat
+            </button>
           )}
         </div>
-        {onExit && (
-          <button
-            onClick={handleReturnToChat}
-            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            Return to Chat
-          </button>
-        )}
-      </div>
 
-      {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="flex space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">Loading scenario...</p>
             </div>
-            <p className="text-gray-600 dark:text-gray-300">Loading scenario...</p>
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
-            {currentScenario?.scenario && (
-              <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
-                <p className="text-sm">
-                  <strong>Issue:</strong> {currentScenario.scenario.issue}
-                </p>
-                <p className="text-sm">
-                  <strong>Manager Type:</strong> {currentScenario.scenario.managerType}
-                </p>
-                <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
-                  {getManagerDescription(currentScenario.scenario.managerType)}
-                </p>
-              </div>
-            )}
+        ) : (
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
+              {currentScenario?.scenario && (
+                <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
+                  <p className="text-sm">
+                    <strong>Issue:</strong> {currentScenario.scenario.issue || 'Unknown'}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Manager Type:</strong> {currentScenario.scenario.managerType || 'Unknown'}
+                  </p>
+                  <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
+                    {getManagerDescription(currentScenario.scenario.managerType)}
+                  </p>
+                </div>
+              )}
 
-            {currentScenario?.conversation && currentScenario.conversation.length > 0 ? (
-              <div className="space-y-2 mb-2">
-                {currentScenario.conversation.map((message, index) => {
-                  if (message.role === 'feedback') {
-                    const feedbackMsg = message as FeedbackMessage;
-                    return (
-                      <div key={index} className="p-2 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-1 text-sm">
-                        <span className="font-semibold">EVS: {feedbackMsg.evs}</span>
-                        {feedbackMsg.category && <span className="ml-2">({feedbackMsg.category})</span>}
-                      </div>
-                    );
-                  }
-
-                  if (message.role === 'final_evaluation') {
-                    return (
-                      <div key={index} className="p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3">
-                        <div className="mb-2 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center">
-                          🎯 EVA Analysis
+              {currentScenario?.conversation && Array.isArray(currentScenario.conversation) && currentScenario.conversation.length > 0 ? (
+                <div className="space-y-2 mb-2">
+                  {currentScenario.conversation.map((message, index) => {
+                    if (message.role === 'feedback') {
+                      const feedbackMsg = message as FeedbackMessage;
+                      return (
+                        <div key={index} className="p-2 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-1 text-sm">
+                          <span className="font-semibold">EVS: {feedbackMsg.evs}</span>
+                          {feedbackMsg.category && <span className="ml-2">({feedbackMsg.category})</span>}
                         </div>
-                        <div className="whitespace-pre-line text-sm">{message.content}</div>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <div key={index} className="mb-2">
-                      {(message.role === 'manager' || message.role === 'user') && (
-                        <div className={message.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start ml-12'}>
-                          <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center`}>
-                            {message.role === 'manager' ? 'Manager' : 'You'}
+                      );
+                    }
+
+                    if (message.role === 'final_evaluation') {
+                      return (
+                        <div key={index} className="p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3">
+                          <div className="mb-2 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center">
+                            🎯 EVA Analysis
                           </div>
-                          <div className={getMessageStyle(message.role)} data-role={message.role}>
-                            {message.role === 'manager' && (
-                              <div className="absolute -left-12 -top-5">
-                                <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
-                                  <img 
-                                    src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
-                                    alt="Manager" 
-                                    className="w-14 h-14 object-cover manager-icon" 
-                                  />
+                          <div className="whitespace-pre-line text-sm">{message.content}</div>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div key={index} className="mb-2">
+                        {(message.role === 'manager' || message.role === 'user') && (
+                          <div className={message.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start ml-12'}>
+                            <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center`}>
+                              {message.role === 'manager' ? 'Manager' : 'You'}
+                            </div>
+                            <div className={getMessageStyle(message.role)} data-role={message.role}>
+                              {message.role === 'manager' && (
+                                <div className="absolute -left-12 -top-5">
+                                  <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                                    <img 
+                                      src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
+                                      alt="Manager" 
+                                      className="w-14 h-14 object-cover manager-icon" 
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            <div className="pl-1">{message.content}</div>
+                              )}
+                              <div className="pl-1">{message.content}</div>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Show typing indicator at the bottom of conversation */}
-                {isTyping && (
-                  <div className="mb-2">
-                    <div className="flex flex-col items-start ml-12">
-                      <div className="mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center">
-                        Manager
+                        )}
                       </div>
-                      <div className="p-3 pl-5 bg-amber-50/70 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-none max-w-[80%] mr-auto relative mt-3">
-                        <div className="absolute -left-12 -top-5">
-                          <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
-                            <img 
-                              src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
-                              alt="Manager" 
-                              className="w-14 h-14 object-cover manager-icon" 
-                            />
-                          </div>
+                    );
+                  })}
+
+                  {/* Show typing indicator at the bottom of conversation */}
+                  {isTyping && (
+                    <div className="mb-2">
+                      <div className="flex flex-col items-start ml-12">
+                        <div className="mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center">
+                          Manager
                         </div>
-                        <div className="pl-1 flex items-center space-x-1">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                        <div className="p-3 pl-5 bg-amber-50/70 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-none max-w-[80%] mr-auto relative mt-3">
+                          <div className="absolute -left-12 -top-5">
+                            <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                              <img 
+                                src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
+                                alt="Manager" 
+                                className="w-14 h-14 object-cover manager-icon" 
+                              />
+                            </div>
+                          </div>
+                          <div className="pl-1 flex items-center space-x-1">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
-              </div>
-            ) : null}
-
-            {/* Show final summary if scenario is complete */}
-            {finalReport && currentScenario?.sessionSummary && (
-              <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
-                <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
-                
-                {/* Total Score Display */}
-                <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {currentScenario.sessionSummary.averageEvs.toFixed(1)}/100
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Total EVS Score</div>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    currentScenario.sessionSummary.averageEvs >= 80 
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                      : currentScenario.sessionSummary.averageEvs >= 60
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                  }`}>
-                    {currentScenario.sessionSummary.performanceLevel}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                  <div>
-                    <p><strong>Scenario:</strong> {currentScenario.sessionSummary.scenarioTitle}</p>
-                    <p><strong>Issue Type:</strong> {currentScenario.sessionSummary.issue}</p>
-                  </div>
-                  <div>
-                    <p><strong>Total Steps:</strong> {currentScenario.sessionSummary.choiceHistory.length}</p>
-                    <p><strong>Manager Type:</strong> {currentScenario.sessionSummary.managerType}</p>
-                  </div>
-                </div>
-
-                {/* Decision Pattern Summary */}
-                <div className="mb-4 p-3 bg-white/50 dark:bg-gray-800/30 rounded-lg">
-                  <h4 className="font-medium text-sm mb-2">Decision Patterns:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(currentScenario.sessionSummary.tacticCounts || {}).map(([tactic, count]: [string, any]) => (
-                      <span key={tactic} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
-                        {tactic}: {count}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Always show feedback options when session is complete */}
-                <div className="flex flex-col space-y-2">
-                  <button
-                    onClick={handleGetFeedbackFromEVA}
-                    disabled={loading}
-                    className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
-                  >
-                    <span>🤖</span>
-                    <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
-                  </button>
+                  )}
                   
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={handlePracticeAgain}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    >
-                      🔄 Practice Again
-                    </button>
-                    {onExit && (
-                      <button
-                        onClick={handleReturnToChat}
-                        className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                      >
-                        💬 Return to Chat
-                      </button>
-                    )}
-                  </div>
+                  <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
                 </div>
-              </div>
-            )}
-          </div>
+              ) : null}
 
-          {/* Show choices if available and scenario is not complete */}
-          {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
-            <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
-              
-              {/* Animated EVS Feedback */}
-              {currentEVSFeedback && (
-                <div className={`mb-3 p-3 rounded-lg transition-all duration-500 ease-in-out transform ${
-                  currentEVSFeedback.show 
-                    ? 'opacity-100 translate-y-0 scale-100' 
-                    : 'opacity-0 translate-y-2 scale-95'
-                } ${
-                  currentEVSFeedback.score >= 70 
-                    ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
-                    : currentEVSFeedback.score >= 40
-                    ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
-                    : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium">
-                        {currentEVSFeedback.message}
-                      </span>
+              {/* Show final summary if scenario is complete */}
+              {finalReport && (
+                <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
+                  
+                  {/* Total Score Display */}
+                  <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                      {finalScore}/100
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-sm font-bold ${
-                        currentEVSFeedback.score >= 70 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : currentEVSFeedback.score >= 40
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        EVS: {currentEVSFeedback.score}
-                      </span>
-                      <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
-                        {currentEVSFeedback.category}
-                      </span>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Total EVS Score</div>
+                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      finalScore >= 80 
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                        : finalScore >= 60
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                    }`}>
+                      {finalScore >= 80 ? 'Excellent' : finalScore >= 60 ? 'Good' : 'Needs Improvement'}
+                    </div>
+                  </div>
+                  
+                  {currentScenario?.sessionSummary && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                        <div>
+                          <p><strong>Scenario:</strong> {currentScenario.sessionSummary.scenarioTitle || 'Unknown'}</p>
+                          <p><strong>Issue Type:</strong> {currentScenario.sessionSummary.issue || 'Unknown'}</p>
+                        </div>
+                        <div>
+                          <p><strong>Total Steps:</strong> {currentScenario.sessionSummary.choiceHistory?.length || 0}</p>
+                          <p><strong>Manager Type:</strong> {currentScenario.sessionSummary.managerType || 'Unknown'}</p>
+                        </div>
+                      </div>
+
+                      {/* Simplified Decision Pattern Summary */}
+                      <div className="mb-4 p-3 bg-white/50 dark:bg-gray-800/30 rounded-lg">
+                        <h4 className="font-medium text-sm mb-2">Decision Patterns:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {currentScenario.sessionSummary.tacticCounts && Object.entries(currentScenario.sessionSummary.tacticCounts).map(([tactic, count]: [string, any]) => (
+                            <span key={tactic} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                              {tactic}: {count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Always show feedback options when session is complete */}
+                  <div className="flex flex-col space-y-2">
+                    <button
+                      onClick={handleGetFeedbackFromEVA}
+                      disabled={loading}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                    >
+                      <span>🤖</span>
+                      <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
+                    </button>
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handlePracticeAgain}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        🔄 Practice Again
+                      </button>
+                      {onExit && (
+                        <button
+                          onClick={handleReturnToChat}
+                          className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          💬 Return to Chat
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
-
-              <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
-                processingChoice || isTyping 
-                  ? 'text-gray-400 dark:text-gray-500' 
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}>
-                {processingChoice 
-                  ? 'Processing your choice...' 
-                  : isTyping 
-                  ? 'Manager is responding...'
-                  : 'How do you respond?'
-                }
-              </h3>
-              <div className="space-y-1.5 mb-1">
-                {currentScenario.currentChoices.map((choice, index) => (
-                  <button
-                    key={index}
-                    className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
-                      processingChoice || isTyping
-                        ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
-                        : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
-                    }`}
-                    onClick={() => handleChoice(index)}
-                    disabled={processingChoice || isTyping}
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="flex-1">{choice.text}</span>
-                      <span className={`ml-2 text-xs px-2 py-1 rounded transition-colors duration-300 ${
-                        processingChoice || isTyping
-                          ? 'bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500'
-                          : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
-                      }`}>
-                        {choice.category}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
-          {error}
-        </div>
-      )}
-    </div>
-  );
+            {/* Show choices if available and scenario is not complete */}
+            {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
+              <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
+                
+                {/* Animated EVS Feedback */}
+                {currentEVSFeedback && (
+                  <div className={`mb-3 p-3 rounded-lg transition-all duration-500 ease-in-out transform ${
+                    currentEVSFeedback.show 
+                      ? 'opacity-100 translate-y-0 scale-100' 
+                      : 'opacity-0 translate-y-2 scale-95'
+                  } ${
+                    currentEVSFeedback.score >= 70 
+                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                      : currentEVSFeedback.score >= 40
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium">
+                          {currentEVSFeedback.message}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm font-bold ${
+                          currentEVSFeedback.score >= 70 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : currentEVSFeedback.score >= 40
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          EVS: {currentEVSFeedback.score}
+                        </span>
+                        <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
+                          {currentEVSFeedback.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
+                  processingChoice || isTyping 
+                    ? 'text-gray-400 dark:text-gray-500' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}>
+                  {processingChoice 
+                    ? 'Processing your choice...' 
+                    : isTyping 
+                    ? 'Manager is responding...'
+                    : 'How do you respond?'
+                  }
+                </h3>
+                <div className="space-y-1.5 mb-1">
+                  {currentScenario.currentChoices.map((choice, index) => (
+                    <button
+                      key={index}
+                      className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
+                        processingChoice || isTyping
+                          ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                          : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
+                      }`}
+                      onClick={() => handleChoice(index)}
+                      disabled={processingChoice || isTyping}
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className="flex-1">{choice.text}</span>
+                        <span className={`ml-2 text-xs px-2 py-1 rounded transition-colors duration-300 ${
+                          processingChoice || isTyping
+                            ? 'bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500'
+                            : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                        }`}>
+                          {choice.category}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering PracticeModule:', error);
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-4">
+        <div className="text-red-500 mb-4">⚠️ An error occurred. Please refresh and try again.</div>
+        <button
+          onClick={loadAndStartScenario}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 };
 
 export default PracticeModule; 
