@@ -1,13 +1,13 @@
 package com.ego.ethicai.controller;
 
-import com.ego.ethicai.dto.practice.PracticeSessionRequestDTO;
-import com.ego.ethicai.dto.practice.PracticeSessionResponseDTO;
+import com.ego.ethicai.dto.practice.*;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.enums.AccountTypes;
 import com.ego.ethicai.security.CurrentUser;
 import com.ego.ethicai.security.CustomUserDetails;
 import com.ego.ethicai.service.PracticeSessionService;
 import com.ego.ethicai.service.UserService;
+import com.ego.ethicai.service.ScenarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class PracticeController {
 
     private final PracticeSessionService practiceSessionService;
     private final UserService userService;
+    private final ScenarioService scenarioService;
 
     @PostMapping("/save")
     public ResponseEntity<PracticeSessionResponseDTO> savePracticeSession(
@@ -97,6 +98,32 @@ public class PracticeController {
         } catch (Exception e) {
             log.error("Error retrieving all practice sessions: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/admin/practice-sessions/{sessionId}/selections")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<SelectionDataDTO>> getUserSelections(@PathVariable UUID sessionId) {
+        try {
+            log.info("Retrieving user selections for session: {}", sessionId);
+            List<SelectionDataDTO> selections = practiceSessionService.getUserSelections(sessionId);
+            return ResponseEntity.ok(selections);
+        } catch (Exception e) {
+            log.error("Error retrieving user selections for session {}: {}", sessionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/admin/practice-sessions/{sessionId}/decision-tree")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<DecisionTreeDataDTO> getDecisionTree(@PathVariable UUID sessionId) {
+        try {
+            log.info("Retrieving decision tree for session: {}", sessionId);
+            DecisionTreeDataDTO decisionTree = practiceSessionService.getDecisionTree(sessionId);
+            return ResponseEntity.ok(decisionTree);
+        } catch (Exception e) {
+            log.error("Error retrieving decision tree for session {}: {}", sessionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 } 

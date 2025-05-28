@@ -1,7 +1,6 @@
 package com.ego.ethicai.service;
 
-import com.ego.ethicai.dto.practice.PracticeSessionRequestDTO;
-import com.ego.ethicai.dto.practice.PracticeSessionResponseDTO;
+import com.ego.ethicai.dto.practice.*;
 import com.ego.ethicai.entity.PracticeSession;
 
 import java.util.List;
@@ -12,4 +11,6 @@ public interface PracticeSessionService {
     List<PracticeSessionResponseDTO> getPracticeSessionsByUserId(UUID userId);
     PracticeSession getPracticeSessionEntityById(UUID id);
     List<PracticeSessionResponseDTO> getAllPracticeSessions();
+    List<SelectionDataDTO> getUserSelections(UUID sessionId);
+    DecisionTreeDataDTO getDecisionTree(UUID sessionId);
 } 

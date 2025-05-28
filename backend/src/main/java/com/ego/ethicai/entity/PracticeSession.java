@@ -34,9 +34,12 @@ public class PracticeSession {
     @Column(name = "scenario_id")
     private String scenarioId;
 
-    @ElementCollection
-    @CollectionTable(name = "practice_session_choices", joinColumns = @JoinColumn(name = "practice_session_id"))
-    @Column(name = "choice")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "practice_session_id")
+    private List<PracticeSessionChoice> practiceSessionChoices;
+
+    // Transient field for backward compatibility
+    @Transient
     private List<String> selectedChoices;
 
     @Column(name = "created_at", nullable = false)

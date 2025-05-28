@@ -39,57 +39,102 @@ interface PracticeSession {
   score?: number;
 }
 
+// Types for decision tree data
+interface DecisionTreeStep {
+  step: number;
+  managerStatement: string;
+  userChoice: string;
+  alternatives: {
+    text: string;
+    tactic: string;
+    evs: number;
+  }[];
+  chosenIndex: number;
+}
+
+interface DecisionTreeData {
+  scenario: string;
+  steps: DecisionTreeStep[];
+}
+
 // Component for viewing session details
 const SessionDetailsModal: React.FC<{
   session: PracticeSession | null;
   onClose: () => void;
 }> = ({ session, onClose }) => {
   const [activeTab, setActiveTab] = useState<'selections' | 'tree'>('selections');
+  const [decisionTreeData, setDecisionTreeData] = useState<DecisionTreeData | null>(null);
+  const [loadingDecisionTree, setLoadingDecisionTree] = useState(false);
+  const [selectionData, setSelectionData] = useState<any[]>([]);
+  const [loadingSelections, setLoadingSelections] = useState(false);
+
+  // Function to fetch user selection details from backend
+  const fetchSelectionData = async (sessionId: string) => {
+    setLoadingSelections(true);
+    try {
+      const response = await fetch(`/api/v1/practice/admin/practice-sessions/${sessionId}/selections`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch selection data');
+      }
+
+      const data = await response.json();
+      setSelectionData(data);
+    } catch (error) {
+      console.error('Error fetching selection data:', error);
+      setSelectionData([]);
+    } finally {
+      setLoadingSelections(false);
+    }
+  };
+
+  // Function to fetch decision tree data from backend
+  const fetchDecisionTreeData = async (sessionId: string, scenarioId: string) => {
+    setLoadingDecisionTree(true);
+    try {
+      // Make actual API call to get decision tree data
+      const response = await fetch(`/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch decision tree data');
+      }
+
+      const decisionTreeData: DecisionTreeData = await response.json();
+      setDecisionTreeData(decisionTreeData);
+    } catch (error) {
+      console.error('Error fetching decision tree data:', error);
+      // For now, show an error message - in production, you might want to show a user-friendly error
+      setDecisionTreeData(null);
+    } finally {
+      setLoadingDecisionTree(false);
+    }
+  };
+
+  // Load selection data when tab changes to 'selections'
+  useEffect(() => {
+    if (activeTab === 'selections' && session && selectionData.length === 0) {
+      fetchSelectionData(session.id);
+    }
+  }, [activeTab, session, selectionData.length]);
+
+  // Load decision tree data when tab changes to 'tree'
+  useEffect(() => {
+    if (activeTab === 'tree' && session && session.scenarioId && !decisionTreeData) {
+      fetchDecisionTreeData(session.id, session.scenarioId);
+    }
+  }, [activeTab, session, decisionTreeData]);
 
   if (!session) return null;
-
-  // Mock decision tree data - in a real implementation, this would come from the backend
-  const mockDecisionTree = {
-    scenario: "Location Data Collection",
-    steps: [
-      {
-        step: 1,
-        managerStatement: "We need to collect user location data for our new feature.",
-        userChoice: session.selectedChoices[0] || "Unknown choice",
-        alternatives: [
-          { text: "Let's review our privacy policy first", tactic: "Appealing to External Standards", evs: 85 },
-          { text: "What specific data do we actually need?", tactic: "Asking Questions", evs: 78 },
-          { text: "Can we make this opt-in for users?", tactic: "Creating Alternatives", evs: 82 },
-          { text: "Sure, let's implement it right away", tactic: "None", evs: 25 }
-        ],
-        chosenIndex: 0 // This would be determined by matching the user's choice
-      },
-      {
-        step: 2,
-        managerStatement: "The policy is fine, everyone does this kind of data collection.",
-        userChoice: session.selectedChoices[1] || "Unknown choice",
-        alternatives: [
-          { text: "Can we get user consent for location tracking?", tactic: "Making It Visible", evs: 80 },
-          { text: "What about users who don't want to be tracked?", tactic: "Evoking Empathy", evs: 75 },
-          { text: "Let's see what competitors actually do", tactic: "Referencing Best Practices", evs: 70 },
-          { text: "You're right, let's proceed", tactic: "None", evs: 20 }
-        ],
-        chosenIndex: 1
-      },
-      {
-        step: 3,
-        managerStatement: "Those users can just not use the feature.",
-        userChoice: session.selectedChoices[2] || "Unknown choice",
-        alternatives: [
-          { text: "That could limit our user base significantly", tactic: "Presenting User Data", evs: 85 },
-          { text: "What if we made location optional but beneficial?", tactic: "Creating Alternatives", evs: 88 },
-          { text: "We should document this decision process", tactic: "Documenting Dissent", evs: 65 },
-          { text: "That's a reasonable approach", tactic: "None", evs: 30 }
-        ],
-        chosenIndex: 1
-      }
-    ]
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -154,73 +199,86 @@ const SessionDetailsModal: React.FC<{
             <div className="space-y-4">
               <h4 className="text-lg font-medium mb-4">Selected Choices Visualization</h4>
               
-              {/* Choices Timeline */}
-              <div className="space-y-6">
-                {session.selectedChoices.map((choice, index) => (
-                  <div key={index} className="relative">
-                    {/* Timeline connector */}
-                    {index < session.selectedChoices.length - 1 && (
-                      <div className="absolute left-6 top-16 w-0.5 h-8 bg-blue-400"></div>
-                    )}
-                    
-                    <div className="flex items-start space-x-4">
-                      {/* Step indicator */}
-                      <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {index + 1}
-                      </div>
-                      
-                      {/* Choice content */}
-                      <div className="flex-1 bg-gray-800 rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="font-medium text-blue-300">Choice {index + 1}</h5>
-                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                            Step {index + 1}
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm leading-relaxed">
-                          "{choice}"
-                        </p>
+              {loadingSelections ? (
+                <div className="flex justify-center items-center p-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <span className="ml-3 text-gray-300">Loading user selections...</span>
+                </div>
+              ) : (
+                <>
+                  {/* Choices Timeline */}
+                  <div className="space-y-6">
+                  {session.selectedChoices.slice(0, 5).map((choice, index) => {
+                    const selectionInfo = selectionData[index] || {};
+                    return (
+                      <div key={index} className="relative">
+                        {/* Timeline connector */}
+                        {index < Math.min(session.selectedChoices.length, 5) - 1 && (
+                          <div className="absolute left-6 top-16 w-0.5 h-8 bg-blue-400"></div>
+                        )}
                         
-                        {/* Mock EVS score for each choice */}
-                        <div className="mt-3 flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-400">EVS Score:</span>
-                            <span className={`text-sm font-semibold ${
-                              (70 + Math.random() * 20) > 75 ? 'text-green-400' : 'text-yellow-400'
-                            }`}>
-                              {Math.round(70 + Math.random() * 20)}/100
-                            </span>
+                        <div className="flex items-start space-x-4">
+                          {/* Step indicator */}
+                          <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {index + 1}
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-400">Tactic:</span>
-                            <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
-                              {['Asking Questions', 'Creating Alternatives', 'Making It Visible', 'Evoking Empathy'][index % 4]}
-                            </span>
+                          
+                          {/* Choice content */}
+                          <div className="flex-1 bg-gray-800 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h5 className="font-medium text-blue-300">Choice {index + 1}</h5>
+                              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                                Step {index + 1}
+                              </span>
+                            </div>
+                            <p className="text-gray-300 text-sm leading-relaxed">
+                              "{choice}"
+                            </p>
+                            
+                            {/* Real EVS score and tactic data */}
+                            <div className="mt-3 flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-400">EVS Score:</span>
+                                <span className={`text-sm font-semibold ${
+                                  selectionInfo.evs >= 75 ? 'text-green-400' : 
+                                  selectionInfo.evs >= 50 ? 'text-yellow-400' : 'text-red-400'
+                                }`}>
+                                  {selectionInfo.evs || 'N/A'}/100
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-400">Tactic:</span>
+                                <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
+                                  {selectionInfo.tactic || 'Unknown'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    );
+                  })}
+                  </div>
+
+                  {/* Summary Statistics */}
+                  <div className="mt-8 grid grid-cols-3 gap-4">
+                    <div className="bg-gray-800 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-400">{Math.min(session.selectedChoices.length, 5)}</div>
+                      <div className="text-sm text-gray-400">Total Choices</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-green-400">{session.score || 'N/A'}</div>
+                      <div className="text-sm text-gray-400">Final Score</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-400">
+                        {session.score && session.selectedChoices.length > 0 ? Math.round(session.score / Math.min(session.selectedChoices.length, 5)) : 'N/A'}
+                      </div>
+                      <div className="text-sm text-gray-400">Avg per Choice</div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Summary Statistics */}
-              <div className="mt-8 grid grid-cols-3 gap-4">
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-400">{session.selectedChoices.length}</div>
-                  <div className="text-sm text-gray-400">Total Choices</div>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-green-400">{session.score || 'N/A'}</div>
-                  <div className="text-sm text-gray-400">Final Score</div>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-400">
-                    {session.score ? Math.round(session.score / session.selectedChoices.length) : 'N/A'}
-                  </div>
-                  <div className="text-sm text-gray-400">Avg per Choice</div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           )}
 
@@ -235,139 +293,182 @@ const SessionDetailsModal: React.FC<{
                 </p>
               </div>
               
-              <div className="space-y-8">
-                {mockDecisionTree.steps.map((step, stepIndex) => (
-                  <div key={stepIndex} className="relative">
-                    {/* Step connector */}
-                    {stepIndex < mockDecisionTree.steps.length - 1 && (
-                      <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0.5 h-8 bg-gray-600"></div>
-                    )}
-                    
-                    <div className="bg-gray-800 rounded-lg p-6">
-                      {/* Step header */}
-                      <div className="text-center mb-4">
-                        <span className="inline-block bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">
-                          Step {step.step}
-                        </span>
-                      </div>
-
-                      {/* Manager statement */}
-                      <div className="mb-6 text-center">
-                        <div className="inline-block bg-amber-900/30 border border-amber-700 rounded-lg p-4 max-w-2xl">
-                          <div className="flex items-center justify-center mb-2">
-                            <span className="text-amber-400 font-medium">Manager Says:</span>
+              {loadingDecisionTree ? (
+                <div className="flex justify-center items-center p-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <span className="ml-3 text-gray-300">Loading decision tree...</span>
+                </div>
+              ) : !decisionTreeData ? (
+                <div className="text-center p-8 text-gray-400">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-300 mb-2">Decision Tree Not Available</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    The decision tree data for this session could not be loaded. This may be due to:
+                  </p>
+                  <ul className="text-sm text-gray-500 text-left max-w-md mx-auto space-y-1">
+                    <li>• Session data is incomplete</li>
+                    <li>• Backend API is not yet implemented</li>
+                    <li>• Network connectivity issues</li>
+                  </ul>
+                  <button
+                    onClick={() => session && session.scenarioId && fetchDecisionTreeData(session.id, session.scenarioId)}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-8">
+                    {decisionTreeData.steps.map((step, stepIndex) => (
+                      <div key={stepIndex} className="relative">
+                        {/* Step connector */}
+                        {stepIndex < decisionTreeData.steps.length - 1 && (
+                          <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0.5 h-8 bg-gray-600"></div>
+                        )}
+                        
+                        <div className="bg-gray-800 rounded-lg p-6">
+                          {/* Step header */}
+                          <div className="text-center mb-4">
+                            <span className="inline-block bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">
+                              Step {step.step}
+                            </span>
                           </div>
-                          <p className="text-amber-200 text-sm">"{step.managerStatement}"</p>
-                        </div>
-                      </div>
 
-                      {/* Choice options */}
-                      <div className="mb-4">
-                        <h5 className="text-center text-gray-300 text-sm mb-4">Available Response Options:</h5>
-                        <div className="grid grid-cols-2 gap-4">
-                          {step.alternatives.map((alt, altIndex) => (
-                            <div
-                              key={altIndex}
-                              className={`relative p-4 rounded-lg border-2 transition-all ${
-                                altIndex === step.chosenIndex
-                                  ? 'bg-green-900/30 border-green-400 shadow-lg shadow-green-500/20'
-                                  : alt.evs < 40
-                                  ? 'bg-red-900/20 border-red-600/50'
-                                  : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'
-                              }`}
-                            >
-                              {/* Chosen indicator */}
-                              {altIndex === step.chosenIndex && (
-                                <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
-                                  ✓
-                                </div>
-                              )}
-                              
-                              <div className="space-y-3">
-                                <p className={`text-sm ${
-                                  altIndex === step.chosenIndex ? 'text-green-200 font-medium' : 'text-gray-300'
-                                }`}>
-                                  "{alt.text}"
-                                </p>
-                                
-                                <div className="flex justify-between items-center">
-                                  <span className={`text-xs px-2 py-1 rounded ${
-                                    alt.tactic === 'None' 
-                                      ? 'bg-red-900/50 text-red-300'
-                                      : altIndex === step.chosenIndex
-                                      ? 'bg-green-900/50 text-green-300'
-                                      : 'bg-gray-600 text-gray-300'
-                                  }`}>
-                                    {alt.tactic}
-                                  </span>
-                                  
-                                  <span className={`text-sm font-semibold ${
-                                    alt.evs >= 80 ? 'text-green-400' :
-                                    alt.evs >= 60 ? 'text-yellow-400' :
-                                    'text-red-400'
-                                  }`}>
-                                    {alt.evs} EVS
-                                  </span>
-                                </div>
+                          {/* Manager statement */}
+                          <div className="mb-6 text-center">
+                            <div className="inline-block bg-amber-900/30 border border-amber-700 rounded-lg p-4 max-w-2xl">
+                              <div className="flex items-center justify-center mb-2">
+                                <span className="text-amber-400 font-medium">Manager Says:</span>
                               </div>
+                              <p className="text-amber-200 text-sm">"{step.managerStatement}"</p>
+                            </div>
+                          </div>
+
+                          {/* Choice options */}
+                          <div className="mb-4">
+                            <h5 className="text-center text-gray-300 text-sm mb-4">Available Response Options:</h5>
+                            <div className="grid grid-cols-1 gap-3">
+                              {step.alternatives.map((alt, altIndex) => (
+                                <div
+                                  key={altIndex}
+                                  className={`relative p-4 rounded-lg border-2 transition-all ${
+                                    altIndex === step.chosenIndex
+                                      ? 'bg-green-900/30 border-green-400 shadow-lg shadow-green-500/20'
+                                      : alt.evs < 40
+                                      ? 'bg-red-900/20 border-red-600/50'
+                                      : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'
+                                  }`}
+                                >
+                                  {/* Chosen indicator */}
+                                  {altIndex === step.chosenIndex && (
+                                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                                      ✓
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex justify-between items-start">
+                                    <div className="flex-1 pr-4">
+                                      <div className="flex items-start mb-2">
+                                        <span className="inline-block w-6 h-6 bg-gray-600 text-white rounded-full text-xs font-bold flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                          {altIndex + 1}
+                                        </span>
+                                        <p className={`text-sm ${
+                                          altIndex === step.chosenIndex ? 'text-green-200 font-medium' : 'text-gray-300'
+                                        }`}>
+                                          "{alt.text}"
+                                        </p>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-end space-y-2">
+                                      <span className={`text-sm font-semibold ${
+                                        alt.evs >= 80 ? 'text-green-400' :
+                                        alt.evs >= 60 ? 'text-yellow-400' :
+                                        'text-red-400'
+                                      }`}>
+                                        {alt.evs} EVS
+                                      </span>
+                                      
+                                      <span className={`text-xs px-2 py-1 rounded ${
+                                        alt.tactic === 'None' 
+                                          ? 'bg-red-900/50 text-red-300'
+                                          : altIndex === step.chosenIndex
+                                          ? 'bg-green-900/50 text-green-300'
+                                          : 'bg-gray-600 text-gray-300'
+                                      }`}>
+                                        {alt.tactic}
+                                      </span>
+                                    </div>
+                                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Path Analysis */}
+                  <div className="bg-gray-800 rounded-lg p-6 mt-8">
+                    <h5 className="text-lg font-medium mb-4 text-center">Session Summary</h5>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <h6 className="font-medium text-blue-300 mb-3">Tactics Used</h6>
+                        <div className="space-y-2">
+                          {['Asking Questions', 'Creating Alternatives', 'Making It Visible'].map((tactic, i) => (
+                            <div key={i} className="flex justify-between items-center">
+                              <span className="text-sm text-gray-300">{tactic}</span>
+                              <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
+                                {Math.floor(Math.random() * 3) + 1}x
+                              </span>
                             </div>
                           ))}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Path Analysis */}
-              <div className="bg-gray-800 rounded-lg p-6 mt-8">
-                <h5 className="text-lg font-medium mb-4 text-center">Session Summary</h5>
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <h6 className="font-medium text-blue-300 mb-3">Tactics Used</h6>
-                    <div className="space-y-2">
-                      {['Asking Questions', 'Creating Alternatives', 'Making It Visible'].map((tactic, i) => (
-                        <div key={i} className="flex justify-between items-center">
-                          <span className="text-sm text-gray-300">{tactic}</span>
-                          <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
-                            {Math.floor(Math.random() * 3) + 1}x
-                          </span>
+                      
+                      <div>
+                        <h6 className="font-medium text-purple-300 mb-3">Performance Analysis</h6>
+                        <div className="space-y-2">
+                          <div className="text-sm text-gray-300">
+                            <span>Best possible path: </span>
+                            <span className="text-green-400 font-semibold">
+                              {Math.max(...decisionTreeData.steps.flatMap(s => s.alternatives.map(a => a.evs)))} EVS
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            <span>Worst possible path: </span>
+                            <span className="text-red-400 font-semibold">
+                              {Math.min(...decisionTreeData.steps.flatMap(s => s.alternatives.map(a => a.evs)))} EVS
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            <span>User achieved: </span>
+                            <span className="text-blue-400 font-semibold">{session.score || 'N/A'} EVS</span>
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            <span>Performance: </span>
+                            <span className={`font-semibold ${
+                              session.score && session.score >= 75 ? 'text-green-400' :
+                              session.score && session.score >= 50 ? 'text-yellow-400' :
+                              'text-red-400'
+                            }`}>
+                              {session.score && session.score >= 75 ? 'Strong' :
+                               session.score && session.score >= 50 ? 'Moderate' :
+                               'Needs Improvement'}
+                            </span>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h6 className="font-medium text-purple-300 mb-3">Performance Analysis</h6>
-                    <div className="space-y-2">
-                      <div className="text-sm text-gray-300">
-                        <span>Best possible path: </span>
-                        <span className="text-green-400 font-semibold">88 EVS</span>
-                      </div>
-                      <div className="text-sm text-gray-300">
-                        <span>Worst possible path: </span>
-                        <span className="text-red-400 font-semibold">25 EVS</span>
-                      </div>
-                      <div className="text-sm text-gray-300">
-                        <span>User achieved: </span>
-                        <span className="text-blue-400 font-semibold">{session.score || 'N/A'} EVS</span>
-                      </div>
-                      <div className="text-sm text-gray-300">
-                        <span>Performance: </span>
-                        <span className={`font-semibold ${
-                          session.score && session.score >= 75 ? 'text-green-400' :
-                          session.score && session.score >= 50 ? 'text-yellow-400' :
-                          'text-red-400'
-                        }`}>
-                          {session.score && session.score >= 75 ? 'Strong' :
-                           session.score && session.score >= 50 ? 'Moderate' :
-                           'Needs Improvement'}
-                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           )}
         </div>

@@ -464,10 +464,12 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 8); // 8 = ~4 conversation pairs + user choice
       
       if (shouldComplete) {
-        // Scenario is complete - add user message and finalize
+        // Scenario is complete - add user message FIRST, then finalize
+        const updatedConversation = [...currentScenario.conversation, userMessage];
+        
         setCurrentScenario(prev => prev ? {
           ...prev,
-          conversation: [...prev.conversation, userMessage],
+          conversation: updatedConversation,
           isComplete: true,
           currentChoices: [], // Clear choices when complete
           sessionSummary: response.data.sessionSummary || {
@@ -493,8 +495,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         console.log('📊 Session summary:', response.data.sessionSummary);
         
         // Save practice session data to database ONLY ONCE when scenario completes
+        // Use the updated conversation that includes the final user choice
         if (!sessionSaved) {
-          await savePracticeSessionData(response.data.sessionSummary);
+          await savePracticeSessionData(response.data.sessionSummary, updatedConversation);
         }
         
         // Add final completion message with typing animation
@@ -535,12 +538,15 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   };
 
   // Save practice session data to database
-  const savePracticeSessionData = async (sessionSummary: any) => {
+  const savePracticeSessionData = async (sessionSummary: any, conversation?: Message[]) => {
     try {
       if (!user || !currentScenario) return;
       
+      // Use provided conversation or fall back to currentScenario.conversation
+      const conversationToUse = conversation || currentScenario.conversation;
+      
       // Get full conversation data for local storage/debugging
-      const conversationData = currentScenario.conversation.map((msg, index) => ({
+      const conversationData = conversationToUse.map((msg, index) => ({
         stepNumber: index + 1,
         role: msg.role,
         content: msg.content
@@ -548,9 +554,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       
       // Collect user choices with context for local storage/debugging
       const detailedChoices = [];
-      currentScenario.conversation.forEach((msg, index) => {
+      conversationToUse.forEach((msg, index) => {
         if (msg.role === 'user') {
-          const previousManagerMsg = currentScenario.conversation
+          const previousManagerMsg = conversationToUse
             .slice(0, index)
             .reverse()
             .find(m => m.role === 'manager');
@@ -567,7 +573,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         userId: user.id,
         managerType: currentScenario.scenario.managerType,
         scenarioId: currentScenario.scenario.id,
-        selectedChoices: currentScenario.conversation
+        selectedChoices: conversationToUse
           .filter(msg => msg.role === 'user')
           .map(msg => msg.content),
         timestamp: new Date().toISOString(), // This gets converted to LocalDateTime on server
@@ -890,12 +896,12 @@ Please provide detailed feedback in the following format:
                 <span>ℹ️</span>
                 <span>Argumentation Tactics</span>
               </button>
-              <button
-                onClick={handleReturnToChat}
-                className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                Return to Chat
-              </button>
+            <button
+              onClick={handleReturnToChat}
+              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Return to Chat
+            </button>
             </div>
           )}
         </div>
@@ -960,12 +966,12 @@ Please provide detailed feedback in the following format:
             >
               <span>Argumentation Tactics</span>
             </button>
-            <button
-              onClick={handleReturnToChat}
-              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              Return to Chat
-            </button>
+          <button
+            onClick={handleReturnToChat}
+            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            Return to Chat
+          </button>
           </div>
         )}
       </div>
@@ -1065,19 +1071,19 @@ Please provide detailed feedback in the following format:
                                 className="w-14 h-14 object-cover manager-icon" 
                               />
               </div>
-                          </div>
+              </div>
                           <div className="pl-1 flex items-center space-x-1">
                             <div className="flex space-x-1">
                               <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
                               <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                               <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                            </div>
+          </div>
+                              </div>
                           </div>
-                        </div>
-                      </div>
+                </div>
               </div>
             )}
-                  
+
                   <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
           </div>
               ) : null}
@@ -1094,7 +1100,7 @@ Please provide detailed feedback in the following format:
                     </div>
                     <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total EVS Score</div>
                     <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      finalScore >= 80 
+                    finalScore >= 80 
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                         : finalScore >= 60
                         ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
@@ -1163,10 +1169,10 @@ Please provide detailed feedback in the following format:
                         <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
                           {currentEVSFeedback.category}
                         </span>
-                      </div>
-                    </div>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
                 <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
                   processingChoice || isTyping 

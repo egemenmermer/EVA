@@ -268,6 +268,15 @@ public class ScenarioServiceImpl implements ScenarioService {
         return generateSessionSummary(session, scenario);
     }
     
+    @Override
+    public JsonNode getScenarioData(String scenarioId) {
+        JsonNode scenario = loadScenario(scenarioId);
+        if (scenario == null) {
+            throw new RuntimeException("Scenario not found: " + scenarioId);
+        }
+        return scenario;
+    }
+    
     private JsonNode loadScenario(String scenarioId) {
         return scenarioCache.computeIfAbsent(scenarioId, id -> {
             try {

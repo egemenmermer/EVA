@@ -26,8 +26,11 @@ public class PracticeSessionRequestDTO {
     
     private String scenarioId;
     
-    @NotEmpty(message = "Selected choices are required")
+    // Legacy field for backward compatibility
     private List<String> selectedChoices;
+    
+    // New field with detailed choice information
+    private List<PracticeChoiceDTO> choices;
     
     private LocalDateTime timestamp;
 

@@ -1513,7 +1513,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       console.log('Found practice_to_chat flag on mount, processing feedback request');
       // Set flag immediately to prevent duplicate processing
       isProcessingFeedback.current = true;
-      handlePracticeFeedbackRequest();
+        handlePracticeFeedbackRequest();
     }
     
     return () => {

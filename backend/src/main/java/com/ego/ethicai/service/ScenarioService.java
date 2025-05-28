@@ -2,6 +2,7 @@ package com.ego.ethicai.service;
 
 import com.ego.ethicai.dto.scenario.ScenarioSessionResponseDTO;
 import com.ego.ethicai.dto.scenario.ScenarioChoiceResponseDTO;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.Map;
@@ -19,4 +20,6 @@ public interface ScenarioService {
     List<Map<String, Object>> getAvailableScenarios();
     
     Map<String, Object> generateSessionFeedback(UUID userId, String scenarioId, String sessionId);
+    
+    JsonNode getScenarioData(String scenarioId);
 } 

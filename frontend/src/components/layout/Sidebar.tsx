@@ -230,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       // Trigger immediate refresh when we get this event
       fetchConversations();
     };
-
+    
     window.addEventListener('refresh-conversations', handleRefreshConversations);
     
     return () => {

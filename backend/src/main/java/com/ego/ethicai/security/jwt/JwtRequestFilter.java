@@ -58,6 +58,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             // Extract JWT Token
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
                 jwtToken = requestTokenHeader.substring(7);
+                
+                // Debug logging for token format issues
+                if (jwtToken.contains(" ")) {
+                    logger.error("JWT token contains spaces: '{}'", jwtToken);
+                    sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token format: contains spaces");
+                    return;
+                }
+                
                 try {
                     email = jwtTokenUtil.getEmailFromToken(jwtToken);
                     logger.debug("Processing token for user: {}", email);
@@ -69,9 +77,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     logger.error("JWT Token has expired", e);
                     sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "JWT token expired");
                     return;
+                } catch (Exception e) {
+                    logger.error("Error parsing JWT token: {}", e.getMessage(), e);
+                    sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token format");
+                    return;
                 }
             } else if (requestTokenHeader != null) {
-                logger.warn("JWT Token does not begin with Bearer String");
+                logger.warn("JWT Token does not begin with Bearer String. Header: '{}'", requestTokenHeader);
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token format");
                 return;
             }
