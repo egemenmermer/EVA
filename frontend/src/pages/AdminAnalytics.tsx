@@ -272,7 +272,19 @@ const SessionDetailsModal: React.FC<{
                     </div>
                     <div className="bg-gray-800 rounded-lg p-4 text-center">
                       <div className="text-2xl font-bold text-purple-400">
-                        {session.score && session.selectedChoices.length > 0 ? Math.round(session.score / Math.min(session.selectedChoices.length, 5)) : 'N/A'}
+                        {(() => {
+                          // Calculate average from actual selection data EVS scores
+                          if (selectionData.length > 0) {
+                            const validScores = selectionData.filter(s => s.evs !== undefined && s.evs !== null);
+                            if (validScores.length > 0) {
+                              const avgScore = validScores.reduce((sum, s) => sum + s.evs, 0) / validScores.length;
+                              return Math.round(avgScore);
+                            }
+                          }
+                          // Fallback to session score divided by choices if selection data not available
+                          return session.score && session.selectedChoices.length > 0 ? 
+                            Math.round(session.score / Math.min(session.selectedChoices.length, 5)) : 'N/A';
+                        })()}
                       </div>
                       <div className="text-sm text-gray-400">Avg per Choice</div>
                     </div>
