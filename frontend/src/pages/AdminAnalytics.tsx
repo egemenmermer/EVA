@@ -72,7 +72,8 @@ const SessionDetailsModal: React.FC<{
   const fetchSelectionData = async (sessionId: string) => {
     setLoadingSelections(true);
     try {
-      const response = await fetch(`/api/v1/practice/admin/practice-sessions/${sessionId}/selections`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+      const response = await fetch(`${API_URL}/api/v1/practice/admin/practice-sessions/${sessionId}/selections`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -97,8 +98,9 @@ const SessionDetailsModal: React.FC<{
   const fetchDecisionTreeData = async (sessionId: string, scenarioId: string) => {
     setLoadingDecisionTree(true);
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
       // Make actual API call to get decision tree data
-      const response = await fetch(`/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`, {
+      const response = await fetch(`${API_URL}/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
