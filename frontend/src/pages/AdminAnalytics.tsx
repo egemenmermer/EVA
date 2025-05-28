@@ -405,11 +405,11 @@ const SessionDetailsModal: React.FC<{
                                       </span>
                                     </div>
                                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -421,14 +421,25 @@ const SessionDetailsModal: React.FC<{
                       <div>
                         <h6 className="font-medium text-blue-300 mb-3">Tactics Used</h6>
                         <div className="space-y-2">
-                          {['Asking Questions', 'Creating Alternatives', 'Making It Visible'].map((tactic, i) => (
-                            <div key={i} className="flex justify-between items-center">
-                              <span className="text-sm text-gray-300">{tactic}</span>
-                              <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
-                                {Math.floor(Math.random() * 3) + 1}x
-                              </span>
-                            </div>
-                          ))}
+                          {(() => {
+                            // Calculate tactics from user's actual choices
+                            const tacticCounts: { [key: string]: number } = {};
+                            decisionTreeData.steps.forEach(step => {
+                              if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
+                                const tactic = step.alternatives[step.chosenIndex].tactic;
+                                tacticCounts[tactic] = (tacticCounts[tactic] || 0) + 1;
+                              }
+                            });
+                            
+                            return Object.entries(tacticCounts).map(([tactic, count]) => (
+                              <div key={tactic} className="flex justify-between items-center">
+                                <span className="text-sm text-gray-300">{tactic}</span>
+                                <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
+                                  {count}x
+                                </span>
+                              </div>
+                            ));
+                          })()}
                         </div>
                       </div>
                       
@@ -438,29 +449,73 @@ const SessionDetailsModal: React.FC<{
                           <div className="text-sm text-gray-300">
                             <span>Best possible path: </span>
                             <span className="text-green-400 font-semibold">
-                              {Math.max(...decisionTreeData.steps.flatMap(s => s.alternatives.map(a => a.evs)))} EVS
+                              {(() => {
+                                // Calculate best possible path: sum of max EVS from each step
+                                const bestPath = decisionTreeData.steps.reduce((total, step) => {
+                                  const maxEvs = Math.max(...step.alternatives.map(a => a.evs));
+                                  return total + maxEvs;
+                                }, 0);
+                                return `${bestPath} EVS`;
+                              })()}
                             </span>
                           </div>
                           <div className="text-sm text-gray-300">
                             <span>Worst possible path: </span>
                             <span className="text-red-400 font-semibold">
-                              {Math.min(...decisionTreeData.steps.flatMap(s => s.alternatives.map(a => a.evs)))} EVS
+                              {(() => {
+                                // Calculate worst possible path: sum of min EVS from each step
+                                const worstPath = decisionTreeData.steps.reduce((total, step) => {
+                                  const minEvs = Math.min(...step.alternatives.map(a => a.evs));
+                                  return total + minEvs;
+                                }, 0);
+                                return `${worstPath} EVS`;
+                              })()}
                             </span>
                           </div>
                           <div className="text-sm text-gray-300">
                             <span>User achieved: </span>
-                            <span className="text-blue-400 font-semibold">{session.score || 'N/A'} EVS</span>
+                            <span className="text-blue-400 font-semibold">
+                              {(() => {
+                                // Calculate user's actual total EVS from their choices
+                                let totalEvs = 0;
+                                decisionTreeData.steps.forEach(step => {
+                                  if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
+                                    totalEvs += step.alternatives[step.chosenIndex].evs;
+                                  }
+                                });
+                                return totalEvs > 0 ? `${totalEvs} EVS` : (session.score ? `${session.score} EVS` : 'N/A');
+                              })()}
+                            </span>
                           </div>
                           <div className="text-sm text-gray-300">
                             <span>Performance: </span>
                             <span className={`font-semibold ${
-                              session.score && session.score >= 75 ? 'text-green-400' :
-                              session.score && session.score >= 50 ? 'text-yellow-400' :
-                              'text-red-400'
+                              (() => {
+                                // Calculate performance based on user's actual EVS
+                                let totalEvs = 0;
+                                decisionTreeData.steps.forEach(step => {
+                                  if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
+                                    totalEvs += step.alternatives[step.chosenIndex].evs;
+                                  }
+                                });
+                                const actualScore = totalEvs > 0 ? totalEvs : (session.score || 0);
+                                return actualScore >= 75 ? 'text-green-400' :
+                                       actualScore >= 50 ? 'text-yellow-400' :
+                                       'text-red-400';
+                              })()
                             }`}>
-                              {session.score && session.score >= 75 ? 'Strong' :
-                               session.score && session.score >= 50 ? 'Moderate' :
-                               'Needs Improvement'}
+                              {(() => {
+                                let totalEvs = 0;
+                                decisionTreeData.steps.forEach(step => {
+                                  if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
+                                    totalEvs += step.alternatives[step.chosenIndex].evs;
+                                  }
+                                });
+                                const actualScore = totalEvs > 0 ? totalEvs : (session.score || 0);
+                                return actualScore >= 75 ? 'Strong' :
+                                       actualScore >= 50 ? 'Moderate' :
+                                       'Needs Improvement';
+                              })()}
                             </span>
                           </div>
                         </div>

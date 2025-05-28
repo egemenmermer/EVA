@@ -57,11 +57,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             // Extract JWT Token
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-                jwtToken = requestTokenHeader.substring(7);
+                jwtToken = requestTokenHeader.substring(7).trim();
+                
+                // Handle case where token already has "Bearer " prefix (double Bearer issue)
+                if (jwtToken.startsWith("Bearer ")) {
+                    jwtToken = jwtToken.substring(7).trim();
+                    logger.debug("Removed duplicate Bearer prefix from token");
+                }
                 
                 // Debug logging for token format issues
                 if (jwtToken.contains(" ")) {
-                    logger.error("JWT token contains spaces: '{}'", jwtToken);
+                    logger.error("JWT token contains spaces after trimming and Bearer removal: '{}'", jwtToken);
+                    logger.error("Original header: '{}'", requestTokenHeader);
                     sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token format: contains spaces");
                     return;
                 }
