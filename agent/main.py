@@ -534,20 +534,31 @@ Your feedback MUST be structured *exactly* as follows, using these *exact litera
 2.  `**Summary of Feedback:**` [Concise overall summary of performance and score, if mentioned.]
 
 3.  `**Detailed Feedback:**`
-    *   Under this heading, provide EXACTLY these four sections, each starting with its *exact literal heading* **on its own new line, with no leading markdown characters (*, -) or other formatting**:*
-        *   `Strengths`
-            [Provide bullet points analyzing *each* decision listed in the user's prompt that was a strength. Example: - Decision X: [Explanation]]
-        *   `Areas for Improvement`
-            [Provide bullet points analyzing *each* decision listed in the user's prompt that could be improved. Example: - Decision Y: [Explanation]]
-        *   `Reasoning Process`
-            [Overall analysis of the user's ethical reasoning pattern.]
-        *   `Practical Advice for the Future`
-            [General advice based on the overall performance.]
+
+    Under this heading, provide EXACTLY these four sections in order. Each section MUST start with its heading on its own separate line with NO leading bullets or markdown characters:
+
+    `Strengths`
+    [Provide bullet points analyzing decisions that were strengths. Example: - Decision X: [Explanation]]
+
+    `Areas for Improvement`
+    [Provide bullet points analyzing decisions that could be improved. Example: - Decision Y: [Explanation]]
+
+    `Reasoning Process`
+    [Overall analysis of the user's ethical reasoning pattern and thought processes. This section should ONLY focus on analyzing HOW they made decisions, not what to do in the future.]
+
+    `Practical Advice for the Future`
+    [General advice and specific recommendations for future similar situations. This section should ONLY focus on actionable guidance for future scenarios.]
 
 4.  `**Concluding Action Prompt:**`
     End with the *exact text*: "Do you feel ready to discuss this with your manager, or would you like to practice again? [Yes, help draft email] [No, practice again]"
 
 **CRITICAL:** The headings `**Introductory Paragraph:**`, `**Summary of Feedback:**`, `**Detailed Feedback:**`, `Strengths`, `Areas for Improvement`, `Reasoning Process`, `Practical Advice for the Future`, and `**Concluding Action Prompt:**` MUST appear exactly as written, each on its own line where specified. Do not add extra formatting or deviate.
+**CRITICAL FORMATTING RULES:**
+- Each of the four sections under "Detailed Feedback" (Strengths, Areas for Improvement, Reasoning Process, Practical Advice for the Future) MUST be on their own separate lines
+- "Reasoning Process" content must be COMPLETELY SEPARATE from "Practical Advice for the Future" content
+- "Reasoning Process" = analysis of their past decision-making patterns
+- "Practical Advice for the Future" = recommendations for future scenarios
+- Do not mix these two sections or put future advice in the reasoning section
 """
         
         if query.request_type == "post_feedback":
@@ -1472,20 +1483,30 @@ Your feedback MUST be structured *exactly* as follows, using these *exact litera
 2.  `**Summary of Feedback:**` [Concise overall summary of performance and score, if mentioned.]
 
 3.  `**Detailed Feedback:**`
-    *   Under this heading, provide EXACTLY these four sections, each starting with its *exact literal heading* **on its own new line, with no leading markdown characters (*, -) or other formatting**:*
-        *   `Strengths`
-            [Provide bullet points analyzing *each* decision listed in the user's prompt that was a strength. Example: - Decision X: [Explanation]]
-        *   `Areas for Improvement`
-            [Provide bullet points analyzing *each* decision listed in the user's prompt that could be improved. Example: - Decision Y: [Explanation]]
-        *   `Reasoning Process`
-            [Overall analysis of the user's ethical reasoning pattern.]
-        *   `Practical Advice for the Future`
-            [General advice based on the overall performance.]
+
+    Under this heading, provide EXACTLY these four sections in order. Each section MUST start with its heading on its own separate line with NO leading bullets or markdown characters:
+
+    `Strengths`
+    [Provide bullet points analyzing decisions that were strengths. Example: - Decision X: [Explanation]]
+
+    `Areas for Improvement`
+    [Provide bullet points analyzing decisions that could be improved. Example: - Decision Y: [Explanation]]
+
+    `Reasoning Process`
+    [Overall analysis of the user's ethical reasoning pattern and thought processes. This section should ONLY focus on analyzing HOW they made decisions, not what to do in the future.]
+
+    `Practical Advice for the Future`
+    [General advice and specific recommendations for future similar situations. This section should ONLY focus on actionable guidance for future scenarios.]
 
 4.  `**Concluding Action Prompt:**`
     End with the *exact text*: "Do you feel ready to discuss this with your manager, or would you like to practice again? [Yes, help draft email] [No, practice again]"
 
-**CRITICAL:** The headings `**Introductory Paragraph:**`, `**Summary of Feedback:**`, `**Detailed Feedback:**`, `Strengths`, `Areas for Improvement`, `Reasoning Process`, `Practical Advice for the Future`, and `**Concluding Action Prompt:**` MUST appear exactly as written, each on its own line where specified. Do not add extra formatting or deviate.
+**CRITICAL FORMATTING RULES:**
+- Each of the four sections under "Detailed Feedback" (Strengths, Areas for Improvement, Reasoning Process, Practical Advice for the Future) MUST be on their own separate lines
+- "Reasoning Process" content must be COMPLETELY SEPARATE from "Practical Advice for the Future" content
+- "Reasoning Process" = analysis of their past decision-making patterns
+- "Practical Advice for the Future" = recommendations for future scenarios
+- Do not mix these two sections or put future advice in the reasoning section
 """
 
         email_draft_prompt = """You are EVA, an empathetic AI assistant.
