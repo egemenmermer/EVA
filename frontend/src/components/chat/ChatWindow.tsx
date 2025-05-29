@@ -3178,6 +3178,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           <PracticeModule 
             onExit={handleExitPracticeMode}
             managerType={activeManagerType}
+            userQuery={localStorage.getItem('practice_user_query') || undefined}
           />
         </div>
       ) : (
