@@ -22,6 +22,7 @@ public class ScenarioChoiceResponseDTO {
     private int currentStep;
     private int evs;
     private String category;
+    private String feedback;
     private boolean isComplete;
     private Map<String, Object> sessionSummary;
 } 

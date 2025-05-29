@@ -133,6 +133,9 @@ public class ScenarioServiceImpl implements ScenarioService {
         int evs = selectedChoice.get("EVS").asInt();
         String nextStatementId = selectedChoice.get("leads_to").asText();
         
+        // Generate professional feedback
+        String feedback = generateProfessionalFeedback(evs, category);
+        
         session.getChoiceHistory().add(choiceText);
         session.getEvsHistory().add(evs);
         session.getCategoryHistory().add(category);
@@ -148,6 +151,7 @@ public class ScenarioServiceImpl implements ScenarioService {
                 .currentStep(session.getCurrentStep())
                 .evs(evs)
                 .category(category)
+                .feedback(feedback)  // Include professional feedback
                 .isComplete(isComplete);
         
         if (isComplete) {
@@ -327,6 +331,45 @@ public class ScenarioServiceImpl implements ScenarioService {
         summary.put("managerType", scenario.get("manager_type").asText());
         
         return summary;
+    }
+    
+    private String generateProfessionalFeedback(int evs, String category) {
+        String[] templates;
+        
+        if (evs >= 3) {
+            templates = new String[]{
+                String.format("Strong approach. This %s strategy effectively addresses the ethical concern while maintaining professional credibility.", category),
+                String.format("Effective choice. Your %s approach demonstrates thoughtful ethical reasoning with practical application.", category),
+                String.format("Well-reasoned response. This %s strategy balances ethical principles with workplace dynamics appropriately.", category)
+            };
+        } else if (evs == 2) {
+            templates = new String[]{
+                String.format("Solid approach. This %s strategy addresses the issue, though more direct advocacy might be more impactful.", category),
+                String.format("Reasonable choice. Your %s approach shows ethical awareness with room for stronger positioning.", category),
+                String.format("Good direction. This %s strategy demonstrates ethical thinking but could be more assertive.", category)
+            };
+        } else if (evs == 1) {
+            templates = new String[]{
+                String.format("Cautious approach. This %s strategy shows awareness but may not effectively address the underlying ethical issue.", category),
+                String.format("Minimal engagement. Your %s approach acknowledges the concern but lacks substantive ethical advocacy.", category),
+                String.format("Conservative choice. This %s strategy is professionally safe but may not create meaningful change.", category)
+            };
+        } else if (evs == 0) {
+            templates = new String[]{
+                "Passive response. This approach maintains workplace harmony but doesn't address the ethical concern.",
+                "Non-committal choice. This response avoids conflict but may enable continued unethical practices.",
+                "Risk-averse approach. This strategy prioritizes immediate comfort over ethical responsibility."
+            };
+        } else {
+            templates = new String[]{
+                "Problematic choice. This response may inadvertently support or enable unethical practices.",
+                "Concerning approach. This strategy could compromise professional ethical standards.",
+                "Risky response. This choice may undermine ethical advocacy opportunities."
+            };
+        }
+        
+        // Return a random template from the appropriate array
+        return templates[(int) (Math.random() * templates.length)];
     }
     
     // Inner class for session management

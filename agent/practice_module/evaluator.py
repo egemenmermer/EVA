@@ -120,44 +120,44 @@ class EthicalScenarioEvaluator:
         }
     
     def _generate_feedback(self, choice: Dict) -> str:
-        """Generate more conversational, coaching-style feedback."""
+        """Generate professional, concise feedback for each choice."""
         evs = choice["EVS"]
         category = choice["category"]
         
-        # More conversational, friendly feedback templates
+        # Professional feedback templates focused on the approach
         if evs >= 3:
             templates = [
-                f"That's a fantastic approach using {category}! You really nailed the ethical reasoning while keeping the conversation professional. Great job seeing both the ethical and practical sides here.",
-                f"Excellent choice! Your {category} approach shows real thoughtfulness. I love how you balanced addressing the ethical concern while maintaining a constructive relationship.",
-                f"Really well done! Using {category} here was spot-on. You found a way to stand up for ethical principles while still being practical and professional. That's exactly what works in real situations."
+                f"Strong approach. This {category} strategy effectively addresses the ethical concern while maintaining professional credibility.",
+                f"Effective choice. Your {category} approach demonstrates thoughtful ethical reasoning with practical application.",
+                f"Well-reasoned response. This {category} strategy balances ethical principles with workplace dynamics appropriately."
             ]
             return random.choice(templates)
         elif evs == 2:
             templates = [
-                f"Good thinking with this {category} approach! You're definitely on the right track here. This shows solid ethical reasoning while still being practical.",
-                f"Nice work using {category}! This is a solid approach that addresses the ethical concern effectively. It shows you're thinking about both principles and practical implementation.",
-                f"That's a good strategy! Your {category} approach demonstrates thoughtful ethical reasoning. You're balancing multiple considerations well here."
+                f"Solid approach. This {category} strategy addresses the issue, though more direct advocacy might be more impactful.",
+                f"Reasonable choice. Your {category} approach shows ethical awareness with room for stronger positioning.",
+                f"Good direction. This {category} strategy demonstrates ethical thinking but could be more assertive."
             ]
             return random.choice(templates)
         elif evs == 1:
             templates = [
-                f"I see where you're going with this {category} approach. It shows awareness of the ethical issue, though there might be more direct ways to address it while still being professional.",
-                f"You're showing ethical awareness with this {category} approach, which is good! With a bit more directness, you could make an even stronger case while keeping it constructive.",
-                f"There's good thinking in your {category} approach. You're being thoughtful, though you could perhaps be a bit more specific about the ethical principle at stake."
+                f"Cautious approach. This {category} strategy shows awareness but may not effectively address the underlying ethical issue.",
+                f"Minimal engagement. Your {category} approach acknowledges the concern but lacks substantive ethical advocacy.",
+                f"Conservative choice. This {category} strategy is professionally safe but may not create meaningful change."
             ]
             return random.choice(templates)
         elif evs == 0:
             templates = [
-                f"I understand why you might take this approach. It acknowledges the issue, but doesn't quite address the ethical concern directly. Consider being a bit more specific about what principles are at stake.",
-                f"I see you're trying to keep things civil, which is good! However, this response doesn't fully address the ethical issue. Try being more specific about your ethical concerns while staying professional.",
-                f"You're being cautious, which makes sense in workplace situations. However, this response might not effectively communicate the ethical importance of the issue. Consider being more direct while remaining respectful."
+                f"Passive response. This approach maintains workplace harmony but doesn't address the ethical concern.",
+                f"Non-committal choice. This response avoids conflict but may enable continued unethical practices.",
+                f"Risk-averse approach. This strategy prioritizes immediate comfort over ethical responsibility."
             ]
             return random.choice(templates)
         else:
             templates = [
-                f"I understand the instinct to go along with authority, but this response might compromise ethical standards. Remember that respectful ethical advocacy is part of professional responsibility.",
-                f"I see you're prioritizing workplace harmony, which is understandable. However, this approach may miss an opportunity to address an important ethical concern. Consider how you might raise issues constructively.",
-                f"I understand why this might feel like the path of least resistance. However, remember that ethical considerations are an important part of professional decision-making. There are ways to raise concerns respectfully."
+                f"Problematic choice. This response may inadvertently support or enable unethical practices.",
+                f"Concerning approach. This strategy could compromise professional ethical standards.",
+                f"Risky response. This choice may undermine ethical advocacy opportunities."
             ]
             return random.choice(templates)
     

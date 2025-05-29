@@ -56,6 +56,7 @@ interface ScenarioChoiceResponse {
   currentStep: number;
   evs: number;
   category: string;
+  feedback?: string;
   isComplete: boolean;
   sessionSummary?: {
     totalEvs: number;
@@ -458,7 +459,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       };
       
       // Show animated EVS feedback
-      showEVSFeedback(response.data.evs, response.data.category);
+      showEVSFeedback(response.data.evs, response.data.category, response.data.feedback);
       
       // Check if scenario should be completed (either backend says so, or we've made 5+ choices)
       const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 8); // 8 = ~4 conversation pairs + user choice
@@ -822,62 +823,57 @@ Please provide detailed feedback in the following format:
 
   // Scroll to bottom when new messages are added
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = document.getElementById('message-container');
+    if (container) {
+      setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 100);
+    }
   };
 
   // Add typing animation for manager messages
   const addManagerMessageWithTyping = async (content: string) => {
+    if (!currentScenario) return;
+
     setIsTyping(true);
     
     // Simulate typing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Add the manager message to conversation
+    const managerMessage: ManagerMessage = {
+      role: 'manager',
+      content: content
+    };
+
     setCurrentScenario(prev => prev ? {
       ...prev,
-      conversation: [
-        ...prev.conversation,
-        {
-          role: 'manager',
-          content: content,
-          isTyping: false
-        } as ManagerMessage
-      ]
+      conversation: [...prev.conversation, managerMessage]
     } : null);
-    
+
     setIsTyping(false);
     setTimeout(scrollToBottom, 100);
   };
 
-  // Generate encouraging message based on EVS score
-  const getEncouragingMessage = (score: number, category: string): string => {
-    if (score >= 80) {
-      return "🎉 Excellent! You made a highly ethical choice!";
-    } else if (score >= 60) {
-      return "👍 Good decision! You balanced ethics well.";
-    } else if (score >= 40) {
-      return "⚖️ Fair approach, but consider the ethical implications.";
-    } else if (score >= 20) {
-      return "🤔 You could have done better. Think about ethics.";
-    } else {
-      return "💭 Consider the ethical impact of your choices.";
-    }
-  };
-
-  // Show EVS feedback with animation
-  const showEVSFeedback = (score: number, category: string) => {
-    const message = getEncouragingMessage(score, category);
-    setCurrentEVSFeedback({ score, category, message, show: true });
+  // Show EVS feedback with animation - now uses backend feedback
+  const showEVSFeedback = (score: number, category: string, feedbackText?: string) => {
+    // Use backend feedback if available, otherwise fall back to professional default
+    const message = feedbackText || `Professional assessment: ${category} approach with EVS ${score}`;
     
-    // Auto-hide after 4 seconds
-    setTimeout(() => {
-      setCurrentEVSFeedback(prev => prev ? { ...prev, show: false } : null);
-    }, 4000);
+    // Clear any existing feedback first to ensure fresh display
+    setCurrentEVSFeedback(null);
     
-    // Clear after animation completes
+    // Show new feedback after a brief delay to ensure state reset
     setTimeout(() => {
-      setCurrentEVSFeedback(null);
-    }, 4500);
+      setCurrentEVSFeedback({ score, category, message, show: true });
+      
+      // Auto-hide after 3.5 seconds (reduced from 4 for smoother flow)
+      setTimeout(() => {
+        setCurrentEVSFeedback(prev => prev ? { ...prev, show: false } : null);
+      }, 3500);
+      
+      // Clear after animation completes
+      setTimeout(() => {
+        setCurrentEVSFeedback(null);
+      }, 4000);
+    }, 100);
   };
 
   // Show loading while scenario is being set up
