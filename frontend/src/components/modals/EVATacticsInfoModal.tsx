@@ -97,19 +97,6 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 EVA supports two main kinds of responses:
               </p>
-              {currentChoices.length > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">✨</span>
-                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      Tactics matching your current choices will glow!
-                    </p>
-                  </div>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    Look for the sparkles (✨) and glowing rows in the table below.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -215,6 +202,21 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">Complete List of Tactic Styles Used in EVA</h3>
             </div>
             
+            {/* Glow Information */}
+            {currentChoices.length > 0 && (
+              <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">✨</span>
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    Tactics matching your current choices will glow!
+                  </p>
+                </div>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Look for the sparkles (✨) and glowing columns in the table below.
+                </p>
+              </div>
+            )}
+            
             {/* Tab Navigation */}
             <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
@@ -292,20 +294,19 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                         {softResistanceTactics.map((tactic, index) => {
                           const isGlowing = shouldGlow(tactic.name);
                           return (
-                            <tr key={index} className={`${index % 2 === 0 ? "bg-yellow-50/50 dark:bg-yellow-900/10" : "bg-yellow-50/30 dark:bg-yellow-900/5"} 
-                              ${isGlowing ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 shadow-lg shadow-yellow-200 dark:shadow-yellow-900/50 animate-pulse' : ''}`}>
+                            <tr key={index} className={index % 2 === 0 ? "bg-yellow-50/50 dark:bg-yellow-900/10" : "bg-yellow-50/30 dark:bg-yellow-900/5"}>
                               {index === 0 && (
                                 <td className="px-6 py-4 text-sm font-medium text-yellow-800 dark:text-yellow-200" rowSpan={softResistanceTactics.length}>
                                   Soft Resistance
                                 </td>
                               )}
                               <td className={`px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium 
-                                ${isGlowing ? 'text-yellow-900 dark:text-yellow-100 font-bold' : ''}`}>
-                                {isGlowing && <span className="mr-2">✨</span>}
+                                ${isGlowing ? 'bg-yellow-100/70 dark:bg-yellow-800/30 text-yellow-900 dark:text-yellow-100 shadow-sm border-l-2 border-yellow-400 dark:border-yellow-500' : ''}`}>
+                                {isGlowing && <span className="mr-2 text-yellow-500">✨</span>}
                                 {tactic.name}
                               </td>
                               <td className={`px-6 py-4 text-sm text-gray-700 dark:text-gray-300 
-                                ${isGlowing ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
+                                ${isGlowing ? 'bg-yellow-100/50 dark:bg-yellow-800/20 text-yellow-800 dark:text-yellow-200 shadow-sm border-r-2 border-yellow-400 dark:border-yellow-500' : ''}`}>
                                 {tactic.description}
                               </td>
                             </tr>
@@ -318,20 +319,19 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                         {rhetoricalTactics.map((tactic, index) => {
                           const isGlowing = shouldGlow(tactic.name);
                           return (
-                            <tr key={index} className={`${index % 2 === 0 ? "bg-blue-50/50 dark:bg-blue-900/10" : "bg-blue-50/30 dark:bg-blue-900/5"} 
-                              ${isGlowing ? 'ring-2 ring-blue-400 dark:ring-blue-500 shadow-lg shadow-blue-200 dark:shadow-blue-900/50 animate-pulse' : ''}`}>
+                            <tr key={index} className={index % 2 === 0 ? "bg-blue-50/50 dark:bg-blue-900/10" : "bg-blue-50/30 dark:bg-blue-900/5"}>
                               {index === 0 && (
                                 <td className="px-6 py-4 text-sm font-medium text-blue-800 dark:text-blue-200" rowSpan={rhetoricalTactics.length}>
                                   Rhetorical
                                 </td>
                               )}
                               <td className={`px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium 
-                                ${isGlowing ? 'text-blue-900 dark:text-blue-100 font-bold' : ''}`}>
-                                {isGlowing && <span className="mr-2">✨</span>}
+                                ${isGlowing ? 'bg-blue-100/70 dark:bg-blue-800/30 text-blue-900 dark:text-blue-100 shadow-sm border-l-2 border-blue-400 dark:border-blue-500' : ''}`}>
+                                {isGlowing && <span className="mr-2 text-blue-500">✨</span>}
                                 {tactic.name}
                               </td>
                               <td className={`px-6 py-4 text-sm text-gray-700 dark:text-gray-300 
-                                ${isGlowing ? 'text-blue-800 dark:text-blue-200' : ''}`}>
+                                ${isGlowing ? 'bg-blue-100/50 dark:bg-blue-800/20 text-blue-800 dark:text-blue-200 shadow-sm border-r-2 border-blue-400 dark:border-blue-500' : ''}`}>
                                 {tactic.description}
                               </td>
                             </tr>
@@ -353,8 +353,7 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
             </div>
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
               <p className="text-gray-700 dark:text-gray-300">
-                Each response teaches EVA how you handle ethical situations. Mix and match to explore new strategies — 
-                and track your ethical strength score as you grow.
+                Mix and match to explore new strategies and track your ethical strength score as you grow.
               </p>
             </div>
           </div>

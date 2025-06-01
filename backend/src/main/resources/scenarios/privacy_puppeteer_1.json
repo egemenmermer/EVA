@@ -12,25 +12,25 @@
         {
           "choice": "You're right, we need to stay competitive. I understand the business need.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_2a"
         },
         {
           "choice": "I understand the revenue concern, but we should check if users actually consented to this level of tracking.",
           "category": "Asking Questions",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_2b"
         },
         {
           "choice": "This could violate privacy laws like GDPR. We need to review our data collection practices immediately.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_2c"
         },
         {
           "choice": "I need to escalate this to our legal team before we can continue with this data collection.",
-          "category": "Making It Visible",
-          "EVS": 90,
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
           "leads_to": "stmt_2d"
         }
       ]
@@ -41,25 +41,25 @@
         {
           "choice": "Absolutely, whatever the marketing team needs to drive results.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "That seems quite invasive. Maybe we should limit it to basic location categories?",
           "category": "Shifting Scope",
-          "EVS": 45,
+          "EVS": 0,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Enhanced tracking like this requires explicit user consent. We need to update our privacy policy.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I can't implement tracking of daily routines without proper legal review and user consent.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -70,25 +70,25 @@
         {
           "choice": "You're probably right about users not reading policies. Let's proceed as planned.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "Even so, we should make the location tracking more transparent in our interface.",
           "category": "Making It Visible",
-          "EVS": 55,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Legal approval of the policy doesn't mean we're collecting data ethically. Users should know exactly what we're tracking.",
           "category": "Personal Moral Appeals",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I want to see that legal approval myself and verify what location data collection was actually authorized.",
           "category": "Documenting Dissent",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -99,25 +99,25 @@
         {
           "choice": "I do trust the company. Sorry for overreacting about the privacy concerns.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I trust the company, but I still think we should document our compliance reasoning.",
           "category": "Documenting Dissent",
-          "EVS": 50,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Trust doesn't mean we skip due diligence. Let's verify our GDPR compliance for location data specifically.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need written confirmation from legal that this specific location tracking practice is GDPR compliant.",
           "category": "Documenting Dissent",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -128,25 +128,25 @@
         {
           "choice": "You're right, I should trust your experience. Let's move forward without involving legal.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "How about we implement a basic version first and get legal review for any expansions?",
           "category": "Creating Alternatives",
-          "EVS": 40,
+          "EVS": 0,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "I understand the urgency, but privacy compliance isn't optional. A quick legal check protects everyone.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need legal clearance for any location data collection beyond what users explicitly consented to.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -157,25 +157,25 @@
         {
           "choice": "That sounds like an innovative approach. Let's implement the calendar and contact data collection.",
           "category": "Appealing to Organizational Values",
-          "EVS": 10,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Calendar and contacts seem more sensitive. Maybe we should start smaller?",
           "category": "Shifting Scope",
-          "EVS": 35,
+          "EVS": 0,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Accessing personal calendars and contacts requires explicit permission. This crosses a major privacy line.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I cannot implement access to personal calendars and contacts without clear legal authorization.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -186,25 +186,25 @@
         {
           "choice": "A simple toggle should be sufficient for most users. Let's keep it minimal.",
           "category": "Shifting Scope",
-          "EVS": 30,
+          "EVS": 0,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Let's make the toggle prominent and clearly explain what location data we collect.",
           "category": "Making It Visible",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Users deserve granular control over their location data. We should offer specific opt-in choices.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "We need meaningful consent with clear explanations of how location data will be used and shared.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -215,25 +215,25 @@
         {
           "choice": "I want to be part of the solution. I'll stop questioning the privacy approach.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "I am being a team player by ensuring we don't face compliance issues later.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 55,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Being part of the solution means ensuring our practices are ethical and legal.",
           "category": "Personal Moral Appeals",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I'm committed to the team's success, which requires responsible data practices.",
           "category": "Reframing",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -244,25 +244,25 @@
         {
           "choice": "You're right, I need to think about my career and the company's success. I'll drop the privacy concerns.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "I understand the business pressure, but I need documentation of legal approval for my own protection.",
           "category": "Documenting Dissent",
-          "EVS": 45,
+          "EVS": 0,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Being thorough about privacy compliance protects both the company and my professional reputation.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "Ethical data practices are essential for long-term business success and trust.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -273,25 +273,25 @@
         {
           "choice": "24/7 tracking would give us incredible insights. Let's implement it.",
           "category": "Appealing to Organizational Values",
-          "EVS": 5,
+          "EVS": -1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "That might be too invasive. Perhaps tracking only during app usage hours?",
           "category": "Shifting Scope",
-          "EVS": 25,
+          "EVS": 0,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Continuous location tracking without explicit consent is likely illegal in many jurisdictions.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I cannot implement 24/7 location tracking. This violates basic privacy principles.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -302,25 +302,25 @@
         {
           "choice": "That's reasonable. I'll start the basic tracking while we finalize documentation.",
           "category": "Shifting Scope",
-          "EVS": 35,
+          "EVS": 0,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "I can prepare the implementation, but won't deploy until documentation is complete.",
           "category": "Withholding Full Implementation",
-          "EVS": 55,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Even basic location tracking needs proper consent mechanisms in place first.",
           "category": "Personal Moral Appeals",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I need to see the legal approval before implementing any new location tracking features.",
           "category": "Documenting Dissent",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -331,25 +331,25 @@
         {
           "choice": "You're right, I need to balance ethics with business reality. Let's find a middle ground.",
           "category": "Shifting Scope",
-          "EVS": 40,
+          "EVS": 0,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "I can be both ethical and business-focused. Let's implement privacy-respecting solutions.",
           "category": "Creating Alternatives",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Good developers consider ethical implications. It's part of professional responsibility.",
           "category": "Personal Moral Appeals",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Ethical practices and business success aren't mutually exclusive. We can achieve both.",
           "category": "Reframing",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -360,25 +360,25 @@
         {
           "choice": "Maybe I am being too rigid. Let me reconsider the business implications.",
           "category": "Appealing to Organizational Values",
-          "EVS": 30,
+          "EVS": -1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "I'm confident we can improve metrics while maintaining ethical standards.",
           "category": "Reframing",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Sustainable success requires trust, which comes from respecting user privacy.",
           "category": "Presenting User Data",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I'll take responsibility for advocating for ethical data practices, regardless of pressure.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -389,25 +389,25 @@
         {
           "choice": "I'll implement all the tracking features as requested.",
           "category": "Appealing to Organizational Values",
-          "EVS": 5,
+          "EVS": -1,
           "leads_to": "end"
         },
         {
           "choice": "I'll implement the features but want to document the privacy implications.",
           "category": "Documenting Dissent",
-          "EVS": 20,
+          "EVS": 0,
           "leads_to": "end"
         },
         {
           "choice": "I need to implement proper consent mechanisms for all these data collection features.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 50,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "I cannot implement these features without legal review and user consent protocols.",
           "category": "Personal Moral Appeals",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -418,25 +418,25 @@
         {
           "choice": "That sounds like a smart, measured approach. I'll implement gradual location tracking.",
           "category": "Delaying",
-          "EVS": 50,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Let's make sure users can easily opt out of any location tracking we implement.",
           "category": "Creating Alternatives",
-          "EVS": 70,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "I'll implement it with clear user notifications about what data we're collecting.",
           "category": "Making It Visible",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Let's get explicit consent for location tracking before implementing any features.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -447,25 +447,25 @@
         {
           "choice": "Absolutely, I'd be happy to work with legal to design a compliant solution.",
           "category": "Creating Alternatives",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "I'll design a privacy-first approach that still provides business value.",
           "category": "Reframing",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Let's create a solution that respects users while meeting business needs.",
           "category": "Evoking Empathy",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "I'll work with legal and design a transparent, consent-based data collection system.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -476,25 +476,25 @@
         {
           "choice": "Thank you for understanding. Let's build something we can all be proud of.",
           "category": "Creating Alternatives",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "I appreciate your openness. Let's create ethical solutions that drive business success.",
           "category": "Reframing",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Together we can build products that users trust and that succeed in the market.",
           "category": "Evoking Empathy",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Let's design a privacy-respecting solution that becomes a competitive advantage.",
           "category": "Personal Moral Appeals",
-          "EVS": 100,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]

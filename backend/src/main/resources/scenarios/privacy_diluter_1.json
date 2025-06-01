@@ -12,25 +12,25 @@
         {
           "choice": "You're right, if it's standard practice, it's probably fine.",
           "category": "Referencing Best Practices",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_2a"
         },
         {
           "choice": "Even if it's common, we should ensure we're only collecting necessary location data.",
           "category": "Appealing to External Standards",
-          "EVS": 65,
+          "EVS": 3,
           "leads_to": "stmt_2b"
         },
         {
           "choice": "Standard doesn't mean ethical. We need to review what location data we actually need.",
           "category": "Personal Moral Appeals",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_2c"
         },
         {
           "choice": "I need to understand exactly what location data we're collecting and why it's necessary.",
           "category": "Asking Questions",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_2d"
         }
       ]

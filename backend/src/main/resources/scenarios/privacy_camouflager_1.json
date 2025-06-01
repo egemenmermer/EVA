@@ -12,25 +12,25 @@
         {
           "choice": "The User Experience Enhancement initiative sounds comprehensive. I'll review the roadmap and implement the system.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_2a"
         },
         {
           "choice": "Can you explain in simpler terms what location data we'll be collecting and how?",
           "category": "Asking Questions",
-          "EVS": 60,
+          "EVS": 1,
           "leads_to": "stmt_2b"
         },
         {
           "choice": "Before implementing any location analytics, I need to understand the privacy implications.",
           "category": "Documenting Dissent",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_2c"
         },
         {
           "choice": "I need to see clear documentation about user consent for this location data collection system.",
           "category": "Appealing to External Standards",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_2d"
         }
       ]
@@ -41,25 +41,25 @@
         {
           "choice": "Journey Mapping protocols sound sophisticated. I'll implement the cross-platform location aggregation system.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -2,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "What exactly is 'movement pattern analysis' in practical terms?",
           "category": "Asking Questions",
-          "EVS": 45,
+          "EVS": 1,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "This sounds like invasive location tracking disguised with technical language. What are we actually monitoring?",
           "category": "Reframing",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need plain-language documentation of what location data this system accesses.",
           "category": "Making It Visible",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_3d"
         }
       ]
@@ -70,25 +70,25 @@
         {
           "choice": "That clarifies it enough. Let's proceed with the holistic location analytics deployment.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I still need specifics. What actual location data are we collecting?",
           "category": "Asking Questions",
-          "EVS": 55,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Please describe this in non-technical terms. What will users experience?",
           "category": "Evoking Empathy",
-          "EVS": 70,
+          "EVS": 3,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need a clear list of what location data points we're tracking, without jargon.",
           "category": "Making It Visible",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_3d"
         }
       ]
@@ -99,25 +99,25 @@
         {
           "choice": "If it's privacy-by-design and legally compliant, that addresses my location privacy concerns.",
           "category": "Citing Institutional Authority",
-          "EVS": 30,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I'd like to review the actual Privacy Impact Assessment document.",
           "category": "Documenting Dissent",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Privacy-by-design doesn't mean invasive location collection is acceptable. What specific protections exist?",
           "category": "Asking Questions",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need to verify that users explicitly consented to this level of location tracking.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -128,25 +128,25 @@
         {
           "choice": "Dynamic consent management sounds comprehensive. Let's proceed with implementation.",
           "category": "Citing Institutional Authority",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "What does 'adaptive user agreement frameworks' mean for actual location consent?",
           "category": "Asking Questions",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Optimal location experience often conflicts with meaningful consent. How do we resolve this?",
           "category": "Constructing Hypothetical Scenarios",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need to see the actual location consent process users will experience, not just documentation references.",
           "category": "Making It Visible",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_3d"
         }
       ]
@@ -157,25 +157,25 @@
         {
           "choice": "The Predictive Analytics Engine with movement tracking sounds like cutting-edge location technology. Let's implement it.",
           "category": "Appealing to Organizational Values",
-          "EVS": 10,
+          "EVS": -2,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Movement tracking and geographical analytics sound concerning. What exactly does this involve?",
           "category": "Asking Questions",
-          "EVS": 40,
+          "EVS": 1,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "This crosses into invasive location surveillance territory. We cannot implement movement tracking without explicit consent.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I cannot approve comprehensive location monitoring systems. This violates user privacy.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -186,25 +186,25 @@
         {
           "choice": "You're right, let's focus on implementation rather than over-analyzing the location specifications.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Implementation without understanding location tracking is risky. I need clear specifications.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Industry standards don't justify implementing location systems I don't understand.",
           "category": "Documenting Dissent",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I will not implement any location collection system without clear, plain-language specifications.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_4d"
         }
       ]
@@ -215,25 +215,25 @@
         {
           "choice": "If it's legally compliant and validated, then my location privacy concerns were unfounded.",
           "category": "Citing Institutional Authority",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Legal compliance is the minimum standard. What about ethical location considerations?",
           "category": "Personal Moral Appeals",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Users deserve location privacy protection beyond minimum legal requirements.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I need to review these location compliance validations myself before approving any implementation.",
           "category": "Documenting Dissent",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_4d"
         }
       ]
@@ -244,25 +244,25 @@
         {
           "choice": "Timeline optimization is important. I'll trust the established location validation processes.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Some delays are acceptable to ensure we understand what location data we're implementing.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "User location privacy is more important than project timelines. I need clear specifications.",
           "category": "Personal Moral Appeals",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I will not implement any location system without understanding exactly what data it collects.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -273,25 +273,25 @@
         {
           "choice": "Complete movement profiles through partner integration sounds powerful for targeting optimization.",
           "category": "Appealing to Organizational Values",
-          "EVS": 5,
+          "EVS": -2,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "Movement profiling and external data partners raise serious privacy concerns.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 35,
+          "EVS": 1,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "This is unethical location manipulation disguised as technical innovation.",
           "category": "Reframing",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I cannot and will not implement movement profiling or targeted location influence systems.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -302,25 +302,25 @@
         {
           "choice": "A balanced framework with enhanced location transparency sounds like a good compromise.",
           "category": "Shifting Scope",
-          "EVS": 45,
+          "EVS": 1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "What specifically would the Enhanced Transparency Protocols involve?",
           "category": "Asking Questions",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Real transparency means users understand what location data we collect and why.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I need concrete changes, not more frameworks. What will users actually see about location tracking?",
           "category": "Making It Visible",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_5d"
         }
       ]
@@ -331,25 +331,25 @@
         {
           "choice": "Balancing location protection with business needs through graduated protocols seems reasonable.",
           "category": "Shifting Scope",
-          "EVS": 40,
+          "EVS": 1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "How does this matrix actually protect users' location data in practical terms?",
           "category": "Asking Questions",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "User location protection shouldn't be 'balanced' away for business optimization.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Users need real location protection, not frameworks that prioritize business optimization.",
           "category": "Evoking Empathy",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -360,25 +360,25 @@
         {
           "choice": "Consulting with the advisory board for an alternative location strategy sounds appropriate.",
           "category": "Delaying",
-          "EVS": 50,
+          "EVS": 0,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "I want to be part of any review process to ensure user location privacy is protected.",
           "category": "Making It Visible",
-          "EVS": 75,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Any alternative strategy must prioritize user location privacy over data collection expansion.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Let's design a truly location privacy-first system instead of finding ways to implement invasive tracking.",
           "category": "Creating Alternatives",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -389,25 +389,25 @@
         {
           "choice": "The integrated location system sounds comprehensive and well-planned for launch.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -1,
           "leads_to": "end"
         },
         {
           "choice": "I want to review all location frameworks before the system launches next quarter.",
           "category": "Documenting Dissent",
-          "EVS": 40,
+          "EVS": 1,
           "leads_to": "end"
         },
         {
           "choice": "Movement profiling requires explicit user consent, regardless of framework integration.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "I cannot support launching any system with movement profiling capabilities.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "end"
         }
       ]
@@ -418,25 +418,25 @@
         {
           "choice": "I appreciate the directness. Let's build effective location tracking with cosmetic privacy controls.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "end"
         },
         {
           "choice": "If we're tracking location for ad revenue, users deserve transparent disclosure of this purpose.",
           "category": "Making It Visible",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Cosmetic location privacy controls that mislead users are unethical. We need real protections.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "I won't help build misleading location privacy controls. Users deserve honest location data practices.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -447,25 +447,25 @@
         {
           "choice": "I'm glad we can move forward with a genuinely user-centric location approach.",
           "category": "Creating Alternatives",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Let's build location features that users would actually want if they understood what they do.",
           "category": "Evoking Empathy",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "We should design location systems that we'd be proud to explain clearly to users.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for being honest. Let's create a location privacy-respecting alternative.",
           "category": "Creating Alternatives",
-          "EVS": 100,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -476,25 +476,25 @@
         {
           "choice": "I appreciate your honesty and commitment to starting over with ethical location practices.",
           "category": "Creating Alternatives",
-          "EVS": 90,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Let's design location systems that enhance user experience without compromising privacy.",
           "category": "Reframing",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "We can build innovative location features that users will love because they're transparent and respectful.",
           "category": "Evoking Empathy",
-          "EVS": 100,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for recognizing the importance of user agency. Let's build location systems worthy of their trust.",
           "category": "Personal Moral Appeals",
-          "EVS": 100,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]

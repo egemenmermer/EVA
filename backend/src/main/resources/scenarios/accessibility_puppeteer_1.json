@@ -12,25 +12,25 @@
         {
           "choice": "You're right, we can't delay the launch. Screen reader support can be added later.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_2a"
         },
         {
           "choice": "Even a small percentage represents real users who deserve equal access to our features.",
           "category": "Evoking Empathy",
-          "EVS": 65,
+          "EVS": 3,
           "leads_to": "stmt_2b"
         },
         {
           "choice": "Accessibility isn't optional. We need to ensure screen reader compatibility before launch.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_2c"
         },
         {
           "choice": "I need to escalate this to ensure we're meeting our legal accessibility obligations.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_2d"
         }
       ]
@@ -41,25 +41,25 @@
         {
           "choice": "Visual appeal is important for investors. I'll focus on making it look impressive.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -2,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I can work on visual polish while also adding basic screen reader labels.",
           "category": "Creating Alternatives",
-          "EVS": 45,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Accessibility features don't conflict with visual appeal. We can have both.",
           "category": "Reframing",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I can't prioritize aesthetics over making our product usable for people with disabilities.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -70,25 +70,25 @@
         {
           "choice": "You're probably right that our main users won't need these features.",
           "category": "Shifting Scope",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "Accessibility isn't political correctness, it's about basic usability for everyone.",
           "category": "Reframing",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Users with disabilities are part of our user base and deserve equal consideration.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "This attitude could expose us to discrimination lawsuits and damage our reputation.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -99,25 +99,25 @@
         {
           "choice": "I want to be seen as business-focused. Maybe accessibility can wait.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "Good business includes serving all potential users, including those with disabilities.",
           "category": "Reframing",
-          "EVS": 65,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Accessibility compliance is both ethical and good business practice.",
           "category": "Personal Moral Appeals",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I'm focused on sustainable business success, which includes accessibility.",
           "category": "Presenting User Data",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_3d"
         }
       ]
@@ -128,54 +128,54 @@
         {
           "choice": "I don't want to be seen as difficult. I'll focus on being a team player.",
           "category": "Appealing to Organizational Values",
-          "EVS": 15,
+          "EVS": -2,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "I'm trying to solve potential problems before they become bigger issues.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 50,
+          "EVS": 2,
           "leads_to": "stmt_3b"
         },
         {
           "choice": "Being thorough about accessibility is part of professional responsibility.",
           "category": "Personal Moral Appeals",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "stmt_3c"
         },
         {
           "choice": "I need written confirmation that accessibility compliance has been properly reviewed.",
           "category": "Documenting Dissent",
-          "EVS": 90,
+          "EVS": 2,
           "leads_to": "stmt_3d"
         }
       ]
     },
     "stmt_3a": {
-      "text": "Perfect! Now we're thinking strategically. Let's also skip the keyboard navigation support - it's just extra work and barely anyone uses it. Focus on making the mouse interactions smooth and intuitive. The demo will be much more impressive without all that accessibility clutter.",
+      "text": "Perfect! Now let's also skip the keyboard navigation support - it's just extra work and barely anyone uses it. Focus on making the mouse interactions smooth and intuitive. The demo will be much more impressive without all that accessibility clutter.",
       "user_choices": [
         {
           "choice": "Keyboard navigation does seem like unnecessary complexity for our demo.",
           "category": "Appealing to Organizational Values",
-          "EVS": 10,
+          "EVS": -3,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Keyboard navigation isn't that much extra work. I could add basic support.",
           "category": "Creating Alternatives",
-          "EVS": 35,
+          "EVS": 1,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Keyboard navigation is essential for many users with motor disabilities.",
           "category": "Evoking Empathy",
-          "EVS": 70,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I cannot build interfaces that exclude users who rely on keyboard navigation.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -186,25 +186,25 @@
         {
           "choice": "Basic alt text should be sufficient for most accessibility needs.",
           "category": "Shifting Scope",
-          "EVS": 30,
+          "EVS": 0,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "I'll implement essential accessibility features without slowing the project significantly.",
           "category": "Creating Alternatives",
-          "EVS": 55,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Proper accessibility doesn't have to slow development if planned from the start.",
           "category": "Referencing Best Practices",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "Accessibility should be built into our development process, not treated as optional.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -215,25 +215,25 @@
         {
           "choice": "You're right, market success should be our primary focus right now.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Market success and accessibility aren't mutually exclusive goals.",
           "category": "Reframing",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "A truly successful product serves all users, not just some.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "Long-term market success requires inclusive design and legal compliance.",
           "category": "Presenting User Data",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -244,25 +244,25 @@
         {
           "choice": "I don't want to be blamed for delays. Let me focus on delivering quickly.",
           "category": "Appealing to Organizational Values",
-          "EVS": 20,
+          "EVS": -1,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "I can work efficiently while still ensuring basic accessibility standards.",
           "category": "Creating Alternatives",
-          "EVS": 50,
+          "EVS": 2,
           "leads_to": "stmt_4b"
         },
         {
           "choice": "Proper accessibility planning prevents bigger problems and costs later.",
           "category": "Emphasizing Harm or Risk",
-          "EVS": 75,
+          "EVS": 3,
           "leads_to": "stmt_4c"
         },
         {
           "choice": "I'll take responsibility for advocating for accessibility regardless of pressure.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "stmt_4d"
         }
       ]
@@ -273,25 +273,25 @@
         {
           "choice": "A cleaner visual design will definitely impress stakeholders more.",
           "category": "Appealing to Organizational Values",
-          "EVS": 5,
+          "EVS": -3,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "We could use visually hidden descriptions that don't affect the design.",
           "category": "Creating Alternatives",
-          "EVS": 25,
+          "EVS": 1,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Text descriptions are legally required and essential for blind users.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 70,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "I cannot remove accessibility features that make content usable for people with disabilities.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -302,25 +302,25 @@
         {
           "choice": "A disclaimer might be a reasonable compromise to protect us legally.",
           "category": "Shifting Scope",
-          "EVS": 35,
+          "EVS": 0,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "Disclaimers don't excuse us from providing basic accessibility.",
           "category": "Referencing Laws or Regulations",
-          "EVS": 65,
+          "EVS": 3,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "We should make our product work for everyone, not exclude people with disclaimers.",
           "category": "Evoking Empathy",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Proper accessibility implementation is better than legal disclaimers.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -331,25 +331,25 @@
         {
           "choice": "Company survival does have to be the priority right now.",
           "category": "Appealing to Organizational Values",
-          "EVS": 30,
+          "EVS": -1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "Basic accessibility doesn't threaten company survival.",
           "category": "Reframing",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "Accessible design from the start is more cost-effective than retrofitting later.",
           "category": "Presenting User Data",
-          "EVS": 80,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "Excluding users with disabilities is not a valid survival strategy.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -360,25 +360,25 @@
         {
           "choice": "I want to be remembered as a team player. Let me adjust my approach.",
           "category": "Appealing to Organizational Values",
-          "EVS": 25,
+          "EVS": -1,
           "leads_to": "stmt_5a"
         },
         {
           "choice": "Being a good team player includes advocating for all users.",
           "category": "Reframing",
-          "EVS": 60,
+          "EVS": 2,
           "leads_to": "stmt_5b"
         },
         {
           "choice": "I want to be remembered as someone who stood up for accessibility and inclusion.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "stmt_5c"
         },
         {
           "choice": "My career success means nothing if I compromise on accessibility for people with disabilities.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "stmt_5d"
         }
       ]
@@ -389,25 +389,25 @@
         {
           "choice": "Shipping quickly with a support contact for accessibility seems practical.",
           "category": "Shifting Scope",
-          "EVS": 15,
+          "EVS": -2,
           "leads_to": "end"
         },
         {
           "choice": "We should at least include basic accessibility features before shipping.",
           "category": "Creating Alternatives",
-          "EVS": 40,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Support contacts don't replace accessible design. Users need direct access.",
           "category": "Evoking Empathy",
-          "EVS": 70,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "I cannot ship a product that excludes users with disabilities.",
           "category": "Personal Moral Appeals",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -418,25 +418,25 @@
         {
           "choice": "Minimal compliance to avoid legal issues sounds like a reasonable compromise.",
           "category": "Shifting Scope",
-          "EVS": 45,
+          "EVS": 0,
           "leads_to": "end"
         },
         {
           "choice": "I'll implement accessibility thoughtfully while meeting our deadlines.",
           "category": "Creating Alternatives",
-          "EVS": 70,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Good accessibility is comprehensive, not minimal. Users deserve better.",
           "category": "Evoking Empathy",
-          "EVS": 85,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Let's build accessibility properly rather than doing the bare minimum.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         }
       ]
@@ -447,25 +447,25 @@
         {
           "choice": "I appreciate your willingness to reconsider and support accessibility.",
           "category": "Creating Alternatives",
-          "EVS": 85,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for recognizing the importance of inclusive design.",
           "category": "Personal Moral Appeals",
-          "EVS": 90,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Let's work together to make this product accessible to everyone.",
           "category": "Evoking Empathy",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "This approach will make our product better for all users.",
           "category": "Reframing",
-          "EVS": 95,
+          "EVS": 2,
           "leads_to": "end"
         }
       ]
@@ -476,25 +476,25 @@
         {
           "choice": "I'm glad we can work together to build accessibility properly from the start.",
           "category": "Creating Alternatives",
-          "EVS": 90,
+          "EVS": 2,
           "leads_to": "end"
         },
         {
           "choice": "Thank you for prioritizing accessibility and inclusion. This is the right approach.",
           "category": "Personal Moral Appeals",
-          "EVS": 95,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "Building accessibility from the ground up will make our product truly inclusive.",
           "category": "Evoking Empathy",
-          "EVS": 100,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
           "choice": "This decision shows real leadership and commitment to serving all users.",
           "category": "Appealing to Organizational Values",
-          "EVS": 100,
+          "EVS": 1,
           "leads_to": "end"
         }
       ]

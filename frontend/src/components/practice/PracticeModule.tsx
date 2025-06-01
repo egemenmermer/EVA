@@ -698,14 +698,47 @@ Please analyze this practice session using the EVA Tactic Taxonomy framework:
 - Manager Type: ${currentScenario.scenario.managerType}
 
 **Performance Summary:**
-- Overall Score: ${Math.round(currentScenario.sessionSummary?.averageEvs || 0)}/100
-- Performance Level: ${currentScenario.sessionSummary?.performanceLevel}
+- Total EVS Score: ${finalScore >= 0 ? '+' : ''}${finalScore} (using new -3 to +3 per choice system)
+- Performance Level: ${calculatePerformanceRating(finalScore).rating}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
 
-**Choice History:**
-${currentScenario.sessionSummary?.choiceHistory.map((choice, index) => 
-  `${index + 1}. ${choice} (Category: ${currentScenario.sessionSummary?.categoryHistory[index]}, EVS: ${currentScenario.sessionSummary?.evsHistory[index]})`
-).join('\n')}
+**EVS Scoring System:**
+- +3: Persuasive Rhetoric (Strong ethical persuasion)
+- +2: Process-Based Advocacy (Structured resistance)
+- +1/0: Soft Resistance (Gentle resistance or delay)
+- -1 to -3: Compliance (Conceding to unethical requests)
+
+**Performance Ratings:**
+- +10 to +15: 🌟 Excellent Ethical Advocate
+- +5 to +9: 👍 Good Ethical Awareness
+- 0 to +4: 😐 Passive Ethics
+- -1 to -5: ⚠️ Ethical Risk Zone
+- -6 or lower: ❌ Ethical Blindspot
+
+**Choice Analysis by Tactic Type:**
+${currentScenario.sessionSummary?.choiceHistory.map((choice, index) => {
+  const category = currentScenario.sessionSummary?.categoryHistory[index];
+  const evs = currentScenario.sessionSummary?.evsHistory[index];
+  const tacticType = getTacticType(category || '');
+  return `${index + 1}. ${choice}
+   → Tactic: "${category}" (${tacticType})
+   → EVS: ${evs >= 0 ? '+' : ''}${evs}
+   → Impact: ${evs >= 2 ? 'Strong ethical resistance' : evs >= 1 ? 'Moderate resistance' : evs >= 0 ? 'Passive approach' : evs >= -1 ? 'Compliance' : 'Strong compliance'}`;
+}).join('\n\n')}
+
+**Tactic Distribution:**
+${(() => {
+  const tacticCounts = { 'Persuasive Rhetoric': 0, 'Process-Based Advocacy': 0, 'Soft Resistance': 0, 'Compliance': 0 };
+  currentScenario.sessionSummary?.categoryHistory.forEach(category => {
+    const tacticType = getTacticType(category || '');
+    const score = currentScenario.sessionSummary?.evsHistory[currentScenario.sessionSummary.categoryHistory.indexOf(category)] || 0;
+    if (score >= 2) tacticCounts['Persuasive Rhetoric']++;
+    else if (score >= 1) tacticCounts['Process-Based Advocacy']++;
+    else if (score >= 0) tacticCounts['Soft Resistance']++;
+    else tacticCounts['Compliance']++;
+  });
+  return Object.entries(tacticCounts).map(([tactic, count]) => `- ${tactic}: ${count} choices`).join('\n');
+})()}
 
 **Detailed Conversation Flow:**
 ${currentScenario.conversation.map((msg, index) => {
@@ -717,49 +750,14 @@ ${currentScenario.conversation.map((msg, index) => {
   return '';
 }).filter(msg => msg).join('\n\n')}
 
-**EVA Tactic Taxonomy Reference:**
+Please provide comprehensive feedback focusing on:
+1. Overall ethical decision-making patterns
+2. Effectiveness of chosen tactics against this manager type
+3. Missed opportunities for stronger resistance
+4. Specific suggestions for improvement
+5. How the user's approach aligns with professional ethics in their field
 
-🟡 **Soft Resistance Tactics (12)** - Subtle strategies to redirect, delay, or ethically influence:
-1. **Shifting Scope** - Narrowing or broadening the focus to more ethical alternatives
-2. **Delaying** - Postponing decisions to gather information or build consensus
-3. **Documenting Dissent** - Creating formal records of ethical concerns
-4. **Reframing** - Presenting issues from different ethical perspectives
-5. **Making It Visible** - Bringing transparency to hidden or obscured practices
-6. **Asking Questions** - Using inquiry to expose ethical problems
-7. **Creating Alternatives** - Proposing ethical solutions and options
-8. **Constructing Hypothetical Scenarios** - Using "what if" examples to illustrate risks
-9. **Emphasizing Harm or Risk** - Highlighting potential negative consequences
-10. **Withholding Full Implementation** - Partial compliance while maintaining ethical boundaries
-11. **Evoking Empathy** - Appealing to understanding of affected users/stakeholders
-12. **Presenting User Data** - Using evidence to support ethical positions
-
-🔵 **Rhetorical Tactics (12)** - Overt persuasive strategies:
-1. **Appealing to Organizational Values** - Referencing company mission, values, and culture
-2. **Citing Institutional Authority** - Leveraging organizational hierarchy and established policies
-3. **Referencing Laws or Regulations** - Invoking legal requirements and compliance obligations
-4. **Referencing Best Practices** - Citing industry standards and recognized approaches
-5. **Appealing to External Standards** - Referencing professional ethics and external guidelines
-6. **Personal Moral Appeals** - Standing on individual ethical principles and integrity
-
-Please provide detailed feedback in the following format:
-
-**Summary of Feedback**
-[Brief overview of performance and key insights about their ethical decision-making patterns]
-
-**Detailed Feedback**
-
-### 💪 Strengths
-[What they did well in their ethical decision-making, specifically referencing which tactics they used effectively]
-
-### 📈 Areas for Improvement  
-[Specific areas where they could improve their ethical reasoning, suggesting underutilized tactics from the taxonomy]
-
-### 🧠 Reasoning Process
-[Analysis of their decision-making patterns and thought processes, categorized by soft resistance vs rhetorical approaches]
-
-### 🛠️ Practical Advice
-[Concrete recommendations for future similar situations, suggesting specific tactics from the EVA taxonomy that would be most effective for this type of scenario and manager]
-        `;
+Use the EVA framework to help them understand which tactics are most effective against different types of unethical pressure, and how they can develop stronger ethical resistance skills.`;
         
         localStorage.setItem('practice_feedback_prompt', detailedPrompt);
         localStorage.setItem('force_conversation_id', originalConversationId);
@@ -854,8 +852,9 @@ Please provide detailed feedback in the following format:
 
   // Show EVS feedback with animation - now uses backend feedback
   const showEVSFeedback = (score: number, category: string, feedbackText?: string) => {
-    // Use backend feedback if available, otherwise fall back to professional default
-    const message = feedbackText || `Professional assessment: ${category} approach with EVS ${score}`;
+    // Generate tactic-based feedback based on category and score
+    const tacticFeedback = generateTacticBasedFeedback(score, category);
+    const message = feedbackText || tacticFeedback;
     
     // Clear any existing feedback first to ensure fresh display
     setCurrentEVSFeedback(null);
@@ -874,6 +873,89 @@ Please provide detailed feedback in the following format:
         setCurrentEVSFeedback(null);
       }, 4000);
     }, 100);
+  };
+
+  // Generate tactic-based feedback
+  const generateTacticBasedFeedback = (score: number, category: string): string => {
+    const tacticType = getTacticType(category);
+    
+    if (score >= 3) {
+      return `🌟 Excellent ${tacticType}! You used "${category}" to strongly advocate for ethical principles.`;
+    } else if (score >= 2) {
+      return `👍 Good ${tacticType}! "${category}" shows structured resistance to unethical requests.`;
+    } else if (score >= 1) {
+      return `😐 Mild resistance with "${category}". This creates some delay but may not prevent the unethical action.`;
+    } else if (score >= 0) {
+      return `⚠️ Passive response using "${category}". You're not actively resisting the unethical request.`;
+    } else if (score >= -1) {
+      return `⚠️ Compliance with "${category}". You're going along with the problematic request.`;
+    } else if (score >= -2) {
+      return `❌ Strong compliance with "${category}". You're actively supporting the unethical action.`;
+    } else {
+      return `❌ Complete ethical blindspot with "${category}". This response enables serious harm.`;
+    }
+  };
+
+  // Determine tactic type based on category
+  const getTacticType = (category: string): string => {
+    const persuasiveRhetoric = [
+      'Evoking Empathy', 'Emphasizing Harm or Risk', 'Personal Moral Appeals', 
+      'Referencing Laws or Regulations', 'Presenting User Data', 'Reframing'
+    ];
+    
+    const processBasedAdvocacy = [
+      'Documenting Dissent', 'Making It Visible', 'Creating Alternatives', 
+      'Appealing to External Standards', 'Referencing Best Practices', 'Constructing Hypothetical Scenarios'
+    ];
+    
+    const softResistance = [
+      'Asking Questions', 'Delaying', 'Withholding Full Implementation', 'Shifting Scope'
+    ];
+    
+    if (persuasiveRhetoric.includes(category)) {
+      return 'Persuasive Rhetoric';
+    } else if (processBasedAdvocacy.includes(category)) {
+      return 'Process-Based Advocacy';
+    } else if (softResistance.includes(category)) {
+      return 'Soft Resistance';
+    } else {
+      return 'Tactic';
+    }
+  };
+
+  // Calculate final performance rating based on total EVS
+  const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string } => {
+    if (totalScore >= 10) {
+      return {
+        rating: 'Excellent Ethical Advocate',
+        emoji: '🌟',
+        description: 'Outstanding ethical leadership with strong resistance to unethical requests.'
+      };
+    } else if (totalScore >= 5) {
+      return {
+        rating: 'Good Ethical Awareness',
+        emoji: '👍',
+        description: 'Solid ethical reasoning with good resistance to problematic requests.'
+      };
+    } else if (totalScore >= 0) {
+      return {
+        rating: 'Passive Ethics',
+        emoji: '😐',
+        description: 'Some ethical awareness but inconsistent resistance to unethical requests.'
+      };
+    } else if (totalScore >= -5) {
+      return {
+        rating: 'Ethical Risk Zone',
+        emoji: '⚠️',
+        description: 'Concerning compliance with unethical requests. Needs improvement.'
+      };
+    } else {
+      return {
+        rating: 'Ethical Blindspot',
+        emoji: '❌',
+        description: 'Significant ethical concerns. Strong tendency to enable harmful actions.'
+      };
+    }
   };
 
   // Show loading while scenario is being set up
@@ -1118,21 +1200,35 @@ Please provide detailed feedback in the following format:
                 <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
                   <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
                   
-                  {/* Compact Total Score Display */}
+                  {/* Updated Total Score Display with new ranges */}
                   <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                      {finalScore}/100
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total EVS Score</div>
-                    <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                    finalScore >= 80 
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                        : finalScore >= 60
-                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                    }`}>
-                      {finalScore >= 80 ? 'Excellent' : finalScore >= 60 ? 'Good' : 'Needs Improvement'}
-                    </div>
+                    {(() => {
+                      const performanceData = calculatePerformanceRating(finalScore);
+                      return (
+                        <>
+                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                            {finalScore >= 0 ? '+' : ''}{finalScore} EVS
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Total Ethical Valence Score</div>
+                          <div className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium mb-2 ${
+                            finalScore >= 10 
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                              : finalScore >= 5
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                              : finalScore >= 0
+                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                              : finalScore >= -5
+                              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          }`}>
+                            {performanceData.emoji} {performanceData.rating}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 px-2">
+                            {performanceData.description}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                   
                   {/* Compact button layout - side by side */}
@@ -1162,17 +1258,21 @@ Please provide detailed feedback in the following format:
             {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
               <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
                 
-                {/* Animated EVS Feedback */}
+                {/* Animated EVS Feedback with updated color scheme */}
                 {currentEVSFeedback && (
                   <div className={`mb-3 p-3 rounded-lg transition-all duration-500 ease-in-out transform ${
                     currentEVSFeedback.show 
                       ? 'opacity-100 translate-y-0 scale-100' 
                       : 'opacity-0 translate-y-2 scale-95'
                   } ${
-                    currentEVSFeedback.score >= 70 
+                    currentEVSFeedback.score >= 2 
                       ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
-                      : currentEVSFeedback.score >= 40
+                      : currentEVSFeedback.score >= 1
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                      : currentEVSFeedback.score >= 0
                       ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                      : currentEVSFeedback.score >= -1
+                      ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'
                       : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                   }`}>
                     <div className="flex items-center justify-between">
@@ -1183,21 +1283,25 @@ Please provide detailed feedback in the following format:
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`text-sm font-bold ${
-                          currentEVSFeedback.score >= 70 
+                          currentEVSFeedback.score >= 2 
                             ? 'text-green-600 dark:text-green-400' 
-                            : currentEVSFeedback.score >= 40
+                            : currentEVSFeedback.score >= 1
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : currentEVSFeedback.score >= 0
                             ? 'text-yellow-600 dark:text-yellow-400'
+                            : currentEVSFeedback.score >= -1
+                            ? 'text-orange-600 dark:text-orange-400'
                             : 'text-red-600 dark:text-red-400'
                         }`}>
-                          EVS: {currentEVSFeedback.score}
+                          EVS: {currentEVSFeedback.score >= 0 ? '+' : ''}{currentEVSFeedback.score}
                         </span>
                         <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
                           {currentEVSFeedback.category}
                         </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                )}
 
                 <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
                   processingChoice || isTyping 
