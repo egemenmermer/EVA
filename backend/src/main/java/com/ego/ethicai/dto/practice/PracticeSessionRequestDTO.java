@@ -34,5 +34,5 @@ public class PracticeSessionRequestDTO {
     
     private LocalDateTime timestamp;
 
-    private Integer score;
+    private Double score;
 }

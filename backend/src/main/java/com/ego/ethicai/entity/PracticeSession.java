@@ -46,5 +46,5 @@ public class PracticeSession {
     private LocalDateTime createdAt;
 
     @Column(name = "score")
-    private Integer score;
+    private Double score;
 } 

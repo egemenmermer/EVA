@@ -38,6 +38,8 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     public PracticeSessionResponseDTO savePracticeSession(PracticeSessionRequestDTO requestDTO) {
         log.info("Received PracticeSessionRequestDTO in service: {}", requestDTO);
         log.info("Saving practice session for user: {}", requestDTO.getUserId());
+        log.info("DEBUG: RequestDTO choices field: {}", requestDTO.getChoices());
+        log.info("DEBUG: RequestDTO choices size: {}", requestDTO.getChoices() != null ? requestDTO.getChoices().size() : "null");
         
         // Find the user
         User user = userService.findById(requestDTO.getUserId())
@@ -57,43 +59,55 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         PracticeSession savedSession = practiceSessionRepository.save(practiceSession);
         log.info("Practice session saved with ID: {}", savedSession.getId());
 
-        // Handle detailed choices if provided
-        if (requestDTO.getChoices() != null && !requestDTO.getChoices().isEmpty()) {
-            List<PracticeSessionChoice> choiceEntities = new ArrayList<>();
-            for (PracticeChoiceDTO choiceDTO : requestDTO.getChoices()) {
-                PracticeSessionChoice choice = PracticeSessionChoice.builder()
-                        .practiceSessionId(savedSession.getId())
-                        .stepNumber(choiceDTO.getStepNumber())
-                        .choiceText(choiceDTO.getChoiceText())
-                        .evsScore(choiceDTO.getEvsScore())
-                        .tactic(choiceDTO.getTactic())
-                        .build();
-                choiceEntities.add(choice);
-            }
-            practiceSessionChoiceRepository.saveAll(choiceEntities);
-        } else if (requestDTO.getSelectedChoices() != null && requestDTO.getScenarioId() != null) {
-            // For backward compatibility, parse EVS scores and tactics from scenario files
+        // Save detailed choice data if available
+        if (requestDTO.getSelectedChoices() != null && !requestDTO.getSelectedChoices().isEmpty()) {
             try {
-                JsonNode scenarioData = scenarioService.getScenarioData(requestDTO.getScenarioId());
                 List<PracticeSessionChoice> choiceEntities = new ArrayList<>();
                 
-                for (int i = 0; i < requestDTO.getSelectedChoices().size(); i++) {
-                    String userChoice = requestDTO.getSelectedChoices().get(i);
-                    SelectionDataDTO selectionData = findChoiceData(scenarioData, userChoice, i + 1);
+                // Use detailed choices if available
+                if (requestDTO.getChoices() != null && !requestDTO.getChoices().isEmpty()) {
+                    log.info("DEBUG: Using detailed choice data for session {} with {} choices", savedSession.getId(), requestDTO.getChoices().size());
+                    for (PracticeChoiceDTO choiceDTO : requestDTO.getChoices()) {
+                        log.info("DEBUG: Processing choice - Step: {}, Text: {}, EVS: {}, Tactic: {}", 
+                                choiceDTO.getStepNumber(), choiceDTO.getChoiceText(), choiceDTO.getEvsScore(), choiceDTO.getTactic());
+                        
+                        PracticeSessionChoice choice = PracticeSessionChoice.builder()
+                                .practiceSession(savedSession)
+                                .stepNumber(choiceDTO.getStepNumber())
+                                .choiceText(choiceDTO.getChoiceText())
+                                .evsScore(choiceDTO.getEvsScore())
+                                .tactic(choiceDTO.getTactic())
+                                .build();
+                        choiceEntities.add(choice);
+                    }
+                } else {
+                    // Fall back to parsing scenario data for backward compatibility
+                    log.info("DEBUG: Using scenario parsing for session {} (legacy mode)", savedSession.getId());
+                    JsonNode scenarioData = scenarioService.getScenarioData(requestDTO.getScenarioId());
                     
-                    PracticeSessionChoice choice = PracticeSessionChoice.builder()
-                            .practiceSessionId(savedSession.getId())
-                            .stepNumber(i + 1)
-                            .choiceText(userChoice)
-                            .evsScore(selectionData != null ? selectionData.getEvs() : null)
-                            .tactic(selectionData != null ? selectionData.getTactic() : "Unknown")
-                            .build();
-                    choiceEntities.add(choice);
+                    for (int i = 0; i < requestDTO.getSelectedChoices().size(); i++) {
+                        String userChoice = requestDTO.getSelectedChoices().get(i);
+                        SelectionDataDTO selectionData = findChoiceData(scenarioData, userChoice, i + 1);
+                        
+                        PracticeSessionChoice choice = PracticeSessionChoice.builder()
+                                .practiceSession(savedSession)
+                                .stepNumber(i + 1)
+                                .choiceText(userChoice)
+                                .evsScore(selectionData != null ? selectionData.getEvs() : null)
+                                .tactic(selectionData != null ? selectionData.getTactic() : "Unknown")
+                                .build();
+                        choiceEntities.add(choice);
+                    }
                 }
-                practiceSessionChoiceRepository.saveAll(choiceEntities);
+                
+                log.info("DEBUG: About to save {} choice entities", choiceEntities.size());
+                List<PracticeSessionChoice> savedChoices = practiceSessionChoiceRepository.saveAll(choiceEntities);
+                log.info("DEBUG: Successfully saved {} choice entities for session {}", savedChoices.size(), savedSession.getId());
             } catch (Exception e) {
-                log.warn("Could not parse EVS scores and tactics for session {}: {}", savedSession.getId(), e.getMessage());
+                log.error("DEBUG: Could not save choice data for session {}: {}", savedSession.getId(), e.getMessage(), e);
             }
+        } else {
+            log.warn("DEBUG: No selected choices provided for session {}", savedSession.getId());
         }
 
         // Map to response DTO
@@ -238,7 +252,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                         alternatives.add(DecisionTreeAlternativeDTO.builder()
                                 .text(choiceText)
                                 .tactic(choice.get("category").asText())
-                                .evs(choice.get("EVS").asInt())
+                                .evs((double) choice.get("EVS").asInt())
                                 .build());
                         
                         // Check if this matches the user's choice
@@ -283,7 +297,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                 return SelectionDataDTO.builder()
                                         .step(step)
                                         .choice(userChoice)
-                                        .evs(choice.get("EVS").asInt())
+                                        .evs((double) choice.get("EVS").asInt())
                                         .tactic(choice.get("category").asText())
                                         .build();
                             }

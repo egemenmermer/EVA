@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class DecisionTreeAlternativeDTO {
     private String text;
     private String tactic;
-    private Integer evs;
+    private Double evs;
 } 

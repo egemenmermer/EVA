@@ -162,9 +162,7 @@ const SessionDetailsModal: React.FC<{
             </div>
             <div>
               <p><span className="font-medium">Date:</span> {new Date(session.createdAt).toLocaleString()}</p>
-              {session.score !== undefined && (
-                <p><span className="font-medium">Score:</span> {session.score}/100</p>
-              )}
+              <p><span className="font-medium">Score:</span> {session.score?.toFixed(1) || 'N/A'}/10</p>
             </div>
           </div>
         </div>
@@ -242,10 +240,10 @@ const SessionDetailsModal: React.FC<{
                               <div className="flex items-center space-x-2">
                                 <span className="text-xs text-gray-400">EVS Score:</span>
                                 <span className={`text-sm font-semibold ${
-                                  selectionInfo.evs >= 75 ? 'text-green-400' : 
-                                  selectionInfo.evs >= 50 ? 'text-yellow-400' : 'text-red-400'
+                                  selectionInfo.evs >= 2 ? 'text-green-400' : 
+                                  selectionInfo.evs >= 1 ? 'text-yellow-400' : 'text-red-400'
                                 }`}>
-                                  {selectionInfo.evs || 'N/A'}/100
+                                  {selectionInfo.evs !== undefined && selectionInfo.evs !== null ? `${selectionInfo.evs >= 0 ? '+' : ''}${selectionInfo.evs}` : 'N/A'}/3
                                 </span>
                               </div>
                               <div className="flex items-center space-x-2">
@@ -870,7 +868,7 @@ const AdminAnalytics: React.FC = () => {
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Avg. Ethical Score</p>
-                <p className="text-3xl font-bold text-white">{metrics.avgScore}/100</p>
+                <p className="text-3xl font-bold text-white">{metrics.avgScore?.toFixed(1) || 'N/A'}/10</p>
               </div>
             </div>
           </div>
@@ -928,7 +926,7 @@ const AdminAnalytics: React.FC = () => {
                   scales: {
                     y: {
                       beginAtZero: true,
-                      max: 100,
+                      max: 10,
                       ticks: {
                         color: 'white'
                       },

@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class SelectionDataDTO {
     private int step;
     private String choice;
-    private Integer evs;
+    private Double evs;
     private String tactic;
 } 

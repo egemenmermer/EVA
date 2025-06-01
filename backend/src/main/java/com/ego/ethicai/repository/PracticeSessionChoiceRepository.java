@@ -12,8 +12,8 @@ import java.util.UUID;
 @Repository
 public interface PracticeSessionChoiceRepository extends JpaRepository<PracticeSessionChoice, UUID> {
     
-    @Query("SELECT psc FROM PracticeSessionChoice psc WHERE psc.practiceSessionId = :sessionId ORDER BY psc.stepNumber")
+    @Query("SELECT psc FROM PracticeSessionChoice psc WHERE psc.practiceSession.id = :sessionId ORDER BY psc.stepNumber")
     List<PracticeSessionChoice> findByPracticeSessionIdOrderByStepNumber(@Param("sessionId") UUID sessionId);
     
-    List<PracticeSessionChoice> findByPracticeSessionId(UUID practiceSessionId);
+    List<PracticeSessionChoice> findByPracticeSession_Id(UUID practiceSessionId);
 } 

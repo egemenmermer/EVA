@@ -22,5 +22,5 @@ public class PracticeSessionResponseDTO {
     private String scenarioId;
     private List<String> selectedChoices;
     private LocalDateTime createdAt;
-    private Integer score;
+    private Double score;
 } 

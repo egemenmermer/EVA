@@ -625,10 +625,22 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         selectedChoices: conversationToUse
           .filter(msg => msg.role === 'user')
           .map(msg => msg.content),
+        // Add detailed choices with EVS scores and tactics
+        choices: sessionSummary?.choiceHistory?.map((choice: string, index: number) => ({
+          stepNumber: index + 1,
+          choiceText: choice,
+          evsScore: sessionSummary?.evsHistory?.[index] || null,
+          tactic: sessionSummary?.categoryHistory?.[index] || 'Unknown'
+        })) || [],
         timestamp: new Date().toISOString(), // This gets converted to LocalDateTime on server
         score: sessionSummary?.totalEvs || 0 // Use scaled totalEvs instead of averageEvs
       };
       
+      console.log('DEBUG: Session summary data:', sessionSummary);
+      console.log('DEBUG: Choice history:', sessionSummary?.choiceHistory);
+      console.log('DEBUG: EVS history:', sessionSummary?.evsHistory); 
+      console.log('DEBUG: Category history:', sessionSummary?.categoryHistory);
+      console.log('DEBUG: Detailed choices being sent:', practiceData.choices);
       console.log('Saving practice session with exact DTO format:', practiceData);
       
       // The token should already be included by the axios interceptor

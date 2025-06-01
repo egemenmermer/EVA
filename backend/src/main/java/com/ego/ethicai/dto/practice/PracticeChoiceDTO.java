@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class PracticeChoiceDTO {
     private Integer stepNumber;
     private String choiceText;
-    private Integer evsScore;
+    private Double evsScore;
     private String tactic;
 } 

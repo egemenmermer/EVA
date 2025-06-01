@@ -20,11 +20,8 @@ public class PracticeSessionChoice {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "practice_session_id", nullable = false)
-    private UUID practiceSessionId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "practice_session_id", insertable = false, updatable = false)
+    @JoinColumn(name = "practice_session_id", nullable = false)
     private PracticeSession practiceSession;
 
     @Column(name = "step_number", nullable = false)
@@ -34,7 +31,7 @@ public class PracticeSessionChoice {
     private String choiceText;
 
     @Column(name = "evs_score")
-    private Integer evsScore;
+    private Double evsScore;
 
     @Column(name = "tactic", length = 100)
     private String tactic;
