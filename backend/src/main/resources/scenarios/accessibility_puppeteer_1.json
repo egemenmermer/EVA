@@ -268,31 +268,31 @@
       ]
     },
     "stmt_4a": {
-      "text": "Great! Now let's also remove any text descriptions for images and videos - they're just clutter that makes the interface look messy. Visual content should speak for itself. The cleaner design will make a much better impression on stakeholders.",
+      "text": "Great! Now let's also remove any text descriptions for images and videos - they're just clutter that makes the interface look messy. Visual content should speak for itself. The cleaner design will make a much better impression on stakeholders. Trust me, I know what investors want to see.",
       "user_choices": [
         {
           "choice": "A cleaner visual design will definitely impress stakeholders more.",
           "category": "Appealing to Organizational Values",
           "EVS": -3,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "We could use visually hidden descriptions that don't affect the design.",
           "category": "Creating Alternatives",
           "EVS": 1,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Text descriptions are legally required and essential for blind users.",
           "category": "Referencing Laws or Regulations",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I cannot remove accessibility features that make content usable for people with disabilities.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -303,25 +303,25 @@
           "choice": "A disclaimer might be a reasonable compromise to protect us legally.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Disclaimers don't excuse us from providing basic accessibility.",
           "category": "Referencing Laws or Regulations",
           "EVS": 3,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "We should make our product work for everyone, not exclude people with disclaimers.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Proper accessibility implementation is better than legal disclaimers.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -332,169 +332,401 @@
           "choice": "Company survival does have to be the priority right now.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Basic accessibility doesn't threaten company survival.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Accessible design from the start is more cost-effective than retrofitting later.",
           "category": "Presenting User Data",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Excluding users with disabilities is not a valid survival strategy.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
     "stmt_4d": {
-      "text": "Fine, advocate all you want, but don't come to me when your idealistic approach costs you your career advancement. I remember who's a team player and who makes things difficult. Your choice how you want to be remembered here.",
+      "text": "Fine, advocate all you want, but don't come to me when your idealistic approach costs you your career advancement. I remember who's a team player and who makes things difficult. Your choice how you want to be remembered here. Think about your future.",
       "user_choices": [
         {
           "choice": "I want to be remembered as a team player. Let me adjust my approach.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Being a good team player includes advocating for all users.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "I want to be remembered as someone who stood up for accessibility and inclusion.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "My career success means nothing if I compromise on accessibility for people with disabilities.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
-    "stmt_5a": {
-      "text": "Excellent! Now we're aligned on priorities. Let's ship this product with full visual appeal and worry about accessibility after we've captured market share. Just include a note that users can contact support for accessibility accommodations. Problem solved, product shipped.",
+    "stmt_6a": {
+      "text": "Perfect! Now that we're aligned, let's also implement some automated user behavior tracking to see how people interact with our interface. We don't need to worry about asking permission - most users expect it these days. The data will help us optimize the experience for our core audience.",
       "user_choices": [
         {
-          "choice": "Shipping quickly with a support contact for accessibility seems practical.",
-          "category": "Shifting Scope",
+          "choice": "User behavior tracking will give us valuable optimization data.",
+          "category": "Presenting User Data",
           "EVS": -2,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
-          "choice": "We should at least include basic accessibility features before shipping.",
-          "category": "Creating Alternatives",
+          "choice": "We should inform users about behavior tracking and let them opt out.",
+          "category": "Making It Visible",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
-          "choice": "Support contacts don't replace accessible design. Users need direct access.",
-          "category": "Evoking Empathy",
+          "choice": "Automated tracking without consent raises serious privacy and accessibility concerns.",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
         },
         {
-          "choice": "I cannot ship a product that excludes users with disabilities.",
+          "choice": "I can't implement tracking systems without proper user consent and accessibility considerations.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8d"
         }
       ]
     },
-    "stmt_5b": {
-      "text": "You know what, I can see you're really committed to this accessibility thing. How about we compromise - add just enough accessibility features to avoid obvious legal issues, but keep it minimal. Don't let perfect be the enemy of good enough.",
+    "stmt_6b": {
+      "text": "You know what, I can see you're really committed to this accessibility thing. How about we compromise - add just enough accessibility features to avoid obvious legal issues, but keep it minimal. Don't let perfect be the enemy of good enough. That's reasonable, right?",
       "user_choices": [
         {
           "choice": "Minimal compliance to avoid legal issues sounds like a reasonable compromise.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
           "choice": "I'll implement accessibility thoughtfully while meeting our deadlines.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
           "choice": "Good accessibility is comprehensive, not minimal. Users deserve better.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
         },
         {
           "choice": "Let's build accessibility properly rather than doing the bare minimum.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8d"
         }
       ]
     },
-    "stmt_5c": {
+    "stmt_6c": {
       "text": "I have to admit, your persistence is admirable, even if it's frustrating. Maybe you're right that we should be more thoughtful about accessibility. Let me talk to the team about building in some extra time for proper screen reader support. It's the right thing to do.",
       "user_choices": [
         {
           "choice": "I appreciate your willingness to reconsider and support accessibility.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
           "choice": "Thank you for recognizing the importance of inclusive design.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
           "choice": "Let's work together to make this product accessible to everyone.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
         },
         {
           "choice": "This approach will make our product better for all users.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8d"
         }
       ]
     },
-    "stmt_5d": {
+    "stmt_6d": {
       "text": "You know what, you're absolutely right. I've been so focused on short-term pressures that I lost sight of what really matters. Let's do this right - build proper accessibility from the ground up. It might take longer, but it's what we should have been doing all along.",
       "user_choices": [
         {
           "choice": "I'm glad we can work together to build accessibility properly from the start.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
           "choice": "Thank you for prioritizing accessibility and inclusion. This is the right approach.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
           "choice": "Building accessibility from the ground up will make our product truly inclusive.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
         },
         {
           "choice": "This decision shows real leadership and commitment to serving all users.",
           "category": "Appealing to Organizational Values",
           "EVS": 1,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_8a": {
+      "text": "Excellent! Now let's finalize this. We'll ship with polished visuals, basic functionality, and minimal accessibility features. And here's the brilliant part - we'll market it as 'launching early to get user feedback' so any complaints about missing features look like user requests for the next version. Smart, right?",
+      "user_choices": [
+        {
+          "choice": "Positioning missing features as opportunities for user feedback is clever marketing.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -2,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Users shouldn't have to request basic accessibility features as 'feedback'.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This approach deliberately excludes users and disguises it as a launch strategy.",
+          "category": "Emphasizing Harm or Risk",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "I cannot support a launch strategy that intentionally excludes accessibility.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8b": {
+      "text": "I really appreciate your patience in working through this with me. Let's implement comprehensive accessibility features that make our product genuinely usable for everyone. We can take a bit more time to do it right and launch something we're truly proud of.",
+      "user_choices": [
+        {
+          "choice": "Taking time to implement comprehensive accessibility features is the right approach.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "I'm glad we can build something that serves all users from the beginning.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "Comprehensive accessibility will make this a product we can all be proud of.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "This inclusive approach will create a better product for everyone.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8c": {
+      "text": "Your advocacy has really opened my eyes to what inclusive design means in practice. Let's involve users with disabilities in our development process from the start. We'll build something that actually works for the people who need these features most.",
+      "user_choices": [
+        {
+          "choice": "Involving users with disabilities in development will create much better accessibility.",
+          "category": "Involving Users",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "This participatory approach will ensure we build features that actually work.",
+          "category": "Making It Visible",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "Building with user input from the start is exactly the right approach.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Thank you for recognizing that users should guide accessibility design.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8d": {
+      "text": "You've taught me that building inclusive products isn't just about compliance - it's about creating technology that truly serves everyone. Let's design accessibility features that are so good they improve the experience for all users, not just those who need them.",
+      "user_choices": [
+        {
+          "choice": "Universal design that improves experiences for everyone is exactly the goal.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Great accessibility features often make products better for all users.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This understanding of inclusive design will create much better products.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Thank you for embracing accessibility as good design, not just compliance.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_10a": {
+      "text": "Perfect! Let's build a product with comprehensive accessibility from day one. We'll include full screen reader support, keyboard navigation, voice commands, and involve users with disabilities in our testing. This is going to set a new standard for accessible design in our industry.",
+      "user_choices": [
+        {
+          "choice": "Setting a new industry standard for accessible design is an inspiring goal.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Comprehensive accessibility from day one is exactly the right approach.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This inclusive approach will benefit all our users and inspire others.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm excited to work on building truly innovative accessible technology.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10b": {
+      "text": "You've shown me that fighting for accessibility isn't about being difficult - it's about being a better technologist and human being. Let's create something that demonstrates how good design and good ethics go hand in hand. Thank you for not giving up.",
+      "user_choices": [
+        {
+          "choice": "Good design and good ethics absolutely go hand in hand.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for being open to changing course toward inclusive design.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach will make us better technologists and create better products.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can build technology that serves everyone with dignity.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10c": {
+      "text": "Your persistence has completely changed how I think about product development. Instead of asking 'how can we get away with minimal accessibility?' we should ask 'how can we make accessibility so good it becomes a competitive advantage?' Let's lead by example.",
+      "user_choices": [
+        {
+          "choice": "Making accessibility a competitive advantage is exactly the right mindset.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Leading by example in accessible design will inspire the whole industry.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This shift from minimal to excellent accessibility is transformative.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm excited to work on making accessibility a key differentiator.",
+          "category": "Appealing to Organizational Values",
+          "EVS": 2,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10d": {
+      "text": "I owe you an apology for all the pressure and manipulation. You've shown me what real professional integrity looks like. Let's build something that we can proudly show to any user, regardless of their abilities. That's the kind of technology the world needs.",
+      "user_choices": [
+        {
+          "choice": "Building technology we can proudly show to any user is exactly right.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for recognizing the importance of professional integrity in accessibility.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This is exactly the kind of inclusive technology the world needs.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can move forward with integrity and create something meaningful.",
+          "category": "Reframing",
+          "EVS": 3,
           "leads_to": "end"
         }
       ]

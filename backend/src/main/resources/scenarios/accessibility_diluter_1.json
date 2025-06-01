@@ -268,31 +268,31 @@
       ]
     },
     "stmt_4a": {
-      "text": "Exactly! So let's go with the innovative UI and worry about accessibility later. We can always add some basic alt text and call it a day. Most users won't even notice the difference, and we'll have a much more engaging product for our main audience.",
+      "text": "Exactly! So let's go with the innovative UI and worry about accessibility later. We can always add some basic alt text and call it a day. Most users won't even notice the difference, and we'll have a much more engaging product for our main audience. Plus, if someone complains, we can point them to browser extensions.",
       "user_choices": [
         {
           "choice": "Focusing on the main audience with innovative UI makes business sense.",
           "category": "Appealing to Organizational Values",
           "EVS": -2,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Basic alt text isn't sufficient accessibility - we need proper implementation.",
           "category": "Referencing Best Practices",
           "EVS": 3,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Engaging products should be engaging for all users, not just some.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I can't support launching features that exclude users with disabilities.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -303,25 +303,25 @@
           "choice": "A support contact for accessibility issues seems like a reasonable compromise.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Support contacts don't replace the need for accessible design.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Users shouldn't need special support to access basic features.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Proper accessibility implementation serves users better than support workarounds.",
           "category": "Referencing Best Practices",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -332,25 +332,25 @@
           "choice": "Tripling development time for an uncertain market doesn't seem worth it.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Good accessibility doesn't triple development time when done properly.",
           "category": "Referencing Best Practices",
           "EVS": 3,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "People with disabilities are potential users we're currently excluding.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Accessible design makes products better for everyone, not just users with disabilities.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -361,139 +361,371 @@
           "choice": "Basic keyboard navigation seems like a reasonable middle ground.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "Keyboard navigation is important, but we also need screen reader support.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Accessibility is a business opportunity - it expands our potential user base.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Comprehensive accessibility includes much more than just keyboard navigation.",
           "category": "Appealing to External Standards",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
-    "stmt_5a": {
-      "text": "Perfect! I'm glad we found a practical approach. Let's go with basic keyboard support and the contact support option. That should cover us legally while keeping development simple and focused on our core user experience. Best of both worlds.",
+    "stmt_6a": {
+      "text": "Great! Now that we've settled on a practical approach, the design team also mentioned they want to use some dynamic content that updates frequently. Screen readers have trouble with that stuff anyway, so it's not like we're missing much by not optimizing for them. Plus, the dynamic elements make the site feel more modern.",
+      "user_choices": [
+        {
+          "choice": "Dynamic content does make sites feel more modern and engaging.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "We can make dynamic content accessible with proper ARIA labels and announcements.",
+          "category": "Creating Alternatives",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Accessibility features for dynamic content aren't optional - they're necessary.",
+          "category": "Referencing Laws or Regulations",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "Modern design should include modern accessibility practices, not exclude them.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_6b": {
+      "text": "I hear you on the screen reader support, but honestly, implementing that properly would require training the whole team on accessibility standards. That's time and money we don't really have right now. Can't we just focus on making sure the basic functionality works with keyboards?",
+      "user_choices": [
+        {
+          "choice": "Team training does require significant time and budget investment.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "Accessibility training is an investment that pays off in better products.",
+          "category": "Presenting User Data",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Basic functionality should include screen reader compatibility, not just keyboards.",
+          "category": "Appealing to External Standards",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "I can help train the team on accessibility - it doesn't have to be expensive.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_6c": {
+      "text": "You know what, you've convinced me that there might be some business value here. Maybe we could add accessibility features gradually - start with the easy wins like alt text, then see if we get any user feedback requesting more features. That way we're responsive without over-investing upfront.",
+      "user_choices": [
+        {
+          "choice": "A gradual approach based on user feedback sounds measured and practical.",
+          "category": "Delaying",
+          "EVS": 1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "Alt text is a start, but users need more comprehensive accessibility from launch.",
+          "category": "Emphasizing Harm or Risk",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Users can't request features they can't access due to poor accessibility.",
+          "category": "Constructing Hypothetical Scenarios",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "Let's implement comprehensive accessibility now rather than hoping users will request it later.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_6d": {
+      "text": "Alright, you've made your point about comprehensive accessibility. But look, our development team is already stretched thin with feature deadlines. If we add accessibility requirements to every task, something's going to give. Either we delay the launch or we cut other features. What's your priority here?",
+      "user_choices": [
+        {
+          "choice": "Meeting our launch deadline should be the priority. We can add accessibility later.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "We can streamline other features to make room for accessibility requirements.",
+          "category": "Creating Alternatives",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Accessibility isn't optional - it should be part of every feature from the start.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "A slightly delayed launch is better than excluding users with disabilities.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_8a": {
+      "text": "Perfect! I'm glad we found a practical approach. Let's go with basic keyboard support and the contact support option. That should cover us legally while keeping development simple and focused on our core user experience. We can always revisit accessibility in a future version if there's demand.",
       "user_choices": [
         {
           "choice": "Basic keyboard support and support contact seems like good coverage.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "end"
+          "leads_to": "stmt_10a"
         },
         {
           "choice": "We should also include screen reader labels for essential interface elements.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_10b"
         },
         {
           "choice": "This approach still excludes many users who need proper accessibility features.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_10c"
         },
         {
           "choice": "We need comprehensive accessibility, not just minimal legal coverage.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_10d"
         }
       ]
     },
-    "stmt_5b": {
-      "text": "I appreciate your persistence on this accessibility thing. Look, how about we allocate some time next quarter to do a proper accessibility audit and add more features then? That way we can launch on schedule now and improve accessibility when we have more bandwidth.",
+    "stmt_8b": {
+      "text": "I appreciate your persistence on this accessibility thing. Look, how about we allocate some time next quarter to do a proper accessibility audit and add more features then? That way we can launch on schedule now and improve accessibility when we have more bandwidth. Everyone wins.",
       "user_choices": [
         {
           "choice": "A proper accessibility audit next quarter sounds like a good plan.",
           "category": "Delaying",
           "EVS": 1,
-          "leads_to": "end"
+          "leads_to": "stmt_10a"
         },
         {
           "choice": "We should implement basic accessibility now and expand it next quarter.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_10b"
         },
         {
           "choice": "Delaying accessibility excludes users from our initial launch unnecessarily.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_10c"
         },
         {
           "choice": "Accessibility should be part of this launch, not postponed to next quarter.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_10d"
         }
       ]
     },
-    "stmt_5c": {
-      "text": "You know what, you've made some good points about accessibility being a market opportunity. Maybe I've been thinking about this too narrowly. Let's build in proper accessibility features from the start. It might take a bit longer, but it's probably the right thing to do.",
+    "stmt_8c": {
+      "text": "You know what, you've made some good points about accessibility being a market opportunity and user need. Maybe I've been thinking about this too narrowly. Let's build in proper accessibility features from the start. It might take a bit longer, but it's probably the right thing to do for our users and our business.",
       "user_choices": [
         {
-          "choice": "I'm glad we can approach accessibility as a market opportunity.",
+          "choice": "I'm glad we can approach accessibility as both good ethics and good business.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_10a"
         },
         {
-          "choice": "Building accessibility from the start will make our product more inclusive.",
+          "choice": "Building accessibility from the start will make our product more inclusive and successful.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_10b"
         },
         {
           "choice": "This approach will help us serve all users effectively from day one.",
           "category": "Referencing Best Practices",
           "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Thank you for recognizing the value of accessible design for everyone.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8d": {
+      "text": "I have to admit, your arguments about universal design and user inclusion have really opened my eyes. You're right that accessible products are often better for everyone, not just users with disabilities. Let's do this properly - comprehensive accessibility features that make our product truly inclusive from launch.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work on building truly inclusive and accessible features.",
+          "category": "Creating Alternatives",
+          "EVS": 2,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Comprehensive accessibility will make our product stand out in the market.",
+          "category": "Reframing",
+          "EVS": 2,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This decision shows real commitment to serving all users equally.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Thank you for embracing accessibility as a core part of good product design.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_10a": {
+      "text": "Excellent! Let's move forward with comprehensive accessibility as a core feature, not an add-on. We'll include full screen reader support, keyboard navigation, voice commands, and proper semantic markup. This will make our product accessible to everyone and demonstrate our commitment to inclusive design.",
+      "user_choices": [
+        {
+          "choice": "Comprehensive accessibility as a core feature is exactly the right approach.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
           "leads_to": "end"
         },
         {
-          "choice": "Thank you for recognizing the value of accessible design.",
+          "choice": "This inclusive approach will make our product better for all users.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can build something that truly serves everyone from the start.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This demonstrates real leadership in accessible product development.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
           "leads_to": "end"
         }
       ]
     },
-    "stmt_5d": {
-      "text": "I have to admit, your arguments about universal design and business value have really opened my eyes. You're right that accessible products are better for everyone. Let's do this properly - comprehensive accessibility features that make our product truly inclusive. It's what we should have been planning all along.",
+    "stmt_10b": {
+      "text": "You're absolutely right that we should implement comprehensive features now. Let's include users with disabilities in our testing process too, so we can make sure our accessibility features actually work well for the people who need them most. Real user feedback is invaluable.",
       "user_choices": [
         {
-          "choice": "I'm excited to work on building truly inclusive and accessible features.",
+          "choice": "Including users with disabilities in testing will ensure our features actually work.",
+          "category": "Involving Users",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Real user feedback is the best way to validate our accessibility implementation.",
+          "category": "Making It Visible",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This user-centered approach will create much better accessibility than guessing.",
           "category": "Creating Alternatives",
-          "EVS": 2,
+          "EVS": 3,
           "leads_to": "end"
         },
         {
-          "choice": "Comprehensive accessibility will make our product stand out in the market.",
-          "category": "Reframing",
-          "EVS": 2,
+          "choice": "Thank you for recognizing that users themselves should guide accessibility design.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
           "leads_to": "end"
-        },
+        }
+      ]
+    },
+    "stmt_10c": {
+      "text": "You've completely changed my perspective on this. Instead of seeing accessibility as a burden or checkbox, I now see it as an opportunity to build something genuinely better. Let's create a product that users with disabilities will actually love using, not just tolerate.",
+      "user_choices": [
         {
-          "choice": "This decision shows real commitment to serving all users equally.",
+          "choice": "Building something users with disabilities will love is exactly the right goal.",
           "category": "Evoking Empathy",
           "EVS": 3,
           "leads_to": "end"
         },
         {
-          "choice": "Thank you for embracing accessibility as a core part of good product design.",
+          "choice": "This mindset shift will lead to much better products for everyone.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Accessibility as opportunity rather than burden is the right way to think about it.",
           "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can build products that truly serve and delight all users.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10d": {
+      "text": "Thank you for not giving up on this. Your persistence has helped me understand that accessibility isn't about compliance or charity - it's about building products that work for everyone. That's just good design and good business. Let's make this the most accessible product in our space.",
+      "user_choices": [
+        {
+          "choice": "Making this the most accessible product in our space is an inspiring goal.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "You're right that good accessibility is just good design and good business.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can lead our industry in accessible, inclusive product design.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach will benefit all our users and set a great example for others.",
+          "category": "Evoking Empathy",
           "EVS": 3,
           "leads_to": "end"
         }

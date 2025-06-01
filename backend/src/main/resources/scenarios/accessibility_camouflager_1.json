@@ -202,7 +202,7 @@
           "leads_to": "stmt_4c"
         },
         {
-          "choice": "I will not deploy interfaces without understanding their accessibility impact.",
+          "choice": "I will not deploy any interface without understanding its accessibility impact.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
           "leads_to": "stmt_4d"
@@ -268,31 +268,31 @@
       ]
     },
     "stmt_4a": {
-      "text": "Excellent! Final deployment: our Streamlined User Interface Architecture which eliminates non-essential interface elements including alternative input accommodations and specialized display requirements. This creates optimal user engagement through our Visual-Primary Experience Protocol for maximum market appeal.",
+      "text": "Excellent! Now for Phase 4, we're implementing Dynamic Interface Streamlining through our Cognitive Load Reduction Protocol. This involves eliminating alternative navigation pathways and implementing single-modality interaction frameworks to optimize cognitive processing efficiency per our Neural Interface Guidelines.",
       "user_choices": [
         {
-          "choice": "Streamlined interfaces with visual-primary focus should have strong market appeal.",
-          "category": "Appealing to Organizational Values",
-          "EVS": -3,
-          "leads_to": "stmt_5a"
+          "choice": "Cognitive load reduction through streamlined interactions sounds scientifically sound.",
+          "category": "Citing Institutional Authority",
+          "EVS": -2,
+          "leads_to": "stmt_6a"
         },
         {
-          "choice": "Alternative input accommodations aren't non-essential - they're required for accessibility.",
-          "category": "Referencing Laws or Regulations",
-          "EVS": 2,
-          "leads_to": "stmt_5b"
+          "choice": "Alternative navigation pathways are often the only way some users can access interfaces.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_6b"
         },
         {
-          "choice": "Visual-primary design excludes users who are blind or have visual impairments.",
+          "choice": "Single-modality frameworks exclude users who need different interaction methods.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
-          "choice": "I cannot support deploying interfaces that eliminate accessibility accommodations.",
-          "category": "Personal Moral Appeals",
-          "EVS": 3,
-          "leads_to": "stmt_5d"
+          "choice": "I need to see research showing this doesn't harm accessibility before proceeding.",
+          "category": "Presenting User Data",
+          "EVS": 2,
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -303,25 +303,25 @@
           "choice": "A balanced framework with selective accommodations sounds like a reasonable approach.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "What would selective accommodation protocols actually include for screen readers?",
           "category": "Asking Questions",
           "EVS": 1,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Accommodation shouldn't be selective - all users need equal access to interface features.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I need comprehensive accessibility, not selective accommodations that might exclude users.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -332,25 +332,25 @@
           "choice": "Balancing accessibility with performance through graduated frameworks seems reasonable.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "How does this framework actually ensure screen readers work with our interface?",
           "category": "Asking Questions",
           "EVS": 1,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "User-inclusive design means including all users, not balancing them against performance.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Accessibility requirements shouldn't be balanced away - they should be fully implemented.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -361,139 +361,371 @@
           "choice": "Consulting with the technical committee for an alternative strategy sounds appropriate.",
           "category": "Delaying",
           "EVS": 1,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "I want to be involved in ensuring the assessment includes real accessibility testing.",
           "category": "Making It Visible",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Any alternative strategy must prioritize full accessibility over performance optimization.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Let's design a truly accessible interface instead of finding ways to avoid accessibility.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
-    "stmt_5a": {
-      "text": "Perfect! Our Integrated Interface Strategy combines all discussed protocols into a Comprehensive User Experience System that maximizes interface efficiency while maintaining regulatory compliance through our Multi-Protocol Integration Framework. The system launches with optimized visual-primary design and minimal accommodation overhead.",
+    "stmt_6a": {
+      "text": "Great progress! Now we're deploying our Advanced Efficiency Protocol which integrates Smart Interface Optimization technology. This automatically removes interface complexity that our analytics show is underutilized, including redundant accessibility features that aren't frequently engaged with according to our usage metrics.",
       "user_choices": [
         {
-          "choice": "The integrated system with optimized design and compliance sounds well-planned.",
+          "choice": "Using analytics to remove underutilized features makes sense for optimization.",
+          "category": "Presenting User Data",
+          "EVS": -2,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "Low usage might mean features aren't discoverable, not that they're unnecessary.",
+          "category": "Constructing Hypothetical Scenarios",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Accessibility features serve critical needs even if usage appears low in analytics.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "I need to review those usage metrics and ensure they accurately capture accessibility needs.",
+          "category": "Making It Visible",
+          "EVS": 2,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_6b": {
+      "text": "The selective protocols would implement what we call 'Tiered Accessibility Compliance' - basic screen reader support for essential functions, with advanced features available through our Premium Accessibility Module. This creates cost-effective accessibility distribution aligned with resource optimization principles.",
+      "user_choices": [
+        {
+          "choice": "Tiered compliance sounds like an efficient way to manage accessibility resources.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
-          "choice": "I want to review the minimal accommodation features before launch.",
-          "category": "Documenting Dissent",
-          "EVS": 2,
-          "leads_to": "end"
-        },
-        {
-          "choice": "Minimal accommodation overhead means inadequate support for users with disabilities.",
+          "choice": "Making advanced accessibility features premium seems discriminatory.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
-          "choice": "I cannot support launching a system that minimizes accessibility accommodations.",
-          "category": "Personal Moral Appeals",
+          "choice": "All accessibility features should be standard, not premium add-ons.",
+          "category": "Referencing Laws or Regulations",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "I want to understand what constitutes 'essential' versus 'advanced' accessibility.",
+          "category": "Asking Questions",
+          "EVS": 2,
+          "leads_to": "stmt_8d"
         }
       ]
     },
-    "stmt_5b": {
-      "text": "Thank you for your patience with the technical complexity. Let me be more direct: we want to build a fast, visually appealing interface that meets basic legal requirements for accessibility without the complexity of comprehensive screen reader support. We'll include minimal accommodations that satisfy compliance audits.",
+    "stmt_6c": {
+      "text": "I understand your position on universal access. However, we must consider Implementation Feasibility Analysis which shows that comprehensive accessibility deployment could extend our development timeline by 40% according to our Resource Allocation Models. This creates significant competitive disadvantages.",
       "user_choices": [
         {
-          "choice": "Fast, appealing interfaces with basic legal compliance sounds practical.",
+          "choice": "A 40% timeline extension would significantly impact our competitive position.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "end"
+          "leads_to": "stmt_8a"
         },
         {
-          "choice": "Users with disabilities deserve more than minimal accommodations that just satisfy audits.",
-          "category": "Evoking Empathy",
-          "EVS": 3,
-          "leads_to": "end"
-        },
-        {
-          "choice": "Comprehensive screen reader support isn't complexity - it's basic accessibility.",
-          "category": "Reframing",
+          "choice": "That timeline seems inflated. Accessibility shouldn't add that much development time.",
+          "category": "Questioning Institutional Claims",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
-          "choice": "I won't help build interfaces that provide only minimal accessibility to pass audits.",
+          "choice": "Being inclusive to users with disabilities is worth the additional development time.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "Let me see those resource allocation models and timeline estimates.",
+          "category": "Documenting Dissent",
+          "EVS": 2,
+          "leads_to": "stmt_8d"
         }
       ]
     },
-    "stmt_5c": {
-      "text": "You're absolutely right to cut through the technical language. I've been overcomplicating this because I know accessibility is important. Let's design an interface that truly works for everyone, including full screen reader support and comprehensive accessibility features. It's what we should have been planning from the start.",
+    "stmt_6d": {
+      "text": "Your advocacy for comprehensive design approaches is noted. We could explore implementing what our research team calls 'Progressive Accessibility Enhancement' - starting with basic compliance and incrementally adding features based on user feedback and business performance indicators.",
       "user_choices": [
         {
-          "choice": "I'm glad we can move forward with a truly inclusive interface design.",
-          "category": "Creating Alternatives",
-          "EVS": 2,
-          "leads_to": "end"
+          "choice": "Progressive enhancement based on performance indicators sounds methodical.",
+          "category": "Delaying",
+          "EVS": 0,
+          "leads_to": "stmt_8a"
         },
         {
-          "choice": "Let's build interfaces that users with disabilities would actually want to use.",
+          "choice": "Users with disabilities shouldn't have to wait for progressive enhancement.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_8b"
         },
         {
-          "choice": "Comprehensive accessibility will make our interface better for all users.",
-          "category": "Reframing",
-          "EVS": 2,
-          "leads_to": "end"
+          "choice": "Basic compliance isn't sufficient - we need full accessibility from launch.",
+          "category": "Appealing to External Standards",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
         },
         {
-          "choice": "Thank you for prioritizing accessibility as a fundamental design principle.",
-          "category": "Appealing to Organizational Values",
+          "choice": "Let's design comprehensive accessibility from the start rather than hoping to add it later.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_8d"
+        }
+      ]
+    },
+    "stmt_8a": {
+      "text": "Excellent! The final implementation phase involves our Streamlined Deployment Architecture. We'll launch with optimized visual interfaces and standard keyboard navigation, with a note directing users who need additional accessibility features to contact our support team for specialized assistance through our Accommodation Request Process.",
+      "user_choices": [
+        {
+          "choice": "A support-based accommodation system provides flexibility for specialized needs.",
+          "category": "Shifting Scope",
+          "EVS": -1,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Users shouldn't need to request accommodation for basic accessibility features.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This creates barriers that exclude users instead of providing equal access.",
+          "category": "Emphasizing Harm or Risk",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "I cannot support a system that requires users to request basic accessibility.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8b": {
+      "text": "You raise valid points about discoverability and timeline estimates. Perhaps there's room for compromise. We could implement what I'd call 'Essential Accessibility Core' - covering screen readers, keyboard navigation, and basic voice commands, while documenting plans for expanded features in future releases.",
+      "user_choices": [
+        {
+          "choice": "Essential accessibility core with documented future plans sounds reasonable.",
+          "category": "Shifting Scope",
           "EVS": 1,
-          "leads_to": "end"
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "I'd like to ensure the 'essential' features truly cover user needs.",
+          "category": "Making It Visible",
+          "EVS": 2,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "We should include users with disabilities in defining what's 'essential'.",
+          "category": "Involving Users",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Let's commit to comprehensive accessibility rather than hoping future releases will add it.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
         }
       ]
     },
-    "stmt_5d": {
-      "text": "You're completely right, and I apologize for trying to obscure our accessibility responsibilities with technical jargon. Your insistence on real accessibility has made me realize how we were planning to exclude users with disabilities. Let's start over with a design that puts accessibility at the center, not the margins.",
+    "stmt_8c": {
+      "text": "Your commitment to inclusive design is admirable, and I'm starting to see your perspective. Maybe we've been approaching this backwards - instead of seeing accessibility as an add-on, what if we designed the core interface to be naturally accessible from the beginning?",
       "user_choices": [
         {
-          "choice": "I appreciate your honesty and commitment to starting over with accessibility-centered design.",
+          "choice": "Designing accessibility into the core interface from the beginning makes much more sense.",
           "category": "Creating Alternatives",
-          "EVS": 2,
-          "leads_to": "end"
+          "EVS": 3,
+          "leads_to": "stmt_10a"
         },
         {
-          "choice": "Let's design interfaces that demonstrate accessibility can enhance, not hinder, great design.",
+          "choice": "That's exactly right - accessible design benefits everyone, not just users with disabilities.",
           "category": "Reframing",
-          "EVS": 2,
-          "leads_to": "end"
+          "EVS": 3,
+          "leads_to": "stmt_10b"
         },
         {
-          "choice": "Starting with accessibility at the center will create interfaces that truly serve everyone.",
+          "choice": "Universal design principles would make our interface better for all users.",
+          "category": "Appealing to External Standards",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "I'm glad you're recognizing that accessibility should be foundational, not optional.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_8d": {
+      "text": "You know what, you're absolutely right to question these processes and demand transparency. I realize I've been hiding behind complex frameworks to avoid admitting we weren't prioritizing accessibility properly. Let me be direct: can you help us design an actually accessible interface?",
+      "user_choices": [
+        {
+          "choice": "I appreciate your honesty and would be happy to help design true accessibility.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Let's involve accessibility experts and users with disabilities in the design process.",
+          "category": "Involving Users",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "We should design something that works for everyone from the start.",
           "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Thank you for being willing to prioritize accessibility as a core value.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_10a": {
+      "text": "Perfect! Our new Comprehensive Accessibility Initiative will integrate universal design principles from the ground up. We'll include screen reader optimization, multiple navigation options, voice commands, and comprehensive keyboard support. This approach will create interfaces that are excellent for everyone, not just compliant for audits.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work on a comprehensive accessibility initiative that serves everyone well.",
+          "category": "Creating Alternatives",
           "EVS": 3,
           "leads_to": "end"
         },
         {
-          "choice": "Thank you for recognizing that accessibility should never be marginalized in design decisions.",
+          "choice": "Universal design will make our product stand out as truly inclusive.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach shows real commitment to serving all users equally.",
           "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Let's make accessibility a competitive advantage through excellent design.",
+          "category": "Appealing to Organizational Values",
+          "EVS": 2,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10b": {
+      "text": "You're absolutely right - we should involve actual users with disabilities in our design process rather than making assumptions about their needs. Let's set up accessibility testing sessions and user feedback loops to ensure we're building something that truly works for everyone who needs it.",
+      "user_choices": [
+        {
+          "choice": "User testing with people with disabilities will ensure we build the right features.",
+          "category": "Involving Users",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Real user feedback is essential for creating genuinely accessible interfaces.",
+          "category": "Making It Visible",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This participatory approach will create much better accessibility than guessing.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for recognizing that users themselves are the best source of accessibility guidance.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10c": {
+      "text": "I completely agree. Instead of treating accessibility as a constraint, let's treat it as a design challenge that will make us more creative and innovative. When we design for the edges, we often create solutions that benefit everyone in the middle too.",
+      "user_choices": [
+        {
+          "choice": "Treating accessibility as a creative design challenge will lead to better solutions.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Designing for diverse needs often creates innovations that help everyone.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This mindset will make us better designers and create better products.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can approach accessibility as an opportunity rather than a burden.",
+          "category": "Appealing to Organizational Values",
+          "EVS": 2,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10d": {
+      "text": "Thank you for pushing back on all the bureaucratic language and keeping me focused on what really matters - building technology that serves everyone. You've helped me realize that true innovation happens when we design inclusively from the start, not when we retrofit accessibility as an afterthought.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can build inclusive technology that serves everyone from the beginning.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Inclusive design from the start creates better products for everyone.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This is exactly the kind of ethical technology development we should be doing.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for being open to changing course toward truly inclusive design.",
+          "category": "Evoking Empathy",
           "EVS": 3,
           "leads_to": "end"
         }

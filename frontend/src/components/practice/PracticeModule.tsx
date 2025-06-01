@@ -686,7 +686,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         
         // Set up practice to chat integration
       localStorage.setItem('practice_to_chat', 'true');
-        localStorage.setItem('practice_feedback_simple', `I just completed a practice scenario about ${currentScenario.scenario.issue.toLowerCase()} with a ${currentScenario.scenario.managerType.toLowerCase()} manager. My ethical decision-making score was ${Math.round(currentScenario.sessionSummary?.averageEvs || 0)}/100. Can you provide detailed feedback on my performance?`);
+        localStorage.setItem('practice_feedback_simple', `I just completed a practice scenario about ${currentScenario.scenario.issue.toLowerCase()} with a ${currentScenario.scenario.managerType.toLowerCase()} manager. My ethical decision-making score was ${Math.round(((finalScore + 15) / 30) * 10)}/10. Can you provide detailed feedback on my performance?`);
         
         // Store detailed practice data for the backend
         const detailedPrompt = `
@@ -698,7 +698,7 @@ Please analyze this practice session using the EVA Tactic Taxonomy framework:
 - Manager Type: ${currentScenario.scenario.managerType}
 
 **Performance Summary:**
-- Total EVS Score: ${finalScore >= 0 ? '+' : ''}${finalScore} (using new -3 to +3 per choice system)
+- Final Score: ${Math.round(((finalScore + 15) / 30) * 10)}/10 (converted from EVS range to 10-point scale)
 - Performance Level: ${calculatePerformanceRating(finalScore).rating}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
 
@@ -852,27 +852,20 @@ Use the EVA framework to help them understand which tactics are most effective a
 
   // Show EVS feedback with animation - now uses backend feedback
   const showEVSFeedback = (score: number, category: string, feedbackText?: string) => {
-    // Generate tactic-based feedback based on category and score
     const tacticFeedback = generateTacticBasedFeedback(score, category);
-    const message = feedbackText || tacticFeedback;
     
-    // Clear any existing feedback first to ensure fresh display
-    setCurrentEVSFeedback(null);
-    
-    // Show new feedback after a brief delay to ensure state reset
-    setTimeout(() => {
-      setCurrentEVSFeedback({ score, category, message, show: true });
-      
-      // Auto-hide after 3.5 seconds (reduced from 4 for smoother flow)
-      setTimeout(() => {
-        setCurrentEVSFeedback(prev => prev ? { ...prev, show: false } : null);
-      }, 3500);
-      
-      // Clear after animation completes
-      setTimeout(() => {
-        setCurrentEVSFeedback(null);
-      }, 4000);
-    }, 100);
+    const feedbackMessage: FeedbackMessage = {
+      role: 'feedback',
+      content: tacticFeedback,
+      evs: score,
+      category: category,
+      isTyping: false
+    };
+
+    setCurrentScenario(prev => prev ? {
+      ...prev,
+      conversation: [...prev.conversation, feedbackMessage]
+    } : null);
   };
 
   // Generate tactic-based feedback
@@ -880,19 +873,15 @@ Use the EVA framework to help them understand which tactics are most effective a
     const tacticType = getTacticType(category);
     
     if (score >= 3) {
-      return `🌟 Excellent ${tacticType}! You used "${category}" to strongly advocate for ethical principles.`;
+      return `🌟 Excellent ${tacticType}! You used '${category}' to strongly advocate for ethical principles.`;
     } else if (score >= 2) {
-      return `👍 Good ${tacticType}! "${category}" shows structured resistance to unethical requests.`;
+      return `👍 Good ${tacticType}! You used '${category}' to effectively resist unethical requests.`;
     } else if (score >= 1) {
-      return `😐 Mild resistance with "${category}". This creates some delay but may not prevent the unethical action.`;
+      return `😐 ${tacticType} approach using '${category}'. This shows awareness but could be stronger.`;
     } else if (score >= 0) {
-      return `⚠️ Passive response using "${category}". You're not actively resisting the unethical request.`;
-    } else if (score >= -1) {
-      return `⚠️ Compliance with "${category}". You're going along with the problematic request.`;
-    } else if (score >= -2) {
-      return `❌ Strong compliance with "${category}". You're actively supporting the unethical action.`;
+      return `⚠️ Passive response using '${category}'. Consider more assertive ethical resistance.`;
     } else {
-      return `❌ Complete ethical blindspot with "${category}". This response enables serious harm.`;
+      return `❌ This '${category}' choice shows compliance with unethical requests.`;
     }
   };
 
