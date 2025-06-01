@@ -149,27 +149,39 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     public List<SelectionDataDTO> getUserSelections(UUID sessionId) {
         log.info("Getting user selections for session: {}", sessionId);
         
-        PracticeSession session = getPracticeSessionEntityById(sessionId);
-        
-        // First try to get data from stored choices (new format)
-        List<PracticeSessionChoice> storedChoices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
-        if (!storedChoices.isEmpty()) {
-            return storedChoices.stream()
-                    .map(choice -> SelectionDataDTO.builder()
-                            .step(choice.getStepNumber())
-                            .choice(choice.getChoiceText())
-                            .evs(choice.getEvsScore())
-                            .tactic(choice.getTactic())
-                            .build())
-                    .collect(Collectors.toList());
-        }
-        
-        // Fall back to legacy method for backward compatibility
-        if (session.getScenarioId() == null || session.getSelectedChoices() == null) {
-            return new ArrayList<>();
-        }
-        
         try {
+            PracticeSession session = getPracticeSessionEntityById(sessionId);
+            log.info("DEBUG: Found session with ID: {}, scenarioId: {}", session.getId(), session.getScenarioId());
+            
+            // First try to get data from stored choices (new format)
+            List<PracticeSessionChoice> storedChoices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
+            log.info("DEBUG: Found {} stored choices for session {}", storedChoices.size(), sessionId);
+            
+            if (!storedChoices.isEmpty()) {
+                log.info("DEBUG: Using stored choices data");
+                List<SelectionDataDTO> result = storedChoices.stream()
+                        .map(choice -> {
+                            log.info("DEBUG: Processing choice - Step: {}, Text: {}, EVS: {}, Tactic: {}", 
+                                    choice.getStepNumber(), choice.getChoiceText(), choice.getEvsScore(), choice.getTactic());
+                            return SelectionDataDTO.builder()
+                                    .step(choice.getStepNumber())
+                                    .choice(choice.getChoiceText())
+                                    .evs(choice.getEvsScore())
+                                    .tactic(choice.getTactic())
+                                    .build();
+                        })
+                        .collect(Collectors.toList());
+                log.info("DEBUG: Returning {} selection DTOs", result.size());
+                return result;
+            }
+            
+            // Fall back to legacy method for backward compatibility
+            log.info("DEBUG: No stored choices found, falling back to legacy method");
+            if (session.getScenarioId() == null || session.getSelectedChoices() == null) {
+                log.info("DEBUG: No scenario ID or selected choices, returning empty list");
+                return new ArrayList<>();
+            }
+            
             // Get scenario data from ScenarioService
             JsonNode scenarioData = scenarioService.getScenarioData(session.getScenarioId());
             List<SelectionDataDTO> selections = new ArrayList<>();
@@ -195,7 +207,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
             
             return selections;
         } catch (Exception e) {
-            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage());
+            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage(), e);
             throw new RuntimeException("Failed to retrieve user selections", e);
         }
     }

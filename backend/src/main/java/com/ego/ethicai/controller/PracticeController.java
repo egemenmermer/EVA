@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -104,12 +105,19 @@ public class PracticeController {
     @GetMapping("/admin/practice-sessions/{sessionId}/selections")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<SelectionDataDTO>> getUserSelections(@PathVariable UUID sessionId) {
+        log.info("=== ADMIN SELECTIONS ENDPOINT CALLED ===");
+        log.info("SessionId: {}", sessionId);
+        log.info("Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
+        log.info("Principal: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        log.info("Authorities: {}", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+        
         try {
             log.info("Retrieving user selections for session: {}", sessionId);
             List<SelectionDataDTO> selections = practiceSessionService.getUserSelections(sessionId);
+            log.info("Successfully retrieved {} selections", selections.size());
             return ResponseEntity.ok(selections);
         } catch (Exception e) {
-            log.error("Error retrieving user selections for session {}: {}", sessionId, e.getMessage());
+            log.error("Error retrieving user selections for session {}: {}", sessionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
@@ -117,6 +125,9 @@ public class PracticeController {
     @GetMapping("/admin/practice-sessions/{sessionId}/decision-tree")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DecisionTreeDataDTO> getDecisionTree(@PathVariable UUID sessionId) {
+        log.info("=== ADMIN DECISION TREE ENDPOINT CALLED ===");
+        log.info("SessionId: {}", sessionId);
+        
         try {
             log.info("Retrieving decision tree for session: {}", sessionId);
             DecisionTreeDataDTO decisionTree = practiceSessionService.getDecisionTree(sessionId);

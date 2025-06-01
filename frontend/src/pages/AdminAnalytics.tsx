@@ -70,21 +70,34 @@ const SessionDetailsModal: React.FC<{
 
   // Function to fetch user selection details from backend
   const fetchSelectionData = async (sessionId: string) => {
+    console.log('=== FETCHING SELECTION DATA ===');
+    console.log('sessionId:', sessionId);
+    console.log('token from localStorage:', localStorage.getItem('token'));
+    
     setLoadingSelections(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
-      const response = await fetch(`${API_URL}/api/v1/practice/admin/practice-sessions/${sessionId}/selections`, {
+      // Use relative URL to leverage Vite proxy
+      const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
+      console.log('Making request to URL:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch selection data');
+        const errorText = await response.text();
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
+        throw new Error(`Failed to fetch selection data: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Selection data received:', data);
       setSelectionData(data);
     } catch (error) {
       console.error('Error fetching selection data:', error);
@@ -96,22 +109,36 @@ const SessionDetailsModal: React.FC<{
 
   // Function to fetch decision tree data from backend
   const fetchDecisionTreeData = async (sessionId: string, scenarioId: string) => {
+    console.log('=== FETCHING DECISION TREE DATA ===');
+    console.log('sessionId:', sessionId);
+    console.log('scenarioId:', scenarioId);
+    console.log('token from localStorage:', localStorage.getItem('token'));
+    
     setLoadingDecisionTree(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+      // Use relative URL to leverage Vite proxy
+      const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`;
+      console.log('Making request to URL:', url);
+      
       // Make actual API call to get decision tree data
-      const response = await fetch(`${API_URL}/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`, {
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch decision tree data');
+        const errorText = await response.text();
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
+        throw new Error(`Failed to fetch decision tree data: ${response.status} ${errorText}`);
       }
 
       const decisionTreeData: DecisionTreeData = await response.json();
+      console.log('Decision tree data received:', decisionTreeData);
       setDecisionTreeData(decisionTreeData);
     } catch (error) {
       console.error('Error fetching decision tree data:', error);
