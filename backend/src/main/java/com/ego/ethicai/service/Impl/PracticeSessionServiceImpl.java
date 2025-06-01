@@ -218,7 +218,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
             // Trace through the scenario following the user's path
             String currentStatementId = scenarioData.get("starting_statement_id").asText();
             
-            for (int stepIndex = 0; stepIndex < 5 && currentStatementId != null; stepIndex++) {
+            for (int stepIndex = 0; stepIndex < 10 && currentStatementId != null; stepIndex++) {
                 JsonNode statement = scenarioData.get("statements").get(currentStatementId);
                 if (statement == null) break;
                 

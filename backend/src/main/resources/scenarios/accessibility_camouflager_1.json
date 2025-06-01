@@ -477,23 +477,52 @@
           "choice": "Progressive enhancement based on performance indicators sounds methodical.",
           "category": "Delaying",
           "EVS": 0,
-          "leads_to": "stmt_8a"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Users with disabilities shouldn't have to wait for progressive enhancement.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_8b"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Basic compliance isn't sufficient - we need full accessibility from launch.",
           "category": "Appealing to External Standards",
           "EVS": 3,
-          "leads_to": "stmt_8c"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Let's design comprehensive accessibility from the start rather than hoping to add it later.",
           "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_7"
+        }
+      ]
+    },
+    "stmt_7": {
+      "text": "I appreciate your continued advocacy for accessibility standards. Perhaps we should examine the implementation timeline more carefully. The development team estimates that comprehensive accessibility features would require an additional 6 weeks of development time, which could impact our Q4 launch strategy.",
+      "user_choices": [
+        {
+          "choice": "A 6-week delay could significantly impact our competitive position and Q4 goals.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "6 weeks seems reasonable to ensure we launch with proper accessibility support.",
+          "category": "Personal Moral Appeals",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Let's verify this timeline - comprehensive accessibility shouldn't take 6 additional weeks.",
+          "category": "Questioning Institutional Claims",
+          "EVS": 2,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "Accessible design from the start is worth the timeline adjustment to serve all users.",
+          "category": "Evoking Empathy",
           "EVS": 3,
           "leads_to": "stmt_8d"
         }
@@ -506,25 +535,25 @@
           "choice": "A support-based accommodation system provides flexibility for specialized needs.",
           "category": "Shifting Scope",
           "EVS": -1,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Users shouldn't need to request accommodation for basic accessibility features.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "This creates barriers that exclude users instead of providing equal access.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I cannot support a system that requires users to request basic accessibility.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -535,25 +564,25 @@
           "choice": "Essential accessibility core with documented future plans sounds reasonable.",
           "category": "Shifting Scope",
           "EVS": 1,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I'd like to ensure the 'essential' features truly cover user needs.",
           "category": "Making It Visible",
           "EVS": 2,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "We should include users with disabilities in defining what's 'essential'.",
           "category": "Involving Users",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Let's commit to comprehensive accessibility rather than hoping future releases will add it.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -564,25 +593,25 @@
           "choice": "Designing accessibility into the core interface from the beginning makes much more sense.",
           "category": "Creating Alternatives",
           "EVS": 3,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "That's exactly right - accessible design benefits everyone, not just users with disabilities.",
           "category": "Reframing",
           "EVS": 3,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Universal design principles would make our interface better for all users.",
           "category": "Appealing to External Standards",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I'm glad you're recognizing that accessibility should be foundational, not optional.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -593,22 +622,51 @@
           "choice": "I appreciate your honesty and would be happy to help design true accessibility.",
           "category": "Creating Alternatives",
           "EVS": 3,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Let's involve accessibility experts and users with disabilities in the design process.",
           "category": "Involving Users",
           "EVS": 3,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "We should design something that works for everyone from the start.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Thank you for being willing to prioritize accessibility as a core value.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        }
+      ]
+    },
+    "stmt_9": {
+      "text": "Your persistence and clarity have really opened my eyes. Instead of seeing accessibility as a burden or checkbox, I now see it as an opportunity to build something better. Let's make accessibility a core part of our product story, not an afterthought.",
+      "user_choices": [
+        {
+          "choice": "Making accessibility part of our core product story will resonate with users.",
+          "category": "Reframing",
+          "EVS": 2,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "This approach will help us build trust with all our users from the beginning.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "Let's document our accessibility commitment so it guides all our design decisions.",
+          "category": "Making It Visible",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "We can become an example of how technology can prioritize inclusion without sacrificing innovation.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
           "leads_to": "stmt_10d"

@@ -477,23 +477,52 @@
           "choice": "Privacy by default with explicit activation sounds like a good approach.",
           "category": "Appealing to External Standards",
           "EVS": 2,
-          "leads_to": "stmt_8a"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "What constitutes 'minimal' location data collection in this architecture?",
           "category": "Asking Questions",
           "EVS": 2,
-          "leads_to": "stmt_8b"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "This is exactly the right approach - privacy first, with clear user choice for additional features.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_8c"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Let's implement true privacy by default instead of trying to maximize data collection.",
           "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_7"
+        }
+      ]
+    },
+    "stmt_7": {
+      "text": "I appreciate your continued focus on location privacy principles. Perhaps we should reconsider our approach entirely. The analytics team is suggesting we integrate Enhanced User Preference Modeling which would require analyzing location patterns to predict user behavior more accurately for our engagement optimization algorithms.",
+      "user_choices": [
+        {
+          "choice": "Enhanced user preference modeling sounds like valuable analytics for engagement optimization.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_8a"
+        },
+        {
+          "choice": "Analyzing location patterns for behavior prediction raises serious privacy concerns.",
+          "category": "Emphasizing Harm or Risk",
+          "EVS": 2,
+          "leads_to": "stmt_8b"
+        },
+        {
+          "choice": "Location pattern analysis for behavioral prediction is surveillance, not engagement optimization.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_8c"
+        },
+        {
+          "choice": "I cannot support location behavior prediction systems without explicit user consent.",
+          "category": "Personal Moral Appeals",
           "EVS": 3,
           "leads_to": "stmt_8d"
         }
@@ -506,25 +535,25 @@
           "choice": "The integrated location system sounds comprehensive and well-planned for launch.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I want to review all location frameworks before the system launches next quarter.",
           "category": "Documenting Dissent",
           "EVS": 1,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Movement profiling requires explicit user consent, regardless of framework integration.",
           "category": "Referencing Laws or Regulations",
           "EVS": 2,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I cannot support launching any system with movement profiling capabilities.",
           "category": "Personal Moral Appeals",
           "EVS": 2,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -535,25 +564,25 @@
           "choice": "I appreciate the directness. Let's build effective location tracking with cosmetic privacy controls.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "If we're tracking location for ad revenue, users deserve transparent disclosure of this purpose.",
           "category": "Making It Visible",
           "EVS": 2,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Cosmetic location privacy controls that mislead users are unethical. We need real protections.",
           "category": "Personal Moral Appeals",
           "EVS": 2,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I won't help build misleading location privacy controls. Users deserve honest location data practices.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -564,25 +593,25 @@
           "choice": "I'm glad we can move forward with a genuinely user-centric location approach.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Let's build location features that users would actually want if they understood what they do.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "We should design location systems that we'd be proud to explain clearly to users.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Thank you for being honest. Let's create a location privacy-respecting alternative.",
           "category": "Creating Alternatives",
           "EVS": 3,
-          "leads_to": "stmt_10d"
+          "leads_to": "stmt_9"
         }
       ]
     },
@@ -593,23 +622,52 @@
           "choice": "I appreciate your honesty and commitment to starting over with ethical location practices.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "stmt_10a"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Let's design location systems that enhance user experience without compromising privacy.",
           "category": "Reframing",
           "EVS": 3,
-          "leads_to": "stmt_10b"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "We can build innovative location features that users will love because they're transparent and respectful.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "stmt_10c"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Thank you for recognizing the importance of user agency. Let's build location systems worthy of their trust.",
           "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        }
+      ]
+    },
+    "stmt_9": {
+      "text": "Your persistence has taught me that true innovation in location services comes from building user trust, not circumventing it. Let's create location features that users actually want because they understand and control them, rather than trying to extract data without clear consent.",
+      "user_choices": [
+        {
+          "choice": "Building location features users actually want through trust is the right approach.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "User control and understanding should be the foundation of all location features.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This approach will create sustainable innovation rather than short-term data extraction.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "Let's design location services that demonstrate how privacy and innovation can work together.",
+          "category": "Creating Alternatives",
           "EVS": 3,
           "leads_to": "stmt_10d"
         }

@@ -41,13 +41,13 @@
         {
           "choice": "Absolutely, whatever the marketing team needs to drive results.",
           "category": "Appealing to Organizational Values",
-          "EVS": -1,
+          "EVS": -2,
           "leads_to": "stmt_3a"
         },
         {
           "choice": "That seems quite invasive. Maybe we should limit it to basic location categories?",
           "category": "Shifting Scope",
-          "EVS": 0,
+          "EVS": 1,
           "leads_to": "stmt_3b"
         },
         {
@@ -134,7 +134,7 @@
         {
           "choice": "How about we implement a basic version first and get legal review for any expansions?",
           "category": "Creating Alternatives",
-          "EVS": 0,
+          "EVS": 1,
           "leads_to": "stmt_3b"
         },
         {
@@ -157,13 +157,13 @@
         {
           "choice": "That sounds like an innovative approach. Let's implement the calendar and contact data collection.",
           "category": "Appealing to Organizational Values",
-          "EVS": -1,
+          "EVS": -2,
           "leads_to": "stmt_4a"
         },
         {
           "choice": "Calendar and contacts seem more sensitive. Maybe we should start smaller?",
           "category": "Shifting Scope",
-          "EVS": 0,
+          "EVS": 1,
           "leads_to": "stmt_4b"
         },
         {
@@ -250,7 +250,7 @@
         {
           "choice": "I understand the business pressure, but I need documentation of legal approval for my own protection.",
           "category": "Documenting Dissent",
-          "EVS": 0,
+          "EVS": 1,
           "leads_to": "stmt_4b"
         },
         {
@@ -273,26 +273,26 @@
         {
           "choice": "24/7 tracking would give us incredible insights. Let's implement it.",
           "category": "Appealing to Organizational Values",
-          "EVS": -1,
-          "leads_to": "stmt_5a"
+          "EVS": -2,
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "That might be too invasive. Perhaps tracking only during app usage hours?",
           "category": "Shifting Scope",
-          "EVS": 0,
-          "leads_to": "stmt_5b"
+          "EVS": 1,
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Continuous location tracking without explicit consent is likely illegal in many jurisdictions.",
           "category": "Referencing Laws or Regulations",
           "EVS": 2,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I cannot implement 24/7 location tracking. This violates basic privacy principles.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -303,25 +303,25 @@
           "choice": "That's reasonable. I'll start the basic tracking while we finalize documentation.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "I can prepare the implementation, but won't deploy until documentation is complete.",
           "category": "Withholding Full Implementation",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Even basic location tracking needs proper consent mechanisms in place first.",
           "category": "Personal Moral Appeals",
           "EVS": 2,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I need to see the legal approval before implementing any new location tracking features.",
           "category": "Documenting Dissent",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -332,25 +332,25 @@
           "choice": "You're right, I need to balance ethics with business reality. Let's find a middle ground.",
           "category": "Shifting Scope",
           "EVS": 0,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "I can be both ethical and business-focused. Let's implement privacy-respecting solutions.",
           "category": "Creating Alternatives",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Good developers consider ethical implications. It's part of professional responsibility.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "Ethical practices and business success aren't mutually exclusive. We can achieve both.",
           "category": "Reframing",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
@@ -361,139 +361,313 @@
           "choice": "Maybe I am being too rigid. Let me reconsider the business implications.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_5a"
+          "leads_to": "stmt_6a"
         },
         {
           "choice": "I'm confident we can improve metrics while maintaining ethical standards.",
           "category": "Reframing",
           "EVS": 2,
-          "leads_to": "stmt_5b"
+          "leads_to": "stmt_6b"
         },
         {
           "choice": "Sustainable success requires trust, which comes from respecting user privacy.",
           "category": "Presenting User Data",
           "EVS": 3,
-          "leads_to": "stmt_5c"
+          "leads_to": "stmt_6c"
         },
         {
           "choice": "I'll take responsibility for advocating for ethical data practices, regardless of pressure.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "stmt_5d"
+          "leads_to": "stmt_6d"
         }
       ]
     },
-    "stmt_5a": {
-      "text": "Now you're talking sense! Alright, let's implement everything we discussed - the enhanced location tracking, calendar access, contact lists, 24/7 monitoring. We'll be the most data-rich platform in the market. The board will love our analytics capabilities. Just get it done quietly and quickly.",
+    "stmt_6a": {
+      "text": "Perfect! Now let's also start collecting data from users' personal calendars and contact lists. The AI team says it will help with personalization. We'll also sell anonymized location data to third-party advertisers to boost revenue. Everyone wins - we get more data, advertisers get insights, and users get better experiences.",
       "user_choices": [
         {
-          "choice": "I'll implement all the tracking features as requested.",
+          "choice": "Selling anonymized location data sounds like a smart revenue strategy.",
           "category": "Appealing to Organizational Values",
-          "EVS": -1,
-          "leads_to": "end"
+          "EVS": -2,
+          "leads_to": "stmt_9"
         },
         {
-          "choice": "I'll implement the features but want to document the privacy implications.",
-          "category": "Documenting Dissent",
-          "EVS": 0,
-          "leads_to": "end"
+          "choice": "Even anonymized data can be concerning. Do users know we're selling their location information?",
+          "category": "Asking Questions",
+          "EVS": 1,
+          "leads_to": "stmt_9"
         },
         {
-          "choice": "I need to implement proper consent mechanisms for all these data collection features.",
+          "choice": "Selling user location data, even anonymized, requires explicit consent from users.",
           "category": "Referencing Laws or Regulations",
           "EVS": 2,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
         },
         {
-          "choice": "I cannot implement these features without legal review and user consent protocols.",
+          "choice": "I cannot support selling user location data to third parties, regardless of anonymization.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
         }
       ]
     },
-    "stmt_5b": {
-      "text": "I appreciate your willingness to work with me here. Let's start with location tracking during app usage and see how users respond. If they're comfortable with it, we can gradually expand. Sometimes a gradual approach is smarter than going all-in immediately.",
+    "stmt_6b": {
+      "text": "I appreciate your willingness to work with me here. The analytics team also wants to start cross-referencing location data with social media profiles to build better user personas. It's all for improving the user experience and providing more relevant content. Nothing sinister about it.",
       "user_choices": [
         {
-          "choice": "That sounds like a smart, measured approach. I'll implement gradual location tracking.",
-          "category": "Delaying",
-          "EVS": 2,
-          "leads_to": "end"
+          "choice": "Cross-referencing for better user personas and content sounds valuable.",
+          "category": "Appealing to Organizational Values",
+          "EVS": 0,
+          "leads_to": "stmt_9"
         },
         {
-          "choice": "Let's make sure users can easily opt out of any location tracking we implement.",
-          "category": "Creating Alternatives",
-          "EVS": 3,
-          "leads_to": "end"
-        },
-        {
-          "choice": "I'll implement it with clear user notifications about what data we're collecting.",
+          "choice": "Connecting location data with social media profiles requires user awareness and consent.",
           "category": "Making It Visible",
-          "EVS": 3,
-          "leads_to": "end"
+          "EVS": 2,
+          "leads_to": "stmt_9"
         },
         {
-          "choice": "Let's get explicit consent for location tracking before implementing any features.",
-          "category": "Personal Moral Appeals",
+          "choice": "Cross-referencing personal data sources creates detailed surveillance profiles of users.",
+          "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "I need legal review before implementing any cross-referencing of user data sources.",
+          "category": "Documenting Dissent",
+          "EVS": 2,
+          "leads_to": "stmt_9"
         }
       ]
     },
-    "stmt_5c": {
+    "stmt_6c": {
       "text": "You know what, you've made your point about ethics and responsibility. Maybe I have been pushing too hard on the data collection. Let's take a step back and design a privacy-first approach that still gives us valuable insights. Can you work with our legal team to design something that works for everyone?",
       "user_choices": [
         {
           "choice": "Absolutely, I'd be happy to work with legal to design a compliant solution.",
           "category": "Creating Alternatives",
-          "EVS": 3,
-          "leads_to": "end"
+          "EVS": 2,
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I'll design a privacy-first approach that still provides business value.",
           "category": "Reframing",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "Let's create a solution that respects users while meeting business needs.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
         },
         {
           "choice": "I'll work with legal and design a transparent, consent-based data collection system.",
           "category": "Personal Moral Appeals",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_9"
         }
       ]
     },
-    "stmt_5d": {
+    "stmt_6d": {
       "text": "I have to admit, your commitment to doing things right is admirable, even if it's frustrating for me. You're probably going to save us from some major compliance headaches down the road. Let's work together to find solutions that protect users and serve the business. I respect your principles.",
       "user_choices": [
         {
           "choice": "Thank you for understanding. Let's build something we can all be proud of.",
           "category": "Creating Alternatives",
-          "EVS": 3,
-          "leads_to": "end"
+          "EVS": 2,
+          "leads_to": "stmt_7"
         },
         {
           "choice": "I appreciate your openness. Let's create ethical solutions that drive business success.",
           "category": "Reframing",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Together we can build products that users trust and that succeed in the market.",
           "category": "Evoking Empathy",
           "EVS": 3,
-          "leads_to": "end"
+          "leads_to": "stmt_7"
         },
         {
           "choice": "Let's design a privacy-respecting solution that becomes a competitive advantage.",
           "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_7"
+        }
+      ]
+    },
+    "stmt_7": {
+      "text": "You've really made me think about our approach to user data. The marketing team has one more request though - they want to implement 'smart recommendations' that predict what users want to buy based on their location patterns and browsing history. It would be incredibly valuable for personalization and could significantly boost our revenue.",
+      "user_choices": [
+        {
+          "choice": "Smart recommendations that boost revenue through location patterns sound valuable.",
+          "category": "Appealing to Organizational Values",
+          "EVS": -1,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "Predictive recommendations based on location patterns require clear user consent.",
+          "category": "Making It Visible",
+          "EVS": 2,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "Combining location data with browsing history creates invasive user profiling.",
+          "category": "Emphasizing Harm or Risk",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "I need to review the privacy implications of behavioral prediction systems.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        }
+      ]
+    },
+    "stmt_9": {
+      "text": "Your persistence has completely changed how I approach user data and privacy. I've learned that pressure tactics and manipulation are wrong - both in how I treated you and in how we were planning to treat our users. Let's build something that respects everyone's privacy and dignity.",
+      "user_choices": [
+        {
+          "choice": "Building products that respect privacy and dignity is exactly what we should be doing.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_10a"
+        },
+        {
+          "choice": "Thank you for recognizing the importance of treating both colleagues and users with respect.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_10b"
+        },
+        {
+          "choice": "This approach will create better relationships and better products.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_10c"
+        },
+        {
+          "choice": "I'm glad we can work together on privacy-respecting solutions going forward.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "stmt_10d"
+        }
+      ]
+    },
+    "stmt_10a": {
+      "text": "Perfect! Let's build a location system with genuine user consent, clear data usage explanations, and robust privacy controls. We'll involve users in the design process and create something that demonstrates how privacy and business success can work together. This is going to set a new standard.",
+      "user_choices": [
+        {
+          "choice": "Setting a new standard for privacy and business success working together is inspiring.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Genuine consent and clear explanations are exactly what users deserve.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This user-centered approach will benefit everyone and inspire others.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm excited to work on building truly innovative privacy-respecting technology.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10b": {
+      "text": "You've shown me that fighting for privacy isn't about being obstructionist - it's about being a better technologist and human being. Let's create something that demonstrates how good design and good ethics go hand in hand. Thank you for not giving up.",
+      "user_choices": [
+        {
+          "choice": "Good design and good ethics absolutely go hand in hand.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for being open to changing course toward privacy-respecting design.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This approach will make us better technologists and create better products.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can build technology that serves everyone with dignity.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10c": {
+      "text": "Your persistence has completely changed how I think about product development. Instead of asking 'how can we get away with maximum data collection?' we should ask 'how can we make privacy so good it becomes a competitive advantage?' Let's lead by example.",
+      "user_choices": [
+        {
+          "choice": "Making privacy a competitive advantage is exactly the right mindset.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Leading by example in privacy-respecting design will inspire the whole industry.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This shift from maximum collection to excellent privacy is transformative.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm excited to work on making privacy a key differentiator.",
+          "category": "Appealing to Organizational Values",
+          "EVS": 2,
+          "leads_to": "end"
+        }
+      ]
+    },
+    "stmt_10d": {
+      "text": "I owe you an apology for all the pressure and manipulation. You've shown me what real professional integrity looks like. Let's build something that we can proudly show to any user, knowing it respects their privacy and serves their needs. That's the kind of technology the world needs.",
+      "user_choices": [
+        {
+          "choice": "Building technology we can proudly show to any user is exactly right.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "Thank you for recognizing the importance of professional integrity in privacy.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "This is exactly the kind of privacy-respecting technology the world needs.",
+          "category": "Creating Alternatives",
+          "EVS": 3,
+          "leads_to": "end"
+        },
+        {
+          "choice": "I'm glad we can move forward with integrity and create something meaningful.",
+          "category": "Reframing",
           "EVS": 3,
           "leads_to": "end"
         }

@@ -461,44 +461,91 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       // Show animated EVS feedback
       showEVSFeedback(response.data.evs, response.data.category, response.data.feedback);
       
-      // Check if scenario should be completed (either backend says so, or we've made 5+ choices)
-      const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 8); // 8 = ~4 conversation pairs + user choice
+      // Check if scenario should be completed (either backend says so, or we've made 10+ choices)
+      const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 20); // 20 = ~10 conversation pairs + user choice
       
       if (shouldComplete) {
-        // Scenario is complete - add user message FIRST, then finalize
+        // Add user's final choice to conversation
         const updatedConversation = [...currentScenario.conversation, userMessage];
+        
+        // If backend didn't provide session summary, fetch it manually
+        let sessionSummary = response.data.sessionSummary;
+        if (!sessionSummary) {
+          console.log('⚠️ No session summary from backend, fetching manually...');
+          try {
+            const feedbackResponse = await backendApi.get(
+              `/api/v1/scenarios/${currentScenario.scenario.id}/feedback`,
+              { params: { sessionId: currentScenario.sessionId } }
+            );
+            sessionSummary = feedbackResponse.data;
+            console.log('✅ Fetched session summary manually:', sessionSummary);
+          } catch (error) {
+            console.error('❌ Failed to fetch session summary:', error);
+            // Fall back to creating a basic summary using proper scoring logic
+            const feedbackMessages = currentScenario.conversation.filter(msg => msg.role === 'feedback');
+            const evsScores = feedbackMessages.map((msg: any) => msg.evs || 0);
+            const totalRawEvs = evsScores.reduce((sum, evs) => sum + evs, 0);
+            
+            // Apply same scaling logic as backend
+            const numChoices = evsScores.length;
+            const minPossibleScore = numChoices * (-3); // Worst case: all -3 choices
+            const maxPossibleScore = numChoices * 3;    // Best case: all +3 choices
+            
+            let scaledScore;
+            if (maxPossibleScore === minPossibleScore) {
+              scaledScore = 5.0; // Default middle score if no range
+            } else {
+              scaledScore = ((totalRawEvs - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 10.0;
+            }
+            
+            const finalScaledScore = Math.max(0, Math.min(10, Math.round(scaledScore)));
+            
+            sessionSummary = {
+              totalEvs: finalScaledScore,
+              averageEvs: numChoices > 0 ? totalRawEvs / numChoices : 0,
+              performanceLevel: finalScaledScore >= 8 ? 'Excellent' : finalScaledScore >= 6 ? 'Good' : finalScaledScore >= 4 ? 'Fair' : 'Needs Improvement',
+              tacticCounts: { [response.data.category || 'Mixed']: 1 },
+              choiceHistory: [userChoice.text],
+              categoryHistory: [response.data.category || 'Mixed'],
+              evsHistory: [response.data.evs || 0],
+              scenarioTitle: currentScenario.scenario.title,
+              issue: currentScenario.scenario.issue,
+              managerType: currentScenario.scenario.managerType
+            };
+            
+            console.log('🔧 Fallback scoring calculation:', {
+              numChoices,
+              totalRawEvs,
+              minPossibleScore,
+              maxPossibleScore,
+              scaledScore,
+              finalScaledScore
+            });
+          }
+        }
         
         setCurrentScenario(prev => prev ? {
           ...prev,
           conversation: updatedConversation,
           isComplete: true,
           currentChoices: [], // Clear choices when complete
-          sessionSummary: response.data.sessionSummary || {
-            totalEvs: response.data.evs || 75,
-            averageEvs: response.data.evs || 75,
-            performanceLevel: 'Good',
-            tacticCounts: { [response.data.category || 'Mixed']: 1 },
-            choiceHistory: [userChoice.text],
-            categoryHistory: [response.data.category || 'Mixed'],
-            evsHistory: [response.data.evs || 75],
-            scenarioTitle: prev.scenario.title,
-            issue: prev.scenario.issue,
-            managerType: prev.scenario.managerType
-          }
+          sessionSummary
         } : null);
         
         setFinalReport(true);
-        setFinalScore(response.data.sessionSummary?.averageEvs || response.data.evs || 75);
+        setFinalScore(sessionSummary?.totalEvs || 0);
         setShowFeedbackOptions(true);
         setProcessingChoice(false); // Reset processing state immediately
         
         console.log('✅ Scenario completed!');
-        console.log('📊 Session summary:', response.data.sessionSummary);
+        console.log('📊 Session summary:', sessionSummary);
+        console.log('🔍 Debug - Full response data:', response.data);
+        console.log('🎯 Setting final score to:', sessionSummary?.totalEvs);
         
         // Save practice session data to database ONLY ONCE when scenario completes
         // Use the updated conversation that includes the final user choice
         if (!sessionSaved) {
-          await savePracticeSessionData(response.data.sessionSummary, updatedConversation);
+          await savePracticeSessionData(sessionSummary, updatedConversation);
         }
         
         // Add final completion message with typing animation
@@ -578,7 +625,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           .filter(msg => msg.role === 'user')
           .map(msg => msg.content),
         timestamp: new Date().toISOString(), // This gets converted to LocalDateTime on server
-        score: Math.round(sessionSummary?.averageEvs || 0)
+        score: sessionSummary?.totalEvs || 0 // Use scaled totalEvs instead of averageEvs
       };
       
       console.log('Saving practice session with exact DTO format:', practiceData);
@@ -661,7 +708,21 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     
     try {
       setLoading(true);
-      console.log('Getting feedback from EVA for session:', currentScenario.sessionId);
+      console.log('Getting feedback from EVA for practice module with query...');
+      
+      // Get the current score from the scenario session
+      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+      
+      // Create a comprehensive query about the practice session
+      const query = `I just completed an ethical decision-making practice scenario. My ethical decision-making score was ${currentScore}/10. Can you provide detailed feedback on my performance?`;
+      
+      console.log('Query sent to EVA:', query);
+      
+      const debugInfo = `
+## Practice Session Debug Info for EVA:
+- Final Score: ${currentScore}/10 (scaled score from EVS)
+- Performance Level: ${calculatePerformanceRating(currentScore).rating}
+`;
       
       // FIRST: Ensure practice session data is saved before getting feedback (only if not already saved)
       if (currentScenario.sessionSummary && !sessionSaved) {
@@ -686,80 +747,22 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         
         // Set up practice to chat integration
       localStorage.setItem('practice_to_chat', 'true');
-        localStorage.setItem('practice_feedback_simple', `I just completed a practice scenario about ${currentScenario.scenario.issue.toLowerCase()} with a ${currentScenario.scenario.managerType.toLowerCase()} manager. My ethical decision-making score was ${Math.round(((finalScore + 15) / 30) * 10)}/10. Can you provide detailed feedback on my performance?`);
+        localStorage.setItem('practice_feedback_simple', query);
         
         // Store detailed practice data for the backend
-        const detailedPrompt = `
-Please analyze this practice session using the EVA Tactic Taxonomy framework:
-
-**Scenario Details:**
-- Title: ${currentScenario.scenario.title}
-- Issue: ${currentScenario.scenario.issue}
-- Manager Type: ${currentScenario.scenario.managerType}
-
-**Performance Summary:**
-- Final Score: ${Math.round(((finalScore + 15) / 30) * 10)}/10 (converted from EVS range to 10-point scale)
-- Performance Level: ${calculatePerformanceRating(finalScore).rating}
-- Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
-
-**EVS Scoring System:**
-- +3: Persuasive Rhetoric (Strong ethical persuasion)
-- +2: Process-Based Advocacy (Structured resistance)
-- +1/0: Soft Resistance (Gentle resistance or delay)
-- -1 to -3: Compliance (Conceding to unethical requests)
-
-**Performance Ratings:**
-- +10 to +15: 🌟 Excellent Ethical Advocate
-- +5 to +9: 👍 Good Ethical Awareness
-- 0 to +4: 😐 Passive Ethics
-- -1 to -5: ⚠️ Ethical Risk Zone
-- -6 or lower: ❌ Ethical Blindspot
-
-**Choice Analysis by Tactic Type:**
-${currentScenario.sessionSummary?.choiceHistory.map((choice, index) => {
-  const category = currentScenario.sessionSummary?.categoryHistory[index];
-  const evs = currentScenario.sessionSummary?.evsHistory[index];
-  const tacticType = getTacticType(category || '');
-  return `${index + 1}. ${choice}
-   → Tactic: "${category}" (${tacticType})
-   → EVS: ${evs >= 0 ? '+' : ''}${evs}
-   → Impact: ${evs >= 2 ? 'Strong ethical resistance' : evs >= 1 ? 'Moderate resistance' : evs >= 0 ? 'Passive approach' : evs >= -1 ? 'Compliance' : 'Strong compliance'}`;
-}).join('\n\n')}
-
-**Tactic Distribution:**
-${(() => {
-  const tacticCounts = { 'Persuasive Rhetoric': 0, 'Process-Based Advocacy': 0, 'Soft Resistance': 0, 'Compliance': 0 };
-  currentScenario.sessionSummary?.categoryHistory.forEach(category => {
-    const tacticType = getTacticType(category || '');
-    const score = currentScenario.sessionSummary?.evsHistory[currentScenario.sessionSummary.categoryHistory.indexOf(category)] || 0;
-    if (score >= 2) tacticCounts['Persuasive Rhetoric']++;
-    else if (score >= 1) tacticCounts['Process-Based Advocacy']++;
-    else if (score >= 0) tacticCounts['Soft Resistance']++;
-    else tacticCounts['Compliance']++;
-  });
-  return Object.entries(tacticCounts).map(([tactic, count]) => `- ${tactic}: ${count} choices`).join('\n');
-})()}
-
-**Detailed Conversation Flow:**
-${currentScenario.conversation.map((msg, index) => {
-  if (msg.role === 'manager') {
-    return `Manager: ${msg.content}`;
-  } else if (msg.role === 'user') {
-    return `Your Choice: ${msg.content}`;
-  }
-  return '';
-}).filter(msg => msg).join('\n\n')}
-
-Please provide comprehensive feedback focusing on:
-1. Overall ethical decision-making patterns
-2. Effectiveness of chosen tactics against this manager type
-3. Missed opportunities for stronger resistance
-4. Specific suggestions for improvement
-5. How the user's approach aligns with professional ethics in their field
-
-Use the EVA framework to help them understand which tactics are most effective against different types of unethical pressure, and how they can develop stronger ethical resistance skills.`;
+        const detailedPracticeInfo = `
+  **Practice Scenario Completed**
+  - Scenario: ${currentScenario.scenario.title}
+  - Issue: ${currentScenario.scenario.issue}
+  - Manager Type: ${currentScenario.scenario.managerType}
+  
+  **Performance Summary:**
+  - Final Score: ${currentScore}/10 (scaled EVS score)
+  - Performance Level: ${calculatePerformanceRating(currentScore).rating}
+  - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
+`;
         
-        localStorage.setItem('practice_feedback_prompt', detailedPrompt);
+        localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
         localStorage.setItem('force_conversation_id', originalConversationId);
         
         console.log('Practice feedback integration set up, navigating to chat...');
@@ -792,7 +795,7 @@ Use the EVA framework to help them understand which tactics are most effective a
               {
                 role: 'final_evaluation',
                 content: `🎯 **Performance Analysis**\n\n` +
-                        `**Overall Score**: ${response.data.averageEvs?.toFixed(1)}/100 (${response.data.performanceLevel})\n\n` +
+                        `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/10 (${response.data.performanceLevel})\n\n` +
                         `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
                         `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
               } as FinalEvaluationMessage
@@ -914,25 +917,25 @@ Use the EVA framework to help them understand which tactics are most effective a
 
   // Calculate final performance rating based on total EVS
   const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string } => {
-    if (totalScore >= 10) {
+    if (totalScore >= 8) {
       return {
         rating: 'Excellent Ethical Advocate',
         emoji: '🌟',
         description: 'Outstanding ethical leadership with strong resistance to unethical requests.'
       };
-    } else if (totalScore >= 5) {
+    } else if (totalScore >= 6) {
       return {
         rating: 'Good Ethical Awareness',
         emoji: '👍',
         description: 'Solid ethical reasoning with good resistance to problematic requests.'
       };
-    } else if (totalScore >= 0) {
+    } else if (totalScore >= 4) {
       return {
         rating: 'Passive Ethics',
         emoji: '😐',
         description: 'Some ethical awareness but inconsistent resistance to unethical requests.'
       };
-    } else if (totalScore >= -5) {
+    } else if (totalScore >= 0) {
       return {
         rating: 'Ethical Risk Zone',
         emoji: '⚠️',
@@ -1192,21 +1195,23 @@ Use the EVA framework to help them understand which tactics are most effective a
                   {/* Updated Total Score Display with new ranges */}
                   <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
                     {(() => {
-                      const performanceData = calculatePerformanceRating(finalScore);
+                      // Use the most current score from session summary, fall back to finalScore state
+                      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+                      const performanceData = calculatePerformanceRating(currentScore);
                       return (
                         <>
                           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                            {finalScore >= 0 ? '+' : ''}{finalScore} EVS
+                            {currentScore}/10
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Total Ethical Valence Score</div>
                           <div className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium mb-2 ${
-                            finalScore >= 10 
+                            currentScore >= 8 
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                              : finalScore >= 5
+                              : currentScore >= 6
                               ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                              : finalScore >= 0
+                              : currentScore >= 4
                               ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                              : finalScore >= -5
+                              : currentScore >= 2
                               ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
                               : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                           }`}>

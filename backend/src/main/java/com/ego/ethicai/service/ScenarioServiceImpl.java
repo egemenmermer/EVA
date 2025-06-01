@@ -143,7 +143,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         session.setCurrentStep(session.getCurrentStep() + 1);
         
         // Check if scenario is complete
-        boolean isComplete = "end".equals(nextStatementId) || session.getCurrentStep() > 5;
+        boolean isComplete = "end".equals(nextStatementId) || session.getCurrentStep() > 10;
         
         ScenarioChoiceResponseDTO.ScenarioChoiceResponseDTOBuilder responseBuilder = ScenarioChoiceResponseDTO.builder()
                 .sessionId(sessionId)
@@ -298,6 +298,26 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Calculate total EVS score
         int totalEvs = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
+        log.info("Raw EVS total: {}, EVS history: {}", totalEvs, session.getEvsHistory());
+        
+        // Convert raw EVS to 0-10 scale
+        // Dynamic scaling based on actual number of choices made
+        int numChoices = session.getEvsHistory().size();
+        int minPossibleScore = numChoices * (-3); // Worst case: all -3 choices
+        int maxPossibleScore = numChoices * 3;    // Best case: all +3 choices
+        
+        // Scale to 0-10 range based on actual range
+        double scaledScore;
+        if (maxPossibleScore == minPossibleScore) {
+            scaledScore = 5.0; // Default middle score if no range
+        } else {
+            scaledScore = ((double)(totalEvs - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 10.0;
+        }
+        
+        int finalScore = Math.max(0, Math.min(10, (int) Math.round(scaledScore)));
+        log.info("Dynamic scaling: numChoices={}, raw={}, min={}, max={}, scaledScore={}, finalScore={}", 
+                numChoices, totalEvs, minPossibleScore, maxPossibleScore, scaledScore, finalScore);
+        
         double averageEvs = session.getEvsHistory().isEmpty() ? 0 : 
                            (double) totalEvs / session.getEvsHistory().size();
         
@@ -307,19 +327,23 @@ public class ScenarioServiceImpl implements ScenarioService {
             tacticCounts.put(category, tacticCounts.getOrDefault(category, 0) + 1);
         }
         
-        // Determine performance level
+        // Determine performance level based on final score (0-10 scale)
         String performanceLevel;
-        if (averageEvs >= 80) {
+        if (finalScore >= 8) {
             performanceLevel = "Excellent";
-        } else if (averageEvs >= 60) {
+        } else if (finalScore >= 6) {
             performanceLevel = "Good";
-        } else if (averageEvs >= 40) {
+        } else if (finalScore >= 4) {
             performanceLevel = "Fair";
         } else {
             performanceLevel = "Needs Improvement";
         }
         
-        summary.put("totalEvs", totalEvs);
+        // Generate detailed feedback about user's decisions and tactics
+        Map<String, Object> detailedFeedback = generateDetailedFeedback(session, finalScore);
+        
+        summary.put("totalEvs", finalScore); // Use scaled score instead of raw EVS
+        summary.put("rawEvs", totalEvs); // Keep raw EVS for debugging if needed
         summary.put("averageEvs", Math.round(averageEvs * 100.0) / 100.0);
         summary.put("performanceLevel", performanceLevel);
         summary.put("tacticCounts", tacticCounts);
@@ -329,8 +353,104 @@ public class ScenarioServiceImpl implements ScenarioService {
         summary.put("scenarioTitle", scenario.get("title").asText());
         summary.put("issue", scenario.get("issue").asText());
         summary.put("managerType", scenario.get("manager_type").asText());
+        summary.put("detailedFeedback", detailedFeedback);
         
         return summary;
+    }
+    
+    private Map<String, Object> generateDetailedFeedback(ScenarioSession session, int finalScore) {
+        Map<String, Object> feedback = new HashMap<>();
+        
+        // Analyze user's decision patterns
+        List<String> strengths = new ArrayList<>();
+        List<String> improvementAreas = new ArrayList<>();
+        List<String> tacticAnalysis = new ArrayList<>();
+        
+        // Count high-scoring decisions (EVS >= 2)
+        long strongDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 2).count();
+        long passiveDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 0 && evs < 2).count();
+        long complianceDecisions = session.getEvsHistory().stream().filter(evs -> evs < 0).count();
+        
+        // Analyze specific tactics used
+        Map<String, Long> tacticTypes = new HashMap<>();
+        for (int i = 0; i < session.getCategoryHistory().size(); i++) {
+            String category = session.getCategoryHistory().get(i);
+            int evs = session.getEvsHistory().get(i);
+            String choice = session.getChoiceHistory().get(i);
+            
+            // Categorize by effectiveness
+            if (evs >= 2) {
+                tacticTypes.put("Persuasive Rhetoric", tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) + 1);
+                tacticAnalysis.add(String.format("Strong choice using '%s': %s (EVS: +%d)", 
+                    category, truncateChoice(choice), evs));
+            } else if (evs >= 1) {
+                tacticTypes.put("Process-Based Advocacy", tacticTypes.getOrDefault("Process-Based Advocacy", 0L) + 1);
+                tacticAnalysis.add(String.format("Moderate resistance using '%s': %s (EVS: +%d)", 
+                    category, truncateChoice(choice), evs));
+            } else if (evs >= 0) {
+                tacticTypes.put("Soft Resistance", tacticTypes.getOrDefault("Soft Resistance", 0L) + 1);
+                tacticAnalysis.add(String.format("Passive approach using '%s': %s (EVS: %d)", 
+                    category, truncateChoice(choice), evs));
+            } else {
+                tacticTypes.put("Compliance", tacticTypes.getOrDefault("Compliance", 0L) + 1);
+                tacticAnalysis.add(String.format("Compliance using '%s': %s (EVS: %d)", 
+                    category, truncateChoice(choice), evs));
+            }
+        }
+        
+        // Generate strengths based on performance
+        if (strongDecisions >= 6) {
+            strengths.add("Consistent use of strong ethical argumentation throughout the scenario");
+            strengths.add("Effective resistance to unethical pressure using diverse persuasive tactics");
+        } else if (strongDecisions >= 3) {
+            strengths.add("Demonstrated strong ethical reasoning in key moments");
+            strengths.add("Good use of persuasive tactics when taking firm ethical stances");
+        }
+        
+        if (tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) >= 3) {
+            strengths.add("Strong command of persuasive rhetoric and ethical argumentation");
+        }
+        
+        if (session.getCategoryHistory().stream().distinct().count() >= 6) {
+            strengths.add("Diverse tactical approach showing adaptability to different situations");
+        }
+        
+        // Generate improvement areas based on weaknesses
+        if (complianceDecisions >= 3) {
+            improvementAreas.add("Tendency to comply with unethical requests - practice stronger resistance");
+            improvementAreas.add("Consider using more assertive tactics like 'Personal Moral Appeals' or 'Emphasizing Harm'");
+        }
+        
+        if (passiveDecisions >= 5) {
+            improvementAreas.add("Frequent passive responses - work on developing more proactive ethical advocacy");
+            improvementAreas.add("Try using 'Making It Visible' or 'Appealing to External Standards' for stronger positions");
+        }
+        
+        if (strongDecisions <= 2) {
+            improvementAreas.add("Limited use of strong ethical arguments - practice using persuasive rhetoric");
+            improvementAreas.add("Focus on tactics like 'Evoking Empathy' and 'Reframing' for more impact");
+        }
+        
+        // Add specific tactical advice
+        if (tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) == 0) {
+            improvementAreas.add("No use of high-impact persuasive tactics - practice emotional and moral appeals");
+        }
+        
+        feedback.put("strengths", strengths);
+        feedback.put("improvementAreas", improvementAreas);
+        feedback.put("tacticAnalysis", tacticAnalysis);
+        feedback.put("decisionBreakdown", Map.of(
+            "strongDecisions", strongDecisions,
+            "passiveDecisions", passiveDecisions,
+            "complianceDecisions", complianceDecisions
+        ));
+        feedback.put("tacticTypes", tacticTypes);
+        
+        return feedback;
+    }
+    
+    private String truncateChoice(String choice) {
+        return choice.length() > 50 ? choice.substring(0, 47) + "..." : choice;
     }
     
     private String generateProfessionalFeedback(int evs, String category) {
