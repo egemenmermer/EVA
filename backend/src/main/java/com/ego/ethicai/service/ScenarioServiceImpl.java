@@ -314,7 +314,8 @@ public class ScenarioServiceImpl implements ScenarioService {
             scaledScore = ((double)(totalEvs - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 10.0;
         }
         
-        int finalScore = Math.max(0, Math.min(10, (int) Math.round(scaledScore)));
+        // Keep decimal precision, round to 1 decimal place
+        double finalScore = Math.max(0.0, Math.min(10.0, Math.round(scaledScore * 10.0) / 10.0));
         log.info("Dynamic scaling: numChoices={}, raw={}, min={}, max={}, scaledScore={}, finalScore={}", 
                 numChoices, totalEvs, minPossibleScore, maxPossibleScore, scaledScore, finalScore);
         
@@ -329,11 +330,11 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Determine performance level based on final score (0-10 scale)
         String performanceLevel;
-        if (finalScore >= 8) {
+        if (finalScore >= 8.0) {
             performanceLevel = "Excellent";
-        } else if (finalScore >= 6) {
+        } else if (finalScore >= 6.0) {
             performanceLevel = "Good";
-        } else if (finalScore >= 4) {
+        } else if (finalScore >= 4.0) {
             performanceLevel = "Fair";
         } else {
             performanceLevel = "Needs Improvement";
@@ -358,7 +359,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         return summary;
     }
     
-    private Map<String, Object> generateDetailedFeedback(ScenarioSession session, int finalScore) {
+    private Map<String, Object> generateDetailedFeedback(ScenarioSession session, double finalScore) {
         Map<String, Object> feedback = new HashMap<>();
         
         // Analyze user's decision patterns

@@ -498,12 +498,13 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               scaledScore = ((totalRawEvs - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 10.0;
             }
             
-            const finalScaledScore = Math.max(0, Math.min(10, Math.round(scaledScore)));
+            // Keep decimal precision, round to 1 decimal place (same as backend)
+            const finalScaledScore = Math.max(0.0, Math.min(10.0, Math.round(scaledScore * 10.0) / 10.0));
             
             sessionSummary = {
               totalEvs: finalScaledScore,
               averageEvs: numChoices > 0 ? totalRawEvs / numChoices : 0,
-              performanceLevel: finalScaledScore >= 8 ? 'Excellent' : finalScaledScore >= 6 ? 'Good' : finalScaledScore >= 4 ? 'Fair' : 'Needs Improvement',
+              performanceLevel: finalScaledScore >= 8.0 ? 'Excellent' : finalScaledScore >= 6.0 ? 'Good' : finalScaledScore >= 4.0 ? 'Fair' : 'Needs Improvement',
               tacticCounts: { [response.data.category || 'Mixed']: 1 },
               choiceHistory: [userChoice.text],
               categoryHistory: [response.data.category || 'Mixed'],
@@ -917,25 +918,25 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Calculate final performance rating based on total EVS
   const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string } => {
-    if (totalScore >= 8) {
+    if (totalScore >= 8.0) {
       return {
         rating: 'Excellent Ethical Advocate',
         emoji: '🌟',
         description: 'Outstanding ethical leadership with strong resistance to unethical requests.'
       };
-    } else if (totalScore >= 6) {
+    } else if (totalScore >= 6.0) {
       return {
         rating: 'Good Ethical Awareness',
         emoji: '👍',
         description: 'Solid ethical reasoning with good resistance to problematic requests.'
       };
-    } else if (totalScore >= 4) {
+    } else if (totalScore >= 4.0) {
       return {
         rating: 'Passive Ethics',
         emoji: '😐',
         description: 'Some ethical awareness but inconsistent resistance to unethical requests.'
       };
-    } else if (totalScore >= 0) {
+    } else if (totalScore >= 0.0) {
       return {
         rating: 'Ethical Risk Zone',
         emoji: '⚠️',
@@ -1201,17 +1202,17 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                       return (
                         <>
                           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                            {currentScore}/10
+                            {currentScore.toFixed(1)}/10
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Total Ethical Valence Score</div>
                           <div className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium mb-2 ${
-                            currentScore >= 8 
+                            currentScore >= 8.0 
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                              : currentScore >= 6
+                              : currentScore >= 6.0
                               ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                              : currentScore >= 4
+                              : currentScore >= 4.0
                               ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                              : currentScore >= 2
+                              : currentScore >= 2.0
                               ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
                               : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                           }`}>
