@@ -886,11 +886,25 @@ Please provide detailed feedback in the following format:
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowInfoModal(true)}
-                className="px-3 py-2 text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center space-x-1"
-                title="About Manager Tactics"
+                className="group relative px-4 py-2 text-sm rounded-lg overflow-hidden
+                          bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
+                          hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
+                          text-white shadow-md hover:shadow-lg
+                          transform hover:scale-[1.02] active:scale-[0.98]
+                          transition-all duration-500 ease-out
+                          before:absolute before:inset-0 before:bg-gradient-to-r 
+                          before:from-pink-500 before:via-purple-500 before:to-blue-500
+                          before:opacity-0 before:transition-opacity before:duration-700
+                          hover:before:opacity-100"
+                title="Learn about EVA Tactics"
               >
-                <span>ℹ️</span>
-                <span>Argumentation Tactics</span>
+                <span className="relative z-10 flex items-center space-x-1.5">
+                  <span className="text-sm">💡</span>
+                  <span>Argumentation Tactics</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                               translate-x-[-100%] group-hover:translate-x-[100%] 
+                               transition-transform duration-1500 ease-in-out"></div>
               </button>
             <button
               onClick={handleReturnToChat}
@@ -957,11 +971,26 @@ Please provide detailed feedback in the following format:
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowInfoModal(true)}
-              className="px-3 py-2 text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center space-x-1"
-              title="About Manager Tactics"
-            >
-              <span>Argumentation Tactics</span>
-            </button>
+              className="group relative px-4 py-2 text-sm rounded-lg overflow-hidden
+                        bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
+                        hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
+                        text-white shadow-md hover:shadow-lg
+                        transform hover:scale-[1.02] active:scale-[0.98]
+                        transition-all duration-500 ease-out
+                        before:absolute before:inset-0 before:bg-gradient-to-r 
+                        before:from-pink-500 before:via-purple-500 before:to-blue-500
+                        before:opacity-0 before:transition-opacity before:duration-700
+                        hover:before:opacity-100"
+                title="Learn about EVA Tactics"
+              >
+                <span className="relative z-10 flex items-center space-x-1.5">
+                  <span className="text-sm">💡</span>
+                  <span>Argumentation Tactics</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                               translate-x-[-100%] group-hover:translate-x-[100%] 
+                               transition-transform duration-1500 ease-in-out"></div>
+              </button>
           <button
             onClick={handleReturnToChat}
             className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -1223,6 +1252,7 @@ Please provide detailed feedback in the following format:
         <EVATacticsInfoModal
           isOpen={showInfoModal}
           onClose={() => setShowInfoModal(false)}
+          currentChoices={currentScenario?.currentChoices || []}
         />
       )}
     </div>
