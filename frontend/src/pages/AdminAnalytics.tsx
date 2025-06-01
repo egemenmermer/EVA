@@ -235,12 +235,12 @@ const SessionDetailsModal: React.FC<{
                 <>
                   {/* Choices Timeline */}
                   <div className="space-y-6">
-                  {session.selectedChoices.slice(0, 5).map((choice, index) => {
+                  {session.selectedChoices.map((choice, index) => {
                     const selectionInfo = selectionData[index] || {};
                     return (
                       <div key={index} className="relative">
                         {/* Timeline connector */}
-                        {index < Math.min(session.selectedChoices.length, 5) - 1 && (
+                        {index < session.selectedChoices.length - 1 && (
                           <div className="absolute left-6 top-16 w-0.5 h-8 bg-blue-400"></div>
                         )}
                         
@@ -290,7 +290,7 @@ const SessionDetailsModal: React.FC<{
                   {/* Summary Statistics */}
                   <div className="mt-8 grid grid-cols-3 gap-4">
                     <div className="bg-gray-800 rounded-lg p-4 text-center">
-                      <div className="text-2xl font-bold text-blue-400">{Math.min(session.selectedChoices.length, 5)}</div>
+                      <div className="text-2xl font-bold text-blue-400">{session.selectedChoices.length}</div>
                       <div className="text-sm text-gray-400">Total Choices</div>
                     </div>
                     <div className="bg-gray-800 rounded-lg p-4 text-center">
@@ -310,7 +310,7 @@ const SessionDetailsModal: React.FC<{
                           }
                           // Fallback to session score divided by choices if selection data not available
                           return session.score && session.selectedChoices.length > 0 ? 
-                            Math.round(session.score / Math.min(session.selectedChoices.length, 5)) : 'N/A';
+                            Math.round(session.score / session.selectedChoices.length) : 'N/A';
                         })()}
                       </div>
                       <div className="text-sm text-gray-400">Avg per Choice</div>
