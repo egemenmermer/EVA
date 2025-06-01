@@ -822,7 +822,7 @@ const AdminAnalytics: React.FC = () => {
     // Average ethical score across all sessions
     const validScores = sessions.filter(s => s.score !== undefined).map(s => s.score as number);
     const avgScore = validScores.length > 0 
-      ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length) 
+      ? Number((validScores.reduce((sum, score) => sum + score, 0) / validScores.length).toFixed(1))
       : 0;
 
     // Most common manager type
@@ -841,6 +841,37 @@ const AdminAnalytics: React.FC = () => {
     });
 
     return { totalSessions, avgScore, mostCommonType };
+  };
+
+  // Function to get manager type icon
+  const getManagerTypeIcon = (managerType: string) => {
+    switch (managerType) {
+      case 'PUPPETEER':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+          </svg>
+        );
+      case 'DILUTER':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          </svg>
+        );
+      case 'CAMOUFLAGER':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        );
+    }
   };
 
   const { managerTypeData, scoreData } = sessions.length 
@@ -895,7 +926,7 @@ const AdminAnalytics: React.FC = () => {
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Avg. Ethical Score</p>
-                <p className="text-3xl font-bold text-white">{metrics.avgScore?.toFixed(1) || 'N/A'}/10</p>
+                <p className="text-3xl font-bold text-white">{metrics.avgScore || 'N/A'}/10</p>
               </div>
             </div>
           </div>
@@ -903,9 +934,7 @@ const AdminAnalytics: React.FC = () => {
           <div className="bg-[#1A2337] rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-green-900 text-green-300 mr-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+                {getManagerTypeIcon(metrics.mostCommonType)}
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Most Common Type</p>
