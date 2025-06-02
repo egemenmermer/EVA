@@ -37,7 +37,7 @@ if [ -f "/etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem" ] && [ -f "/etc/let
 
         # Proxy API requests to backend
         location /api/ {
-            proxy_pass http://backend:8443/api/;
+            proxy_pass http://backend:8443;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \\$http_upgrade;
             proxy_set_header Connection 'upgrade';
