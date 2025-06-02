@@ -76,7 +76,7 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingSelections(true);
     try {
-      // Use relative URL to leverage Vite proxy - corrected to match backend endpoint
+      // Use relative URL to leverage Vite proxy
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
       console.log('Making request to URL:', url);
       
@@ -86,14 +86,16 @@ const SessionDetailsModal: React.FC<{
           'Content-Type': 'application/json'
         }
       });
-      
+
       console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
+      console.log('Response headers:', response.headers);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch selection data: ${response.status} (${response.statusText})`);
+        const errorText = await response.text();
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
+        throw new Error(`Failed to fetch selection data: ${response.status} ${errorText}`);
       }
-      
+
       const data = await response.json();
       console.log('Selection data received:', data);
       setSelectionData(data);
@@ -114,29 +116,33 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingDecisionTree(true);
     try {
-      // Use relative URL to leverage Vite proxy - corrected to match backend endpoint
+      // Use relative URL to leverage Vite proxy
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`;
       console.log('Making request to URL:', url);
       
+      // Make actual API call to get decision tree data
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
-      
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch decision tree data: ${response.status} (${response.statusText})`);
+        const errorText = await response.text();
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
+        throw new Error(`Failed to fetch decision tree data: ${response.status} ${errorText}`);
       }
-      
-      const data = await response.json();
-      console.log('Decision tree data received:', data);
-      setDecisionTreeData(data);
+
+      const decisionTreeData: DecisionTreeData = await response.json();
+      console.log('Decision tree data received:', decisionTreeData);
+      setDecisionTreeData(decisionTreeData);
     } catch (error) {
       console.error('Error fetching decision tree data:', error);
+      // For now, show an error message - in production, you might want to show a user-friendly error
       setDecisionTreeData(null);
     } finally {
       setLoadingDecisionTree(false);

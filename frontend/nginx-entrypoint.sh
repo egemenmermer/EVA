@@ -31,7 +31,7 @@ if [ -f "/etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem" ] && [ -f "/etc/let
 
         # For React Router or any SPA routing
         location / {
-            try_files \$uri \$uri/ /index.html;
+            try_files \$uri /index.html;
             add_header Cache-Control "no-cache, no-store, must-revalidate";
         }
 
