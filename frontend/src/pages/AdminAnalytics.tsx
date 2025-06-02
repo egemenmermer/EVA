@@ -13,6 +13,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
+import { backendApi } from '../services/axiosConfig';
 
 // Register ChartJS components
 ChartJS.register(
@@ -76,29 +77,13 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingSelections(true);
     try {
-      // Use relative URL to leverage Vite proxy
+      // Use backendApi instead of fetch to ensure consistent routing
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
       console.log('Making request to URL:', url);
       
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
-        throw new Error(`Failed to fetch selection data: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Selection data received:', data);
-      setSelectionData(data);
+      const response = await backendApi.get(url);
+      console.log('Selection data received:', response.data);
+      setSelectionData(response.data);
     } catch (error) {
       console.error('Error fetching selection data:', error);
       setSelectionData([]);
@@ -116,30 +101,14 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingDecisionTree(true);
     try {
-      // Use relative URL to leverage Vite proxy
+      // Use backendApi instead of fetch to ensure consistent routing
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`;
       console.log('Making request to URL:', url);
       
       // Make actual API call to get decision tree data
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
-        throw new Error(`Failed to fetch decision tree data: ${response.status} ${errorText}`);
-      }
-
-      const decisionTreeData: DecisionTreeData = await response.json();
-      console.log('Decision tree data received:', decisionTreeData);
-      setDecisionTreeData(decisionTreeData);
+      const response = await backendApi.get(url);
+      console.log('Decision tree data received:', response.data);
+      setDecisionTreeData(response.data);
     } catch (error) {
       console.error('Error fetching decision tree data:', error);
       // For now, show an error message - in production, you might want to show a user-friendly error
