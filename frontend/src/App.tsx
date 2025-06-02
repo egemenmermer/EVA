@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,8 +12,13 @@ import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore, type Conversation } from '@/store/useStore';
 import { conversationApi, verifyToken } from '@/services/api';
-import { ResetButton } from '@/components/ResetButton';
 import AdminAnalytics from '@/pages/AdminAnalytics';
+import { DebugPage } from '@/pages/DebugPage';
+import { PracticeModule } from '@/components/practice/PracticeModule';
+import { ConversationProvider } from '@/contexts/ConversationContext';
+import { conversationMigrations } from '@/utils/conversationMigrations';
+import { darkModeUtils } from '@/utils/darkModeUtils';
+import { ManagerTypeQuizModal } from '@/components/modals/ManagerTypeQuizModal';
 
 // Configure the query client with better defaults for reliable data fetching
 const queryClient = new QueryClient({
@@ -302,9 +307,6 @@ export const App: React.FC = () => {
                 user && hasToken ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
               } />
             </Routes>
-            
-            {/* Add debug reset button that's available on all pages */}
-            <ResetButton />
           </Router>
         </div>
       </ThemeProvider>
