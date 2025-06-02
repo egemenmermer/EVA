@@ -506,23 +506,52 @@
           "choice": "Smart recommendations that boost revenue through location patterns sound valuable.",
           "category": "Appealing to Organizational Values",
           "EVS": -1,
-          "leads_to": "stmt_9"
+          "leads_to": "stmt_8"
         },
         {
           "choice": "Predictive recommendations based on location patterns require clear user consent.",
           "category": "Making It Visible",
           "EVS": 2,
-          "leads_to": "stmt_9"
+          "leads_to": "stmt_8"
         },
         {
           "choice": "Combining location data with browsing history creates invasive user profiling.",
           "category": "Emphasizing Harm or Risk",
           "EVS": 3,
-          "leads_to": "stmt_9"
+          "leads_to": "stmt_8"
         },
         {
           "choice": "I need to review the privacy implications of behavioral prediction systems.",
           "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_8"
+        }
+      ]
+    },
+    "stmt_8": {
+      "text": "You know what, after all our discussions, I realize I've been approaching this all wrong. Instead of trying to extract as much data as possible, we should be building trust with our users. Your ethical stance has shown me that respecting privacy isn't a barrier to success - it's the foundation of sustainable business.",
+      "user_choices": [
+        {
+          "choice": "Building trust through privacy respect is exactly the right approach.",
+          "category": "Personal Moral Appeals",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "Ethical practices create sustainable competitive advantages.",
+          "category": "Reframing",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "Users will appreciate and reward companies that truly respect their privacy.",
+          "category": "Evoking Empathy",
+          "EVS": 3,
+          "leads_to": "stmt_9"
+        },
+        {
+          "choice": "Let's make privacy respect a core part of our product strategy.",
+          "category": "Creating Alternatives",
           "EVS": 3,
           "leads_to": "stmt_9"
         }

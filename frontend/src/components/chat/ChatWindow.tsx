@@ -963,13 +963,134 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       }
       // --- End Draft Conversation Handling ---
       
+      // IMPROVED: More robust conversation state validation
       if (!conversationId || !isPersisted) {
-         console.error('Cannot send message: No valid persisted conversation ID.');
-         setError('Cannot send message. Invalid conversation state.');
-         setLoading(false);
-         isMessageSending.current = false;
-         return;
+        console.warn('Conversation state invalid, attempting comprehensive recovery...');
+        
+        // Try multiple recovery strategies
+        const originalConversationId = localStorage.getItem('originalConversationId');
+        const currentConversationId = localStorage.getItem('current-conversation-id');
+        
+        // Strategy 1: Use originalConversationId if available
+        if (originalConversationId) {
+          console.log('Attempting recovery using originalConversationId:', originalConversationId);
+          try {
+            const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
+            if (response.data && response.data.id) {
+              conversationId = response.data.id;
+              isPersisted = true;
+              
+              // Update the current conversation in the store
+              const recoveredConversation = {
+                conversationId: response.data.id,
+                title: response.data.title || 'Recovered Conversation',
+                managerType: response.data.managerType || managerType || 'PUPPETEER',
+                isPersisted: true,
+                createdAt: response.data.createdAt || new Date().toISOString()
+              };
+              
+              setCurrentConversation(recoveredConversation);
+              currentConv = recoveredConversation;
+              console.log('Successfully recovered conversation using originalConversationId');
+            }
+          } catch (err) {
+            console.warn('Failed to recover using originalConversationId:', err);
+          }
+        }
+        
+        // Strategy 2: Use current-conversation-id if Strategy 1 failed
+        if ((!conversationId || !isPersisted) && currentConversationId && currentConversationId !== originalConversationId) {
+          console.log('Attempting recovery using current-conversation-id:', currentConversationId);
+          try {
+            const response = await api.get(`/api/v1/conversation/${currentConversationId}`);
+            if (response.data && response.data.id) {
+              conversationId = response.data.id;
+              isPersisted = true;
+              
+              // Update the current conversation in the store
+              const recoveredConversation = {
+                conversationId: response.data.id,
+                title: response.data.title || 'Recovered Conversation',
+                managerType: response.data.managerType || managerType || 'PUPPETEER',
+                isPersisted: true,
+                createdAt: response.data.createdAt || new Date().toISOString()
+              };
+              
+              setCurrentConversation(recoveredConversation);
+              currentConv = recoveredConversation;
+              console.log('Successfully recovered conversation using current-conversation-id');
+            }
+          } catch (err) {
+            console.warn('Failed to recover using current-conversation-id:', err);
+          }
+        }
+        
+        // Strategy 3: Create a new conversation if all recovery attempts failed
+        if (!conversationId || !isPersisted) {
+          console.log('All recovery attempts failed, creating new conversation...');
+          try {
+            const titleForNewConv = trimmedValue.substring(0, 35) + (trimmedValue.length > 35 ? '...' : '');
+            const activeManagerType = managerType || 'PUPPETEER';
+            
+            const persistedConvData = await agentCreateConversation(
+              userId,
+              activeManagerType,
+              undefined
+            );
+            
+            if (persistedConvData && persistedConvData.conversationId) {
+              conversationId = persistedConvData.conversationId;
+              isPersisted = true;
+              
+              const newPersistedConversation: Conversation = {
+                ...persistedConvData,
+                conversationId: conversationId,
+                isDraft: false,
+                isPersisted: true,
+                managerType: persistedConvData.managerType || activeManagerType,
+                title: titleForNewConv,
+                createdAt: persistedConvData.createdAt || new Date().toISOString(),
+              };
+              
+              setCurrentConversation(newPersistedConversation);
+              currentConv = newPersistedConversation;
+              
+              console.log('Successfully created new conversation as fallback:', conversationId);
+              
+              // Trigger sidebar refresh
+              triggerSidebarRefresh({ 
+                type: 'new-conversation', 
+                conversationId: conversationId, 
+                title: newPersistedConversation.title 
+              });
+            }
+          } catch (createError: any) {
+            console.error('Failed to create fallback conversation:', createError);
+            setError('Unable to create conversation. Please refresh the page and try again.');
+            setLoading(false);
+            isMessageSending.current = false;
+            return;
+          }
+        }
+        
+        // Final validation - this should now always pass
+        if (!conversationId || !isPersisted) {
+          console.error('Conversation state could not be recovered after all attempts');
+          setError('Unable to establish conversation context. Please refresh the page and try again.');
+          setLoading(false);
+          isMessageSending.current = false;
+          return;
+        }
       }
+
+      // DISABLED: Redundant validation - comprehensive validation above handles all cases
+      // if (!conversationId || !isPersisted) {
+      //    console.error('Cannot send message: No valid persisted conversation ID.');
+      //    setError('Cannot send message. Invalid conversation state.');
+      //    setLoading(false);
+      //    isMessageSending.current = false;
+      //    return;
+      // }
 
       // Add debug logging for conversation tracking
       console.log("Message history tracking:", {
