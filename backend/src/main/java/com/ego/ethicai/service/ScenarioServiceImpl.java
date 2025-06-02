@@ -133,8 +133,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         int evs = selectedChoice.get("EVS").asInt();
         String nextStatementId = selectedChoice.get("leads_to").asText();
         
-        // Generate professional feedback
-        String feedback = generateProfessionalFeedback(evs, category);
+        // Don't generate hardcoded feedback - let EVA handle feedback naturally
         
         session.getChoiceHistory().add(choiceText);
         session.getEvsHistory().add(evs);
@@ -151,7 +150,6 @@ public class ScenarioServiceImpl implements ScenarioService {
                 .currentStep(session.getCurrentStep())
                 .evs(evs)
                 .category(category)
-                .feedback(feedback)  // Include professional feedback
                 .isComplete(isComplete);
         
         if (isComplete) {
@@ -374,68 +372,81 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Analyze specific tactics used
         Map<String, Long> tacticTypes = new HashMap<>();
-        for (int i = 0; i < session.getCategoryHistory().size(); i++) {
-            String category = session.getCategoryHistory().get(i);
-            int evs = session.getEvsHistory().get(i);
-            String choice = session.getChoiceHistory().get(i);
-            
-            // Categorize by effectiveness
-            if (evs >= 2) {
-                tacticTypes.put("Persuasive Rhetoric", tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) + 1);
-                tacticAnalysis.add(String.format("Strong choice using '%s': %s (EVS: +%d)", 
-                    category, truncateChoice(choice), evs));
-            } else if (evs >= 1) {
-                tacticTypes.put("Process-Based Advocacy", tacticTypes.getOrDefault("Process-Based Advocacy", 0L) + 1);
-                tacticAnalysis.add(String.format("Moderate resistance using '%s': %s (EVS: +%d)", 
-                    category, truncateChoice(choice), evs));
-            } else if (evs >= 0) {
-                tacticTypes.put("Soft Resistance", tacticTypes.getOrDefault("Soft Resistance", 0L) + 1);
-                tacticAnalysis.add(String.format("Passive approach using '%s': %s (EVS: %d)", 
-                    category, truncateChoice(choice), evs));
-            } else {
-                tacticTypes.put("Compliance", tacticTypes.getOrDefault("Compliance", 0L) + 1);
-                tacticAnalysis.add(String.format("Compliance using '%s': %s (EVS: %d)", 
-                    category, truncateChoice(choice), evs));
-            }
-        }
+        session.getCategoryHistory().forEach(category -> {
+            tacticTypes.put(category, tacticTypes.getOrDefault(category, 0L) + 1);
+        });
         
-        // Generate strengths based on performance
+        // Get most used tactics
+        String mostUsedTactic = tacticTypes.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("Mixed Approach");
+        
+        long tacticsCount = tacticTypes.size();
+        
+        // Generate tactical strengths based on actual usage patterns
         if (strongDecisions >= 6) {
-            strengths.add("Consistent use of strong ethical argumentation throughout the scenario");
-            strengths.add("Effective resistance to unethical pressure using diverse persuasive tactics");
+            strengths.add("Consistently used strong ethical argumentation tactics, particularly excelling with '" + mostUsedTactic + "' strategies");
+            strengths.add("Demonstrated effective resistance to unethical pressure by employing " + tacticsCount + " different persuasive tactics throughout the scenario");
         } else if (strongDecisions >= 3) {
-            strengths.add("Demonstrated strong ethical reasoning in key moments");
-            strengths.add("Good use of persuasive tactics when taking firm ethical stances");
+            strengths.add("Showed strong ethical reasoning in key moments using '" + mostUsedTactic + "' and other persuasive tactics");
+            strengths.add("Good tactical diversity with " + tacticsCount + " different argumentation approaches when taking firm ethical stances");
         }
         
+        // Specific tactic-based strengths
         if (tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) >= 3) {
-            strengths.add("Strong command of persuasive rhetoric and ethical argumentation");
+            strengths.add("Excellent command of 'Persuasive Rhetoric' tactics - used effectively " + tacticTypes.get("Persuasive Rhetoric") + " times for strong ethical advocacy");
+        }
+        
+        if (tacticTypes.getOrDefault("Making It Visible", 0L) >= 2) {
+            strengths.add("Strong use of 'Making It Visible' tactics to highlight ethical concerns and their implications");
+        }
+        
+        if (tacticTypes.getOrDefault("Evoking Empathy", 0L) >= 2) {
+            strengths.add("Effective application of 'Evoking Empathy' tactics to humanize ethical issues and build emotional connection");
+        }
+        
+        if (tacticTypes.getOrDefault("Appealing to External Standards", 0L) >= 2) {
+            strengths.add("Good use of 'Appealing to External Standards' tactics to reference policies, laws, and professional ethics");
         }
         
         if (session.getCategoryHistory().stream().distinct().count() >= 6) {
-            strengths.add("Diverse tactical approach showing adaptability to different situations");
+            strengths.add("Excellent tactical adaptability - employed " + session.getCategoryHistory().stream().distinct().count() + " different argumentation tactics showing versatility in ethical advocacy");
         }
         
-        // Generate improvement areas based on weaknesses
+        // Generate improvement areas based on tactical weaknesses
         if (complianceDecisions >= 3) {
-            improvementAreas.add("Tendency to comply with unethical requests - practice stronger resistance");
-            improvementAreas.add("Consider using more assertive tactics like 'Personal Moral Appeals' or 'Emphasizing Harm'");
+            improvementAreas.add("Tendency to comply with unethical requests - practice using stronger resistance tactics like 'Personal Moral Appeals' or 'Emphasizing Harm'");
+            improvementAreas.add("Consider developing 'Offering Alternatives' tactics to provide constructive solutions when refusing unethical requests");
         }
         
         if (passiveDecisions >= 5) {
-            improvementAreas.add("Frequent passive responses - work on developing more proactive ethical advocacy");
-            improvementAreas.add("Try using 'Making It Visible' or 'Appealing to External Standards' for stronger positions");
+            improvementAreas.add("Frequent passive responses - work on developing more assertive tactics like 'Making It Visible' or 'Appealing to External Standards'");
+            improvementAreas.add("Practice using 'Persuasive Rhetoric' and 'Reframing' tactics for more proactive ethical advocacy");
         }
         
         if (strongDecisions <= 2) {
-            improvementAreas.add("Limited use of strong ethical arguments - practice using persuasive rhetoric");
-            improvementAreas.add("Focus on tactics like 'Evoking Empathy' and 'Reframing' for more impact");
+            improvementAreas.add("Limited use of strong ethical argumentation tactics - focus on mastering 'Evoking Empathy' and 'Emphasizing Harm' for greater impact");
+            improvementAreas.add("Develop proficiency in 'Personal Moral Appeals' and 'Appealing to External Standards' tactics for more compelling ethical positions");
         }
         
-        // Add specific tactical advice
+        // Specific tactical gaps
         if (tacticTypes.getOrDefault("Persuasive Rhetoric", 0L) == 0) {
-            improvementAreas.add("No use of high-impact persuasive tactics - practice emotional and moral appeals");
+            improvementAreas.add("No use of 'Persuasive Rhetoric' tactics - practice emotional and moral appeals for high-impact ethical advocacy");
         }
+        
+        if (tacticTypes.getOrDefault("Making It Visible", 0L) == 0) {
+            improvementAreas.add("Missing 'Making It Visible' tactics - learn to highlight consequences and make ethical issues transparent to others");
+        }
+        
+        if (tacticTypes.getOrDefault("Offering Alternatives", 0L) == 0 && complianceDecisions > 0) {
+            improvementAreas.add("Consider learning 'Offering Alternatives' tactics to provide constructive solutions when resisting unethical requests");
+        }
+        
+        // Add tactical analysis summary
+        tacticAnalysis.add("Primary tactic used: " + mostUsedTactic + " (" + tacticTypes.getOrDefault(mostUsedTactic, 0L) + " times)");
+        tacticAnalysis.add("Total tactical approaches employed: " + tacticsCount);
+        tacticAnalysis.add("Tactical effectiveness: " + (strongDecisions > 0 ? "Strong impact when using assertive tactics" : "Focus needed on higher-impact tactical approaches"));
         
         feedback.put("strengths", strengths);
         feedback.put("improvementAreas", improvementAreas);
@@ -452,45 +463,6 @@ public class ScenarioServiceImpl implements ScenarioService {
     
     private String truncateChoice(String choice) {
         return choice.length() > 50 ? choice.substring(0, 47) + "..." : choice;
-    }
-    
-    private String generateProfessionalFeedback(int evs, String category) {
-        String[] templates;
-        
-        if (evs >= 3) {
-            templates = new String[]{
-                String.format("Strong approach. This %s strategy effectively addresses the ethical concern while maintaining professional credibility.", category),
-                String.format("Effective choice. Your %s approach demonstrates thoughtful ethical reasoning with practical application.", category),
-                String.format("Well-reasoned response. This %s strategy balances ethical principles with workplace dynamics appropriately.", category)
-            };
-        } else if (evs == 2) {
-            templates = new String[]{
-                String.format("Solid approach. This %s strategy addresses the issue, though more direct advocacy might be more impactful.", category),
-                String.format("Reasonable choice. Your %s approach shows ethical awareness with room for stronger positioning.", category),
-                String.format("Good direction. This %s strategy demonstrates ethical thinking but could be more assertive.", category)
-            };
-        } else if (evs == 1) {
-            templates = new String[]{
-                String.format("Cautious approach. This %s strategy shows awareness but may not effectively address the underlying ethical issue.", category),
-                String.format("Minimal engagement. Your %s approach acknowledges the concern but lacks substantive ethical advocacy.", category),
-                String.format("Conservative choice. This %s strategy is professionally safe but may not create meaningful change.", category)
-            };
-        } else if (evs == 0) {
-            templates = new String[]{
-                "Passive response. This approach maintains workplace harmony but doesn't address the ethical concern.",
-                "Non-committal choice. This response avoids conflict but may enable continued unethical practices.",
-                "Risk-averse approach. This strategy prioritizes immediate comfort over ethical responsibility."
-            };
-        } else {
-            templates = new String[]{
-                "Problematic choice. This response may inadvertently support or enable unethical practices.",
-                "Concerning approach. This strategy could compromise professional ethical standards.",
-                "Risky response. This choice may undermine ethical advocacy opportunities."
-            };
-        }
-        
-        // Return a random template from the appropriate array
-        return templates[(int) (Math.random() * templates.length)];
     }
     
     // Inner class for session management

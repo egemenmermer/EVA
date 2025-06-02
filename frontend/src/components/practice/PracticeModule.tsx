@@ -183,12 +183,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [showFeedbackOptions, setShowFeedbackOptions] = useState(false);
   const [sessionFeedback, setSessionFeedback] = useState<any>(null);
-  const [currentEVSFeedback, setCurrentEVSFeedback] = useState<{
-    score: number;
-    category: string;
-    message: string;
-    show: boolean;
-  } | null>(null);
   const [processingChoice, setProcessingChoice] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
   const [showInfoModal, setShowInfoModal] = useState(false); // Add state for info modal
@@ -451,15 +445,15 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         }
       );
       
+      // Show animated EVS feedback
+      showEVSFeedback(response.data.evs, response.data.category);
+      
       // NOW add user's choice to conversation after successful API call
       const userChoice = currentScenario.currentChoices[choiceIndex];
       const userMessage: UserMessage = {
         role: 'user',
         content: userChoice.text
       };
-      
-      // Show animated EVS feedback
-      showEVSFeedback(response.data.evs, response.data.category, response.data.feedback);
       
       // Check if scenario should be completed (either backend says so, or we've made 10+ choices)
       const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 20); // 20 = ~10 conversation pairs + user choice
@@ -706,7 +700,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     setSessionFeedback(null);
     setFinalScore(0);
     setProcessingChoice(false);
-    setCurrentEVSFeedback(null);
     setIsTyping(false);
     setError(null);
     setLoading(false);
@@ -764,15 +757,76 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         
         // Store detailed practice data for the backend
         const detailedPracticeInfo = `
-  **Practice Scenario Completed**
-  - Scenario: ${currentScenario.scenario.title}
-  - Issue: ${currentScenario.scenario.issue}
-  - Manager Type: ${currentScenario.scenario.managerType}
+**Practice Scenario Completed**
+- Scenario: ${currentScenario.scenario.title}
+- Issue: ${currentScenario.scenario.issue}
+- Manager Type: ${currentScenario.scenario.managerType}
+
+**Performance Summary:**
+- Final Score: ${currentScore}/10 (scaled EVS score)
+- Performance Level: ${calculatePerformanceRating(currentScore).rating}
+- Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length || 0}
+
+**Available Argumentation Tactics (Please reference these in your feedback):**
+
+🔸 **Soft Resistance Tactics** (Subtle, non-confrontational approaches):
+- Shifting Scope: Redirect focus to ethically preferable areas
+- Delaying: Postpone decisions to buy time or avoid unethical choices  
+- Documenting Dissent: Log disagreement for accountability
+- Reframing: Reinterpret problems in ethical/user-centered terms
+- Appealing to External Standards: Cite ethics codes, laws, standards
+- Making It Visible: Draw attention to hidden ethical issues
+- Adding Friction: Subtly slow down unethical decisions
+- Creating Alternatives: Suggest solutions that reduce harm
+- Redirecting Conversations: Steer dialogue toward user well-being
+- Asking Questions: Use inquiry to expose flaws without confronting
+- Withholding Full Implementation: Implement partially to reduce harm
+- Testing Loopholes: Find policy gaps allowing more ethical action
+
+🔹 **Rhetorical Tactics** (Persuasive, evidence-based approaches):
+- Appealing to Organizational Values: Reference company mission/ethics
+- Citing Institutional Authority: Reference respected sources
+- Referencing Laws or Regulations: Mention GDPR, ADA, compliance rules
+- Presenting User Data: Use metrics, research to support arguments
+- Referencing Best Practices: Cite UX/design guidelines
+- Constructing Hypothetical Scenarios: Paint realistic future situations
+- Drawing Analogies: Compare to familiar systems/decisions
+- Evoking Empathy: Appeal to user emotions around harm/exclusion
+- Emphasizing Harm or Risk: Focus on what could go wrong
+- Citing Public Backlash: Reference reputational risk
+- Personal Moral Appeals: Use your ethical compass as authority
+- Sarcastic Ridicule: Discredit unethical logic using irony
+
+**Tactical Analysis:**
+${currentScenario.sessionSummary?.categoryHistory ? (() => {
+  const tactics = currentScenario.sessionSummary.categoryHistory;
+  const tacticCounts = tactics.reduce((acc: any, tactic: string) => {
+    acc[tactic] = (acc[tactic] || 0) + 1;
+    return acc;
+  }, {});
+  const mostFrequentTactic = Object.entries(tacticCounts).reduce((a: any, b: any) => 
+    tacticCounts[a[0]] > tacticCounts[b[0]] ? a : b
+  )[0];
   
-  **Performance Summary:**
-  - Final Score: ${currentScore}/10 (scaled EVS score)
-  - Performance Level: ${calculatePerformanceRating(currentScore).rating}
-  - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length}
+  return `- Tactics Used: ${tactics.join(', ')}
+- Most Frequent Tactic: ${mostFrequentTactic} (used ${tacticCounts[mostFrequentTactic]} times)
+- All Tactics Employed: ${Object.entries(tacticCounts).map(([tactic, count]: [string, any]) => `${tactic} (${count}x)`).join(', ')}`;
+})() : '- No tactical data available'}
+
+**Decision-by-Decision Breakdown:**
+${currentScenario.sessionSummary?.choiceHistory?.map((choice: string, i: number) => 
+  `${i+1}. "${choice.substring(0, 80)}${choice.length > 80 ? '...' : ''}" 
+   → Tactic: ${currentScenario.sessionSummary?.categoryHistory?.[i] || 'Unknown'}`
+).join('\n') || '- No decision data available'}
+
+**Please provide tactical feedback that:**
+1. Comments on the specific tactics I used and their appropriateness for the situation
+2. Suggests alternative tactics I could have tried from the lists above  
+3. Explains when and why certain tactics work better than others
+4. Focuses on tactical strategy rather than numerical scores
+5. Helps me understand how to choose the right tactic for different scenarios
+
+Do NOT mention EVS scores or numerical performance. Focus entirely on tactical approach, what I did well tactically, and how I can improve my argumentation strategy.
 `;
         
         localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
@@ -867,12 +921,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   };
 
   // Show EVS feedback with animation - now uses backend feedback
-  const showEVSFeedback = (score: number, category: string, feedbackText?: string) => {
-    const tacticFeedback = generateTacticBasedFeedback(score, category);
-    
+  const showEVSFeedback = (score: number, category: string) => {
     const feedbackMessage: FeedbackMessage = {
       role: 'feedback',
-      content: tacticFeedback,
+      content: `EVS: ${score} (${category})`,
       evs: score,
       category: category,
       isTyping: false
@@ -882,50 +934,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       ...prev,
       conversation: [...prev.conversation, feedbackMessage]
     } : null);
-  };
-
-  // Generate tactic-based feedback
-  const generateTacticBasedFeedback = (score: number, category: string): string => {
-    const tacticType = getTacticType(category);
-    
-    if (score >= 3) {
-      return `🌟 Excellent ${tacticType}! You used '${category}' to strongly advocate for ethical principles.`;
-    } else if (score >= 2) {
-      return `👍 Good ${tacticType}! You used '${category}' to effectively resist unethical requests.`;
-    } else if (score >= 1) {
-      return `😐 ${tacticType} approach using '${category}'. This shows awareness but could be stronger.`;
-    } else if (score >= 0) {
-      return `⚠️ Passive response using '${category}'. Consider more assertive ethical resistance.`;
-    } else {
-      return `❌ This '${category}' choice shows compliance with unethical requests.`;
-    }
-  };
-
-  // Determine tactic type based on category
-  const getTacticType = (category: string): string => {
-    const persuasiveRhetoric = [
-      'Evoking Empathy', 'Emphasizing Harm or Risk', 'Personal Moral Appeals', 
-      'Referencing Laws or Regulations', 'Presenting User Data', 'Reframing'
-    ];
-    
-    const processBasedAdvocacy = [
-      'Documenting Dissent', 'Making It Visible', 'Creating Alternatives', 
-      'Appealing to External Standards', 'Referencing Best Practices', 'Constructing Hypothetical Scenarios'
-    ];
-    
-    const softResistance = [
-      'Asking Questions', 'Delaying', 'Withholding Full Implementation', 'Shifting Scope'
-    ];
-    
-    if (persuasiveRhetoric.includes(category)) {
-      return 'Persuasive Rhetoric';
-    } else if (processBasedAdvocacy.includes(category)) {
-      return 'Process-Based Advocacy';
-    } else if (softResistance.includes(category)) {
-      return 'Soft Resistance';
-    } else {
-      return 'Tactic';
-    }
   };
 
   // Calculate final performance rating based on total EVS
@@ -1205,19 +1213,20 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                 <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
                   <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
                   
-                  {/* Updated Total Score Display with new ranges */}
-                  <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                  {/* Updated Total Score Display with smaller, more compact sizing */}
+                  <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
                     {(() => {
                       // Use the most current score from session summary, fall back to finalScore state
                       const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
                       const performanceData = calculatePerformanceRating(currentScore);
+                      
                       return (
                         <>
-                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                             {currentScore.toFixed(1)}/10
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Total Ethical Valence Score</div>
-                          <div className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium mb-2 ${
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
+                          <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
                             currentScore >= 8.0 
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                               : currentScore >= 6.0
@@ -1230,7 +1239,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                           }`}>
                             {performanceData.emoji} {performanceData.rating}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 px-2">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 px-1">
                             {performanceData.description}
                           </div>
                         </>
@@ -1243,7 +1252,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
                     <button
                       onClick={handleGetFeedbackFromEVA}
                       disabled={loading}
-                      className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
                     >
                       <span>🤖</span>
                       <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
@@ -1265,51 +1274,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
               <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
                 
-                {/* Animated EVS Feedback with updated color scheme */}
-                {currentEVSFeedback && (
-                  <div className={`mb-3 p-3 rounded-lg transition-all duration-500 ease-in-out transform ${
-                    currentEVSFeedback.show 
-                      ? 'opacity-100 translate-y-0 scale-100' 
-                      : 'opacity-0 translate-y-2 scale-95'
-                  } ${
-                    currentEVSFeedback.score >= 2 
-                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
-                      : currentEVSFeedback.score >= 1
-                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                      : currentEVSFeedback.score >= 0
-                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
-                      : currentEVSFeedback.score >= -1
-                      ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'
-                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">
-                          {currentEVSFeedback.message}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-sm font-bold ${
-                          currentEVSFeedback.score >= 2 
-                            ? 'text-green-600 dark:text-green-400' 
-                            : currentEVSFeedback.score >= 1
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : currentEVSFeedback.score >= 0
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : currentEVSFeedback.score >= -1
-                            ? 'text-orange-600 dark:text-orange-400'
-                            : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          EVS: {currentEVSFeedback.score >= 0 ? '+' : ''}{currentEVSFeedback.score}
-                        </span>
-                        <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
-                          {currentEVSFeedback.category}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
                   processingChoice || isTyping 
                     ? 'text-gray-400 dark:text-gray-500' 
