@@ -76,8 +76,8 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingSelections(true);
     try {
-      // Use relative URL to leverage Vite proxy
-      const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
+      // Use relative URL to leverage Vite proxy - corrected to match backend endpoint
+      const url = `/v1/practice/admin/practice-sessions/${sessionId}/selections`;
       console.log('Making request to URL:', url);
       
       const response = await fetch(url, {
@@ -116,8 +116,8 @@ const SessionDetailsModal: React.FC<{
     
     setLoadingDecisionTree(true);
     try {
-      // Use relative URL to leverage Vite proxy
-      const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`;
+      // Use relative URL to leverage Vite proxy - corrected to match backend endpoint
+      const url = `/v1/practice/admin/practice-sessions/${sessionId}/decision-tree`;
       console.log('Making request to URL:', url);
       
       // Make actual API call to get decision tree data
