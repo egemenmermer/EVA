@@ -2204,27 +2204,67 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       // Set state flag to indicate email drafting is in progress
       setIsDraftingEmail(true);
       
-      // Find the original ethical issue/concern that started the conversation
-      const originalMessages = storeMessages.filter(m => m.role === 'user');
+      // Find the most recent ethical issue/concern that the user raised
+      const userMessages = storeMessages.filter(m => m.role === 'user');
       let originalEthicalIssue = '';
       
-      // Try to find the first substantial user message that's likely about the ethical issue
-      if (originalMessages.length > 0) {
-        // Look for the first message that doesn't mention "practice" or "draft"
-        for (const msg of originalMessages) {
+      // Strategy 1: Look for the most recent substantial user message that came after any practice feedback
+      const lastFeedbackIndex = (() => {
+        for (let i = storeMessages.length - 1; i >= 0; i--) {
+          const msg = storeMessages[i];
+          if (msg.role === 'assistant' && 
+              (msg.content.includes('practice scenario') || 
+               msg.content.includes('Strengths') || 
+               msg.content.includes('Areas for Improvement'))) {
+            return i;
+          }
+        }
+        return -1;
+      })();
+      
+      if (lastFeedbackIndex !== -1) {
+        // Find user messages that came after the last practice feedback
+        const messagesAfterFeedback = storeMessages.slice(lastFeedbackIndex + 1);
+        const userMessagesAfterFeedback = messagesAfterFeedback.filter(m => m.role === 'user');
+        
+        // Look for the most recent substantial user message after feedback
+        for (let i = userMessagesAfterFeedback.length - 1; i >= 0; i--) {
+          const msg = userMessagesAfterFeedback[i];
           if (!msg.content.toLowerCase().includes('practice') && 
               !msg.content.toLowerCase().includes('draft') &&
               !msg.content.toLowerCase().includes('simulate') &&
+              !msg.content.toLowerCase().includes('yes, help') &&
+              !msg.content.toLowerCase().includes('copy') &&
               msg.content.length > 15) {
             originalEthicalIssue = msg.content;
+            console.log('Found recent ethical issue after feedback:', originalEthicalIssue.substring(0, 50) + '...');
             break;
           }
         }
-        
-        // If we couldn't find a specific message, use the first substantial message
-        if (!originalEthicalIssue && originalMessages.length > 0) {
-          originalEthicalIssue = originalMessages[0].content;
+      }
+      
+      // Strategy 2: If no recent issue found after feedback, look for the most recent substantial user message overall
+      if (!originalEthicalIssue && userMessages.length > 0) {
+        // Look backwards through all user messages for the most recent substantial one
+        for (let i = userMessages.length - 1; i >= 0; i--) {
+          const msg = userMessages[i];
+          if (!msg.content.toLowerCase().includes('practice') && 
+              !msg.content.toLowerCase().includes('draft') &&
+              !msg.content.toLowerCase().includes('simulate') &&
+              !msg.content.toLowerCase().includes('yes, help') &&
+              !msg.content.toLowerCase().includes('copy') &&
+              msg.content.length > 15) {
+            originalEthicalIssue = msg.content;
+            console.log('Found most recent ethical issue:', originalEthicalIssue.substring(0, 50) + '...');
+            break;
+          }
         }
+      }
+      
+      // Strategy 3: Final fallback - use the last user message if nothing else found
+      if (!originalEthicalIssue && userMessages.length > 0) {
+        originalEthicalIssue = userMessages[userMessages.length - 1].content;
+        console.log('Using last user message as fallback:', originalEthicalIssue.substring(0, 50) + '...');
       }
       
       // Create a very simplified message for display in the UI
@@ -2234,7 +2274,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       let detailedPrompt = `Please draft me a professional email to my manager about an ethical concern I'm facing at work.`;
       
       if (originalEthicalIssue) {
-        detailedPrompt += ` The ethical issue is regarding: \\"${originalEthicalIssue.substring(0, 200)}...\\"`;
+        detailedPrompt += ` The ethical issue is regarding: "${originalEthicalIssue.substring(0, 200)}..."`;
       }
       
       detailedPrompt += ` Please include a proper subject line, greeting, and professional closing. Focus on communicating the ethical concern clearly and professionally without mentioning any practice scenarios or scores.`;
@@ -3366,4 +3406,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       />
     </div>
   );
-}; 
+};
