@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight, ChevronLeft, Presentation, Maximize, Minimize } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { PresentationSlideshow } from '@/components/PresentationSlideshow';
 
 // Import manager icons
 import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
@@ -197,26 +198,117 @@ export const LandingPage: React.FC = () => {
   {/* Spacer to offset fixed header */}
   <div className="pt-16 md:pt-20" />
 
-  {/* Hero Section - More modern with asymmetric layout */}
+  {/* Hero Section - Slidable with navigation arrows */}
   <section className="container mx-auto px-4 py-16 md:py-24">
-    <div className="max-w-5xl mx-auto">
-      <div className="grid md:grid-cols-5 gap-8 items-center">
-        <div className="md:col-span-3">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 text-left">
-            Practice Ethical Decision-Making in Software Development
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed text-left">
-            EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.
-          </p>
+    <div className="max-w-5xl mx-auto relative">
+      {/* Navigation Arrows - Hide when on presentation slide */}
+      {!heroSlides[currentSlide].isPresentationSlide && (
+        <>
+          <button
+            onClick={() => setCurrentSlide(currentSlide === 0 ? heroSlides.length - 1 : currentSlide - 1)}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 z-10 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 group"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+          </button>
+          
+          <button
+            onClick={() => setCurrentSlide(currentSlide === heroSlides.length - 1 ? 0 : currentSlide + 1)}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 z-10 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 group"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+          </button>
+        </>
+      )}
+
+      {/* Slide Content */}
+      <div className="overflow-hidden">
+        <div 
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {heroSlides.map((slide, index) => (
+            <div key={index} className="w-full flex-shrink-0">
+              {slide.isPresentationSlide ? (
+                // Compact presentation layout - similar to first slide
+                <div className="grid md:grid-cols-5 gap-8 items-center min-h-[400px]">
+                  <div className="md:col-span-3">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 text-left">
+                      {slide.title}
+                    </h2>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+                      {slide.description}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2 flex justify-center md:justify-center items-center">
+                    <div className="w-full max-w-sm mx-auto">
+                      <PresentationSlideshow isDarkMode={isDarkMode} />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Regular two-column layout
+                <div className="grid md:grid-cols-5 gap-8 items-center min-h-[400px]">
+                  <div className="md:col-span-3">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 text-left">
+                      {slide.title}
+                    </h2>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+                      {slide.description}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2 flex justify-center md:justify-end">
+                    {slide.showLogo ? (
+                      <div className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-xs">
+                        <img 
+                          src={isDarkMode ? logoDark : logoLight} 
+                          alt="EVA Showcase" 
+                          className="w-full h-auto rounded-xl"
+                        />
+                      </div>
+                    ) : (
+                      <div className="p-6 bg-gray-100 dark:bg-gray-700 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md h-64 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                            <BookOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            Presentation Content Area
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        <div className="md:col-span-2 flex justify-center md:justify-end">
-          <div className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-xs">
-            <img 
-              src={isDarkMode ? logoDark : logoLight} 
-              alt="EVA Showcase" 
-              className="w-full h-auto rounded-xl"
-            />
+      </div>
+
+      {/* Slide Indicators */}
+      <div className="flex justify-center mt-8 space-x-3">
+        <div className="flex flex-col items-center space-y-2">
+          <div className="flex space-x-3">
+            {heroSlides.map((slide, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide 
+                    ? 'bg-blue-600 transform scale-125' 
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                }`}
+                aria-label={`Go to slide ${index + 1}${slide.isPresentationSlide ? ' (Presentation)' : ''}`}
+              />
+            ))}
           </div>
+          {heroSlides[currentSlide].isPresentationSlide && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+              Use the controls within the presentation to navigate slides • Click the fullscreen button for best viewing
+            </p>
+          )}
         </div>
       </div>
     </div>
