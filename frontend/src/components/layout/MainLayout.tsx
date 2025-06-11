@@ -3,6 +3,10 @@ import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { GuidelinesPanel } from '../guidelines/GuidelinesPanel';
 import { ManagerTypeQuizModal } from '../modals/ManagerTypeQuizModal';
+import { SimplifiedTacticsModal } from '../modals/SimplifiedTacticsModal';
+import { SurveyModal } from '../modals/SurveyModal';
+import { hasCompletedSurvey, SurveyType } from '@/utils/surveyUtils';
+import { SurveyDebugPanel } from '@/components/debug/SurveyDebugPanel';
 import { useStore } from '@/store/useStore';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -35,6 +39,11 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   // State for manager type quiz modal
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [isQuizRetake, setIsQuizRetake] = useState(false);
+  // State for tactics modal
+  const [showTacticsModal, setShowTacticsModal] = useState(false);
+  // State for survey modal
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [surveyType, setSurveyType] = useState<'pre' | 'post'>('pre');
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
@@ -80,17 +89,28 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     }
   }, [navigate, token, user, setUser, setToken]);
 
-  // Check if user needs to take manager type quiz
+  // Check if user needs to take pre-survey first, then manager type quiz
   useEffect(() => {
-    if (user && !user.managerTypePreference && !showQuizModal) {
-      console.log('User has not taken manager type quiz, showing modal');
-      setShowQuizModal(true);
-    } else if (user && user.managerTypePreference && !showQuizModal) {
-      console.log('User has manager type preference:', user.managerTypePreference);
-      // Don't automatically close if modal is currently open - let it handle its own closing
-      // setShowQuizModal(false);
+    if (user && !showQuizModal && !showSurveyModal) {
+      const hasCompletedPreSurvey = hasCompletedSurvey('pre');
+      
+      // First check: if user hasn't completed pre-survey, show it first
+      if (!hasCompletedPreSurvey) {
+        console.log('User has not completed pre-survey, showing pre-survey first');
+        setSurveyType('pre');
+        setShowSurveyModal(true);
+      }
+      // Second check: if pre-survey is done but no manager type preference, show quiz
+      else if (!user.managerTypePreference) {
+        console.log('Pre-survey completed, now showing manager type quiz');
+        setShowQuizModal(true);
+      }
+      // User has both pre-survey and quiz completed
+      else {
+        console.log('User has completed both pre-survey and manager type quiz');
+      }
     }
-  }, [user, showQuizModal]);
+  }, [user, showQuizModal, showSurveyModal]);
 
   // Listen for retake quiz events from sidebar
   useEffect(() => {
@@ -101,10 +121,25 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       setShowQuizModal(true);
     };
 
+    const handleShowTacticsModal = (event: Event) => {
+      console.log('Received show-tactics-modal event');
+      setShowTacticsModal(true);
+    };
+
+    const handleShowPostSurveyModal = (event: Event) => {
+      console.log('Received show-post-survey-modal event');
+      setSurveyType('post');
+      setShowSurveyModal(true);
+    };
+
     window.addEventListener('show-manager-quiz', handleShowQuizModal);
+    window.addEventListener('show-tactics-modal', handleShowTacticsModal);
+    window.addEventListener('show-post-survey-modal', handleShowPostSurveyModal);
 
     return () => {
       window.removeEventListener('show-manager-quiz', handleShowQuizModal);
+      window.removeEventListener('show-tactics-modal', handleShowTacticsModal);
+      window.removeEventListener('show-post-survey-modal', handleShowPostSurveyModal);
     };
   }, []);
 
@@ -275,6 +310,16 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     setIsQuizRetake(false);
   };
 
+  const handleSurveyComplete = () => {
+    console.log('Survey completed callback triggered');
+    // Additional logic can be added here if needed
+  };
+
+  const handleShowSurveyFromDebug = (surveyType: SurveyType) => {
+    setSurveyType(surveyType);
+    setShowSurveyModal(true);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">
       {/* Header - Responsive padding */}
@@ -414,6 +459,25 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         isRetake={isQuizRetake}
         isRequired={!user?.managerTypePreference}
       />
+
+      {/* Tactics Modal */}
+      <SimplifiedTacticsModal
+        isOpen={showTacticsModal}
+        onClose={() => setShowTacticsModal(false)}
+      />
+
+      {/* Survey Modal */}
+      <SurveyModal
+        isOpen={showSurveyModal}
+        onClose={() => setShowSurveyModal(false)}
+        surveyType={surveyType}
+        onComplete={handleSurveyComplete}
+      />
+
+      {/* Survey Debug Panel - Development only */}
+      {process.env.NODE_ENV === 'development' && (
+        <SurveyDebugPanel onShowSurvey={handleShowSurveyFromDebug} />
+      )}
     </div>
   );
 }; 

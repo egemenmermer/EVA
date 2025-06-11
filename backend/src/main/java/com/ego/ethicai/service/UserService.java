@@ -23,4 +23,12 @@ public interface UserService {
     User processOAuthPostLogin(String email, String name, String provider);
     Optional<User> findById(UUID id);
     void deleteUser(UUID id);
+    
+    // Survey completion methods
+    User markPreSurveyCompleted(UUID userId);
+    User markPostSurveyCompleted(UUID userId);
+    
+    // Scenario completion methods
+    User markAccessibilityScenariosCompleted(UUID userId);
+    User markPrivacyScenariosCompleted(UUID userId);
 }

@@ -3,6 +3,8 @@ import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { EditDraftModal } from './EditDraftModal'; // Import the modal component
 import { ScenarioSelectionModal } from '@/components/modals/ScenarioSelectionModal'; // Import our new modal
+import { SimplifiedTacticsModal } from '@/components/modals/SimplifiedTacticsModal'; // Import simplified tactics modal
+import { analyzeMessageForScenarioCompletion } from '@/utils/scenarioTracker';
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';
 import { conversationApi, saveMessage, getManagerType, sendMessage as apiSendMessage, agentCreateConversation } from '@/services/api'; // Import saveMessage, getManagerType, sendMessage, and agentCreateConversation
@@ -279,6 +281,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Add state for scenario selection modal
   const [showScenarioModal, setShowScenarioModal] = useState(false);
+  
+  // Add state for tactics modal
+  const [showTacticsModal, setShowTacticsModal] = useState(false);
   
   const navigate = useNavigate();
   
@@ -1327,6 +1332,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       console.error('Error parsing practice history:', e);
       return [];
     }
+  };
+
+  // Function to check if user has completed at least one practice module
+  const hasCompletedPractice = () => {
+    const history = getPracticeHistory();
+    return history.length > 0;
   };
 
   // Complete replacement of the handlePracticeFeedbackRequest function with proper structure
@@ -3350,6 +3361,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
   }, [currentConversation, storeMessages.length]);
 
+  // Add event listener for tactics modal
+  useEffect(() => {
+    const handleShowTacticsModal = () => {
+      setShowTacticsModal(true);
+    };
+
+    window.addEventListener('show-tactics-modal', handleShowTacticsModal);
+
+    return () => {
+      window.removeEventListener('show-tactics-modal', handleShowTacticsModal);
+    };
+  }, []);
+
   // Render practice module or chat interface based on practice mode state
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
@@ -3444,6 +3468,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             handleSendMessage(prompt);
           }, 100); // Small delay to ensure modal is closed first
         }}
+      />
+
+      {/* Add Simplified Tactics Modal */}
+      <SimplifiedTacticsModal
+        isOpen={showTacticsModal}
+        onClose={() => setShowTacticsModal(false)}
       />
     </div>
   );

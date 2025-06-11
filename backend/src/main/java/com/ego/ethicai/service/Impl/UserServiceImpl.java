@@ -40,15 +40,23 @@ public class UserServiceImpl implements UserService {
         User user = findById(id).orElseThrow(
                 () -> new UserNotFoundException("User not found with ID: " + id));
 
-        return new UserResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getLastLogin(),
-                user.getUpdatedAt(),
-                user.getRole(),
-                user.getManagerTypePreference()
-        );
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .lastLogin(user.getLastLogin())
+                .updatedAt(user.getUpdatedAt())
+                .role(user.getRole())
+                .managerTypePreference(user.getManagerTypePreference())
+                .preSurveyCompleted(user.getPreSurveyCompleted())
+                .postSurveyCompleted(user.getPostSurveyCompleted())
+                .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
+                .postSurveyCompletedAt(user.getPostSurveyCompletedAt())
+                .accessibilityScenariosCompleted(user.getAccessibilityScenariosCompleted())
+                .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
+                .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
+                .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .build();
     }
 
     @Override
@@ -119,15 +127,23 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
         logger.debug("Updated user with ID: {} and email: {}", user.getId(), user.getEmail());
 
-        return new UserResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getLastLogin(),
-                user.getUpdatedAt(),
-                user.getRole(),
-                user.getManagerTypePreference()
-        );
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .lastLogin(user.getLastLogin())
+                .updatedAt(user.getUpdatedAt())
+                .role(user.getRole())
+                .managerTypePreference(user.getManagerTypePreference())
+                .preSurveyCompleted(user.getPreSurveyCompleted())
+                .postSurveyCompleted(user.getPostSurveyCompleted())
+                .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
+                .postSurveyCompletedAt(user.getPostSurveyCompletedAt())
+                .accessibilityScenariosCompleted(user.getAccessibilityScenariosCompleted())
+                .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
+                .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
+                .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .build();
     }
 
     @Override
@@ -220,5 +236,69 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(id);
         logger.debug("Deleted user with ID: {}", id);
+    }
+
+    @Override
+    @Transactional
+    public User markPreSurveyCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.markPreSurveyCompleted();
+        user = userRepository.save(user);
+        logger.debug("Marked pre-survey completed for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User markPostSurveyCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.markPostSurveyCompleted();
+        user = userRepository.save(user);
+        logger.debug("Marked post-survey completed for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User markAccessibilityScenariosCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.markAccessibilityScenariosCompleted();
+        user = userRepository.save(user);
+        logger.debug("Marked accessibility scenarios completed for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User markPrivacyScenariosCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.markPrivacyScenariosCompleted();
+        user = userRepository.save(user);
+        logger.debug("Marked privacy scenarios completed for user with ID: {}", userId);
+        return user;
     }
 }

@@ -70,6 +70,8 @@ interface ScenarioChoiceResponse {
     scenarioTitle: string;
     issue: string;
     managerType: string;
+    endingMessage?: string;
+    endingType?: string;
   };
 }
 
@@ -460,13 +462,34 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Handle user choice selection
   const handleChoice = async (choiceIndex: number) => {
-    if (!currentScenario || processingChoice) return;
+    console.log('🚀 handleChoice called with choiceIndex:', choiceIndex);
     
-    try {
+    if (!currentScenario || processingChoice) {
+      console.log('❌ Early return: currentScenario=', !!currentScenario, 'processingChoice=', processingChoice);
+      return;
+    }
+
+    console.log('✅ Proceeding with choice processing...');
       setProcessingChoice(true);
-      console.log(`Processing choice ${choiceIndex} for scenario ${currentScenario.scenario.id}`);
-      
-      // Process the choice with backend FIRST to get the response
+
+    try {
+      const userChoice = currentScenario.currentChoices[choiceIndex];
+      console.log('👤 User choice:', userChoice);
+
+      // Add user message to conversation
+      const userMessage: UserMessage = {
+        role: 'user',
+        content: userChoice.text
+      };
+
+      console.log('📤 Making API call to:', `/api/v1/scenarios/${currentScenario.scenario.id}/next`);
+      console.log('📤 API payload:', {
+        sessionId: currentScenario.sessionId,
+        choiceIndex,
+        currentStatementId: currentScenario.currentStatementId
+      });
+
+      // Make API call to backend
       const response = await backendApi.post<ScenarioChoiceResponse>(
         `/api/v1/scenarios/${currentScenario.scenario.id}/next`,
         {
@@ -476,18 +499,121 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         }
       );
       
-      // Show animated EVS feedback
-      showEVSFeedback(response.data.evs, response.data.category);
+      console.log('📥 API response received:', response.data);
+      console.log('📥 Response keys:', Object.keys(response.data));
+      console.log('📥 isComplete:', response.data.isComplete);
+      console.log('📥 sessionSummary:', response.data.sessionSummary);
+
+      // Skip EVS feedback - removed for cleaner conversation
       
       // NOW add user's choice to conversation after successful API call
-      const userChoice = currentScenario.currentChoices[choiceIndex];
-      const userMessage: UserMessage = {
-        role: 'user',
-        content: userChoice.text
-      };
+      const updatedConversation = [...currentScenario.conversation, userMessage];
       
-      // Check if scenario should be completed (either backend says so, or we've made 10+ choices)
-      const shouldComplete = response.data.isComplete || (currentScenario.conversation.length >= 20); // 20 = ~10 conversation pairs + user choice
+      console.log('🔍 Response from backend:', response.data);
+      console.log('🔍 isComplete:', response.data.isComplete);
+      console.log('🔍 nextChoices length:', response.data.nextChoices?.length);
+      console.log('🔍 sessionSummary exists:', !!response.data.sessionSummary);
+      
+      // Check if backend says scenario is complete OR we have no more choices
+      const backendSaysComplete = response.data.isComplete;
+      const isAtEnding = response.data.nextChoices && response.data.nextChoices.length === 0;
+      
+      // Debug logging for completion logic
+      console.log('🔍 Completion check:', {
+        backendSaysComplete,
+        hasSessionSummary: !!response.data.sessionSummary,
+        nextStatementId: response.data.nextStatementId,
+        isAtEnding,
+        nextChoicesLength: response.data.nextChoices?.length
+      });
+      
+      // If backend says complete with session summary, show completion immediately
+      if (backendSaysComplete && response.data.sessionSummary) {
+        const sessionSummary = response.data.sessionSummary;
+        
+        console.log('🎉 COMPLETION TRIGGERED! Backend says complete with summary');
+        console.log('📊 Session summary received:', sessionSummary);
+        
+        setCurrentScenario(prev => prev ? {
+          ...prev,
+          conversation: updatedConversation,
+          isComplete: true,
+          currentChoices: [],
+          sessionSummary
+        } : null);
+        
+        setFinalScore(sessionSummary.totalEvs || 0);
+        
+        console.log('✅ Scenario completed with summary!');
+        console.log('📊 Session summary:', sessionSummary);
+        
+        // Save practice session data
+        if (!sessionSaved) {
+          await savePracticeSessionData(sessionSummary, updatedConversation);
+        }
+        
+        // Show completion popup immediately
+        setFinalReport(true);
+        setShowFeedbackOptions(true);
+        setProcessingChoice(false);
+        return;
+      }
+      
+      // If we're at ending but no completion data yet, try to get it
+      // ONLY if we don't already have sessionSummary from the first response
+      if ((isAtEnding || (response.data.nextStatementId && response.data.nextStatementId.startsWith('end'))) && !response.data.sessionSummary) {
+        console.log('🔍 At ending, trying to get completion data...');
+        
+        try {
+          const completionResponse = await backendApi.post<ScenarioChoiceResponse>(
+            `/api/v1/scenarios/${currentScenario.scenario.id}/next`,
+            {
+              sessionId: currentScenario.sessionId,
+              choiceIndex: 0, // Dummy choice for completion
+              currentStatementId: response.data.nextStatementId || currentScenario.currentStatementId
+            }
+          );
+          
+          console.log('🔍 Completion response:', completionResponse.data);
+          
+          // Check if we have session summary (completion) regardless of isComplete flag
+          if (completionResponse.data.sessionSummary) {
+            const sessionSummary = completionResponse.data.sessionSummary;
+            
+            setCurrentScenario(prev => prev ? {
+              ...prev,
+              conversation: updatedConversation,
+              isComplete: true,
+              currentChoices: [],
+              sessionSummary
+            } : null);
+            
+            setFinalScore(sessionSummary.totalEvs || 0);
+            
+            console.log('✅ Scenario completed via second call!');
+            console.log('📊 Session summary:', sessionSummary);
+            
+            // Save practice session data
+            if (!sessionSaved) {
+              await savePracticeSessionData(sessionSummary, updatedConversation);
+            }
+            
+            // Show completion popup immediately
+            setFinalReport(true);
+            setShowFeedbackOptions(true);
+            setProcessingChoice(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Error getting completion data:', error);
+        }
+        
+        setProcessingChoice(false);
+        return;
+      }
+      
+      // Check if we need to fallback complete (emergency case)
+      const shouldComplete = currentScenario.conversation.length >= 20;
       
       if (shouldComplete) {
         // Add user's final choice to conversation
@@ -558,9 +684,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           sessionSummary
         } : null);
         
-        setFinalReport(true);
         setFinalScore(sessionSummary?.totalEvs || 0);
-        setShowFeedbackOptions(true);
         setProcessingChoice(false); // Reset processing state immediately
         
         console.log('✅ Scenario completed!');
@@ -574,9 +698,16 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           await savePracticeSessionData(sessionSummary, updatedConversation);
         }
         
-        // Add final completion message with typing animation
+        // Add final completion message with typing animation using ending from scenario
         setTimeout(async () => {
-          await addManagerMessageWithTyping("Well done! Your practice session is complete. Let's review your performance.");
+          const endingMessage = sessionSummary?.endingMessage || "Well done! Your practice session is complete. Let's review your performance.";
+          await addManagerMessageWithTyping(endingMessage);
+          
+          // ONLY show final report AFTER the ending message is fully displayed
+          setTimeout(() => {
+            setFinalReport(true);
+            setShowFeedbackOptions(true);
+          }, 1000); // Give time for the ending message to be read
         }, 500);
         
         } else {
@@ -798,35 +929,25 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 - Performance Level: ${calculatePerformanceRating(currentScore).rating}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length || 0}
 
-**Available Argumentation Tactics (Please reference these in your feedback):**
+**Available Argumentation Tactics (Focus on tactics relevant to this practice scenario):**
 
-🔸 **Soft Resistance Tactics** (Subtle, non-confrontational approaches):
-- Shifting Scope: Redirect focus to ethically preferable areas
-- Delaying: Postpone decisions to buy time or avoid unethical choices  
-- Documenting Dissent: Log disagreement for accountability
-- Reframing: Reinterpret problems in ethical/user-centered terms
-- Appealing to External Standards: Cite ethics codes, laws, standards
-- Making It Visible: Draw attention to hidden ethical issues
-- Adding Friction: Subtly slow down unethical decisions
-- Creating Alternatives: Suggest solutions that reduce harm
-- Redirecting Conversations: Steer dialogue toward user well-being
-- Asking Questions: Use inquiry to expose flaws without confronting
-- Withholding Full Implementation: Implement partially to reduce harm
-- Testing Loopholes: Find policy gaps allowing more ethical action
-
-🔹 **Rhetorical Tactics** (Persuasive, evidence-based approaches):
-- Appealing to Organizational Values: Reference company mission/ethics
-- Citing Institutional Authority: Reference respected sources
-- Referencing Laws or Regulations: Mention GDPR, ADA, compliance rules
-- Presenting User Data: Use metrics, research to support arguments
-- Referencing Best Practices: Cite UX/design guidelines
-- Constructing Hypothetical Scenarios: Paint realistic future situations
-- Drawing Analogies: Compare to familiar systems/decisions
-- Evoking Empathy: Appeal to user emotions around harm/exclusion
-- Emphasizing Harm or Risk: Focus on what could go wrong
-- Citing Public Backlash: Reference reputational risk
-- Personal Moral Appeals: Use your ethical compass as authority
-- Sarcastic Ridicule: Discredit unethical logic using irony
+${currentScenario.sessionSummary ? (() => {
+  // Get all tactics the user actually chose
+  const usedTactics = currentScenario.sessionSummary.categoryHistory || [];
+  const uniqueUsedTactics = [...new Set(usedTactics.filter(t => t !== 'None'))];
+  
+  // Practice scenarios include these 4 tactics in various choices
+  const tacticDescriptions = {
+    'Direct Confrontation': '🔸 **Direct Confrontation**: Directly challenge unethical decisions with evidence and strong ethical positions',
+    'Persuasive Rhetoric': '🔹 **Persuasive Rhetoric**: Use logical arguments, evidence, and emotional appeals to convince others',
+    'Process-Based Advocacy': '📋 **Process-Based Advocacy**: Suggest processes, reviews, or systematic approaches to address concerns',
+    'Soft Resistance': '🤲 **Soft Resistance**: Subtle pushback that doesn\'t directly confront but raises ethical concerns'
+  };
+  
+  const allTacticDescriptions = Object.values(tacticDescriptions).join('\n');
+  
+  return `These are the 4 main tactics used in practice scenarios (reference any of these in your feedback):\n\n${allTacticDescriptions}\n\n**Tactics the user actually chose:** ${uniqueUsedTactics.join(', ') || 'None'}`;
+})() : 'No tactical data available.'}
 
 **Tactical Analysis:**
 ${currentScenario.sessionSummary?.categoryHistory ? (() => {
@@ -851,13 +972,14 @@ ${currentScenario.sessionSummary?.choiceHistory?.map((choice: string, i: number)
 ).join('\n') || '- No decision data available'}
 
 **Please provide tactical feedback that:**
-1. Comments on the specific tactics I used and their appropriateness for the situation
-2. Suggests alternative tactics I could have tried from the lists above  
-3. Explains when and why certain tactics work better than others
-4. Focuses on tactical strategy rather than numerical scores
-5. Helps me understand how to choose the right tactic for different scenarios
+1. Comments on the specific tactics I actually used and their appropriateness for the situation  
+2. Suggests alternative tactics I could have chosen from the 4 main tactics available in practice scenarios
+3. ONLY reference the 4 tactics listed above - these are the ones used in EVA practice scenarios
+4. Explains when and why different tactics work well in similar ethical dilemmas
+5. Focuses on tactical strategy rather than numerical scores
+6. Helps me understand how to choose between different tactics for various ethical challenges
 
-Do NOT mention EVS scores or numerical performance. Focus entirely on tactical approach, what I did well tactically, and how I can improve my argumentation strategy.
+IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical strategy - what I did well with my chosen tactics and how I could strategically use other available tactics in similar situations.
 `;
         
         localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
@@ -951,21 +1073,7 @@ Do NOT mention EVS scores or numerical performance. Focus entirely on tactical a
     setTimeout(scrollToBottom, 100);
   };
 
-  // Show EVS feedback with animation - now uses backend feedback
-  const showEVSFeedback = (score: number, category: string) => {
-    const feedbackMessage: FeedbackMessage = {
-      role: 'feedback',
-      content: `EVS: ${score} (${category})`,
-      evs: score,
-      category: category,
-      isTyping: false
-    };
-
-    setCurrentScenario(prev => prev ? {
-      ...prev,
-      conversation: [...prev.conversation, feedbackMessage]
-    } : null);
-  };
+  // EVS feedback removed for cleaner conversation experience
 
   // Calculate final performance rating based on total EVS
   const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string } => {
@@ -1010,28 +1118,6 @@ Do NOT mention EVS scores or numerical performance. Focus entirely on tactical a
           <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
           {onExit && (
             <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setShowInfoModal(true)}
-                className="group relative px-4 py-2 text-sm rounded-lg overflow-hidden
-                          bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
-                          hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
-                          text-white shadow-md hover:shadow-lg
-                          transform hover:scale-[1.02] active:scale-[0.98]
-                          transition-all duration-500 ease-out
-                          before:absolute before:inset-0 before:bg-gradient-to-r 
-                          before:from-pink-500 before:via-purple-500 before:to-blue-500
-                          before:opacity-0 before:transition-opacity before:duration-700
-                          hover:before:opacity-100"
-                title="Learn about EVA Tactics"
-              >
-                <span className="relative z-10 flex items-center space-x-1.5">
-                  <span className="text-sm">💡</span>
-                  <span>Argumentation Tactics</span>
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
-                               translate-x-[-100%] group-hover:translate-x-[100%] 
-                               transition-transform duration-1500 ease-in-out"></div>
-              </button>
             <button
               onClick={handleReturnToChat}
               className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -1158,14 +1244,9 @@ Do NOT mention EVS scores or numerical performance. Focus entirely on tactical a
               {currentScenario?.conversation && Array.isArray(currentScenario.conversation) && currentScenario.conversation.length > 0 ? (
               <div className="space-y-2 mb-2">
                 {currentScenario.conversation.map((message, index) => {
+                  // Skip feedback messages for cleaner conversation
                   if (message.role === 'feedback') {
-                      const feedbackMsg = message as FeedbackMessage;
-                      return (
-                        <div key={index} className="p-2 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-1 text-sm">
-                          <span className="font-semibold">EVS: {feedbackMsg.evs}</span>
-                          {feedbackMsg.category && <span className="ml-2">({feedbackMsg.category})</span>}
-                        </div>
-                      );
+                      return null;
                     }
 
                     if (message.role === 'final_evaluation') {
@@ -1243,6 +1324,19 @@ Do NOT mention EVS scores or numerical performance. Focus entirely on tactical a
               {finalReport && (
                 <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
                   <h3 className="font-semibold text-lg mb-3">🎉 Practice Session Complete!</h3>
+                  
+                  {/* Show ending message from scenario as informational */}
+                  {currentScenario?.sessionSummary?.endingMessage && (
+                    <div className="mb-4 p-3 bg-blue-50/70 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-800/30 rounded-lg text-center">
+                      <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center justify-center">
+                        <span className="mr-2">📋</span>
+                        Scenario Outcome
+                      </div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {currentScenario.sessionSummary.endingMessage}
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Updated Total Score Display with smaller, more compact sizing */}
                   <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
@@ -1331,10 +1425,10 @@ Do NOT mention EVS scores or numerical performance. Focus entirely on tactical a
                     >
                       <div className="flex justify-between items-start">
                         <span className="flex-1">{choice.text}</span>
-                        <span className={`ml-2 text-xs px-2 py-1 rounded transition-colors duration-300 ${
+                        <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
                           processingChoice || isTyping
-                            ? 'bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                            ? 'bg-gray-200/30 dark:bg-gray-600/20 text-gray-400 dark:text-gray-500'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
                         }`}>
                           {choice.category}
                         </span>

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Iterator;
 
 @Slf4j
 @Service
@@ -110,6 +111,39 @@ public class ScenarioServiceImpl implements ScenarioService {
             throw new RuntimeException("Scenario not found: " + scenarioId);
         }
         
+        // Check if session is already complete (prevent duplicate processing)
+        if (session.getCurrentStatementId() != null && session.getCurrentStatementId().startsWith("end")) {
+            log.info("Session {} is at ending: {}. Completing scenario.", 
+                    sessionId, session.getCurrentStatementId());
+            
+            // Complete the scenario since we're at an ending
+            Map<String, Object> summary = generateSessionSummary(session, scenario);
+            
+            // Add ending message from scenarios endings section
+            String endingId = session.getCurrentStatementId();
+            JsonNode endings = scenario.get("endings");
+            if (endings != null && endings.has(endingId)) {
+                JsonNode ending = endings.get(endingId);
+                summary.put("endingMessage", ending.get("text").asText());
+                summary.put("endingType", endingId.equals("end_good") ? "SUCCESS" : "PARTIAL");
+            }
+            
+            ScenarioChoiceResponseDTO response = ScenarioChoiceResponseDTO.builder()
+                    .sessionId(sessionId)
+                    .scenarioId(scenarioId)
+                    .currentStep(session.getCurrentStep())
+                    .evs(0) // No new EVS for completion request
+                    .category("NONE") // No category for completion request
+                    .isComplete(true)
+                    .sessionSummary(summary)
+                    .build();
+            
+            log.info("Returning completion response for session {}: isComplete={}, hasSessionSummary={}", 
+                    sessionId, response.isComplete(), response.getSessionSummary() != null);
+            
+            return response;
+        }
+        
         JsonNode statements = scenario.get("statements");
         if (statements == null) {
             throw new RuntimeException("No statements found in scenario");
@@ -152,33 +186,137 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Don't generate hardcoded feedback - let EVA handle feedback naturally
         
-        session.getChoiceHistory().add(choiceText);
-        session.getEvsHistory().add(evs);
-        session.getCategoryHistory().add(category);
-        session.setCurrentStatementId(nextStatementId);
-        session.setCurrentStep(session.getCurrentStep() + 1);
-        
-        // Check if scenario is complete
-        boolean isComplete = nextStatementId.startsWith("end") || session.getCurrentStep() > 7;
-        
-        log.info("Processing choice for session {}: step={}, nextStatementId={}, isComplete={}", 
-                sessionId, session.getCurrentStep(), nextStatementId, isComplete);
+        log.info("Processing choice for session {}: step={}, nextStatementId={}", 
+                sessionId, session.getCurrentStep() + 1, nextStatementId);
         
         ScenarioChoiceResponseDTO.ScenarioChoiceResponseDTOBuilder responseBuilder = ScenarioChoiceResponseDTO.builder()
                 .sessionId(sessionId)
                 .scenarioId(scenarioId)
-                .currentStep(session.getCurrentStep())
+                .currentStep(session.getCurrentStep() + 1)  // Will be incremented
                 .evs(evs)
                 .category(category)
-                .isComplete(isComplete);
+                .isComplete(false); // Default to not complete
         
-        if (isComplete) {
-            log.info("Scenario completed for session {}: generating summary", sessionId);
-            // Generate session summary
-            Map<String, Object> summary = generateSessionSummary(session, scenario);
-            responseBuilder.sessionSummary(summary);
+        // Check if we've reached an ending or final score
+        if (nextStatementId.startsWith("end") || nextStatementId.equals("final_score")) {
+            log.info("Reached ending for session {}: {}", sessionId, nextStatementId);
+            
+            // Update session with current choice ONCE here
+            session.getChoiceHistory().add(choiceText);
+            session.getEvsHistory().add(evs);
+            session.getCategoryHistory().add(category);
+            session.setCurrentStatementId(nextStatementId);
+            session.setCurrentStep(session.getCurrentStep() + 1);
+            
+            // Mark scenario as complete
+            responseBuilder.isComplete(true);
+            
+            // Handle different ending types
+            if (nextStatementId.equals("final_score")) {
+                log.info("Handling final_score completion for session {}", sessionId);
+                
+                // Calculate final score using updated history
+                int totalEvs = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
+                log.info("Final score calculation: totalEvs={}, evsHistory={}", totalEvs, session.getEvsHistory());
+                
+                // Get the final_score statement to check for score ranges
+                JsonNode finalScoreStatement = statements.get("final_score");
+                if (finalScoreStatement != null && finalScoreStatement.has("score_ranges")) {
+                    JsonNode scoreRanges = finalScoreStatement.get("score_ranges");
+                    
+                    // Find the correct ending key based on EVS score
+                    String endingKey = null;
+                    for (Iterator<Map.Entry<String, JsonNode>> it = scoreRanges.fields(); it.hasNext(); ) {
+                        Map.Entry<String, JsonNode> entry = it.next();
+                        String range = entry.getKey();
+                        String[] parts = range.split("_to_");
+                        log.info("🔍 Checking score range: {} -> {}", range, entry.getValue().asText());
+                        if (parts.length == 2) {
+                            try {
+                                int minScore = Integer.parseInt(parts[0]);
+                                int maxScore = Integer.parseInt(parts[1]);
+                                log.info("📊 Range {}-{}, user score: {}", minScore, maxScore, totalEvs);
+                                if (totalEvs >= minScore && totalEvs <= maxScore) {
+                                    endingKey = entry.getValue().asText();
+                                    log.info("✅ Found matching range! Using ending: {}", endingKey);
+                                    break;
+                                }
+                            } catch (NumberFormatException e) {
+                                log.warn("⚠️ Invalid score range format: {}", range);
+                            }
+                        }
+                    }
+                    
+                    if (endingKey != null) {
+                        // Get the actual ending from the endings section
+                        JsonNode endings = scenario.get("endings");
+                        if (endings != null && endings.has(endingKey)) {
+                            JsonNode ending = endings.get(endingKey);
+                            String endingText = ending.get("text").asText();
+                            
+                            // Generate session summary for frontend
+                            Map<String, Object> summary = generateSessionSummary(session, scenario);
+                            // Add the ending message to the summary so the frontend can display it
+                            summary.put("endingMessage", endingText);
+                            
+                            responseBuilder
+                                    .nextStatementId(endingKey)
+                                    .nextStatement(endingText)
+                                    .nextChoices(List.of())
+                                    .isComplete(true)  // Mark as complete!
+                                    .sessionSummary(summary);
+                        } else {
+                            log.error("Ending not found: {} for session {}", endingKey, sessionId);
+                            throw new RuntimeException("Ending not found: " + endingKey);
+                        }
+                    } else {
+                        // Fallback to custom message if no matching range found
+                        Map<String, Object> summary = generateSessionSummary(session, scenario);
+                        String endingText = formatFinalScoreMessage(summary);
+                        // Add the ending message to the summary so the frontend can display it
+                        summary.put("endingMessage", endingText);
+                        
+                        responseBuilder
+                                .nextStatementId("final_score")
+                                .nextStatement(endingText)
+                                .nextChoices(List.of())
+                                .isComplete(true)  // Mark as complete!
+                                .sessionSummary(summary);
+                    }
+                }
+            } else {
+                // Get ending message from scenarios endings section
+                JsonNode endings = scenario.get("endings");
+                if (endings != null && endings.has(nextStatementId)) {
+                    JsonNode ending = endings.get(nextStatementId);
+                    String endingText = ending.get("text").asText();
+                    
+                    // Generate session summary for completion
+                    Map<String, Object> summary = generateSessionSummary(session, scenario);
+                    // Add the ending message to the summary so the frontend can display it
+                    summary.put("endingMessage", endingText);
+                    
+                    // Return ending as the final manager statement (without choices)
+                    responseBuilder
+                            .nextStatementId(nextStatementId)
+                            .nextStatement(endingText)
+                            .nextChoices(List.of()) // No choices for ending
+                            .isComplete(true)       // Mark as complete!
+                            .sessionSummary(summary); // Include summary for frontend
+                } else {
+                    log.error("Ending not found for session {}: {}", sessionId, nextStatementId);
+                    throw new RuntimeException("Ending not found: " + nextStatementId);
+                }
+            }
         } else {
-            // Get next statement and choices
+            // Update session with current choice for non-ending cases
+            session.getChoiceHistory().add(choiceText);
+            session.getEvsHistory().add(evs);
+            session.getCategoryHistory().add(category);
+            session.setCurrentStatementId(nextStatementId);
+            session.setCurrentStep(session.getCurrentStep() + 1);
+            
+            // Get next statement and choices from statements section
             JsonNode nextStatement = statements.get(nextStatementId);
             if (nextStatement != null) {
                 log.info("Found next statement for session {}: {}", sessionId, nextStatementId);
@@ -211,7 +349,22 @@ public class ScenarioServiceImpl implements ScenarioService {
             }
         }
         
-        return responseBuilder.build();
+        // Debug logging before building response
+        ScenarioChoiceResponseDTO response = responseBuilder.build();
+        log.info("🔍 Response debug for session {}: isComplete={}, sessionSummary={}, nextChoices={}",
+                sessionId, response.isComplete(), 
+                response.getSessionSummary() != null ? "present" : "null",
+                response.getNextChoices() != null ? response.getNextChoices().size() : "null");
+        
+        // Additional debug: log the actual JSON that will be sent
+        try {
+            String jsonResponse = objectMapper.writeValueAsString(response);
+            log.info("📤 JSON Response for session {}: {}", sessionId, jsonResponse);
+        } catch (Exception e) {
+            log.error("Failed to serialize response to JSON", e);
+        }
+        
+        return response;
     }
     
     @Override
@@ -489,6 +642,39 @@ public class ScenarioServiceImpl implements ScenarioService {
         feedback.put("tacticTypes", tacticTypes);
         
         return feedback;
+    }
+    
+    private String formatFinalScoreMessage(Map<String, Object> summary) {
+        double finalScore = (Double) summary.get("totalEvs"); // This is actually the scaled final score (0-10)
+        int rawEvs = (Integer) summary.get("rawEvs"); // This is the raw EVS total
+        int numChoices = ((List<?>) summary.get("evsHistory")).size(); // Get count from EVS history
+        
+        String scoreCategory;
+        String feedback;
+        
+        if (finalScore >= 8.0) {
+            scoreCategory = "Excellent";
+            feedback = "You consistently made ethical choices that prioritize user needs and company values. Your approach demonstrates strong ethical leadership.";
+        } else if (finalScore >= 6.0) {
+            scoreCategory = "Good";
+            feedback = "You made mostly ethical choices with some room for improvement. Consider the long-term impact of decisions on all stakeholders.";
+        } else if (finalScore >= 4.0) {
+            scoreCategory = "Fair";
+            feedback = "Your choices showed mixed ethical considerations. Reflect on how to better balance competing priorities while maintaining ethical standards.";
+        } else {
+            scoreCategory = "Needs Improvement";
+            feedback = "Consider focusing more on ethical implications and stakeholder impact in your decision-making process.";
+        }
+        
+        return String.format(
+            "Great work completing this scenario! Here's your performance summary:\n\n" +
+            "📊 **Final Score: %.1f/10 (%s)**\n" +
+            "🎯 Total EVS Points: %d/%d\n" +
+            "📋 Decisions Made: %d\n\n" +
+            "💡 **Feedback:** %s\n\n" +
+            "Thank you for practicing ethical decision-making with EVA!",
+            finalScore, scoreCategory, rawEvs, numChoices, numChoices, feedback
+        );
     }
     
     private String truncateChoice(String choice) {

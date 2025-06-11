@@ -75,6 +75,32 @@ public class User {
     @Column(name = "manager_type_preference", nullable = true)
     private String managerTypePreference;
 
+    // Survey completion tracking
+    @Column(name = "pre_survey_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean preSurveyCompleted = false;
+
+    @Column(name = "post_survey_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean postSurveyCompleted = false;
+
+    @Column(name = "pre_survey_completed_at", nullable = true)
+    private LocalDateTime preSurveyCompletedAt;
+
+    @Column(name = "post_survey_completed_at", nullable = true)
+    private LocalDateTime postSurveyCompletedAt;
+
+    // Scenario completion tracking
+    @Column(name = "accessibility_scenarios_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean accessibilityScenariosCompleted = false;
+
+    @Column(name = "privacy_scenarios_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean privacyScenariosCompleted = false;
+
+    @Column(name = "accessibility_scenarios_completed_at", nullable = true)
+    private LocalDateTime accessibilityScenariosCompletedAt;
+
+    @Column(name = "privacy_scenarios_completed_at", nullable = true)
+    private LocalDateTime privacyScenariosCompletedAt;
+
     // Helper method to set manager type preference
     public void setManagerTypePreference(String managerType) {
         if (managerType != null) {
@@ -87,6 +113,28 @@ public class User {
         } else {
             this.managerTypePreference = null;
         }
+    }
+
+    // Helper methods for survey completion
+    public void markPreSurveyCompleted() {
+        this.preSurveyCompleted = true;
+        this.preSurveyCompletedAt = LocalDateTime.now();
+    }
+
+    public void markPostSurveyCompleted() {
+        this.postSurveyCompleted = true;
+        this.postSurveyCompletedAt = LocalDateTime.now();
+    }
+
+    // Helper methods for scenario completion
+    public void markAccessibilityScenariosCompleted() {
+        this.accessibilityScenariosCompleted = true;
+        this.accessibilityScenariosCompletedAt = LocalDateTime.now();
+    }
+
+    public void markPrivacyScenariosCompleted() {
+        this.privacyScenariosCompleted = true;
+        this.privacyScenariosCompletedAt = LocalDateTime.now();
     }
 
 }

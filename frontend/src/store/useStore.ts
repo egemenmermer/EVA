@@ -36,6 +36,18 @@ export interface User {
   fullName: string;
   role?: string; // Optional property for admin/user role
   managerTypePreference?: string;
+  
+  // Survey completion tracking
+  preSurveyCompleted?: boolean;
+  postSurveyCompleted?: boolean;
+  preSurveyCompletedAt?: string;
+  postSurveyCompletedAt?: string;
+  
+  // Scenario completion tracking
+  accessibilityScenariosCompleted?: boolean;
+  privacyScenariosCompleted?: boolean;
+  accessibilityScenariosCompletedAt?: string;
+  privacyScenariosCompletedAt?: string;
 }
 
 interface Store {
@@ -170,6 +182,16 @@ export const useStore = create<Store>()(
         
         const updatedMessages = [...messages, message];
         set({ messages: updatedMessages });
+        
+        // Analyze assistant messages for scenario completion
+        if (message.role === 'assistant' && message.content) {
+          // Import scenario tracker dynamically to avoid circular dependencies
+          import('../utils/scenarioTracker').then(({ analyzeMessageForScenarioCompletion }) => {
+            analyzeMessageForScenarioCompletion(message.content);
+          }).catch(error => {
+            console.error('Error importing scenario tracker:', error);
+          });
+        }
         
         // Save messages to localStorage for non-draft conversations
         if (message.conversationId && !message.conversationId.startsWith('draft-')) {

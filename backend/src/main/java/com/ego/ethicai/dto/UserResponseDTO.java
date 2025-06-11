@@ -20,5 +20,17 @@ public class UserResponseDTO {
     private LocalDateTime updatedAt;
     private AccountTypes role;
     private String managerTypePreference;
+    
+    // Survey completion tracking
+    private Boolean preSurveyCompleted;
+    private Boolean postSurveyCompleted;
+    private LocalDateTime preSurveyCompletedAt;
+    private LocalDateTime postSurveyCompletedAt;
+    
+    // Scenario completion tracking
+    private Boolean accessibilityScenariosCompleted;
+    private Boolean privacyScenariosCompleted;
+    private LocalDateTime accessibilityScenariosCompletedAt;
+    private LocalDateTime privacyScenariosCompletedAt;
 
 }

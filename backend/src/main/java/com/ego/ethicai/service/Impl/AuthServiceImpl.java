@@ -66,15 +66,23 @@ public class AuthServiceImpl implements AuthService {
 
         logger.debug("Generated token for user: {} with ID: {}", email, user.getId());
 
-        return new LoginResponseDTO(token, new UserResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getLastLogin(),
-                user.getUpdatedAt(),
-                user.getRole(),
-                user.getManagerTypePreference()
-        ));
+        return new LoginResponseDTO(token, UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .lastLogin(user.getLastLogin())
+                .updatedAt(user.getUpdatedAt())
+                .role(user.getRole())
+                .managerTypePreference(user.getManagerTypePreference())
+                .preSurveyCompleted(user.getPreSurveyCompleted())
+                .postSurveyCompleted(user.getPostSurveyCompleted())
+                .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
+                .postSurveyCompletedAt(user.getPostSurveyCompletedAt())
+                .accessibilityScenariosCompleted(user.getAccessibilityScenariosCompleted())
+                .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
+                .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
+                .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .build());
     }
 
     @Override

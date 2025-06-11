@@ -12,7 +12,7 @@ import { conversationApi, agentCreateConversation } from '@/services/api';
 import type { ManagerType, Conversation, User } from '@/types';
 import type { ConversationContentResponseDTO } from '@/types/api';
 import { Mail, Github, ExternalLink, FileText, LogOut, Sun, Moon, Bot, BookOpen } from 'lucide-react';
-import { TemperatureControl } from '@/components/controls/TemperatureControl';
+
 import { v4 as uuidv4 } from 'uuid';
 import '../chat/scrollbar.css'; // Import the scrollbar CSS
 
@@ -155,6 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
 
@@ -230,11 +231,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       // Trigger immediate refresh when we get this event
       fetchConversations();
     };
+
+    // Listen for scenario completion events to trigger UI refresh
+    const handleScenarioCompleted = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Scenario completed, refreshing sidebar...', customEvent.detail);
+      // Force a re-render by updating a state (can use a timestamp)
+      setDirectFetchedConversations(prev => [...prev]);
+    };
     
     window.addEventListener('refresh-conversations', handleRefreshConversations);
+    window.addEventListener('scenario-completed', handleScenarioCompleted);
     
     return () => {
       window.removeEventListener('refresh-conversations', handleRefreshConversations);
+      window.removeEventListener('scenario-completed', handleScenarioCompleted);
     };
   }, []);
 
@@ -428,6 +439,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     setShowProfileMenu(!showProfileMenu);
   };
 
+  // Check if current conversation has practice module history
+  const currentConversationHasPractice = () => {
+    if (!currentConversation?.conversationId) return false;
+    
+    try {
+      // Check if there are any messages mentioning practice completion
+      const conversationKey = `messages_${currentConversation.conversationId}`;
+      const messagesStr = localStorage.getItem(conversationKey);
+      if (!messagesStr) return false;
+      
+      const messages = JSON.parse(messagesStr);
+      return messages.some((msg: any) => 
+        msg.content && 
+        (msg.content.includes('Practice Session Complete!') || 
+         msg.content.includes('🎉 Practice Session Complete!') ||
+         msg.content.includes('practice module') ||
+         msg.content.includes('Practice Summary') ||
+         msg.content.includes('Scenario Outcome') ||
+         msg.content.includes('practice scenario') ||
+         msg.content.includes('Practice Scenario Completed') ||
+         msg.content.includes('Final Score:') ||
+         msg.content.includes('Performance Level:') ||
+         msg.content.includes('ending_') ||
+         msg.content.includes('Excellent Ethical Advocate') ||
+         msg.content.includes('Good Ethical Awareness') ||
+         msg.content.includes('Get Feedback from EVA'))
+      );
+    } catch (e) {
+      console.error('Error checking practice history:', e);
+      return false;
+    }
+  };
+
   const renderConversations = () => {
     if (error) {
       return (
@@ -499,15 +543,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <HiPlus size={18} />
           <span>New Chat</span>
         </button>
+        
+        {/* Tactics Button - Only show if current conversation has practice history */}
+        {currentConversationHasPractice() && (
+          <button
+            onClick={() => {
+              // Dispatch event to show tactics modal in main layout
+              window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-md transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+          >
+            <span className="text-sm">💡</span>
+            <span>Tactics Guide</span>
+          </button>
+        )}
+        
+        {/* Post-Survey Button - Only show after completing both accessibility and privacy scenarios and if user hasn't completed post-survey */}
+        {/* Check both database fields (if available) and localStorage fallback */}
+        {(
+          (user?.accessibilityScenariosCompleted || localStorage.getItem('scenario_completed_accessibility') === 'true') &&
+          (user?.privacyScenariosCompleted || localStorage.getItem('scenario_completed_privacy') === 'true') &&
+          !user?.postSurveyCompleted
+        ) && (
+          <button
+            onClick={() => {
+              // Dispatch event to show post-survey modal
+              window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-md transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg animate-pulse"
+          >
+            <span className="text-sm">📋</span>
+            <span>Final Survey</span>
+          </button>
+        )}
       </div>
-      
-      {/* Temperature Control */}
-      <TemperatureControl />
 
       {/* Conversations List */}
       <div 
         className="flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar"
       >
+        {/* Chats Header */}
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Chats
+          </h3>
+        </div>
+        
         {renderConversations()}
         {isLoading && (
           <div className="flex items-center justify-center h-6 mt-2">
@@ -561,6 +642,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           />
         )}
       </div>
+
+
     </div>
   );
 }; 

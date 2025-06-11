@@ -1,5 +1,5 @@
 {
-  "id": "accessibility_camouflager_1",
+  "id": "accessibility_camouflager",
   "title": "Screen Reader Compatibility",
   "description": "Your team is rolling out a new interface design that looks sleek and modern—but it no longer works properly with screen readers. The manager insists that accessibility is still \"technically covered\" by minimal backend accommodations and claims the issue is overstated. As the advocate, you must identify rhetorical misdirection and surface the real-world impact on users with disabilities. The manager's responses may sound agreeable but are designed to avoid meaningful changes. You'll need to spot this camouflage and redirect the conversation toward inclusive design and legal responsibility.",
   "issue": "Accessibility",

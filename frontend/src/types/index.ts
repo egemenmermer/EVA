@@ -7,6 +7,18 @@ export interface User {
   fullName: string;
   role?: string; // Optional property for admin/user role
   managerTypePreference?: string;
+  
+  // Survey completion tracking
+  preSurveyCompleted?: boolean;
+  postSurveyCompleted?: boolean;
+  preSurveyCompletedAt?: string;
+  postSurveyCompletedAt?: string;
+  
+  // Scenario completion tracking
+  accessibilityScenariosCompleted?: boolean;
+  privacyScenariosCompleted?: boolean;
+  accessibilityScenariosCompletedAt?: string;
+  privacyScenariosCompletedAt?: string;
 }
 
 export interface Conversation {

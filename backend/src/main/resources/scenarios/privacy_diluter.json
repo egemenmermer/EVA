@@ -1,5 +1,5 @@
 {
-  "id": "privacy_diluter_1",
+  "id": "privacy_diluter",
   "title": "Location Data Collection", 
   "description": "In this scenario, you're part of a development team working on a product that tracks user behavior. You've noticed that the company is storing detailed location data even when it's not necessary for the app's core functionality. The manager downplays privacy concerns using vague, casual language and attempts to normalize the data collection as \"just business as usual.\" As the ethical advocate, your task is to recognize misleading reassurances and push back with clear, informed responses that highlight the privacy implications and ethical boundaries of unnecessary data collection.",
   "issue": "Privacy",

@@ -54,5 +54,30 @@ public class UserController {
         return ResponseEntity.ok("User account deleted successfully.");
     }
 
+    // Survey completion endpoints
+    @PostMapping("/mark-pre-survey-completed")
+    public ResponseEntity<String> markPreSurveyCompleted(@CurrentUser CustomUserDetails currentUser) {
+        userService.markPreSurveyCompleted(currentUser.getId());
+        return ResponseEntity.ok("Pre-survey marked as completed");
+    }
+
+    @PostMapping("/mark-post-survey-completed")
+    public ResponseEntity<String> markPostSurveyCompleted(@CurrentUser CustomUserDetails currentUser) {
+        userService.markPostSurveyCompleted(currentUser.getId());
+        return ResponseEntity.ok("Post-survey marked as completed");
+    }
+
+    // Scenario completion endpoints
+    @PostMapping("/mark-accessibility-scenarios-completed")
+    public ResponseEntity<String> markAccessibilityScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        userService.markAccessibilityScenariosCompleted(currentUser.getId());
+        return ResponseEntity.ok("Accessibility scenarios marked as completed");
+    }
+
+    @PostMapping("/mark-privacy-scenarios-completed")
+    public ResponseEntity<String> markPrivacyScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        userService.markPrivacyScenariosCompleted(currentUser.getId());
+        return ResponseEntity.ok("Privacy scenarios marked as completed");
+    }
 
 }

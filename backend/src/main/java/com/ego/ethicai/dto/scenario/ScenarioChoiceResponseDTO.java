@@ -1,5 +1,6 @@
 package com.ego.ethicai.dto.scenario;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,9 @@ public class ScenarioChoiceResponseDTO {
     private int evs;
     private String category;
     private String feedback;
+    
+    @JsonProperty("isComplete")
     private boolean isComplete;
+    
     private Map<String, Object> sessionSummary;
 } 
