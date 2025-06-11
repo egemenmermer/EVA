@@ -6,7 +6,6 @@ import { ManagerTypeQuizModal } from '../modals/ManagerTypeQuizModal';
 import { SimplifiedTacticsModal } from '@/components/modals/SimplifiedTacticsModal';
 import { SurveyModal } from '../modals/SurveyModal';
 import { hasCompletedSurvey, SurveyType } from '@/utils/surveyUtils';
-import { SurveyDebugPanel } from '@/components/debug/SurveyDebugPanel';
 import { useStore } from '@/store/useStore';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -315,11 +314,6 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     // Additional logic can be added here if needed
   };
 
-  const handleShowSurveyFromDebug = (surveyType: SurveyType) => {
-    setSurveyType(surveyType);
-    setShowSurveyModal(true);
-  };
-
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">
       {/* Header - Responsive padding */}
@@ -473,11 +467,6 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         surveyType={surveyType}
         onComplete={handleSurveyComplete}
       />
-
-      {/* Survey Debug Panel - Development only */}
-      {process.env.NODE_ENV === 'development' && (
-        <SurveyDebugPanel onShowSurvey={handleShowSurveyFromDebug} />
-      )}
     </div>
   );
 }; 

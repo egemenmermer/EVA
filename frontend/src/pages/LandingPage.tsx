@@ -32,13 +32,13 @@ export const LandingPage: React.FC = () => {
   // Hero slides content
   const heroSlides = [
     {
-      title: "Practice Ethical Decision-Making in Software Development",
-      description: "EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.",
+      title: "Ethical Decision-Making Practice Tool for Software Development",
+      description: "EVA is a research prototype developed for a master's thesis to explore ethical challenges in software development through simulated workplace scenarios with different manager types.",
       showLogo: true
     },
     {
       title: "Research Presentation",
-      description: "This slide will contain the PowerPoint presentation content for direct presentation on the website.",
+      description: "This slide contains the experiment introduction presentation for participants.",
       showLogo: false,
       isPresentationSlide: true
     }
@@ -48,15 +48,15 @@ export const LandingPage: React.FC = () => {
   const aboutContent = [
     {
       title: "Research Background",
-      content: "This prototype was developed as part of a comprehensive master's thesis investigating the role of conversational agents in facilitating ethical decision-making processes. The primary objective is to provide software developers with a controlled, interactive environment to rehearse and refine their ethical reasoning capabilities."
+      content: "This prototype was developed as part of a master's thesis investigating conversational agents' role in ethical decision-making processes. The objective is to provide software developers with an interactive environment to practice ethical reasoning capabilities."
     },
     {
-      title: "Addressing Challenges",
-      content: "Contemporary software teams frequently encounter multifaceted ethical challenges related to privacy concerns, algorithmic bias, and responsible AI implementation. Despite the significance of these issues, developers often lack adequate resources, time, or confidence to address them effectively. EVA bridges this gap by meticulously simulating realistic team dynamics and delivering structured feedback."
+      title: "Research Problem",
+      content: "Software teams often encounter ethical challenges related to privacy, algorithmic bias, and responsible AI implementation. However, developers may lack adequate resources, time, or confidence to address these issues effectively. This tool aims to bridge this gap by simulating realistic team dynamics and providing structured feedback."
     },
     {
-      title: "Research Impact",
-      content: "Through sophisticated simulation of team interactions and provision of detailed analytical feedback, EVA prepares users for navigating real-world conversations where ethical considerations might otherwise be overlooked. This tool constitutes a critical component of a broader research initiative evaluating the impact of conversational agents on developer confidence, ethical awareness, and argumentation efficacy."
+      title: "Research Purpose",
+      content: "Through simulation of team interactions and analytical feedback, this tool aims to help users practice navigating conversations where ethical considerations are important. This study evaluates the impact of conversational agents on developer confidence, ethical awareness, and argumentation skills."
     }
   ];
   
@@ -64,7 +64,7 @@ export const LandingPage: React.FC = () => {
   useEffect(() => {
     const tabInterval = setInterval(() => {
       setActiveAboutTab(prev => (prev + 1) % aboutContent.length);
-    }, 5000);
+    }, 20000);
     
     return () => clearInterval(tabInterval);
   }, []);
@@ -374,9 +374,9 @@ export const LandingPage: React.FC = () => {
             Strategically orchestrates project workflows to subtly guide developers toward ethically questionable decisions through authoritative directives, psychological pressure tactics, and cultivating environments where ethical compromises appear inevitable.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Employs sophisticated influence strategies</li>
-            <li>Creates systemic pressure on ethical boundaries</li>
-            <li>Implements calculated information control mechanisms</li>
+            <li>Uses influence strategies in decision-making</li>
+            <li>Creates pressure on ethical boundaries</li>
+            <li>Controls information flow in discussions</li>
           </ul>
         </div>
         <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-yellow-500">
@@ -394,9 +394,9 @@ export const LandingPage: React.FC = () => {
             Methodically diminishes ethical considerations through systematic trivialization of their significance or urgency, presenting persuasive arguments that ethical frameworks are inapplicable within current operational contexts.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Employs strategic minimization of ethical implications</li>
-            <li>Constructs sophisticated rationalizations for questionable practices</li>
-            <li>Implements calculated risk understatement techniques</li>
+            <li>Minimizes the importance of ethical implications</li>
+            <li>Provides rationalizations for questionable practices</li>
+            <li>Understates potential risks and consequences</li>
           </ul>
         </div>
         <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-blue-500">
@@ -411,12 +411,12 @@ export const LandingPage: React.FC = () => {
           </div>
           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Camouflager</h4>
           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
-            Artfully conceals ethically problematic directives beneath established business methodologies or obscures questionable elements through intricate technical terminology and sophisticated linguistic constructions.
+            Conceals ethically problematic directives beneath established business methodologies or obscures questionable elements through technical terminology and complex language.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Implements complex linguistic obfuscation strategies</li>
-            <li>Creates sophisticated ambiguity around ethical responsibilities</li>
-            <li>Employs advanced misdirection techniques for ethical concerns</li>
+            <li>Uses complex language to obscure meaning</li>
+            <li>Creates ambiguity around ethical responsibilities</li>
+            <li>Employs misdirection techniques for ethical concerns</li>
           </ul>
         </div>
       </div>
@@ -436,7 +436,7 @@ export const LandingPage: React.FC = () => {
             <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Knowledge-Based</h4>
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
-            Access comprehensive ethical guidelines based on established ACM, IEEE standards and GDPR compliance frameworks.
+            Access ethical guidelines based on established ACM, IEEE standards and GDPR compliance frameworks.
           </p>
           <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
             <li>Professional standards integration</li>
@@ -450,10 +450,10 @@ export const LandingPage: React.FC = () => {
             <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg mr-4">
               <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">AI-Powered Guidance</h4>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">AI-Powered Responses</h4>
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
-            Experience intelligent, contextual responses powered by advanced language models that adapt to your decisions.        
+            Provides contextual responses powered by language models that adapt to user decisions in the conversation.        
           </p>
           <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
             <li>GPT-powered conversational agents</li>
@@ -470,12 +470,12 @@ export const LandingPage: React.FC = () => {
             <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Tracking</h4>
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-left mb-4">
-            Monitor and improve your ethical reasoning skills with detailed analytics and progress metrics.
+            Track ethical reasoning skills with analytics and progress metrics for research purposes.
           </p>
           <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Multidimensional performance analysis</li>
+            <li>Performance analysis</li>
             <li>Progress visualization</li>
-            <li>Skill development recommendations</li>
+            <li>Skill development tracking</li>
           </ul>
         </div>
 
