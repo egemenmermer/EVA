@@ -3,7 +3,7 @@ import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { EditDraftModal } from './EditDraftModal'; // Import the modal component
 import { ScenarioSelectionModal } from '@/components/modals/ScenarioSelectionModal'; // Import our new modal
-import { SimplifiedTacticsModal } from '@/components/modals/SimplifiedTacticsModal'; // Import simplified tactics modal
+import { SimplifiedTacticsModal } from '../modals/SimplifiedTacticsModal'; // Import simplified tactics modal
 import { analyzeMessageForScenarioCompletion } from '@/utils/scenarioTracker';
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';

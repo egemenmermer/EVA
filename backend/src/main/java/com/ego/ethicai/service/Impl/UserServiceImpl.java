@@ -56,6 +56,8 @@ public class UserServiceImpl implements UserService {
                 .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
                 .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
                 .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .hasCompletedPractice(user.getHasCompletedPractice())
+                .firstPracticeCompletedAt(user.getFirstPracticeCompletedAt())
                 .build();
     }
 
@@ -143,6 +145,8 @@ public class UserServiceImpl implements UserService {
                 .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
                 .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
                 .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .hasCompletedPractice(user.getHasCompletedPractice())
+                .firstPracticeCompletedAt(user.getFirstPracticeCompletedAt())
                 .build();
     }
 

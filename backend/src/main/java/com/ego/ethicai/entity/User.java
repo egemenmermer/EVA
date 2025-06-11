@@ -101,6 +101,13 @@ public class User {
     @Column(name = "privacy_scenarios_completed_at", nullable = true)
     private LocalDateTime privacyScenariosCompletedAt;
 
+    // Practice scenarios tracking - for showing tactics guide permanently
+    @Column(name = "has_completed_practice", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean hasCompletedPractice = false;
+
+    @Column(name = "first_practice_completed_at", nullable = true)
+    private LocalDateTime firstPracticeCompletedAt;
+
     // Helper method to set manager type preference
     public void setManagerTypePreference(String managerType) {
         if (managerType != null) {
@@ -135,6 +142,14 @@ public class User {
     public void markPrivacyScenariosCompleted() {
         this.privacyScenariosCompleted = true;
         this.privacyScenariosCompletedAt = LocalDateTime.now();
+    }
+
+    // Helper method for practice completion
+    public void markFirstPracticeCompleted() {
+        if (!this.hasCompletedPractice) {
+            this.hasCompletedPractice = true;
+            this.firstPracticeCompletedAt = LocalDateTime.now();
+        }
     }
 
 }

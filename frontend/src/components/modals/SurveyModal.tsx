@@ -21,7 +21,21 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
   const [showThankYou, setShowThankYou] = useState(false);
   const [hasConfirmed, setHasConfirmed] = useState(false);
 
-  const surveyUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUMzhKUzNCQlBOSlZDQUpNNUZLTDhESENOSC4u";
+  // Reset modal state when it opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowThankYou(false);
+      setHasConfirmed(false);
+    }
+  }, [isOpen]);
+
+  // Different URLs for pre and post surveys
+  const surveyUrls = {
+    pre: "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUMzhKUzNCQlBOSlZDQUpNNUZLTDhESENOSC4u",
+    post: "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUNDhLOEdYNjFFR1FETUFBUVkxQVZUQTUxNC4u"
+  };
+  
+  const surveyUrl = surveyUrls[surveyType];
 
   // Function to handle survey completion submission
   const handleSurveySubmit = async () => {
@@ -79,7 +93,7 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
     post: {
       title: "Research Follow-up Survey", 
       description: "Share your experience with EVA and how it has influenced your ethical decision-making approach.",
-      buttonText: "Complete Final Survey",
+      buttonText: "Complete Post Survey",
       icon: "✅"
     }
   };

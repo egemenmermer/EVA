@@ -59,6 +59,22 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         PracticeSession savedSession = practiceSessionRepository.save(practiceSession);
         log.info("Practice session saved with ID: {}", savedSession.getId());
 
+        // Mark user as having completed practice (for permanent tactics guide)
+        user.markFirstPracticeCompleted();
+        
+        // Also mark the specific scenario type as completed
+        String scenarioType = extractScenarioType(requestDTO.getScenarioId());
+        if ("accessibility".equals(scenarioType)) {
+            user.markAccessibilityScenariosCompleted();
+            log.info("Marked user {} as having completed accessibility scenarios", user.getId());
+        } else if ("privacy".equals(scenarioType)) {
+            user.markPrivacyScenariosCompleted();
+            log.info("Marked user {} as having completed privacy scenarios", user.getId());
+        }
+        
+        userService.saveUser(user);
+        log.info("Marked user {} as having completed first practice", user.getId());
+
         // Save detailed choice data if available
         if (requestDTO.getSelectedChoices() != null && !requestDTO.getSelectedChoices().isEmpty()) {
             try {
@@ -324,6 +340,18 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     }
     
     // Helper method to map entity to response DTO
+    private String extractScenarioType(String scenarioId) {
+        if (scenarioId == null) return "unknown";
+        
+        if (scenarioId.startsWith("accessibility")) {
+            return "accessibility";
+        } else if (scenarioId.startsWith("privacy")) {
+            return "privacy";
+        }
+        
+        return "unknown";
+    }
+
     private PracticeSessionResponseDTO mapToResponseDTO(PracticeSession entity) {
         // Get choices from the new relationship
         List<String> choices = new ArrayList<>();

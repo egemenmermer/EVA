@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import './practice.css'; // Import the CSS file for animations
 import { useStore } from '@/store/useStore'; // Import the global store
-import { EVATacticsInfoModal } from '@/components/modals/EVATacticsInfoModal';
+
 
 // Import manager icons
 import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
@@ -187,11 +187,26 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [sessionFeedback, setSessionFeedback] = useState<any>(null);
   const [processingChoice, setProcessingChoice] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
-  const [showInfoModal, setShowInfoModal] = useState(false); // Add state for info modal
   
-  const { user, setManagerType: setGlobalManagerType } = useStore();
+  
+  const { user, setUser, setManagerType: setGlobalManagerType } = useStore();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Function to refresh user data from API
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data after practice completion...');
+      const response = await backendApi.get('/api/v1/user/profile');
+      const updatedUser = response.data;
+      console.log('Updated user data:', updatedUser);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return null;
+    }
+  };
 
   // Error boundary-like error handling
   const [componentError, setComponentError] = useState<string | null>(null);
@@ -819,6 +834,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       
       setSessionSaved(true);
       
+      // **IMPORTANT: Refresh user data to update completion flags for Post Survey button**
+      await refreshUserData();
+      console.log('User data refreshed after practice completion');
+      
       return true;
     } catch (error: any) {
       console.error('Error saving practice session:', error);
@@ -1181,28 +1200,6 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
         </div>
         {onExit && (
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setShowInfoModal(true)}
-              className="group relative px-4 py-2 text-sm rounded-lg overflow-hidden
-                        bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
-                        hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
-                        text-white shadow-md hover:shadow-lg
-                        transform hover:scale-[1.02] active:scale-[0.98]
-                        transition-all duration-500 ease-out
-                        before:absolute before:inset-0 before:bg-gradient-to-r 
-                        before:from-pink-500 before:via-purple-500 before:to-blue-500
-                        before:opacity-0 before:transition-opacity before:duration-700
-                        hover:before:opacity-100"
-                title="Learn about EVA Tactics"
-              >
-                <span className="relative z-10 flex items-center space-x-1.5">
-                  <span className="text-sm">💡</span>
-                  <span>Argumentation Tactics</span>
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
-                               translate-x-[-100%] group-hover:translate-x-[100%] 
-                               transition-transform duration-1500 ease-in-out"></div>
-              </button>
           <button
             onClick={handleReturnToChat}
             className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -1447,14 +1444,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
         </div>
       )}
 
-      {/* Info Modal */}
-      {showInfoModal && (
-        <EVATacticsInfoModal
-          isOpen={showInfoModal}
-          onClose={() => setShowInfoModal(false)}
-          currentChoices={currentScenario?.currentChoices || []}
-        />
-      )}
+
     </div>
   );
   } catch (error) {

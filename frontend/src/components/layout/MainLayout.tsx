@@ -3,7 +3,7 @@ import { Sidebar } from './Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { GuidelinesPanel } from '../guidelines/GuidelinesPanel';
 import { ManagerTypeQuizModal } from '../modals/ManagerTypeQuizModal';
-import { SimplifiedTacticsModal } from '../modals/SimplifiedTacticsModal';
+import { SimplifiedTacticsModal } from '@/components/modals/SimplifiedTacticsModal';
 import { SurveyModal } from '../modals/SurveyModal';
 import { hasCompletedSurvey, SurveyType } from '@/utils/surveyUtils';
 import { SurveyDebugPanel } from '@/components/debug/SurveyDebugPanel';

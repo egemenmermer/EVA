@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight } from 'lucide-react';
+import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight, ChevronLeft, Presentation, Maximize, Minimize } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { PresentationSlideshow } from '@/components/PresentationSlideshow';
 
 // Import manager icons
 import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
@@ -24,6 +25,24 @@ export const LandingPage: React.FC = () => {
   
   // State for the About section tabs
   const [activeAboutTab, setActiveAboutTab] = useState(0);
+  
+  // State for hero slides
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Hero slides content
+  const heroSlides = [
+    {
+      title: "Practice Ethical Decision-Making in Software Development",
+      description: "EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.",
+      showLogo: true
+    },
+    {
+      title: "Research Presentation",
+      description: "This slide will contain the PowerPoint presentation content for direct presentation on the website.",
+      showLogo: false,
+      isPresentationSlide: true
+    }
+  ];
   
   // About section content
   const aboutContent = [
@@ -421,7 +440,7 @@ export const LandingPage: React.FC = () => {
       </div>
     </div>
   </section>
-  
+
 </div>
   );
 }; 

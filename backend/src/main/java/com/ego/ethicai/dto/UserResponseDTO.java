@@ -32,5 +32,7 @@ public class UserResponseDTO {
     private Boolean privacyScenariosCompleted;
     private LocalDateTime accessibilityScenariosCompletedAt;
     private LocalDateTime privacyScenariosCompletedAt;
+    private Boolean hasCompletedPractice;
+    private LocalDateTime firstPracticeCompletedAt;
 
 }
