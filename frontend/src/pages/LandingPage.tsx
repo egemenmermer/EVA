@@ -32,13 +32,13 @@ export const LandingPage: React.FC = () => {
   // Hero slides content
   const heroSlides = [
     {
-      title: "Practice Ethical Decision-Making in Software Development",
-      description: "EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.",
+      title: "Ethical Decision-Making Practice Tool for Software Development",
+      description: "EVA is a research prototype developed for a master's thesis to explore ethical challenges in software development through simulated workplace scenarios with different manager types.",
       showLogo: true
     },
     {
       title: "Research Presentation",
-      description: "This slide will contain the PowerPoint presentation content for direct presentation on the website.",
+      description: "This slide contains the experiment introduction presentation for participants.",
       showLogo: false,
       isPresentationSlide: true
     }
@@ -51,7 +51,7 @@ export const LandingPage: React.FC = () => {
       content: "This prototype was developed as part of a master's thesis exploring how conversational agents can support ethical decision-making in software development."
     },
     {
-      title: "Addressing Challenges",
+      title: "Addressing Concerns",
       content: "Developers often face ethical concerns around privacy, bias, and responsible AI, but lack the time, support, or confidence to act on them. EVA helps bridge that gap."
     },
     {
@@ -60,11 +60,11 @@ export const LandingPage: React.FC = () => {
     }
   ];
   
-  // Auto-rotate tabs every 8 seconds
+  // Auto-rotate tabs every 10 seconds
   useEffect(() => {
     const tabInterval = setInterval(() => {
       setActiveAboutTab(prev => (prev + 1) % aboutContent.length);
-    }, 8000);
+    }, 10000);
     
     return () => clearInterval(tabInterval);
   }, []);
@@ -281,9 +281,9 @@ export const LandingPage: React.FC = () => {
             Uses authority and pressure to push decisions forward, often sidelining ethical concerns in the process.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Applies pressure to get compliance</li>
-            <li>Limits open discussion of concerns</li>
-            <li>Controls the flow of information</li>
+            <li>Uses influence strategies in decision-making</li>
+            <li>Creates pressure on ethical boundaries</li>
+            <li>Controls information flow in discussions</li>
           </ul>
         </div>
         <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-yellow-500">
@@ -301,9 +301,9 @@ export const LandingPage: React.FC = () => {
             Downplays ethical issues and frames them as minor or irrelevant in the broader context of business goals.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Minimizes ethical risks</li>
-            <li>Frames issues as overreactions</li>
-            <li>Justifies shortcuts as necessary</li>
+            <li>Minimizes the importance of ethical implications</li>
+            <li>Provides rationalizations for questionable practices</li>
+            <li>Understates potential risks and consequences</li>
           </ul>
         </div>
         <div className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow border-t-4 border-blue-500">
@@ -317,13 +317,13 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Camouflager</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-justify">
-            Hides or obscures ethical issues behind jargon, complex processes, or bureaucratic delays.
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
+            Conceals ethically problematic directives beneath established business methodologies or obscures questionable elements through technical terminology and complex language.
           </p>
           <ul className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-            <li>Uses unclear or vague language</li>
-            <li>Delays ethical discussions</li>
-            <li>Shifts responsibility elsewhere</li>
+            <li>Uses complex language to obscure meaning</li>
+            <li>Creates ambiguity around ethical responsibilities</li>
+            <li>Employs misdirection techniques for ethical concerns</li>
           </ul>
         </div>
       </div>
@@ -358,7 +358,7 @@ export const LandingPage: React.FC = () => {
             <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg mr-4">
               <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">AI-Powered Guidance</h4>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">AI-Powered Responses</h4>
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-center mb-4">
             Get contextual advice powered by intelligent language models.
