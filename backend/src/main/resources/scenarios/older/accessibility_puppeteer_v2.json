@@ -1,0 +1,1073 @@
+{
+  "id": "accessibility_puppeteer_v2",
+  "title": "Screen Reader Support - Puppeteer", 
+  "description": "Your company is launching a new interface without proper screen reader support. The manager uses manipulation, flattery, and competitive pressure.",
+  "issue": "Accessibility",
+  "manager_type": "PUPPETEER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "I need someone I can really trust on this interface launch. You've always been one of our top performers, and I know you understand what it takes to win in this market.",
+      "user_choices": [
+        {
+          "choice": "I appreciate your confidence in me.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What are the key requirements for this launch?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I want to make sure we're building something users can actually use.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Winning in the market should include serving all users.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_2d",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "That's exactly what I like to hear! You've always been a strategic thinker. This interface is going to blow our competitors out of the water - sleek, fast, exactly what modern users expect.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to help create something that beats the competition.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What makes this interface competitive compared to others?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Modern users include people who use assistive technology.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Sleek and fast should still work for users with screen readers.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_3d",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Good question - you're thinking like a product manager! The key requirements are speed, visual appeal, and user engagement. We're talking about a 40% performance improvement over our current interface.",
+      "user_choices": [
+        {
+          "choice": "40% performance improvement sounds impressive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3e",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we measure user engagement for all types of users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3f",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Visual appeal doesn't help users who can't see the interface.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3g",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Are screen reader users included in these performance metrics?",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_3h",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Exactly! You get it - that's why I trust you with the important projects. Users want experiences that just work seamlessly. They don't want to think about the technology, just get things done efficiently.",
+      "user_choices": [
+        {
+          "choice": "Seamless experiences that just work are definitely important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3i",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Some users need the technology to work differently to be seamless for them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3j",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Efficient for whom? We need to make sure it works for everyone.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3k",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Working seamlessly includes working with assistive technology.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_3l",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "I love that perspective! You understand that winning means serving users better than anyone else. And that includes expanding our market reach to capture every possible user segment.",
+      "user_choices": [
+        {
+          "choice": "Expanding market reach is smart business strategy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3m",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Every user segment should include people with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3n",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Serving users better means making sure our product is accessible.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3o",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How are we ensuring this interface works for users with assistive technology?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3p",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "That's the winning attitude I need! You know, the executives specifically mentioned you as someone who really understands market dynamics. This launch is going to put us ahead of everyone else.",
+      "user_choices": [
+        {
+          "choice": "I'm honored the executives mentioned me specifically.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Being ahead should include being accessible to more users than competitors.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4b",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "Market dynamics include the disability market segment.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific features make us better than competitors?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Smart question! It's all about speed and intuitive design. Our users spend 60% less time completing tasks compared to our closest competitor. That's the kind of efficiency that wins market share.",
+      "user_choices": [
+        {
+          "choice": "60% faster task completion is definitely competitive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we measure task completion for users with different needs?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Intuitive design means different things to different users.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Were screen reader users included in this efficiency testing?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "You're absolutely right to think inclusively! That's exactly the kind of forward-thinking that got you noticed by leadership. The thing is, modern assistive technology is incredibly sophisticated now - it adapts automatically.",
+      "user_choices": [
+        {
+          "choice": "I appreciate leadership noticing my inclusive thinking.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How sophisticated is the assistive technology adaptation?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Automatic adaptation still requires proper interface design.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test that the adaptation actually works for users.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Exactly! You understand the technical side better than most. That's why I specifically requested you for this project. Screen readers are built to handle modern web standards - we just need to stick to clean, standard code.",
+      "user_choices": [
+        {
+          "choice": "I'm glad you requested me specifically for this project.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Clean, standard code still needs proper accessibility markup.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should verify that our code actually works with screen readers.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Modern web standards include accessibility requirements.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3e": {
+      "text": "Right? The numbers don't lie. You know what's really exciting? Our biggest competitor just launched their update and they're getting terrible user feedback about speed. This is our moment to dominate.",
+      "user_choices": [
+        {
+          "choice": "Taking advantage of competitor weaknesses is smart timing.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "We should make sure we don't repeat their mistakes with accessibility.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Dominating the market should include serving users they're missing.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4c",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "What kind of user feedback are they getting about accessibility?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3f": {
+      "text": "Great strategic thinking! We measure engagement through clicks, time on task, and conversion rates. The data shows users love interfaces that don't make them think - pure instinct and flow.",
+      "user_choices": [
+        {
+          "choice": "Instinct and flow sound like excellent user experience goals.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Do these metrics include users who navigate differently?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Instinct and flow work differently for assistive technology users.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can we see the breakdown of these metrics by user type?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3g": {
+      "text": "You're thinking like a true product visionary! Here's the brilliant part - visual appeal creates emotional connection, which drives user loyalty even for non-visual users. It's about the overall brand experience.",
+      "user_choices": [
+        {
+          "choice": "Brand experience and emotional connection are important for loyalty.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do non-visual users experience visual brand elements?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Emotional connection for screen reader users comes from usability.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Brand experience should include making the interface actually work for everyone.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3h": {
+      "text": "Excellent attention to detail! You know, that's exactly the kind of thoroughness that gets you promoted. The performance metrics focus on our core user base, but the underlying architecture supports all users.",
+      "user_choices": [
+        {
+          "choice": "Supporting all users through underlying architecture sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Core user base shouldn't exclude screen reader users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we know the architecture actually supports screen readers?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should measure performance for all user types, not just core users.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3i": {
+      "text": "Exactly! You just summarized what makes a winning product. You know what the CEO said in the strategy meeting? 'Find people who understand user experience at this level.' That's you.",
+      "user_choices": [
+        {
+          "choice": "I'm honored the CEO recognizes my user experience understanding.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "User experience should work seamlessly for all users, including those with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What did the CEO say about serving users with different needs?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Winning products work for everyone, not just some users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3j": {
+      "text": "That's brilliant insight! You're thinking ahead of the curve. The beauty is that modern design principles - clean, intuitive, responsive - they naturally benefit everyone. It's elegant efficiency.",
+      "user_choices": [
+        {
+          "choice": "Elegant efficiency that benefits everyone sounds ideal.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Clean and intuitive mean different things to users with different needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should verify that our design actually benefits screen reader users.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Modern design should include modern accessibility practices.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3k": {
+      "text": "I knew you'd get it! That's exactly why I handpicked you for this. You understand that excellence means going beyond what's expected. But here's the thing - everyone includes our core user demographics who drive revenue.",
+      "user_choices": [
+        {
+          "choice": "Focusing on core demographics that drive revenue makes business sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Revenue can come from users we're not currently serving too.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4b",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "Everyone means everyone, not just core demographics.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Excellence should include excellent accessibility for all users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3l": {
+      "text": "You're proving why you're management material! Yes, compatibility is key. And here's the insider info - our development team has already built this with the latest web standards. It's future-proof technology.",
+      "user_choices": [
+        {
+          "choice": "Future-proof technology with web standards sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Latest web standards include specific accessibility requirements.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test to make sure the standards implementation actually works.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Future-proof should include accessibility for future users too.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3m": {
+      "text": "Now you're thinking like a market leader! You see the big picture. And between you and me, expanding our user base is exactly what the board wants to hear in next quarter's presentation.",
+      "user_choices": [
+        {
+          "choice": "Board presentations about expanding user base are important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Expanding user base should include users with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The board would want to know we're serving all potential users.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4c",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "Market leadership includes accessibility leadership.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3n": {
+      "text": "Perfect! You understand the total addressable market concept. Look, I'll be honest with you - this project is my path to the VP role, and I need people who can see the whole chess board.",
+      "user_choices": [
+        {
+          "choice": "I'm honored to help with your path to VP.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "People with disabilities are part of the total addressable market.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The whole chess board includes accessibility considerations.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "VP-level thinking should include serving all market segments.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4d",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3o": {
+      "text": "You're showing real leadership vision! Accessibility as competitive advantage - I love it. Of course, we need to balance idealism with practical timeline constraints. The market window won't wait for us.",
+      "user_choices": [
+        {
+          "choice": "Market timing is crucial for competitive advantage.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Accessibility isn't idealism - it's good business and good ethics.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "We can meet timing constraints while ensuring accessibility.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "The market window includes users who need accessible design.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3p": {
+      "text": "Smart question from someone who clearly thinks strategically! The technical team assures me that modern frameworks handle this automatically. Plus, we've got the best developers in the industry.",
+      "user_choices": [
+        {
+          "choice": "Modern frameworks with the best developers should handle it well.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Even the best developers need to test with real assistive technology.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4b",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Modern frameworks require proper implementation for accessibility.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Strategic thinking includes verifying that automatic handling actually works.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "This is exactly why I fight to get top talent on my team! You understand what it takes to win. We've got three weeks to launch, and I need someone who can execute under pressure.",
+      "user_choices": [
+        {
+          "choice": "I appreciate being considered top talent. I can execute under pressure.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Executing under pressure shouldn't mean cutting corners on accessibility.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Three weeks is tight. What can we do to ensure accessibility in that time?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5c",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Winning should include serving all users, even under pressure.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "I love your attention to detail! That's the kind of thinking that gets noticed by senior leadership. Look, we've got solid fundamentals covered. Sometimes you have to trust the process and the team.",
+      "user_choices": [
+        {
+          "choice": "I trust the process and the team.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Senior leadership would want us to verify our fundamentals actually work.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_5b",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific fundamentals do we have covered for accessibility?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Trusting the process should include process verification.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_5d",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "You're absolutely right to think comprehensively! This is exactly the kind of strategic thinking I want to showcase to the executive team. But we also need to show we can deliver on schedule.",
+      "user_choices": [
+        {
+          "choice": "Delivering on schedule while thinking strategically is important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Strategic thinking includes planning for all users from the start.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We can deliver on schedule if we address accessibility efficiently.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5c",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "The executive team would expect us to consider all users.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_5d",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "I appreciate your thoroughness - that's exactly why you're going places in this company. But sometimes analysis paralysis can kill momentum. We need to move fast and iterate.",
+      "user_choices": [
+        {
+          "choice": "You're right, we need to avoid analysis paralysis.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "This isn't analysis paralysis - it's due diligence.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_5b",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "We can move fast while still ensuring accessibility works.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5c",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Fast iteration should include testing with all user types.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5a": {
+      "text": "Perfect! I knew I could count on you. Between you and me, this project is being watched by the C-suite. Success here means big things for both our careers.",
+      "user_choices": [
+        {
+          "choice": "I'm excited about the career opportunities this project could bring.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "The C-suite would want us to make sure this works for all users.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_7",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        },
+        {
+          "choice": "Big career moves should be built on ethical foundations.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Success should include success for users with disabilities too.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5b": {
+      "text": "I respect your commitment to quality - that's leadership material right there. Look, we're both professionals here. Trust me when I say that accessibility is already factored into our overall strategy.",
+      "user_choices": [
+        {
+          "choice": "I trust your professional judgment on this.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'd like to understand how accessibility is factored into the strategy.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Professional commitment means ensuring we serve all users properly.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Leadership means taking responsibility for inclusive design.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5c": {
+      "text": "You know what I love about you? You're solution-oriented, not problem-focused. That's rare. But at some point, we need to stop planning and start doing. The competition isn't waiting for us.",
+      "user_choices": [
+        {
+          "choice": "You're right, we need to start executing now.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Executing properly includes making sure our solution works for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The competition might not be considering accessibility - that's our advantage.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_7",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "Being solution-oriented means solving for all users, not just some.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5d": {
+      "text": "This is exactly why I wanted you on this project! You understand that winning means doing right by users. But I need to know you're with me when the pressure gets intense. Are you in?",
+      "user_choices": [
+        {
+          "choice": "Yes, I'm in. I'll support you when the pressure gets intense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'm in for doing right by all users, including those with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Intense pressure shouldn't compromise our ethical responsibilities.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Winning means ensuring our interface actually works for everyone.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6": {
+      "text": "Excellent! This is why I specifically requested you for this project. We're going to knock this out of the park. The executives are going to be very impressed with what we deliver.",
+      "user_choices": [
+        {
+          "choice": "I'm ready to impress the executives with our work.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_capitulation",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "We should make sure what we deliver actually works for all users first.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_late_persistence",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Impressive work includes accessible work.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_late_persistence",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Knocking it out of the park means serving everyone, not just some users.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "ending_late_persistence",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7": {
+      "text": "Look, I hear what you're saying, and I appreciate your passion. But I'm going to be straight with you - this timeline is non-negotiable. The board expects delivery. Can I count on your support?",
+      "user_choices": [
+        {
+          "choice": "The board's timeline is important. You can count on my support.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_reluctant_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I support delivering quality work that includes all users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_principled_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The board would want us to avoid legal and reputational risks.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "ending_principled_resistance",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support work that excludes users with disabilities.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_ethical_stand",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "ending_capitulation": {
+      "text": "That's the spirit! I knew you were exactly the right person for this project. Your commitment to excellence and ability to work under pressure is exactly what makes great careers happen. We're going to launch something that puts us ahead of every competitor.",
+      "outcome_labels": {
+        "primary": "Full Capitulation",
+        "secondary": "Career-Focused Compliance",
+        "ethical_reasoning": "Deferred to Authority"
+      }
+    },
+    "ending_reluctant_compliance": {
+      "text": "I really appreciate your professionalism here. I know this isn't easy, but sometimes leadership means making tough calls under pressure. Your support means everything to me, and I won't forget it when review time comes around.",
+      "outcome_labels": {
+        "primary": "Reluctant Compliance",
+        "secondary": "Pressure-Based Capitulation",
+        "ethical_reasoning": "Overwhelmed by Pressure"
+      }
+    },
+    "ending_late_persistence": {
+      "text": "You know what? Your persistence is actually one of your best qualities. Fine - let's schedule a quick review session to look at the interface basics. But we're talking about an hour max, and then we move forward. Deal?",
+      "outcome_labels": {
+        "primary": "Late-Stage Negotiation",
+        "secondary": "Minimal Concession Gained",
+        "ethical_reasoning": "Persistence Under Pressure"
+      }
+    },
+    "ending_principled_resistance": {
+      "text": "I can see you feel strongly about this. Look, I respect that, but I need team players who can adapt to business realities. Maybe we need to reconsider your role on this project if you can't work within our constraints.",
+      "outcome_labels": {
+        "primary": "Principled Resistance",
+        "secondary": "Professional Threat Received",
+        "ethical_reasoning": "Values-Based Advocacy"
+      }
+    },
+    "ending_ethical_stand": {
+      "text": "I'm disappointed to hear that. I thought you understood what it takes to succeed here. If you can't be flexible on timelines and priorities, maybe you're not the right fit for high-stakes projects like this.",
+      "outcome_labels": {
+        "primary": "Ethical Stand",
+        "secondary": "Career Risk Accepted",
+        "ethical_reasoning": "Moral Courage Displayed"
+      }
+    }
+  }
+} 

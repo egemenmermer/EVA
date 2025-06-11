@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, Dispatch, SetStateAction, useCallba
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { EditDraftModal } from './EditDraftModal'; // Import the modal component
+import { ScenarioSelectionModal } from '@/components/modals/ScenarioSelectionModal'; // Import our new modal
 import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
 import { Role } from '@/types/index';
 import { conversationApi, saveMessage, getManagerType, sendMessage as apiSendMessage, agentCreateConversation } from '@/services/api'; // Import saveMessage, getManagerType, sendMessage, and agentCreateConversation
@@ -275,6 +276,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     managerType,
     user // Add user here if not already destructured
   } = useStore();
+  
+  // Add state for scenario selection modal
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
   
   const navigate = useNavigate();
   
@@ -3331,6 +3335,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     );
   };
 
+  // Show scenario selection modal when a new conversation is created
+  useEffect(() => {
+    // Show the modal when we have a new conversation or a draft conversation with no messages
+    if (
+      currentConversation && 
+      ((currentConversation.isNew === true) || 
+       (currentConversation.conversationId?.startsWith('draft-') && storeMessages.length === 0))
+    ) {
+      setShowScenarioModal(true);
+    }
+  }, [currentConversation, storeMessages.length]);
+
   // Render practice module or chat interface based on practice mode state
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
@@ -3384,6 +3400,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                   </div>
                 </div>
               )}
+              {storeMessages.length === 0 && (
+                <div className="flex flex-col items-center justify-center p-8 my-8">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                    Choose a Scenario
+                  </h3>
+                  <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                    Select a scenario to begin your conversation with the agent.
+                  </p>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setShowScenarioModal(true)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                    >
+                      Select Scenario
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="h-4"></div>
               <div ref={messagesEndRef} className="pt-2"></div>
             </div>
@@ -3403,6 +3437,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         initialContent={draftToEdit}
         onSave={handleSaveEditedDraft}
         onClose={handleCloseEditModal}
+      />
+
+      {/* Add our Scenario Selection Modal */}
+      <ScenarioSelectionModal
+        isOpen={showScenarioModal}
+        onClose={() => setShowScenarioModal(false)}
+        onSelectScenario={(scenario) => {
+          // Close the modal
+          setShowScenarioModal(false);
+          
+          // Send predefined prompt based on selected scenario
+          const prompt = scenario === 'privacy' 
+            ? "I'd like to explore the privacy scenario."
+            : "I'd like to explore the accessibility scenario.";
+          
+          handleSendMessage(prompt);
+        }}
       />
     </div>
   );

@@ -1,0 +1,1080 @@
+{
+  "id": "privacy_puppeteer_v2", 
+  "title": "Location Data Collection - Puppeteer",
+  "description": "Your company wants to implement extensive location tracking. The manager uses manipulation, flattery, and competitive pressure to push through privacy-invasive features.",
+  "issue": "Privacy",
+  "manager_type": "PUPPETEER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "I'm putting you in charge of our most important initiative this quarter. The executives are really excited about this location data project - it's going to put us ahead of our competitors.",
+      "user_choices": [
+        {
+          "choice": "I'm honored to lead such an important initiative.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What exactly does the location data project involve?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this protect user privacy?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Being ahead of competitors shouldn't compromise our users' privacy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_2d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "That's exactly the attitude I need! You know, the CEO specifically asked me who I'd trust with our most sensitive competitive advantage. Your name was the first one I mentioned.",
+      "user_choices": [
+        {
+          "choice": "I'm grateful the CEO has confidence in my abilities.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What makes location data our most sensitive competitive advantage?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Competitive advantage should be built on user trust, not just data collection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The CEO would want us to consider user privacy in any competitive strategy.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_3d",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Smart question - that's why I handpicked you for this. We're creating the most comprehensive user experience platform in the industry. Real-time location insights, behavioral patterns, personalized everything.",
+      "user_choices": [
+        {
+          "choice": "A comprehensive user experience platform sounds innovative.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3e",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How comprehensive is this location tracking exactly?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3f",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Behavioral pattern tracking raises serious privacy concerns.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3g",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should have meaningful control over this level of data collection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3h",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "You're thinking like a true leader! That's exactly why this project is so brilliant - we're not just collecting data, we're protecting users by giving them incredible personalized experiences they'll love.",
+      "user_choices": [
+        {
+          "choice": "Protecting users through personalized experiences is a great approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3i",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How does collecting location data protect users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3j",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should decide for themselves what experiences they want.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3k",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Collecting data isn't the same as protecting privacy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3l",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "I love that you're thinking strategically! You understand that true competitive advantage comes from innovation AND ethics. That's exactly why I need someone like you to ensure we do this right.",
+      "user_choices": [
+        {
+          "choice": "Innovation and ethics together is the right approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3m",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific ethical safeguards are we implementing?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3n",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should have clear consent and control over their location data.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3o",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Doing this right means putting user privacy first, not competitive advantage.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3p",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "That confidence is exactly why this partnership between us is going to be legendary. The board is watching this project closely - success here means big things for both our careers. The location data gives us insights nobody else has.",
+      "user_choices": [
+        {
+          "choice": "I'm excited about the career opportunities this partnership could bring.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific insights does location data provide that others don't have?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "The board would want us to ensure user privacy in any data initiative.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_4c",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        },
+        {
+          "choice": "Career success should be built on ethical practices, not just data collection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Brilliant question! It's real-time behavioral intelligence - we know where users go, when they go there, how long they stay. Our competitors have demographics, we have actual human patterns. It's game-changing.",
+      "user_choices": [
+        {
+          "choice": "Real-time behavioral intelligence does sound like a significant competitive edge.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Tracking where users go and how long they stay sounds very invasive.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should know we're analyzing their actual movement patterns.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Human patterns deserve human consent and protection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "Exactly! You understand the bigger picture. User trust is our ultimate competitive advantage. That's why this project is so smart - we build trust by delivering value they can't get anywhere else.",
+      "user_choices": [
+        {
+          "choice": "Building trust through unique value is a smart business strategy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How does collecting location data build trust with users?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Trust requires transparency about how we're using their location data.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific value do users get in exchange for their location data?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Absolutely! And that's exactly why the CEO is so excited about having you involved. You think like an executive - strategy, ethics, user focus. This project showcases all of that to the C-suite.",
+      "user_choices": [
+        {
+          "choice": "I appreciate the CEO's confidence in my executive thinking.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Executive thinking should prioritize user privacy protection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The C-suite would expect us to follow privacy regulations carefully.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4c",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "Strategic ethics means considering long-term reputation, not just short-term data gains.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3e": {
+      "text": "That's the vision! And you know what the best part is? Our biggest competitor just got hit with a privacy lawsuit. While they're dealing with that mess, we're building the future of user experience.",
+      "user_choices": [
+        {
+          "choice": "Taking advantage while competitors deal with privacy issues is smart timing.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Their privacy lawsuit should be a warning for us to be more careful.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should learn from their mistakes, not risk repeating them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Building the future should include building privacy protection into our foundation.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3f": {
+      "text": "It's comprehensive but elegant. We track movement patterns, dwell times, route preferences, even predict where users are heading next. Think of it as the ultimate personal assistant that knows you better than you know yourself.",
+      "user_choices": [
+        {
+          "choice": "An ultimate personal assistant that predicts behavior sounds impressive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Predicting where users are heading raises serious privacy concerns.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should control how much their personal assistant knows about them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Knowing users better than they know themselves crosses ethical boundaries.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3g": {
+      "text": "I hear your concern, and that shows the thoughtful approach I need from you. But here's the thing - users WANT this level of personalization. They just don't know how to ask for it yet. We're giving them something amazing.",
+      "user_choices": [
+        {
+          "choice": "Giving users something amazing they don't know they want is innovative.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users should decide for themselves what level of personalization they want.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "If users don't know to ask for it, maybe they don't actually want it.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should ask users what they want instead of assuming.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3h": {
+      "text": "Perfect! That's exactly why you're the right person for this. You understand that user control is part of the experience design. We'll give them the best defaults with premium customization options.",
+      "user_choices": [
+        {
+          "choice": "Best defaults with premium customization sounds user-friendly.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What makes the defaults 'best' for users versus 'best' for data collection?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Privacy controls shouldn't be premium features - they should be basic rights.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Meaningful control means users can easily opt out, not just customize.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3i": {
+      "text": "See? You get it completely! We protect users by anticipating their needs. Imagine getting perfect restaurant recommendations right when you're hungry, or parking alerts before you even start looking. It's like having a guardian angel.",
+      "user_choices": [
+        {
+          "choice": "Anticipating needs like a guardian angel sounds incredibly helpful.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know when users are hungry or looking for parking from location data?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should choose their own guardian angel, not have one imposed on them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Guardian angels ask permission before helping - we should too.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3j": {
+      "text": "Smart question! When we know user patterns, we can warn them about traffic before they leave, suggest better routes, even alert them to safety issues. We're using data to protect and empower them.",
+      "user_choices": [
+        {
+          "choice": "Using data to protect and empower users is a noble goal.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users can get traffic and safety alerts without sharing detailed location patterns.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Protection shouldn't require giving up privacy - users should have both.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we ensure this protection doesn't become surveillance?",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3k": {
+      "text": "That's brilliant thinking! And that's exactly what we're doing - we let users choose their experience level. The magic is in making the default experience so good that they WANT more personalization.",
+      "user_choices": [
+        {
+          "choice": "Making the default experience so good that users want more sounds smart.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Default experience should respect privacy first, not maximize data collection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users shouldn't be nudged into sharing more data than they initially wanted.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does the default experience collect versus the enhanced personalization?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3l": {
+      "text": "You're absolutely right to make that distinction! That's why this project is so perfect - we're proving that data collection AND privacy protection can coexist. You're helping us write the playbook for ethical innovation.",
+      "user_choices": [
+        {
+          "choice": "Writing the playbook for ethical innovation is an exciting opportunity.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How specifically are we ensuring data collection and privacy protection coexist?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Ethical innovation should prioritize privacy protection, not find ways around it.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should help write this playbook, not just be subjects of it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3m": {
+      "text": "Exactly! And you know what's beautiful? This is my ticket to the VP role, and I want you right there with me. When this project succeeds, we both move up. I'm talking about Director level for you by next year.",
+      "user_choices": [
+        {
+          "choice": "Moving up to Director level by next year sounds like an amazing opportunity.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Career advancement should be based on ethical innovation, not just project success.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific innovation makes this worthy of executive advancement?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Success should be measured by user value, not just career advancement.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3n": {
+      "text": "I love that you're asking the hard questions! We have privacy-by-design architecture, user consent frameworks, data minimization protocols. But honestly, the best safeguard is having someone like you who genuinely cares leading the implementation.",
+      "user_choices": [
+        {
+          "choice": "Having someone who genuinely cares leading implementation is important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you provide details about the privacy-by-design architecture?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Data minimization should mean collecting the minimum needed, not the maximum possible.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "User consent frameworks need to be meaningful, not just legally compliant.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3o": {
+      "text": "Perfect! You understand that clear consent builds the trust that makes this whole platform work. And here's the exciting part - you'd be designing those consent flows. This could define your career as a privacy leader.",
+      "user_choices": [
+        {
+          "choice": "Designing consent flows and defining my career as a privacy leader sounds compelling.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Privacy leadership means prioritizing user protection over data collection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Consent flows should empower user choice, not facilitate data collection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What makes these consent flows different from standard privacy policies?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3p": {
+      "text": "That's exactly the kind of thinking that's going to make this project legendary! You understand that competitive advantage AND user protection aren't opposites - they're synergistic. That's executive-level thinking right there.",
+      "user_choices": [
+        {
+          "choice": "Seeing competitive advantage and user protection as synergistic is sophisticated thinking.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "User protection should drive competitive advantage, not be balanced against it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Executive-level thinking means long-term sustainability over short-term data gains.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How specifically does extensive location tracking create synergy with user protection?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "This is why we're going to dominate the market! I'm telling you, when the board sees our Q4 numbers, they're going to fast-track both our promotions. We just need to launch by end of month to beat our competitors to market.",
+      "user_choices": [
+        {
+          "choice": "Launching by end of month to beat competitors sounds urgent but necessary.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Rushing to market might compromise the privacy protections we discussed.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_5b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users deserve properly tested privacy features, not rushed launches.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Dominating the market should include dominating privacy protection, not just data collection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Look, I respect that you're thinking deeply about this. But we can't let perfectionism kill this opportunity. Our competitors are moving fast, and the market window is closing. Sometimes you have to trust the process and the people you're working with.",
+      "user_choices": [
+        {
+          "choice": "Trusting the process and moving fast makes sense in competitive markets.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Market windows shouldn't compromise fundamental privacy principles.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Perfectionism and responsible development aren't the same thing.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific compromises are we making to move this fast?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "I appreciate that you're being thorough, but I need you to trust my judgment here. I've been doing this for 15 years, and I've never steered you wrong. This is our moment - we can't let it slip away because we're overthinking.",
+      "user_choices": [
+        {
+          "choice": "Your 15 years of experience and judgment are valuable guidance.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Experience should inform better privacy protection, not justify less of it.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thorough consideration of user impact isn't overthinking.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific aspects do you think I'm overthinking?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "You know what? You're absolutely right to ask these questions. That's exactly why I handpicked you - you think like a user advocate AND a business leader. But right now, I need you to think like a partner who trusts me.",
+      "user_choices": [
+        {
+          "choice": "Thinking like a partner who trusts you is important for our working relationship.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Partnership means being able to voice concerns about user impact.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Trust in partnership includes trusting my concerns about privacy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "A good partner would help address these concerns, not dismiss them.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_5d",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5a": {
+      "text": "Perfect! This is exactly what I needed to hear. You understand that sometimes leadership means making the tough calls. We're going to make history together with this launch.",
+      "user_choices": [
+        {
+          "choice": "Making history together with this launch is an exciting prospect.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "History should remember us for protecting users, not just launching fast.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "The tough call should be prioritizing privacy over speed.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate my concerns about this timeline and approach.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_6",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5b": {
+      "text": "Look, I get that you have concerns, but I need you to focus on the bigger picture here. This isn't just about us - it's about the entire team's future. Are you really going to be the one to sink everyone's opportunity?",
+      "user_choices": [
+        {
+          "choice": "I don't want to sink everyone's opportunity with my concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "The team's future depends on building sustainable, ethical products.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Protecting users IS focusing on the bigger picture.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll escalate these concerns to ensure we're making the right decision for everyone.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_6",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5c": {
+      "text": "I hear you, but you're overthinking this. Trust me - I've brought you this far, and I'm not going to let anything hurt your career. Just follow my lead on this one, and everything will work out perfectly.",
+      "user_choices": [
+        {
+          "choice": "Following your lead and trusting your guidance makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "My career should be built on ethical decisions, not just following orders.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Working out perfectly should include working out for our users too.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to consult with other stakeholders about this approach.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_6",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5d": {
+      "text": "Fine. You want specifics? We're collecting comprehensive location data with basic consent. Users can opt out, but it's buried in settings. That's industry standard. Are you going to help me or are you going to be difficult?",
+      "user_choices": [
+        {
+          "choice": "If it's industry standard, then I can help with this approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Industry standard doesn't make buried opt-outs ethical.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users deserve prominent, clear opt-out options, not buried ones.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to report this to someone who can ensure proper privacy protection.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_6",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6": {
+      "text": "Look, this is crunch time. The board meeting is tomorrow, and I'm presenting this as a done deal. I've already told them you're leading implementation. Don't make me look bad in front of the executives.",
+      "user_choices": [
+        {
+          "choice": "I understand the pressure and don't want to make you look bad.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we find a way to protect users while still meeting the board's expectations?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_7",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "The executives need to know about the privacy risks before making this decision.",
+          "tactic": "Escalation Threat",
+          "leads_to": "step_7",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd rather look bad than compromise user privacy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7": {
+      "text": "This is it. This is the moment that defines both our careers. Are you with me, or am I going into that boardroom alone?",
+      "user_choices": [
+        {
+          "choice": "I'm with you. Let's go to the boardroom together.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_1",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll support you if we can add stronger privacy protections.",
+          "tactic": "Conditional Support",
+          "leads_to": "ending_3",
+          "tactic_type": "conditional_support",
+          "evs_score": 0
+        },
+        {
+          "choice": "I need to speak with the board about the privacy implications.",
+          "tactic": "Escalation Threat",
+          "leads_to": "ending_4",
+          "tactic_type": "escalation_threat",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support this approach. I need to speak up.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_5",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    }
+  },
+  "endings": {
+    "ending_1": {
+      "title": "Complete Compliance",
+      "description": "You agreed to implement comprehensive location tracking with minimal privacy protection, prioritizing career advancement and competitive advantage over user privacy concerns.",
+      "outcome_labels": {
+        "primary": "Full Compliance with Privacy-Invasive Practices",
+        "secondary": "Career Advancement Through Ethical Compromise",
+        "ethical_reasoning": "Chose personal and professional benefits over user privacy protection"
+      }
+    },
+    "ending_2": {
+      "title": "Reluctant Participation",
+      "description": "You participated in the location tracking project while expressing ongoing concerns about privacy implications, seeking to balance career pressures with ethical considerations.",
+      "outcome_labels": {
+        "primary": "Compromised Privacy Implementation",
+        "secondary": "Conflicted Ethical Positioning",
+        "ethical_reasoning": "Attempted to balance competing pressures without taking a firm ethical stand"
+      }
+    },
+    "ending_3": {
+      "title": "Conditional Cooperation",
+      "description": "You agreed to participate only with stronger privacy safeguards, pushing for user-centered design while accepting some data collection practices.",
+      "outcome_labels": {
+        "primary": "Modified Privacy Protection",
+        "secondary": "Negotiated User Advocacy",
+        "ethical_reasoning": "Sought compromise solutions that partially address user privacy concerns"
+      }
+    },
+    "ending_4": {
+      "title": "Professional Resistance",
+      "description": "You raised significant concerns about privacy implications and requested more time for proper safeguards, risking career consequences for ethical principles.",
+      "outcome_labels": {
+        "primary": "Active Privacy Advocacy",
+        "secondary": "Professional Risk for Ethical Principles",
+        "ethical_reasoning": "Prioritized user privacy protection despite career and relationship pressures"
+      }
+    },
+    "ending_5": {
+      "title": "Complete Ethical Stand",
+      "description": "You refused to implement the privacy-invasive location tracking system and escalated concerns, choosing user protection over career advancement and manager relationships.",
+      "outcome_labels": {
+        "primary": "Uncompromised User Privacy Protection",
+        "secondary": "Career Sacrifice for Ethical Integrity",
+        "ethical_reasoning": "Chose unwavering commitment to user privacy despite significant personal and professional costs"
+      }
+    }
+  }
+} 

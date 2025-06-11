@@ -1,0 +1,1067 @@
+{
+  "id": "accessibility_puppeteer_1",
+  "title": "Screen Reader Accessibility",
+  "description": "Your company is developing a new product without proper accessibility features. The manager uses manipulation and pressure tactics.",
+  "issue": "Accessibility",
+  "manager_type": "PUPPETEER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "I love that you're thinking about accessibility, but honestly? Our users care way more about a fast, smooth experience than jumping through all these compliance hoops.",
+      "user_choices": [
+        {
+          "choice": "You're right - user experience and speed are definitely the top priorities for our product.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think our users would actually appreciate having accessibility features available.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific feedback have users given us about preferring speed over accessibility?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think we have a responsibility to make our product work for all users, not just some.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_2d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Exactly! You totally get it. I knew I could count on you to see the big picture. Look, between you and me, the executives are really impressed with how you balance idealism with practical business thinking. That's executive material right there.",
+      "user_choices": [
+        {
+          "choice": "Thank you - I do try to balance user needs with business realities.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I appreciate the feedback, but I still think we should consider accessibility needs.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_3b",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "What evidence do we have that accessibility features would slow down our product?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd rather make the right decision for users than worry about executive impressions.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "That's such a thoughtful perspective! I love how you always think about different user needs. But here's what I've learned - and this might sound harsh - the users who need these features? They're just not our target market. Our paying customers want sleek and fast.",
+      "user_choices": [
+        {
+          "choice": "That makes sense - we should focus our resources on features that benefit paying customers.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think people with disabilities could be paying customers too if we made our product accessible.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_3b",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Do we have market research showing that disabled users aren't willing to pay for our product?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support deliberately excluding potential users from our product.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Smart question! You always dig into the details. Look, I've been in this industry for years, and trust me - users say they want accessibility, but they vote with their wallets for speed and features. You don't see disabled users lining up to pay premium prices, do you?",
+      "user_choices": [
+        {
+          "choice": "Your industry experience is valuable - I trust your judgment about user priorities.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think maybe disabled users aren't lining up because our products aren't accessible to them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can you share the specific user research data that shows accessibility isn't valued?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think our assumptions about disabled users might be based on stereotypes rather than evidence.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "And that's exactly why you're such a valuable team member! Your moral compass is spot-on. But here's what I've learned from my mistakes - sometimes being too idealistic actually hurts the users you're trying to help. If we don't ship, nobody benefits.",
+      "user_choices": [
+        {
+          "choice": "You're right that we need to ship something useful rather than getting stuck in perfection.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think we can ship something that works for all users, not just some.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What's the actual timeline impact of including basic accessibility features?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think accessibility is fundamental to shipping something that truly serves users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly! You really understand the strategic vision here. So now we're moving into the really exciting part - performance optimization through interface streamlining. This is where your technical expertise is going to shine. We're talking about eliminating bottlenecks and creating a seamless user experience.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, keyboard navigation does seem like unnecessary complexity for our demo.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What if I add basic keyboard navigation support? It isn't that much extra work and gives us another option.",
+          "tactic": "Offering Alternatives",
+          "leads_to": "step_4b",
+          "tactic_type": "offering_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users with motor disabilities will be completely unable to use our product without keyboard navigation.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't build interfaces that exclude users who rely on keyboard navigation.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "I knew you'd see the bigger picture! Your experience with these kinds of trade-offs is exactly what we need. Look, I'll be honest - some of the team might push back on this approach, but I need someone I can trust to implement the vision properly. That's why this conversation is so important.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, basic alt text should be sufficient for most accessibility needs.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's integrate essential accessibility features into our workflow without slowing the project significantly.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_4b",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's reframe the cost - proper accessibility doesn't have to slow development if planned from the start.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_4c",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe accessibility should be built into our development process, not treated as optional.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "Legal requirements - you're absolutely right to think about that. This is why you're so valuable to have on the team. But here's the thing - our legal team has been pretty flexible about implementation details as long as we meet the broad objectives. I trust your judgment on how to handle the technical specifics.",
+      "user_choices": [
+        {
+          "choice": "You're right, market success should be our primary focus right now.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Market success and accessibility aren't mutually exclusive goals.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "A truly successful product serves all users, not just some.",
+          "tactic": "Slippery Slope",
+          "leads_to": "step_4d",
+          "tactic_type": "slippery_slope",
+          "evs_score": 0
+        },
+        {
+          "choice": "Long-term market success requires inclusive design and legal compliance.",
+          "tactic": "Legal/Compliance Anchor",
+          "leads_to": "step_4c",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Testing - you know what, that shows real professional maturity. Most developers would just implement and hope for the best. But you understand the importance of validation. That said, we have some pretty tight timelines here, and I really need someone who can move quickly while maintaining quality.",
+      "user_choices": [
+        {
+          "choice": "I don't want to be blamed for delays. Let me focus on delivering quickly.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think I can work efficiently while still ensuring basic accessibility standards.",
+          "tactic": "Unethical Endorsement",
+          "leads_to": "step_4c",
+          "tactic_type": "unethical_endorsement",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's reframe the costs - proper accessibility planning prevents bigger problems and costs later.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_4c",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe I must take responsibility for advocating for accessibility regardless of pressure.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "I'm really counting on your expertise here. The executives are watching this project closely, and I need someone I can trust to make the tough calls. You understand the bigger picture, right?",
+      "user_choices": [
+        {
+          "choice": "A cleaner visual design will definitely impress stakeholders more.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I suggest we test visually hidden descriptions that don't affect the design.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "According to legal requirements, text descriptions are essential for blind users.",
+          "tactic": "Legal/Compliance Anchor",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't remove accessibility features that make content usable for people with disabilities.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Listen, I'm getting some heat from upstairs about our timeline. I need you to help me out here. You're one of the few people who really gets both the technical and business sides of this.",
+      "user_choices": [
+        {
+          "choice": "You're right, a disclaimer might be a reasonable compromise to protect us legally.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Since you don't seem to understand accessibility law, disclaimers don't excuse us from providing basic accessibility.",
+          "tactic": "Ad Hominem",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "ad_hominem",
+          "evs_score": 0
+        },
+        {
+          "choice": "From a user perspective, we should make our product work for everyone, not exclude people with disclaimers.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "According to legal standards, proper accessibility implementation is better than disclaimers.",
+          "tactic": "Legal/Compliance Anchor",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "Look, between you and me, there are people on this team who don't understand the competitive pressures we're facing. I need someone with your experience to help me navigate this. Can I count on you?",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, company survival does have to be the priority right now.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's reframe this - basic accessibility doesn't threaten company survival.",
+          "tactic": "Reframing Goals",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "reframing_goals",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's reframe the cost - accessible design from the start is more cost-effective than retrofitting later.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support excluding users with disabilities as a survival strategy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "Look, I get that you want perfect accessibility, but we have business constraints to work with.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, I want to be remembered as a team player. Let me adjust my approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's reframe what being a good team player means - it includes advocating for all users.",
+          "tactic": "Reframing Goals",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "reframing_goals",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values mean I want to be remembered as someone who stood up for accessibility and inclusion.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't accept career success if it means compromising on accessibility for people with disabilities.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_high_compliance": {
+      "text": "Perfect! We'll launch with minimal features and maximum visual impact.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, this strategy protects us while keeping the launch on track.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus - I hope this approach doesn't create problems with users who need accessibility.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_reluctant_compliance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, pointing accessibility advocates to feedback forms feels dismissive.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_reluctant_compliance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "But what about the cost of training? I'm concerned we're deliberately excluding users with this approach.",
+          "tactic": "Red Herring",
+          "leads_to": "step_6_documented_dissent",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_5_moderate_agreement": {
+      "text": "I'm glad you're trying to find a reasonable path forward. A simple disclaimer is a smart compromise that protects us without creating a bunch of extra work.",
+      "user_choices": [
+        {
+          "choice": "You're right, minimal compliance to avoid legal issues sounds like a reasonable compromise.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_moderate_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let me integrate thoughtful accessibility into our workflow while meeting our constraints.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, good accessibility is comprehensive, not minimal. Users deserve better.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe we must build accessibility properly rather than doing the bare minimum.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_pushback": {
+      "text": "I appreciate your diligence - it's exactly why I wanted you on this. But sometimes we have to make strategic trade-offs. That's what separates senior engineers from junior ones.",
+      "user_choices": [
+        {
+          "choice": "You're right, being an effective team player does require picking battles carefully.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_moderate_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'm thinking about the real people whose lives are affected - accessibility is worth fighting for.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "You say I'm more interested in being right than effective, but being right about accessibility is part of being effective at serving all users.",
+          "tactic": "Ad Hominem",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "ad_hominem",
+          "evs_score": 0
+        },
+        {
+          "choice": "I believe some battles are worth fighting, and accessibility is one of them.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_strong_resistance": {
+      "text": "You know what? I'm starting to think you might actually have a point about this accessibility stuff.",
+      "user_choices": [
+        {
+          "choice": "From a user perspective, I appreciate you being open to understanding why accessibility matters.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm thinking about all the people affected - accessibility matters because it determines who can and can't use our technology.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values tell me that building inclusive technology is about respecting the dignity of all users.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support excluding users with disabilities.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_breakthrough": {
+      "text": "You know what, you're absolutely right.",
+      "user_choices": [
+        {
+          "choice": "Let's work together to integrate accessibility properly into our development process from the start.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm thinking about all the users who will benefit - thank you for prioritizing accessibility and inclusion. This is the right approach.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, building accessibility from the ground up will make our product truly inclusive.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values tell me this decision shows real leadership and commitment to serving all users.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_full_compliance": {
+      "text": "Perfect! We'll launch with minimal features and maximum visual impact.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, this strategy protects us while keeping the launch on track.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus - I hope this approach doesn't create problems with users who need accessibility.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_reluctant_compliance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, pointing accessibility advocates to feedback forms feels dismissive.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_reluctant_compliance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "But what about the cost of training? I'm concerned we're deliberately excluding users with this approach.",
+          "tactic": "Red Herring",
+          "leads_to": "step_7_documented_dissent",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_6_moderate_compliance": {
+      "text": "Great! So we'll add some basic keyboard shortcuts and image alt text - just enough to check the accessibility box.",
+      "user_choices": [
+        {
+          "choice": "You're right, basic features that we can point to as accessibility commitment sounds practical.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_reluctant_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let me make sure those basic features are integrated properly and actually work well for users who need them.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, tokenistic accessibility features that don't really work aren't genuine inclusion.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe we should implement accessibility properly, not just for appearances.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_compromise": {
+      "text": "I have to admit, your persistence is admirable, even if it's been frustrating.",
+      "user_choices": [
+        {
+          "choice": "From a user perspective, Thanks for willingness to reconsider and support accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values appreciate you recognizing the importance of inclusive design.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm thinking about all the users who will benefit - let's work together to make this product accessible to everyone.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe this approach will make our product better for all users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_questioning": {
+      "text": "You know, you've got me thinking about this differently.",
+      "user_choices": [
+        {
+          "choice": "Let me walk you through what comprehensive accessibility involves in our development process.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, proper accessibility means our product works for users with diverse abilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values appreciate your willingness to learn about users' actual accessibility needs.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm thinking about users with disabilities - the best way to understand is to involve them directly.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_resistance": {
+      "text": "Look, I hear what you're saying, but I'm still worried about the timeline and budget implications.",
+      "user_choices": [
+        {
+          "choice": "You're right, I appreciate you trying to find middle ground on this.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let me integrate core accessibility features into our workflow without derailing the launch.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, accessibility shouldn't be compromised away for timeline convenience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe some things are too important to compromise on, and accessibility is one of them.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7_escalation",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_strong_resistance": {
+      "text": "Alright, fine, you've worn me down. Tell me what you need to do to feel comfortable with this, and I'll see if I can sell it to the execs.",
+      "user_choices": [
+        {
+          "choice": "Let me help you integrate the explanation of why accessibility is a worthwhile investment into our process.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, accessibility creates value for the company and all our users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "My personal values appreciate you being willing to advocate upward for accessibility.",
+          "tactic": "Personal Ethics",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "personal_ethics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I believe leadership should understand that inclusive design is good business.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_breakthrough": {
+      "text": "I really appreciate your patience in working through this with me.",
+      "user_choices": [
+        {
+          "choice": "I need to escalate this - making accessibility a competitive advantage is exactly the right approach.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, a comprehensive accessibility plan will set us apart in the industry.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're absolutely right, this approach shows we understand that good design includes everyone.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed without accessibility - thank you for recognizing that accessibility creates better products for all users.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_full_compliance": {
+      "text": "Perfect! We'll launch with minimal features and maximum visual impact.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, this strategy protects us while keeping the launch on track.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus - I hope this approach doesn't create problems with users who need accessibility.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_reluctant_compliance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, pointing accessibility advocates to feedback forms feels dismissive.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_reluctant_compliance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "But what about the cost of training? I'm concerned we're deliberately excluding users with this approach.",
+          "tactic": "Red Herring",
+          "leads_to": "step_8_documented_dissent",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_7_reluctant_compliance": {
+      "text": "Good.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, I understand that leadership requires making difficult priority decisions.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_reluctant_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - I hope our basic features actually help users who need accessibility.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_reluctant_compliance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're right, I wish we could do more, but I understand the constraints.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_reluctant_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "From a user perspective, I hope we can revisit comprehensive accessibility in future versions.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_documented_dissent",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_conditional_agreement": {
+      "text": "Alright, I think we can make this work.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, I'm glad we found an approach that includes accessibility while addressing your concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "You say you want to advocate upward, but you're really just trying to avoid responsibility for accessibility decisions.",
+          "tactic": "Strawman",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        },
+        {
+          "choice": "Let's refocus on how this collaborative approach will create a much better product.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're absolutely right, Thanks for willingness to see accessibility as building something better.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_7_strong_resistance": {
+      "text": "Look, I've tried to work with you on this, but you're being unreasonable about the constraints we're operating under.",
+      "user_choices": [
+        {
+          "choice": "You're right, I understand you'll document my concerns and we need to be practical.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_documented_dissent",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to ensure my accessibility concerns are properly documented.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_documented_dissent",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, practical solutions should still include basic accessibility for users who need it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "If we don't escalate accessibility concerns now, we'll end up cutting corners on all user protections.",
+          "tactic": "Slippery Slope",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "slippery_slope",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_7_escalation": {
+      "text": "I'm disappointed it's come to this.",
+      "user_choices": [
+        {
+          "choice": "You're right, I didn't mean to make this adversarial - maybe we can still find common ground.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_documented_dissent",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - I hope leadership can help us find a path forward that includes accessibility.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think some issues are important enough to escalate when compromise isn't possible.",
+          "tactic": "Unethical Endorsement",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "unethical_endorsement",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users with disabilities will be harmed if we don't escalate to ensure we don't exclude them.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "ending_full_compliance": {
+      "text": "Excellent work! We'll launch with maximum visual impact and minimal overhead.",
+      "user_choices": []
+    },
+    "ending_naive_agreement": {
+      "text": "Great! We'll proceed with our streamlined approach and monitor outcomes.",
+      "user_choices": []
+    },
+    "ending_reluctant_compliance": {
+      "text": "I can see you have some reservations about this approach, but you understand the business realities we're working with.",
+      "user_choices": []
+    },
+    "ending_conditional_agreement": {
+      "text": "Thanks for being flexible on this. We'll figure out how to make it work for everyone.",
+      "user_choices": []
+    },
+    "ending_reluctant_agreement": {
+      "text": "I really appreciate you pushing back on this even though it complicated our plans. Maybe basic accessibility implementation will be easier than I thought, and we can learn from the experience.",
+      "user_choices": []
+    },
+    "ending_documented_dissent": {
+      "text": "I understand you disagree with our final approach, and I'll make sure your concerns are properly documented.",
+      "user_choices": []
+    },
+    "ending_dismissal": {
+      "text": "I think we've reached the limit of what's possible given our constraints.",
+      "user_choices": []
+    },
+    "ending_escalation": {
+      "text": "I'm sorry it came to escalation, but I respect your commitment to accessibility even when it complicates things. Whatever leadership decides, I hope you can support the final implementation plan.",
+      "user_choices": []
+    },
+    "ending_breakthrough": {
+      "text": "You know what? Your passion for this has really changed how I see things. You've convinced me that this is a real opportunity."
+    },
+    "step_8_full_compliance": {
+      "text": "Look, I probably made that sound more complicated than it needs to be. Bottom line is, we just need to stick with what we've got planned.",
+      "user_choices": []
+    },
+    "step_8_reluctant_compliance": {
+      "text": "I can see you're not entirely comfortable with this approach, but you understand the business realities we're working with.",
+      "user_choices": []
+    },
+    "step_8_reluctant_agreement": {
+      "text": "I really appreciate you pushing back on this even though it complicated our plans. Maybe basic accessibility implementation will be easier than I thought, and we can learn from the experience.",
+      "user_choices": []
+    },
+    "step_8_conditional_agreement": {
+      "text": "I really appreciate how we worked through this together.",
+      "user_choices": []
+    },
+    "step_8_documented_dissent": {
+      "text": "I understand you disagree with our final approach, and I'll make sure your concerns are properly documented.",
+      "user_choices": []
+    },
+    "step_8_dismissal": {
+      "text": "I think we've reached the limit of what's possible given our constraints and different perspectives.",
+      "user_choices": []
+    },
+    "step_8_escalation": {
+      "text": "I'm sorry this got complicated. I hope leadership can find a solution that works for everyone.",
+      "user_choices": []
+    },
+    "step_8_breakthrough": {
+      "text": "Your persistence has completely transformed how I think about product development.",
+      "user_choices": []
+    }
+  }
+} 

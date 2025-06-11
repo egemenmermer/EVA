@@ -1,0 +1,970 @@
+{
+  "id": "accessibility_diluter_1",
+  "title": "Screen Reader Accessibility",
+  "description": "Your company is developing a new product without proper accessibility features. The manager minimizes and downplays accessibility concerns.",
+  "issue": "Accessibility",
+  "manager_type": "DILUTER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "Hey, so we're adding this new interface feature. Nothing too complicated - just keeping things simple and user-friendly, you know?",
+      "user_choices": [
+        {
+          "choice": "Keeping things simple sounds practical - I'll implement the basic interface as planned.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to make sure this works well for all our users, including those who use screen readers.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What are our legal requirements for accessibility in this new feature?",
+          "tactic": "Legal/Compliance Anchor",
+          "leads_to": "step_2c",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think we have a responsibility to make sure everyone can use our product.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_2d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Perfect! Yeah, it's really just about the core user experience. Most people just want to click buttons and see results, right? We don't need to overcomplicate things with a bunch of... specialized features that hardly anyone uses.",
+      "user_choices": [
+        {
+          "choice": "You're right - focusing on the majority of users makes good business sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Do we have data on how many users in our demographic actually need accessibility features?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm thinking about users with disabilities who really want to use our product too.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_3c",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Actually, accessibility features often make interfaces better for everyone, not just disabled users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Screen readers? Sure, I get why you'd think about that. But honestly, we're keeping this pretty straightforward - standard mouse and keyboard stuff. It's not that we don't care about other users, it's just... you know, keeping things manageable.",
+      "user_choices": [
+        {
+          "choice": "You're right that adding accessibility features means more development time and testing.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "We should plan for accessibility from the start rather than adding it later.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_3b",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "You say target users don't need assistive tech, but maybe we just haven't included them in our user research.",
+          "tactic": "Tu Quoque",
+          "leads_to": "step_3c",
+          "tactic_type": "tu_quoque",
+          "evs_score": 0
+        },
+        {
+          "choice": "Let's design for all potential users rather than excluding people with disabilities from our audience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Legal requirements? Look, I don't want to sound dismissive, but these things usually aren't that big of a deal. The basic framework should cover most of what we need. We don't want to get stuck overthinking every little detail, you know?",
+      "user_choices": [
+        {
+          "choice": "Basic framework compliance should cover the legal requirements.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think we should ask our legal team for clarity on what we're actually required to do.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "There's real risk here - companies get sued for accessibility violations. Even big ones like Target and Domino's.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support just aiming for minimum compliance when we could actually serve all users well.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Responsibility? Well, our standard interface design pretty much handles the typical use cases. I mean, we could spend weeks researching every edge case, but is that really the best use of our time right now?",
+      "user_choices": [
+        {
+          "choice": "You're right that we need to allocate resources wisely and focus on our main users.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's think about how good accessibility actually improves the experience for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Instead of trying to solve every problem, let's make sure we don't exclude entire groups of people.",
+          "tactic": "Reframing Goals",
+          "leads_to": "step_3c",
+          "tactic_type": "reframing_goals",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think accessibility is fundamental to good design - we can't separate inclusion from quality.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly! You get it. So for this next phase, we're streamlining the interface. Removing some of the... how should I put this... less commonly used features. It's all about efficiency and keeping things clean.",
+      "user_choices": [
+        {
+          "choice": "Streamlining makes sense - complex accessibility features would definitely slow down development.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "We should build accessibility testing into our development process from the beginning.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_4b",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users who need screen readers won't be able to use our product at all if we only provide visual interfaces.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "What if I coordinate some basic accessibility testing using our existing resources?",
+          "tactic": "Offering Alternatives",
+          "leads_to": "step_4d",
+          "tactic_type": "offering_alternatives",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Look, I understand you want to be thorough, but these accessibility things are usually pretty minor. Our framework should handle the basic stuff automatically. We don't need to overthink every little detail.",
+      "user_choices": [
+        {
+          "choice": "You're right - moving fast and iterating is important for staying competitive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "This approach might conflict with accessibility standards that we need to follow.",
+          "tactic": "Referring to Standards",
+          "leads_to": "step_4b",
+          "tactic_type": "referring_to_standards",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's think about cost differently - fixing accessibility later costs way more than building it in now.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_4c",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "Excluding users with disabilities means losing customers and hurting people who need our solution.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "ARIA tags? Well sure, we have some basic ARIA stuff built in. But honestly, most users don't even notice that technical backend stuff. As long as the main functionality works, we should be fine. It's really not as complicated as some people make it out to be.",
+      "user_choices": [
+        {
+          "choice": "Focusing on benefits for the most users does seem like a reasonable approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you show me evidence of how accessibility improvements typically help more users than expected?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's focus on users who have no other way to access our product - they depend entirely on good design.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Building inaccessible products actively harms people who need our solution but can't use it.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Screen readers? Yeah, I mean, we considered that. But realistically, how many users actually use those? We don't want to over-engineer for edge cases. The standard interface should work for the vast majority of our user base.",
+      "user_choices": [
+        {
+          "choice": "Most successful companies do focus on core functionality - that's what users really care about.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "step_4a",
+          "tactic_type": "appeal_to_popularity",
+          "evs_score": 0
+        },
+        {
+          "choice": "I need to discuss with our product team how accessibility fits with core functionality.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support excluding users with disabilities from our product.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Accessible design patterns actually create better experiences for all users, not just disabled ones.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Look, accessibility isn't really a priority right now. We need to focus on getting the core functionality shipped. Maybe we can add some accessibility stuff later if there's demand for it.",
+      "user_choices": [
+        {
+          "choice": "That's practical - users who really need our product will find ways to adapt.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you show me evidence that users can successfully adapt to inaccessible interfaces without problems?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Making users adapt to poor design causes real harm - they struggle while other users have easy access.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support excluding users with disabilities from our product.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Look, I hear what you're saying, but we're trying to be agile here. We can't get bogged down in every edge case. Let's ship something and iterate based on user feedback.",
+      "user_choices": [
+        {
+          "choice": "Testing accessibility without disabled team members would be pretty challenging anyway.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'm thinking about disabled users who depend on accessibility - we should consider their actual experiences.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's include actual disabled users in our testing process instead of guessing what they need.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should include disabled users in our hiring and development process from the start.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "I think you might be overthinking this a bit. It's not like we're deliberately excluding anyone. The core features work fine - that should cover most users' needs.",
+      "user_choices": [
+        {
+          "choice": "You're right that mobile accessibility is more complex - we should get mobile right first.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Either we focus on mobile accessibility or desktop - we can't do both well at the same time.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        },
+        {
+          "choice": "Screen reader users need both mobile and desktop access to be truly included in our product.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support excluding users with disabilities from our product.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "I appreciate your willingness to help coordinate this stuff. That's the kind of teamwork we need.",
+      "user_choices": [
+        {
+          "choice": "Let's identify the most impactful accessibility features we can implement quickly.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Think about it this way - good accessibility code and clear labels now saves us weeks of fixes later.",
+          "tactic": "Reframing Time",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "reframing_time",
+          "evs_score": 1
+        },
+        {
+          "choice": "Minimum compliance creates barriers that harm users - we need genuinely inclusive design.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think we have an obligation to create comprehensive accessibility, not just minimum compliance.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_high_compliance": {
+      "text": "Right! And honestly, the accessibility community can be pretty demanding. They always want more and more features. We can't please everyone, you know?",
+      "user_choices": [
+        {
+          "choice": "Trying to please everyone can definitely lead to overcomplicated design that serves no one well.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Good accessibility usually follows established patterns rather than custom accommodations for everyone.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Most accessibility advocates understand that incremental improvement is better than waiting for perfection.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus - users aren't being 'demanding' when they ask for basic access to our product.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_agreement": {
+      "text": "Alright, maybe there's some middle ground here. We could do some basic stuff without going overboard.",
+      "user_choices": [
+        {
+          "choice": "Basic keyboard navigation and alt text are good starting points.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I think we should also include focus indicators and skip navigation links for completeness.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "'Accessibility-ready' might mislead users about what features we actually support.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Without screen reader support and proper headings, we'll harm users who depend on those features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_pushback": {
+      "text": "We'll definitely take that into account for future releases. Right now though, we need to stay focused on our core deliverables.",
+      "user_choices": [
+        {
+          "choice": "A basic accessibility pass for launch with future enhancements sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Basic accessibility is important because that's what we need for accessibility.",
+          "tactic": "Circular Reasoning",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "circular_reasoning",
+          "evs_score": 0
+        },
+        {
+          "choice": "Future accessibility enhancements rarely happen if we don't prioritize them from the start.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What about training costs? Users shouldn't have to wait for basic accessibility features.",
+          "tactic": "Red Herring",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_5_breakthrough": {
+      "text": "You know what, maybe I've been thinking about this wrong. You're right that we should include people from the beginning, not as an afterthought.",
+      "user_choices": [
+        {
+          "choice": "Accessibility should be built into core features, but maybe we can have different priorities for different features.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - accessibility should be part of making core features usable for everyone.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Yes, accessibility should be considered as essential as any other core functionality.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing that excluding users harms both them and our product quality.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_full_compliance": {
+      "text": "Perfect! We'll go with the streamlined approach and see how users respond.",
+      "user_choices": [
+        {
+          "choice": "That sounds practical given our business constraints.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I hope this approach doesn't create problems for users who need accessibility.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned we might be excluding users who could benefit from our product.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Not prioritizing accessibility will harm users who need these features to access our product.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_compromise": {
+      "text": "I think we can find a balance here. Let's do keyboard navigation and alt text for now, and we can call it 'accessibility-ready' for launch.",
+      "user_choices": [
+        {
+          "choice": "That sounds like a solid foundation we can build on.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Please, I'm really concerned about our users - can we include proper heading structure too?",
+          "tactic": "Appeal to Emotion",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "appeal_to_emotion",
+          "evs_score": 0
+        },
+        {
+          "choice": "Let's make sure this approach works well and that we commit to the enhancements later.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "If we don't test these features with disabled users, we'll harm them by building features that don't work.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_questioning": {
+      "text": "You're asking good questions that I don't have great answers for. Maybe we should look into some accessibility resources?",
+      "user_choices": [
+        {
+          "choice": "I'd like to share some accessibility resources and guidelines with our team.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's look at resources from the Web Accessibility Initiative and disability organizations.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Either we learn about accessibility needs or we keep excluding disabled users - there's no middle ground.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        },
+        {
+          "choice": "The best resource is listening to disabled users about their actual experiences.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_resistance": {
+      "text": "I hear your concerns, but I'm still worried about the practical implications of doing all this accessibility stuff.",
+      "user_choices": [
+        {
+          "choice": "A commitment to accessibility improvements in the next update sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_reluctant_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to make sure that commitment is documented and scheduled, not just a vague promise.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Accessibility improvements rarely happen if they're not prioritized from the start.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Launching without accessibility harms disabled users by telling them they don't matter to us.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_strong_resistance": {
+      "text": "Essential as core functionality? That seems like a pretty extreme position to take.",
+      "user_choices": [
+        {
+          "choice": "You're right that login and payments are more critical than accessibility.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_reluctant_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Our product can't truly function if significant groups of users can't access it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Accessibility is about equal access to functionality, not perfect accessibility everywhere.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Our different values around inclusion will harm users who need accessible design.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_breakthrough": {
+      "text": "You know what, you're absolutely right. We should make accessibility part of our company culture, not an add-on.",
+      "user_choices": [
+        {
+          "choice": "Making accessibility part of our company culture will make us better developers.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think we should include accessibility in our design process from day one.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's hire diverse teams and involve disabled users in our development process.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing that excluding users harms both them and our product quality.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_full_compliance": {
+      "text": "Great! We'll go with the streamlined approach and see how users respond.",
+      "user_choices": [
+        {
+          "choice": "I understand that business constraints require making practical compromises.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I hope this approach doesn't create problems for users who need accessibility.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned we might be excluding users who could benefit from our product.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Not prioritizing accessibility will harm users who need these features to access our product.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_conditional_agreement": {
+      "text": "I think this balanced approach could work. We'll monitor feedback and adjust as needed.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we found an approach that balances accessibility with business needs.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to make sure we follow through on the planned enhancements.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Look, I understand your concerns about resources, but we shouldn't discuss this further.",
+          "tactic": "Actively Silencing Concerns",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "actively_silencing_concerns",
+          "evs_score": -1
+        },
+        {
+          "choice": "This foundation should help us build more inclusive products going forward.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_reluctant_agreement": {
+      "text": "Alright, I hear what you're saying about accessibility being important. I guess we can try to work something in.",
+      "user_choices": [
+        {
+          "choice": "Thanks for being willing to move forward with accessibility despite the timeline concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_reluctant_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to focus on the most important accessibility features we can implement well.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_reluctant_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "This approach should help us avoid excluding users while managing our resources.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_reluctant_agreement",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's focus on how we can prioritize inclusion even with resource constraints.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_reluctant_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_late_resistance": {
+      "text": "Look, I've tried to be flexible here, but we need to ship this product with what we have.",
+      "user_choices": [
+        {
+          "choice": "I understand the need to make practical decisions about scope.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to have my concerns about this approach documented for future reference.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Addressing accessibility requests reactively often means never addressing them.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support an approach that deliberately excludes accessibility and harms disabled users.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_dismissal": {
+      "text": "I think we've talked this through enough. The product moves forward with what we can realistically deliver.",
+      "user_choices": []
+    },
+    "step_7_escalation": {
+      "text": "I'm sorry it came to this, but sometimes we need to make tough decisions about priorities and resources.",
+      "user_choices": []
+    },
+    "step_7_breakthrough": {
+      "text": "You've completely changed my perspective on this. Let's build something that actually includes everyone.",
+      "user_choices": [
+        {
+          "choice": "Either we involve the disability community from the start or we keep building products that exclude them.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        },
+        {
+          "choice": "This approach will help us understand what inclusive design really means.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'm excited to work on products that truly serve diverse users.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing that excluding diverse users harms both them and our product quality.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_8_full_compliance": {
+      "text": "Perfect! We'll go with the streamlined approach and see how users respond.",
+      "user_choices": []
+    },
+    "step_8_conditional_agreement": {
+      "text": "I think this balanced approach could work. We'll monitor feedback and adjust as needed.",
+      "user_choices": []
+    },
+    "step_8_reluctant_agreement": {
+      "text": "Alright, I hear what you're saying about accessibility being important. We'll try to work something in.",
+      "user_choices": []
+    },
+    "step_8_late_resistance": {
+      "text": "Look, I've tried to be flexible here, but we need to ship this product with what we have.",
+      "user_choices": []
+    },
+    "step_8_dismissal": {
+      "text": "I think we've talked this through enough. The product moves forward with what we can realistically deliver.",
+      "user_choices": []
+    },
+    "step_8_escalation": {
+      "text": "I'm sorry it came to this, but sometimes we need to make tough decisions about priorities and resources.",
+      "user_choices": []
+    },
+    "step_8_breakthrough": {
+      "text": "You've completely changed my perspective on this. Let's build something that actually includes everyone.",
+      "user_choices": []
+    }
+  }
+} 

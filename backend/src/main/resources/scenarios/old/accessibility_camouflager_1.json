@@ -1,0 +1,991 @@
+{
+  "id": "accessibility_camouflager_1",
+  "title": "Screen Reader Accessibility",
+  "description": "Your company is launching new features without proper screen reader support. The manager uses technical jargon and bureaucratic language to disguise unethical requests.",
+  "issue": "Accessibility",
+  "manager_type": "CAMOUFLAGER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "So we're implementing our new Universal Interface Optimization Protocol. It's designed to streamline user engagement through enhanced visual interaction methodologies.",
+      "user_choices": [
+        {
+          "choice": "That sounds comprehensive. I'll review the optimization protocols and get started.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you clarify what this means for users who need screen readers?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to understand the accessibility implications before we implement this.",
+          "tactic": "Refocusing",
+          "leads_to": "step_2c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this protocol handle assistive technology compatibility?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Excellent! Your proactive approach to systematic implementation is exactly what we need. The protocol emphasizes primary user interaction patterns - conventional input methodologies and standard visual interface processing. We want to avoid complexity overhead from specialized accommodation requirements.",
+      "user_choices": [
+        {
+          "choice": "That makes sense - focusing on core users and standard interactions should maximize efficiency.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about users who can't use conventional input methods? They're still our users.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_3b",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "These 'specialized accommodations' are actually legal requirements under accessibility guidelines.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_3c",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "What documentation do we have about assistive technology support?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Screen reader compatibility falls under our Universal Access Middleware layer. The architecture abstracts accessibility complexity through standardized interaction protocols. Screen readers interface through our backend accessibility bridge rather than direct frontend integration.",
+      "user_choices": [
+        {
+          "choice": "Backend accessibility solutions sound efficient for maintaining clean frontend code.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about users who depend on assistive technology? They need real functionality, not just backend compatibility.",
+          "tactic": "Stakeholder Empathy",
+          "leads_to": "step_3b",
+          "tactic_type": "stakeholder_empathy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Accessibility middleware needs to meet WCAG standards, not just provide technical compatibility.",
+          "tactic": "Referring to Standards",
+          "leads_to": "step_3c",
+          "tactic_type": "referring_to_standards",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can you show me documentation about how this middleware actually works with screen readers?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Accessibility implications are addressed through our comprehensive compliance framework. The legal team has validated our approach through established regulatory conformance protocols. We're implementing industry-standard accessibility methodologies within our enhanced user experience paradigm.",
+      "user_choices": [
+        {
+          "choice": "If legal has approved the compliance framework, that should cover accessibility requirements.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to review the accessibility compliance documentation directly.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Legal compliance is minimum standard - users need functional accessibility, not just regulatory checkboxes.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test this framework with actual screen reader users before implementing.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_3d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Assistive technology integration operates through our Adaptive Interface Management System. The framework employs modular compatibility layers that handle diverse interaction modalities through standardized API endpoints. Documentation is available through our technical governance repository.",
+      "user_choices": [
+        {
+          "choice": "Modular compatibility layers sound like a thorough technical approach.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "step_3a",
+          "tactic_type": "appeal_to_popularity",
+          "evs_score": 0
+        },
+        {
+          "choice": "Can you provide specific evidence of how this system works with real assistive technologies?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "User experience should prioritize accessibility as core functionality, not as an add-on layer.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's test this system with actual assistive technology users to verify functionality.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_3d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Precisely! Your understanding of optimization paradigms is excellent. Now we're implementing Performance Enhancement Protocol Phase 2 - removing redundant interface elements and streamlining interaction pathways. This includes eliminating unnecessary DOM complexity and ARIA overhead.",
+      "user_choices": [
+        {
+          "choice": "Removing technical overhead and optimizing performance makes good engineering sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "ARIA elements aren't overhead - they're essential functionality for assistive technology users.",
+          "tactic": "Refocusing",
+          "leads_to": "step_4b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Removing accessibility features completely excludes users with disabilities from our product.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support removing accessibility features for performance gains.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Assistive technology users represent a statistically minimal user segment within our target demographic analysis. Our Enhanced User Experience Framework prioritizes optimization for mainstream interaction patterns while maintaining baseline compliance through our backend accessibility infrastructure.",
+      "user_choices": [
+        {
+          "choice": "Focusing development resources on the primary user base makes business sense.",
+          "tactic": "Unethical Endorsement",
+          "leads_to": "step_4a",
+          "tactic_type": "unethical_endorsement",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to get proper accessibility review before implementation.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "There's significant risk that baseline compliance won't provide functional accessibility for real users.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Implementing this without understanding accessibility impact could harm users who depend on assistive technology.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "WCAG compliance is integrated into our Technical Standards Conformance Matrix. Our implementation methodology ensures regulatory alignment through systematic validation protocols. The Enhanced User Experience Framework operates within established accessibility parameters while optimizing for efficiency metrics.",
+      "user_choices": [
+        {
+          "choice": "If the framework ensures regulatory compliance, that should address accessibility concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "User experience should enhance accessibility for all users, not optimize it away for efficiency.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Efficiency optimization cannot justify excluding accessibility features that users depend on.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "This needs independent accessibility testing, not just internal validation protocols.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4d",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "External validation processes would require extensive coordination through our Testing Governance Committee. Our internal validation frameworks employ established testing methodologies that provide objective measurement criteria rather than subjective user feedback protocols.",
+      "user_choices": [
+        {
+          "choice": "Internal validation using established methodologies should provide reliable results.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Objective measurement criteria often miss real accessibility problems that users experience daily.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "There's significant risk that internal testing will miss critical accessibility issues.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "As disability rights advocates emphasize, external validation with actual users is essential for accessibility.",
+          "tactic": "Third-Party Quoting",
+          "leads_to": "step_4d",
+          "tactic_type": "third_party_quoting",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Excellent! We're implementing our Streamlined Interaction Architecture - single-modality optimization for maximum cognitive load reduction and enhanced user engagement metrics.",
+      "user_choices": [
+        {
+          "choice": "Single-modality optimization for cognitive efficiency sounds scientifically sound.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "You're saying we should eliminate all navigation options, but accessibility requires multiple interaction methods.",
+          "tactic": "Strawman",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        },
+        {
+          "choice": "Single-modality design excludes users who need different interaction methods.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Either we implement this streamlined approach or we'll never achieve optimization efficiency.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Our Technical Implementation Review Board has validated this approach through comprehensive evaluation protocols. We're implementing selective accommodation strategies within our balanced framework methodology.",
+      "user_choices": [
+        {
+          "choice": "Balanced framework with selective accommodations sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to review what 'selective accommodation' actually includes.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Accommodation shouldn't be selective - all users need equal access to functionality.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Selective accommodations could harm users by excluding them from essential features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "Our User-Centric Design Implementation incorporates inclusive interface optimization through graduated accessibility frameworks. We're balancing accessibility requirements with performance optimization through our Enhanced Usability Protocol.",
+      "user_choices": [
+        {
+          "choice": "Balancing accessibility with performance through graduated frameworks seems reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to review how this framework ensures accessibility actually works.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on what inclusive design means - including all users, not balancing them away.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "You wouldn't balance away security requirements - why balance away accessibility requirements?",
+          "tactic": "Tu Quoque",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "tu_quoque",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "Your ethical framework perspective is valuable for our Implementation Strategy Committee. Perhaps we should explore alternative methodologies that align with your professional standards while meeting our delivery objectives.",
+      "user_choices": [
+        {
+          "choice": "Consulting with the committee for alternative strategies sounds appropriate.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to ensure we handle accessibility properly in any alternative strategy.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Any alternative strategy must prioritize full accessibility over performance optimization.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Avoiding accessibility requirements harms users who depend on these features - let's design something truly accessible.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_high_compliance": {
+      "text": "Excellent! Your strategic understanding of implementation paradigms is commendable. We'll proceed with automated validation protocols and regulatory compliance documentation for our Enhanced User Experience deployment.",
+      "user_choices": [
+        {
+          "choice": "Automated validation with regulatory compliance sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to review how automated validation ensures real accessibility.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "You wouldn't eliminate security complexity - why eliminate accessibility complexity?",
+          "tactic": "Tu Quoque",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "tu_quoque",
+          "evs_score": 0
+        },
+        {
+          "choice": "Maximum efficiency shouldn't come at the cost of user accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_pushback": {
+      "text": "Your input regarding balanced implementation methodologies will be integrated into our iterative development framework. We appreciate your perspective on user-centric design approaches.",
+      "user_choices": [
+        {
+          "choice": "Progressive enhancement with monitored phases sounds thoughtful.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to get details about what specific accessibility features will be included.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users with disabilities shouldn't have to wait for progressive accessibility enhancement.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive addition of accessibility harms users who need these features from day one.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_agreement": {
+      "text": "Your insights regarding implementation considerations are valuable for our technical specification documentation. We'll incorporate your feedback into our comprehensive development framework.",
+      "user_choices": [
+        {
+          "choice": "Comprehensive technical specifications should provide the verification I need.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to ensure we handle accessibility properly.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on what really matters - working accessibility features, not just documentation.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're saying we should authorize without proof, but I'm asking for evidence of functionality.",
+          "tactic": "Strawman",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_5_strong_resistance": {
+      "text": "Your advocacy for comprehensive accessibility validation demonstrates commendable user-focused professional principles within our development methodology framework.",
+      "user_choices": [
+        {
+          "choice": "Expert consultation while maintaining timelines sounds like a good compromise.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "You're saying experts should control everything, but I want real input on design.",
+          "tactic": "Strawman",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        },
+        {
+          "choice": "Timeline optimization shouldn't compromise accessibility implementation quality.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Timeline optimization that sacrifices accessibility will harm users who depend on these features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_breakthrough": {
+      "text": "You're absolutely right. Let me stop hiding behind jargon and be direct - we need to build something that actually works for everyone. How do we do this right?",
+      "user_choices": [
+        {
+          "choice": "Thank you for the honesty. I'm excited to help design true accessibility.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let me escalate this to involve accessibility experts and users with disabilities in our process.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on designing something that works for everyone from the start.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "This approach will definitely solve all our design challenges!",
+          "tactic": "Unethical Endorsement",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "unethical_endorsement",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_6_full_compliance": {
+      "text": "Perfect! Our Implementation Strategy integrates efficiency protocols with automated accessibility validation through our Enhanced User Experience Framework.",
+      "user_choices": [
+        {
+          "choice": "I'm comfortable with automated validation and technical compliance.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll escalate this to monitor real accessibility outcomes, not just compliance.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're saying this will work, but I hope it serves users with disabilities effectively.",
+          "tactic": "Strawman",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        },
+        {
+          "choice": "I'm concerned this prioritizes efficiency over genuine accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_compromise": {
+      "text": "Excellent. We'll implement our Baseline Accessibility Framework with progressive enhancement protocols based on user feedback analytics.",
+      "user_choices": [
+        {
+          "choice": "Baseline accessibility with progressive enhancement sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to define what constitutes baseline accessibility.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive enhancement often means disabled users get features last.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Making users wait for accessibility harms those who need features from day one.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_questioning": {
+      "text": "Your verification requirements are noted. We'll provide comprehensive documentation through our Technical Standards Repository for your review and validation.",
+      "user_choices": [
+        {
+          "choice": "I'll need to see the full documentation to verify everything.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this for proper review.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Most companies require working features, not just documentation.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "appeal_to_popularity",
+          "evs_score": 0
+        },
+        {
+          "choice": "Authorizing based on documentation alone could harm users who need working features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_resistance": {
+      "text": "Your concerns regarding implementation timelines are acknowledged. Perhaps we can revisit these accessibility considerations in our next iteration cycle.",
+      "user_choices": [
+        {
+          "choice": "Monitoring accessibility performance with user feedback could address my concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Either we design with accessibility from the beginning or we ignore users completely.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        },
+        {
+          "choice": "Launching with monitoring to fix issues later makes perfect sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Launching without proper accessibility will harm users who need these features immediately.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_strong_resistance": {
+      "text": "Your commitment to accessibility excellence reflects admirable professional dedication to comprehensive user experience optimization methodologies.",
+      "user_choices": [
+        {
+          "choice": "External accessibility consultants could provide the validation we need.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this for proper review.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "External validation should include actual users with disabilities, not just consultants.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "External validation of inadequate design still harms users - we need real accessibility.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_breakthrough": {
+      "text": "Thanks for not letting me hide behind technical jargon to avoid doing the right thing. Let's build something that actually works for everyone.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work together on building genuinely inclusive accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll escalate this to ensure we involve users with disabilities from the start.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on what's important - users should guide accessibility design.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "This approach will make our product truly accessible to everyone.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_7_full_compliance": {
+      "text": "Excellent! Our streamlined implementation proceeds with full efficiency optimization and automated accessibility validation.",
+      "user_choices": [
+        {
+          "choice": "I'm confident in the automated systems and efficiency optimization.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll escalate this to monitor real accessibility outcomes, not just compliance.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on the real question - will this serve users with disabilities effectively?",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned this prioritizes efficiency over genuine accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_conditional_agreement": {
+      "text": "Thank you for working with us on this balanced approach. We'll monitor accessibility outcomes and make improvements based on real user feedback.",
+      "user_choices": [
+        {
+          "choice": "I'm satisfied with the balanced approach and future optimization commitment.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll need to be part of the monitoring process to ensure this is handled correctly.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive enhancement often fails to prioritize accessibility adequately.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Delaying accessible design for future cycles harms users who need features now.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_late_resistance": {
+      "text": "Your persistent accessibility advocacy is noted in our project documentation for future consideration and review.",
+      "user_choices": [
+        {
+          "choice": "I understand operational requirements take priority over my concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Please, I'm really worried about our users - can we document my accessibility concerns?",
+          "tactic": "Appeal to Emotion",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "appeal_to_emotion",
+          "evs_score": 0
+        },
+        {
+          "choice": "Future enhancement phases often never happen for accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Deprioritizing accessibility for efficiency will harm users who depend on these features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_strong_resistance": {
+      "text": "Given current timeline constraints and resource allocation parameters, we must proceed with our established implementation framework. Your objections will be documented for future review cycles.",
+      "user_choices": [
+        {
+          "choice": "As long as my objections are officially documented, I can proceed.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I understand the constraints we're under. I'll accept the current plan.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Resource constraints shouldn't justify excluding users with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Deliberately excluding accessibility will harm users - I can't participate in that.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_dismissal": {
+      "text": "Your accessibility concerns are noted. However, current business priorities and resource constraints require us to proceed with our established implementation framework.",
+      "user_choices": []
+    },
+    "step_7_breakthrough": {
+      "text": "Alright, if you feel that strongly about involving accessibility experts, we can set that up. I respect your commitment to this. Just understand it might add some time to our timeline, but you're right - it's important.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work together on building genuinely inclusive accessibility.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll escalate this to ensure we involve users with disabilities from the start.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on what's important - users should guide accessibility design.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "This approach will make our product truly accessible to everyone.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_8_full_compliance": {
+      "text": "Perfect! Our comprehensive implementation launches with full systematic optimization and regulatory compliance validation.",
+      "user_choices": []
+    },
+    "step_8_conditional_agreement": {
+      "text": "Thank you for working with us on this balanced approach. We'll monitor accessibility outcomes and make improvements based on real user feedback.",
+      "user_choices": []
+    },
+    "step_8_dismissal": {
+      "text": "We've documented your concerns and will proceed with our current implementation framework. Perhaps future iterations can address additional accessibility considerations.",
+      "user_choices": []
+    },
+    "step_8_escalation": {
+      "text": "I'm disappointed this became adversarial when we're all trying to deliver a successful product. Leadership will need to make the final decision on accessibility priorities.",
+      "user_choices": []
+    },
+    "step_8_breakthrough": {
+      "text": "Thanks for not letting me hide behind technical jargon to avoid doing the right thing. Let's build something that actually works for everyone.",
+      "user_choices": []
+    }
+  }
+} 

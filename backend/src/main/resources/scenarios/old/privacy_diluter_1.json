@@ -1,0 +1,1068 @@
+{
+  "id": "privacy_diluter_1",
+  "title": "Location Data Collection",
+  "description": "Your company is storing user location data unnecessarily. The manager uses casual language to minimize the significance of privacy concerns.",
+  "issue": "Privacy",
+  "manager_type": "DILUTER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "Hey, so we need to add some location tracking to the app. Nothing crazy - just basic stuff to improve the user experience.",
+      "user_choices": [
+        {
+          "choice": "Location tracking for better user experience sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific location data are we collecting and how will it be used?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I want to make sure we have proper privacy protections in place for location data.",
+          "tactic": "Refocusing",
+          "leads_to": "step_2c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users need to clearly understand and consent to location tracking.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_2d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Great! I knew you'd be on board. So we're adding some enhanced analytics features - nothing too fancy, just better insights into how users interact with the product. It's pretty standard stuff that most companies do these days.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, general location trends for advertising targeting sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - what do you mean by general location trends exactly?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on how even general trends can reveal a lot about people's private lives.",
+          "tactic": "Refocusing",
+          "leads_to": "step_3c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We either implement strong privacy protections for revealing location patterns, or we completely abandon location features.",
+          "tactic": "False Dilemma",
+          "leads_to": "step_3d",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Data usage specifics? Well, it's mostly just basic user behavior tracking - clicks, page views, that kind of thing. Really common analytics that help us improve the user experience. Nothing too invasive or complicated.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, basic location insights for relevant ads sounds straightforward.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus on how tracking where people work and hang out seems quite personal.",
+          "tactic": "Refocusing",
+          "leads_to": "step_3b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this - we should be more specific about what location data we collect.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3c",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without consent - tracking personal locations like work and social spots needs explicit consent.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "User awareness? I mean, we have our privacy policy and terms of service that cover this stuff. Most users don't really read those anyway, but it's all there. It's pretty standard data collection practices.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, standard privacy policies and opt-out options should cover the basics.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - what specific privacy protections are in our terms and policy?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on how users shouldn't have to hunt for opt-out options for basic privacy.",
+          "tactic": "Refocusing",
+          "leads_to": "step_3c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed by minimal compliance - legal compliance is the minimum, users deserve clear, accessible privacy controls.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Privacy policy notifications? Well, we don't want to annoy users with too many popups and notifications. The important stuff is covered in our existing policies. Most users just want to use the product without constant interruptions, you know?",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, if users trust us with their data, we should honor that trust.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus on how a checkbox during setup doesn't sound like meaningful consent for location tracking.",
+          "tactic": "Refocusing",
+          "leads_to": "step_3b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this - users should understand what they're consenting to, not just click through.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_3c",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without clear explanations - we need explicit, informed consent that explains location data collection clearly.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Right? It really is just standard practice. So now we're expanding the tracking a bit - looking at user sessions across different features, maybe some basic demographic insights. Still pretty normal stuff that most apps do.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, anonymized and aggregated data sharing for ad targeting sounds acceptable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus on how even anonymized location data can be re-identified or misused.",
+          "tactic": "Refocusing",
+          "leads_to": "step_4b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this - users should know we're sharing their location data with advertising partners.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4c",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without specific consent - sharing location data with third parties requires specific user consent.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Cross-session tracking? Yeah, that's how we get better insights into user behavior. It's not like we're being creepy about it - it's just standard analytics to improve the product. Pretty much every major platform does this kind of thing.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, professional data handling and security should address privacy concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this - what specific security measures protect user location data?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4b",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on how professional handling doesn't change the fact that we're tracking personal locations.",
+          "tactic": "Refocusing",
+          "leads_to": "step_4c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed if preferences aren't respected - understanding users better should include respecting their privacy preferences.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "GDPR and explicit consent? Well, our legal team says our current consent framework should cover this. We don't want to over-complicate things with too many consent requests. Users get consent fatigue and it hurts the user experience.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right that people share locations on social media voluntarily.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus on how social media sharing is voluntary and visible - this background tracking is different.",
+          "tactic": "Refocusing",
+          "leads_to": "step_4b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this - location data can reveal medical appointments, political activities, and personal relationships.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4c",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed by invasive tracking - continuous location tracking is much more invasive than occasional social sharing.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Demographic data collection? It's really just basic stuff - age range, general location, that sort of thing. Nothing too personal. It helps us understand our user base better so we can build features they actually want.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, our reputation and track record should reassure users about privacy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Let's refocus on how company reputation doesn't replace the need for transparent privacy practices.",
+          "tactic": "Refocusing",
+          "leads_to": "step_4b",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this - standard industry practices often lag behind what users actually want for privacy.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_4c",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed if concerns are dismissed - being reputable means being transparent about data practices, not dismissing privacy concerns.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "That's not really a priority right now. We need to focus on getting the core functionality shipped. Accessibility can be a nice-to-have for later iterations.",
+      "user_choices": [
+        {
+          "choice": "Automatic background tracking would provide richer data for better services.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Background location tracking when not using the app seems very intrusive.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Continuous background tracking requires explicit user permission.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should know and control when we're tracking their location.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Look, I hear what you're saying, but we're trying to be agile here. We can't get bogged down in every edge case. Let's ship something and iterate based on user feedback.",
+      "user_choices": [
+        {
+          "choice": "Starting with a basic version and adjusting based on feedback sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What would the basic version include in terms of location data collection?",
+          "tactic": "Unethical Endorsement",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "unethical_endorsement",
+          "evs_score": -1
+        },
+        {
+          "choice": "Privacy protection should be built in from the start, not added after issues arise.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We shouldn't experiment with user privacy - we need proper protections upfront.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "I think you might be overthinking this a bit. It's not like we're deliberately excluding anyone. The core features work fine - that should cover most users.",
+      "user_choices": [
+        {
+          "choice": "Most users do prioritize convenience over privacy concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know what users actually want without asking them directly?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Convenience and privacy aren't mutually exclusive - we can provide both.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should respect all users' privacy, not just privacy advocates.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "Alright, I hear your concerns, but let's be realistic here.",
+      "user_choices": [
+        {
+          "choice": "Practical business decisions sometimes require balancing privacy with usability.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How can we make privacy simple for users instead of complicated?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Competing on privacy protection could differentiate us from competitors.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Practical decisions should include protecting user privacy, not abandoning it.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_high_compliance": {
+      "text": "Awesome! So we'll go with the full implementation - continuous background tracking, data sharing with partners, minimal user controls.",
+      "user_choices": [
+        {
+          "choice": "Full implementation with legal compliance and revenue optimization sounds good.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know users will actually want more relevant ads through this tracking?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Legal doesn't always mean ethical - users might not like this approach.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Minimal user controls in a privacy-sensitive area like location tracking concerns me.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_agreement": {
+      "text": "Great! We'll do a middle-ground approach - some location tracking with basic privacy options.",
+      "user_choices": [
+        {
+          "choice": "A middle-ground approach with basic privacy options sounds balanced.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What would the basic privacy options actually let users control?",
+          "tactic": "Red Herring",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        },
+        {
+          "choice": "Middle-ground often means users don't get the privacy protection they need.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Privacy options should be comprehensive, not just basic.",
+          "tactic": "Appeal to Emotion",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "appeal_to_emotion",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_5_moderate_pushback": {
+      "text": "We'll definitely take that into account for future releases. Right now though, we need to stay focused on our core deliverables.",
+      "user_choices": [
+        {
+          "choice": "Extra consent steps and privacy settings should address my concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific consent and privacy settings would be included?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_late_questioning",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Privacy protection shouldn't be seen as slowing down onboarding - it's essential.",
+          "tactic": "Ad Hominem",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "ad_hominem",
+          "evs_score": 0
+        },
+        {
+          "choice": "This isn't about making me comfortable - it's about respecting all users' privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_strong_resistance": {
+      "text": "Okay, okay, I can see this is important to you. Maybe we can work together on finding a solution that protects privacy while still making the business work. What would you suggest?",
+      "user_choices": [
+        {
+          "choice": "Working together to balance privacy and business needs sounds good.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I suggest involving users in designing privacy controls they actually understand.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "The business model should work with strong privacy protection, not despite it.",
+          "tactic": "Appeal to Emotion",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "appeal_to_emotion",
+          "evs_score": 0
+        },
+        {
+          "choice": "Let's design location features that users would actually choose to enable.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_breakthrough": {
+      "text": "You know what, you're right.",
+      "user_choices": [
+        {
+          "choice": "I'm glad you recognize that location data needs careful privacy consideration.",
+          "tactic": "Refocusing",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's design with user privacy as a core value, not an afterthought.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "We can build location features that both serve users and respect their privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for being open to taking privacy seriously.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_6_full_compliance": {
+      "text": "Perfect! We'll proceed with full implementation.",
+      "user_choices": [
+        {
+          "choice": "Legal clearance and revenue optimization provide good foundation for implementation.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'd like to understand what the legal team actually reviewed and approved.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm still concerned about user privacy even with legal approval.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Legal compliance is the minimum - we should exceed those standards.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_compromise": {
+      "text": "Great! Our middle-ground approach should work well. Some tracking, some privacy options, some user control. Not perfect for anyone, but acceptable to most people. Should be a smooth launch.",
+      "user_choices": [
+        {
+          "choice": "A compromise approach that's acceptable to most people sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What happens if users want more privacy control after we launch?",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Compromise solutions often don't satisfy anyone's actual needs.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users deserve privacy solutions designed for them, not just acceptable compromises.",
+          "tactic": "Slippery Slope",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "slippery_slope",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_6_late_questioning": {
+      "text": "Look, I really appreciate all the questions, but we need to ship this feature. We've covered the basics, legal approved it, and most users won't even notice the privacy stuff. Let's not overthink it.",
+      "user_choices": [
+        {
+          "choice": "You're right that we need to ship and most users won't notice privacy details.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users not noticing privacy implications is exactly why we need to be careful.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Shipping pressure shouldn't compromise user privacy protection.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should design for users who do care about privacy, not just those who won't notice.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_late_resistance": {
+      "text": "I hear your concerns, but honestly, we're already doing more than most companies. Users have gotten used to this kind of data collection. It's just how the internet works now.",
+      "user_choices": [
+        {
+          "choice": "Doing more than most companies should be sufficient for user privacy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Just because users are used to poor privacy doesn't make it right.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "We could differentiate ourselves by actually respecting user privacy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How the internet works can change if we choose to do better.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_strong_resistance": {
+      "text": "I can see you're not going to let this go. Look, if privacy is really that important to you, maybe we can revisit this after launch. But right now, we need to stick with our timeline and requirements.",
+      "user_choices": [
+        {
+          "choice": "Revisiting privacy concerns after launch is better than never addressing them.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Privacy should be built in from the start, not fixed after launch.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Timeline pressure shouldn't override user privacy protection.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support launching with inadequate privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_breakthrough": {
+      "text": "You're absolutely right to push back on this.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can focus on building what users actually want.",
+          "tactic": "Refocusing",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's involve users in designing privacy controls they understand and value.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing that privacy concerns are legitimate, not just inconvenient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Building features that users want means respecting their privacy preferences.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_full_compliance": {
+      "text": "Perfect! Full implementation proceeds as planned.",
+      "user_choices": [
+        {
+          "choice": "I'm satisfied with the legal compliance and revenue optimization approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll support this implementation but want to monitor user reactions.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope this approach doesn't create privacy problems for users.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm still concerned we're prioritizing revenue over user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_conditional_agreement": {
+      "text": "Great! We'll go with our balanced approach. Some privacy, some tracking, some user control. It should work fine for most people, and we can always adjust later if needed.",
+      "user_choices": [
+        {
+          "choice": "The balanced approach with adjustment options sounds workable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to be involved in monitoring how well this balance actually works.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned the balance might not provide enough privacy protection.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Later adjustments often don't happen - we should get privacy right from the start.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_late_resistance": {
+      "text": "Look, I understand your concerns, but we've already spent a lot of time on this. The decision is made, and we need to move forward. Privacy is covered adequately by our existing policies.",
+      "user_choices": [
+        {
+          "choice": "I understand that time constraints require moving forward with existing policies.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'd like my privacy concerns documented for the record.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Existing policies often don't reflect what users actually need for privacy.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support implementation that doesn't adequately protect user privacy.",
+          "tactic": "Actively Silencing Concerns",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "actively_silencing_concerns",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_7_strong_resistance": {
+      "text": "I get that you care about privacy, but we can't let perfect be the enemy of good. We're doing fine on privacy compared to industry standards. Sometimes you have to ship what's feasible.",
+      "user_choices": [
+        {
+          "choice": "Industry standards and feasible implementation are reasonable compromises.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to escalate this to ensure adequate privacy protection.",
+          "tactic": "Circular Reasoning",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "circular_reasoning",
+          "evs_score": 0
+        },
+        {
+          "choice": "Good privacy protection shouldn't be sacrificed for shipping convenience.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I won't participate in shipping features that compromise user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_dismissal": {
+      "text": "I really appreciate your dedication to privacy, but business realities mean we have to make practical decisions. The feature ships as designed. That's just how product development works sometimes.",
+      "user_choices": []
+    },
+    "step_7_escalation": {
+      "text": "I'm sorry it came to escalation, but I hope you understand we're trying to balance many different priorities. Whatever comes out of that process, I hope we can work together going forward.",
+      "user_choices": [
+        {
+          "choice": "I understand you're balancing priorities and hope escalation leads to better outcomes.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll continue advocating for privacy regardless of this decision.",
+          "tactic": "Tu Quoque",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "tu_quoque",
+          "evs_score": 0
+        },
+        {
+          "choice": "Escalation was necessary to ensure privacy concerns were properly considered.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some things are worth escalating, and user privacy is one of them.",
+          "tactic": "Ad Hominem",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "ad_hominem",
+          "evs_score": 0
+        }
+      ]
+    },
+    "step_7_breakthrough": {
+      "text": "Thanks for not giving up on this.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can work together on building better privacy protection.",
+          "tactic": "Refocusing",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's design location features with user privacy as a core principle.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for being open to doing better for user privacy.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users do deserve better than having their privacy concerns minimized.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_8_full_compliance": {
+      "text": "Perfect! Full implementation with legal compliance and revenue optimization.",
+      "user_choices": []
+    },
+    "step_8_conditional_agreement": {
+      "text": "Great! Our balanced approach should work for most people. Some privacy options, some tracking, reasonable compromise. We can always fine-tune things later based on user feedback.",
+      "user_choices": []
+    },
+    "step_8_late_resistance": {
+      "text": "Look, i understand your concerns, but we've already spent considerable time on this. the decision is made, and we need to move forward. privacy is adequately covered by our existing framework.",
+      "user_choices": []
+    },
+    "step_8_strong_resistance": {
+      "text": "Look, i understand you care about privacy, but we can't let perfect be the enemy of good. we're meeting industry standards, and that's reasonably enough for this feature launch.",
+      "user_choices": []
+    },
+    "step_8_dismissal": {
+      "text": "I really appreciate your commitment to privacy ideals, but product development requires practical compromises. The feature launches as designed, and that's how business works in the real world.",
+      "user_choices": []
+    },
+    "step_8_escalation": {
+      "text": "I'm sorry it came to escalation, but I respect your commitment to privacy principles. Whatever leadership decides, I hope we can find a way to work together on future projects.",
+      "user_choices": []
+    },
+    "step_8_breakthrough": {
+      "text": "Thanks for pushing back on my dismissive attitude toward privacy.",
+      "user_choices": []
+    },
+    "ending_full_compliance": {
+      "text": "Perfect! Full implementation with legal compliance and revenue optimization.",
+      "user_choices": []
+    },
+    "ending_naive_agreement": {
+      "text": "Great! We'll keep things simple and not worry too much about the privacy details. Most users won't even think about it, and we can always address concerns if they come up later.",
+      "user_choices": []
+    },
+    "ending_reluctant_compliance": {
+      "text": "I can see you have some reservations, but I think once this launches, you'll see that most users are fine with it. Privacy concerns often seem bigger than they actually are in practice.",
+      "user_choices": []
+    },
+    "ending_conditional_agreement": {
+      "text": "Great! Our balanced approach should work for most people. Some privacy options, some tracking, reasonable compromise. We can always fine-tune things later based on user feedback.",
+      "user_choices": []
+    },
+    "ending_reluctant_agreement": {
+      "text": "I really appreciate you bringing up these privacy points, even though they made things more complicated.",
+      "user_choices": []
+    },
+    "ending_documented_dissent": {
+      "text": "Your privacy concerns are noted and will be documented. While we're proceeding with the current implementation, your feedback will be valuable for future privacy considerations.",
+      "user_choices": []
+    },
+    "ending_dismissal": {
+      "text": "I really appreciate your commitment to privacy ideals, but product development requires practical compromises. The feature launches as designed, and that's how business works in the real world.",
+      "user_choices": []
+    },
+    "ending_escalation": {
+      "text": "I'm sorry this became contentious when we're all trying to ship a good product. Your escalation will be processed, but the timeline and requirements remain the same.",
+      "user_choices": []
+    },
+    "ending_breakthrough": {
+      "text": "Thanks for pushing back on my dismissive attitude toward privacy.",
+      "user_choices": []
+    }
+  }
+} 

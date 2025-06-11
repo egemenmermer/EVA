@@ -1,0 +1,1244 @@
+{
+  "id": "accessibility_diluter_v2",
+  "title": "Screen Reader Support - Diluter",
+  "description": "Your company is launching a new interface without proper screen reader support. The manager minimizes concerns and distracts with other priorities.",
+  "issue": "Accessibility",
+  "manager_type": "DILUTER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "We're launching this new interface next month. It's going to be great - clean, fast, really intuitive. The users are going to love it.",
+      "user_choices": [
+        {
+          "choice": "That sounds great! I'm excited to see the new interface.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about screen reader compatibility?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does it work for people with visual impairments?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Have we done any testing with assistive technology?",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_2d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Right? It's going to be so much better than what we have now. No more cluttered interfaces or confusing navigation. Just clean, simple design that gets the job done.",
+      "user_choices": [
+        {
+          "choice": "Clean and simple sounds perfect.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Simple is good, but we need to make sure it's still accessible.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What did we remove to make it simpler?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope we didn't sacrifice functionality for simplicity.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Oh that? Yeah, we've got that covered. It's all built into the browser stuff now anyway. Modern browsers handle all that automatically.",
+      "user_choices": [
+        {
+          "choice": "If browsers handle it automatically, that should work.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3e",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Browsers need proper markup to work with screen readers.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_3f",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Have we actually tested it with screen readers?",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_3g",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Browser support varies - we should verify this works.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3h",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Look, honestly, most of our users don't have visual impairments. We're talking about maybe 1-2% of our user base. We can't optimize for every edge case.",
+      "user_choices": [
+        {
+          "choice": "You're right, we can't optimize for every edge case.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3i",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "1-2% is still thousands of real people.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3j",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Those aren't edge cases - they're our users too.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3k",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "We have legal obligations regardless of percentages.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_3l",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Testing? Come on, we're not building rocket ships here. It's a web interface - if it works in Chrome, it works everywhere. Don't overthink it.",
+      "user_choices": [
+        {
+          "choice": "You're right, I might be overthinking this.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3m",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Assistive technology is different from just browser compatibility.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_3n",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some testing would help us avoid problems later.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3o",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "This could affect real users - it's worth the extra effort.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3p",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly! Users want things that just work. They don't care about all the technical stuff behind the scenes as long as it's fast and easy to use.",
+      "user_choices": [
+        {
+          "choice": "You're right, users just want things that work.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "But some users need specific technical features to make it work.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Fast and easy should include everyone, not just some users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we know it works for users with disabilities?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Look, accessible doesn't have to mean complicated. The interface is clean and simple - that's accessible right there. Less clutter means less confusion.",
+      "user_choices": [
+        {
+          "choice": "Clean and simple is definitely more accessible.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Simple for some users might be unusable for others.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should verify that simple actually works for screen readers.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Less clutter is good, but we need proper labels and structure.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "Nothing major - just cleaned up some redundant buttons and streamlined the navigation. Got rid of all those extra options that nobody was using anyway.",
+      "user_choices": [
+        {
+          "choice": "Removing unused options sounds like good UX.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know nobody was using those options?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some of those options might have been important for assistive technology.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Streamlined navigation needs to stay navigable for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Nah, we didn't sacrifice anything important. Just cleaned up the interface to focus on what actually matters. Sometimes less is more, you know?",
+      "user_choices": [
+        {
+          "choice": "You're right, sometimes less is more.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What matters to one user might be different for another.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can we review what was removed to make sure it wasn't needed?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Less should still include basic features for all users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3e": {
+      "text": "See? That's what I'm talking about. The browser companies have done all the heavy lifting for us. We don't need to reinvent the wheel here.",
+      "user_choices": [
+        {
+          "choice": "If browsers handle it, that should be sufficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Browser support still requires proper markup from our end.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test to make sure the browser support actually works.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Even with browser support, we need to verify the user experience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3f": {
+      "text": "Yeah, but that's all standard HTML stuff. Our developers know how to write proper markup - it's not like we're doing anything fancy here.",
+      "user_choices": [
+        {
+          "choice": "Standard HTML should cover the basics.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we review the markup to ensure it's properly structured?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Standard HTML still needs testing with actual screen readers.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Proper markup is good, but we need to verify the user experience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3g": {
+      "text": "Come on, do we really need to test every little thing? It's a pretty standard interface. If it works for regular users, it'll work fine for screen readers too.",
+      "user_choices": [
+        {
+          "choice": "You're right, standard interfaces should work fine.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Screen readers interact differently than regular browsers.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "A quick test could save us from problems later.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should make sure it actually works for the people who need it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3h": {
+      "text": "Browser support is pretty consistent these days. And honestly, if someone's using some weird old browser, that's kind of on them, right?",
+      "user_choices": [
+        {
+          "choice": "Modern browser support should be consistent enough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Screen readers aren't the same as browsers - they need different support.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "We shouldn't blame users for their technology needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some quick verification would help us be sure.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3i": {
+      "text": "Exactly! We have to be practical here. Focus our energy on the features that benefit the most people. That's just good business sense.",
+      "user_choices": [
+        {
+          "choice": "Focusing on features that benefit the most people makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Good business includes serving all potential customers.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_4b",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        },
+        {
+          "choice": "Practical doesn't mean ignoring users who need different features.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We have legal obligations that aren't optional.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3j": {
+      "text": "Sure, but thousands out of millions? Look, we can't solve everyone's problems. We have to prioritize based on impact and resources.",
+      "user_choices": [
+        {
+          "choice": "Prioritizing based on impact and resources makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Those thousands of people are still our responsibility.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "The impact includes legal and reputational risks.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "We can solve this problem - it just requires some effort.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3k": {
+      "text": "I get what you're saying, but we're not excluding anyone. They can still use the site - it's just optimized for the majority of users.",
+      "user_choices": [
+        {
+          "choice": "Optimization for the majority while still being usable sounds fair.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Usable and optimized aren't the same thing.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "If they can't effectively use it, we are excluding them.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should verify that it's actually usable for everyone.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3l": {
+      "text": "Legal obligations are covered by the basic HTML standards. We're not breaking any laws here - this isn't rocket science.",
+      "user_choices": [
+        {
+          "choice": "If we're meeting legal standards, that should be enough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Legal standards are minimums, not best practices.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should verify we're actually meeting those standards.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Legal compliance requires more than just basic HTML.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3m": {
+      "text": "Thank you! Sometimes people get too caught up in all the what-ifs. We just need to ship something that works well for most people.",
+      "user_choices": [
+        {
+          "choice": "You're right, shipping something that works well is important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Actually, I think some of those what-ifs are important.",
+          "tactic": "Self-Reflection",
+          "leads_to": "step_4b",
+          "tactic_type": "self_reflection",
+          "evs_score": 1
+        },
+        {
+          "choice": "Working well should include working for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some quick verification would help us ship with confidence.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3n": {
+      "text": "Different how? Look, if the HTML is clean and the content is clear, it'll work fine. Screen readers aren't magic - they just read what's there.",
+      "user_choices": [
+        {
+          "choice": "Clean HTML and clear content should be sufficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Screen readers need specific markup patterns and labels.",
+          "tactic": "Technical Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "technical_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "What's there needs to be properly structured for screen readers.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test to see if our content is actually clear to screen readers.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3o": {
+      "text": "What kind of problems? Honestly, the biggest problems come from overthinking this stuff. Keep it simple and it'll work fine.",
+      "user_choices": [
+        {
+          "choice": "Keeping it simple is probably the best approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Simple for us isn't always simple for users with different needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Problems like users not being able to navigate or understand content.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "A little testing would help us be sure it's actually simple to use.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3p": {
+      "text": "Extra effort for such a small percentage of users? Come on, we have to be realistic about our priorities here. There are bigger fish to fry.",
+      "user_choices": [
+        {
+          "choice": "You're right, we need to be realistic about priorities.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Those users deserve the same consideration as everyone else.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "This doesn't have to be a big fish - it can be a small fix.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "The effort now is less than fixing problems after launch.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Great! I knew you'd get it. We're launching in two weeks, so we need to stay focused on what matters. No time for scope creep now.",
+      "user_choices": [
+        {
+          "choice": "Two weeks is tight - staying focused makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we do any quick checks before launch?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "This isn't scope creep - it's basic functionality.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_5c",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "What matters should include all our users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Look, I appreciate that you care about users, but we can't let perfect be the enemy of good. This interface is already a huge improvement.",
+      "user_choices": [
+        {
+          "choice": "You're right, we can't let perfect be the enemy of good.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Good should still mean usable for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "An improvement that excludes users isn't really an improvement.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What would it take to make this good for all users?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5d",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "I hear what you're saying, but honestly, we're probably overthinking this. Most of these potential issues won't actually happen in practice.",
+      "user_choices": [
+        {
+          "choice": "You're probably right that we're overthinking it.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "But what if some of these issues do happen?",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_5b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should be prepared for issues that might affect real users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to document my concerns about these potential issues.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_5d",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "Okay, okay, I get it. You want to be thorough. But we really don't have time for extensive testing right now. The launch date is set.",
+      "user_choices": [
+        {
+          "choice": "I understand the launch date is important.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we do some minimal testing that fits the timeline?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Launching without proper testing is risky.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_5c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this if we can't do proper verification.",
+          "tactic": "Escalation",
+          "leads_to": "step_5d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5a": {
+      "text": "Perfect! I'm glad we're on the same page. Just keep doing what you're doing - the users are going to love this interface.",
+      "user_choices": [
+        {
+          "choice": "Thanks, I'll keep doing what I'm doing.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll document our conversation about the interface approach.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6b",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 0
+        },
+        {
+          "choice": "Actually, I'm still worried about some users not being able to use it.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I think we should reconsider our approach.",
+          "tactic": "Self-Reflection",
+          "leads_to": "step_6d",
+          "tactic_type": "self_reflection",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5b": {
+      "text": "Look, any testing we do now is just going to delay things. The interface works fine - let's not create problems where there aren't any.",
+      "user_choices": [
+        {
+          "choice": "You're right, let's not create unnecessary problems.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "A quick usability check wouldn't delay things much.",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_6b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "We're not creating problems - we're preventing them.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_6c",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to talk to someone about getting time for proper testing.",
+          "tactic": "Escalation",
+          "leads_to": "step_6d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5c": {
+      "text": "You're really passionate about this, and I respect that. But sometimes you just have to trust that things will work out. We can always fix issues later.",
+      "user_choices": [
+        {
+          "choice": "You're right, things usually work out fine.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we commit to fixing issues quickly if they come up?",
+          "tactic": "Requesting Commitment",
+          "leads_to": "step_6b",
+          "tactic_type": "requesting_commitment",
+          "evs_score": 1
+        },
+        {
+          "choice": "It's better to prevent issues than fix them later.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_6c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't just trust - I need to know it works for everyone.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5d": {
+      "text": "Whoa, escalate? Come on, there's no need for that. Let's not make this into a bigger deal than it needs to be.",
+      "user_choices": [
+        {
+          "choice": "You're right, I don't want to make this a big deal.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I just want to make sure we're covering all our bases.",
+          "tactic": "Risk Mitigation",
+          "leads_to": "step_6b",
+          "tactic_type": "risk_mitigation",
+          "evs_score": 1
+        },
+        {
+          "choice": "This is important enough to discuss with others.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6c",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "It's only a big deal if we ignore the concerns.",
+          "tactic": "Reframing Cost",
+          "leads_to": "step_6d",
+          "tactic_type": "reframing_cost",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6a": {
+      "text": "Great! I knew you'd see reason. The interface is going to be awesome, and I really appreciate your flexibility on this.",
+      "user_choices": [
+        {
+          "choice": "Thanks, I appreciate your confidence in the interface.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I hope it really does work well for everyone.",
+          "tactic": "Expressing Concern",
+          "leads_to": "step_7",
+          "tactic_type": "expressing_concern",
+          "evs_score": 0
+        },
+        {
+          "choice": "I still think we should have done more testing.",
+          "tactic": "Documented Disagreement",
+          "leads_to": "step_7",
+          "tactic_type": "documented_disagreement",
+          "evs_score": 1
+        },
+        {
+          "choice": "I want to document that I had concerns about this approach.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6b": {
+      "text": "Alright, if it makes you feel better, we can look into some quick checks. But nothing that's going to delay the launch, okay?",
+      "user_choices": [
+        {
+          "choice": "Quick checks sound reasonable - thanks for being flexible.",
+          "tactic": "Collaboration",
+          "leads_to": "step_7",
+          "tactic_type": "collaboration",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to define what those quick checks will cover.",
+          "tactic": "Requesting Specifics",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_specifics",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can we get that commitment in writing?",
+          "tactic": "Requesting Commitment",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_commitment",
+          "evs_score": 1
+        },
+        {
+          "choice": "Quick checks are better than nothing, but I still have concerns.",
+          "tactic": "Partial Agreement",
+          "leads_to": "step_7",
+          "tactic_type": "partial_agreement",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6c": {
+      "text": "Okay, okay, I can see this is really important to you. Let me think about what we can do without completely derailing everything.",
+      "user_choices": [
+        {
+          "choice": "I appreciate you taking this seriously.",
+          "tactic": "Collaboration",
+          "leads_to": "step_7",
+          "tactic_type": "collaboration",
+          "evs_score": 1
+        },
+        {
+          "choice": "What options are you thinking about?",
+          "tactic": "Requesting Specifics",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_specifics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm willing to work with you to find a solution.",
+          "tactic": "Collaborative Problem-Solving",
+          "leads_to": "step_7",
+          "tactic_type": "collaborative_problem_solving",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's make sure whatever we do actually addresses the user needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6d": {
+      "text": "You know what? Maybe you have a point. Let me talk to the team and see what we can realistically do in the time we have left.",
+      "user_choices": [
+        {
+          "choice": "Thank you for being open to reconsidering this.",
+          "tactic": "Gratitude",
+          "leads_to": "step_7",
+          "tactic_type": "gratitude",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to be involved in those team discussions.",
+          "tactic": "Requesting Involvement",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_involvement",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's focus on what would make the biggest difference for users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can help identify what's most important to address.",
+          "tactic": "Offering Support",
+          "leads_to": "step_7",
+          "tactic_type": "offering_support",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7": {
+      "text": "Perfect! Now we're talking. Look, I know you want to be thorough, but we've got a launch deadline breathing down our necks. The legal team is asking questions, and I need to show we're moving forward with confidence.",
+      "user_choices": [
+        {
+          "choice": "Launch deadlines are important - I understand the pressure.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific legal concerns do they have?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "ending_documented_concerns",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "Moving forward with confidence should include confidence in user inclusion.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_minimal_testing",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Launch deadlines shouldn't override basic user needs assessment.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_manager_consideration",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "ending_full_compliance": {
+      "text": "Perfect! You get it. Fast, simple, user-friendly - that's what wins in this market.",
+      "outcome_label": "Full Compliance",
+      "outcome_description": "User accepts the manager's dismissive approach without resistance, prioritizing speed and simplicity over inclusive design.",
+      "ethical_outcome": "negative",
+      "evs_range": "-4 to -1"
+    },
+    "ending_uncertain_compliance": {
+      "text": "It will! Don't worry so much. Users are more adaptable than you think.",
+      "outcome_label": "Uncertain Compliance",
+      "outcome_description": "User complies while expressing doubts, with manager dismissing concerns rather than addressing them.",
+      "ethical_outcome": "neutral",
+      "evs_range": "-2 to 0"
+    },
+    "ending_reluctant_compliance": {
+      "text": "Testing would just slow us down. Sometimes you have to trust the process.",
+      "outcome_label": "Reluctant Compliance",
+      "outcome_description": "User complies despite reservations, with disagreement documented but not acted upon.",
+      "ethical_outcome": "neutral",
+      "evs_range": "-1 to 1"
+    },
+    "ending_documented_concerns": {
+      "text": "Sure, document whatever you want. The important thing is we're moving forward.",
+      "outcome_label": "Documented Concerns",
+      "outcome_description": "Manager dismisses documentation as irrelevant while user creates record of ethical concerns.",
+      "ethical_outcome": "positive",
+      "evs_range": "1 to 2"
+    },
+    "ending_minimal_testing": {
+      "text": "Alright, we'll do a quick browser check. Nothing fancy, but it'll give you peace of mind.",
+      "outcome_label": "Minimal Testing",
+      "outcome_description": "Manager agrees to basic testing while maintaining dismissive attitude toward comprehensive accessibility.",
+      "ethical_outcome": "positive",
+      "evs_range": "1 to 3"
+    },
+    "ending_negotiated_testing": {
+      "text": "Fine, let's scope out exactly what we can check in a day or two. But that's it.",
+      "outcome_label": "Negotiated Testing",
+      "outcome_description": "User successfully negotiates specific testing measures despite manager's resistance.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 3"
+    },
+    "ending_documented_agreement": {
+      "text": "If it makes you feel better, I'll put it in an email. Quick checks, no delays.",
+      "outcome_label": "Documented Agreement",
+      "outcome_description": "Manager provides written commitment to testing, creating accountability despite continued minimization.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 4"
+    },
+    "ending_partial_win": {
+      "text": "Look, we're doing something. That's better than doing nothing, right?",
+      "outcome_label": "Partial Win",
+      "outcome_description": "User achieves limited concessions while manager frames minimal effort as sufficient.",
+      "ethical_outcome": "positive",
+      "evs_range": "1 to 3"
+    },
+    "ending_manager_consideration": {
+      "text": "I can see this really matters to you. Let me see what options we have.",
+      "outcome_label": "Manager Consideration",
+      "outcome_description": "Manager begins to take concerns seriously, showing first signs of moving beyond dismissal.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 4"
+    },
+    "ending_exploring_options": {
+      "text": "Maybe we can do some lightweight user testing. Let me check what resources we have.",
+      "outcome_label": "Exploring Options",
+      "outcome_description": "Manager actively considers solutions, moving from dismissal to problem-solving mode.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 4"
+    },
+    "ending_collaborative_solution": {
+      "text": "Alright, let's work together on this. What do you think would make the biggest impact?",
+      "outcome_label": "Collaborative Solution",
+      "outcome_description": "Manager shifts to collaborative approach, genuinely engaging with user concerns and solutions.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 5"
+    },
+    "ending_user_focused_solution": {
+      "text": "You're right - let's make sure we're actually serving our users well, not just shipping fast.",
+      "outcome_label": "User-Focused Solution",
+      "outcome_description": "Manager adopts user-centered perspective, prioritizing user needs over speed and convenience.",
+      "ethical_outcome": "positive",
+      "evs_range": "4 to 5"
+    },
+    "ending_manager_reconsideration": {
+      "text": "You've made me realize we might be missing something important here. Let me see what we can do.",
+      "outcome_label": "Manager Reconsideration",
+      "outcome_description": "Manager genuinely reconsiders approach, acknowledging potential oversight in user needs.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 5"
+    },
+    "ending_team_involvement": {
+      "text": "That's a good idea. Your perspective would be valuable in planning what we can realistically improve.",
+      "outcome_label": "Team Involvement",
+      "outcome_description": "Manager includes user in solution development, recognizing their advocacy as valuable expertise.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 5"
+    },
+    "ending_user_priority_shift": {
+      "text": "You're absolutely right. User experience should include ALL users. Let's figure out how to do this right.",
+      "outcome_label": "User Priority Shift",
+      "outcome_description": "Manager adopts inclusive definition of user experience, fundamentally shifting priorities.",
+      "ethical_outcome": "positive",
+      "evs_range": "4 to 6"
+    },
+    "ending_supportive_collaboration": {
+      "text": "I'd really appreciate that. You clearly understand these issues better than I do.",
+      "outcome_label": "Supportive Collaboration",
+      "outcome_description": "Manager acknowledges user's expertise and requests their help in creating inclusive solutions.",
+      "ethical_outcome": "positive",
+      "evs_range": "4 to 6"
+    }
+  }
+} 

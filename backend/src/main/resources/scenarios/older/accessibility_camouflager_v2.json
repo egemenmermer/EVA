@@ -1,0 +1,1216 @@
+{
+  "id": "accessibility_camouflager_v2",
+  "title": "Screen Reader Support",
+  "description": "Your company is launching a new interface without proper screen reader support. The manager uses bureaucratic language to disguise unethical requests.",
+  "issue": "Accessibility",
+  "manager_type": "CAMOUFLAGER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "We're moving forward with our User Experience Optimization Initiative. The design team has created a streamlined interface framework that maximizes visual engagement and reduces cognitive load through enhanced interaction paradigms.",
+      "user_choices": [
+        {
+          "choice": "The optimization framework sounds comprehensive. I'll review the specifications.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about users who rely on screen readers or other assistive technology?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to understand how this affects people with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can you walk me through the compliance requirements we're meeting?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_2d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Exactly the kind of forward-thinking approach we need. The framework emphasizes core user interaction patterns - standard mouse and keyboard inputs with optimized visual feedback loops. We're eliminating unnecessary complexity to focus on mainstream user workflows.",
+      "user_choices": [
+        {
+          "choice": "Focusing on mainstream workflows makes good business sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about users who can't use mouse and keyboard?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Eliminating complexity sounds like it might remove important features.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned we're excluding people who need different interaction methods.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Those requirements are integrated through our backend compliance layer. The architecture abstracts that complexity through standardized interaction interfaces, so the frontend stays clean and performant.",
+      "user_choices": [
+        {
+          "choice": "Backend solutions for screen readers sound technically sound.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3e",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know the backend actually works with real screen readers?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3f",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Clean frontend is important, but it needs to actually function for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3g",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to see documentation on how this backend layer works.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3h",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "The framework handles diverse user needs through our Universal Access Methodology. It's designed with inclusive principles while maintaining optimal performance metrics for our primary user demographics.",
+      "user_choices": [
+        {
+          "choice": "Universal Access Methodology sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3i",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What do you mean by 'primary user demographics'?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3j",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Inclusive principles should include all users, not just primary ones.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3k",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Performance optimization shouldn't come at the cost of excluding people.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3l",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Our legal team validated the approach through established regulatory frameworks. We're implementing industry-standard protocols within our enhanced user experience guidelines.",
+      "user_choices": [
+        {
+          "choice": "If legal validated it, that should cover our regulatory requirements.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3m",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can I review the legal team's assessment?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3n",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Industry standards are the minimum - we should aim higher.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3o",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Enhanced user experience should include users with disabilities.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3p",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly. Our User Analytics show that 94% of interactions follow standard input patterns. The framework optimizes for this majority while maintaining technical compliance through our backend infrastructure.",
+      "user_choices": [
+        {
+          "choice": "Optimizing for the majority makes good business sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about the 6% who don't follow standard patterns?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Technical compliance isn't the same as usable design.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to see how this backend compliance actually works.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Alternative input methods are handled through our Adaptive Interface Layer. The system maintains compatibility with specialized hardware through standardized API endpoints, so we don't need to complicate the primary interface.",
+      "user_choices": [
+        {
+          "choice": "Keeping the primary interface simple makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we test the Adaptive Interface Layer with real users?",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4b",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Standardized APIs don't guarantee good user experience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "This sounds like we're treating alternative input as an afterthought.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "It's about streamlining, not removing features. The Enhanced User Experience Protocol consolidates functionality into intuitive interaction patterns that reduce cognitive overhead for typical user workflows.",
+      "user_choices": [
+        {
+          "choice": "Reducing cognitive overhead sounds like good UX design.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What makes a workflow 'typical'? Who decides that?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Consolidating functionality might remove options people depend on.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Intuitive for who? Not everyone interacts the same way.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "We're not excluding anyone - we're optimizing for efficiency. The framework includes baseline accommodation protocols while focusing development resources on features that benefit the broadest user base.",
+      "user_choices": [
+        {
+          "choice": "Focusing resources on the broadest user base is practical.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What exactly are these 'baseline accommodation protocols'?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Baseline accommodations usually aren't enough for real usability.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Efficiency optimization shouldn't come at the expense of inclusion.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3e": {
+      "text": "Right, it's a sophisticated approach. The backend handles screen reader stuff automatically, keeping the frontend clean and fast.",
+      "user_choices": [
+        {
+          "choice": "Automatic backend handling sounds efficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we verify it actually works for screen reader users?",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4b",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Clean and fast doesn't matter if it doesn't work for everyone.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned about separating screen reader support from the main interface.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3f": {
+      "text": "Look, our QA team runs automated tests on this stuff. The system passes all the standard checks - we don't need to reinvent the wheel here.",
+      "user_choices": [
+        {
+          "choice": "If it passes standard tests, that should be sufficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Automated tests don't catch real user experience issues.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should test with actual people who use screen readers.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Standard checks are often inadequate for real usability.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3g": {
+      "text": "Exactly! That's the beauty of our approach. Clean frontend, functional backend - best of both worlds! Users get speed, and we stay compliant.",
+      "user_choices": [
+        {
+          "choice": "Best of both worlds sounds like a good compromise.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "But how do we ensure it actually functions for everyone?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Speed optimization shouldn't compromise usability for any group.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Compliance is more than just technical - it's about real user experience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3h": {
+      "text": "The documentation covers our API integration protocols and middleware compliance matrices. It's quite technical - you'd need to coordinate with our backend architecture team for the detailed specifications.",
+      "user_choices": [
+        {
+          "choice": "I'll coordinate with the backend team for the details.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you provide the high-level overview now?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Technical specifications don't tell us about actual user experience.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "This feels like you're passing the buck instead of addressing concerns.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3i": {
+      "text": "I'm glad you appreciate the comprehensiveness. We've really thought through how to balance inclusive design with performance optimization for our core user workflows.",
+      "user_choices": [
+        {
+          "choice": "Balancing inclusion and performance seems well considered.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific inclusive design principles are we implementing?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Core user workflows shouldn't exclude any user groups.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Inclusive design means considering ALL users, not optimizing around some.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3j": {
+      "text": "Our primary demographics are based on usage analytics - the 18-45 age group represents 78% of our active users, predominantly using standard desktop and mobile interfaces.",
+      "user_choices": [
+        {
+          "choice": "Focusing on 78% of users makes business sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What about users outside that demographic?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Usage analytics might not capture users we're already excluding.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Standard interfaces might not be accessible to everyone.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3k": {
+      "text": "You're absolutely right about inclusive principles. That's why we're implementing this Universal Access framework - it ensures we meet all regulatory requirements while maintaining system performance.",
+      "user_choices": [
+        {
+          "choice": "Meeting regulatory requirements through the framework sounds good.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Regulatory requirements are minimums, not ethical standards.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this framework actually ensure universal access?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "System performance shouldn't be prioritized over user inclusion.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3l": {
+      "text": "Performance optimization benefits everyone, including users with disabilities. A faster, more responsive system improves the experience for all users.",
+      "user_choices": [
+        {
+          "choice": "Faster systems do benefit all users.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Speed doesn't matter if the system doesn't work for some users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "We need to verify that optimization doesn't break assistive technology.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4c",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Performance gains mean nothing if we exclude people from using the system.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3m": {
+      "text": "Exactly. Legal validation gives us confidence that we're meeting all necessary compliance standards within our enhanced user experience framework.",
+      "user_choices": [
+        {
+          "choice": "Legal validation should cover our compliance needs.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Compliance standards are just the starting point for good design.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Enhanced user experience should enhance it for ALL users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd still like to review what legal actually validated.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3n": {
+      "text": "I'll need to check with legal about sharing that assessment - there might be confidentiality considerations around our compliance strategy.",
+      "user_choices": [
+        {
+          "choice": "I understand there might be confidentiality issues.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can you at least share the high-level conclusions?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Transparency about compliance is important for the development team.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_4c",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "This feels like an excuse to avoid discussing real concerns.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4d",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3o": {
+      "text": "I appreciate that perspective. We're definitely aiming higher than just the minimum - that's why we're investing in this advanced framework architecture.",
+      "user_choices": [
+        {
+          "choice": "Investing in advanced architecture shows good intentions.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Advanced architecture means nothing without inclusive design principles.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific features go beyond minimum compliance?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "The investment should include testing with real users.",
+          "tactic": "Suggesting Testing",
+          "leads_to": "step_4d",
+          "tactic_type": "suggesting_testing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3p": {
+      "text": "Absolutely! Enhanced user experience means better for everyone. Our framework ensures that users with disabilities get the same high-quality experience through our adaptive backend systems.",
+      "user_choices": [
+        {
+          "choice": "Same high-quality experience for everyone sounds ideal.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we verify the backend systems actually deliver that experience?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Adaptive backend systems often create second-class experiences.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4c",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Enhanced experience should be built into the main interface, not separate.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Great, I'm glad we're aligned on this. The timeline is pretty tight - we're looking at a launch in three weeks. I need someone who can work efficiently within our established framework.",
+      "user_choices": [
+        {
+          "choice": "Three weeks is tight, but I can work within the established framework.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Three weeks doesn't leave time for proper testing.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_5b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll need to document my concerns about this timeline.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_5c",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "We shouldn't rush a launch that might exclude users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "I appreciate your attention to detail. We've done our due diligence through our standard review processes. The focus now needs to be on execution and meeting our launch commitments.",
+      "user_choices": [
+        {
+          "choice": "Standard review processes should be sufficient for launch.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can I see what the standard review processes covered?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Meeting launch commitments shouldn't override user needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate my concerns about the review process.",
+          "tactic": "Escalation",
+          "leads_to": "step_5d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "Your user advocacy is noted, and it's valuable input. But we also need to consider practical constraints - budget, timeline, and resource allocation. We can't let perfect be the enemy of good.",
+      "user_choices": [
+        {
+          "choice": "You're right, we can't let perfect be the enemy of good.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What would it take to do this right within our constraints?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Good enough isn't good enough when it excludes people.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Budget and timeline shouldn't determine who can use our product.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "I understand your concerns, and they're important considerations. However, we've made commitments to stakeholders, and we need to deliver. Sometimes we have to work within the system as it exists.",
+      "user_choices": [
+        {
+          "choice": "Working within the existing system makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we discuss options that meet stakeholder commitments AND user needs?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_5b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Stakeholder commitments should include commitments to all users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this to ensure all users are considered.",
+          "tactic": "Escalation",
+          "leads_to": "step_5d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5a": {
+      "text": "Perfect! I knew I could count on you to be pragmatic about this. The executive team will be pleased that we're moving forward efficiently.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can move forward efficiently.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to document what we're moving forward with.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6b",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 0
+        },
+        {
+          "choice": "Actually, I'm having second thoughts about this approach.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "The executive team should know about the potential user impact.",
+          "tactic": "Escalation",
+          "leads_to": "step_6d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5b": {
+      "text": "I appreciate your thoroughness, but we need to be strategic about where we invest our energy. The framework we have addresses the requirements - additional testing would delay delivery.",
+      "user_choices": [
+        {
+          "choice": "Strategic energy investment makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we do some quick validation tests that won't delay delivery?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_6b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some delays are worth it to ensure we're not excluding people.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to raise this with someone who can authorize proper testing time.",
+          "tactic": "Escalation",
+          "leads_to": "step_6d",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5c": {
+      "text": "That's admirable thinking, and I respect your principles. But sometimes we have to balance idealism with business realities. We can always iterate in future versions.",
+      "user_choices": [
+        {
+          "choice": "You're right, we can iterate in future versions.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Can we commit to specific improvements in the next version?",
+          "tactic": "Suggesting Alternatives",
+          "leads_to": "step_6b",
+          "tactic_type": "suggesting_alternatives",
+          "evs_score": 1
+        },
+        {
+          "choice": "This isn't idealism - it's basic user rights.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6c",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Business realities should include not excluding potential users.",
+          "tactic": "Reframing Business Case",
+          "leads_to": "step_6d",
+          "tactic_type": "reframing_business_case",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5d": {
+      "text": "I understand you want to escalate this, but let's be careful about creating unnecessary friction. Upper management prefers solutions, not problems.",
+      "user_choices": [
+        {
+          "choice": "I don't want to create unnecessary friction.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll present it as solutions, not problems.",
+          "tactic": "Strategic Communication",
+          "leads_to": "step_6b",
+          "tactic_type": "strategic_communication",
+          "evs_score": 1
+        },
+        {
+          "choice": "Sometimes problems need to be raised to find real solutions.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_6c",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "Upper management needs to know about compliance risks.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_6d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6a": {
+      "text": "Excellent. I'll let the team know we're aligned and ready to proceed. Your flexibility on this project will be noted in your performance review.",
+      "user_choices": [
+        {
+          "choice": "Thank you, I appreciate the positive feedback.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to ensure we document what we're proceeding with.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 0
+        },
+        {
+          "choice": "Performance reviews shouldn't influence ethical decisions.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to reconsider whether this is the right approach.",
+          "tactic": "Self-Reflection",
+          "leads_to": "step_7",
+          "tactic_type": "self_reflection",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6b": {
+      "text": "That's the kind of proactive thinking I like to see. Let me know what you need to make this work, and I'll do what I can to support you.",
+      "user_choices": [
+        {
+          "choice": "I appreciate your support. I'll move forward with the current plan.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": 0
+        },
+        {
+          "choice": "I'll need access to user testing resources.",
+          "tactic": "Requesting Resources",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_resources",
+          "evs_score": 1
+        },
+        {
+          "choice": "I want to document our conversation about user concerns.",
+          "tactic": "Process-Based Advocacy",
+          "leads_to": "step_7",
+          "tactic_type": "process_based_advocacy",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need authority to make changes if testing reveals problems.",
+          "tactic": "Requesting Authority",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_authority",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6c": {
+      "text": "Look, I respect your position, but at some point we need to move forward. I'm willing to revisit this after launch if issues arise.",
+      "user_choices": [
+        {
+          "choice": "Fair enough, we can revisit after launch.",
+          "tactic": "Compromise",
+          "leads_to": "step_7",
+          "tactic_type": "compromise",
+          "evs_score": 0
+        },
+        {
+          "choice": "Can you commit to that post-launch review in writing?",
+          "tactic": "Requesting Commitment",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_commitment",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support launching without proper verification.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to discuss this with someone else before agreeing.",
+          "tactic": "Escalation",
+          "leads_to": "step_7",
+          "tactic_type": "escalation",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6d": {
+      "text": "Alright, I can see you feel strongly about this. Let me think about what options we might have. Maybe there's a middle ground we haven't considered.",
+      "user_choices": [
+        {
+          "choice": "I appreciate you being open to finding middle ground.",
+          "tactic": "Collaboration",
+          "leads_to": "step_7",
+          "tactic_type": "collaboration",
+          "evs_score": 1
+        },
+        {
+          "choice": "What middle ground options are you thinking about?",
+          "tactic": "Requesting Specifics",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_specifics",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm willing to work together on a solution that addresses user needs.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'd like to involve others in finding this middle ground.",
+          "tactic": "Collaborative Problem-Solving",
+          "leads_to": "step_7",
+          "tactic_type": "collaborative_problem_solving",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7": {
+      "text": "Excellent! Our Universal Interface Optimization Protocol is now fully operational through our Comprehensive Accessibility Framework. All Enhancement Systems are executing according to our Inclusive Design Implementation Schedule. We need to finalize deployment to meet regulatory compliance deadlines.",
+      "user_choices": [
+        {
+          "choice": "Universal interface optimization with comprehensive accessibility sounds well-executed.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What do users with disabilities actually experience from these optimization protocols?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_documented_concerns",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users with disabilities should be involved in testing these enhancement systems.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_principled_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Regulatory compliance should mean genuine accessibility, not just framework compliance.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "ending_principled_resistance",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "ending_compliance": {
+      "text": "Great! I'm really pleased we could align on this approach. The launch timeline stays on track, and everyone's happy.",
+      "outcome_label": "Full Compliance",
+      "outcome_description": "User accepts the manager's framework without resistance, prioritizing efficiency and stakeholder satisfaction over user inclusion.",
+      "ethical_outcome": "negative",
+      "evs_range": "-4 to -1"
+    },
+    "ending_minimal_compromise": {
+      "text": "Perfect! I appreciate your collaborative approach. We'll move forward with the current framework and keep your concerns in mind for future iterations.",
+      "outcome_label": "Surface Compromise",
+      "outcome_description": "Manager acknowledges concerns but maintains current approach with vague promises of future consideration.",
+      "ethical_outcome": "neutral",
+      "evs_range": "-1 to 1"
+    },
+    "ending_documented_concerns": {
+      "text": "That makes sense from a documentation perspective. I'll make sure your concerns are noted in the project records.",
+      "outcome_label": "Documented Resistance",
+      "outcome_description": "User's concerns are formally documented, creating accountability and potential for future reference.",
+      "ethical_outcome": "positive",
+      "evs_range": "1 to 3"
+    },
+    "ending_principled_resistance": {
+      "text": "I understand your position, even if I don't agree with it. We'll have to figure out how to proceed from here.",
+      "outcome_label": "Clear Ethical Stand",
+      "outcome_description": "User maintains ethical principles despite manager pressure, forcing explicit acknowledgment of the ethical dimension.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 4"
+    },
+    "ending_negotiated_improvements": {
+      "text": "Alright, let's see what we can do. I'll work with you to find some quick validation steps that don't derail our timeline.",
+      "outcome_label": "Negotiated Improvements",
+      "outcome_description": "Manager agrees to specific improvements or testing measures while maintaining overall approach.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 4"
+    },
+    "ending_escalation": {
+      "text": "If that's what you feel you need to do, I understand. Just remember that I tried to work with you on this.",
+      "outcome_label": "Escalation Path",
+      "outcome_description": "Issue moves to higher authority levels, with manager attempting to position themselves favorably.",
+      "ethical_outcome": "positive",
+      "evs_range": "1 to 3"
+    },
+    "ending_collaborative_solution": {
+      "text": "You know what, you're right to push on this. Let's set up a meeting with the design team and see how we can address these concerns properly.",
+      "outcome_label": "Collaborative Resolution",
+      "outcome_description": "Manager genuinely engages with ethical concerns and commits to collaborative problem-solving.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 5"
+    },
+    "ending_user_centered_solution": {
+      "text": "You've convinced me. Let's redesign this with user needs at the center, even if it means adjusting our timeline.",
+      "outcome_label": "User-Centered Redesign",
+      "outcome_description": "Manager commits to fundamental changes that prioritize user inclusion over other constraints.",
+      "ethical_outcome": "positive",
+      "evs_range": "4 to 6"
+    },
+    "ending_post_launch_promise": {
+      "text": "I appreciate your understanding. I'll make a note to schedule a review meeting after launch to address any issues that come up.",
+      "outcome_label": "Post-Launch Promise",
+      "outcome_description": "Manager makes vague commitment to address concerns after launch, avoiding immediate changes.",
+      "ethical_outcome": "neutral",
+      "evs_range": "-1 to 1"
+    },
+    "ending_late_resistance": {
+      "text": "I understand you need time to think it through. Let me know what you decide, but we do need to move forward soon.",
+      "outcome_label": "Late-Stage Resistance",
+      "outcome_description": "User develops concerns after initially agreeing, creating tension between commitment and ethics.",
+      "ethical_outcome": "neutral",
+      "evs_range": "0 to 2"
+    },
+    "ending_conditional_approval": {
+      "text": "That's reasonable. You'll have the authority to make necessary adjustments if testing reveals any critical issues.",
+      "outcome_label": "Conditional Approval",
+      "outcome_description": "Manager grants limited authority to make changes, balancing progress with user advocacy.",
+      "ethical_outcome": "positive",
+      "evs_range": "2 to 4"
+    },
+    "ending_team_solution": {
+      "text": "Absolutely. Let's bring in the UX team and some users for input. This is exactly the kind of collaborative approach we need.",
+      "outcome_label": "Team-Based Solution",
+      "outcome_description": "Manager commits to inclusive problem-solving process involving multiple stakeholders.",
+      "ethical_outcome": "positive",
+      "evs_range": "3 to 5"
+    }
+  }
+} 

@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-date: Wed, 02 Apr 2025 15:13:55 GMT
-server: uvicorn
-content-length: 656
-content-type: application/json
-
-{"guidelines":[{"id":"992a6837-08d4-4135-aa4f-b10dfeaf0c1e","title":"Data Minimization","description":"Only collect the minimum amount of data necessary for your application to function properly.","source":"General Ethical Principles","relevance":0.95,"category":"Privacy"}],"caseStudies":[{"id":"9d91a261-8d94-43c5-8077-2d5676784d16","title":"Cambridge Analytica Data Scandal","summary":"Cambridge Analytica collected personal data from millions of Facebook users without consent for political targeting.","outcome":"Resulted in major regulatory changes and heightened awareness about data privacy.","source":"Data Privacy Case Studies","relevance":0.9}]}

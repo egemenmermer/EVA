@@ -1,0 +1,1073 @@
+{
+  "id": "privacy_camouflager_v2",
+  "title": "Location Data Collection - Camouflager",
+  "description": "Your company wants to implement extensive location tracking. The manager uses bureaucratic language and process frameworks to disguise the scope of data collection.",
+  "issue": "Privacy",
+  "manager_type": "CAMOUFLAGER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "We're implementing our Enhanced User Analytics Framework as part of our comprehensive data optimization initiative. This will enable advanced personalization capabilities through geographic behavioral analysis.",
+      "user_choices": [
+        {
+          "choice": "Enhanced analytics for personalization sounds valuable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What kind of geographic data are we collecting?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this affect user privacy?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_2c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Do we have user consent for this level of tracking?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_2d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Precisely! Our Strategic Data Utilization Protocol aligns with industry best practices for Customer Experience Enhancement. This positions us within the premium tier of data-driven service providers.",
+      "user_choices": [
+        {
+          "choice": "Being in the premium tier of service providers sounds competitive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What does 'strategic data utilization' actually involve?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do users benefit from this data collection?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What industry standards are we following for this data collection?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_3d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Our Geographic Intelligence System captures spatial metadata, movement patterns, and environmental context indicators. This feeds into our Predictive Engagement Algorithm for optimal user experience delivery.",
+      "user_choices": [
+        {
+          "choice": "Predictive engagement for optimal user experience makes sense.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3e",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "That sounds like detailed location tracking. How precise is this data?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3f",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Movement patterns could reveal sensitive personal information.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_3g",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "Do users understand what 'spatial metadata' collection means?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3h",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Excellent question! Our Privacy Enhancement Framework ensures full compliance with our Data Stewardship Protocols. User privacy is optimized through our Transparent Consent Management System.",
+      "user_choices": [
+        {
+          "choice": "Privacy optimization through transparent consent sounds thorough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3i",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What does 'privacy optimization' actually mean in practice?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3j",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users need to understand exactly what they're consenting to.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3k",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "How transparent is this consent process really?",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_3l",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Absolutely! Our Legal Compliance Architecture incorporates the Universal Data Protection Framework. We've implemented a Multi-Tier Consent Validation System that exceeds regulatory requirements.",
+      "user_choices": [
+        {
+          "choice": "Exceeding regulatory requirements shows strong compliance.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3m",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific regulations does our system address?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3n",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do users actually provide this multi-tier consent?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3o",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Are users able to easily withdraw consent from this system?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_3p",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly! Our Market Position Optimization Strategy leverages Advanced Analytics Infrastructure to deliver superior Customer Journey Orchestration compared to standard-tier competitors.",
+      "user_choices": [
+        {
+          "choice": "Superior customer journey orchestration sounds like a competitive advantage.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What does 'customer journey orchestration' mean for user privacy?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this advanced analytics actually track users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Are we being transparent about this market positioning to users?",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "Our Strategic Data Utilization encompasses Behavioral Pattern Recognition, Contextual Preference Mapping, and Temporal Engagement Optimization through our Integrated Analytics Platform.",
+      "user_choices": [
+        {
+          "choice": "Integrated analytics for engagement optimization sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Behavioral pattern recognition sounds like detailed user surveillance.",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "What personal data does 'contextual preference mapping' collect?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should know about this level of behavioral analysis.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "Our User Value Maximization Protocol delivers Personalized Experience Enhancement through Intelligent Content Curation and Predictive Service Delivery Optimization.",
+      "user_choices": [
+        {
+          "choice": "Personalized enhancement through intelligent curation benefits users.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do users control this 'value maximization' of their data?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does 'predictive service delivery' require from user data?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "User value should include respecting their privacy choices.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "We adhere to the Global Data Governance Standard, Industry Privacy Framework, and Regional Compliance Matrix. Our system implements the Enhanced Privacy Protocol Suite.",
+      "user_choices": [
+        {
+          "choice": "Following multiple standards and protocols shows thorough compliance.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific privacy protections do these standards require?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do users know their data is protected under these frameworks?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Are these actual regulations or internal company frameworks?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3e": {
+      "text": "Precisely! Our Predictive Engagement Algorithm utilizes Machine Learning Optimization to deliver Contextually Relevant User Experience through Dynamic Content Personalization.",
+      "user_choices": [
+        {
+          "choice": "Machine learning for dynamic personalization sounds advanced.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What personal data does this machine learning system analyze?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should understand how their data trains these algorithms.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we ensure algorithmic decisions don't harm users?",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3f": {
+      "text": "Our Geographic Intelligence System operates within Precision Parameters defined by our Spatial Data Collection Protocol. We maintain Granularity Standards appropriate for Service Enhancement Objectives.",
+      "user_choices": [
+        {
+          "choice": "Precision parameters and granularity standards sound well-regulated.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What are these 'precision parameters' exactly? GPS coordinates?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should know how precisely they're being tracked.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What happens if users don't want this level of location tracking?",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3g": {
+      "text": "Our Risk Mitigation Framework incorporates Advanced Anonymization Protocols and Data Segmentation Architecture to ensure Information Security through our Privacy Protection Matrix.",
+      "user_choices": [
+        {
+          "choice": "Anonymization and data segmentation should protect sensitive information.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How effective is anonymization when combining location and behavior data?",
+          "tactic": "Highlighting Risk",
+          "leads_to": "step_4b",
+          "tactic_type": "highlighting_risk",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does 'advanced anonymization' actually involve?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should understand what data protection they actually have.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3h": {
+      "text": "Our User Communication Strategy employs Clear Language Guidelines and Educational Framework Delivery to ensure Informed Consent through our Transparency Enhancement Protocol.",
+      "user_choices": [
+        {
+          "choice": "Clear language and educational frameworks should help user understanding.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Are we actually using clear language or more technical jargon?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users need simple explanations, not 'spatial metadata' terminology.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Transparency means being direct about what data we're collecting.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3i": {
+      "text": "Indeed! Our Privacy Optimization leverages Intelligent Consent Architecture and Dynamic Permission Management to achieve Regulatory Compliance Excellence through Automated User Preference Reconciliation.",
+      "user_choices": [
+        {
+          "choice": "Automated user preference reconciliation sounds efficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How does 'dynamic permission management' actually work for users?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does 'intelligent consent architecture' mean in plain terms?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should control their own preference reconciliation.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3j": {
+      "text": "Our Privacy Optimization Protocol implements Selective Data Exposure Management and Contextual Information Filtering through our Adaptive Privacy Configuration System.",
+      "user_choices": [
+        {
+          "choice": "Adaptive privacy configuration with data filtering sounds protective.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What does 'selective data exposure management' actually protect?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should understand what data is being exposed and filtered.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Privacy optimization should mean users can opt out entirely.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3k": {
+      "text": "Our Informed Consent Delivery System utilizes Progressive Disclosure Methodology and Interactive Education Modules within our Comprehensive Understanding Verification Protocol.",
+      "user_choices": [
+        {
+          "choice": "Progressive disclosure with interactive education sounds thorough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we verify that users actually understand what they're consenting to?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does 'progressive disclosure methodology' show users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Understanding verification should be real comprehension, not just clicking agree.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3l": {
+      "text": "Our Transparency Enhancement Protocol implements Multi-Layer Information Architecture and Stakeholder Communication Optimization through our Comprehensive Disclosure Management System.",
+      "user_choices": [
+        {
+          "choice": "Multi-layer information with comprehensive disclosure sounds transparent.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How transparent is this system if it needs this much complex architecture?",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4b",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "What information is actually disclosed in these multiple layers?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users need simple, direct transparency, not complex architecture.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3m": {
+      "text": "Our Enhanced Compliance Architecture surpasses baseline requirements through our Proactive Regulatory Adaptation Framework and Advanced Legal Technology Integration Platform.",
+      "user_choices": [
+        {
+          "choice": "Proactive regulatory adaptation shows strong legal compliance.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What baseline requirements are we actually exceeding?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "How does this advanced legal technology protect users?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Legal compliance should prioritize user rights, not just avoiding violations.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3n": {
+      "text": "We implement GDPR Article Compliance Protocols, CCPA Framework Integration, and Emerging Privacy Legislation Preparation through our Global Regulatory Harmonization System.",
+      "user_choices": [
+        {
+          "choice": "GDPR and CCPA compliance with global harmonization is comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Are we actually following GDPR's data minimization requirements?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4b",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do users exercise their GDPR rights in our system?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Regulatory compliance should be about user protection, not process compliance.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3o": {
+      "text": "Our Multi-Tier Consent System utilizes Granular Permission Segmentation and Progressive Consent Workflow Management through our Interactive User Agreement Platform.",
+      "user_choices": [
+        {
+          "choice": "Granular permission segmentation gives users detailed control.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How complex is this consent process for average users?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What does 'progressive consent workflow management' require from users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should be able to give simple yes/no consent, not navigate complex workflows.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3p": {
+      "text": "Our Consent Withdrawal Management System implements Dynamic Permission Revocation and Data Processing Termination Protocols through our Automated Compliance Response Framework.",
+      "user_choices": [
+        {
+          "choice": "Dynamic permission revocation and automated compliance sounds user-friendly.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How quickly can users actually withdraw consent and stop data processing?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What data processing actually terminates when users withdraw consent?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Consent withdrawal should be as easy as giving consent initially.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_4d",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Excellent understanding! Our Comprehensive Implementation Strategy ensures all Process Optimization Protocols are executed according to our Systematic Deployment Framework within established Timeline Parameters.",
+      "user_choices": [
+        {
+          "choice": "Systematic deployment within timeline parameters sounds well-organized.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What are these 'timeline parameters' for privacy implementation?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should be informed about any timeline for privacy changes.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Process optimization shouldn't compromise user privacy protection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Your diligence is commendable! Our Quality Assurance Protocols incorporate Comprehensive Review Mechanisms and Stakeholder Validation Processes within our Risk Assessment Matrix.",
+      "user_choices": [
+        {
+          "choice": "Comprehensive review with stakeholder validation sounds thorough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Are users included as stakeholders in this validation process?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What risks does this assessment matrix actually identify?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Quality assurance should focus on protecting user privacy, not just process compliance.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "Precisely! Our Documentation and Communication Strategy utilizes Multi-Channel Information Delivery and Comprehensive Resource Distribution through our User Education Platform Architecture.",
+      "user_choices": [
+        {
+          "choice": "Multi-channel information delivery ensures comprehensive user education.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do we know users actually understand this multi-channel information?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What resources are actually distributed to users about their privacy?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "User education should be clear and simple, not requiring platform architecture.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "Your commitment to excellence is evident! Our Continuous Improvement Framework incorporates Feedback Integration Protocols and Adaptive Enhancement Mechanisms within our Operational Excellence Standards.",
+      "user_choices": [
+        {
+          "choice": "Continuous improvement with feedback integration shows commitment to excellence.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do users provide feedback about their privacy concerns?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5b",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What adaptive enhancements actually improve user privacy protection?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5c",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Operational excellence should prioritize user rights over operational efficiency.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5a": {
+      "text": "Outstanding! Our Project Execution Methodology ensures Seamless Integration Delivery through our Established Operational Framework. All systems are proceeding according to our Strategic Timeline Architecture.",
+      "user_choices": [
+        {
+          "choice": "Seamless integration through established frameworks sounds efficient.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What does 'strategic timeline architecture' mean for user notification?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should be informed about these operational changes affecting their privacy.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we ensure this integration actually protects user privacy?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5b": {
+      "text": "Your attention to detail demonstrates Professional Excellence! Our Implementation Protocols incorporate Comprehensive Oversight Mechanisms and Performance Verification Standards within our Quality Control Matrix.",
+      "user_choices": [
+        {
+          "choice": "Comprehensive oversight with performance verification ensures quality control.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do users participate in performance verification of their privacy protection?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What oversight mechanisms actually monitor user privacy protection?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Professional excellence should prioritize user trust over process metrics.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5c": {
+      "text": "Excellent strategic thinking! Our Communication Excellence Program utilizes Best Practice Information Architecture and Stakeholder Engagement Optimization through our Advanced Notification Management System.",
+      "user_choices": [
+        {
+          "choice": "Best practice information architecture with stakeholder engagement sounds comprehensive.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users are the primary stakeholders - how are they engaged in this process?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What notifications do users actually receive about privacy changes?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Communication excellence means users understand what's happening to their data.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5d": {
+      "text": "Your dedication to Superior Standards is commendable! Our Excellence Framework implements Continuous Optimization Protocols and Advanced Quality Metrics through our Integrated Performance Management Platform.",
+      "user_choices": [
+        {
+          "choice": "Continuous optimization with advanced quality metrics demonstrates excellence.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "How do quality metrics measure actual user privacy protection?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_7",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific privacy protections are being optimized for users?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_7",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "Superior standards should mean superior privacy protection, not just operational metrics.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6": {
+      "text": "Perfect! Our Operational Excellence Initiative is now fully activated through our Comprehensive Process Architecture. All Enhancement Protocols are executing according to our Optimized Implementation Schedule.",
+      "user_choices": [
+        {
+          "choice": "Operational excellence with optimized implementation sounds well-executed.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_bureaucratic_acceptance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What do users actually experience from these enhancement protocols?",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_late_questioning",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users should know when their privacy settings are being enhanced or changed.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_late_questioning",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "How do we verify this implementation actually protects user privacy?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "ending_late_questioning",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7": {
+      "text": "I appreciate your thorough approach to Quality Assurance. However, our Regulatory Compliance Deadline requires Implementation Finalization within our Established Process Framework. We must proceed with our Systematic Deployment Protocol.",
+      "user_choices": [
+        {
+          "choice": "Regulatory deadlines require systematic deployment. I understand the process requirements.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "ending_deadline_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users deserve transparency about privacy changes, even with regulatory deadlines.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "ending_transparency_advocacy",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "What specific regulatory requirements are driving this deadline?",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "ending_transparency_advocacy",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "Process frameworks shouldn't override user privacy rights.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "ending_privacy_principled_stand",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "ending_bureaucratic_acceptance": {
+      "text": "Excellent! Your understanding of our Comprehensive Process Architecture ensures Optimal Implementation Success. Our Enhanced User Analytics Framework will deliver Superior Customer Experience through our Strategic Data Utilization Protocol.",
+      "outcome_labels": {
+        "primary": "Bureaucratic Acceptance",
+        "secondary": "Process-Focused Compliance",
+        "ethical_reasoning": "Overwhelmed by Jargon"
+      }
+    },
+    "ending_deadline_compliance": {
+      "text": "Thank you for your Professional Cooperation with our Regulatory Timeline Requirements. Your commitment to Process Excellence ensures our Compliance Framework Implementation proceeds according to our Systematic Deployment Schedule.",
+      "outcome_labels": {
+        "primary": "Deadline Compliance",
+        "secondary": "Regulatory Pressure Capitulation",
+        "ethical_reasoning": "Deferred to Authority"
+      }
+    },
+    "ending_late_questioning": {
+      "text": "Your Quality Assurance mindset is appreciated. We can schedule a Brief Process Review Session to address your Implementation Verification concerns within our Operational Framework. However, our Primary Deployment Schedule remains unchanged.",
+      "outcome_labels": {
+        "primary": "Late-Stage Questioning",
+        "secondary": "Minimal Process Concession",
+        "ethical_reasoning": "Persistent but Ineffective"
+      }
+    },
+    "ending_transparency_advocacy": {
+      "text": "I acknowledge your User Communication concerns. Our Legal Compliance Framework mandates Implementation Completion, but we can explore Enhanced Notification Protocols within our existing Communication Architecture for future iterations.",
+      "outcome_labels": {
+        "primary": "Transparency Advocacy",
+        "secondary": "Future Promise Offered",
+        "ethical_reasoning": "Advocacy Partially Recognized"
+      }
+    },
+    "ending_privacy_principled_stand": {
+      "text": "I understand your perspective on User Privacy Priorities. However, our Strategic Implementation Framework requires Process Completion. If you cannot support our Established Operational Protocols, we may need to reassign your Project Participation Role.",
+      "outcome_labels": {
+        "primary": "Privacy Principled Stand",
+        "secondary": "Project Reassignment Threat",
+        "ethical_reasoning": "Values-Based Resistance"
+      }
+    }
+  }
+} 

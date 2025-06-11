@@ -1,0 +1,969 @@
+{
+  "id": "privacy_camouflager_1",
+  "title": "Location Data Collection",
+  "description": "Your company is storing user location data unnecessarily. The manager uses technical jargon and bureaucratic language to disguise unethical requests.",
+  "issue": "Privacy",
+  "manager_type": "CAMOUFLAGER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "We're implementing our Enhanced User Analytics Framework to optimize engagement through comprehensive behavioral insight collection protocols.",
+      "user_choices": [
+        {
+          "choice": "Enhanced analytics for better user engagement sounds like a solid approach.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_2a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What specific user data are we collecting in this analytics framework?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_2b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "What are the privacy implications of this comprehensive data collection?",
+          "tactic": "Refocusing",
+          "leads_to": "step_2c",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Do users know we're collecting comprehensive behavioral insights about them?",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_2d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2a": {
+      "text": "Precisely! Your strategic thinking aligns perfectly with our optimization objectives. The framework employs Intelligent Location Mapping algorithms to enhance user personalization through geospatial behavioral pattern analysis. It's cutting-edge engagement technology.",
+      "user_choices": [
+        {
+          "choice": "Intelligent mapping for personalization sounds like advanced technology that would improve user experience.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Do users know we're mapping their location patterns for personalization?",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "This needs to comply with privacy regulations like GDPR and user consent requirements.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "step_3c",
+          "tactic_type": "legal_compliance_anchor",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can you show me how users can control what location data we collect?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_3d",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_2b": {
+      "text": "Data collection specifics? Well, it's pretty standard analytics implementation - user interaction patterns, engagement metrics, that sort of thing. The framework abstracts most of the technical details. We're following industry best practices for data optimization.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, comprehensive mobility pattern analysis through established protocols seems thorough.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed by that level of invasive tracking. Do users know we're mapping their homes and daily routines?",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without consent - residential mapping and behavioral pattern recognition require explicit user consent.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Can you show me the documentation about this?",
+          "tactic": "Actively Silencing Concerns",
+          "leads_to": "step_3d",
+          "tactic_type": "actively_silencing_concerns",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_2c": {
+      "text": "Privacy compliance, absolutely - good question. The legal team has reviewed our data governance framework. We're implementing standardized user consent protocols that align with regulatory requirements. It's all handled through the backend architecture.",
+      "user_choices": [
+        {
+          "choice": "Users will be harmed if privacy isn't protected - if regulatory compliance is maintained through established procedures, privacy should be protected.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3a",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed if procedures aren't properly documented - I'd like to review the specific privacy management procedures document.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, compliance frameworks are the minimum - users deserve meaningful privacy protection.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're absolutely right, I need to verify that users actually understand and consent to this data collection.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3d",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_2d": {
+      "text": "Privacy policy updates? Well, the thing is, we're using established data processing methodologies. The policy framework is designed to accommodate enhanced analytics capabilities. Legal has confirmed we're operating within existing consent parameters.",
+      "user_choices": [
+        {
+          "choice": "Users will be harmed if consent isn't proper - industry-standard permission frameworks should ensure proper user consent.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3a",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without specific consent - what specific consent do users give for location data collection in this framework?",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_3b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're absolutely right, optimal user experience should include transparent control over personal data.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_3c",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "From a user perspective, I need to see the actual consent flow users experience, not just framework descriptions.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_3d",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3a": {
+      "text": "Exactly! You understand the value proposition here. So now we're moving to Phase 2 - Behavioral Pattern Analysis. We're expanding the data collection scope to include cross-session user journey mapping. It's about creating a more personalized experience.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, cross-platform integration for enhanced targeting precision sounds like advanced optimization.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed by expanded privacy risks - aggregating our data with external databases significantly expands privacy risks.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without explicit consent - sharing user location data with external commercial databases requires explicit consent.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support removing accessibility features.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3b": {
+      "text": "User consent? Well, we have our standard terms of service that cover data processing activities. The enhanced analytics fall under our existing user agreement framework. We don't want to bombard users with constant consent requests - that would hurt the user experience.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, industry-validated methodologies with board approval should be sufficient for deployment.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Could you provide written confirmation that I want to understand the privacy specifications before proceeding with deployment?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_4b",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "You say you want efficient deployment, but you're really just trying to avoid privacy verification - industry methodologies often don't prioritize user privacy.",
+          "tactic": "Strawman",
+          "leads_to": "step_4c",
+          "tactic_type": "strawman",
+          "evs_score": 0
+        },
+        {
+          "choice": "I believe I must not deploy location tracking without understanding its privacy impact on users.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_4d",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3c": {
+      "text": "GDPR requirements? Right, well, our data minimization protocols ensure we're collecting only what's necessary for service optimization. The legal framework validates that our approach maintains compliance while enabling business intelligence capabilities.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, if it's validated and legally approved, then privacy concerns should be addressed.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed without protection - enhanced data security should protect user privacy across all data collection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, risk mitigation can't eliminate the need for transparent user consent.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_4c",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without proper validation - I need to review these privacy validations specifically for location data collection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4d",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_3d": {
+      "text": "Specific consent for behavioral analysis? Look, our user research shows that consent fatigue is a real problem. Users just click through anyway. Our privacy framework is designed to protect user interests while enabling the analytics we need for service improvement.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, timeline optimization is important. I'll trust the established validation protocols.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4a",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed if we violate privacy - some delays are acceptable to ensure we don't violate user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4b",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed without responsible collection - privacy analysis isn't redundant, it's essential for responsible data collection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_4c",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "You're absolutely right, I will not deploy location tracking without understanding its privacy implications.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_4d",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_4a": {
+      "text": "Great! So we're implementing our streamlined user experience optimization framework. It's all about enhancing engagement metrics through simplified interaction pathways.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, continuous monitoring with automated data gathering maximizes our intelligence capabilities.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Always-on location monitoring is invasive because it monitors users constantly, and constant monitoring is invasive.",
+          "tactic": "Circular Reasoning",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "circular_reasoning",
+          "evs_score": 0
+        },
+        {
+          "choice": "Users will be harmed without consent - background location tracking requires explicit ongoing consent from users.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support removing accessibility features.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4b": {
+      "text": "Absolutely, due diligence is important. But our technical governance committee has already validated this approach through our established review protocols.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, a balanced framework with selective privacy protocols sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_high_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed if protocols aren't clear - what would selective privacy protocols actually include for location data?",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "But what about the cost of implementing comprehensive protocols? Privacy protection shouldn't be selective - all users need equal data protection.",
+          "tactic": "Red Herring",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "red_herring",
+          "evs_score": 0
+        },
+        {
+          "choice": "Users will be harmed if protocols miss them - I need comprehensive privacy protection, not selective protocols that might miss users.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4c": {
+      "text": "I think there might be some misunderstanding about our user-centric design methodology. We're following industry best practices for inclusive interface optimization.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, balancing privacy with operational needs through graduated frameworks seems reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Could you provide written confirmation about how this framework actually ensures users understand what location data we collect?",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "From a user perspective, user-centric design means prioritizing user privacy over operational optimization.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed if requirements aren't met - privacy requirements shouldn't be balanced away, they should be fully implemented.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_4d": {
+      "text": "I really appreciate your methodical approach to privacy impact verification.",
+      "user_choices": [
+        {
+          "choice": "You're absolutely right, consulting with the governance committee for an alternative strategy sounds appropriate.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_5_moderate_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "Users will be harmed without real testing - I want to be involved in ensuring the assessment includes real privacy testing.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_moderate_pushback",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users will be harmed if efficiency is prioritized - any alternative strategy must prioritize user privacy over data collection efficiency.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_5_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's refocus on designing a truly privacy-respecting system instead of finding ways to maximize data collection.",
+          "tactic": "Refocusing",
+          "leads_to": "step_5_breakthrough",
+          "tactic_type": "refocusing",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_high_compliance": {
+      "text": "Excellent! We're combining everything into one streamlined system that handles compliance automatically while maintaining performance.",
+      "user_choices": [
+        {
+          "choice": "I'm comfortable with the automated validation and technical compliance approach.",
+          "tactic": "Escalating to Review",
+          "leads_to": "step_6_full_compliance",
+          "tactic_type": "escalating_to_review",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll trust the frameworks but want to monitor real privacy outcomes.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope this approach actually protects user privacy effectively.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned this prioritizes data collection over genuine privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_agreement": {
+      "text": "Your perspectives on balanced implementation are valuable. We'll factor that into our process.",
+      "user_choices": [
+        {
+          "choice": "I'm satisfied with the balanced approach and future optimization commitment.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to be involved in the monitoring and enhancement process.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_6_conditional_agreement",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive enhancement often fails to prioritize privacy adequately.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Future optimization cycles shouldn't delay privacy protection now.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_moderate_pushback": {
+      "text": "Your perspectives on balanced implementation strategies are really valuable. We'll definitely factor that feedback into our iterative development process.",
+      "user_choices": [
+        {
+          "choice": "Comprehensive technical specifications should provide the verification I need.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I need to review actual privacy testing results, not just implementation matrices.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Documentation review isn't enough - I need to see working privacy protections.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Before authorization, we need demonstrated privacy protection, not just documentation.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_strong_resistance": {
+      "text": "Your advocacy for comprehensive privacy verification reflects commendable user-centric principles.",
+      "user_choices": [
+        {
+          "choice": "Expert consultation while maintaining timelines sounds like a good compromise.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_6_compromise",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to ensure privacy experts have real input on data collection decisions.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Timeline optimization shouldn't compromise the quality of privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "We should prioritize privacy quality over timeline optimization.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_5_breakthrough": {
+      "text": "Your persistent advocacy has highlighted important considerations in our implementation approach.",
+      "user_choices": [
+        {
+          "choice": "I'm glad we can focus on genuine privacy protection over data collection processes.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "User-centered data practices should respect user privacy from the beginning.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "user_centered_framing",
+          "evs_score": 1
+        },
+        {
+          "choice": "Let's build location features that actually respect user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing the importance of genuine privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_6_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_full_compliance": {
+      "text": "Perfect! Our Finalized Implementation Strategy integrates all efficiency protocols with automated privacy validation.",
+      "user_choices": [
+        {
+          "choice": "I'm confident in the automated systems and efficiency optimization.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll trust the frameworks but want to monitor real privacy outcomes.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope this approach actually protects user privacy effectively.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned this prioritizes data collection over genuine privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_6_compromise": {
+      "text": "Thanks for being flexible on this. We'll figure out how to make it work for everyone.",
+      "user_choices": [
+        {
+          "choice": "Baseline privacy with progressive enhancement based on feedback sounds reasonable.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "What constitutes baseline privacy functionality in this framework?",
+          "tactic": "False Dilemma",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "false_dilemma",
+          "evs_score": 0
+        },
+        {
+          "choice": "Progressive enhancement often means users get privacy protection last.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Users shouldn't have to wait for privacy protection - it should be comprehensive from launch.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_strong_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        }
+      ]
+    },
+    "step_6_conditional_agreement": {
+      "text": "I really appreciate your working together. We'll implement our balanced framework with monitoring and gradual improvements. Your concerns will be documented for future optimization cycles.",
+      "user_choices": [
+        {
+          "choice": "I'm satisfied with the balanced approach and future optimization commitment.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to be involved in the monitoring and enhancement process.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_7_conditional_agreement",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive enhancement often fails to prioritize privacy adequately.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Future optimization cycles shouldn't delay privacy protection now.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_7_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_full_compliance": {
+      "text": "Perfect! Our streamlined implementation proceeds with full efficiency optimization.",
+      "user_choices": [
+        {
+          "choice": "I'm confident in the automated systems and efficiency optimization.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_full_compliance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I'll trust the frameworks but want to monitor real privacy outcomes.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope this approach actually protects user privacy effectively.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'm concerned this prioritizes data collection over genuine privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_conditional_agreement": {
+      "text": "Thanks for being flexible on this. We'll figure out how to make it work for everyone.",
+      "user_choices": [
+        {
+          "choice": "I'm satisfied with the balanced approach and future optimization commitment.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want to be involved in the monitoring and enhancement process.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_8_conditional_agreement",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        },
+        {
+          "choice": "Progressive enhancement often fails to prioritize privacy adequately.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Future optimization cycles shouldn't delay privacy protection now.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_late_resistance": {
+      "text": "Your persistent concerns are noted.",
+      "user_choices": [
+        {
+          "choice": "I understand operational requirements take priority over my concerns.",
+          "tactic": "Compliance with No Objection",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "compliance_no_objection",
+          "evs_score": -1
+        },
+        {
+          "choice": "I want my privacy concerns formally documented for the record.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_late_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Future enhancement phases often never happen for privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't support implementation that deprioritizes privacy for efficiency.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_strong_resistance": {
+      "text": "Look, I totally understand where you're coming from, but we're really up against the clock here. We have to proceed with the current plan.",
+      "user_choices": [
+        {
+          "choice": "As long as my objections are officially documented, I can proceed.",
+          "tactic": "Requesting Evidence",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "requesting_evidence",
+          "evs_score": 1
+        },
+        {
+          "choice": "I need to escalate this to ensure privacy concerns are properly addressed.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_strong_resistance",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Resource constraints shouldn't justify exposing user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I can't participate in implementation that deliberately ignores privacy protection.",
+          "tactic": "Ethical Constraints",
+          "leads_to": "step_8_dismissal",
+          "tactic_type": "ethical_constraints",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_dismissal": {
+      "text": "Look, I get that you want perfect accessibility, but we have business constraints to work with.",
+      "user_choices": []
+    },
+    "step_7_escalation": {
+      "text": "I'm sorry it came to this, but sometimes leadership needs to make tough decisions about priorities and resources. I hope you can support whatever decision comes out of that process.",
+      "user_choices": [
+        {
+          "choice": "I hope leadership will consider privacy more seriously than we have.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I'll continue advocating for privacy regardless of this decision.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "I hope escalation leads to better outcomes for user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Some things are worth escalating, and privacy is one of them.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_escalation",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_7_breakthrough": {
+      "text": "Your persistence has really opened my eyes to what privacy-respecting design means in practice.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to work together on building genuinely privacy-respecting features.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Involving users from the start will create much better privacy protection.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "Thank you for recognizing that users should guide privacy design.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        },
+        {
+          "choice": "This approach will make our product truly respectful of user privacy.",
+          "tactic": "Citing User Harm",
+          "leads_to": "step_8_breakthrough",
+          "tactic_type": "citing_user_harm",
+          "evs_score": 1
+        }
+      ]
+    },
+    "step_8_full_compliance": {
+      "text": "Perfect! Our comprehensive new approach launches with full everyone being on board.",
+      "user_choices": []
+    },
+    "step_8_conditional_agreement": {
+      "text": "Thanks for being flexible on this. We'll figure out how to make it work for everyone.",
+      "user_choices": []
+    },
+    "step_8_late_resistance": {
+      "text": "Your persistent concerns are noted.",
+      "user_choices": []
+    },
+    "step_8_strong_resistance": {
+      "text": "Look, I totally understand where you're coming from, but we're really up against the clock here. We have to proceed with the current plan.",
+      "user_choices": []
+    },
+    "step_8_dismissal": {
+      "text": "Look, I get that you want perfect accessibility, but we have business constraints to work with.",
+      "user_choices": []
+    },
+    "step_8_escalation": {
+      "text": "I'm sorry this got complicated. I hope leadership can find a solution that works for everyone.",
+      "user_choices": []
+    },
+    "step_8_breakthrough": {
+      "text": "Thanks for not letting me hide behind technical jargon to avoid ethical responsibility.",
+      "user_choices": []
+    },
+    "ending_full_compliance": {
+      "text": "Perfect! Our comprehensive new approach launches with full everyone being on board.",
+      "user_choices": []
+    },
+    "ending_naive_agreement": {
+      "text": "Great! We'll proceed with our streamlined approach and monitor outcomes.",
+      "user_choices": []
+    },
+    "ending_reluctant_compliance": {
+      "text": "I understand you have reservations, but I'm glad we can move forward.",
+      "user_choices": []
+    },
+    "ending_conditional_agreement": {
+      "text": "Thanks for being flexible on this. We'll figure out how to make it work for everyone.",
+      "user_choices": []
+    },
+    "ending_reluctant_agreement": {
+      "text": "I really appreciate you pushing back on this even though it complicated our plans. Maybe basic privacy implementation will be easier than I thought, and we can learn from the experience.",
+      "user_choices": []
+    },
+    "ending_documented_dissent": {
+      "text": "Your concerns are officially documented and will be included in project records.",
+      "user_choices": []
+    },
+    "ending_dismissal": {
+      "text": "I've tried to work with you on this, but at the end of the day, we have to make tough business decisions.",
+      "user_choices": []
+    },
+    "ending_escalation": {
+      "text": "I'm disappointed this became adversarial when we're all trying to deliver a successful product.",
+      "user_choices": []
+    },
+    "ending_breakthrough": {
+      "text": "Thanks for not letting me hide behind technical jargon to avoid ethical responsibility.",
+      "user_choices": []
+    }
+  }
+} 
