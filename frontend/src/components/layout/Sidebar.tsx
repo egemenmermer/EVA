@@ -544,8 +544,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span>New Chat</span>
         </button>
         
-        {/* Tactics Button - Only show if current conversation has practice history */}
-        {currentConversationHasPractice() && (
+        {/* Tactics Button - Show permanently once user has completed any practice scenario */}
+        {(user?.hasCompletedPractice || currentConversationHasPractice()) && (
           <button
             onClick={() => {
               // Dispatch event to show tactics modal in main layout

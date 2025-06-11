@@ -189,9 +189,24 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
   const [showInfoModal, setShowInfoModal] = useState(false); // Add state for info modal
   
-  const { user, setManagerType: setGlobalManagerType } = useStore();
+  const { user, setUser, setManagerType: setGlobalManagerType } = useStore();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Function to refresh user data from API
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data after practice completion...');
+      const response = await backendApi.get('/api/v1/user/profile');
+      const updatedUser = response.data;
+      console.log('Updated user data:', updatedUser);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return null;
+    }
+  };
 
   // Error boundary-like error handling
   const [componentError, setComponentError] = useState<string | null>(null);
@@ -818,6 +833,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       }));
       
       setSessionSaved(true);
+      
+      // **IMPORTANT: Refresh user data to update completion flags for Post Survey button**
+      await refreshUserData();
+      console.log('User data refreshed after practice completion');
       
       return true;
     } catch (error: any) {

@@ -82,6 +82,8 @@ public class AuthServiceImpl implements AuthService {
                 .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
                 .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
                 .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .hasCompletedPractice(user.getHasCompletedPractice())
+                .firstPracticeCompletedAt(user.getFirstPracticeCompletedAt())
                 .build());
     }
 

@@ -48,6 +48,10 @@ export interface User {
   privacyScenariosCompleted?: boolean;
   accessibilityScenariosCompletedAt?: string;
   privacyScenariosCompletedAt?: string;
+  
+  // Practice completion tracking - for permanent tactics guide
+  hasCompletedPractice?: boolean;
+  firstPracticeCompletedAt?: string;
 }
 
 interface Store {
