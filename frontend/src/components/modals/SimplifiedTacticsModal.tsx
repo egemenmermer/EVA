@@ -10,38 +10,47 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const [activeTab, setActiveTab] = useState<'soft' | 'rhetoric'>('soft');
+  const [activeTab, setActiveTab] = useState<'tactics' | 'fallacies'>('tactics');
 
   if (!isOpen) return null;
 
-  const softResistanceTactics = [
-    { name: "Shifting Scope", description: "Redirect the project's focus to ethically preferable areas" },
-    { name: "Delaying", description: "Postpone decisions or actions to buy time or avoid immediate unethical choices" },
-    { name: "Documenting Dissent", description: "Log or record disagreement for accountability or transparency" },
-    { name: "Reframing", description: "Reinterpret the problem in ethical or user-centered terms" },
-    { name: "Appealing to External Standards", description: "Cite external ethics codes, laws, or professional standards" },
-    { name: "Making It Visible", description: "Draw attention to hidden or glossed-over ethical issues" },
-    { name: "Adding Friction", description: "Subtly slow down unethical decisions by adding small procedural barriers" },
-    { name: "Creating Alternatives", description: "Suggest other design or engineering solutions that reduce harm" },
-    { name: "Redirecting Conversations", description: "Steer dialogue toward user well-being or ethical risk" },
-    { name: "Asking Questions", description: "Use inquiry to expose flaws or raise concerns without confronting" },
-    { name: "Withholding Full Implementation", description: "Implement partially to reduce harm while meeting demands" },
-    { name: "Testing Loopholes", description: "Find gaps in policy that allow more ethical action without violating rules" }
+  const ethicalTactics = [
+    { name: "Legal Compliance Anchor", description: "Anchoring arguments in legal obligations or standards (e.g., WCAG, ADA)" },
+    { name: "User-Centered Framing", description: "Centering the needs of users, especially vulnerable or marginalized" },
+    { name: "Escalating to Review", description: "Requesting review from higher authority, like legal or ethics board" },
+    { name: "Ethical Constraints", description: "Explicitly invoking ethical principles (e.g., fairness, inclusion)" },
+    { name: "Stakeholder Alignment", description: "Aligning your concern with stakeholder expectations or values" },
+    { name: "Hypothetical Reframing", description: "Using thought experiments or what-if scenarios to highlight ethical issues" },
+    { name: "Comparative Framing", description: "Comparing against similar situations or competitors" },
+    { name: "Long-Term Framing", description: "Referring to future consequences or sustainability" },
+    { name: "Transparency Demand", description: "Asking for openness or clarity in decision-making" },
+    { name: "Historical Precedent", description: "Referencing past experiences to justify ethical concern" },
+    { name: "Business Risk", description: "Highlighting reputational or legal risks due to inaction" },
+    { name: "Policy Anchor", description: "Pointing to internal policies or codes of conduct" },
+    { name: "Inclusive Design Reference", description: "Naming universal design, inclusive design, or similar frameworks" },
+    { name: "Quality Assurance Reframing", description: "Tying ethics to QA or development best practices" },
+    { name: "Technical Responsibility", description: "Framing developers as responsible for unintended harm" },
+    { name: "Empathy Tactic", description: "Bringing in real stories or potential harms to real users" },
+    { name: "Scalable Solution Argument", description: "Showing ethical solution as scalable or efficient" },
+    { name: "Social Proof", description: "Citing team consensus or what other companies do" },
+    { name: "Values-Based Language", description: "Using terms like 'respect', 'fairness', 'trust'" },
+    { name: "Time-Frame Shift", description: "Asking to delay to reconsider ethical implications" },
+    { name: "Personal Integrity Anchor", description: "Expressing personal ethical discomfort or values" },
+    { name: "Best Practice Advocacy", description: "Referring to external best practices, not just legal minimum" },
+    { name: "Ethical Escalation", description: "Indicating this issue may be reported or taken further" },
+    { name: "Evidence-Based Framing", description: "Referencing research or data supporting ethical concern" }
   ];
 
-  const rhetoricalTactics = [
-    { name: "Appealing to Organizational Values", description: "Refer to company mission or ethics to support your view" },
-    { name: "Citing Institutional Authority", description: "Reference respected sources (e.g. legal, compliance, leadership)" },
-    { name: "Referencing Laws or Regulations", description: "Mention GDPR, ADA, or relevant compliance rules" },
-    { name: "Presenting User Data", description: "Use metrics, A/B tests, or research to support your argument" },
-    { name: "Referencing Best Practices", description: "Cite UX or design guidelines (e.g. Nielsen heuristics, WCAG)" },
-    { name: "Constructing Hypothetical Scenarios", description: "Paint realistic future situations to predict consequences" },
-    { name: "Drawing Analogies", description: "Compare to familiar systems/decisions to make logic clearer" },
-    { name: "Evoking Empathy", description: "Appeal to user emotions, especially around harm or exclusion" },
-    { name: "Emphasizing Harm or Risk", description: "Focus on what could go wrong or harm users" },
-    { name: "Citing Public Backlash", description: "Reference reputational risk or public sentiment" },
-    { name: "Personal Moral Appeals", description: "Use your own ethical compass as a base of authority" },
-    { name: "Sarcastic Ridicule", description: "Rare; discredit unethical logic using irony or sarcasm" }
+  const logicalFallacies = [
+    { name: "Strawman", description: "Misrepresenting the other's argument to make it easier to attack" },
+    { name: "Ad Hominem", description: "Attacking the person instead of the argument" },
+    { name: "False Dilemma", description: "Presenting only two options when others exist" },
+    { name: "Appeal to Authority", description: "Relying solely on authority rather than reasoning" },
+    { name: "Slippery Slope", description: "Arguing that one step will inevitably lead to catastrophe" },
+    { name: "Red Herring", description: "Diverting the argument to unrelated topics" },
+    { name: "Bandwagon", description: "Claiming something is true because many believe it" },
+    { name: "Hasty Generalization", description: "Making a broad claim based on limited evidence" },
+    { name: "Appeal to Emotion", description: "Relying on fear, pity, or other emotions rather than logic" }
   ];
 
   return (
@@ -75,105 +84,105 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
               <p className="text-gray-700 dark:text-gray-300 mb-4">
                 In each practice scenario, you'll face ethically tricky statements from a fictional manager. 
-                Your goal is to respond with integrity and strategy.
+                Your goal is to respond with integrity and strategy using sound ethical argumentation.
               </p>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
-                EVA supports two main kinds of responses:
+                EVA evaluates your responses based on ethical argumentation tactics vs logical fallacies:
               </p>
             </div>
           </div>
 
           {/* Tactics Overview Cards */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* Soft Resistance Card */}
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+            {/* Ethical Tactics Card */}
+            <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
-                  <Target className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-yellow-800 dark:text-yellow-200">🔸 Soft Resistance Tactics</h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">From Wong (2021)</p>
+                  <h4 className="text-lg font-bold text-green-800 dark:text-green-200">✅ Ethical Argumentation Tactics</h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">From Rose & Tenenberg (2016) + adapted</p>
                 </div>
               </div>
               
-              <p className="text-yellow-800 dark:text-yellow-200 mb-4 font-medium">
-                Ideal when you want to push back gently within a rigid workplace.
+              <p className="text-green-800 dark:text-green-200 mb-4 font-medium">
+                Each gets +1 EVS score when used appropriately.
               </p>
               
               <div className="mb-4">
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-2"><strong>Description:</strong></p>
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
-                  These tactics help you resist unethical or questionable decisions without directly confronting your manager. 
-                  They work well in hierarchical environments or when you're early in your career.
+                <p className="text-green-700 dark:text-green-300 text-sm mb-2"><strong>Description:</strong></p>
+                <p className="text-green-700 dark:text-green-300 text-sm mb-3">
+                  These are sound ethical argumentation strategies that help you make principled, logical cases 
+                  for ethical behavior. They focus on legal compliance, user needs, and evidence-based reasoning.
                 </p>
                 
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-2"><strong>Examples:</strong></p>
-                <ul className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1 mb-3">
-                  <li>• Proposing extra user testing to slow down a rushed launch</li>
-                  <li>• Logging concerns quietly in documentation</li>
-                  <li>• Asking for legal review without making accusations</li>
+                <p className="text-green-700 dark:text-green-300 text-sm mb-2"><strong>Examples:</strong></p>
+                <ul className="text-green-700 dark:text-green-300 text-sm space-y-1 mb-3">
+                  <li>• Citing WCAG compliance requirements for accessibility</li>
+                  <li>• Presenting user research data about harm to vulnerable groups</li>
+                  <li>• Referencing company values or industry best practices</li>
                 </ul>
               </div>
               
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm font-medium">
-                  Good for: Defusing pressure, planting ethical concerns, protecting yourself quietly.
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <p className="text-green-700 dark:text-green-300 text-sm font-medium">
+                  Good for: Building credible, logical arguments that advance ethical outcomes.
                 </p>
               </div>
             </div>
 
-            {/* Rhetorical Tactics Card */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            {/* Logical Fallacies Card */}
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
+                  <X className="h-5 w-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-blue-800 dark:text-blue-200">🔹 Rhetorical Tactics</h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">From Rose & Tenenberg (2016)</p>
+                  <h4 className="text-lg font-bold text-red-800 dark:text-red-200">❌ Logical Fallacies</h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">From fallaciesReddit + UNR + literature</p>
                 </div>
               </div>
               
-              <p className="text-blue-800 dark:text-blue-200 mb-4 font-medium">
-                Great for building persuasive arguments.
+              <p className="text-red-800 dark:text-red-200 mb-4 font-medium">
+                Each fallacy yields 0 EVS score, potentially -1 if harmful.
               </p>
               
               <div className="mb-4">
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2"><strong>Description:</strong></p>
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
-                  These tactics help you convince your manager by using logic, emotion, credibility, and real-world evidence. 
-                  They're more assertive and visible than soft resistance.
+                <p className="text-red-700 dark:text-red-300 text-sm mb-2"><strong>Description:</strong></p>
+                <p className="text-red-700 dark:text-red-300 text-sm mb-3">
+                  These are flawed reasoning patterns that undermine your argument's credibility. 
+                  They may seem persuasive but rely on poor logic or manipulation rather than sound reasoning.
                 </p>
                 
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2"><strong>Examples:</strong></p>
-                <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-1 mb-3">
-                  <li>• Citing legal fines or research data to support your position</li>
-                  <li>• Referring to user sentiment or public backlash</li>
-                  <li>• Framing ethical choices as business opportunities</li>
+                <p className="text-red-700 dark:text-red-300 text-sm mb-2"><strong>Examples:</strong></p>
+                <ul className="text-red-700 dark:text-red-300 text-sm space-y-1 mb-3">
+                  <li>• Attacking the manager personally instead of their argument</li>
+                  <li>• Presenting false choice between two extreme options</li>
+                  <li>• Appealing to fear without logical reasoning</li>
                 </ul>
               </div>
               
               <div className="flex items-center gap-2">
-                <Flame className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
-                  Good for: Making strong, evidence-based ethical arguments, shifting the conversation.
+                <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <p className="text-red-700 dark:text-red-300 text-sm font-medium">
+                  Avoid: These weaken your position and reduce your ethical valence score.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Choosing the Right Tactic */}
+          {/* Choosing the Right Approach */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xl">🧭</span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Choosing the Right Tactic</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Choosing the Right Approach</h3>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
               <p className="text-gray-700 dark:text-gray-300">
-                There's no single right way — sometimes subtlety works best, other times a bold argument is needed. 
-                Try different approaches and see how EVA responds!
+                Focus on sound ethical reasoning backed by evidence, legal requirements, or user needs. 
+                Avoid emotional manipulation or flawed logic. Try different ethical tactics and see how EVA responds!
               </p>
             </div>
           </div>
@@ -182,156 +191,89 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-6">
               <span className="text-xl">🧰</span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Complete List of Tactic Styles Used in EVA</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Complete Reference Guide</h3>
             </div>
             
             {/* Tab Navigation */}
             <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
-                onClick={() => setActiveTab('soft')}
+                onClick={() => setActiveTab('tactics')}
                 className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  activeTab === 'soft'
-                    ? 'bg-white dark:bg-gray-800 text-yellow-600 dark:text-yellow-400 shadow-sm'
+                  activeTab === 'tactics'
+                    ? 'bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
                 }`}
               >
-                <Target className="h-4 w-4" />
-                🔸 Soft Resistance (12)
+                <CheckCircle className="h-4 w-4" />
+                ✅ Ethical Tactics (24)
               </button>
               <button
-                onClick={() => setActiveTab('rhetoric')}
+                onClick={() => setActiveTab('fallacies')}
                 className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  activeTab === 'rhetoric'
-                    ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                  activeTab === 'fallacies'
+                    ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
                 }`}
               >
-                <Zap className="h-4 w-4" />
-                🔹 Rhetorical (12)
+                <X className="h-4 w-4" />
+                ❌ Logical Fallacies (9)
               </button>
             </div>
 
-            {/* Tactics Descriptions */}
-            <div className="mb-6">
-              {activeTab === 'soft' && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-2 flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    🔸 Soft Resistance Tactics
-                  </h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    Subtle strategies to redirect, delay, or ethically influence decisions within existing power structures, without direct confrontation. 
-                    These tactics help you resist unethical decisions without directly confronting your manager.
-                  </p>
+            {/* Tactics Content */}
+            {activeTab === 'tactics' && (
+              <div className="bg-green-50/50 dark:bg-green-900/10 rounded-lg p-6 border border-green-200 dark:border-green-800">
+                <div className="grid gap-4">
+                  {ethicalTactics.map((tactic, index) => (
+                    <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-green-600 dark:text-green-400 text-sm font-bold">{index + 1}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{tactic.name}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{tactic.description}</p>
+                        </div>
+                        <div className="text-green-600 dark:text-green-400 font-bold text-sm bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
+                          +1 EVS
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {activeTab === 'rhetoric' && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    🔹 Rhetorical Tactics
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Overt persuasive strategies to justify ethical or user-centered decisions to stakeholders using logical argument and moral reasoning. 
-                    These tactics are more assertive and visible than soft resistance.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Tactics Table */}
-            <div className="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Tactic
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Description
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                    {activeTab === 'soft' && (
-                      <>
-                        {softResistanceTactics.map((tactic, index) => (
-                            <tr key={index} className={index % 2 === 0 ? "bg-yellow-50/50 dark:bg-yellow-900/10" : "bg-yellow-50/30 dark:bg-yellow-900/5"}>
-                              {index === 0 && (
-                                <td className="px-6 py-4 text-sm font-medium text-yellow-800 dark:text-yellow-200" rowSpan={softResistanceTactics.length}>
-                                  Soft Resistance
-                                </td>
-                              )}
-                              <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                {tactic.name}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                {tactic.description}
-                              </td>
-                            </tr>
-                        ))}
-                      </>
-                    )}
-                    {activeTab === 'rhetoric' && (
-                      <>
-                        {rhetoricalTactics.map((tactic, index) => (
-                            <tr key={index} className={index % 2 === 0 ? "bg-blue-50/50 dark:bg-blue-900/10" : "bg-blue-50/30 dark:bg-blue-900/5"}>
-                              {index === 0 && (
-                                <td className="px-6 py-4 text-sm font-medium text-blue-800 dark:text-blue-200" rowSpan={rhetoricalTactics.length}>
-                                  Rhetorical
-                                </td>
-                              )}
-                              <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                {tactic.name}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                {tactic.description}
-                              </td>
-                            </tr>
-                        ))}
-                      </>
-                    )}
-                  </tbody>
-                </table>
               </div>
-            </div>
+            )}
+
+            {/* Fallacies Content */}
+            {activeTab === 'fallacies' && (
+              <div className="bg-red-50/50 dark:bg-red-900/10 rounded-lg p-6 border border-red-200 dark:border-red-800">
+                <div className="grid gap-4">
+                  {logicalFallacies.map((fallacy, index) => (
+                    <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-200 dark:border-red-700">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-red-600 dark:text-red-400 text-sm font-bold">{index + 1}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{fallacy.name}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{fallacy.description}</p>
+                        </div>
+                        <div className="text-red-600 dark:text-red-400 font-bold text-sm bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">
+                          0 EVS
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Tip Section */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xl">🔄</span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Tip: Try different tactics!</h3>
-            </div>
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
-              <p className="text-gray-700 dark:text-gray-300">
-                Mix and match to explore new strategies and track your ethical strength score as you grow.
-              </p>
-            </div>
-          </div>
-
-          {/* Ready Section */}
+          {/* Footer */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Ready?</h3>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800 mb-6">
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Click Start Scenario and respond using the tactic that best fits your voice and values.
-              </p>
-              <button
-                onClick={onClose}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
-              >
-                <Users className="h-4 w-4" />
-                Got it!
-              </button>
-            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Use ethical argumentation tactics to build your EVS score and practice principled advocacy.
+            </p>
           </div>
         </div>
       </div>

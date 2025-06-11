@@ -187,7 +187,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [sessionFeedback, setSessionFeedback] = useState<any>(null);
   const [processingChoice, setProcessingChoice] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
-
+  
   
   const { user, setUser, setManagerType: setGlobalManagerType } = useStore();
   const navigate = useNavigate();
@@ -1200,12 +1200,12 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
         </div>
         {onExit && (
           <div className="flex items-center space-x-2">
-            <button
-              onClick={handleReturnToChat}
-              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              Return to Chat
-            </button>
+          <button
+            onClick={handleReturnToChat}
+            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            Return to Chat
+          </button>
           </div>
         )}
       </div>

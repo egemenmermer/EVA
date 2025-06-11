@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight } from 'lucide-react';
+import { Bot, Shield, Eye, Wand2, BookOpen, Brain, Target, Rocket, Moon, Sun, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
 // Import manager icons
@@ -24,6 +24,24 @@ export const LandingPage: React.FC = () => {
   
   // State for the About section tabs
   const [activeAboutTab, setActiveAboutTab] = useState(0);
+  
+  // State for hero slides
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Hero slides content
+  const heroSlides = [
+    {
+      title: "Practice Ethical Decision-Making in Software Development",
+      description: "EVA is an advanced research prototype designed to facilitate exploration of complex ethical challenges within realistic workplace scenarios, guided by sophisticated simulated manager attitudes.",
+      showLogo: true
+    },
+    {
+      title: "Research Presentation",
+      description: "This slide will contain the PowerPoint presentation content for direct presentation on the website.",
+      showLogo: false,
+      isPresentationSlide: true
+    }
+  ];
   
   // About section content
   const aboutContent = [
@@ -159,28 +177,12 @@ export const LandingPage: React.FC = () => {
       </h1>
     </div>
     <div className="flex items-center space-x-4">
-      <a
-        href="https://example.com/pre-survey"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md"
-      >
-        Pre-survey
-      </a>
       <button
         onClick={handleGetStarted}
         className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md flex items-center"
       >
         Start Practicing
       </button>
-      <a
-        href="https://example.com/post-survey"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md"
-      >
-        Post-survey
-      </a>
       <button 
         onClick={toggleDarkMode}
         className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
