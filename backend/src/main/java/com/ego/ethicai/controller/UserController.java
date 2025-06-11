@@ -32,6 +32,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponseDTO> getUserProfile(@CurrentUser CustomUserDetails currentUser){
+        try {
+            UserResponseDTO userProfile = userService.getUser(currentUser.getId());
+            return ResponseEntity.ok(userProfile);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserDetailsById(@PathVariable UUID id){
             User user = userService.findById(id).orElseThrow(

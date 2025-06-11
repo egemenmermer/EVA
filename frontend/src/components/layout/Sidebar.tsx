@@ -551,10 +551,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               // Dispatch event to show tactics modal in main layout
               window.dispatchEvent(new CustomEvent('show-tactics-modal'));
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-md transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+            className="group relative px-3 py-2 text-sm rounded-lg overflow-hidden
+                      bg-gradient-to-r from-green-500 to-emerald-600
+                      hover:from-green-600 hover:to-emerald-700
+                      text-white shadow-md hover:shadow-lg
+                      transform hover:scale-[1.02] active:scale-[0.98]
+                      transition-all duration-500 ease-out
+                      before:absolute before:inset-0 before:bg-gradient-to-r 
+                      before:from-green-400 before:via-emerald-500 before:to-green-600
+                      before:opacity-0 before:transition-opacity before:duration-700
+                      hover:before:opacity-100 w-full flex items-center gap-2"
           >
-            <span className="text-sm">💡</span>
-            <span>Tactics Guide</span>
+            <span className="relative z-10 flex items-center space-x-1.5">
+              <span className="text-sm">💡</span>
+              <span>Tactics Guide</span>
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                           translate-x-[-100%] group-hover:translate-x-[100%] 
+                           transition-transform duration-1500 ease-in-out"></div>
           </button>
         )}
         
@@ -570,11 +584,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               // Dispatch event to show post-survey modal
               window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-md transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg animate-pulse"
-          >
-            <span className="text-sm">📋</span>
-            <span>Final Survey</span>
-          </button>
+            className="group relative px-3 py-2 text-sm rounded-lg overflow-hidden
+                      bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
+                      hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
+                      text-white shadow-md hover:shadow-lg
+                      transform hover:scale-[1.02] active:scale-[0.98]
+                      transition-all duration-500 ease-out
+                      before:absolute before:inset-0 before:bg-gradient-to-r 
+                      before:from-pink-500 before:via-purple-500 before:to-blue-500
+                      before:opacity-0 before:transition-opacity before:duration-700
+                      hover:before:opacity-100 w-full flex items-center gap-2"
+                      >
+              <span className="relative z-10 flex items-center space-x-1.5">
+                <span className="text-sm">📋</span>
+                <span>Post Survey</span>
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                             translate-x-[-100%] group-hover:translate-x-[100%] 
+                             transition-transform duration-1500 ease-in-out"></div>
+            </button>
         )}
       </div>
 
