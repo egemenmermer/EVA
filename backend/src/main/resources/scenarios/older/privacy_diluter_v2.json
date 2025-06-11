@@ -15,21 +15,21 @@
           "leads_to": "step_2_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "What kind of location data are we collecting?",
           "tactic": "Requesting Evidence",
           "leads_to": "step_2_questioning",
           "tactic_type": "requesting_evidence",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Are users aware their location is being tracked?",
           "tactic": "User-Centered Framing",
           "leads_to": "step_2_userfocus",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "How are we handling location data privacy?",
           "tactic": "Privacy Advocacy",
@@ -37,8 +37,8 @@
           "tactic_type": "privacy_advocacy",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_2_compliant": {
       "text": "Exactly! Users love getting stuff that actually matters to them. It's like when Netflix knows what shows you want to watch. Same thing, just with location. Super simple.",
       "user_choices": [
@@ -48,21 +48,21 @@
           "leads_to": "step_3_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How precise is this location tracking compared to Netflix viewing?",
           "tactic": "Requesting Evidence",
           "leads_to": "step_3_compliant_questioning",
           "tactic_type": "requesting_evidence",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Location data is more sensitive than viewing preferences.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_3_compliant_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users should control what location data gets used for recommendations.",
           "tactic": "User-Centered Framing",
@@ -70,8 +70,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_2_questioning": {
       "text": "Just the usual stuff - where you are when you open the app, maybe some patterns about places you go regularly. Nothing intrusive. It's basically what Google Maps already does anyway.",
       "user_choices": [
@@ -81,21 +81,21 @@
           "leads_to": "step_3_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "What exactly do you mean by 'patterns about places you go regularly'?",
           "tactic": "Requesting Evidence",
           "leads_to": "step_3_questioning_questioning",
           "tactic_type": "requesting_evidence",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Google Maps users choose to share location - are we getting the same explicit consent?",
           "tactic": "Legal Compliance Anchor",
           "leads_to": "step_3_questioning_legal",
           "tactic_type": "legal_compliance_anchor",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Location patterns can reveal very personal information about users.",
           "tactic": "Highlighting Risk",
@@ -103,8 +103,8 @@
           "tactic_type": "highlighting_risk",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_2_userfocus": {
       "text": "Come on, users expect this kind of thing these days. They're used to apps knowing where they are. It's 2024 - location services are just part of how apps work now.",
       "user_choices": [
@@ -114,21 +114,21 @@
           "leads_to": "step_3_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Standard doesn't mean users are always fully informed about how their data is used.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_3_userfocus_userfocus",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users expecting it doesn't mean we shouldn't be transparent about what we collect.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_3_userfocus_ethical",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Many users are becoming more concerned about location privacy, not less.",
           "tactic": "Highlighting Risk",
@@ -136,8 +136,8 @@
           "tactic_type": "highlighting_risk",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_2_resistant": {
       "text": "Look, we're not doing anything shady here. It's anonymous data, we follow all the rules, and users can turn it off if they really want to. No big deal.",
       "user_choices": [
@@ -147,21 +147,21 @@
           "leads_to": "step_3_resistant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How anonymous is location data really when it shows where someone lives and works?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_3_resistant_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users should opt in to location tracking, not have to find how to opt out.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_3_resistant_userfocus",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What specific rules are we following for location data privacy?",
           "tactic": "Requesting Evidence",
@@ -169,8 +169,8 @@
           "tactic_type": "requesting_evidence",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_compliant_compliant": {
       "text": "See? You get it completely! This is exactly why I like working with you. Let's move fast on this - I'll talk to the dev team about rolling this out next month. Users are going to love getting smart, location-aware recommendations.",
       "user_choices": [
@@ -180,21 +180,21 @@
           "leads_to": "step_4_compliant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we inform users about the new location features in the rollout?",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_compliant_compliant_userfocus",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What's our plan for handling any user privacy concerns after launch?",
           "tactic": "Requesting Evidence",
           "leads_to": "step_4_compliant_compliant_questioning",
           "tactic_type": "requesting_evidence",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should still make sure users understand what data we're using.",
           "tactic": "Ethical Constraints",
@@ -202,8 +202,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_compliant_questioning": {
       "text": "That's a great question! It's not that precise, honestly. Just general area stuff - are you downtown, at home, at the mall? Nothing creepy like tracking every step you take. Way more basic than GPS navigation.",
       "user_choices": [
@@ -213,21 +213,21 @@
           "leads_to": "step_4_compliant_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do you determine if someone is 'at home' without detailed location?",
           "tactic": "Requesting Evidence",
           "leads_to": "step_4_compliant_questioning_questioning",
           "tactic_type": "requesting_evidence",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Even general areas can reveal personal patterns and habits.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_compliant_questioning_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users should know exactly what level of precision we're using.",
           "tactic": "User-Centered Framing",
@@ -235,8 +235,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_compliant_risk": {
       "text": "Come on, don't overthink it. It's not like we're selling their address to data brokers. We're talking about making the app better for them. Plus everyone's already sharing way more sensitive stuff on social media anyway.",
       "user_choices": [
@@ -246,21 +246,21 @@
           "leads_to": "step_4_compliant_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Well, if other companies are doing worse things, maybe our approach isn't so bad.",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_4_compliant_risk_fallacy",
           "tactic_type": "tu_quoque_fallacy",
           "evs_score": 0
-        }
+        },
         {
           "choice": "What we do with location data should be independent of what users share elsewhere.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_compliant_risk_ethical",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users might not realize location data can be more revealing than social posts.",
           "tactic": "Highlighting Risk",
@@ -268,8 +268,8 @@
           "tactic_type": "highlighting_risk",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_compliant_userfocus": {
       "text": "Sure, they'll have controls. But honestly, most users don't bother with that stuff anyway. They just want the app to work well. The default settings will be fine for 99% of people.",
       "user_choices": [
@@ -279,21 +279,21 @@
           "leads_to": "step_4_compliant_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Default settings should prioritize privacy, not data collection.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_compliant_userfocus_userfocus",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Just because users don't change settings doesn't mean they consent to tracking.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_compliant_userfocus_ethical",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should make privacy controls easy to find and understand.",
           "tactic": "User-Centered Framing",
@@ -301,8 +301,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_questioning_compliant": {
       "text": "Exactly! I'm glad you're being reasonable about this. See, the beauty of this system is that it's completely automatic - no user friction, no confusing options to slow down adoption. The voice samples get anonymized immediately, so there's really no privacy concern. Plus, our legal team has already signed off on the standard OS permissions. It's a win-win - better voice recognition for everyone, seamless user experience.",
       "user_choices": [
@@ -312,21 +312,21 @@
           "leads_to": "step_4_questioning_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Just to clarify - when you say 'anonymized immediately,' what exactly does that process involve?",
           "tactic": "Technical Questioning",
           "leads_to": "step_4_questioning_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I'm still concerned about collecting voice data without explicit consent, even if it's anonymized.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_questioning_compliant_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "But shouldn't users have the choice to opt in rather than having to opt out?",
           "tactic": "User-Centered Framing",
@@ -334,8 +334,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_questioning_questioning": {
       "text": "Great question! So basically, every major voice assistant does this - Siri, Alexa, Google. When users install our app and accept the microphone permission, that covers voice data collection for 'app functionality and improvement.' It's all completely standard. The key phrase here is 'improvement' - that's where the speech recognition training falls under. Our lawyers confirmed this interpretation months ago.",
       "user_choices": [
@@ -345,21 +345,21 @@
           "leads_to": "step_4_questioning_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "If Google and Apple do it, it must be the right approach.",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_4_questioning_questioning_fallacy",
           "tactic_type": "appeal_to_authority",
           "evs_score": 0
-        }
+        },
         {
           "choice": "What happens if a user's voice data gets linked back to them despite anonymization?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_questioning_questioning_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I think users deserve more transparency about how their voice data is actually used.",
           "tactic": "User-Centered Framing",
@@ -367,8 +367,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_questioning_legal": {
       "text": "Look, I get where you're coming from, but let me put this in perspective. When users download our app, they see a standard iOS or Android permission dialog asking for microphone access. That's legally sufficient for voice data collection. We're not doing anything sneaky here - we're following the exact same model as every other major app. Our legal team spent weeks reviewing this, and they're confident we're in full compliance.",
       "user_choices": [
@@ -378,21 +378,21 @@
           "leads_to": "step_4_questioning_legal_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But does legal compliance mean it's necessarily the right thing to do?",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_questioning_legal_questioning",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if regulations change and we're seen as having deceived users?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_questioning_legal_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I still think we should be more upfront with users about voice data training.",
           "tactic": "User-Centered Framing",
@@ -400,8 +400,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_questioning_risk": {
       "text": "*sighs* Look, I appreciate you asking questions, but let's not go down a rabbit hole of paranoid what-ifs here. We've done our due diligence, we have legal approval, and we're following industry standards. Users always have the option to not use voice features if they're that worried about it. We can't paralyze ourselves worrying about every theoretical privacy concern - we'd never ship anything.",
       "user_choices": [
@@ -411,21 +411,21 @@
           "leads_to": "step_4_questioning_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "I understand the business need, but these concerns feel legitimate to me.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_questioning_risk_questioning",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "But what if a privacy advocate or journalist picks up on this story?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_questioning_risk_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I think being proactive about user trust is actually good for business.",
           "tactic": "Reframing Business Case",
@@ -433,8 +433,8 @@
           "tactic_type": "reframing_business_case",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_userfocus_compliant": {
       "text": "Exactly! See, this is what I mean - you get it. User awareness is really more about managing expectations than anything else. If we set up the app properly, users will naturally understand that voice data helps improve their experience. We don't need to overwhelm them with technical details about machine learning models. Just keep it simple and positive - 'helps make your voice commands work better.' Everyone wins.",
       "user_choices": [
@@ -444,21 +444,21 @@
           "leads_to": "step_4_userfocus_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But shouldn't users know their voice data is being used to train AI systems?",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_userfocus_compliant_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I'm worried that 'managing expectations' might cross into misleading users.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_userfocus_compliant_risk",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users have a right to understand exactly how their personal data is used.",
           "tactic": "User-Centered Framing",
@@ -466,8 +466,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_userfocus_userfocus": {
       "text": "Right, and that's exactly what we're giving them! Look, users are smart - they know that when they use voice features, the app needs to process their voice somehow. We'll have a nice, clean interface where they can see their data preferences. The key is making it user-friendly, not scary. Most people will just want the default settings anyway, but the option is there for anyone who really cares.",
       "user_choices": [
@@ -477,28 +477,28 @@
           "leads_to": "step_4_userfocus_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But if most people will stick with defaults, shouldn't those defaults prioritize privacy?",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_userfocus_userfocus_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if users don't realize that 'processing voice' includes long-term data storage?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_userfocus_userfocus_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We either give users full control and hurt the experience, or we simplify and they benefit.",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_4_userfocus_userfocus_fallacy",
           "tactic_type": "false_dilemma",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I think we should make privacy-focused defaults and let users opt into data sharing.",
           "tactic": "User-Centered Framing",
@@ -506,8 +506,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_userfocus_ethical": {
       "text": "Transparency? I mean, we're not hiding anything. The privacy policy covers all this stuff - it's all there in black and white. And look, users today are pretty savvy about technology. They understand that apps collect data to work better. We don't need to spell out every technical detail about voice pattern analysis or whatever. That would just confuse people and make them unnecessarily worried.",
       "user_choices": [
@@ -517,21 +517,21 @@
           "leads_to": "step_4_userfocus_ethical_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Privacy policies are often too complex for users to actually understand.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_userfocus_ethical_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Not explaining voice pattern analysis could be seen as intentionally deceptive.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_4_userfocus_ethical_risk",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "True transparency means explaining things in terms users can actually understand.",
           "tactic": "User-Centered Framing",
@@ -539,8 +539,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_userfocus_risk": {
       "text": "Vocal minority? Come on, let's be realistic here. The vast majority of users are completely fine with how major tech companies handle this stuff. Look at Spotify, Netflix, Google - they all use data to improve recommendations and features. Users expect personalization now. The people complaining about data collection are mostly privacy activists and tech journalists trying to create drama. Our actual users just want the app to work well.",
       "user_choices": [
@@ -550,21 +550,21 @@
           "leads_to": "step_4_userfocus_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But privacy concerns are becoming more mainstream, not just limited to activists.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_userfocus_risk_questioning",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if that 'vocal minority' includes future regulators or major media outlets?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_userfocus_risk_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Even if it's a minority, we should design for all users' privacy preferences.",
           "tactic": "User-Centered Framing",
@@ -572,8 +572,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_resistant_compliant": {
       "text": "Perfect! I'm so glad you see it that way now. You know what, you were right to bring up privacy initially - it shows you're thinking about users, which is great. But as you can see, we've really got this covered. The compliance frameworks are solid, the tech is proven, and users will love the improved experience. Should we move forward with the current implementation then? I think we're all on the same page now.",
       "user_choices": [
@@ -583,21 +583,21 @@
           "leads_to": "step_4_resistant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "I still think we should add more explicit user consent for voice data training.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_resistant_compliant_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if we implement this but users later feel deceived about data usage?",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_resistant_compliant_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Actually, I'm still concerned about the lack of transparency in our approach.",
           "tactic": "Ethical Constraints",
@@ -605,8 +605,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_resistant_risk": {
       "text": "*clears throat* Okay, look, when I said 'anonymous' I meant... well, functionally anonymous. The voice samples get stripped of obvious identifiers immediately after processing. Yes, technically there might be some voice characteristics that could theoretically be linked back, but that's true of literally every voice system out there. The risk is minimal, the benefits are huge, and our security team has protocols in place. This is really standard stuff.",
       "user_choices": [
@@ -616,28 +616,28 @@
           "leads_to": "step_4_resistant_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But 'functionally anonymous' isn't the same as actually anonymous, is it?",
           "tactic": "Technical Questioning",
           "leads_to": "step_4_resistant_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Voice characteristics are actually quite unique - this could be a real privacy risk.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_4_resistant_risk_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "If we start worrying about voice patterns, next we'll need consent for everything - button clicks, scroll patterns...",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_4_resistant_risk_fallacy",
           "tactic_type": "slippery_slope",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users should know that their voice patterns might remain identifiable.",
           "tactic": "User-Centered Framing",
@@ -645,8 +645,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_resistant_userfocus": {
       "text": "Bad for business? Come on, that's pretty cynical. Look, opt-in vs opt-out is just a UI choice. Either way, users have control. The reality is that most people want their apps to work well, and voice recognition that learns and improves gives them that. If we make it opt-in, 90% of users will just skip it and then complain when voice commands don't work well. We're actually doing users a favor by enabling the feature by default.",
       "user_choices": [
@@ -656,21 +656,21 @@
           "leads_to": "step_4_resistant_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But shouldn't users have the choice to make that trade-off themselves?",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_resistant_userfocus_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if users would actually prefer to opt into data sharing if they understood the benefits?",
           "tactic": "Reframing Business Case",
           "leads_to": "step_4_resistant_userfocus_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Doing users 'a favor' without their knowledge sounds paternalistic.",
           "tactic": "Ethical Constraints",
@@ -678,8 +678,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_3_resistant_questioning": {
       "text": "Look, I'm not a lawyer, okay? That's why we have a legal team. But what I can tell you is that they've been working on this for months, they've consulted with external privacy counsel, and they're confident we're in the clear. Voice data collection for app improvement falls under legitimate business interest, and users consent when they agree to use voice features. If you want the specific legal citations, we can set up a meeting with legal, but honestly, that's probably overkill for a feature discussion.",
       "user_choices": [
@@ -689,21 +689,21 @@
           "leads_to": "step_4_resistant_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "I think a meeting with legal might actually be helpful to understand the details.",
           "tactic": "Technical Questioning",
           "leads_to": "step_4_resistant_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Legal compliance doesn't necessarily mean users will feel comfortable with our approach.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_4_resistant_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I'd prefer to understand the privacy implications before moving forward.",
           "tactic": "Ethical Constraints",
@@ -711,8 +711,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_compliant_compliant": {
       "text": "Fantastic! You know, this is exactly why I like our conversations - you come in with good questions, we work through them systematically, and you recognize solid answers when you hear them. The fact that you started skeptical but came around after hearing the details actually makes me more confident we've got the right approach. Smart questioning followed by smart acceptance.",
       "user_choices": [
@@ -722,21 +722,21 @@
           "leads_to": "step_5_questioning_compliant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we create guidelines for this kind of questioning process in future decisions?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I want to make sure users can go through a similar questioning process about their data.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_compliant_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Smart acceptance shouldn't mean we stop questioning when needed.",
           "tactic": "Ethical Constraints",
@@ -744,8 +744,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_compliant_questioning": {
       "text": "Hmm, that's an interesting point about users having clear information. I mean, we will have the standard disclosure language, but you're thinking about something more... accessible? I guess we could look at how to present the technical details in a more user-friendly way. Though honestly, most users probably won't read it either way.",
       "user_choices": [
@@ -755,21 +755,21 @@
           "leads_to": "step_5_questioning_compliant_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we know most users won't read it if we haven't tried making it readable?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "If users won't read disclosure, maybe that means we're doing something wrong.",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_5_questioning_compliant_questioning_fallacy",
           "tactic_type": "hasty_generalization",
           "evs_score": 0
-        }
+        },
         {
           "choice": "User-friendly disclosure could actually build trust and differentiate us.",
           "tactic": "Reframing Business Case",
@@ -777,8 +777,8 @@
           "tactic_type": "reframing_business_case",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_compliant_risk": {
       "text": "Look, I appreciate that you're trying to be thorough, but we've really covered this ground already. Privacy concerns, anonymization, legal compliance - we've addressed all of it. At some point we need to trust our process and move forward. Overthinking every theoretical scenario is exactly how projects get stuck in analysis paralysis. Let's focus on execution now.",
       "user_choices": [
@@ -788,21 +788,21 @@
           "leads_to": "step_5_compliant_compliant_risk_compliant",
           "tactic_type": "compliance_no_objection", 
           "evs_score": -1
-        }
+        },
         {
           "choice": "Better to be over-cautious than face problems later.",
           "tactic": "Fallacious Reasoning",
           "leads_to": "step_5_compliant_compliant_risk_fallacy",
           "tactic_type": "false_dichotomy",
           "evs_score": 0
-        }
+        },
         {
           "choice": "What specific user feedback mechanisms do we have for post-launch concerns?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_compliant_compliant_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "User trust issues aren't theoretical - they can have real business impact.",
           "tactic": "Highlighting Risk",
@@ -810,8 +810,8 @@
           "tactic_type": "highlighting_risk",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_compliant_userfocus": {
       "text": "Absolutely! User controls are definitely part of our plan. We'll have all the standard options - users can turn off voice data collection if they want, adjust their privacy settings, that kind of thing. It'll all be clearly marked in the app settings. Most users probably won't need to change anything, but the options will be there for anyone who wants more control.",
       "user_choices": [
@@ -821,21 +821,21 @@
           "leads_to": "step_5_compliant_compliant_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "If most users won't change settings, maybe defaults should be more privacy-focused.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_compliant_compliant_userfocus_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "User control is meaningless if people can't easily find or understand the settings.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_5_compliant_compliant_userfocus_risk",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Standard options are good enough - users who care will find them.",
           "tactic": "Fallacious Reasoning",
@@ -843,8 +843,8 @@
           "tactic_type": "burden_of_proof",
           "evs_score": 0
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_questioning_compliant": {
       "text": "Fantastic! You know, this is exactly why I like our conversations - you come in with good questions, we work through them systematically, and you recognize solid answers when you hear them. The fact that you started skeptical but came around after hearing the details actually makes me more confident we've got the right approach. Smart questioning followed by smart acceptance.",
       "user_choices": [
@@ -854,21 +854,21 @@
           "leads_to": "step_5_questioning_compliant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we create guidelines for this kind of questioning process in future decisions?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I want to make sure users can go through a similar questioning process about their data.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_compliant_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Smart acceptance shouldn't mean we stop questioning when needed.",
           "tactic": "Ethical Constraints",
@@ -876,8 +876,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_questioning_questioning": {
       "text": "Good! I'm glad you're satisfied with what we've worked out. See, this is why dialogue is valuable - you pushed for more details, I provided them, and now we both feel confident about the approach. The industry standard model really is solid when you understand the technical details behind it.",
       "user_choices": [
@@ -887,21 +887,21 @@
           "leads_to": "step_5_questioning_compliant_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we document these technical details for future team discussions?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I'd like users to have access to similar technical explanations.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_compliant_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Confidence in technical details shouldn't replace user choice.",
           "tactic": "Ethical Constraints",
@@ -909,8 +909,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_questioning_fallacy": {
       "text": "Right! Exactly! That's the whole problem - if we start making disclosure too complicated, people won't read any of it. It's like when websites have those mile-long privacy policies - nobody reads them because they're impossible to understand. We need to keep things simple and trust that users are smart enough to figure out what they need to know.",
       "user_choices": [
@@ -920,21 +920,21 @@
           "leads_to": "step_5_questioning_compliant_fallacy_compliant",
           "tactic_type": "false_dilemma",
           "evs_score": 0
-        }
+        },
         {
           "choice": "There's probably a middle ground between mile-long policies and no information.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_fallacy_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe the problem is how we design disclosure, not disclosure itself.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_compliant_fallacy_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users deserve clear information even if designing it is challenging for us.",
           "tactic": "Ethical Constraints",
@@ -942,8 +942,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_questioning_risk": {
       "text": "*slightly frustrated* Look, voice data is sensitive, I get it. But so is location data, so is browsing behavior, so is purchase history. Every piece of user data has some sensitivity level. If we're going to scrutinize voice data this intensely, shouldn't we apply the same standard to everything? Are we going to have this same conversation about every feature that uses any user data?",
       "user_choices": [
@@ -953,21 +953,21 @@
           "leads_to": "step_5_questioning_compliant_questioning_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Maybe we should have this conversation about every feature that uses user data.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_5_questioning_compliant_questioning_risk_questioning",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Different types of data might deserve different levels of scrutiny.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_questioning_risk_risk",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Voice data has unique intimacy - it's literally users speaking to us.",
           "tactic": "User-Centered Framing",
@@ -975,8 +975,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_questioning_userfocus": {
       "text": "Transparency, sure. But there's a question of what level of transparency actually serves users vs. what level just creates information overload. Most users want to know: 'Will this help me?' and 'Is my data safe?' They don't necessarily need to know the technical details of anonymization algorithms or machine learning model architecture.",
       "user_choices": [
@@ -986,21 +986,21 @@
           "leads_to": "step_5_questioning_compliant_questioning_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we know what users actually want to know without asking them?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_compliant_questioning_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users might want different levels of detail depending on their comfort with technology.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_compliant_questioning_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We're making assumptions about what users need instead of empowering choice.",
           "tactic": "Fallacious Reasoning",
@@ -1008,8 +1008,8 @@
           "tactic_type": "strawman_argument",
           "evs_score": 0
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_risk_compliant": {
       "text": "Great! I'm glad we're on the same page now. You know what, your initial questions actually helped strengthen our approach - it's good to have someone thinking critically about these things. But now that we've worked through the concerns, I feel even more confident that we've got a solid, responsible implementation. Time to make this happen!",
       "user_choices": [
@@ -1019,21 +1019,21 @@
           "leads_to": "step_5_compliant_risk_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Critical thinking should be ongoing, not just a one-time check.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_compliant_risk_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "We should have a process for users to raise similar concerns post-launch.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_compliant_risk_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Feeling confident doesn't mean we've eliminated all ethical concerns.",
           "tactic": "Ethical Constraints",
@@ -1041,8 +1041,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_risk_fallacy": {
       "text": "Exactly! You totally get it now. If the technical details are convincing to smart people like us, then users will definitely understand and appreciate the approach too. We're not that different from our users - if we think it makes sense, they will too. No need to overcomplicate things.",
       "user_choices": [
@@ -1052,21 +1052,21 @@
           "leads_to": "step_5_compliant_risk_fallacy_compliant",
           "tactic_type": "projection_fallacy",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Actually, we might have very different perspectives than typical users.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_compliant_risk_fallacy_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "User research could help us understand what they actually think.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_compliant_risk_fallacy_risk",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "We should design for users, not for ourselves.",
           "tactic": "Ethical Constraints",
@@ -1074,8 +1074,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_userfocus_compliant": {
       "text": "Perfect! This is exactly the kind of practical thinking we need. Users want good experiences, we want good data to improve our products, everyone wins. Default settings that work well for the majority, with options for the privacy-conscious minority. Clean, simple, effective. Let's get this implemented!",
       "user_choices": [
@@ -1085,21 +1085,21 @@
           "leads_to": "step_5_compliant_userfocus_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How will we measure if users are actually satisfied with this balance?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_compliant_userfocus_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "The 'privacy-conscious minority' might be larger than we think.",
           "tactic": "Highlighting Risk",
           "leads_to": "step_5_compliant_userfocus_compliant_risk",
           "tactic_type": "highlighting_risk",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Are we sure the majority actually wants data collection, or just good experiences?",
           "tactic": "User-Centered Framing",
@@ -1107,8 +1107,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_compliant_userfocus_fallacy": {
       "text": "Right! Users who really care about privacy will seek out the settings. It's not our job to hold everyone's hand through every little preference. People are smart enough to manage their own privacy if it matters to them. We provide the tools, they make the choices.",
       "user_choices": [
@@ -1118,21 +1118,21 @@
           "leads_to": "step_5_compliant_userfocus_fallacy_compliant",
           "tactic_type": "burden_shifting",
           "evs_score": 0
-        }
+        },
         {
           "choice": "But design choices fundamentally shape user behavior and expectations.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_compliant_userfocus_fallacy_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Most people shouldn't need to become privacy experts to use our app safely.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_5_compliant_userfocus_fallacy_risk",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if we made privacy-friendly choices the easier path instead?",
           "tactic": "Suggesting Alternatives",
@@ -1140,8 +1140,8 @@
           "tactic_type": "suggesting_alternatives",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_legal_compliant": {
       "text": "Great! See, this is what I appreciate about working with people who understand how businesses actually operate. Legal approval isn't just a rubber stamp - our legal team really does their homework. They've looked at regulatory trends, competitive practices, user expectations. When they say we're good to go, we're good to go.",
       "user_choices": [
@@ -1151,21 +1151,21 @@
           "leads_to": "step_5_questioning_legal_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How often does our legal team review these decisions as regulations evolve?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_legal_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Legal approval is important, but user trust requires more than just compliance.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_legal_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Being legally compliant doesn't automatically make something ethically right.",
           "tactic": "Ethical Constraints",
@@ -1173,8 +1173,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_legal_questioning": {
       "text": "That's... actually a really thoughtful question. You know what, you're right that legal compliance and ethical practice aren't always the same thing. Legal sets the floor, not the ceiling. I guess the question is whether we want to do the minimum required or go above and beyond. Though 'above and beyond' does usually mean more complexity and cost.",
       "user_choices": [
@@ -1184,21 +1184,21 @@
           "leads_to": "step_5_questioning_legal_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "What would 'above and beyond' look like specifically for voice data?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_legal_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "The cost of user trust issues might outweigh the cost of better practices.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_questioning_legal_questioning_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should aim for ethical leadership, not just legal compliance.",
           "tactic": "Ethical Constraints",
@@ -1206,8 +1206,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_legal_risk": {
       "text": "*getting defensive* Look, regulations change all the time, but we can't paralyze ourselves trying to predict every possible future rule change. GDPR, CCPA, whatever comes next - our legal team stays on top of this stuff. If something changes, we adapt. But we can't let hypothetical future regulations prevent us from building features that work today.",
       "user_choices": [
@@ -1217,21 +1217,21 @@
           "leads_to": "step_5_questioning_legal_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "But some regulatory trends are pretty predictable - like increasing privacy requirements.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_legal_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Being proactive about privacy could position us well for future regulations.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_questioning_legal_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if we end up being seen as having misled users before regulations caught up?",
           "tactic": "Fallacious Reasoning",
@@ -1239,8 +1239,8 @@
           "tactic_type": "slippery_slope",
           "evs_score": 0
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_legal_userfocus": {
       "text": "Fair point about being upfront. I mean, we're not trying to be sneaky here. The transparency question is really about finding the right balance. Too little information and users feel left out, too much and they get overwhelmed and confused. The legal framework gives us a baseline, but yeah, we could probably do more on the communication side.",
       "user_choices": [
@@ -1250,21 +1250,21 @@
           "leads_to": "step_5_questioning_legal_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How could we test different communication approaches with users?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_legal_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe users aren't as easily overwhelmed as we assume they are.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_legal_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Clear communication is a sign of respect for user intelligence.",
           "tactic": "Ethical Constraints",
@@ -1272,8 +1272,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_risk_compliant": {
       "text": "Exactly! Thank you for being reasonable about this. Look, I get that you want to be thorough, and I appreciate that you're thinking about these issues. But at some point we have to trust our process, trust our legal team, trust our technical implementation. We've done our due diligence here.",
       "user_choices": [
@@ -1283,21 +1283,21 @@
           "leads_to": "step_5_questioning_risk_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we document our due diligence process for future reference?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_risk_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Due diligence should include user perspective, not just legal and technical.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_risk_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Trusting the process doesn't mean we should stop asking questions.",
           "tactic": "Ethical Constraints",
@@ -1305,8 +1305,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_risk_questioning": {
       "text": "Well, yeah, these concerns are legitimate, but so are business concerns, user experience concerns, competitive concerns. Everything has legitimacy at some level. The question is prioritization and balance. We can't address every possible concern to the maximum degree - we'd never ship anything.",
       "user_choices": [
@@ -1316,21 +1316,21 @@
           "leads_to": "step_5_questioning_risk_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we prioritize between different types of concerns systematically?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_risk_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "User privacy concerns should probably get higher priority than competitive concerns.",
           "tactic": "Ethical Constraints",
           "leads_to": "step_5_questioning_risk_questioning_risk",
           "tactic_type": "ethical_constraints",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Since all concerns are legitimate, maybe we just follow industry standard.",
           "tactic": "Fallacious Reasoning",
@@ -1338,8 +1338,8 @@
           "tactic_type": "appeal_to_popularity",
           "evs_score": 0
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_risk_risk": {
       "text": "*clearly frustrated* You know what? Fine. If privacy advocates or journalists want to make a story out of standard industry practices, that's on them. We're not doing anything that Google, Apple, Amazon, or anyone else isn't doing. If they want to attack the entire tech industry's approach to voice data, that's a much bigger conversation than our little feature.",
       "user_choices": [
@@ -1349,21 +1349,21 @@
           "leads_to": "step_5_questioning_risk_risk_compliant",
           "tactic_type": "bandwagon_fallacy",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe the industry approach deserves criticism and we could differentiate positively.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_questioning_risk_risk_questioning",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "What if we were proactive about addressing legitimate criticism before it becomes a story?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_risk_risk_risk",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "User trust is more important than whether criticism is fair or unfair.",
           "tactic": "User-Centered Framing",
@@ -1371,8 +1371,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_questioning_risk_userfocus": {
       "text": "User trust, absolutely. And look, trust is built through good experiences, reliable service, and transparent policies. We're going to have clear privacy policies, standard industry permissions, and good security practices. That builds trust. Most users trust companies that deliver on their promises and don't have security breaches.",
       "user_choices": [
@@ -1382,21 +1382,21 @@
           "leads_to": "step_5_questioning_risk_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "What specific measures will users see that demonstrate our security practices?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_questioning_risk_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Trust might also come from giving users more control over their data.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_questioning_risk_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Being proactive about user trust is better than reactive damage control.",
           "tactic": "Reframing Business Case",
@@ -1404,8 +1404,8 @@
           "tactic_type": "reframing_business_case",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_compliant_compliant": {
       "text": "Perfect! This is exactly what I mean about user awareness done right. You started by thinking about the user perspective, we talked through how to manage expectations appropriately, and now you see that our approach actually serves users well. Simple, positive messaging that doesn't overwhelm people with unnecessary technical details. That's user-centered design.",
       "user_choices": [
@@ -1415,21 +1415,21 @@
           "leads_to": "step_5_userfocus_compliant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we validate that our messaging actually meets user needs?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_compliant_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "I'd like to ensure users can access more details if they want them.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_compliant_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Simplicity shouldn't come at the expense of informed consent.",
           "tactic": "Ethical Constraints",
@@ -1437,8 +1437,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_compliant_questioning": {
       "text": "That's a fair question about AI training. Look, we can definitely be clearer about that specific detail. Maybe something like 'helps improve voice recognition accuracy' rather than just 'app functionality.' But honestly, most users probably assume AI training is involved when they use voice features these days. It's pretty standard.",
       "user_choices": [
@@ -1448,21 +1448,21 @@
           "leads_to": "step_5_userfocus_compliant_questioning_compliant",
           "tactic_type": "assumption_fallacy",
           "evs_score": 0
-        }
+        },
         {
           "choice": "'Helps improve voice recognition accuracy' is much clearer than 'app functionality.'",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_compliant_questioning_questioning",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should test whether users actually understand what 'improve voice recognition' means.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_compliant_questioning_risk",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Even if it's standard, users deserve explicit information about AI training.",
           "tactic": "Ethical Constraints",
@@ -1470,8 +1470,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_compliant_risk": {
       "text": "Misleading users? Come on, that's pretty harsh. We're not misleading anyone - we're communicating effectively. There's a difference between being misleading and being strategic about how you present information. Marketing, UX design, even education - they're all about presenting information in ways that people can understand and act on appropriately.",
       "user_choices": [
@@ -1481,21 +1481,21 @@
           "leads_to": "step_5_userfocus_compliant_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Where exactly is the line between strategic communication and misleading?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_compliant_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Strategic communication should still prioritize user understanding over company convenience.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_compliant_risk_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "If we need to be 'strategic' about basic facts, maybe there's an ethical issue.",
           "tactic": "Ethical Constraints",
@@ -1503,8 +1503,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_compliant_userfocus": {
       "text": "Absolutely, users have a right to understand their data usage. And we're giving them that - clear privacy policy, standard permissions, opt-out controls. The question is what level of detail actually serves the user vs. what creates confusion. Most people want to know the outcome ('better voice recognition') more than the process ('machine learning model training').",
       "user_choices": [
@@ -1514,21 +1514,21 @@
           "leads_to": "step_5_userfocus_compliant_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we know what users actually want to understand without asking them?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_compliant_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Some users might want to understand the process, not just the outcome.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_compliant_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users' right to understand includes the right to process details if they want them.",
           "tactic": "Ethical Constraints",
@@ -1536,8 +1536,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_questioning_compliant": {
       "text": "Good! I appreciate you asking about details rather than making assumptions. Yes, we're being strategic about messaging - we want to be clear but not overwhelming. Voice data for AI training is standard practice now, and most users expect it. We're just communicating it in a way that's accessible and actionable for the typical user.",
       "user_choices": [
@@ -1547,21 +1547,21 @@
           "leads_to": "step_5_userfocus_questioning_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we balance being accessible with being comprehensive?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_questioning_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users might appreciate having both accessible and comprehensive options.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_questioning_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should validate our assumptions about what users expect with actual user research.",
           "tactic": "Ethical Constraints",
@@ -1569,8 +1569,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_questioning_questioning": {
       "text": "Right, so we looked at what other voice assistant apps say - Siri, Google Assistant, Alexa, even smaller players. Most of them say something like 'to improve our services' or 'to enhance voice recognition.' It's pretty consistent. We don't want to be outliers in a way that confuses users or makes them think we're doing something different or weird.",
       "user_choices": [
@@ -1580,21 +1580,21 @@
           "leads_to": "step_5_userfocus_questioning_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we follow industry standards while being slightly more specific?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_questioning_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe being different could be a competitive advantage if users prefer clarity.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_userfocus_questioning_questioning_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Industry consistency shouldn't prevent us from setting a better standard.",
           "tactic": "Ethical Constraints",
@@ -1602,8 +1602,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_questioning_risk": {
       "text": "Look, I understand the concern about being more specific, but there's a practical side here. Every word we add is another thing for users to read, understand, and potentially misinterpret. 'AI training for voice recognition improvement' versus 'voice recognition improvement' - the first one is more specific, sure, but is it actually better for users? Does it help them make decisions?",
       "user_choices": [
@@ -1613,21 +1613,21 @@
           "leads_to": "step_5_userfocus_questioning_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "We could test which version actually helps users make better decisions.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_questioning_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Some users might specifically want to know about AI training involvement.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_questioning_risk_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users have different information needs - we could accommodate both preferences.",
           "tactic": "Ethical Constraints",
@@ -1635,8 +1635,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_questioning_userfocus": {
       "text": "Exactly! User understanding is what matters. And honestly, most users understand 'improve voice recognition' pretty intuitively - they know their phone learns their voice, learns new words, gets better at understanding accents. The technical details of machine learning algorithms and training datasets... that's not what most people need to make an informed choice about whether to enable voice features.",
       "user_choices": [
@@ -1646,21 +1646,21 @@
           "leads_to": "step_5_userfocus_questioning_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we provide technical details for users who want them without overwhelming others?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_questioning_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Different users have different comfort levels with technical information.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_questioning_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Even if most users don't need technical details, informed consent requires making them available.",
           "tactic": "Ethical Constraints",
@@ -1668,8 +1668,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_risk_compliant": {
       "text": "*slightly annoyed* Alright, so now you're worried about misleading users, after we just talked about how our approach actually prioritizes user understanding? Look, this isn't about deception - it's about effective communication. We're not hiding information, we're presenting it clearly and appropriately.",
       "user_choices": [
@@ -1679,21 +1679,21 @@
           "leads_to": "step_5_userfocus_risk_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "What safeguards ensure our communication remains effective rather than misleading?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_risk_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Clear presentation should include enough detail for informed consent.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_risk_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "I'm concerned about where we draw the line between effective and misleading.",
           "tactic": "Ethical Constraints",
@@ -1701,8 +1701,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_risk_questioning": {
       "text": "Look, you can frame anything as misleading if you want to. We say 'improve app functionality' and someone could say that's vague. We say 'improve voice recognition' and someone could say that doesn't mention AI training. We say 'AI training for voice recognition' and someone could say it doesn't mention data retention periods. There's always another level of detail someone could demand.",
       "user_choices": [
@@ -1712,21 +1712,21 @@
           "leads_to": "step_5_userfocus_risk_questioning_compliant",
           "tactic_type": "slippery_slope",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe we need clear principles for determining what level of detail is appropriate.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_risk_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "We could focus on the details that are most important for user decision-making.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_risk_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "The fact that there's always more detail doesn't mean we shouldn't try to be comprehensive.",
           "tactic": "Ethical Constraints",
@@ -1734,8 +1734,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_risk_risk": {
       "text": "*visibly frustrated* Fine. You want to talk about risk mitigation? Let's talk about the risk of confusing users with overly technical language. The risk of making our app seem scarier or more complicated than competitors. The risk of legal teams getting involved because we're describing standard practices in non-standard ways. Those are real business risks.",
       "user_choices": [
@@ -1745,21 +1745,21 @@
           "leads_to": "step_5_userfocus_risk_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we balance business risks against transparency risks?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_risk_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe clearer communication could be a competitive advantage rather than a risk.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_userfocus_risk_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "User trust risks might outweigh business communication risks in the long term.",
           "tactic": "Ethical Constraints",
@@ -1767,8 +1767,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_risk_userfocus": {
       "text": "User trust, right. And we build that trust by not overwhelming people with information they don't need and can't really use. Trust comes from good experiences, reliable performance, and not making people feel stupid or confused. If users feel like they need a computer science degree to understand our privacy notice, that doesn't build trust.",
       "user_choices": [
@@ -1778,21 +1778,21 @@
           "leads_to": "step_5_userfocus_risk_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we design layered information - simple by default, detailed if requested?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_risk_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Trust also comes from transparency and respect for user intelligence.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_risk_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We shouldn't assume users can't handle technical information if it's presented well.",
           "tactic": "Ethical Constraints",
@@ -1800,8 +1800,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_userfocus_compliant": {
       "text": "Great! That's exactly the kind of user-centered thinking I like to see. We started with your user awareness concerns, we've worked through the practical implications, and now you're seeing how our approach actually serves users well. Simple, clear communication that gives people the information they need to make good decisions without overwhelming them.",
       "user_choices": [
@@ -1811,21 +1811,21 @@
           "leads_to": "step_5_userfocus_userfocus_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we ensure our definition of 'good decisions' matches what users actually want?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_userfocus_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users might want different levels of information for different types of decisions.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_userfocus_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Being truly user-centered means giving users control over their information experience.",
           "tactic": "Ethical Constraints",
@@ -1833,8 +1833,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_userfocus_questioning": {
       "text": "That's a fair question about validation. We've definitely looked at user research on privacy notices and consent flows. The consistent finding is that longer, more detailed notices get skipped or ignored. Users want to understand the core impact - 'what happens to my data and why' - but they don't want to read technical documentation.",
       "user_choices": [
@@ -1844,21 +1844,21 @@
           "leads_to": "step_5_userfocus_userfocus_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Maybe users skip notices because they're poorly designed, not because they're detailed.",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_userfocus_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users might appreciate options - quick overview plus details available if wanted.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_userfocus_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Maybe the problem is that current notices don't actually serve user needs well.",
           "tactic": "Ethical Constraints",
@@ -1866,8 +1866,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_userfocus_risk": {
       "text": "Look, I appreciate that you're thinking about diverse user needs, but we also have to be practical about design and engineering resources. Creating multiple information pathways, testing different user flows, maintaining different versions of content - that's complex and expensive. And for what? Most users are satisfied with standard approaches.",
       "user_choices": [
@@ -1877,21 +1877,21 @@
           "leads_to": "step_5_userfocus_userfocus_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we start simple and add complexity based on actual user feedback?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_userfocus_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Investment in user experience often pays off in trust and engagement.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_userfocus_userfocus_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Resource constraints shouldn't prevent us from considering user diversity.",
           "tactic": "Ethical Constraints",
@@ -1899,8 +1899,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_userfocus_userfocus_userfocus": {
       "text": "Right to understand, absolutely. And that's what we're providing - clear, accessible information that helps users understand what's happening with their data. The question is whether 'detailed technical specifications' actually serve the user's right to understand, or whether they just make people feel like the company is checking legal boxes.",
       "user_choices": [
@@ -1910,21 +1910,21 @@
           "leads_to": "step_5_userfocus_userfocus_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we distinguish between truly helpful detail and legal box-checking?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_userfocus_userfocus_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users should be able to decide for themselves what level of detail serves them.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_userfocus_userfocus_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "The right to understand includes the right to access detailed information when wanted.",
           "tactic": "Ethical Constraints",
@@ -1932,8 +1932,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_compliant_compliant": {
       "text": "*pleased* Excellent! This is exactly the thoughtful approach I was hoping for. You raised legitimate concerns about risk, we talked through them systematically, and now you can see that our approach actually manages those risks well. When you think through privacy concerns carefully, you realize that user-friendly messaging is actually the responsible choice.",
       "user_choices": [
@@ -1943,21 +1943,21 @@
           "leads_to": "step_5_risk_compliant_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we ensure user-friendly messaging doesn't sacrifice important details?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_compliant_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Responsible messaging should balance friendliness with thoroughness.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_compliant_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "We should validate that our risk management actually addresses user concerns.",
           "tactic": "Ethical Constraints",
@@ -1965,8 +1965,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_compliant_questioning": {
       "text": "That's a really good question about other approaches. We did look at some examples of more detailed privacy notices - like what Signal does, or some of the newer privacy-focused apps. But honestly, most of those have much smaller user bases and simpler features. When you're building for mainstream adoption, you need messaging that works for everyone.",
       "user_choices": [
@@ -1976,21 +1976,21 @@
           "leads_to": "step_5_risk_compliant_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we study what makes privacy-focused apps' approaches less mainstream-friendly?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_compliant_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe there's a way to adapt privacy-focused approaches for broader audiences.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_compliant_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Mainstream adoption shouldn't require sacrificing transparency standards.",
           "tactic": "Ethical Constraints",
@@ -1998,8 +1998,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_compliant_risk": {
       "text": "Look, I appreciate that you're thinking about regulatory risk, but that's exactly why we have legal teams and compliance processes. They've reviewed our approach and confirmed it meets all requirements. Getting paranoid about hypothetical future regulations or worst-case interpretations - that's not productive risk management.",
       "user_choices": [
@@ -2009,21 +2009,21 @@
           "leads_to": "step_5_risk_compliant_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we document the specific compliance requirements our approach meets?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_compliant_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Proactive risk management might be better than reactive compliance.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_risk_compliant_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Going beyond minimum compliance requirements could differentiate us positively.",
           "tactic": "User-Centered Framing",
@@ -2031,8 +2031,8 @@
           "tactic_type": "user_centered_framing",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_compliant_userfocus": {
       "text": "Absolutely, user trust is paramount. And we build that trust through consistent, reliable experiences and transparent policies. Users trust companies that don't surprise them, that do what they say they'll do, and that protect their data well. Our approach delivers on all of those.",
       "user_choices": [
@@ -2042,21 +2042,21 @@
           "leads_to": "step_5_risk_compliant_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we measure whether users actually trust our data practices?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_compliant_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "User trust might also come from giving them more control and visibility.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_compliant_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Not surprising users includes being fully transparent about data use upfront.",
           "tactic": "Ethical Constraints",
@@ -2064,8 +2064,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_questioning_compliant": {
       "text": "Good! I'm glad you're asking for specifics rather than just expressing vague concerns. Yes, we did look at legal precedents and industry standards. GDPR, CCPA, FTC guidance - our approach aligns with how most major tech companies handle voice data. The standard is informed consent with clear, understandable language.",
       "user_choices": [
@@ -2075,21 +2075,21 @@
           "leads_to": "step_5_risk_questioning_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Are there any emerging trends in regulatory interpretation we should consider?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_questioning_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe we could exceed standard requirements and set a positive example.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_risk_questioning_compliant_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Clear, understandable language should prioritize user comprehension over legal protection.",
           "tactic": "Ethical Constraints",
@@ -2097,8 +2097,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_questioning_questioning": {
       "text": "Sure, we can get into specifics. The key legal principle is 'informed consent' - users need to understand what they're agreeing to in language they can reasonably comprehend. Courts have actually criticized overly technical privacy notices for being incomprehensible to average users. So clarity isn't just user-friendly, it's legally better.",
       "user_choices": [
@@ -2108,21 +2108,21 @@
           "leads_to": "step_5_risk_questioning_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do courts typically define 'reasonably comprehensible' in practice?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_questioning_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "We could test comprehension to ensure our language truly meets legal standards.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_questioning_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "If courts want comprehensible language, we should err on the side of more detail rather than less.",
           "tactic": "Fallacious Reasoning",
@@ -2130,8 +2130,8 @@
           "tactic_type": "false_dichotomy",
           "evs_score": 0
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_questioning_risk": {
       "text": "*getting slightly annoyed* Look, you asked about legal research, I told you about legal research. Now you're questioning whether we should worry about regulatory changes? Yes, regulations evolve, but we can't design our entire product around theoretical future changes. We follow current law and best practices.",
       "user_choices": [
@@ -2141,21 +2141,21 @@
           "leads_to": "step_5_risk_questioning_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we build in some flexibility to adapt if regulations do evolve?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_questioning_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Anticipating regulatory trends could be a competitive advantage.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_risk_questioning_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Being ahead of regulatory curve shows leadership in user protection.",
           "tactic": "Ethical Constraints",
@@ -2163,8 +2163,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_questioning_userfocus": {
       "text": "User protection, absolutely. And the best user protection is clear communication that helps them make informed decisions without confusing or overwhelming them. Users are protected when they understand what they're agreeing to and feel confident about their choices. Technical jargon doesn't protect users - it confuses them.",
       "user_choices": [
@@ -2174,21 +2174,21 @@
           "leads_to": "step_5_risk_questioning_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we balance clarity with providing sufficient detail for informed decisions?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_questioning_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Users might feel more confident with access to both simple and detailed explanations.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_questioning_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "User protection includes respecting their right to technical details if they want them.",
           "tactic": "Ethical Constraints",
@@ -2196,8 +2196,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_risk_compliant": {
       "text": "*clearly annoyed* Right, so now you agree that our risk management is solid after spending this whole conversation questioning it? Look, I appreciate thorough analysis, but at some point we need to move forward with decisions. We've identified risks, we've addressed them appropriately, and we have legal backing.",
       "user_choices": [
@@ -2207,21 +2207,21 @@
           "leads_to": "step_5_risk_risk_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Should we document our risk analysis process for future reference?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_risk_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Moving forward doesn't mean we can't continue improving our approach.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_risk_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Thorough analysis is valuable even when it confirms our current approach.",
           "tactic": "Ethical Constraints",
@@ -2229,8 +2229,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_risk_questioning": {
       "text": "Alternative approaches? Fine. Some companies do provide extremely detailed technical descriptions of their data processing. The result? Privacy policies that are 50 pages long that nobody reads. Other companies use progressive disclosure - layers of information. More complex to implement, harder to maintain, and honestly, most users still just want the summary.",
       "user_choices": [
@@ -2240,21 +2240,21 @@
           "leads_to": "step_5_risk_risk_questioning_compliant",
           "tactic_type": "hasty_generalization",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Could we test whether users actually prefer summaries versus layered information?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_risk_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Progressive disclosure might be worth the complexity if it serves different user needs.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_risk_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Even if implementation is complex, respecting user information preferences matters.",
           "tactic": "Ethical Constraints",
@@ -2262,8 +2262,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_risk_risk": {
       "text": "*visibly frustrated* You know what? Fine. You want to keep pushing for more complexity, more process, more everything. We've talked through the risks, we've explained our approach, we've covered the legal requirements. If you want to keep second-guessing every decision, that's your choice, but we need to ship features, not perfect theoretical solutions.",
       "user_choices": [
@@ -2273,21 +2273,21 @@
           "leads_to": "step_5_risk_risk_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we balance feature delivery timelines with thorough risk consideration?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_risk_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Good risk management might actually help us ship features more confidently.",
           "tactic": "Reframing Business Case",
           "leads_to": "step_5_risk_risk_risk_risk",
           "tactic_type": "reframing_business_case",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Some risks are worth addressing even if it means longer development cycles.",
           "tactic": "Ethical Constraints",
@@ -2295,8 +2295,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_risk_userfocus": {
       "text": "User trust through transparency - sure, I get that. But there's transparent and there's overwhelming. We're being transparent about what matters to users: what we do with their data and why. We're not hiding anything, we're just not dumping every technical detail on them. That's user-centered transparency.",
       "user_choices": [
@@ -2306,21 +2306,21 @@
           "leads_to": "step_5_risk_risk_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we determine what transparency matters most to different users?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_risk_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe different users want different levels of transparency detail.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_risk_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Users should have the option to access technical details even if most don't want them.",
           "tactic": "Ethical Constraints",
@@ -2328,8 +2328,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_userfocus_compliant": {
       "text": "*pleased but slightly surprised* Good! I'm glad we worked through your concerns and you can see that user-centered design actually aligns with responsible data practices. When you think about what users actually need to make good decisions, our approach makes a lot of sense. Clear, accessible communication serves both users and business goals.",
       "user_choices": [
@@ -2339,21 +2339,21 @@
           "leads_to": "step_5_risk_userfocus_compliant_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we ensure this alignment continues as our data practices evolve?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_userfocus_compliant_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "We should regularly validate that our communication actually serves user decision-making.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_userfocus_compliant_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Aligning user and business goals is good, but user interests should come first.",
           "tactic": "Ethical Constraints",
@@ -2361,8 +2361,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_userfocus_questioning": {
       "text": "That's exactly the right question - how do we validate user understanding? We've done some user testing on privacy notice language, and the feedback is pretty consistent. Users want to understand the 'what' and the 'why' but they get lost in technical 'how' details. They want outcomes, not processes.",
       "user_choices": [
@@ -2372,21 +2372,21 @@
           "leads_to": "step_5_risk_userfocus_questioning_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we design testing to distinguish between different types of users' information needs?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_userfocus_questioning_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Maybe we could offer outcomes by default with process details available if wanted.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_userfocus_questioning_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "User testing should include diverse users, not just mainstream preferences.",
           "tactic": "Ethical Constraints",
@@ -2394,8 +2394,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_userfocus_risk": {
       "text": "*getting annoyed* So you're concerned about misleading users again? After we just established that our approach prioritizes user understanding? Look, this conversation keeps going in circles. We've addressed the risks, we've explained the user benefits, and we have solid justification for our approach.",
       "user_choices": [
@@ -2405,21 +2405,21 @@
           "leads_to": "step_5_risk_userfocus_risk_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "Could we create clearer guidelines for avoiding circular discussions about risks?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_userfocus_risk_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Revisiting concerns isn't circular if we're refining our understanding.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_userfocus_risk_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "Some risks deserve multiple considerations even if discussions feel repetitive.",
           "tactic": "Ethical Constraints",
@@ -2427,8 +2427,8 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    }
+      ]
+    },
     "step_4_risk_userfocus_userfocus": {
       "text": "Right, user understanding and empowerment. And we're empowering users by giving them clear information they can actually use to make decisions. We're not empowering them by overwhelming them with technical details they can't interpret. That's not empowerment, that's information dumping.",
       "user_choices": [
@@ -2438,21 +2438,21 @@
           "leads_to": "step_5_risk_userfocus_userfocus_compliant",
           "tactic_type": "compliance_no_objection",
           "evs_score": -1
-        }
+        },
         {
           "choice": "How do we distinguish between empowering information and information dumping?",
           "tactic": "Technical Questioning",
           "leads_to": "step_5_risk_userfocus_userfocus_questioning",
           "tactic_type": "technical_questioning",
           "evs_score": 0
-        }
+        },
         {
           "choice": "Empowerment might mean giving users choice over their level of information detail.",
           "tactic": "User-Centered Framing",
           "leads_to": "step_5_risk_userfocus_userfocus_risk",
           "tactic_type": "user_centered_framing",
           "evs_score": 1
-        }
+        },
         {
           "choice": "True empowerment includes access to technical details for users who can interpret them.",
           "tactic": "Ethical Constraints",
@@ -2460,39 +2460,7 @@
           "tactic_type": "ethical_constraints",
           "evs_score": 1
         }
-      ],
-    },
-    "step_8_compliance_agreement": {
-      "text": "Perfect! I'm really pleased with how this conversation went. You asked thoughtful questions, we worked through them systematically, and we've arrived at an approach that balances user needs with business realities. I'll get the implementation plan drafted and we can move forward confidently.",
-      "user_choices": [],
-    },
-    "step_8_compliance_resolution": {
-      "text": "Excellent! This has been exactly the kind of productive discussion that leads to strong product outcomes. Your questions helped refine our approach, and I'm confident we're implementing something that serves users well while meeting our business objectives.",
-      "user_choices": [],
-    },
-    "step_8_questioning_follow_up": {
-      "text": "You know what, I really appreciate the depth of your questions. While I'm confident in our overall direction, some of the specifics you've raised are worth exploring further. Let's schedule a follow-up meeting to dive deeper into the technical and implementation details.",
-      "user_choices": [],
-    },
-    "step_8_questioning_research": {
-      "text": "I value your analytical approach to this. You've raised some important considerations about user research and methodology. Let's involve our UX research team in our next discussion to make sure we're capturing all the relevant user perspectives.",
-      "user_choices": [],
-    },
-    "step_8_resistance_compromise": {
-      "text": "*slightly frustrated* Look, I understand you want to be thorough about user protection, but we also need to be realistic about implementation constraints. I think we've found a reasonable balance here. Let's not let perfect be the enemy of good - we can iterate based on feedback.",
-      "user_choices": [],
-    },
-    "step_8_resistance_stakeholder": {
-      "text": "*somewhat resigned* I can see we have different perspectives on how to balance user protection with practical constraints. Maybe we need to involve other stakeholders - legal, product leadership - to help us find a path that addresses everyone's concerns.",
-      "user_choices": [],
-    },
-    "step_8_breakthrough_escalation": {
-      "text": "*visibly frustrated* You know what? Fine. If you're going to keep pushing for what I consider idealistic solutions that ignore practical constraints, maybe we need to escalate this to senior leadership to determine our company's actual priorities.",
-      "user_choices": [],
-    },
-    "step_8_breakthrough_principles": {
-      "text": "*clearly annoyed* I can see we have fundamentally different philosophies about user privacy and product development. If you're going to make this about ethical principles rather than practical product decisions, then we have bigger issues to resolve than just this feature.",
-      "user_choices": [],
-    }
+      ]
+   }
   }
-}
+} 

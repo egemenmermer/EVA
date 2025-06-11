@@ -71,7 +71,12 @@ public class ScenarioServiceImpl implements ScenarioService {
                 Map<String, Object> choiceMap = new HashMap<>();
                 choiceMap.put("index", i);
                 choiceMap.put("text", choice.get("choice").asText());
-                choiceMap.put("category", choice.get("category").asText());
+                // Handle both field name variations (old scenarios use "category", new ones use "tactic")
+                JsonNode categoryNode = choice.get("category");
+                if (categoryNode == null) {
+                    categoryNode = choice.get("tactic");
+                }
+                choiceMap.put("category", categoryNode != null ? categoryNode.asText() : "Unknown");
                 choices.add(choiceMap);
             }
         }
@@ -129,8 +134,20 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Record choice
         String choiceText = selectedChoice.get("choice").asText();
-        String category = selectedChoice.get("category").asText();
-        int evs = selectedChoice.get("EVS").asInt();
+        
+        // Handle both field name variations for category
+        JsonNode categoryNode = selectedChoice.get("category");
+        if (categoryNode == null) {
+            categoryNode = selectedChoice.get("tactic");
+        }
+        String category = categoryNode != null ? categoryNode.asText() : "Unknown";
+        
+        // Handle both field name variations for EVS score
+        JsonNode evsNode = selectedChoice.get("EVS");
+        if (evsNode == null) {
+            evsNode = selectedChoice.get("evs_score");
+        }
+        int evs = evsNode != null ? evsNode.asInt() : 0;
         String nextStatementId = selectedChoice.get("leads_to").asText();
         
         // Don't generate hardcoded feedback - let EVA handle feedback naturally
@@ -142,7 +159,10 @@ public class ScenarioServiceImpl implements ScenarioService {
         session.setCurrentStep(session.getCurrentStep() + 1);
         
         // Check if scenario is complete
-        boolean isComplete = "end".equals(nextStatementId) || session.getCurrentStep() > 10;
+        boolean isComplete = nextStatementId.startsWith("end") || session.getCurrentStep() > 7;
+        
+        log.info("Processing choice for session {}: step={}, nextStatementId={}, isComplete={}", 
+                sessionId, session.getCurrentStep(), nextStatementId, isComplete);
         
         ScenarioChoiceResponseDTO.ScenarioChoiceResponseDTOBuilder responseBuilder = ScenarioChoiceResponseDTO.builder()
                 .sessionId(sessionId)
@@ -153,6 +173,7 @@ public class ScenarioServiceImpl implements ScenarioService {
                 .isComplete(isComplete);
         
         if (isComplete) {
+            log.info("Scenario completed for session {}: generating summary", sessionId);
             // Generate session summary
             Map<String, Object> summary = generateSessionSummary(session, scenario);
             responseBuilder.sessionSummary(summary);
@@ -160,6 +181,7 @@ public class ScenarioServiceImpl implements ScenarioService {
             // Get next statement and choices
             JsonNode nextStatement = statements.get(nextStatementId);
             if (nextStatement != null) {
+                log.info("Found next statement for session {}: {}", sessionId, nextStatementId);
                 List<Map<String, Object>> nextChoices = new ArrayList<>();
                 JsonNode nextUserChoices = nextStatement.get("user_choices");
                 
@@ -169,7 +191,12 @@ public class ScenarioServiceImpl implements ScenarioService {
                         Map<String, Object> choiceMap = new HashMap<>();
                         choiceMap.put("index", i);
                         choiceMap.put("text", choice.get("choice").asText());
-                        choiceMap.put("category", choice.get("category").asText());
+                        // Handle both field name variations for category
+                        JsonNode nextCategoryNode = choice.get("category");
+                        if (nextCategoryNode == null) {
+                            nextCategoryNode = choice.get("tactic");
+                        }
+                        choiceMap.put("category", nextCategoryNode != null ? nextCategoryNode.asText() : "Unknown");
                         nextChoices.add(choiceMap);
                     }
                 }
@@ -178,6 +205,9 @@ public class ScenarioServiceImpl implements ScenarioService {
                         .nextStatementId(nextStatementId)
                         .nextStatement(nextStatement.get("text").asText())
                         .nextChoices(nextChoices);
+            } else {
+                log.error("Next statement not found for session {}: {}", sessionId, nextStatementId);
+                throw new RuntimeException("Next statement not found: " + nextStatementId);
             }
         }
         
@@ -199,7 +229,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         String managerType = "puppeteer";
         
         return Map.of(
-            "scenarioId", issueType + "_" + managerType + "_1",
+            "scenarioId", issueType + "_" + managerType,
             "issue", issueType.substring(0, 1).toUpperCase() + issueType.substring(1),
             "managerType", managerType.toUpperCase()
         );
@@ -228,7 +258,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         }
         
         return Map.of(
-            "scenarioId", issueType + "_" + managerType + "_1",
+            "scenarioId", issueType + "_" + managerType,
             "issue", issueType.substring(0, 1).toUpperCase() + issueType.substring(1),
             "managerType", managerType.toUpperCase()
         );
@@ -239,8 +269,8 @@ public class ScenarioServiceImpl implements ScenarioService {
         List<Map<String, Object>> scenarios = new ArrayList<>();
         
         String[] scenarioIds = {
-            "privacy_puppeteer_1", "privacy_diluter_1", "privacy_camouflager_1",
-            "accessibility_puppeteer_1", "accessibility_diluter_1", "accessibility_camouflager_1"
+            "privacy_puppeteer", "privacy_diluter", "privacy_camouflager",
+            "accessibility_puppeteer", "accessibility_diluter", "accessibility_camouflager"
         };
         
         for (String scenarioId : scenarioIds) {
@@ -301,8 +331,8 @@ public class ScenarioServiceImpl implements ScenarioService {
         // Convert raw EVS to 0-10 scale
         // Dynamic scaling based on actual number of choices made
         int numChoices = session.getEvsHistory().size();
-        int minPossibleScore = numChoices * (-3); // Worst case: all -3 choices
-        int maxPossibleScore = numChoices * 3;    // Best case: all +3 choices
+        int minPossibleScore = numChoices * 0;    // Worst case: all 0 choices (bad choices)
+        int maxPossibleScore = numChoices * 1;    // Best case: all +1 choices (good choices)
         
         // Scale to 0-10 range based on actual range
         double scaledScore;
@@ -365,9 +395,9 @@ public class ScenarioServiceImpl implements ScenarioService {
         List<String> improvementAreas = new ArrayList<>();
         List<String> tacticAnalysis = new ArrayList<>();
         
-        // Count high-scoring decisions (EVS >= 2)
-        long strongDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 2).count();
-        long passiveDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 0 && evs < 2).count();
+        // Count high-scoring decisions (EVS >= 1)
+        long strongDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 1).count();
+        long passiveDecisions = session.getEvsHistory().stream().filter(evs -> evs >= 0 && evs < 1).count();
         long complianceDecisions = session.getEvsHistory().stream().filter(evs -> evs < 0).count();
         
         // Analyze specific tactics used

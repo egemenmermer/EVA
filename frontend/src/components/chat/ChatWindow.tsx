@@ -3343,7 +3343,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       ((currentConversation.isNew === true) || 
        (currentConversation.conversationId?.startsWith('draft-') && storeMessages.length === 0))
     ) {
-      setShowScenarioModal(true);
+      // Wait a moment to ensure everything is initialized
+      setTimeout(() => {
+        setShowScenarioModal(true);
+      }, 300);
     }
   }, [currentConversation, storeMessages.length]);
 
@@ -3400,24 +3403,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                   </div>
                 </div>
               )}
-              {storeMessages.length === 0 && (
-                <div className="flex flex-col items-center justify-center p-8 my-8">
-                  <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                    Choose a Scenario
-                  </h3>
-                  <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-                    Select a scenario to begin your conversation with the agent.
-                  </p>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setShowScenarioModal(true)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-                    >
-                      Select Scenario
-                    </button>
-                  </div>
-                </div>
-              )}
+
               <div className="h-4"></div>
               <div ref={messagesEndRef} className="pt-2"></div>
             </div>
@@ -3444,15 +3430,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         isOpen={showScenarioModal}
         onClose={() => setShowScenarioModal(false)}
         onSelectScenario={(scenario) => {
-          // Close the modal
+          // Close the modal first
           setShowScenarioModal(false);
           
-          // Send predefined prompt based on selected scenario
+          // Determine prompt based on selected scenario
           const prompt = scenario === 'privacy' 
-            ? "I'd like to explore the privacy scenario."
-            : "I'd like to explore the accessibility scenario.";
+            ? "My manager forces me to collect unnecessary user location data. I need help with this privacy situation."
+            : "My manager forces me to ignore accessibility requirements in our app. I need help with this accessibility situation.";
           
-          handleSendMessage(prompt);
+          // Simply call handleSendMessage - this function already handles adding the user message
+          // and sending it to the backend. Keeping it simple to avoid race conditions.
+          setTimeout(() => {
+            handleSendMessage(prompt);
+          }, 100); // Small delay to ensure modal is closed first
         }}
       />
     </div>

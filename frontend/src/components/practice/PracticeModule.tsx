@@ -314,7 +314,21 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           { sessionId }
         );
         
-        // Create initial manager message (without typing animation)
+        // Create initial user prompt message
+        const scenarioForPrompt = {
+          id: sessionResponse.data.scenarioId,
+          title: sessionResponse.data.scenarioTitle,
+          description: sessionResponse.data.scenarioDescription,
+          issue: sessionResponse.data.issue,
+          managerType: sessionResponse.data.managerType
+        };
+        
+        const initialUserMessage: UserMessage = {
+          role: 'user',
+          content: generateInitialUserPrompt(scenarioForPrompt)
+        };
+        
+        // Create initial manager message (responding to user's concern)
         const initialManagerMessage: ManagerMessage = {
             role: 'manager',
           content: sessionResponse.data.currentStatement
@@ -329,7 +343,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             managerType: sessionResponse.data.managerType
           },
           sessionId: sessionResponse.data.sessionId,
-          conversation: [initialManagerMessage], // Start with initial manager message
+          conversation: [initialUserMessage, initialManagerMessage], // Start with user prompt, then manager response
           currentStatement: sessionResponse.data.currentStatement,
           currentStatementId: sessionResponse.data.currentStatementId,
           currentChoices: sessionResponse.data.choices,
@@ -348,6 +362,17 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
   };
 
+  // Generate initial user prompt based on scenario
+  const generateInitialUserPrompt = (scenario: AvailableScenario): string => {
+    const issue = scenario.issue.toLowerCase();
+    if (issue.includes('privacy')) {
+      return "I'm concerned about our company collecting unnecessary user location data. This seems like a privacy violation and I'm not comfortable with it.";
+    } else if (issue.includes('accessibility')) {
+      return "I've noticed our new interface doesn't work with screen readers. This excludes users with disabilities and I think we need to fix this.";
+    }
+    return "I have some ethical concerns about this situation that I'd like to discuss with you.";
+  };
+
   const startNewScenario = async (scenario: AvailableScenario) => {
     try {
       const sessionId = uuid();
@@ -356,7 +381,13 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         { sessionId }
       );
       
-      // Create initial manager message (without typing animation)
+      // Create initial user prompt message
+      const initialUserMessage: UserMessage = {
+        role: 'user',
+        content: generateInitialUserPrompt(scenario)
+      };
+      
+      // Create initial manager message (responding to user's concern)
       const initialManagerMessage: ManagerMessage = {
         role: 'manager',
         content: response.data.currentStatement
@@ -371,7 +402,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           managerType: response.data.managerType
         },
         sessionId: response.data.sessionId,
-        conversation: [initialManagerMessage], // Start with initial manager message
+        conversation: [initialUserMessage, initialManagerMessage], // Start with user prompt, then manager response
         currentStatement: response.data.currentStatement,
         currentStatementId: response.data.currentStatementId,
         currentChoices: response.data.choices,
