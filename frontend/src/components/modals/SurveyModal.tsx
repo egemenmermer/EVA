@@ -34,6 +34,7 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
 
   // Different URLs for pre and post surveys
   const surveyUrls = {
+    consent: "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUN1pERVNGR0JaNDgyQ1AxTEVTMUxJV0tHTi4u",
     pre: "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUMzhKUzNCQlBOSlZDQUpNNUZLTDhESENOSC4u",
     post: "https://forms.office.com/Pages/ResponsePage.aspx?id=nJwqRqYt-0uzGA-DBD_km3-T2_6gLAJNnNt_jf07KBZUNDhLOEdYNjFFR1FETUFBUVkxQVZUQTUxNC4u"
   };
