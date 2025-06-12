@@ -3415,18 +3415,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     }
   }, [currentConversation, storeMessages.length]);
 
-  // Add event listener for tactics modal
-  useEffect(() => {
-    const handleShowTacticsModal = () => {
-      setShowTacticsModal(true);
-    };
 
-    window.addEventListener('show-tactics-modal', handleShowTacticsModal);
-
-    return () => {
-      window.removeEventListener('show-tactics-modal', handleShowTacticsModal);
-    };
-  }, []);
 
   // Render practice module or chat interface based on practice mode state
   return (

@@ -1135,7 +1135,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
-          {onExit && (
+          {/* {onExit && (
             <div className="flex items-center space-x-2">
             <button
               onClick={handleReturnToChat}
@@ -1144,7 +1144,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
               Return to Chat
             </button>
             </div>
-          )}
+          )} */}
         </div>
         
         <div className="flex-1 flex items-center justify-center">
@@ -1198,7 +1198,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
             </h2>
           )}
         </div>
-        {onExit && (
+        {/* {onExit && (
           <div className="flex items-center space-x-2">
           <button
             onClick={handleReturnToChat}
@@ -1207,7 +1207,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
             Return to Chat
           </button>
           </div>
-        )}
+        )} */}
       </div>
 
       {loading ? (
@@ -1380,13 +1380,13 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                       <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
                     </button>
                     
-                    <button
+                    {/* <button
                       onClick={handlePracticeAgain}
                       className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2"
                     >
                       <span>🔄</span>
                       <span>Practice Again</span>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               )}
