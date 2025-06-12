@@ -76,6 +76,12 @@ public class User {
     private String managerTypePreference;
 
     // Survey completion tracking
+    @Column(name = "consent_form_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean consentFormCompleted = false;
+
+    @Column(name = "consent_form_completed_at", nullable = true)
+    private LocalDateTime consentFormCompletedAt;
+
     @Column(name = "pre_survey_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean preSurveyCompleted = false;
 
@@ -150,6 +156,12 @@ public class User {
             this.hasCompletedPractice = true;
             this.firstPracticeCompletedAt = LocalDateTime.now();
         }
+    }
+
+    // Helper method to mark consent form completion
+    public void markConsentFormCompleted() {
+        this.consentFormCompleted = true;
+        this.consentFormCompletedAt = LocalDateTime.now();
     }
 
 }
