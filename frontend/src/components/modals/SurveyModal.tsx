@@ -80,9 +80,15 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
           const userData = await refreshUserData();
           if (userData) {
             setUser(userData);
+            // Dispatch event to notify that post survey has been submitted
+            window.dispatchEvent(new CustomEvent('post-survey-submitted'));
+            localStorage.setItem('eva-post-survey-submitted', 'true');
           }
         } catch (error) {
           console.error('Failed to refresh user data after post-survey completion:', error);
+          // Still dispatch the event even if refreshing user data fails
+          window.dispatchEvent(new CustomEvent('post-survey-submitted'));
+          localStorage.setItem('eva-post-survey-submitted', 'true');
         }
       }
       
@@ -110,8 +116,14 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
           if (userData) {
             setUser(userData);
           }
+          // Dispatch event to notify that post survey has been submitted
+          window.dispatchEvent(new CustomEvent('post-survey-submitted'));
+          localStorage.setItem('eva-post-survey-submitted', 'true');
         } catch (error) {
           console.error('Failed to refresh user data after post-survey completion:', error);
+          // Still dispatch the event even if refreshing user data fails
+          window.dispatchEvent(new CustomEvent('post-survey-submitted'));
+          localStorage.setItem('eva-post-survey-submitted', 'true');
         }
       }
       

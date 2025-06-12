@@ -223,8 +223,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return localStorage.getItem('eva-tactics-viewed') === 'true';
   });
 
+  // Check if post survey has been clicked or completed
   const [hasClickedPostSurvey, setHasClickedPostSurvey] = useState(() => {
     return localStorage.getItem('eva-post-survey-clicked') === 'true';
+  });
+  
+  const [postSurveySubmitted, setPostSurveySubmitted] = useState(() => {
+    return localStorage.getItem('eva-post-survey-submitted') === 'true';
   });
 
   // Convert any conversation list to remove mock IDs
@@ -315,14 +320,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       setDirectFetchedConversations(prev => [...prev]);
     };
     
+    // Listen for post survey submission events
+    const handlePostSurveySubmitted = () => {
+      console.log('Post survey submitted event received, updating state...');
+      setPostSurveySubmitted(true);
+      localStorage.setItem('eva-post-survey-submitted', 'true');
+    };
+    
     window.addEventListener('refresh-conversations', handleRefreshConversations);
     window.addEventListener('scenario-completed', handleScenarioCompleted);
     window.addEventListener('refresh-sidebar', handleRefreshSidebar);
+    window.addEventListener('post-survey-submitted', handlePostSurveySubmitted);
     
     return () => {
       window.removeEventListener('refresh-conversations', handleRefreshConversations);
       window.removeEventListener('scenario-completed', handleScenarioCompleted);
       window.removeEventListener('refresh-sidebar', handleRefreshSidebar);
+      window.removeEventListener('post-survey-submitted', handlePostSurveySubmitted);
     };
   }, []);
 
@@ -664,7 +678,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {(
           user?.accessibilityScenariosCompleted &&
           user?.privacyScenariosCompleted &&
-          !user?.postSurveyCompleted
+          !user?.postSurveyCompleted &&
+          !postSurveySubmitted
         ) && (
           <button
             onClick={() => {
