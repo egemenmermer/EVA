@@ -12,9 +12,9 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(null);
     setToken(null);
     
-    // Clear all localStorage data
-    console.log('Clearing all localStorage data on admin logout');
-    localStorage.clear();
+    // Remove only auth-related items from localStorage
+    console.log('Removing auth token on admin logout');
+    localStorage.removeItem('token');
     
     navigate('/login');
   };

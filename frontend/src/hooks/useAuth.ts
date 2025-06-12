@@ -28,10 +28,10 @@ export const useAuth = () => {
       console.log('Attempting login for:', email);
       const response = await authApi.login(email, password);
       
-      // Clear localStorage when logging in to a new account
-      // This ensures previous user data doesn't persist
-      console.log('Clearing localStorage for new login session');
-      localStorage.clear();
+      // Remove only auth-related items from localStorage
+      // This ensures previous user data doesn't persist but keeps other data
+      console.log('Removing auth-related data for new login session');
+      localStorage.removeItem('token');
       
       // Format token with Bearer prefix if needed
       const formattedToken = formatToken(response.accessToken);
@@ -90,9 +90,9 @@ export const useAuth = () => {
       setUser(null);
       setToken(null);
       
-      // Clear all localStorage data
-      console.log('Clearing all localStorage data on logout');
-      localStorage.clear();
+      // Remove only auth-related items from localStorage
+      console.log('Removing auth token on logout');
+      localStorage.removeItem('token');
       
       console.log('User logged out successfully');
     } catch (error: any) {
