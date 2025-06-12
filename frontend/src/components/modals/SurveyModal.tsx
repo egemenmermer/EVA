@@ -178,9 +178,9 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
               <button
                 onClick={handleSurveySubmit}
                 disabled={!hasConfirmed}
-                className={`px-6 py-2 rounded-lg font-medium flex items-center transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium flex items-center transition-all duration-300 ${
                   hasConfirmed
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
                     : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 }`}
               >

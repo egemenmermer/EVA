@@ -42,32 +42,32 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
           {/* Privacy Scenario */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 hover:shadow-md transition-all">
             <h3 className="text-lg font-medium text-blue-700 dark:text-blue-300 mb-2">
-              Privacy Scenario
+              Privacy & Data Collection
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Explore ethical challenges related to data privacy, user consent, and information handling in the workplace.
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              Your manager is pressuring you to collect unnecessary user location data for analytics purposes. You're concerned about user privacy, consent, and potential legal compliance issues. Navigate this situation while advocating for ethical data practices.
             </p>
             <button
               onClick={() => onSelectScenario('privacy')}
               className="mt-2 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
             >
-              Select Privacy
+              Select Privacy Scenario
             </button>
           </div>
           
           {/* Accessibility Scenario */}
           <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 hover:shadow-md transition-all">
             <h3 className="text-lg font-medium text-purple-700 dark:text-purple-300 mb-2">
-              Accessibility Scenario
+              Screen Reader Compatibility
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Engage with situations focusing on digital accessibility, inclusive design, and accommodating diverse user needs.
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              Your team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. The new interface design looks modern but no longer works properly with assistive technologies. Practice advocating for inclusive design and accessibility standards.
             </p>
             <button
               onClick={() => onSelectScenario('accessibility')}
               className="mt-2 w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
             >
-              Select Accessibility
+              Select Accessibility Scenario
             </button>
           </div>
         </div>

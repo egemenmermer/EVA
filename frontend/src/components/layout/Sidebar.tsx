@@ -150,6 +150,65 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     setCurrentConversation, 
     clearMessages 
   } = useStore();
+
+  // Add CSS for flashy tactics button animation
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes eva-tactics-glow {
+        0%, 100% {
+          box-shadow: 
+            0 0 var(--glow-size) var(--flash-color),
+            0 0 calc(var(--glow-size) * 2) var(--flash-color),
+            0 0 calc(var(--glow-size) * 3) var(--flash-color);
+          filter: brightness(1);
+        }
+        50% {
+          box-shadow: 
+            0 0 calc(var(--glow-size) * 1.5) var(--flash-color),
+            0 0 calc(var(--glow-size) * 3) var(--flash-color),
+            0 0 calc(var(--glow-size) * 4.5) var(--flash-color);
+          filter: brightness(1.2);
+        }
+      }
+      
+             .eva-tactics-flash {
+         animation: eva-tactics-glow 2s ease-in-out infinite;
+         border: 2px solid var(--flash-color);
+         position: relative;
+       }
+      
+      .eva-tactics-flash::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        background: linear-gradient(45deg, 
+          transparent, 
+          var(--flash-color), 
+          transparent, 
+          var(--flash-color), 
+          transparent);
+        border-radius: inherit;
+        z-index: -1;
+        opacity: 0.7;
+        animation: eva-tactics-glow 2s ease-in-out infinite;
+      }
+      
+             .eva-tactics-flash::after {
+         content: '✨';
+         position: absolute;
+         top: -8px;
+         right: -8px;
+         font-size: 16px;
+         z-index: 20;
+       }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   
   const [directFetchedConversations, setDirectFetchedConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -158,6 +217,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
+  
+  // Check if tactics modal has been viewed
+  const [hasViewedTactics, setHasViewedTactics] = useState(() => {
+    return localStorage.getItem('eva-tactics-viewed') === 'true';
+  });
 
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
@@ -239,13 +303,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       // Force a re-render by updating a state (can use a timestamp)
       setDirectFetchedConversations(prev => [...prev]);
     };
+
+    // Listen for refresh sidebar events triggered from scenario completion
+    const handleRefreshSidebar = () => {
+      console.log('Refresh sidebar event received, forcing re-render...');
+      // Force re-render to update post survey button visibility
+      setDirectFetchedConversations(prev => [...prev]);
+    };
     
     window.addEventListener('refresh-conversations', handleRefreshConversations);
     window.addEventListener('scenario-completed', handleScenarioCompleted);
+    window.addEventListener('refresh-sidebar', handleRefreshSidebar);
     
     return () => {
       window.removeEventListener('refresh-conversations', handleRefreshConversations);
       window.removeEventListener('scenario-completed', handleScenarioCompleted);
+      window.removeEventListener('refresh-sidebar', handleRefreshSidebar);
     };
   }, []);
 
@@ -548,10 +621,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {(user?.hasCompletedPractice || currentConversationHasPractice()) && (
           <button
             onClick={() => {
+              // Mark tactics as viewed
+              if (!hasViewedTactics) {
+                setHasViewedTactics(true);
+                localStorage.setItem('eva-tactics-viewed', 'true');
+              }
               // Dispatch event to show tactics modal in main layout
               window.dispatchEvent(new CustomEvent('show-tactics-modal'));
             }}
-            className="group relative px-3 py-2 text-sm rounded-lg overflow-hidden
+            className={`group relative px-3 py-2 text-sm rounded-lg overflow-hidden
                       bg-gradient-to-r from-green-500 to-emerald-600
                       hover:from-green-600 hover:to-emerald-700
                       text-white shadow-md hover:shadow-lg
@@ -560,7 +638,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       before:absolute before:inset-0 before:bg-gradient-to-r 
                       before:from-green-400 before:via-emerald-500 before:to-green-600
                       before:opacity-0 before:transition-opacity before:duration-700
-                      hover:before:opacity-100 w-full flex items-center gap-2"
+                      hover:before:opacity-100 w-full flex items-center gap-2
+                      ${!hasViewedTactics ? 'eva-tactics-flash' : ''}`}
+            style={{
+              '--flash-color': 'rgba(34, 197, 94, 0.8)',
+              '--glow-size': '8px'
+            } as React.CSSProperties}
           >
             <span className="relative z-10 flex items-center space-x-1.5">
               <span className="text-sm">💡</span>
@@ -573,10 +656,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
         
         {/* Post-Survey Button - Only show after completing both accessibility and privacy scenarios and if user hasn't completed post-survey */}
-        {/* Check both database fields (if available) and localStorage fallback */}
+        {/* Check database fields for scenario completion */}
         {(
-          (user?.accessibilityScenariosCompleted || localStorage.getItem('scenario_completed_accessibility') === 'true') &&
-          (user?.privacyScenariosCompleted || localStorage.getItem('scenario_completed_privacy') === 'true') &&
+          user?.accessibilityScenariosCompleted &&
+          user?.privacyScenariosCompleted &&
           !user?.postSurveyCompleted
         ) && (
           <button
@@ -598,6 +681,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <span className="relative z-10 flex items-center space-x-1.5">
                 <span className="text-sm">📋</span>
                 <span>Post Survey</span>
+                <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold animate-pulse ml-2">
+                  Click at the end!
+                </span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
                              translate-x-[-100%] group-hover:translate-x-[100%] 

@@ -16,17 +16,16 @@ import { useNavigate } from 'react-router-dom';
 import api, { agentApi } from '../../services/axiosConfig'; // Restored agentApi
 import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'; // Import Options
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"; // Changed to relative path
-import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'; // Corrected import for PrismLight
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Import oneDark style
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'; // Corrected import for PrismLight
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Import oneDark style
 import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx'; // Example: register language
-import logoLight from '@/assets/logo-light.png';
-import logoDark from '@/assets/logo-dark.png';
+import logoLight from '@/assets/logo-light.svg';
+import logoDark from '@/assets/logo-dark.svg';
 import { Button } from "@/components/ui/button"; // Reverted to alias path
 import { cn } from "@/lib/utils";
 import logoSvg from "@/assets/logo.svg";
-
-SyntaxHighlighter.registerLanguage('jsx', jsx); // Register languages you need
-SyntaxHighlighter.registerLanguage('javascript', jsx); // Assuming js is similar or use 'javascript' language import
+import { markAccessibilityScenariosCompletedAPI, markPrivacyScenariosCompletedAPI } from '../../utils/surveyUtils';
+import { backendApi } from '../../services/axiosConfig';
 
 // Add custom styles for message formatting
 const styles = {
@@ -276,7 +275,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setMessages,
     addMessage,
     managerType,
-    user // Add user here if not already destructured
+    user,
+    setUser
   } = useStore();
   
   // Add state for scenario selection modal
@@ -1340,6 +1340,41 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     return history.length > 0;
   };
 
+  // Helper function to determine current scenario based on conversation content
+  const determineCurrentScenario = (): 'accessibility' | 'privacy' | null => {
+    // Look through messages to determine the scenario type
+    const relevantMessages = storeMessages.filter(msg => 
+      msg.role === 'user' && msg.content && msg.content.length > 20
+    );
+    
+    for (const message of relevantMessages) {
+      const content = message.content.toLowerCase();
+      if (content.includes('accessibility') || content.includes('screen reader')) {
+        return 'accessibility';
+      }
+      if (content.includes('privacy') || content.includes('location data')) {
+        return 'privacy';
+      }
+    }
+    
+    return null;
+  };
+
+  // Function to refresh user data from API
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data after scenario completion...');
+      const response = await backendApi.get('/api/v1/user/profile');
+      const updatedUser = response.data;
+      console.log('Updated user data:', updatedUser);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return null;
+    }
+  };
+
   // Complete replacement of the handlePracticeFeedbackRequest function with proper structure
     const handlePracticeFeedbackRequest = async () => {
     // Set processing flag at the very beginning
@@ -2013,7 +2048,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   }, [messages, currentConversation]);
 
   // Find and modify the handleOptionClick function
-  const handleOptionClick = useCallback((optionText: string, event?: React.MouseEvent) => {
+  const handleOptionClick = useCallback(async (optionText: string, event?: React.MouseEvent) => {
     // Prevent event propagation if event is provided
     if (event) {
       event.preventDefault();
@@ -2057,6 +2092,34 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     } 
     // For "Practice responding to a positive/negative reply" options
     else if (lowerCaseOption.includes('practice responding to a')) {
+      // Track scenario completion based on current conversation using database API
+      if (currentConversation?.conversationId) {
+        const currentScenario = determineCurrentScenario();
+        if (currentScenario) {
+          try {
+            // Mark this scenario as completed in the database
+            if (currentScenario === 'accessibility') {
+              await markAccessibilityScenariosCompletedAPI();
+              console.log('Accessibility scenario marked as completed in database');
+            } else if (currentScenario === 'privacy') {
+              await markPrivacyScenariosCompletedAPI();
+              console.log('Privacy scenario marked as completed in database');
+            }
+            
+                         // Refresh user data to get updated completion status
+             await refreshUserData();
+             
+             // Trigger sidebar refresh to update UI and show post survey if both scenarios are complete
+             setTimeout(() => {
+               window.dispatchEvent(new CustomEvent('refresh-sidebar'));
+             }, 500);
+          } catch (error) {
+            console.error('Failed to mark scenario as completed:', error);
+            // Continue with the flow even if the API call fails
+          }
+        }
+      }
+      
       // Create a simplified user message
       const isPositive = lowerCaseOption.includes('positive');
       const replyType = isPositive ? 'positive' : 'negative';
@@ -2107,7 +2170,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
         setTimeout(() => {
           // Create a more detailed prompt that includes clear instructions for formatting
-          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature. \\nDo not include any practice instructions, buttons, or options like [Yes, practice] or [No, not now] in your response.`;
+          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature. \\nDo not include any practice instructions, buttons, or options like [Yes, practice] in your response.`;
           
           // Send this prompt directly to the API without displaying it in the UI
           if (currentConversation && currentConversation.conversationId) { // Ensure currentConversation and its ID exist
@@ -2392,7 +2455,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     // For other options, keep the existing handling
     else {
       // Existing code for other options
-      if (lowerCaseOption.includes('no, not now') || lowerCaseOption.includes('not now')) {
+      if (lowerCaseOption.includes('not now')) {
         console.log('User chose not to proceed for now.');
         
         // Create a user message to show in the chat
@@ -3025,7 +3088,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
             const match = /language-(\w+)/.exec(className || '');
             return !inline && match ? (
                 <SyntaxHighlighter
-                    style={oneDark}
+                    style={vscDarkPlus}
                     language={match[1]}
                     PreTag="div"
                     {...props}
@@ -3165,18 +3228,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
                         handleOptionClick("Yes, help draft email", e);
                       }} 
                       disabled={isDraftingEmail || loading}
-                      className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200"
+                      className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                     >
-                <span className="mr-1 text-xs">📝</span> Yes, help draft email
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={(e) => handleOptionClick("[No, practice again]", e)} 
-                      disabled={isDraftingEmail || loading}
-                      className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 border-gray-300/60 dark:border-gray-700/60"
-                    >
-                <span className="mr-1 text-xs">🔄</span> No, practice again
+                <span className="mr-1 text-xs">📝</span> Help draft email
                     </Button>
                   </div>
               </div>
@@ -3457,10 +3511,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
           // Close the modal first
           setShowScenarioModal(false);
           
-          // Determine prompt based on selected scenario
+          // Determine prompt based on selected scenario with detailed context
           const prompt = scenario === 'privacy' 
-            ? "My manager forces me to collect unnecessary user location data. I need help with this privacy situation."
-            : "My manager forces me to ignore accessibility requirements in our app. I need help with this accessibility situation.";
+            ? "My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
+            : "My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?";
           
           // Simply call handleSendMessage - this function already handles adding the user message
           // and sending it to the backend. Keeping it simple to avoid race conditions.

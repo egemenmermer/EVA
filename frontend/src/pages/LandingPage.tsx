@@ -165,10 +165,24 @@ export const LandingPage: React.FC = () => {
   return (
 <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
 
-{/* Modern Header with Centered Logo and EVA label */}
+{/* Modern Header with Logo and Survey Buttons */}
 <header className="fixed top-0 left-0 right-0 backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 shadow-sm z-50 border-b border-gray-200 dark:border-gray-700">
-  <div className="container mx-auto px-4 py-3 flex justify-center items-center relative">
-    <div className="absolute right-4">
+  <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+    <div className="flex items-center space-x-2">
+      <img 
+        src={isDarkMode ? logoDark : logoLight} 
+        alt="EVA Logo" 
+        className="h-8 md:h-10 w-auto"
+      />
+
+    </div>
+    <div className="flex items-center space-x-4">
+      <button
+        onClick={handleGetStarted}
+        className="px-5 py-2 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md flex items-center"
+      >
+        Start Practicing
+      </button>
       <button 
         onClick={toggleDarkMode}
         className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
@@ -177,29 +191,8 @@ export const LandingPage: React.FC = () => {
         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
       </button>
     </div>
-    <div className="flex items-center space-x-2">
-      <span className="text-xl font-semibold text-gray-900 dark:text-white">EVA</span>
-      <img 
-        src={isDarkMode ? logoDark : logoLight} 
-        alt="EVA Logo" 
-        className="h-8 md:h-10 w-auto"
-      />
-      <h1 className="text-xl font-medium text-gray-900 dark:text-white hidden sm:block">
-        Ethical Virtual Assistant
-      </h1>
-    </div>
   </div>
 </header>
-
-{/* Fixed Start Button at Bottom */}
-<div className="fixed bottom-4 left-0 right-0 flex justify-center z-50">
-  <button
-    onClick={handleGetStarted}
-    className="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md"
-  >
-    Start Practicing
-  </button>
-</div>
 
 
   {/* Spacer to offset fixed header */}
