@@ -195,9 +195,23 @@ export const LandingPage: React.FC = () => {
 <div className="fixed bottom-4 left-0 right-0 flex justify-center z-50">
   <button
     onClick={handleGetStarted}
-    className="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md"
+    className="group relative px-6 py-3 text-base font-medium rounded-full overflow-hidden
+              bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500
+              hover:from-blue-600 hover:via-purple-600 hover:to-cyan-600
+              text-white shadow-lg hover:shadow-xl
+              transform hover:scale-[1.02] active:scale-[0.98]
+              transition-all duration-500 ease-out
+              before:absolute before:inset-0 before:bg-gradient-to-r 
+              before:from-pink-500 before:via-purple-500 before:to-blue-500
+              before:opacity-0 before:transition-opacity before:duration-700
+              hover:before:opacity-100 flex items-center gap-2"
   >
-    Start Practicing
+    <span className="relative z-10 flex items-center">
+      <span>Start Practicing</span>
+    </span>
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                   translate-x-[-100%] group-hover:translate-x-[100%] 
+                   transition-transform duration-1500 ease-in-out"></div>
   </button>
 </div>
 
