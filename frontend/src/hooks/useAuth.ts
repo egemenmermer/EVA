@@ -12,7 +12,7 @@ const formatToken = (token: string): string => {
 };
 
 export const useAuth = () => {
-  const { user, setUser, setToken } = useStore();
+  const { user, setUser, setToken, clearAllData } = useStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +26,10 @@ export const useAuth = () => {
     
     try {
       console.log('Attempting login for:', email);
+      
+      // First, clear all data from any previous session
+      clearAllData();
+      
       const response = await authApi.login(email, password);
       
       // Remove only auth-related items from localStorage
@@ -86,19 +90,26 @@ export const useAuth = () => {
     
     try {
       await authApi.logout();
-      // Clear user state
-      setUser(null);
-      setToken(null);
       
-      // Remove only auth-related items from localStorage
-      console.log('Removing auth token on logout');
-      localStorage.removeItem('token');
+      // Clear all data from the Zustand store
+      clearAllData();
+      
+      // Also, explicitly clear all conversation messages from localStorage
+      console.log('Clearing all conversation messages from localStorage...');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('messages_') || key.startsWith('backup_messages_')) {
+          localStorage.removeItem(key);
+        }
+      });
       
       console.log('User logged out successfully');
     } catch (error: any) {
       console.error('Logout failed:', error.message);
+      // Even if API fails, clear data locally
+      clearAllData();
     } finally {
       setLoading(false);
+      navigate('/login', { replace: true });
     }
   };
 

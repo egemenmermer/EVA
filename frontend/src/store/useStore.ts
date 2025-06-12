@@ -73,6 +73,7 @@ interface Store {
   setTemperature: (temperature: number) => void;
   toggleDarkMode: () => void;
   clearMessages: () => void;
+  clearAllData: () => void;
 }
 
 // Helper function to get initial dark mode preference
@@ -237,7 +238,23 @@ export const useStore = create<Store>()(
       setManagerType: (managerType) => set({ managerType }),
       setTemperature: (temperature) => set({ temperature }),
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
-      clearMessages: () => set({ messages: [] })
+      clearMessages: () => set({ messages: [] }),
+      
+      // New function to clear all user-related data on logout
+      clearAllData: () => {
+        console.log('Clearing all user data from Zustand store...');
+        set({
+          token: null,
+          user: null,
+          currentConversation: null,
+          messages: []
+        });
+        // Also clear relevant localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('current-conversation-id');
+        // You might want to loop through localStorage and remove all 'messages_*' keys if needed
+      }
     }),
     {
       name: 'eva-store',
