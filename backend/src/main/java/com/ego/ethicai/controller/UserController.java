@@ -71,6 +71,12 @@ public class UserController {
         return ResponseEntity.ok("Pre-survey marked as completed");
     }
 
+    @PostMapping("/mark-consent-form-completed")
+    public ResponseEntity<String> markConsentFormCompleted(@CurrentUser CustomUserDetails currentUser) {
+        userService.markConsentFormCompleted(currentUser.getId());
+        return ResponseEntity.ok("Consent form marked as completed");
+    }
+
     @PostMapping("/mark-post-survey-completed")
     public ResponseEntity<String> markPostSurveyCompleted(@CurrentUser CustomUserDetails currentUser) {
         userService.markPostSurveyCompleted(currentUser.getId());

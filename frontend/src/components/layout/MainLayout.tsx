@@ -42,7 +42,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const [showTacticsModal, setShowTacticsModal] = useState(false);
   // State for survey modal
   const [showSurveyModal, setShowSurveyModal] = useState(false);
-  const [surveyType, setSurveyType] = useState<'pre' | 'post'>('pre');
+  const [surveyType, setSurveyType] = useState<'consent' | 'pre' | 'post'>('pre');
 
   // Check for token and user - if no token, redirect to login
   useEffect(() => {
@@ -88,25 +88,32 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     }
   }, [navigate, token, user, setUser, setToken]);
 
-  // Check if user needs to take pre-survey first, then manager type quiz
+  // Check if user needs to take consent form, then pre-survey, then manager type quiz
   useEffect(() => {
     if (user && !showQuizModal && !showSurveyModal) {
+      const hasCompletedConsentForm = hasCompletedSurvey('consent');
       const hasCompletedPreSurvey = hasCompletedSurvey('pre');
       
-      // First check: if user hasn't completed pre-survey, show it first
-      if (!hasCompletedPreSurvey) {
-        console.log('User has not completed pre-survey, showing pre-survey first');
+      // First check: if user hasn't completed consent form, show it first
+      if (!hasCompletedConsentForm) {
+        console.log('User has not completed consent form, showing consent form first');
+        setSurveyType('consent');
+        setShowSurveyModal(true);
+      }
+      // Second check: if consent form is done but pre-survey isn't, show pre-survey
+      else if (!hasCompletedPreSurvey) {
+        console.log('User has not completed pre-survey, showing pre-survey');
         setSurveyType('pre');
         setShowSurveyModal(true);
       }
-      // Second check: if pre-survey is done but no manager type preference, show quiz
+      // Third check: if pre-survey is done but no manager type preference, show quiz
       else if (!user.managerTypePreference) {
         console.log('Pre-survey completed, now showing manager type quiz');
         setShowQuizModal(true);
       }
-      // User has both pre-survey and quiz completed
+      // User has completed consent form, pre-survey and quiz
       else {
-        console.log('User has completed both pre-survey and manager type quiz');
+        console.log('User has completed consent form, pre-survey and manager type quiz');
       }
     }
   }, [user, showQuizModal, showSurveyModal]);

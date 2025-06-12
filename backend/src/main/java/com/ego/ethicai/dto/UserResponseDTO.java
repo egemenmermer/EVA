@@ -22,6 +22,8 @@ public class UserResponseDTO {
     private String managerTypePreference;
     
     // Survey completion tracking
+    private Boolean consentFormCompleted;
+    private LocalDateTime consentFormCompletedAt;
     private Boolean preSurveyCompleted;
     private Boolean postSurveyCompleted;
     private LocalDateTime preSurveyCompletedAt;

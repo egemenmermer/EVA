@@ -48,6 +48,8 @@ public class UserServiceImpl implements UserService {
                 .updatedAt(user.getUpdatedAt())
                 .role(user.getRole())
                 .managerTypePreference(user.getManagerTypePreference())
+                .consentFormCompleted(user.getConsentFormCompleted())
+                .consentFormCompletedAt(user.getConsentFormCompletedAt())
                 .preSurveyCompleted(user.getPreSurveyCompleted())
                 .postSurveyCompleted(user.getPostSurveyCompleted())
                 .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
@@ -137,6 +139,8 @@ public class UserServiceImpl implements UserService {
                 .updatedAt(user.getUpdatedAt())
                 .role(user.getRole())
                 .managerTypePreference(user.getManagerTypePreference())
+                .consentFormCompleted(user.getConsentFormCompleted())
+                .consentFormCompletedAt(user.getConsentFormCompletedAt())
                 .preSurveyCompleted(user.getPreSurveyCompleted())
                 .postSurveyCompleted(user.getPostSurveyCompleted())
                 .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
@@ -255,6 +259,22 @@ public class UserServiceImpl implements UserService {
         user.markPreSurveyCompleted();
         user = userRepository.save(user);
         logger.debug("Marked pre-survey completed for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User markConsentFormCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.markConsentFormCompleted();
+        user = userRepository.save(user);
+        logger.debug("Marked consent form completed for user with ID: {}", userId);
         return user;
     }
 

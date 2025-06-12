@@ -25,6 +25,7 @@ public interface UserService {
     void deleteUser(UUID id);
     
     // Survey completion methods
+    User markConsentFormCompleted(UUID userId);
     User markPreSurveyCompleted(UUID userId);
     User markPostSurveyCompleted(UUID userId);
     

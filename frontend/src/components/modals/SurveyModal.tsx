@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, FileText, ArrowRight, CheckCircle } from 'lucide-react';
 import { 
   markPreSurveyCompletedAPI, 
-  markPostSurveyCompletedAPI 
+  markPostSurveyCompletedAPI,
+  markConsentFormCompletedAPI 
 } from '@/utils/surveyUtils';
 import { useStore } from '@/store/useStore';
 import { backendApi } from '@/services/axiosConfig';
@@ -10,7 +11,7 @@ import { backendApi } from '@/services/axiosConfig';
 interface SurveyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  surveyType: 'pre' | 'post';
+  surveyType: 'consent' | 'pre' | 'post';
   onComplete?: () => void;
 }
 
@@ -63,8 +64,10 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
       // Mark survey as completed in database
       if (surveyType === 'pre') {
         await markPreSurveyCompletedAPI();
-      } else {
+      } else if (surveyType === 'post') {
         await markPostSurveyCompletedAPI();
+      } else if (surveyType === 'consent') {
+        await markConsentFormCompletedAPI();
       }
       
       // Mark survey as completed in localStorage (for backward compatibility)
@@ -89,6 +92,16 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
           // Still dispatch the event even if refreshing user data fails
           window.dispatchEvent(new CustomEvent('post-survey-submitted'));
           localStorage.setItem('eva-post-survey-submitted', 'true');
+        }
+      } else if (surveyType === 'consent' || surveyType === 'pre') {
+        // For consent form and pre-survey, refresh user data to update flags
+        try {
+          const userData = await refreshUserData();
+          if (userData) {
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error(`Failed to refresh user data after ${surveyType} completion:`, error);
         }
       }
       
@@ -125,6 +138,16 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
           window.dispatchEvent(new CustomEvent('post-survey-submitted'));
           localStorage.setItem('eva-post-survey-submitted', 'true');
         }
+      } else if (surveyType === 'consent' || surveyType === 'pre') {
+        // For consent form and pre-survey, refresh user data to update flags
+        try {
+          const userData = await refreshUserData();
+          if (userData) {
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error(`Failed to refresh user data after ${surveyType} completion:`, error);
+        }
       }
       
       if (onComplete) {
@@ -138,6 +161,12 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
   };
 
   const surveyConfig = {
+    consent: {
+      title: "Research Consent Form",
+      description: "Please read and agree to the research consent form before proceeding with the study.",
+      buttonText: "I Consent to Participate",
+      icon: "📝"
+    },
     pre: {
       title: "Initial Research Survey",
       description: "Help us understand your current ethical decision-making approach. This brief survey will help us tailor your experience with EVA.",

@@ -1,7 +1,7 @@
 // Survey completion tracking utilities
 import { backendApi } from '../services/axiosConfig';
 
-export type SurveyType = 'pre' | 'post';
+export type SurveyType = 'consent' | 'pre' | 'post';
 
 /**
  * Check if user has completed a specific survey type
@@ -49,6 +49,10 @@ export const resetSurveyCompletion = (surveyType: SurveyType): void => {
  */
 export const getAllSurveyStatuses = () => {
   return {
+    consent: {
+      completed: hasCompletedSurvey('consent'),
+      completedAt: getSurveyCompletionDate('consent')
+    },
     pre: {
       completed: hasCompletedSurvey('pre'),
       completedAt: getSurveyCompletionDate('pre')
@@ -108,6 +112,19 @@ export const markPrivacyScenariosCompletedAPI = async (): Promise<void> => {
     console.log('Privacy scenarios marked as completed in database');
   } catch (error) {
     console.error('Failed to mark privacy scenarios as completed:', error);
+    throw error;
+  }
+};
+
+/**
+ * API function to mark consent form as completed
+ */
+export const markConsentFormCompletedAPI = async (): Promise<void> => {
+  try {
+    await backendApi.post('/api/v1/user/mark-consent-form-completed');
+    console.log('Consent form marked as completed in database');
+  } catch (error) {
+    console.error('Failed to mark consent form as completed:', error);
     throw error;
   }
 }; 
