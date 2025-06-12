@@ -668,6 +668,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         ) && (
           <button
             onClick={() => {
+              // Mark that the user has clicked the button to hide the prompt next time
+              if (!hasClickedPostSurvey) {
+                setHasClickedPostSurvey(true);
+                localStorage.setItem('eva-post-survey-clicked', 'true');
+              }
               // Dispatch event to show post-survey modal
               window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
             }}
@@ -685,9 +690,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <span className="relative z-10 flex items-center space-x-1.5">
                 <span className="text-sm">📋</span>
                 <span>Post Survey</span>
-                <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold animate-pulse ml-2">
-                  Click at the end!
-                </span>
+                {!hasClickedPostSurvey && (
+                  <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold animate-pulse ml-2">
+                    Click at the end!
+                  </span>
+                )}
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
                              translate-x-[-100%] group-hover:translate-x-[100%] 

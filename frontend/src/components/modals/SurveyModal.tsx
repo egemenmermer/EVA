@@ -4,6 +4,8 @@ import {
   markPreSurveyCompletedAPI, 
   markPostSurveyCompletedAPI 
 } from '@/utils/surveyUtils';
+import { useStore } from '@/store/useStore';
+import { backendApi } from '@/services/axiosConfig';
 
 interface SurveyModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
   surveyType,
   onComplete
 }) => {
+  const { setUser } = useStore();
   const [showThankYou, setShowThankYou] = useState(false);
   const [hasConfirmed, setHasConfirmed] = useState(false);
 
@@ -36,6 +39,20 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
   };
   
   const surveyUrl = surveyUrls[surveyType];
+
+  // Function to refresh user data from API
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data after survey completion...');
+      const response = await backendApi.get('/api/v1/user/profile');
+      const updatedUser = response.data;
+      console.log('Updated user data:', updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return null;
+    }
+  };
 
   // Function to handle survey completion submission
   const handleSurveySubmit = async () => {
@@ -56,6 +73,18 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
       
       setShowThankYou(true);
       
+      // If it's the post-survey, refresh user data to update the postSurveyCompleted flag
+      if (surveyType === 'post') {
+        try {
+          const userData = await refreshUserData();
+          if (userData) {
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error('Failed to refresh user data after post-survey completion:', error);
+        }
+      }
+      
       if (onComplete) {
         onComplete();
       }
@@ -72,6 +101,18 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
       localStorage.setItem(`${completionKey}_timestamp`, new Date().toISOString());
       
       setShowThankYou(true);
+      
+      // If it's the post-survey, refresh user data to update the postSurveyCompleted flag
+      if (surveyType === 'post') {
+        try {
+          const userData = await refreshUserData();
+          if (userData) {
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error('Failed to refresh user data after post-survey completion:', error);
+        }
+      }
       
       if (onComplete) {
         onComplete();
