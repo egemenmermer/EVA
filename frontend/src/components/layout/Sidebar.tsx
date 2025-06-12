@@ -223,6 +223,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return localStorage.getItem('eva-tactics-viewed') === 'true';
   });
 
+  const [hasClickedPostSurvey, setHasClickedPostSurvey] = useState(() => {
+    return localStorage.getItem('eva-post-survey-clicked') === 'true';
+  });
+
   // Convert any conversation list to remove mock IDs
   const sanitizeConversations = (conversations: Conversation[]): Conversation[] => {
     return conversations.filter(conv => {
