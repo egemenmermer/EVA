@@ -49,6 +49,11 @@ export interface Message {
   isLoading?: boolean;
   isRehearsalRequest?: boolean;
   isRehearsalOptions?: boolean;
+  // Email Assistant properties
+  isEmailAssistant?: boolean;
+  emailQuestionIndex?: number;
+  isFollowUp?: boolean;
+  isEmailSummary?: boolean;
 }
 
 export interface Feedback {

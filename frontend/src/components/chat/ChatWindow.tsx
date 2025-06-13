@@ -303,6 +303,58 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   // Ref to prevent multiple clicks
   const isProcessingOption = useRef(false);
   
+  // Enhanced Email Assistant State
+  const [emailAssistantActive, setEmailAssistantActive] = useState(false);
+  const [emailDraftData, setEmailDraftData] = useState({
+    tone: '',
+    concern: '',
+    address: '',
+    references: [] as string[],
+    action: '',
+    originalEthicalIssue: ''
+  });
+  const [currentEmailQuestion, setCurrentEmailQuestion] = useState(0);
+  const [emailQuestionResponses, setEmailQuestionResponses] = useState<string[]>([]);
+  
+  // Email Assistant Questions - Meta-communication focused
+  const emailQuestions = [
+    {
+      id: 'tone',
+      question: "What tone would you like this email to have?",
+      type: 'choice' as const,
+      choices: ['Confident and assertive', 'Polite but firm', 'Curious and questioning', 'Formal and diplomatic', 'Friendly and open']
+    },
+    {
+      id: 'address',
+      question: "How would you like to address the manager?",
+      type: 'choice',
+      choices: ['By name (e.g., "Hi James")', 'General ("Hi team")', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+    },
+    {
+      id: 'goal',
+      question: "What's your main goal with this email?",
+      type: 'choice',
+      choices: ['Ask for a meeting', 'Raise concern for documentation', 'Escalate to someone higher up', 'Recommend an alternative approach', 'Just express disagreement respectfully']
+    },
+    {
+      id: 'references',
+      question: "Should I include references to existing policies or frameworks?",
+      type: 'choice',
+      choices: ['Yes', 'No']
+    },
+    {
+      id: 'customization',
+      question: "Is there anything you definitely want to say or avoid?",
+      type: 'choice',
+      choices: ['I have specific preferences', 'No, just use best practices', 'Keep it simple and brief'],
+      followUp: {
+        condition: 'I have specific preferences',
+        question: "What would you like to include or avoid?",
+        type: 'text'
+      }
+    }
+  ];
+  
   // State for Edit Draft Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [draftToEdit, setDraftToEdit] = useState<string | null>(null);
@@ -310,6 +362,248 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Create a ref to the handleSendMessage function to use in the useEffect
   const handleSendMessageRef = useRef<(content: string) => Promise<void>>();
+  
+  // Email Assistant Functions
+  const startEmailAssistant = (originalEthicalIssue: string) => {
+    setEmailAssistantActive(true);
+    setCurrentEmailQuestion(0);
+    setEmailQuestionResponses([]);
+    setEmailDraftData({
+      tone: '',
+      concern: '',
+      address: '',
+      references: [],
+      action: '',
+      originalEthicalIssue
+    });
+    
+
+    
+    // Add EVA's first question as a message
+    const evaMessage: Message = {
+      id: `eva-email-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: "Let's get your email ready. " + emailQuestions[0].question,
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isEmailAssistant: true,
+      emailQuestionIndex: 0
+    };
+    
+    setStoreMessages(prev => [...prev, evaMessage]);
+  };
+  
+  const handleEmailQuestionResponse = async (response: string, isFollowUp: boolean = false) => {
+    // Add user's response as a message
+    const userMessage: Message = {
+      id: `user-email-${Date.now()}`,
+      role: 'user' as Role,
+      content: response,
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isEmailAssistant: true
+    };
+    
+    setStoreMessages(prev => [...prev, userMessage]);
+    
+    if (!isFollowUp) {
+      // Update responses array
+      const newResponses = [...emailQuestionResponses, response];
+      setEmailQuestionResponses(newResponses);
+      
+      // Update draft data based on current question
+      const currentQ = emailQuestions[currentEmailQuestion];
+      const updatedDraftData = { ...emailDraftData };
+      
+      switch (currentQ.id) {
+        case 'tone':
+          updatedDraftData.tone = response;
+          break;
+        case 'address':
+          updatedDraftData.address = response;
+          break;
+        case 'goal':
+          updatedDraftData.action = response; // Store goal in action field
+          break;
+        case 'references':
+          updatedDraftData.references = response === 'Yes' ? ['Will include relevant frameworks'] : [];
+          break;
+        case 'customization':
+          if (response === 'I have specific preferences') {
+            // Will handle the follow-up question next
+          } else {
+            updatedDraftData.concern = response; // Store customization preference
+          }
+          break;
+      }
+      
+      setEmailDraftData(updatedDraftData);
+    } else {
+      // Handle follow-up response
+      const currentQ = emailQuestions[currentEmailQuestion];
+      const updatedDraftData = { ...emailDraftData };
+      
+      switch (currentQ.id) {
+        case 'customization':
+          updatedDraftData.concern = response; // Store user's specific preferences/avoidances
+          break;
+      }
+      
+      setEmailDraftData(updatedDraftData);
+    }
+    
+    // Check if we need to ask a follow-up question
+    if (!isFollowUp && emailQuestions[currentEmailQuestion].followUp && 
+        emailQuestions[currentEmailQuestion].followUp?.condition === response) {
+      // Ask follow-up question
+      setTimeout(() => {
+        const followUpMessage: Message = {
+          id: `eva-email-followup-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: emailQuestions[currentEmailQuestion].followUp!.question,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+          isEmailAssistant: true,
+          isFollowUp: true,
+          emailQuestionIndex: currentEmailQuestion
+        };
+        
+        setStoreMessages(prev => [...prev, followUpMessage]);
+      }, 500);
+      return;
+    }
+    
+    // Move to next question or finish
+    const nextQuestionIndex = currentEmailQuestion + 1;
+    
+    if (nextQuestionIndex < emailQuestions.length) {
+      setCurrentEmailQuestion(nextQuestionIndex);
+      
+      // Add next question after a brief delay
+      setTimeout(() => {
+        const nextMessage: Message = {
+          id: `eva-email-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: emailQuestions[nextQuestionIndex].question,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+          isEmailAssistant: true,
+          emailQuestionIndex: nextQuestionIndex
+        };
+        
+        setStoreMessages(prev => [...prev, nextMessage]);
+      }, 500);
+    } else {
+      // All questions answered, generate the email
+      await generateFinalEmail();
+    }
+  };
+  
+  const generateFinalEmail = async () => {
+    // Show summary and generate button
+    const summaryMessage: Message = {
+      id: `eva-email-summary-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: "Perfect! Here's what I've gathered:\n\n" +
+        `• **Tone**: ${emailDraftData.tone}\n` +
+        `• **Address style**: ${emailDraftData.address}\n` +
+        `• **Main goal**: ${emailDraftData.action}\n` +
+        `• **Include references**: ${emailDraftData.references.length > 0 ? 'Yes' : 'No'}\n` +
+        `• **Customization**: ${emailDraftData.concern || 'Use best practices'}\n\n` +
+        "Ready to generate your email?",
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isEmailAssistant: true,
+      isEmailSummary: true
+    };
+    
+    setStoreMessages(prev => [...prev, summaryMessage]);
+  };
+  
+  const generateEmailWithData = async () => {
+    setEmailAssistantActive(false);
+    setIsDraftingEmail(true);
+    
+    // Create loading message
+    const loadingMessage: Message = {
+      id: `assistant-loading-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: 'Generating your personalized email...',
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isLoading: true
+    };
+    
+    setStoreMessages(prev => [...prev, loadingMessage]);
+    
+    // Create enhanced prompt with collected data
+    const currentScenario = determineCurrentScenario();
+    const scenarioContext = currentScenario === 'accessibility' ? 'accessibility' : 
+                           currentScenario === 'privacy' ? 'privacy' : 'ethical';
+    
+    // Determine appropriate references based on scenario
+    const relevantReferences = currentScenario === 'accessibility' 
+      ? 'WCAG guidelines, ADA compliance, Section 508' 
+      : currentScenario === 'privacy'
+      ? 'GDPR, CCPA, company privacy policy'
+      : 'company ethics policy, industry standards';
+    
+    const enhancedPrompt = `Generate a professional email based on the user's communication preferences and scenario context:
+
+**Scenario Context**: This email addresses ${scenarioContext} concerns from a workplace ethical situation the user just practiced.
+
+**Original Ethical Issue**: ${emailDraftData.originalEthicalIssue}
+
+**Communication Preferences**:
+- Tone: ${emailDraftData.tone}
+- Address style: ${emailDraftData.address}
+- Main goal: ${emailDraftData.action}
+- Include policy references: ${emailDraftData.references.length > 0 ? `Yes (suggest: ${relevantReferences})` : 'No'}
+- User customization: ${emailDraftData.concern || 'Use professional best practices'}
+
+**Instructions**: 
+Generate a well-structured email that reflects the specified tone and communication style. The email should address the ${scenarioContext} concerns professionally while achieving the stated goal. ${emailDraftData.references.length > 0 ? `Include appropriate references to ${relevantReferences} to strengthen the argument.` : ''} ${emailDraftData.concern && emailDraftData.concern !== 'Use best practices' && emailDraftData.concern !== 'Keep it simple and brief' ? `Important: ${emailDraftData.concern}` : ''}
+
+Format: Include subject line, greeting (based on address style), body paragraphs, and professional closing.`;
+    
+    try {
+      const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
+        conversationId: currentConversation?.conversationId,
+        userQuery: enhancedPrompt,
+        managerType: currentConversation?.managerType || managerType,
+        temperature: temperature || 0.7,
+        includeHistory: true,
+        historyLimit: 20
+      });
+      
+      setStoreMessages(prev => prev.filter(m => !m.isLoading));
+      
+      if (response.data && response.data.messages && response.data.messages.length > 0) {
+        const assistantResponse = response.data.messages[response.data.messages.length - 1];
+        
+        const newAssistantMessage: Message = {
+          id: assistantResponse.id || `assistant-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: assistantResponse.content,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: assistantResponse.createdAt || new Date().toISOString()
+        };
+        
+        setStoreMessages(prev => [...prev.filter(m => !m.isLoading), newAssistantMessage]);
+        
+        if (currentConversation?.conversationId) {
+          saveConversationState(currentConversation.conversationId, 
+            [...storeMessages.filter(m => !m.isLoading), newAssistantMessage]);
+        }
+      }
+    } catch (error) {
+      console.error('Error generating email:', error);
+      setStoreMessages(prev => prev.filter(m => !m.isLoading));
+      setError('Failed to generate email. Please try again.');
+    } finally {
+      setIsDraftingEmail(false);
+    }
+  };
   
   // Add this state and ref near the other refs and state declarations
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -2066,6 +2360,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     // Set processing flag
     isProcessingOption.current = true;
     
+    try {
+    
     const lowerCaseOption = optionText.toLowerCase();
 
     // For "Practice again" or "Yes, practice" options
@@ -2088,7 +2384,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.error('Could not initiate practice: missing context.');
         setError('Could not start practice mode. Missing conversation context.');
       }
-      isProcessingOption.current = false;
     } 
     // For "Practice responding to a positive/negative reply" options
     else if (lowerCaseOption.includes('practice responding to a')) {
@@ -2262,25 +2557,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               
               setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
             })
-            .finally(() => { // Add finally block here
-                isProcessingOption.current = false; // Reset processing flag
+            .finally(() => { 
+                // Processing flag will be reset in main finally block
             });
           } else {
             console.error('Cannot send simulated reply: No current conversation ID.');
             setError('Cannot send simulated reply. Please start a new chat.');
             setLoading(false);
-            isProcessingOption.current = false; // Reset processing flag
           }
         }, 500);
       }, 100); // Small delay to ensure UI state is updated
       // isProcessingOption.current = false; // Removed from here to move into finally block
     }
-    // For "Yes, help draft email" options - FIX THIS SECTION
+    // For "Yes, help draft email" options - Enhanced Interactive Flow
     else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
-      console.log('Draft email requested - setting isDraftingEmail state');
-      
-      // Set state flag to indicate email drafting is in progress
-      setIsDraftingEmail(true);
+      console.log('Enhanced email assistant requested');
       
       // Find the most recent ethical issue/concern that the user raised
       const userMessages = storeMessages.filter(m => m.role === 'user');
@@ -2323,7 +2614,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       
       // Strategy 2: If no recent issue found after feedback, look for the most recent substantial user message overall
       if (!originalEthicalIssue && userMessages.length > 0) {
-        // Look backwards through all user messages for the most recent substantial one
         for (let i = userMessages.length - 1; i >= 0; i--) {
           const msg = userMessages[i];
           if (!msg.content.toLowerCase().includes('practice') && 
@@ -2345,112 +2635,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         console.log('Using last user message as fallback:', originalEthicalIssue.substring(0, 50) + '...');
       }
       
-      // Create a very simplified message for display in the UI
-      const displayMessage = "Please draft an email about this ethical concern.";
-      
-      // Create a more detailed request for the API focused on the original ethical issue
-      let detailedPrompt = `Please draft me a professional email to my manager about an ethical concern I'm facing at work.`;
-      
-      if (originalEthicalIssue) {
-        detailedPrompt += ` The ethical issue is regarding: "${originalEthicalIssue.substring(0, 200)}..."`;
-      }
-      
-      detailedPrompt += ` Please include a proper subject line, greeting, and professional closing. Focus on communicating the ethical concern clearly and professionally without mentioning any practice scenarios or scores.`;
-      
-      // First, save the detailed prompt for the API to use, but don't show it to the user
-      localStorage.setItem('email_draft_detailed_prompt', detailedPrompt);
-      
-      // Create a user message with just the simple display text
+      // Add user's request message
       const emailRequestMessage: Message = {
         id: `user-${Date.now()}`,
         role: 'user' as Role,
-        content: displayMessage,
+        content: optionText,
         conversationId: currentConversation?.conversationId || '',
         createdAt: new Date().toISOString()
       };
       
-      // Create a loading message
-      const loadingMessage: Message = {
-        id: `assistant-loading-${Date.now()}`,
-        role: 'assistant' as Role,
-        content: 'Drafting your email...',
-        conversationId: currentConversation?.conversationId || '',
-        createdAt: new Date().toISOString(),
-        isLoading: true
-      };
+      setStoreMessages(prev => [...prev, emailRequestMessage]);
       
-      // IMPORTANT: Update UI in a single operation to avoid flicker
-      // Add both the user request and loading message in one update
-      setStoreMessages(prev => [...prev, emailRequestMessage, loadingMessage]);
-      setLoading(true); // Set global loading state
-      
-      // Save current UI state to localStorage to prevent loss during transitions
-      if (currentConversation?.conversationId) {
-        saveConversationState(currentConversation.conversationId, 
-          [...storeMessages, emailRequestMessage, loadingMessage]);
-      }
-      
-      // IMPORTANT: Call API directly instead of going through handleSendMessage
-      console.log('Calling API directly with detailed prompt');
-      
-      // Add a small delay to ensure UI has been updated before API call
-      setTimeout(async () => {
-        try {
-          // Skip handleSendMessage entirely and call the API directly
-          if (!currentConversation || !currentConversation.conversationId) {
-            throw new Error('No valid conversation ID');
-          }
-          
-          // Use api.post instead of handleSendMessage to avoid UI state changes
-          const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
-            conversationId: currentConversation.conversationId,
-            userQuery: detailedPrompt,
-            managerType: currentConversation.managerType || managerType,
-            temperature: temperature || 0.7,
-            includeHistory: true, // Add this to ensure context is preserved
-            historyLimit: 20 // Request more history for better context
-          });
-          
-          // Remove the loading message
-          setStoreMessages(prev => prev.filter(m => !m.isLoading));
-          
-          // If we have a valid response, add it to the UI
-          if (response.data && response.data.messages && response.data.messages.length > 0) {
-            // Get the assistant's message (last one in array)
-            const assistantResponse = response.data.messages[response.data.messages.length - 1];
-            
-            // Create a properly formatted message object
-            const newAssistantMessage: Message = {
-              id: assistantResponse.id || `assistant-${Date.now()}`,
-              role: 'assistant' as Role,
-              content: assistantResponse.content,
-              conversationId: currentConversation.conversationId,
-              createdAt: assistantResponse.createdAt || new Date().toISOString()
-            };
-            
-            // Add the new assistant message to the UI
-            setStoreMessages(prev => [...prev.filter(m => !m.isLoading), newAssistantMessage]);
-            
-            // Save the updated conversation
-            saveConversationState(currentConversation.conversationId, 
-              [...storeMessages.filter(m => !m.isLoading), emailRequestMessage, newAssistantMessage]);
-          } else {
-            // Handle error case
-            console.error('Invalid response from API', response);
-            setError('Failed to get email draft. Please try again.');
-          }
-        } catch (error) {
-          console.error('Error getting email draft:', error);
-          // Remove loading message
-          setStoreMessages(prev => prev.filter(m => !m.isLoading));
-          setError('Failed to get email draft. Please try again.');
-        } finally {
-          // Clear states
-          setLoading(false);
-          setIsDraftingEmail(false);
-          isProcessingOption.current = false;
-        }
-      }, 100);
+      // Start the enhanced email assistant flow
+      setTimeout(() => {
+        startEmailAssistant(originalEthicalIssue);
+      }, 500);
     } 
     // For other options, keep the existing handling
     else {
@@ -2484,6 +2683,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       else {
       handleSendMessage(optionText);
     }
+    }
+    } catch (error) {
+      console.error('Error in handleOptionClick:', error);
+      setError('An error occurred while processing your selection. Please try again.');
+    } finally {
+      // Always reset processing flag
       isProcessingOption.current = false;
     }
   }, [storeMessages, currentConversation, managerType, temperature, setStoreMessages, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
@@ -3082,6 +3287,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     const showEmailDraftActionButtons = isAssistant && isEmailDraft && !isSimulatedEmailReply;
     const showRehearsalOptionButtons = message.isRehearsalOptions === true;
     const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && !isSimulatedEmailReply && extractedOptions.length > 0;
+    
+    // Email Assistant specific conditions
+    const isEmailAssistantMessage = message.isEmailAssistant === true;
+    const isEmailQuestionMessage = isEmailAssistantMessage && typeof message.emailQuestionIndex === 'number';
+    const isEmailSummaryMessage = message.isEmailSummary === true;
+    const isEmailFollowUpMessage = message.isFollowUp === true;
 
     const markdownComponents: ReactMarkdownOptions['components'] = {
         code({ node, inline, className, children, ...props }: any) { 
@@ -3268,6 +3479,110 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
               </Button>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly, or edit it further before sending.</p>
+          </div>
+        )}
+
+        {/* Email Assistant Question Buttons */}
+        {isEmailQuestionMessage && !isEmailFollowUpMessage && (
+          <div className="mt-3 ml-7">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {emailQuestions[message.emailQuestionIndex!]?.choices?.map((choice, idx) => (
+                <Button 
+                  key={idx} 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleEmailQuestionResponse(choice)} 
+                  className="text-xs h-auto py-2 px-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 transition-colors duration-200"
+                >
+                  {choice}
+                </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div 
+                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${((message.emailQuestionIndex! + 1) / emailQuestions.length) * 100}%` }}
+                ></div>
+              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {message.emailQuestionIndex! + 1} of {emailQuestions.length}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Email Assistant Follow-up Input */}
+        {isEmailFollowUpMessage && (
+          <div className="mt-3 ml-7">
+            {(() => {
+              const currentQ = emailQuestions[currentEmailQuestion];
+              if (currentQ.id === 'customization') {
+                // Text input for customization preferences
+                return (
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="e.g., I want to avoid sounding too aggressive, or I want to include a line about users being left out..."
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const input = e.target as HTMLInputElement;
+                          if (input.value.trim()) {
+                            handleEmailQuestionResponse(input.value.trim(), true);
+                            input.value = '';
+                          }
+                        }
+                      }}
+                    />
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (input.value.trim()) {
+                          handleEmailQuestionResponse(input.value.trim(), true);
+                          input.value = '';
+                        }
+                      }}
+                      className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Send
+                    </Button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        )}
+
+        {/* Email Assistant Summary and Generate Button */}
+        {isEmailSummaryMessage && (
+          <div className="mt-3 ml-7">
+            <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => generateEmailWithData()}
+                disabled={isDraftingEmail}
+                className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                <span className="mr-1">📧</span> Generate Email
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setEmailAssistantActive(false);
+                  setCurrentEmailQuestion(0);
+                  setEmailQuestionResponses([]);
+                }}
+                className="text-xs h-auto py-2 px-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Start Over
+              </Button>
+            </div>
           </div>
         )}
       </div>

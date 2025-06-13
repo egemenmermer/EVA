@@ -1510,31 +1510,42 @@ Your feedback MUST be structured *exactly* as follows, using these *exact litera
 """
 
         email_draft_prompt = """You are EVA, an empathetic AI assistant.
-The user wants to draft an email to their boss about an ethical dilemma they have discussed **previously in the conversation history**.
-**IMPORTANT:** Base the draft **ONLY** on the original ethical dilemma described by the user earlier in the conversation. **DO NOT** mention the practice scenario, the user's score, the feedback received, or EVA itself in the email draft.
+The user has gone through an interactive email assistant process and wants to draft an email to their manager about an ethical concern.
 
-Your task is to generate a concise, professional, and actionable draft email based on the **original problem description** found in the history.
+**IMPORTANT:** The user's message contains their personalized preferences collected through the interactive flow. Use these preferences to generate a tailored email draft.
+
+Look for these preference indicators in the user's message:
+- **Context**: The original ethical issue being addressed
+- **Tone**: The user's preferred communication style (confident/collaborative/diplomatic)
+- **Specific concerns**: What they want to mention about privacy/accessibility
+- **Address manager as**: How they want to address their manager (first name/formal/neutral)
+- **Include references**: Any guidelines or policies they want to reference
+- **Proposed next step**: Any specific action they want to propose
+
+Your task is to generate a professional email that incorporates these user preferences while maintaining ethical assertiveness.
 
 The email should:
-1.  Clearly and respectfully state the **original ethical concern** (e.g., data collection, privacy, bias).
-2.  Briefly explain *why* it is a concern (e.g., potential harm, compliance issues, company values).
-3.  Suggest a constructive path forward, such as requesting a meeting to discuss the issue further or proposing an alternative approach.
-4.  Maintain a professional and collaborative tone.
+1. Use the specified tone preference throughout
+2. Address the manager according to their preference
+3. Include the specific concerns they mentioned
+4. Reference any guidelines/policies they specified
+5. Include their proposed next step if provided
+6. Maintain professionalism while being ethically clear
 
 Output ONLY the draft email content (Subject and Body). Do not include any surrounding conversational text, greetings to EVA, or explanations about the email.
+
 Example Structure:
+Subject: [Topic relevant to their concern]
 
-Subject: Discussion regarding [Brief Topic of Concern]
+[Address manager according to preference],
 
-Dear [Boss's Name],
+[Opening that matches their tone preference]
+[Core ethical concern with specific details they provided]
+[Why it matters - reference their concerns and any guidelines they mentioned]
+[Proposed next step based on their preference]
 
-[Sentence briefly stating the reason for the email - raising an ethical concern about a specific project/feature.]
-[Sentence explaining the core ethical issue and its potential implications.]
-[Sentence proposing a next step, e.g., "I would appreciate the opportunity to discuss this further with you at your convenience." or "Could we schedule a brief meeting to explore potential solutions?"]
-
-Best regards, // or Sincerely,
-
-[Your Name Placeholder - Use a generic placeholder like '[Your Name]']
+[Professional closing appropriate to their tone],
+[Your Name]
 """
 
         rehearsal_prompt = """You are EVA, an AI assistant.
@@ -1566,7 +1577,9 @@ Your task is to:
         if request_type == "post_feedback":
             selected_system_prompt = post_feedback_prompt
             logger.info(f"Using post-feedback prompt for conv {conversation_id} based on request_type")
-        elif lower_user_query.startswith("please help me draft an email"): 
+        elif (lower_user_query.startswith("please help me draft an email") or 
+              lower_user_query.startswith("generate a concise, professional email") or
+              "user preferences:" in lower_user_query): 
             selected_system_prompt = email_draft_prompt
             logger.info(f"Using email draft prompt for conv {conversation_id}")
         elif lower_user_query.startswith("okay, i've copied the draft."):
