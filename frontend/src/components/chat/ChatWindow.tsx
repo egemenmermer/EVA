@@ -315,6 +315,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   });
   const [currentEmailQuestion, setCurrentEmailQuestion] = useState(0);
   const [emailQuestionResponses, setEmailQuestionResponses] = useState<string[]>([]);
+  const [selectedChoices, setSelectedChoices] = useState<{ [questionIndex: number]: string }>({});
   
   // Email Assistant Questions - Meta-communication focused
   const emailQuestions = [
@@ -345,13 +346,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     {
       id: 'customization',
       question: "Is there anything you definitely want to say or avoid?",
-      type: 'choice',
-      choices: ['I have specific preferences', 'No, just use best practices', 'Keep it simple and brief'],
-      followUp: {
-        condition: 'I have specific preferences',
-        question: "What would you like to include or avoid?",
-        type: 'text'
-      }
+      type: 'text',
+      placeholder: "e.g., I want to avoid sounding too aggressive, or I want to include a line about users being left out... (optional)"
     }
   ];
   
@@ -368,6 +364,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setEmailAssistantActive(true);
     setCurrentEmailQuestion(0);
     setEmailQuestionResponses([]);
+    setSelectedChoices({});
     setEmailDraftData({
       tone: '',
       concern: '',
@@ -393,85 +390,55 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setStoreMessages(prev => [...prev, evaMessage]);
   };
   
-  const handleEmailQuestionResponse = async (response: string, isFollowUp: boolean = false) => {
-    // Add user's response as a message
-    const userMessage: Message = {
-      id: `user-email-${Date.now()}`,
-      role: 'user' as Role,
-      content: response,
-      conversationId: currentConversation?.conversationId || '',
-      createdAt: new Date().toISOString(),
-      isEmailAssistant: true
-    };
-    
-    setStoreMessages(prev => [...prev, userMessage]);
-    
-    if (!isFollowUp) {
-      // Update responses array
-      const newResponses = [...emailQuestionResponses, response];
-      setEmailQuestionResponses(newResponses);
-      
-      // Update draft data based on current question
-      const currentQ = emailQuestions[currentEmailQuestion];
-      const updatedDraftData = { ...emailDraftData };
-      
-      switch (currentQ.id) {
-        case 'tone':
-          updatedDraftData.tone = response;
-          break;
-        case 'address':
-          updatedDraftData.address = response;
-          break;
-        case 'goal':
-          updatedDraftData.action = response; // Store goal in action field
-          break;
-        case 'references':
-          updatedDraftData.references = response === 'Yes' ? ['Will include relevant frameworks'] : [];
-          break;
-        case 'customization':
-          if (response === 'I have specific preferences') {
-            // Will handle the follow-up question next
-          } else {
-            updatedDraftData.concern = response; // Store customization preference
-          }
-          break;
-      }
-      
-      setEmailDraftData(updatedDraftData);
-    } else {
-      // Handle follow-up response
-      const currentQ = emailQuestions[currentEmailQuestion];
-      const updatedDraftData = { ...emailDraftData };
-      
-      switch (currentQ.id) {
-        case 'customization':
-          updatedDraftData.concern = response; // Store user's specific preferences/avoidances
-          break;
-      }
-      
-      setEmailDraftData(updatedDraftData);
+  const handleEmailQuestionResponse = async (response: string, isTextInput: boolean = false) => {
+    // Mark choice as selected for choice questions
+    if (!isTextInput) {
+      setSelectedChoices(prev => ({ ...prev, [currentEmailQuestion]: response }));
     }
     
-    // Check if we need to ask a follow-up question
-    if (!isFollowUp && emailQuestions[currentEmailQuestion].followUp && 
-        emailQuestions[currentEmailQuestion].followUp?.condition === response) {
-      // Ask follow-up question
-      setTimeout(() => {
-        const followUpMessage: Message = {
-          id: `eva-email-followup-${Date.now()}`,
-          role: 'assistant' as Role,
-          content: emailQuestions[currentEmailQuestion].followUp!.question,
-          conversationId: currentConversation?.conversationId || '',
-          createdAt: new Date().toISOString(),
-          isEmailAssistant: true,
-          isFollowUp: true,
-          emailQuestionIndex: currentEmailQuestion
-        };
-        
-        setStoreMessages(prev => [...prev, followUpMessage]);
-      }, 500);
-      return;
+    // Add user's response as a message (only if not empty for text input)
+    if (!isTextInput || response.trim()) {
+      const userMessage: Message = {
+        id: `user-email-${Date.now()}`,
+        role: 'user' as Role,
+        content: response || "(No specific preferences)",
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isEmailAssistant: true
+      };
+      
+      setStoreMessages(prev => [...prev, userMessage]);
     }
+    
+    // Update responses array
+    const newResponses = [...emailQuestionResponses, response];
+    setEmailQuestionResponses(newResponses);
+    
+    // Update draft data based on current question
+    const currentQ = emailQuestions[currentEmailQuestion];
+    const updatedDraftData = { ...emailDraftData };
+    
+    switch (currentQ.id) {
+      case 'tone':
+        updatedDraftData.tone = response;
+        break;
+      case 'address':
+        updatedDraftData.address = response;
+        break;
+      case 'goal':
+        updatedDraftData.action = response; // Store goal in action field
+        break;
+      case 'references':
+        updatedDraftData.references = response === 'Yes' ? ['Will include relevant frameworks'] : [];
+        break;
+      case 'customization':
+        updatedDraftData.concern = response || 'Use best practices'; // Store customization input (can be empty)
+        break;
+    }
+    
+    setEmailDraftData(updatedDraftData);
+    
+    // No follow-up questions needed anymore
     
     // Move to next question or finish
     const nextQuestionIndex = currentEmailQuestion + 1;
@@ -3474,30 +3441,84 @@ Format: Include subject line, greeting (based on address style), body paragraphs
               <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
                 <span className="mr-1">📋</span> Copy Email
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleEditDraft(message.id || `edit-${index}`, rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
-                <span className="mr-1">✏️</span> Edit Further
-              </Button>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly, or edit it further before sending.</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly.</p>
           </div>
         )}
 
         {/* Email Assistant Question Buttons */}
         {isEmailQuestionMessage && !isEmailFollowUpMessage && (
           <div className="mt-3 ml-7">
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {emailQuestions[message.emailQuestionIndex!]?.choices?.map((choice, idx) => (
-                <Button 
-                  key={idx} 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleEmailQuestionResponse(choice)} 
-                  className="text-xs h-auto py-2 px-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 transition-colors duration-200"
-                >
-                  {choice}
-                </Button>
-              ))}
-            </div>
+            {(() => {
+              const currentQ = emailQuestions[message.emailQuestionIndex!];
+              const questionIndex = message.emailQuestionIndex!;
+              const selectedChoice = selectedChoices[questionIndex];
+              const isQuestionAnswered = selectedChoice !== undefined;
+              
+              if (currentQ?.type === 'text') {
+                // Text input for the last question
+                return (
+                  <div className="mb-2">
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder={currentQ.placeholder || "Type your response..."}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const input = e.target as HTMLInputElement;
+                            handleEmailQuestionResponse(input.value.trim(), true);
+                            input.value = '';
+                          }
+                        }}
+                      />
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        onClick={(e) => {
+                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                          handleEmailQuestionResponse(input.value.trim(), true);
+                          input.value = '';
+                        }}
+                        className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      You can leave this empty if you have no specific preferences
+                    </div>
+                  </div>
+                );
+              } else {
+                // Choice buttons
+                return (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {currentQ?.choices?.map((choice, idx) => {
+                      const isSelected = selectedChoice === choice;
+                      return (
+                        <Button 
+                          key={idx} 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => !isQuestionAnswered && handleEmailQuestionResponse(choice)} 
+                          disabled={isQuestionAnswered}
+                          className={`text-xs h-auto py-2 px-3 transition-colors duration-200 ${
+                            isSelected 
+                              ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200'
+                              : isQuestionAnswered 
+                              ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                              : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 cursor-pointer'
+                          }`}
+                        >
+                          {choice}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                );
+              }
+            })()}
             <div className="flex items-center gap-2 mt-2">
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                 <div 
@@ -3512,50 +3533,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
           </div>
         )}
 
-        {/* Email Assistant Follow-up Input */}
-        {isEmailFollowUpMessage && (
-          <div className="mt-3 ml-7">
-            {(() => {
-              const currentQ = emailQuestions[currentEmailQuestion];
-              if (currentQ.id === 'customization') {
-                // Text input for customization preferences
-                return (
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="e.g., I want to avoid sounding too aggressive, or I want to include a line about users being left out..."
-                      className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          const input = e.target as HTMLInputElement;
-                          if (input.value.trim()) {
-                            handleEmailQuestionResponse(input.value.trim(), true);
-                            input.value = '';
-                          }
-                        }
-                      }}
-                    />
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                      onClick={(e) => {
-                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                        if (input.value.trim()) {
-                          handleEmailQuestionResponse(input.value.trim(), true);
-                          input.value = '';
-                        }
-                      }}
-                      className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      Send
-                    </Button>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-          </div>
-        )}
+
 
         {/* Email Assistant Summary and Generate Button */}
         {isEmailSummaryMessage && (
@@ -3574,9 +3552,27 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
+                  // Reset all email assistant state
                   setEmailAssistantActive(false);
                   setCurrentEmailQuestion(0);
                   setEmailQuestionResponses([]);
+                  setSelectedChoices({});
+                  setEmailDraftData({
+                    tone: '',
+                    concern: '',
+                    address: '',
+                    references: [],
+                    action: '',
+                    originalEthicalIssue: emailDraftData.originalEthicalIssue
+                  });
+                  
+                  // Remove all email assistant messages from chat
+                  setStoreMessages(prev => prev.filter(msg => !msg.isEmailAssistant));
+                  
+                  // Restart the email assistant from the beginning
+                  setTimeout(() => {
+                    startEmailAssistant(emailDraftData.originalEthicalIssue);
+                  }, 300);
                 }}
                 className="text-xs h-auto py-2 px-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
               >

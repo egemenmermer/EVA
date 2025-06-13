@@ -649,6 +649,24 @@ public class ScenarioServiceImpl implements ScenarioService {
         int rawEvs = (Integer) summary.get("rawEvs"); // This is the raw EVS total
         int numChoices = ((List<?>) summary.get("evsHistory")).size(); // Get count from EVS history
         
+        // Get tactics information from detailed feedback
+        Map<String, Object> detailedFeedback = (Map<String, Object>) summary.get("detailedFeedback");
+        Map<String, Long> tacticTypes = (Map<String, Long>) detailedFeedback.get("tacticTypes");
+        Map<String, Object> decisionBreakdown = (Map<String, Object>) detailedFeedback.get("decisionBreakdown");
+        
+        // Calculate tactics statistics
+        int totalTacticsUsed = tacticTypes.values().stream().mapToInt(Long::intValue).sum();
+        int uniqueTacticsUsed = tacticTypes.size();
+        String mostUsedTactic = tacticTypes.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("Mixed Approach");
+        long mostUsedCount = tacticTypes.getOrDefault(mostUsedTactic, 0L);
+        
+        long strongDecisions = (Long) decisionBreakdown.get("strongDecisions");
+        long passiveDecisions = (Long) decisionBreakdown.get("passiveDecisions");
+        long complianceDecisions = (Long) decisionBreakdown.get("complianceDecisions");
+        
         String scoreCategory;
         String feedback;
         
@@ -667,13 +685,26 @@ public class ScenarioServiceImpl implements ScenarioService {
         }
         
         return String.format(
-            "Great work completing this scenario! Here's your performance summary:\n\n" +
+            "Great work completing this scenario! Here's your comprehensive performance summary:\n\n" +
             "📊 **Final Score: %.1f/10 (%s)**\n" +
             "🎯 Total EVS Points: %d/%d\n" +
             "📋 Decisions Made: %d\n\n" +
-            "💡 **Feedback:** %s\n\n" +
+            "🎭 **Tactics Analysis:**\n" +
+            "• Total tactics employed: %d across %d unique types\n" +
+            "• Most used tactic: '%s' (%d times)\n" +
+            "• Decision types: %d strong, %d passive, %d compliance\n\n" +
+            "💡 **Overall Feedback:** %s\n\n" +
+            "Your tactical approach shows %s. %s\n\n" +
             "Thank you for practicing ethical decision-making with EVA!",
-            finalScore, scoreCategory, rawEvs, numChoices, numChoices, feedback
+            finalScore, scoreCategory, rawEvs, numChoices, numChoices,
+            totalTacticsUsed, uniqueTacticsUsed, mostUsedTactic, mostUsedCount,
+            strongDecisions, passiveDecisions, complianceDecisions, feedback,
+            uniqueTacticsUsed >= 6 ? "excellent diversity and adaptability" : 
+            uniqueTacticsUsed >= 4 ? "good tactical variety" : 
+            uniqueTacticsUsed >= 2 ? "moderate tactical range" : "limited tactical diversity",
+            strongDecisions >= 4 ? "Keep leveraging high-impact tactics for ethical advocacy!" :
+            strongDecisions >= 2 ? "Consider using more assertive tactics for greater impact." :
+            "Focus on developing stronger tactical approaches for ethical situations."
         );
     }
     
