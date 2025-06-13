@@ -267,7 +267,7 @@ export const SurveyModal: React.FC<SurveyModalProps> = ({
                     : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Submit
+                Continue
                 <ArrowRight className="h-4 w-4 ml-2" />
               </button>
             </div>

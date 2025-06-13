@@ -19,6 +19,7 @@ export interface Message {
   emailQuestionIndex?: number;
   isFollowUp?: boolean;
   isEmailSummary?: boolean;
+  isScenarioCompletionMessage?: boolean;
 }
 
 export interface Conversation {

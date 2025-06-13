@@ -32,4 +32,5 @@ public interface UserService {
     // Scenario completion methods
     User markAccessibilityScenariosCompleted(UUID userId);
     User markPrivacyScenariosCompleted(UUID userId);
+    UserResponseDTO resetScenarioCompletions(UUID userId);
 }

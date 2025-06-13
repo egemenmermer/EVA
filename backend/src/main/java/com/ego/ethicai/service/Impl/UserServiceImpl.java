@@ -325,4 +325,46 @@ public class UserServiceImpl implements UserService {
         logger.debug("Marked privacy scenarios completed for user with ID: {}", userId);
         return user;
     }
+
+    @Override
+    @Transactional
+    public UserResponseDTO resetScenarioCompletions(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        // Reset scenario completion flags
+        user.setAccessibilityScenariosCompleted(false);
+        user.setPrivacyScenariosCompleted(false);
+        user.setAccessibilityScenariosCompletedAt(null);
+        user.setPrivacyScenariosCompletedAt(null);
+        
+        user = userRepository.save(user);
+        logger.debug("Reset scenario completions for user with ID: {}", userId);
+
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .lastLogin(user.getLastLogin())
+                .updatedAt(user.getUpdatedAt())
+                .role(user.getRole())
+                .managerTypePreference(user.getManagerTypePreference())
+                .consentFormCompleted(user.getConsentFormCompleted())
+                .consentFormCompletedAt(user.getConsentFormCompletedAt())
+                .preSurveyCompleted(user.getPreSurveyCompleted())
+                .postSurveyCompleted(user.getPostSurveyCompleted())
+                .preSurveyCompletedAt(user.getPreSurveyCompletedAt())
+                .postSurveyCompletedAt(user.getPostSurveyCompletedAt())
+                .accessibilityScenariosCompleted(user.getAccessibilityScenariosCompleted())
+                .privacyScenariosCompleted(user.getPrivacyScenariosCompleted())
+                .accessibilityScenariosCompletedAt(user.getAccessibilityScenariosCompletedAt())
+                .privacyScenariosCompletedAt(user.getPrivacyScenariosCompletedAt())
+                .hasCompletedPractice(user.getHasCompletedPractice())
+                .firstPracticeCompletedAt(user.getFirstPracticeCompletedAt())
+                .build();
+    }
 }

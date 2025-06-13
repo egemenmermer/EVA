@@ -20,7 +20,7 @@ public class UserResponseDTO {
     private LocalDateTime updatedAt;
     private AccountTypes role;
     private String managerTypePreference;
-    
+
     // Survey completion tracking
     private Boolean consentFormCompleted;
     private LocalDateTime consentFormCompletedAt;

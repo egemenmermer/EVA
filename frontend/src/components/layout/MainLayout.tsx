@@ -109,7 +109,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       // Third check: if pre-survey is done but no manager type preference, show quiz
       else if (!user.managerTypePreference) {
         console.log('Pre-survey completed, now showing manager type quiz');
-        setShowQuizModal(true);
+      setShowQuizModal(true);
       }
       // User has completed consent form, pre-survey and quiz
       else {

@@ -96,4 +96,11 @@ public class UserController {
         return ResponseEntity.ok("Privacy scenarios marked as completed");
     }
 
+    // Reset scenario completion
+    @PostMapping("/reset-scenario-completions")
+    public ResponseEntity<UserResponseDTO> resetScenarioCompletions(@CurrentUser CustomUserDetails currentUser) {
+        UserResponseDTO updatedUser = userService.resetScenarioCompletions(currentUser.getId());
+        return ResponseEntity.ok(updatedUser);
+    }
+
 }

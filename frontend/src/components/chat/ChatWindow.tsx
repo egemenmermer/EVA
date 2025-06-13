@@ -313,6 +313,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     action: '',
     originalEthicalIssue: ''
   });
+
+  // Add state for scenario transition
+  const [showScenarioTransition, setShowScenarioTransition] = useState(false);
+  
+  // Add state to track copied emails
+  const [copiedEmails, setCopiedEmails] = useState<Set<string>>(new Set());
   const [currentEmailQuestion, setCurrentEmailQuestion] = useState(0);
   const [emailQuestionResponses, setEmailQuestionResponses] = useState<string[]>([]);
   const [selectedChoices, setSelectedChoices] = useState<{ [questionIndex: number]: string }>({});
@@ -1750,8 +1756,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
           // Check if feedback message already exists in the loaded messages
           const feedbackExists = loadedMessages.some(m => 
             m.role === 'user' && 
-            m.content.includes('practice scenario') && 
-            m.content.includes('ethical decision-making score')
+            m.content === displayPrompt // Check for exact content match, not just keywords
           );
           
           let messagesWithUserRequest = loadedMessages;
@@ -2660,44 +2665,84 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     }
   }, [storeMessages, currentConversation, managerType, temperature, setStoreMessages, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
 
-  const handleCopyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
+  const handleCopyToClipboard = async (text: string, messageId?: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
         console.log('Email draft copied to clipboard');
         
-        // Instead of using handleSendMessage, directly add a user message to the UI
-        const userMessage: Message = {
-          id: `user-${Date.now()}`,
-          role: 'user' as Role,
-          content: "I've copied the email, can we rehearse on how my manager might respond to it?",
-          conversationId: currentConversation?.conversationId || '',
-          createdAt: new Date().toISOString(),
-          // Add a property to mark this as a special message type
-          isRehearsalRequest: true
-        };
+      // Mark this email as copied
+      if (messageId) {
+        setCopiedEmails(prev => new Set(prev).add(messageId));
         
-        // Create an agent response immediately with the rehearsal options
-        const agentResponse: Message = {
-          id: `agent-rehearsal-${Date.now()}`,
+        // Reset the copy button after 1 second
+        setTimeout(() => {
+          setCopiedEmails(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(messageId);
+            return newSet;
+          });
+        }, 1000);
+      }
+      
+      // Mark scenario as completed in database
+      await markCurrentScenarioCompleted();
+      
+      // Add congratulations message from EVA
+      const congratsMessage: Message = {
+        id: `eva-congrats-${Date.now()}`,
           role: 'assistant' as Role,
-          content: "Would you like to practice with:",
+        content: "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.",
           conversationId: currentConversation?.conversationId || '',
           createdAt: new Date().toISOString(),
-          isRehearsalOptions: true
-        };
-        
-        // Update UI with both messages
-        setStoreMessages(prev => [...prev, userMessage, agentResponse]);
-        
-        // Save to localStorage to preserve state
-        if (currentConversation?.conversationId) {
-          saveConversationState(currentConversation.conversationId, [...storeMessages, userMessage, agentResponse]);
-        }
-      })
-      .catch(err => {
+        isScenarioCompletionMessage: true
+      };
+      
+      setStoreMessages(prev => [...prev, congratsMessage]);
+      
+    } catch (err) {
         console.error('Failed to copy email draft: ', err);
         setError('Failed to copy draft to clipboard.');
+    }
+  };
+
+  // Function to mark the current scenario as completed
+  const markCurrentScenarioCompleted = async () => {
+    try {
+      const authToken = localStorage.getItem('token');
+      if (!authToken) {
+        console.error('No auth token available');
+        return;
+      }
+
+      // Determine which scenario we're completing based on the conversation content
+      const scenarioType = determineCurrentScenario();
+      if (!scenarioType) {
+        console.error('Could not determine current scenario type');
+        return;
+      }
+
+      const endpoint = scenarioType === 'accessibility' 
+        ? '/api/v1/user/mark-accessibility-scenarios-completed'
+        : '/api/v1/user/mark-privacy-scenarios-completed';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
       });
+
+      if (response.ok) {
+        console.log(`${scenarioType} scenario marked as completed`);
+        // Refresh user data to update the store
+        await refreshUserData();
+      } else {
+        console.error('Failed to mark scenario as completed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error marking scenario as completed:', error);
+    }
   };
 
   // --- Modal Control Functions --- Define them here ---
@@ -2933,7 +2978,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     let rawContentForActions = message.content || 'No response content';
     let extractedOptions: string[] = [];
     let isEmailDraft = false;
-    let isRehearsalPrompt = false;
+    
     let isPracticeFeedback = false;
     
     // Variables for the new feedback structure
@@ -3191,32 +3236,12 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                 lowerContent.includes('draft email:') ||
                 lowerContent.includes('here\'s a draft') ||
                 (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
-            isRehearsalPrompt = 
-                (lowerContent.includes('okay, let\'s rehearse') && lowerContent.includes('which type of reply')) ||
-                lowerContent.includes('can we rehearse on how my manager might respond') || 
-                lowerContent.includes('would you like to practice with a reply') ||
-                message.isRehearsalRequest === true;
             extractedOptions = []; 
-            if (!isEmailDraft && !isRehearsalPrompt) {
+            if (!isEmailDraft) {
                 const matches = [...rawContent.matchAll(optionRegex)];
                 if (matches.length > 0) {
                     extractedOptions = matches.map(match => match[1].trim());
                     displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
-                }
-            } else if (isRehearsalPrompt) {
-                 const matches = [...rawContent.matchAll(optionRegex)];
-                 if (matches.length > 0) {
-                    extractedOptions = matches
-                        .filter(m => m[1].toLowerCase().includes('practice responding to a'))
-                        .map(match => match[1].trim());
-                     displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
-                 }
-                // If no options were extracted but this is a rehearsal prompt, add default options
-                if (extractedOptions.length === 0 || message.isRehearsalRequest === true) {
-                    extractedOptions = [
-                        "Practice responding to a positive reply",
-                        "Practice responding to a negative reply"
-                    ];
                 }
             }
             
@@ -3252,8 +3277,8 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback && !isSimulatedEmailReply;
     // Only show email draft action buttons for regular drafts, not simulated replies
     const showEmailDraftActionButtons = isAssistant && isEmailDraft && !isSimulatedEmailReply;
-    const showRehearsalOptionButtons = message.isRehearsalOptions === true;
-    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isRehearsalPrompt && !isSimulatedEmailReply && extractedOptions.length > 0;
+
+    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isSimulatedEmailReply && extractedOptions.length > 0;
     
     // Email Assistant specific conditions
     const isEmailAssistantMessage = message.isEmailAssistant === true;
@@ -3351,29 +3376,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                     )}
                   </div>
               // --- End Feedback Display Structure ---
-            ) : message.isRehearsalOptions ? (
-              // Special rendering for rehearsal options message
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <p className="mb-3 font-medium">{message.content}</p>
-                <div className="flex gap-2 mt-2">
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                    onClick={() => handleOptionClick("Practice responding to a positive reply")} 
-                    className="text-xs h-auto py-2 px-3 bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
-                    >
-                    <span className="mr-1">😊</span> Positive reply
-                    </Button>
-                    <Button 
-                    variant="destructive" 
-                      size="sm" 
-                    onClick={() => handleOptionClick("Practice responding to a negative reply")} 
-                    className="text-xs h-auto py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white transition-colors duration-200"
-                    >
-                    <span className="mr-1">😠</span> Negative reply
-                    </Button>
-                  </div>
-                </div>
+
             ) : (
               // Regular message display (non-feedback)
               <div className={`message-content prose prose-sm dark:prose-invert max-w-none`}>
@@ -3438,9 +3441,25 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         {showEmailDraftActionButtons && (
           <div className="mt-3 ml-7">
             <div className="flex flex-wrap gap-1.5 mb-2">
-              <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(rawContentForActions)} className="text-xs h-auto py-1.5 px-2.5 bg-white dark:bg-gray-800 transition-colors duration-200">
-                <span className="mr-1">📋</span> Copy Email
+              {(() => {
+                const isEmailCopied = message.id && copiedEmails.has(message.id);
+                return (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => !isEmailCopied && handleCopyToClipboard(rawContentForActions, message.id)}
+                    disabled={isEmailCopied}
+                    className={`text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 ${
+                      isEmailCopied 
+                        ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    <span className="mr-1">{isEmailCopied ? '✅' : '📋'}</span> 
+                    {isEmailCopied ? 'Copied!' : 'Copy Email'}
               </Button>
+                );
+              })()}
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly.</p>
           </div>
@@ -3483,8 +3502,8 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                         className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Send
-                      </Button>
-                    </div>
+              </Button>
+            </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       You can leave this empty if you have no specific preferences
                     </div>
@@ -3574,11 +3593,31 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                     startEmailAssistant(emailDraftData.originalEthicalIssue);
                   }, 300);
                 }}
+                disabled={isDraftingEmail}
                 className="text-xs h-auto py-2 px-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Start Over
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Scenario Completion Button - Show after congratulations message */}
+        {message.isScenarioCompletionMessage && (
+          <div className="mt-3 ml-7">
+            <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => setShowScenarioModal(true)}
+                className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                <span className="mr-1">🎯</span> Continue to Other Scenarios
+              </Button>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
+              Practice more scenarios to further develop your ethical decision-making skills
+            </p>
           </div>
         )}
       </div>
@@ -3829,6 +3868,30 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         isOpen={showTacticsModal}
         onClose={() => setShowTacticsModal(false)}
       />
+
+      {/* Scenario Transition Overlay - REMOVED: No longer using automatic popup */}
+      {/* {showScenarioTransition && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700 shadow-2xl">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-2xl">✅</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Scenario Completed!
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                You're being transferred to select your next practice scenario...
+              </p>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };
