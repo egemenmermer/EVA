@@ -209,13 +209,15 @@ export const LoginPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Sign in</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            {/* Registration temporarily disabled - manual user creation only */}
+            {/* Or{' '}
             <Link
               to="/register"
               className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
             >
               create a new account
-            </Link>
+            </Link> */}
+            Welcome to EVA - Ethical Virtual Assistant
           </p>
         </div>
         

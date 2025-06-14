@@ -6,18 +6,13 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { LoginPage } from '@/pages/LoginPage';
-import { RegisterPage } from '@/pages/RegisterPage';
+// import { RegisterPage } from '@/pages/RegisterPage'; // Registration disabled
 import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
 import { useStore, type Conversation } from '@/store/useStore';
 import { conversationApi, verifyToken } from '@/services/api';
 import AdminAnalytics from '@/pages/AdminAnalytics';
-import { DebugPage } from '@/pages/DebugPage';
-import { PracticeModule } from '@/components/practice/PracticeModule';
-import { ConversationProvider } from '@/contexts/ConversationContext';
-import { conversationMigrations } from '@/utils/conversationMigrations';
-import { darkModeUtils } from '@/utils/darkModeUtils';
 import { ManagerTypeQuizModal } from '@/components/modals/ManagerTypeQuizModal';
 
 // Configure the query client with better defaults for reliable data fetching
@@ -289,13 +284,16 @@ export const App: React.FC = () => {
                   user && hasToken ? <Navigate to="/dashboard" replace /> : <LoginPage />
                 } 
               />
-              <Route 
+              {/* Registration temporarily disabled - manual user creation only */}
+              {/* <Route 
                 path="/register" 
                 element={
                   // Only redirect if we have both a token and a user
                   user && hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />
                 } 
-              />
+              /> */}
+              {/* Redirect registration attempts to login page */}
+              <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/activation" element={<ActivationPage />} />
               <Route path="/auth/google/callback" element={<OAuthCallback />} />
               <Route path="/auth/github/callback" element={<OAuthCallback />} />
