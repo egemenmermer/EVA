@@ -5,7 +5,6 @@
 *.swo
 *~
 .DS_Store
-docs/
 
 # Python - Agent
 **/venv/
