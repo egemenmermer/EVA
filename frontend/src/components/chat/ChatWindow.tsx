@@ -367,6 +367,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   
   // Email Assistant Functions
   const startEmailAssistant = (originalEthicalIssue: string) => {
+    console.log('📧 STARTING EMAIL ASSISTANT:');
+    console.log('- Original ethical issue:', originalEthicalIssue);
+    console.log('- Email assistant active before start:', emailAssistantActive);
+    console.log('- Current conversation ID:', currentConversation?.conversationId);
+    console.log('- Current scenario:', determineCurrentScenario());
+    
     setEmailAssistantActive(true);
     setCurrentEmailQuestion(0);
     setEmailQuestionResponses([]);
@@ -379,6 +385,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       action: '',
       originalEthicalIssue
     });
+    
+    console.log('✅ Email assistant activated and state reset');
     
 
     
@@ -494,7 +502,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   };
   
   const generateEmailWithData = async () => {
-    setEmailAssistantActive(false);
+    console.log('📧 EMAIL GENERATION DEBUG START:');
+    console.log('- Email assistant active before generation:', emailAssistantActive);
+    console.log('- Current email draft data:', emailDraftData);
+    console.log('- Current scenario:', determineCurrentScenario());
+    console.log('- Current conversation ID:', currentConversation?.conversationId);
+    
+    // Keep email assistant active for multiple email generations - DON'T disable it
     setIsDraftingEmail(true);
     
     // Create loading message
@@ -1110,8 +1124,13 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
   // Simplify message handling to ensure user messages remain visible
   const handleSendMessage = useCallback(async (inputValue: string, skipUserMessageUI: boolean = false) => {
-    console.log("handleSendMessage called with input:", inputValue);
-    console.log("Current Conversation before send:", currentConversation);
+    console.log("📨 SEND MESSAGE DEBUG START:");
+    console.log("- Input value:", inputValue);
+    console.log("- Current conversation:", currentConversation);
+    console.log("- Store messages count:", storeMessages.length);
+    console.log("- Email assistant active:", emailAssistantActive);
+    console.log("- Current email question:", currentEmailQuestion);
+    console.log("- skipUserMessageUI:", skipUserMessageUI);
 
     // Trim the input value
     const trimmedValue = inputValue.trim();
@@ -2686,7 +2705,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       
       // Mark scenario as completed in database
       await markCurrentScenarioCompleted();
-      
+        
       // Add congratulations message from EVA
       const congratsMessage: Message = {
         id: `eva-congrats-${Date.now()}`,
@@ -2695,8 +2714,8 @@ Format: Include subject line, greeting (based on address style), body paragraphs
           conversationId: currentConversation?.conversationId || '',
           createdAt: new Date().toISOString(),
         isScenarioCompletionMessage: true
-      };
-      
+        };
+        
       setStoreMessages(prev => [...prev, congratsMessage]);
       
     } catch (err) {
@@ -3557,47 +3576,25 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         {/* Email Assistant Summary and Generate Button */}
         {isEmailSummaryMessage && (
           <div className="mt-3 ml-7">
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-3">
               <Button 
-                variant="default" 
+                variant={isDraftingEmail ? "secondary" : "default"}
                 size="sm" 
-                onClick={() => generateEmailWithData()}
+                onClick={generateEmailWithData}
                 disabled={isDraftingEmail}
-                className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                className="text-xs h-auto py-2 px-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
               >
-                <span className="mr-1">📧</span> Generate Email
+                {isDraftingEmail ? (
+                  <>
+                    <div className="w-3 h-3 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>📧 Generate Email</>
+                )}
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  // Reset all email assistant state
-                  setEmailAssistantActive(false);
-                  setCurrentEmailQuestion(0);
-                  setEmailQuestionResponses([]);
-                  setSelectedChoices({});
-                  setEmailDraftData({
-                    tone: '',
-                    concern: '',
-                    address: '',
-                    references: [],
-                    action: '',
-                    originalEthicalIssue: emailDraftData.originalEthicalIssue
-                  });
-                  
-                  // Remove all email assistant messages from chat
-                  setStoreMessages(prev => prev.filter(msg => !msg.isEmailAssistant));
-                  
-                  // Restart the email assistant from the beginning
-                  setTimeout(() => {
-                    startEmailAssistant(emailDraftData.originalEthicalIssue);
-                  }, 300);
-                }}
-                disabled={isDraftingEmail}
-                className="text-xs h-auto py-2 px-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Start Over
-              </Button>
+              
+              {/* Removed Start Over button to allow multiple email generations */}
             </div>
           </div>
         )}
@@ -3847,19 +3844,32 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         isOpen={showScenarioModal}
         onClose={() => setShowScenarioModal(false)}
         onSelectScenario={(scenario) => {
+          console.log('🎯 SCENARIO SELECTION DEBUG START:');
+          console.log('- Selected scenario:', scenario);
+          console.log('- Current conversation:', currentConversation);
+          console.log('- Current conversation ID:', currentConversation?.conversationId);
+          console.log('- Is draft conversation:', currentConversation?.conversationId?.startsWith('draft-'));
+          console.log('- Current messages count:', storeMessages.length);
+          console.log('- Email assistant active (SHOULD STAY TRUE):', emailAssistantActive);
+          console.log('- Current email question:', currentEmailQuestion);
+          console.log('- Email draft data:', emailDraftData);
+          
           // Close the modal first
           setShowScenarioModal(false);
           
           // Determine prompt based on selected scenario with detailed context
           const prompt = scenario === 'privacy' 
-            ? "My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
-            : "My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?";
+            ? "I'd like to practice a new scenario now. My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
+            : "I'd like to practice a new scenario now. My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?";
           
-          // Simply call handleSendMessage - this function already handles adding the user message
-          // and sending it to the backend. Keeping it simple to avoid race conditions.
+          console.log('- Generated prompt:', prompt);
+          console.log('🔄 PRESERVING EMAIL ASSISTANT STATE - NOT RESETTING');
+          console.log('- Email assistant will remain active:', emailAssistantActive);
+          
           setTimeout(() => {
+            console.log('⏰ Sending message to continue conversation...');
             handleSendMessage(prompt);
-          }, 100); // Small delay to ensure modal is closed first
+          }, 100);
         }}
       />
 

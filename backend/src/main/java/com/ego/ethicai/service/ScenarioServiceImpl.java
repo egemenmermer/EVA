@@ -292,7 +292,7 @@ public class ScenarioServiceImpl implements ScenarioService {
                     String endingText = ending.get("text").asText();
                     
                     // Generate session summary for completion
-                    Map<String, Object> summary = generateSessionSummary(session, scenario);
+            Map<String, Object> summary = generateSessionSummary(session, scenario);
                     // Add the ending message to the summary so the frontend can display it
                     summary.put("endingMessage", endingText);
                     

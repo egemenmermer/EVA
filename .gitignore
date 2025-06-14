@@ -66,5 +66,11 @@ secrets.json
 **/logs/
 *.log
 
+# Large data files and dumps
+dump.rdb
+*.rdb
+accessibility_camouflager_backup.json
+validation_report.txt
+
 # OS specific files
 Thumbs.db
