@@ -29,23 +29,23 @@ The system offers an interactive environment where software engineers can practi
 ## Screenshots
 
 ### Landing Page
-![EVA Landing Page](docs/images/eva-landing.png)
+![EVA Landing Page](docs/images/EVA-5.png)
 *The main landing page introduces EVA as an Ethical Virtual Assistant for practicing ethical decision-making in software development.*
 
 ### Admin Dashboard
-![Admin Dashboard](docs/images/admin-dashboard.png)
+![Admin Dashboard](docs/images/EVA-6.png)
 *Comprehensive admin dashboard showing practice session analytics, ethical scores, manager type distributions, and user performance metrics.*
 
 ### Interactive Practice Session
-![Practice Session](docs/images/practice-session.png)
+![Practice Session](docs/images/EVA-2.png)
 *Interactive ethical decision-making practice where users engage with different manager types in realistic workplace scenarios.*
 
 ### AI-Powered Feedback
-![Detailed Feedback](docs/images/detailed-feedback.png)
+![Detailed Feedback](docs/images/EVA-3.png)
 *Detailed AI-generated feedback with strengths, areas for improvement, reasoning analysis, and practical advice for better ethical decision-making.*
 
 ### Tactics & Fallacies Guide
-![Tactics Guide](docs/images/tactics-guide.png)
+![Tactics Guide](docs/images/EVA-1.png)
 *Built-in reference guide covering rhetorical tactics, soft resistance techniques, and logical fallacies to help users navigate ethical discussions effectively.*
 
 ## Project Structure
