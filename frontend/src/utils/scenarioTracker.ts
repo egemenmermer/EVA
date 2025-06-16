@@ -6,6 +6,9 @@ import {
 
 export type ScenarioType = 'accessibility' | 'privacy';
 
+// Add a flag to prevent multiple simultaneous scenario completion analyses
+let isAnalyzingScenarioCompletion = false;
+
 /**
  * Check if a scenario completion message indicates accessibility scenarios are done
  * by examining the scenario title and issue type in the completion message
@@ -186,6 +189,14 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
  * ONLY marks the specific scenario that was actually completed
  */
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
+  // Prevent multiple simultaneous analyses
+  if (isAnalyzingScenarioCompletion) {
+    console.log('🔍 SCENARIO ANALYSIS ALREADY IN PROGRESS - SKIPPING');
+    return;
+  }
+  
+  isAnalyzingScenarioCompletion = true;
+  
   try {
     // Log the message content for debugging
     console.log('🔍 SCENARIO ANALYSIS START');
@@ -196,6 +207,10 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     const currentPrivacyStatus = hasCompletedScenarioType('privacy');
     
     console.log('🔍 Current completion status - Accessibility:', currentAccessibilityStatus, 'Privacy:', currentPrivacyStatus);
+    
+    // Get practice context FIRST to understand what scenario should be completed
+    const practiceContext = getCurrentPracticeContext();
+    console.log('🔍 Current practice context:', practiceContext);
     
     // CRITICAL: Only proceed if we have a completion indicator
     const completionIndicators = [
@@ -220,7 +235,7 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     console.log('🔍 Completion indicator found, proceeding with scenario type detection');
     
     // PRIORITY 1: Look for explicit scenario type in the completion message
-    // Format: "- Scenario: Location Data Collection\n- Issue: Privacy\n"
+    // Format: "- Scenario: [Name]\n- Issue: [Type]\n"
     const scenarioTypeMatch = messageContent.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
     
     if (scenarioTypeMatch) {
@@ -231,12 +246,22 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
       console.log('🔍 Scenario name:', scenarioName);
       console.log('🔍 Issue type:', issueType);
       
+      // CRITICAL: Validate against practice context BEFORE marking anything
+      if (practiceContext.scenarioType && practiceContext.scenarioType !== issueType) {
+        console.log('❌ VALIDATION FAILED: Detected scenario type does not match practice context');
+        console.log('❌ Practice context type:', practiceContext.scenarioType);
+        console.log('❌ Detected type:', issueType);
+        console.log('❌ This is likely a false positive - SKIPPING completion marking');
+        return;
+      }
+      
       // Mark ONLY the specific scenario type that was completed
       if (issueType === 'privacy' && !currentPrivacyStatus) {
         console.log('✅ Detected NEW privacy scenario completion:', scenarioName);
         
-        // Validate that this matches the current practice context
+        // Double-check validation
         if (validateScenarioCompletion('privacy', messageContent)) {
+          console.log('✅ Privacy scenario completion VALIDATED - marking as completed');
           await markScenarioTypeCompleted('privacy');
           
           // Trigger UI refresh
@@ -253,8 +278,9 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
       } else if (issueType === 'accessibility' && !currentAccessibilityStatus) {
         console.log('✅ Detected NEW accessibility scenario completion:', scenarioName);
         
-        // Validate that this matches the current practice context
+        // Double-check validation
         if (validateScenarioCompletion('accessibility', messageContent)) {
+          console.log('✅ Accessibility scenario completion VALIDATED - marking as completed');
           await markScenarioTypeCompleted('accessibility');
           
           // Trigger UI refresh
@@ -285,6 +311,47 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     // FALLBACK: If no explicit scenario type found, use keyword-based detection
     // But be VERY strict to avoid false positives
     console.log('🔍 No explicit scenario type found, checking keywords as fallback');
+    
+    // CRITICAL: If we have practice context, ONLY check for that specific scenario type
+    if (practiceContext.scenarioType) {
+      console.log('🔍 Practice context available - only checking for:', practiceContext.scenarioType);
+      
+      if (practiceContext.scenarioType === 'accessibility' && !currentAccessibilityStatus) {
+        const isAccessibilityComplete = isAccessibilityScenarioComplete(messageContent);
+        console.log('🔍 Accessibility scenario complete check result:', isAccessibilityComplete);
+        
+        if (isAccessibilityComplete) {
+          console.log('✅ Detected NEW accessibility scenario completion (keyword-based, validated by context)');
+          await markScenarioTypeCompleted('accessibility');
+          
+          // Trigger UI refresh
+          window.dispatchEvent(new CustomEvent('scenario-completed', { 
+            detail: { scenarioType: 'accessibility' } 
+          }));
+        }
+        
+      } else if (practiceContext.scenarioType === 'privacy' && !currentPrivacyStatus) {
+        const isPrivacyComplete = isPrivacyScenarioComplete(messageContent);
+        console.log('🔍 Privacy scenario complete check result:', isPrivacyComplete);
+        
+        if (isPrivacyComplete) {
+          console.log('✅ Detected NEW privacy scenario completion (keyword-based, validated by context)');
+          await markScenarioTypeCompleted('privacy');
+          
+          // Trigger UI refresh
+          window.dispatchEvent(new CustomEvent('scenario-completed', { 
+            detail: { scenarioType: 'privacy' } 
+          }));
+        }
+      }
+      
+      // Skip the general keyword-based detection since we have context
+      console.log('🔍 SCENARIO ANALYSIS END - Context-based detection completed');
+      return;
+    }
+    
+    // GENERAL FALLBACK: Only if no practice context is available
+    console.log('🔍 No practice context - using general keyword detection (with conflict prevention)');
     
     // Check for accessibility scenario completion (strict)
     const isAccessibilityComplete = isAccessibilityScenarioComplete(messageContent);
@@ -351,6 +418,9 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     
   } catch (error) {
     console.error('❌ Error analyzing message for scenario completion:', error);
+  } finally {
+    // Always reset the flag
+    isAnalyzingScenarioCompletion = false;
   }
 };
 
@@ -729,6 +799,107 @@ export const debugPracticeContext = (): void => {
   console.log('===============================');
 };
 
+/**
+ * Comprehensive debugging function to understand scenario completion issues
+ * Usage: window.debugScenarioIssue()
+ */
+export const debugScenarioIssue = (): void => {
+  console.log('=== SCENARIO COMPLETION ISSUE DEBUG ===');
+  
+  // 1. Check current completion status
+  const accessibilityCompleted = hasCompletedScenarioType('accessibility');
+  const privacyCompleted = hasCompletedScenarioType('privacy');
+  console.log('1. Current localStorage completion status:');
+  console.log('   Accessibility:', accessibilityCompleted);
+  console.log('   Privacy:', privacyCompleted);
+  
+  // 2. Check practice context
+  const practiceContext = getCurrentPracticeContext();
+  console.log('2. Current practice context:', practiceContext);
+  
+  // 3. Check all localStorage keys
+  console.log('3. All localStorage keys related to scenarios:');
+  const allKeys = Object.keys(localStorage);
+  const scenarioKeys = allKeys.filter(key => 
+    key.includes('scenario') || 
+    key.includes('practice') || 
+    key.includes('last_selected')
+  );
+  scenarioKeys.forEach(key => {
+    console.log(`   ${key}: ${localStorage.getItem(key)}`);
+  });
+  
+  // 4. Check if analysis is currently running
+  console.log('4. Is scenario analysis currently running:', isAnalyzingScenarioCompletion);
+  
+  // 5. Provide reset options
+  console.log('5. Available reset functions:');
+  console.log('   - window.clearAllScenarioData() - Clear localStorage only');
+  console.log('   - window.manualResetScenarios() - Reset both localStorage and database');
+  console.log('   - window.forceResetUserState() - Force reset user state in UI');
+  
+  console.log('=====================================');
+};
+
+/**
+ * Test scenario detection logic with a sample message
+ * Usage: window.testScenarioDetection("your message here")
+ */
+export const testScenarioDetection = (messageContent: string): void => {
+  console.log('=== TESTING SCENARIO DETECTION ===');
+  console.log('Message content:', messageContent.substring(0, 500));
+  
+  // Test completion indicators
+  const completionIndicators = [
+    'Practice Session Complete!',
+    'Practice Scenario Completed',
+    'scenario complete',
+    'Final Score:',
+    'Performance Level:',
+    'practice module completed',
+    'scenario outcome'
+  ];
+  
+  const hasCompletionIndicator = completionIndicators.some(indicator => 
+    messageContent.toLowerCase().includes(indicator.toLowerCase())
+  );
+  console.log('Has completion indicator:', hasCompletionIndicator);
+  
+  // Test explicit scenario type detection
+  const scenarioTypeMatch = messageContent.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+  if (scenarioTypeMatch) {
+    console.log('Explicit scenario detection:');
+    console.log('  Scenario name:', scenarioTypeMatch[1].trim());
+    console.log('  Issue type:', scenarioTypeMatch[2].trim().toLowerCase());
+  } else {
+    console.log('No explicit scenario type found');
+  }
+  
+  // Test individual detection functions
+  const isAccessibilityComplete = isAccessibilityScenarioComplete(messageContent);
+  const isPrivacyComplete = isPrivacyScenarioComplete(messageContent);
+  
+  console.log('Individual detection results:');
+  console.log('  Accessibility complete:', isAccessibilityComplete);
+  console.log('  Privacy complete:', isPrivacyComplete);
+  
+  // Test validation
+  const practiceContext = getCurrentPracticeContext();
+  console.log('Practice context:', practiceContext);
+  
+  if (isAccessibilityComplete) {
+    const isValid = validateScenarioCompletion('accessibility', messageContent);
+    console.log('Accessibility validation result:', isValid);
+  }
+  
+  if (isPrivacyComplete) {
+    const isValid = validateScenarioCompletion('privacy', messageContent);
+    console.log('Privacy validation result:', isValid);
+  }
+  
+  console.log('=================================');
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
@@ -738,4 +909,6 @@ if (typeof window !== 'undefined') {
   (window as any).forceUpdateUserState = forceUpdateUserState;
   (window as any).forceResetUserState = forceResetUserState;
   (window as any).debugPracticeContext = debugPracticeContext;
+  (window as any).debugScenarioIssue = debugScenarioIssue;
+  (window as any).testScenarioDetection = testScenarioDetection;
 } 
