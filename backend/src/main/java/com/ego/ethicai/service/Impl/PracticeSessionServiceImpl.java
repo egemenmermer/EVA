@@ -350,6 +350,28 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     private String extractScenarioType(String scenarioId) {
         if (scenarioId == null) return "unknown";
         
+        try {
+            // Get the actual scenario data to determine the type
+            JsonNode scenarioData = scenarioService.getScenarioData(scenarioId);
+            if (scenarioData != null && scenarioData.has("concern")) {
+                String concern = scenarioData.get("concern").asText().toLowerCase();
+                
+                // Map concern types to our scenario completion types
+                if (concern.contains("privacy")) {
+                    return "privacy";
+                } else if (concern.contains("inequality") || concern.contains("bias") || concern.contains("accessibility")) {
+                    return "accessibility";
+                } else if (concern.contains("transparency")) {
+                    // For now, map transparency to accessibility scenarios
+                    // This can be adjusted based on your categorization needs
+                    return "accessibility";
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not determine scenario type for scenarioId: {}, error: {}", scenarioId, e.getMessage());
+        }
+        
+        // Fallback to old method if scenario data is not available
         if (scenarioId.startsWith("accessibility")) {
             return "accessibility";
         } else if (scenarioId.startsWith("privacy")) {
