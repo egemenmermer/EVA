@@ -31,7 +31,7 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
   
   if (!hasCompletionIndicator) return false;
   
-  // Look for explicit scenario type in the completion message
+  // PRIORITY 1: Look for explicit scenario type in the completion message
   // Format: "- Scenario: Screen Reader Compatibility\n- Issue: Accessibility\n"
   const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
   console.log('🔍 Scenario type match:', scenarioTypeMatch);
@@ -41,10 +41,22 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
     console.log('🔍 Issue type found:', issueType);
     const isAccessibility = issueType === 'accessibility';
     console.log('🔍 Is accessibility scenario:', isAccessibility);
+    // If we have explicit issue type, use that and ignore keywords
     return isAccessibility;
   }
   
-  // Additional check for accessibility-specific keywords
+  // PRIORITY 2: Only check keywords if no explicit issue type is found
+  // AND make sure we don't have explicit privacy indicators
+  const hasExplicitPrivacyIndicators = content.toLowerCase().includes('- issue: privacy') ||
+                                       content.toLowerCase().includes('privacy scenarios') ||
+                                       content.toLowerCase().includes('location data collection');
+  
+  if (hasExplicitPrivacyIndicators) {
+    console.log('🔍 Found explicit privacy indicators, not accessibility');
+    return false;
+  }
+  
+  // Additional check for accessibility-specific keywords (only if no explicit type found)
   const accessibilityKeywords = [
     'screen reader',
     'accessibility',
@@ -60,6 +72,7 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
   console.log('🔍 Has accessibility keywords:', hasAccessibilityKeywords);
   
   // Only return true if we have both completion indicator AND accessibility-specific content
+  // AND no explicit privacy indicators
   const result = hasCompletionIndicator && hasAccessibilityKeywords;
   console.log('🔍 Final accessibility result:', result);
   return result;
@@ -90,7 +103,7 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
   
   if (!hasCompletionIndicator) return false;
   
-  // Look for explicit scenario type in the completion message
+  // PRIORITY 1: Look for explicit scenario type in the completion message
   // Format: "- Scenario: Location Data Collection\n- Issue: Privacy\n"
   const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
   console.log('🔍 Scenario type match:', scenarioTypeMatch);
@@ -100,10 +113,22 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
     console.log('🔍 Issue type found:', issueType);
     const isPrivacy = issueType === 'privacy';
     console.log('🔍 Is privacy scenario:', isPrivacy);
+    // If we have explicit issue type, use that and ignore keywords
     return isPrivacy;
   }
   
-  // Additional check for privacy-specific keywords
+  // PRIORITY 2: Only check keywords if no explicit issue type is found
+  // AND make sure we don't have explicit accessibility indicators
+  const hasExplicitAccessibilityIndicators = content.toLowerCase().includes('- issue: accessibility') ||
+                                             content.toLowerCase().includes('accessibility scenarios') ||
+                                             content.toLowerCase().includes('screen reader');
+  
+  if (hasExplicitAccessibilityIndicators) {
+    console.log('🔍 Found explicit accessibility indicators, not privacy');
+    return false;
+  }
+  
+  // Additional check for privacy-specific keywords (only if no explicit type found)
   const privacyKeywords = [
     'location data',
     'privacy',
@@ -120,6 +145,7 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
   console.log('🔍 Has privacy keywords:', hasPrivacyKeywords);
   
   // Only return true if we have both completion indicator AND privacy-specific content
+  // AND no explicit accessibility indicators
   const result = hasCompletionIndicator && hasPrivacyKeywords;
   console.log('🔍 Final privacy result:', result);
   return result;
@@ -334,15 +360,14 @@ export const manualResetScenarios = async (): Promise<void> => {
         const updatedUserData = await response.json();
         console.log('🔧 MANUAL RESET: Database reset successful:', updatedUserData);
         
-        // Trigger UI refresh events
-        window.dispatchEvent(new CustomEvent('refresh-sidebar'));
+        // Trigger UI refresh
         window.dispatchEvent(new CustomEvent('scenario-reset', { 
           detail: { timestamp: new Date().toISOString() } 
         }));
         
-        console.log('🔧 MANUAL RESET: Complete! Refresh the page to see changes.');
+        console.log('🔧 MANUAL RESET: Complete! Both localStorage and database have been reset.');
       } else {
-        console.error('🔧 MANUAL RESET: Database reset failed:', response.status);
+        console.error('🔧 MANUAL RESET: Database reset failed:', response.statusText);
       }
     } else {
       console.error('🔧 MANUAL RESET: No auth token found');
@@ -352,7 +377,7 @@ export const manualResetScenarios = async (): Promise<void> => {
   }
 };
 
-// Make it available globally for debugging
+// Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
   (window as any).logScenarioStatus = logScenarioStatus;
