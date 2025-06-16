@@ -348,7 +348,7 @@ export const manualResetScenarios = async (): Promise<void> => {
   try {
     const authToken = localStorage.getItem('token');
     if (authToken) {
-      // Use the correct API path - it should be /api/v1/user/reset-scenario-completions
+      // Use the correct API path with /api prefix
       const response = await fetch('/api/v1/user/reset-scenario-completions', {
         method: 'POST',
         headers: {
@@ -402,6 +402,7 @@ export const refreshUserDataFromServer = async (): Promise<void> => {
       return;
     }
 
+    // Use the correct API path with /api prefix
     const response = await fetch('/api/v1/user/me', {
       method: 'GET',
       headers: {
@@ -480,6 +481,33 @@ export const forceUpdateUserState = async (): Promise<void> => {
   }
 };
 
+/**
+ * Force reset user state in store - bypasses API issues
+ * Usage: window.forceResetUserState()
+ */
+export const forceResetUserState = (): void => {
+  console.log('🔧 FORCE RESET: Directly resetting user state in store...');
+  
+  // Clear localStorage first
+  clearAllScenarioData();
+  
+  // Dispatch event to force reset user state
+  window.dispatchEvent(new CustomEvent('force-user-reset', { 
+    detail: { 
+      timestamp: new Date().toISOString(),
+      resetData: {
+        accessibilityScenariosCompleted: false,
+        privacyScenariosCompleted: false,
+        accessibilityScenariosCompletedAt: null,
+        privacyScenariosCompletedAt: null
+      }
+    } 
+  }));
+  
+  console.log('🔧 FORCE RESET: User state reset event dispatched');
+  console.log('🔧 FORCE RESET: Both scenarios should now show as incomplete');
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
@@ -487,4 +515,5 @@ if (typeof window !== 'undefined') {
   (window as any).clearAllScenarioData = clearAllScenarioData;
   (window as any).refreshUserDataFromServer = refreshUserDataFromServer;
   (window as any).forceUpdateUserState = forceUpdateUserState;
+  (window as any).forceResetUserState = forceResetUserState;
 } 

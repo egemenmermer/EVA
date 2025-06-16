@@ -2050,14 +2050,31 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       }
     };
 
+    const handleForceUserReset = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Force user reset event received:', customEvent.detail);
+      
+      if (customEvent.detail?.resetData && user) {
+        const resetUser = {
+          ...user,
+          ...customEvent.detail.resetData
+        };
+        console.log('Resetting user state to:', resetUser);
+        setUser(resetUser);
+        console.log('User state reset successfully - both scenarios should now show as incomplete');
+      }
+    };
+
     window.addEventListener('conversation-deleted', handleConversationDeleted);
     window.addEventListener('scenario-reset', handleScenarioReset);
     window.addEventListener('force-user-update', handleForceUserUpdate);
+    window.addEventListener('force-user-reset', handleForceUserReset);
     
     return () => {
       window.removeEventListener('conversation-deleted', handleConversationDeleted);
       window.removeEventListener('scenario-reset', handleScenarioReset);
       window.removeEventListener('force-user-update', handleForceUserUpdate);
+      window.removeEventListener('force-user-reset', handleForceUserReset);
     };
   }, [currentConversation, refreshUserData]);
 
