@@ -2780,8 +2780,19 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     }
   };
 
+  // Add a flag to prevent multiple simultaneous scenario completion calls
+  const isMarkingScenarioCompleted = useRef(false);
+
   // Function to mark the current scenario as completed
   const markCurrentScenarioCompleted = async () => {
+    // Prevent multiple simultaneous calls
+    if (isMarkingScenarioCompleted.current) {
+      console.log('⚠️ Scenario completion already in progress - skipping duplicate call');
+      return;
+    }
+    
+    isMarkingScenarioCompleted.current = true;
+    
     try {
       const authToken = localStorage.getItem('token');
       if (!authToken) {
@@ -2796,6 +2807,8 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         return;
       }
 
+      console.log(`🎯 Marking ONLY ${scenarioType} scenario as completed`);
+
       const endpoint = scenarioType === 'accessibility' 
         ? '/api/v1/user/mark-accessibility-scenarios-completed'
         : '/api/v1/user/mark-privacy-scenarios-completed';
@@ -2809,14 +2822,19 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       });
 
       if (response.ok) {
-        console.log(`${scenarioType} scenario marked as completed`);
+        console.log(`✅ ${scenarioType} scenario marked as completed successfully`);
         // Refresh user data to update the store
         await refreshUserData();
       } else {
-        console.error('Failed to mark scenario as completed:', response.statusText);
+        console.error('❌ Failed to mark scenario as completed:', response.statusText);
       }
     } catch (error) {
-      console.error('Error marking scenario as completed:', error);
+      console.error('❌ Error marking scenario as completed:', error);
+    } finally {
+      // Reset the flag after a delay to prevent rapid successive calls
+      setTimeout(() => {
+        isMarkingScenarioCompleted.current = false;
+      }, 2000);
     }
   };
 
