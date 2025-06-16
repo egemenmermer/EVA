@@ -2818,6 +2818,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         : '/api/v1/user/mark-privacy-scenarios-completed';
         
       console.log('🎯 MARK SCENARIO COMPLETED - API endpoint:', endpoint);
+      console.log('🎯 MARK SCENARIO COMPLETED - Auth token (first 20 chars):', authToken.substring(0, 20) + '...');
       console.log('🎯 MARK SCENARIO COMPLETED - Making fetch request...');
 
       const response = await fetch(endpoint, {
@@ -2830,6 +2831,16 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
       console.log('🎯 MARK SCENARIO COMPLETED - API response status:', response.status);
       console.log('🎯 MARK SCENARIO COMPLETED - API response ok:', response.ok);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response statusText:', response.statusText);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response URL:', response.url);
+      
+      // Try to get response text for debugging
+      try {
+        const responseText = await response.text();
+        console.log('🎯 MARK SCENARIO COMPLETED - API response text:', responseText);
+      } catch (textError) {
+        console.log('🎯 MARK SCENARIO COMPLETED - Could not read response text:', textError);
+      }
 
       if (response.ok) {
         console.log(`✅ ${scenarioType} scenario marked as completed successfully`);
