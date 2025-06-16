@@ -188,8 +188,15 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
  * Analyze a message to detect scenario completion and automatically track it
  * ONLY marks the specific scenario that was actually completed
  * ONLY runs during practice sessions, not during feedback sessions
+ * 
+ * DISABLED: This function is disabled to prevent duplicate scenario completion calls.
+ * Scenario completion is now handled exclusively by ChatWindow.tsx markCurrentScenarioCompleted()
  */
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
+  console.log('🔍 SCENARIO ANALYSIS DISABLED - Scenario completion is handled by ChatWindow.tsx');
+  console.log('🔍 This prevents duplicate API calls that were causing both scenarios to be marked as completed');
+  return;
+  
   // Prevent multiple simultaneous analyses
   if (isAnalyzingScenarioCompletion) {
     console.log('🔍 SCENARIO ANALYSIS ALREADY IN PROGRESS - SKIPPING');
