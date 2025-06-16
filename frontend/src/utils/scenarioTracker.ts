@@ -183,12 +183,13 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
 
 /**
  * Analyze a message to detect scenario completion and automatically track it
+ * ONLY marks the specific scenario that was actually completed
  */
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
   try {
     // Log the message content for debugging
     console.log('🔍 SCENARIO ANALYSIS START');
-    console.log('🔍 Analyzing message for scenario completion:', messageContent.substring(0, 300) + '...');
+    console.log('🔍 Analyzing message for scenario completion:', messageContent.substring(0, 500) + '...');
     
     // Get current completion status
     const currentAccessibilityStatus = hasCompletedScenarioType('accessibility');
@@ -196,36 +197,150 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     
     console.log('🔍 Current completion status - Accessibility:', currentAccessibilityStatus, 'Privacy:', currentPrivacyStatus);
     
-    // Check for accessibility scenario completion
+    // CRITICAL: Only proceed if we have a completion indicator
+    const completionIndicators = [
+      'Practice Session Complete!',
+      'Practice Scenario Completed',
+      'scenario complete',
+      'Final Score:',
+      'Performance Level:',
+      'practice module completed',
+      'scenario outcome'
+    ];
+    
+    const hasCompletionIndicator = completionIndicators.some(indicator => 
+      messageContent.toLowerCase().includes(indicator.toLowerCase())
+    );
+    
+    if (!hasCompletionIndicator) {
+      console.log('🔍 No completion indicator found, skipping scenario analysis');
+      return;
+    }
+    
+    console.log('🔍 Completion indicator found, proceeding with scenario type detection');
+    
+    // PRIORITY 1: Look for explicit scenario type in the completion message
+    // Format: "- Scenario: Location Data Collection\n- Issue: Privacy\n"
+    const scenarioTypeMatch = messageContent.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+    
+    if (scenarioTypeMatch) {
+      const scenarioName = scenarioTypeMatch[1].trim();
+      const issueType = scenarioTypeMatch[2].trim().toLowerCase();
+      
+      console.log('🔍 EXPLICIT SCENARIO DETECTION:');
+      console.log('🔍 Scenario name:', scenarioName);
+      console.log('🔍 Issue type:', issueType);
+      
+      // Mark ONLY the specific scenario type that was completed
+      if (issueType === 'privacy' && !currentPrivacyStatus) {
+        console.log('✅ Detected NEW privacy scenario completion:', scenarioName);
+        
+        // Validate that this matches the current practice context
+        if (validateScenarioCompletion('privacy', messageContent)) {
+          await markScenarioTypeCompleted('privacy');
+          
+          // Trigger UI refresh
+          window.dispatchEvent(new CustomEvent('scenario-completed', { 
+            detail: { scenarioType: 'privacy', scenarioName } 
+          }));
+          
+          console.log('🔍 SCENARIO ANALYSIS END - Privacy scenario marked as completed');
+        } else {
+          console.log('❌ Privacy scenario completion validation failed - not marking as completed');
+        }
+        return;
+        
+      } else if (issueType === 'accessibility' && !currentAccessibilityStatus) {
+        console.log('✅ Detected NEW accessibility scenario completion:', scenarioName);
+        
+        // Validate that this matches the current practice context
+        if (validateScenarioCompletion('accessibility', messageContent)) {
+          await markScenarioTypeCompleted('accessibility');
+          
+          // Trigger UI refresh
+          window.dispatchEvent(new CustomEvent('scenario-completed', { 
+            detail: { scenarioType: 'accessibility', scenarioName } 
+          }));
+          
+          console.log('🔍 SCENARIO ANALYSIS END - Accessibility scenario marked as completed');
+        } else {
+          console.log('❌ Accessibility scenario completion validation failed - not marking as completed');
+        }
+        return;
+        
+      } else if (issueType === 'privacy' && currentPrivacyStatus) {
+        console.log('⚠️ Privacy scenario already completed, skipping duplicate marking');
+        return;
+        
+      } else if (issueType === 'accessibility' && currentAccessibilityStatus) {
+        console.log('⚠️ Accessibility scenario already completed, skipping duplicate marking');
+        return;
+        
+      } else {
+        console.log('⚠️ Unknown issue type or invalid scenario completion:', issueType);
+        return;
+      }
+    }
+    
+    // FALLBACK: If no explicit scenario type found, use keyword-based detection
+    // But be VERY strict to avoid false positives
+    console.log('🔍 No explicit scenario type found, checking keywords as fallback');
+    
+    // Check for accessibility scenario completion (strict)
     const isAccessibilityComplete = isAccessibilityScenarioComplete(messageContent);
     console.log('🔍 Accessibility scenario complete check result:', isAccessibilityComplete);
     
-    if (isAccessibilityComplete && !currentAccessibilityStatus) {
-      console.log('✅ Detected NEW accessibility scenario completion, marking as completed');
-      await markScenarioTypeCompleted('accessibility');
-      
-      // Trigger UI refresh
-      window.dispatchEvent(new CustomEvent('scenario-completed', { 
-        detail: { scenarioType: 'accessibility' } 
-      }));
-    } else if (isAccessibilityComplete && currentAccessibilityStatus) {
-      console.log('⚠️ Accessibility scenario already completed, skipping duplicate marking');
-    }
-    
-    // Check for privacy scenario completion
+    // Check for privacy scenario completion (strict)
     const isPrivacyComplete = isPrivacyScenarioComplete(messageContent);
     console.log('🔍 Privacy scenario complete check result:', isPrivacyComplete);
     
-    if (isPrivacyComplete && !currentPrivacyStatus) {
-      console.log('✅ Detected NEW privacy scenario completion, marking as completed');
-      await markScenarioTypeCompleted('privacy');
+    // CRITICAL: Prevent both scenarios from being marked as completed
+    if (isAccessibilityComplete && isPrivacyComplete) {
+      console.log('❌ CONFLICT: Both scenarios detected as complete - this should not happen!');
+      console.log('❌ Message content causing conflict:', messageContent.substring(0, 1000));
+      console.log('❌ Skipping completion marking to prevent false positives');
+      return;
+    }
+    
+    // Mark only the specific scenario that was detected
+    if (isAccessibilityComplete && !currentAccessibilityStatus) {
+      console.log('✅ Detected NEW accessibility scenario completion (keyword-based)');
       
-      // Trigger UI refresh
-      window.dispatchEvent(new CustomEvent('scenario-completed', { 
-        detail: { scenarioType: 'privacy' } 
-      }));
+      // Validate that this matches the current practice context
+      if (validateScenarioCompletion('accessibility', messageContent)) {
+        await markScenarioTypeCompleted('accessibility');
+        
+        // Trigger UI refresh
+        window.dispatchEvent(new CustomEvent('scenario-completed', { 
+          detail: { scenarioType: 'accessibility' } 
+        }));
+      } else {
+        console.log('❌ Accessibility scenario completion validation failed - not marking as completed');
+      }
+      
+    } else if (isPrivacyComplete && !currentPrivacyStatus) {
+      console.log('✅ Detected NEW privacy scenario completion (keyword-based)');
+      
+      // Validate that this matches the current practice context
+      if (validateScenarioCompletion('privacy', messageContent)) {
+        await markScenarioTypeCompleted('privacy');
+        
+        // Trigger UI refresh
+        window.dispatchEvent(new CustomEvent('scenario-completed', { 
+          detail: { scenarioType: 'privacy' } 
+        }));
+      } else {
+        console.log('❌ Privacy scenario completion validation failed - not marking as completed');
+      }
+      
+    } else if (isAccessibilityComplete && currentAccessibilityStatus) {
+      console.log('⚠️ Accessibility scenario already completed, skipping duplicate marking');
+      
     } else if (isPrivacyComplete && currentPrivacyStatus) {
       console.log('⚠️ Privacy scenario already completed, skipping duplicate marking');
+      
+    } else {
+      console.log('🔍 No specific scenario completion detected');
     }
     
     // Log final status
@@ -508,6 +623,112 @@ export const forceResetUserState = (): void => {
   console.log('🔧 FORCE RESET: Both scenarios should now show as incomplete');
 };
 
+/**
+ * Get the current practice session context to determine which scenario is being practiced
+ */
+export const getCurrentPracticeContext = (): { scenarioType: ScenarioType | null, scenarioName: string | null } => {
+  // Check localStorage for practice session data
+  const lastSelectedScenario = localStorage.getItem('last_selected_scenario');
+  const practiceToChat = localStorage.getItem('practice_to_chat');
+  
+  console.log('🔍 Practice context - Last selected scenario:', lastSelectedScenario);
+  console.log('🔍 Practice context - Practice to chat:', practiceToChat);
+  
+  // Try to determine scenario type from various sources
+  let scenarioType: ScenarioType | null = null;
+  let scenarioName: string | null = null;
+  
+  // Check if we have explicit scenario selection
+  if (lastSelectedScenario) {
+    try {
+      const scenarioData = JSON.parse(lastSelectedScenario);
+      if (scenarioData.type) {
+        scenarioType = scenarioData.type.toLowerCase() as ScenarioType;
+        scenarioName = scenarioData.name || scenarioData.title || null;
+      }
+    } catch (e) {
+      // If it's not JSON, treat as string
+      if (lastSelectedScenario.toLowerCase().includes('privacy')) {
+        scenarioType = 'privacy';
+      } else if (lastSelectedScenario.toLowerCase().includes('accessibility')) {
+        scenarioType = 'accessibility';
+      }
+    }
+  }
+  
+  // Check practice session data for additional context
+  if (!scenarioType && practiceToChat) {
+    if (practiceToChat.toLowerCase().includes('privacy') || practiceToChat.toLowerCase().includes('location')) {
+      scenarioType = 'privacy';
+    } else if (practiceToChat.toLowerCase().includes('accessibility') || practiceToChat.toLowerCase().includes('screen reader')) {
+      scenarioType = 'accessibility';
+    }
+  }
+  
+  console.log('🔍 Determined practice context - Type:', scenarioType, 'Name:', scenarioName);
+  
+  return { scenarioType, scenarioName };
+};
+
+/**
+ * Validate that the detected scenario completion matches the current practice context
+ */
+export const validateScenarioCompletion = (detectedType: ScenarioType, messageContent: string): boolean => {
+  const practiceContext = getCurrentPracticeContext();
+  
+  console.log('🔍 VALIDATION: Detected scenario type:', detectedType);
+  console.log('🔍 VALIDATION: Practice context type:', practiceContext.scenarioType);
+  
+  // If we have practice context, ensure it matches the detected type
+  if (practiceContext.scenarioType) {
+    const isValid = practiceContext.scenarioType === detectedType;
+    console.log('🔍 VALIDATION: Scenario completion is valid:', isValid);
+    
+    if (!isValid) {
+      console.log('❌ VALIDATION FAILED: Detected scenario type does not match practice context');
+      console.log('❌ This suggests a false positive in scenario detection');
+    }
+    
+    return isValid;
+  }
+  
+  // If no practice context, allow the completion (fallback to original logic)
+  console.log('🔍 VALIDATION: No practice context found, allowing completion');
+  return true;
+};
+
+/**
+ * Debug function to check current practice context - can be called from browser console
+ * Usage: window.debugPracticeContext()
+ */
+export const debugPracticeContext = (): void => {
+  console.log('=== PRACTICE CONTEXT DEBUG ===');
+  
+  const context = getCurrentPracticeContext();
+  console.log('Current practice context:', context);
+  
+  const scenarioStatuses = getAllScenarioStatuses();
+  console.log('Scenario completion statuses:', scenarioStatuses);
+  
+  // Check all relevant localStorage keys
+  const relevantKeys = [
+    'last_selected_scenario',
+    'practice_to_chat',
+    'practice_manager_type',
+    'scenario_completed_accessibility',
+    'scenario_completed_privacy',
+    'used_email_scenarios'
+  ];
+  
+  console.log('Relevant localStorage keys:');
+  relevantKeys.forEach(key => {
+    const value = localStorage.getItem(key);
+    console.log(`  ${key}:`, value);
+  });
+  
+  console.log('===============================');
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
@@ -516,4 +737,5 @@ if (typeof window !== 'undefined') {
   (window as any).refreshUserDataFromServer = refreshUserDataFromServer;
   (window as any).forceUpdateUserState = forceUpdateUserState;
   (window as any).forceResetUserState = forceResetUserState;
+  (window as any).debugPracticeContext = debugPracticeContext;
 } 
