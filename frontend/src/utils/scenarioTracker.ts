@@ -348,6 +348,7 @@ export const manualResetScenarios = async (): Promise<void> => {
   try {
     const authToken = localStorage.getItem('token');
     if (authToken) {
+      // Use the correct API path - it should be /api/v1/user/reset-scenario-completions
       const response = await fetch('/api/v1/user/reset-scenario-completions', {
         method: 'POST',
         headers: {
@@ -356,18 +357,30 @@ export const manualResetScenarios = async (): Promise<void> => {
         }
       });
       
+      console.log('🔧 MANUAL RESET: API response status:', response.status);
+      console.log('🔧 MANUAL RESET: API response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
         const updatedUserData = await response.json();
         console.log('🔧 MANUAL RESET: Database reset successful:', updatedUserData);
         
         // Trigger UI refresh
         window.dispatchEvent(new CustomEvent('scenario-reset', { 
-          detail: { timestamp: new Date().toISOString() } 
+          detail: { 
+            timestamp: new Date().toISOString(),
+            updatedUser: updatedUserData
+          } 
         }));
         
         console.log('🔧 MANUAL RESET: Complete! Both localStorage and database have been reset.');
+        console.log('🔧 MANUAL RESET: Updated user data:', {
+          accessibilityScenariosCompleted: updatedUserData.accessibilityScenariosCompleted,
+          privacyScenariosCompleted: updatedUserData.privacyScenariosCompleted
+        });
       } else {
-        console.error('🔧 MANUAL RESET: Database reset failed:', response.statusText);
+        const errorText = await response.text();
+        console.error('🔧 MANUAL RESET: Database reset failed:', response.status, response.statusText);
+        console.error('🔧 MANUAL RESET: Error response:', errorText);
       }
     } else {
       console.error('🔧 MANUAL RESET: No auth token found');
@@ -377,9 +390,52 @@ export const manualResetScenarios = async (): Promise<void> => {
   }
 };
 
+/**
+ * Refresh user data from server - useful for debugging
+ * Usage: window.refreshUserData()
+ */
+export const refreshUserDataFromServer = async (): Promise<void> => {
+  try {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      console.error('🔧 REFRESH USER: No auth token found');
+      return;
+    }
+
+    const response = await fetch('/api/v1/user/me', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log('🔧 REFRESH USER: User data from server:', userData);
+      console.log('🔧 REFRESH USER: Scenario completion status:', {
+        accessibilityScenariosCompleted: userData.accessibilityScenariosCompleted,
+        privacyScenariosCompleted: userData.privacyScenariosCompleted
+      });
+      
+      // Trigger event to update user state in store
+      window.dispatchEvent(new CustomEvent('user-data-refreshed', { 
+        detail: { userData } 
+      }));
+    } else {
+      const errorText = await response.text();
+      console.error('🔧 REFRESH USER: Failed to fetch user data:', response.status, response.statusText);
+      console.error('🔧 REFRESH USER: Error response:', errorText);
+    }
+  } catch (error) {
+    console.error('🔧 REFRESH USER: Error:', error);
+  }
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
   (window as any).logScenarioStatus = logScenarioStatus;
   (window as any).clearAllScenarioData = clearAllScenarioData;
+  (window as any).refreshUserDataFromServer = refreshUserDataFromServer;
 } 

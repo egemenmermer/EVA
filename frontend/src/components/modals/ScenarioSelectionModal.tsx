@@ -125,16 +125,26 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
           console.log('=== AFTER DATABASE RESET ===');
           logScenarioStatus();
           
+          // Verify the user state was updated correctly
+          console.log('🔍 MODAL: User state after reset:', {
+            accessibilityScenariosCompleted: updatedUserData.accessibilityScenariosCompleted,
+            privacyScenariosCompleted: updatedUserData.privacyScenariosCompleted
+          });
+          
           // Trigger UI refresh events to update all components
           setTimeout(() => {
             window.dispatchEvent(new CustomEvent('refresh-sidebar'));
             window.dispatchEvent(new CustomEvent('scenario-reset', { 
-              detail: { timestamp: new Date().toISOString() } 
+              detail: { 
+                timestamp: new Date().toISOString(),
+                updatedUser: updatedUserData
+              } 
             }));
           }, 100);
         } else {
           const errorText = await response.text();
           console.error('Failed to reset scenarios in database:', response.status, response.statusText, errorText);
+          console.error('Error response body:', errorText);
           // Keep the UI reset even if API fails
           console.log('Keeping UI reset despite API failure');
         }
