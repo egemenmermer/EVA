@@ -2038,13 +2038,26 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       // Force a re-render by updating a timestamp or similar
       console.log('Scenario reset processed successfully');
     };
-    
+
+    const handleForceUserUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Force user update event received:', customEvent.detail);
+      
+      if (customEvent.detail?.userData) {
+        console.log('Updating user state with fresh data:', customEvent.detail.userData);
+        setUser(customEvent.detail.userData);
+        console.log('User state updated successfully');
+      }
+    };
+
     window.addEventListener('conversation-deleted', handleConversationDeleted);
     window.addEventListener('scenario-reset', handleScenarioReset);
+    window.addEventListener('force-user-update', handleForceUserUpdate);
     
     return () => {
       window.removeEventListener('conversation-deleted', handleConversationDeleted);
       window.removeEventListener('scenario-reset', handleScenarioReset);
+      window.removeEventListener('force-user-update', handleForceUserUpdate);
     };
   }, [currentConversation, refreshUserData]);
 

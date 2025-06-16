@@ -392,7 +392,7 @@ export const manualResetScenarios = async (): Promise<void> => {
 
 /**
  * Refresh user data from server - useful for debugging
- * Usage: window.refreshUserData()
+ * Usage: window.refreshUserDataFromServer()
  */
 export const refreshUserDataFromServer = async (): Promise<void> => {
   try {
@@ -432,10 +432,59 @@ export const refreshUserDataFromServer = async (): Promise<void> => {
   }
 };
 
+/**
+ * Force update user state in store - useful for debugging
+ * Usage: window.forceUpdateUserState()
+ */
+export const forceUpdateUserState = async (): Promise<void> => {
+  try {
+    // Get fresh user data from server
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      console.error('🔧 FORCE UPDATE: No auth token found');
+      return;
+    }
+
+    const response = await fetch('/api/v1/user/profile', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log('🔧 FORCE UPDATE: Fresh user data from server:', userData);
+      
+      // Force update the store by dispatching a custom event with the fresh data
+      window.dispatchEvent(new CustomEvent('force-user-update', { 
+        detail: { 
+          userData,
+          timestamp: new Date().toISOString()
+        } 
+      }));
+      
+      console.log('🔧 FORCE UPDATE: User state update event dispatched');
+      console.log('🔧 FORCE UPDATE: Scenario completion status:', {
+        accessibilityScenariosCompleted: userData.accessibilityScenariosCompleted,
+        privacyScenariosCompleted: userData.privacyScenariosCompleted
+      });
+    } else {
+      const errorText = await response.text();
+      console.error('🔧 FORCE UPDATE: Failed to fetch user data:', response.status, response.statusText);
+      console.error('🔧 FORCE UPDATE: Error response:', errorText);
+    }
+  } catch (error) {
+    console.error('🔧 FORCE UPDATE: Error:', error);
+  }
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
   (window as any).logScenarioStatus = logScenarioStatus;
   (window as any).clearAllScenarioData = clearAllScenarioData;
   (window as any).refreshUserDataFromServer = refreshUserDataFromServer;
+  (window as any).forceUpdateUserState = forceUpdateUserState;
 } 
