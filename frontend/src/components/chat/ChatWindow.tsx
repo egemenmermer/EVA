@@ -2785,6 +2785,10 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
   // Function to mark the current scenario as completed
   const markCurrentScenarioCompleted = async () => {
+    console.log('🎯 MARK SCENARIO COMPLETED - TEMPORARILY DISABLED FOR DEBUGGING');
+    console.log('🎯 This function is disabled to test if it is causing duplicate API calls');
+    return;
+    
     // Prevent multiple simultaneous calls
     if (isMarkingScenarioCompleted.current) {
       console.log('⚠️ Scenario completion already in progress - skipping duplicate call');
