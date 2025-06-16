@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { X, RefreshCw } from 'lucide-react';
 import { conversationApi } from '@/services/api';
+import { clearAllScenarioData, logScenarioStatus } from '@/utils/scenarioTracker';
 
 interface ScenarioSelectionModalProps {
   isOpen: boolean;
@@ -36,6 +37,45 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
   const handleRefreshScenarios = async () => {
     setIsRefreshing(true);
     
+    // Log status before clearing
+    console.log('=== BEFORE REFRESH ===');
+    logScenarioStatus();
+    
+    // Clear all scenario-related localStorage data first
+    clearAllScenarioData();
+    
+    // Log status after clearing localStorage
+    console.log('=== AFTER LOCALSTORAGE CLEAR ===');
+    logScenarioStatus();
+    
+    // Clear knowledge artifacts for current conversation if it exists
+    if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+      try {
+        const authToken = token || localStorage.getItem('token');
+        if (authToken) {
+          console.log('Clearing knowledge artifacts for conversation:', currentConversation.conversationId);
+          const response = await fetch(`/api/v1/knowledge-artifacts/${currentConversation.conversationId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok || response.status === 404) {
+            console.log('Knowledge artifacts cleared successfully for conversation:', currentConversation.conversationId);
+            // Also clear the localStorage cache for artifacts
+            localStorage.removeItem(`artifacts-${currentConversation.conversationId}`);
+          } else {
+            console.warn('Failed to clear knowledge artifacts:', response.status, response.statusText);
+          }
+        }
+      } catch (error) {
+        console.warn('Error clearing knowledge artifacts:', error);
+        // Continue with the reset even if artifact clearing fails
+      }
+    }
+    
     // Immediately update UI to show reset effect
     const resetUser = {
       ...user,
@@ -69,7 +109,19 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
           console.log('Reset successful, updated user data from server:', updatedUserData);
           // Update user data in store with server response
           setUser(updatedUserData);
-          console.log('Scenarios reset successfully in database');
+          console.log('Scenarios reset successfully in database and localStorage');
+          
+          // Log final status after database reset
+          console.log('=== AFTER DATABASE RESET ===');
+          logScenarioStatus();
+          
+          // Trigger UI refresh events to update all components
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('refresh-sidebar'));
+            window.dispatchEvent(new CustomEvent('scenario-reset', { 
+              detail: { timestamp: new Date().toISOString() } 
+            }));
+          }, 100);
         } else {
           const errorText = await response.text();
           console.error('Failed to reset scenarios in database:', response.status, response.statusText, errorText);

@@ -148,4 +148,83 @@ export const getAllScenarioStatuses = () => {
       completedAt: localStorage.getItem('scenario_completed_privacy_timestamp')
     }
   };
+};
+
+/**
+ * Log current scenario completion status for debugging
+ */
+export const logScenarioStatus = (): void => {
+  const statuses = getAllScenarioStatuses();
+  const usedEmailScenarios = JSON.parse(localStorage.getItem('used_email_scenarios') || '[]');
+  const lastSelectedScenario = localStorage.getItem('last_selected_scenario');
+  
+  console.log('=== SCENARIO STATUS DEBUG ===');
+  console.log('Accessibility completed:', statuses.accessibility.completed);
+  console.log('Privacy completed:', statuses.privacy.completed);
+  console.log('Used email scenarios:', usedEmailScenarios);
+  console.log('Last selected scenario:', lastSelectedScenario);
+  console.log('============================');
+};
+
+/**
+ * Clear all scenario completion data from localStorage
+ * Used when refreshing/resetting scenarios
+ */
+export const clearAllScenarioData = (): void => {
+  const keysBeforeClearing = Object.keys(localStorage);
+  console.log('localStorage keys before clearing:', keysBeforeClearing.length);
+  
+  // Clear scenario completion flags
+  localStorage.removeItem('scenario_completed_accessibility');
+  localStorage.removeItem('scenario_completed_accessibility_timestamp');
+  localStorage.removeItem('scenario_completed_privacy');
+  localStorage.removeItem('scenario_completed_privacy_timestamp');
+  
+  // Clear email generation tracking
+  localStorage.removeItem('used_email_scenarios');
+  
+  // Clear last selected scenario
+  localStorage.removeItem('last_selected_scenario');
+  
+  // Clear practice-related data that might interfere with scenario tracking
+  localStorage.removeItem('practice_to_chat');
+  localStorage.removeItem('practice_feedback_simple');
+  localStorage.removeItem('practice_feedback_prompt');
+  localStorage.removeItem('last_practice_session_data');
+  localStorage.removeItem('practice_detailed_data');
+  localStorage.removeItem('practice_session_backup');
+  localStorage.removeItem('returning_from_practice');
+  localStorage.removeItem('auto_open_tactics_guide');
+  
+  // Clear practice manager type selection
+  localStorage.removeItem('practice_manager_type');
+  
+  // Clear conversation-related keys that might interfere with scenario flow
+  localStorage.removeItem('originalConversationId');
+  localStorage.removeItem('force_conversation_id');
+  
+  // Clear dynamic practice message keys
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (
+      key.startsWith('practice_messages_') ||
+      key.startsWith('practice_feedback_messages_') ||
+      key.startsWith('practice_user_query') ||
+      key.startsWith('practice_agent_response') ||
+      key.startsWith('practice_original_problem')
+    )) {
+      keysToRemove.push(key);
+    }
+  }
+  
+  // Remove the identified keys
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  const keysAfterClearing = Object.keys(localStorage);
+  const removedCount = keysBeforeClearing.length - keysAfterClearing.length;
+  
+  console.log('All scenario-related localStorage data cleared');
+  console.log(`Removed ${removedCount} keys total (${keysToRemove.length} dynamic keys)`);
+  console.log('Remaining localStorage keys:', keysAfterClearing.length);
 }; 

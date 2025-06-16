@@ -2020,12 +2020,33 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       }
     };
     
+    const handleScenarioReset = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Scenario reset event received:', customEvent.detail);
+      
+      // Refresh user data to get updated completion status
+      try {
+        await refreshUserData();
+        console.log('User data refreshed after scenario reset');
+      } catch (error) {
+        console.error('Failed to refresh user data after scenario reset:', error);
+      }
+      
+      // Clear any cached scenario-related state
+      setError(null);
+      
+      // Force a re-render by updating a timestamp or similar
+      console.log('Scenario reset processed successfully');
+    };
+    
     window.addEventListener('conversation-deleted', handleConversationDeleted);
+    window.addEventListener('scenario-reset', handleScenarioReset);
     
     return () => {
       window.removeEventListener('conversation-deleted', handleConversationDeleted);
+      window.removeEventListener('scenario-reset', handleScenarioReset);
     };
-  }, [currentConversation]);
+  }, [currentConversation, refreshUserData]);
 
   // Add new useEffect to keep track of current conversation ID in localStorage
   useEffect(() => {
