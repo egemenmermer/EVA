@@ -2785,10 +2785,6 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
   // Function to mark the current scenario as completed
   const markCurrentScenarioCompleted = async () => {
-    console.log('🎯 MARK SCENARIO COMPLETED - TEMPORARILY DISABLED FOR DEBUGGING');
-    console.log('🎯 This function is disabled to test if it is causing duplicate API calls');
-    return;
-    
     // Prevent multiple simultaneous calls
     if (isMarkingScenarioCompleted.current) {
       console.log('⚠️ Scenario completion already in progress - skipping duplicate call');
@@ -2837,10 +2833,18 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
       if (response.ok) {
         console.log(`✅ ${scenarioType} scenario marked as completed successfully`);
-        console.log('🎯 MARK SCENARIO COMPLETED - About to refresh user data...');
-        // Refresh user data to update the store
-        await refreshUserData();
-        console.log('🎯 MARK SCENARIO COMPLETED - User data refreshed');
+        
+        // Update the user state directly in the store instead of calling refreshUserData
+        // This prevents fetching old database state that might have both scenarios as true
+        const { user, setUser } = useStore.getState();
+        if (user) {
+          const updatedUser = {
+            ...user,
+            [scenarioType === 'accessibility' ? 'accessibilityScenariosCompleted' : 'privacyScenariosCompleted']: true
+          };
+          setUser(updatedUser);
+          console.log(`🎯 Updated user state - ${scenarioType} scenario marked as completed`);
+        }
       } else {
         console.error('❌ Failed to mark scenario as completed:', response.statusText);
       }
