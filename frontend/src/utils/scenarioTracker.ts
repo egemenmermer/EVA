@@ -11,6 +11,8 @@ export type ScenarioType = 'accessibility' | 'privacy';
  * by examining the scenario title and issue type in the completion message
  */
 const isAccessibilityScenarioComplete = (content: string): boolean => {
+  console.log('🔍 Checking if accessibility scenario complete for content:', content.substring(0, 200));
+  
   // Check for completion indicators
   const completionIndicators = [
     'Practice Session Complete!',
@@ -25,17 +27,42 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
     content.toLowerCase().includes(indicator.toLowerCase())
   );
   
+  console.log('🔍 Has completion indicator:', hasCompletionIndicator);
+  
   if (!hasCompletionIndicator) return false;
   
   // Look for explicit scenario type in the completion message
   // Format: "- Scenario: Screen Reader Compatibility\n- Issue: Accessibility\n"
   const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+  console.log('🔍 Scenario type match:', scenarioTypeMatch);
+  
   if (scenarioTypeMatch) {
     const issueType = scenarioTypeMatch[2].trim().toLowerCase();
-    return issueType === 'accessibility';
+    console.log('🔍 Issue type found:', issueType);
+    const isAccessibility = issueType === 'accessibility';
+    console.log('🔍 Is accessibility scenario:', isAccessibility);
+    return isAccessibility;
   }
   
-  return false;
+  // Additional check for accessibility-specific keywords
+  const accessibilityKeywords = [
+    'screen reader',
+    'accessibility',
+    'assistive technology',
+    'wcag',
+    'ada compliance'
+  ];
+  
+  const hasAccessibilityKeywords = accessibilityKeywords.some(keyword => 
+    content.toLowerCase().includes(keyword.toLowerCase())
+  );
+  
+  console.log('🔍 Has accessibility keywords:', hasAccessibilityKeywords);
+  
+  // Only return true if we have both completion indicator AND accessibility-specific content
+  const result = hasCompletionIndicator && hasAccessibilityKeywords;
+  console.log('🔍 Final accessibility result:', result);
+  return result;
 };
 
 /**
@@ -43,6 +70,8 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
  * by examining the scenario title and issue type in the completion message
  */
 const isPrivacyScenarioComplete = (content: string): boolean => {
+  console.log('🔍 Checking if privacy scenario complete for content:', content.substring(0, 200));
+  
   // Check for completion indicators
   const completionIndicators = [
     'Practice Session Complete!',
@@ -57,17 +86,43 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
     content.toLowerCase().includes(indicator.toLowerCase())
   );
   
+  console.log('🔍 Has completion indicator:', hasCompletionIndicator);
+  
   if (!hasCompletionIndicator) return false;
   
   // Look for explicit scenario type in the completion message
   // Format: "- Scenario: Location Data Collection\n- Issue: Privacy\n"
   const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+  console.log('🔍 Scenario type match:', scenarioTypeMatch);
+  
   if (scenarioTypeMatch) {
     const issueType = scenarioTypeMatch[2].trim().toLowerCase();
-    return issueType === 'privacy';
+    console.log('🔍 Issue type found:', issueType);
+    const isPrivacy = issueType === 'privacy';
+    console.log('🔍 Is privacy scenario:', isPrivacy);
+    return isPrivacy;
   }
   
-  return false;
+  // Additional check for privacy-specific keywords
+  const privacyKeywords = [
+    'location data',
+    'privacy',
+    'data collection',
+    'user data',
+    'gdpr',
+    'personal information'
+  ];
+  
+  const hasPrivacyKeywords = privacyKeywords.some(keyword => 
+    content.toLowerCase().includes(keyword.toLowerCase())
+  );
+  
+  console.log('🔍 Has privacy keywords:', hasPrivacyKeywords);
+  
+  // Only return true if we have both completion indicator AND privacy-specific content
+  const result = hasCompletionIndicator && hasPrivacyKeywords;
+  console.log('🔍 Final privacy result:', result);
+  return result;
 };
 
 /**
@@ -106,31 +161,55 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
   try {
     // Log the message content for debugging
-    console.log('Analyzing message for scenario completion:', messageContent.substring(0, 200) + '...');
+    console.log('🔍 SCENARIO ANALYSIS START');
+    console.log('🔍 Analyzing message for scenario completion:', messageContent.substring(0, 300) + '...');
+    
+    // Get current completion status
+    const currentAccessibilityStatus = hasCompletedScenarioType('accessibility');
+    const currentPrivacyStatus = hasCompletedScenarioType('privacy');
+    
+    console.log('🔍 Current completion status - Accessibility:', currentAccessibilityStatus, 'Privacy:', currentPrivacyStatus);
     
     // Check for accessibility scenario completion
-    if (isAccessibilityScenarioComplete(messageContent) && !hasCompletedScenarioType('accessibility')) {
-      console.log('Detected accessibility scenario completion, marking as completed');
+    const isAccessibilityComplete = isAccessibilityScenarioComplete(messageContent);
+    console.log('🔍 Accessibility scenario complete check result:', isAccessibilityComplete);
+    
+    if (isAccessibilityComplete && !currentAccessibilityStatus) {
+      console.log('✅ Detected NEW accessibility scenario completion, marking as completed');
       await markScenarioTypeCompleted('accessibility');
       
       // Trigger UI refresh
       window.dispatchEvent(new CustomEvent('scenario-completed', { 
         detail: { scenarioType: 'accessibility' } 
       }));
+    } else if (isAccessibilityComplete && currentAccessibilityStatus) {
+      console.log('⚠️ Accessibility scenario already completed, skipping duplicate marking');
     }
     
     // Check for privacy scenario completion
-    if (isPrivacyScenarioComplete(messageContent) && !hasCompletedScenarioType('privacy')) {
-      console.log('Detected privacy scenario completion, marking as completed');
+    const isPrivacyComplete = isPrivacyScenarioComplete(messageContent);
+    console.log('🔍 Privacy scenario complete check result:', isPrivacyComplete);
+    
+    if (isPrivacyComplete && !currentPrivacyStatus) {
+      console.log('✅ Detected NEW privacy scenario completion, marking as completed');
       await markScenarioTypeCompleted('privacy');
       
       // Trigger UI refresh
       window.dispatchEvent(new CustomEvent('scenario-completed', { 
         detail: { scenarioType: 'privacy' } 
       }));
+    } else if (isPrivacyComplete && currentPrivacyStatus) {
+      console.log('⚠️ Privacy scenario already completed, skipping duplicate marking');
     }
+    
+    // Log final status
+    const finalAccessibilityStatus = hasCompletedScenarioType('accessibility');
+    const finalPrivacyStatus = hasCompletedScenarioType('privacy');
+    console.log('🔍 Final completion status - Accessibility:', finalAccessibilityStatus, 'Privacy:', finalPrivacyStatus);
+    console.log('🔍 SCENARIO ANALYSIS END');
+    
   } catch (error) {
-    console.error('Error analyzing message for scenario completion:', error);
+    console.error('❌ Error analyzing message for scenario completion:', error);
   }
 };
 
@@ -227,4 +306,55 @@ export const clearAllScenarioData = (): void => {
   console.log('All scenario-related localStorage data cleared');
   console.log(`Removed ${removedCount} keys total (${keysToRemove.length} dynamic keys)`);
   console.log('Remaining localStorage keys:', keysAfterClearing.length);
-}; 
+};
+
+/**
+ * Manual reset function for debugging - can be called from browser console
+ * Usage: window.manualResetScenarios()
+ */
+export const manualResetScenarios = async (): Promise<void> => {
+  console.log('🔧 MANUAL RESET: Starting manual scenario reset...');
+  
+  // Clear localStorage
+  clearAllScenarioData();
+  
+  // Reset in database
+  try {
+    const authToken = localStorage.getItem('token');
+    if (authToken) {
+      const response = await fetch('/api/v1/user/reset-scenario-completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const updatedUserData = await response.json();
+        console.log('🔧 MANUAL RESET: Database reset successful:', updatedUserData);
+        
+        // Trigger UI refresh events
+        window.dispatchEvent(new CustomEvent('refresh-sidebar'));
+        window.dispatchEvent(new CustomEvent('scenario-reset', { 
+          detail: { timestamp: new Date().toISOString() } 
+        }));
+        
+        console.log('🔧 MANUAL RESET: Complete! Refresh the page to see changes.');
+      } else {
+        console.error('🔧 MANUAL RESET: Database reset failed:', response.status);
+      }
+    } else {
+      console.error('🔧 MANUAL RESET: No auth token found');
+    }
+  } catch (error) {
+    console.error('🔧 MANUAL RESET: Error:', error);
+  }
+};
+
+// Make it available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).manualResetScenarios = manualResetScenarios;
+  (window as any).logScenarioStatus = logScenarioStatus;
+  (window as any).clearAllScenarioData = clearAllScenarioData;
+} 

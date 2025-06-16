@@ -25,13 +25,23 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
 
   // Check scenario completion status
   const getScenarioStatus = (): ScenarioStatus => {
+    const dbPrivacyCompleted = user?.privacyScenariosCompleted || false;
+    const dbAccessibilityCompleted = user?.accessibilityScenariosCompleted || false;
+    
+    console.log('🔍 MODAL: Database completion status - Privacy:', dbPrivacyCompleted, 'Accessibility:', dbAccessibilityCompleted);
+    
     return {
-      privacyCompleted: user?.privacyScenariosCompleted || false,
-      accessibilityCompleted: user?.accessibilityScenariosCompleted || false
+      privacyCompleted: dbPrivacyCompleted,
+      accessibilityCompleted: dbAccessibilityCompleted
     };
   };
 
   const scenarioStatus = getScenarioStatus();
+  
+  // Show refresh button if at least one scenario is completed
+  const shouldShowRefreshButton = scenarioStatus.privacyCompleted || scenarioStatus.accessibilityCompleted;
+  
+  console.log('🔍 MODAL: Should show refresh button:', shouldShowRefreshButton);
 
   // Handle refresh scenarios
   const handleRefreshScenarios = async () => {
@@ -267,16 +277,22 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
             Your selection will determine the scenario experience throughout your conversation
           </div>
           
-          {/* Refresh Button - Show only if both scenarios are completed */}
-          {scenarioStatus.privacyCompleted && scenarioStatus.accessibilityCompleted && (
-            <div className="flex justify-center">
+          {/* Refresh Button - Show if at least one scenario is completed */}
+          {shouldShowRefreshButton && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-center text-gray-600 dark:text-gray-400 text-xs">
+                {scenarioStatus.privacyCompleted && scenarioStatus.accessibilityCompleted 
+                  ? 'Both scenarios completed - you can reset to practice again'
+                  : 'Reset completed scenarios to practice again'
+                }
+              </div>
               <button
                 onClick={handleRefreshScenarios}
                 disabled={isRefreshing}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-md transition-colors text-sm"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Refreshing...' : 'Reset Scenarios'}
+                {isRefreshing ? 'Resetting...' : 'Reset Scenarios'}
               </button>
             </div>
           )}
