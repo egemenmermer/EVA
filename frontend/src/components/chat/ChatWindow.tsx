@@ -2792,6 +2792,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     }
     
     isMarkingScenarioCompleted.current = true;
+    console.log('🎯 MARK SCENARIO COMPLETED - START');
     
     try {
       const authToken = localStorage.getItem('token');
@@ -2802,16 +2803,22 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
       // Determine which scenario we're completing based on the conversation content
       const scenarioType = determineCurrentScenario();
+      console.log('🎯 MARK SCENARIO COMPLETED - Determined scenario type:', scenarioType);
+      
       if (!scenarioType) {
         console.error('Could not determine current scenario type');
         return;
       }
 
       console.log(`🎯 Marking ONLY ${scenarioType} scenario as completed`);
+      console.log('🎯 MARK SCENARIO COMPLETED - About to make API call');
 
       const endpoint = scenarioType === 'accessibility' 
         ? '/api/v1/user/mark-accessibility-scenarios-completed'
         : '/api/v1/user/mark-privacy-scenarios-completed';
+        
+      console.log('🎯 MARK SCENARIO COMPLETED - API endpoint:', endpoint);
+      console.log('🎯 MARK SCENARIO COMPLETED - Making fetch request...');
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -2821,19 +2828,26 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         }
       });
 
+      console.log('🎯 MARK SCENARIO COMPLETED - API response status:', response.status);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response ok:', response.ok);
+
       if (response.ok) {
         console.log(`✅ ${scenarioType} scenario marked as completed successfully`);
+        console.log('🎯 MARK SCENARIO COMPLETED - About to refresh user data...');
         // Refresh user data to update the store
         await refreshUserData();
+        console.log('🎯 MARK SCENARIO COMPLETED - User data refreshed');
       } else {
         console.error('❌ Failed to mark scenario as completed:', response.statusText);
       }
     } catch (error) {
       console.error('❌ Error marking scenario as completed:', error);
     } finally {
+      console.log('🎯 MARK SCENARIO COMPLETED - END');
       // Reset the flag after a delay to prevent rapid successive calls
       setTimeout(() => {
         isMarkingScenarioCompleted.current = false;
+        console.log('🎯 MARK SCENARIO COMPLETED - Flag reset');
       }, 2000);
     }
   };

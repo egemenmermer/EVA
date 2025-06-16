@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -86,13 +90,25 @@ public class UserController {
     // Scenario completion endpoints
     @PostMapping("/mark-accessibility-scenarios-completed")
     public ResponseEntity<String> markAccessibilityScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        log.info("🎯 API CALL - mark-accessibility-scenarios-completed for user: {}", currentUser.getId());
+        log.info("🎯 API CALL - User email: {}", currentUser.getEmail());
+        log.info("🎯 API CALL - Request timestamp: {}", LocalDateTime.now());
+        
         userService.markAccessibilityScenariosCompleted(currentUser.getId());
+        
+        log.info("✅ API CALL COMPLETED - Accessibility scenarios marked as completed for user: {}", currentUser.getId());
         return ResponseEntity.ok("Accessibility scenarios marked as completed");
     }
 
     @PostMapping("/mark-privacy-scenarios-completed")
     public ResponseEntity<String> markPrivacyScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        log.info("🎯 API CALL - mark-privacy-scenarios-completed for user: {}", currentUser.getId());
+        log.info("🎯 API CALL - User email: {}", currentUser.getEmail());
+        log.info("🎯 API CALL - Request timestamp: {}", LocalDateTime.now());
+        
         userService.markPrivacyScenariosCompleted(currentUser.getId());
+        
+        log.info("✅ API CALL COMPLETED - Privacy scenarios marked as completed for user: {}", currentUser.getId());
         return ResponseEntity.ok("Privacy scenarios marked as completed");
     }
 
