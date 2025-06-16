@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -86,6 +88,71 @@ public class PracticeController {
             return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             log.error("Error retrieving practice session: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    // New endpoint to set auto-open tactics guide flag
+    @PostMapping("/set-auto-open-tactics")
+    public ResponseEntity<Map<String, String>> setAutoOpenTacticsFlag(
+            @CurrentUser CustomUserDetails currentUser,
+            @RequestBody Map<String, Object> request) {
+        
+        log.info("Setting auto-open tactics flag for user: {}", currentUser.getEmail());
+        
+        try {
+            UUID conversationId = UUID.fromString((String) request.get("conversationId"));
+            Map<String, Object> practiceData = (Map<String, Object>) request.get("practiceData");
+            
+            // Store the flag and practice data in the user service
+            practiceSessionService.setAutoOpenTacticsFlag(currentUser.getId(), conversationId, practiceData);
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Auto-open tactics flag set successfully");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error setting auto-open tactics flag: {}", e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "error");
+            response.put("message", "Failed to set auto-open tactics flag");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // New endpoint to get and clear auto-open tactics guide flag
+    @GetMapping("/get-auto-open-tactics")
+    public ResponseEntity<Map<String, Object>> getAutoOpenTacticsFlag(
+            @CurrentUser CustomUserDetails currentUser,
+            @RequestParam UUID conversationId) {
+        
+        log.info("Getting auto-open tactics flag for user: {} and conversation: {}", currentUser.getEmail(), conversationId);
+        
+        try {
+            Map<String, Object> result = practiceSessionService.getAndClearAutoOpenTacticsFlag(currentUser.getId(), conversationId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error getting auto-open tactics flag: {}", e.getMessage(), e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("shouldAutoOpen", false);
+            response.put("practiceData", null);
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    // New endpoint to get latest practice session data for tactics modal
+    @GetMapping("/latest-session-data")
+    public ResponseEntity<Map<String, Object>> getLatestPracticeSessionData(
+            @CurrentUser CustomUserDetails currentUser) {
+        
+        log.info("Getting latest practice session data for user: {}", currentUser.getEmail());
+        
+        try {
+            Map<String, Object> sessionData = practiceSessionService.getLatestPracticeSessionData(currentUser.getId());
+            return ResponseEntity.ok(sessionData);
+        } catch (Exception e) {
+            log.error("Error getting latest practice session data: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }

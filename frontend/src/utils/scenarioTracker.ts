@@ -8,20 +8,10 @@ export type ScenarioType = 'accessibility' | 'privacy';
 
 /**
  * Check if a scenario completion message indicates accessibility scenarios are done
+ * by examining the scenario title and issue type in the completion message
  */
 const isAccessibilityScenarioComplete = (content: string): boolean => {
-  const accessibilityKeywords = [
-    'accessibility',
-    'screen reader',
-    'keyboard navigation',
-    'visual impairment',
-    'assistive technology',
-    'alt text',
-    'aria',
-    'wcag',
-    'ada compliance'
-  ];
-  
+  // Check for completion indicators
   const completionIndicators = [
     'Practice Session Complete!',
     'scenario complete',
@@ -31,34 +21,29 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
     'scenario outcome'
   ];
   
-  const lowerContent = content.toLowerCase();
-  const hasAccessibilityKeyword = accessibilityKeywords.some(keyword => 
-    lowerContent.includes(keyword.toLowerCase())
-  );
   const hasCompletionIndicator = completionIndicators.some(indicator => 
-    lowerContent.includes(indicator.toLowerCase())
+    content.toLowerCase().includes(indicator.toLowerCase())
   );
   
-  return hasAccessibilityKeyword && hasCompletionIndicator;
+  if (!hasCompletionIndicator) return false;
+  
+  // Look for explicit scenario type in the completion message
+  // Format: "- Scenario: Screen Reader Compatibility\n- Issue: Accessibility\n"
+  const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+  if (scenarioTypeMatch) {
+    const issueType = scenarioTypeMatch[2].trim().toLowerCase();
+    return issueType === 'accessibility';
+  }
+  
+  return false;
 };
 
 /**
  * Check if a scenario completion message indicates privacy scenarios are done
+ * by examining the scenario title and issue type in the completion message
  */
 const isPrivacyScenarioComplete = (content: string): boolean => {
-  const privacyKeywords = [
-    'privacy',
-    'location data',
-    'user data',
-    'personal information',
-    'data collection',
-    'tracking',
-    'consent',
-    'gdpr',
-    'data protection',
-    'user tracking'
-  ];
-  
+  // Check for completion indicators
   const completionIndicators = [
     'Practice Session Complete!',
     'scenario complete',
@@ -68,15 +53,21 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
     'scenario outcome'
   ];
   
-  const lowerContent = content.toLowerCase();
-  const hasPrivacyKeyword = privacyKeywords.some(keyword => 
-    lowerContent.includes(keyword.toLowerCase())
-  );
   const hasCompletionIndicator = completionIndicators.some(indicator => 
-    lowerContent.includes(indicator.toLowerCase())
+    content.toLowerCase().includes(indicator.toLowerCase())
   );
   
-  return hasPrivacyKeyword && hasCompletionIndicator;
+  if (!hasCompletionIndicator) return false;
+  
+  // Look for explicit scenario type in the completion message
+  // Format: "- Scenario: Location Data Collection\n- Issue: Privacy\n"
+  const scenarioTypeMatch = content.match(/- Scenario: (.+)\n- Issue: (.+)\n/i);
+  if (scenarioTypeMatch) {
+    const issueType = scenarioTypeMatch[2].trim().toLowerCase();
+    return issueType === 'privacy';
+  }
+  
+  return false;
 };
 
 /**
@@ -114,6 +105,9 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
  */
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
   try {
+    // Log the message content for debugging
+    console.log('Analyzing message for scenario completion:', messageContent.substring(0, 200) + '...');
+    
     // Check for accessibility scenario completion
     if (isAccessibilityScenarioComplete(messageContent) && !hasCompletedScenarioType('accessibility')) {
       console.log('Detected accessibility scenario completion, marking as completed');

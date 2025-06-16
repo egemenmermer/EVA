@@ -1,7 +1,7 @@
 {
   "id": "privacy_puppeteer",
   "title": "Location Data Collection",
-  "description": "Your company is storing user location data unnecessarily for app features. The manager manipulates the conversation and makes you feel like location data protection is your personal responsibility rather than an organizational policy requirement.",
+  "description": "Your company is storing user location data unnecessarily for app features. The manager uses emotional manipulation and makes you feel personally responsible for location data decisions, trying to get you to take individual ownership of what should be organizational policy requirements.",
   "issue": "Privacy",
   "manager_type": "PUPPETEER",
   "starting_statement_id": "step_1",
@@ -11,35 +11,35 @@
       "user_choices": [
         {
           "choice": "Location data protection isn't my personal preference - it's a legal and ethical requirement for the entire organization.",
-          "tactic": "Organizational Requirement Emphasis",
+          "tactic": "Legal Compliance Anchor",
           "leads_to": "r_good_1",
-          "tactic_type": "Legal Compliance Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References legal framework making location data protection an organizational requirement, not personal preference"
+          "justification": "Grounds the argument in legal obligations and rights"
         },
         {
           "choice": "I do care about privacy, and I think we should be really careful about collecting location data without clear necessity.",
-          "tactic": "Personal Care with Caution",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_1",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Accepts personal framing and relies on emotional caution rather than systematic argument"
+          "justification": "Uses emotional reasoning instead of systematic argument"
         },
         {
           "choice": "Location data decisions should be based on data minimization principles and user consent, not individual opinions.",
-          "tactic": "Systematic Decision Framework",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_1",
-          "tactic_type": "Best Practice Advocacy",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References external best practices for systematic location data decision-making processes"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "I appreciate you valuing my privacy perspective - maybe I could help evaluate the necessity of different location features.",
-          "tactic": "Privacy Perspective Contribution",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_1",
-          "tactic_type": "Personal Integrity Anchor",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Anchors on personal privacy knowledge rather than systematic organizational evaluation"
+          "justification": "Appears open but subtly avoids change"
         }
       ]
     },
@@ -48,35 +48,35 @@
       "user_choices": [
         {
           "choice": "Privacy expertise should inform proper compliance processes, not justify finding workarounds for location data collection.",
-          "tactic": "Expertise vs Workaround Distinction",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_2",
-          "tactic_type": "Ethical Constraints",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References ethical constraints preventing use of expertise to compromise location data standards"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
           "choice": "The team should rely on established data minimization frameworks, not individual problem-solving for location features.",
-          "tactic": "Framework vs Individual Reliance",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_2",
-          "tactic_type": "Stakeholder Alignment",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns team needs with established location data frameworks rather than individual responsibility"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "I understand the team is looking for solutions - maybe I could research privacy-compliant location feature models.",
-          "tactic": "Solution Research Offer",
+          "tactic": "Red Herring",
           "leads_to": "r_bad_2",
-          "tactic_type": "Red Herring",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Diverts from systematic location data evaluation to personal research responsibility"
+          "justification": "Introduces irrelevant info to distract from the real issue"
         },
         {
           "choice": "Since I do have location privacy experience, I could help the team understand what approaches might work within compliance requirements.",
-          "tactic": "Experience-Based Team Help",
+          "tactic": "Hasty Generalization",
           "leads_to": "r_bad_2",
-          "tactic_type": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Assumes personal expertise can solve systematic location data evaluation needs"
+          "justification": "Draws broad conclusions from limited examples"
         }
       ]
     },
@@ -85,35 +85,35 @@
       "user_choices": [
         {
           "choice": "Location data guidelines should be developed by privacy professionals with legal review, not assigned to individual contributors.",
-          "tactic": "Professional Development Requirements",
+          "tactic": "Technical Feasibility Framing",
           "leads_to": "r_good_2",
-          "tactic_type": "Technical Responsibility",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames guideline development as requiring professional technical responsibility, not individual assignment"
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
         },
         {
           "choice": "I can contribute privacy knowledge, but developing location data guidelines requires organizational commitment and resources.",
-          "tactic": "Knowledge vs Guideline Development",
+          "tactic": "Risk Management Framing",
           "leads_to": "r_good_2",
-          "tactic_type": "Business Risk",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Identifies business risk of informal guideline development versus proper organizational process"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
           "choice": "I could help develop guidelines, but the organization needs to commit to implementing them consistently across all location features.",
-          "tactic": "Development with Implementation Commitment",
+          "tactic": "False Dilemma",
           "leads_to": "r_bad_2",
-          "tactic_type": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Presents personal development vs no guidelines, missing professional development option"
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
         },
         {
           "choice": "Since the team would benefit from my expertise in balancing these priorities, I could take the lead on location guideline development.",
-          "tactic": "Expertise Leadership Acceptance",
+          "tactic": "Appeal to Popularity",
           "leads_to": "r_bad_2",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Defers to personal expertise authority rather than systematic organizational planning"
+          "justification": "Justifies decisions because 'everyone else does it'"
         }
       ]
     },
@@ -122,35 +122,35 @@
       "user_choices": [
         {
           "choice": "Product team communication about location data requirements should come from project leadership and legal counsel, not individual contributors.",
-          "tactic": "Team Communication Boundaries",
+          "tactic": "Precedent Reference",
           "leads_to": "r_good_3",
-          "tactic_type": "Policy Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References organizational policies about appropriate team communication responsibilities"
+          "justification": "Uses past decisions or industry practices to support an action"
         },
         {
           "choice": "I can provide technical information, but managers should present business cases for location data protection to the product team.",
-          "tactic": "Technical vs Business Case Separation",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_3",
-          "tactic_type": "Stakeholder Alignment",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns stakeholder roles separating technical information from business case presentation"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "If the product team respects my privacy judgment, I should help explain why location data protections are important.",
-          "tactic": "Product Team Respect Utilization",
+          "tactic": "Appeal to Popularity",
           "leads_to": "r_bad_3",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Accepts team authority validation rather than systematic location data planning"
+          "justification": "Justifies decisions because 'everyone else does it'"
         },
         {
           "choice": "I understand the pressure you're feeling - maybe I could help articulate the location data requirements more clearly.",
-          "tactic": "Pressure Sympathy with Articulation Help",
+          "tactic": "Strawman",
           "leads_to": "r_bad_3",
-          "tactic_type": "Strawman",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Misrepresents proper organizational planning as communication clarity problem"
+          "justification": "Misrepresents your point to argue against an easier version"
         }
       ]
     },
@@ -159,35 +159,35 @@
       "user_choices": [
         {
           "choice": "Location data assessments require formal methodology and legal review, not individual judgment about protection flexibility.",
-          "tactic": "Assessment Methodology Requirements",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_3",
-          "tactic_type": "Evidence-Based Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References evidence-based methodology requirements rather than personal opinion for location decisions"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "Location feature decisions should be based on data minimization requirements and user necessity, not individual flexibility judgments.",
-          "tactic": "Minimization vs Individual Judgment",
+          "tactic": "Legal Compliance Anchor",
           "leads_to": "r_good_3",
-          "tactic_type": "Legal Compliance Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References legal compliance framework rather than individual judgment for location decisions"
+          "justification": "Grounds the argument in legal obligations and rights"
         },
         {
           "choice": "I can provide initial location privacy thoughts to help guide the development team's formal assessment process.",
-          "tactic": "Initial Thoughts for Guidance",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_3",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Relies on helpful feeling rather than systematic location data assessment approach"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Since the development team trusts my privacy judgment, I'll create an assessment of location protection requirements and flexibility areas.",
-          "tactic": "Trust-Based Assessment Creation",
+          "tactic": "Bandwagon",
           "leads_to": "r_bad_3",
-          "tactic_type": "Bandwagon",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Validates approach based on team trust rather than proper assessment methodology"
+          "justification": "Follows the crowd rather than proper methodology"
         }
       ]
     },
@@ -196,35 +196,35 @@
       "user_choices": [
         {
           "choice": "Location feature evaluation should include privacy impact from the beginning, not treat privacy as a blocking factor.",
-          "tactic": "Integrated Feature Evaluation",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_4",
-          "tactic_type": "Long-Term Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References long-term consequences of integrating privacy evaluation versus treating it as obstacle"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
           "choice": "I can provide information about location data evaluation criteria, but feature assessment is a management responsibility.",
-          "tactic": "Information vs Assessment Separation",
+          "tactic": "Risk Management Framing",
           "leads_to": "r_good_4",
-          "tactic_type": "Business Risk",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Identifies business risk of inappropriate role separation for feature assessment"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
           "choice": "I understand your concern about stakeholder perception - I could help you understand key location data evaluation questions.",
-          "tactic": "Stakeholder Concern Understanding",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_4",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to sympathy for reputation concerns rather than systematic feature evaluation"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Since I do understand location data implications better, I could help you frame the feature evaluation questions appropriately.",
-          "tactic": "Implication Understanding Help",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_4",
-          "tactic_type": "Personal Integrity Anchor",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Anchors on personal location data knowledge to justify taking on management evaluation role"
+          "justification": "Appears open but subtly avoids change"
         }
       ]
     },
@@ -233,35 +233,35 @@
       "user_choices": [
         {
           "choice": "Location feature evaluation isn't about personal importance - it's determined by user protection requirements and data necessity.",
-          "tactic": "Objective Evaluation Emphasis",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_4",
-          "tactic_type": "User-Centered Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Centers user protection requirements rather than personal importance for location feature evaluation"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
           "choice": "Privacy-friendly location features are defined by data minimization standards and user consent, not individual preferences.",
-          "tactic": "Standards-Based Feature Definition",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_4",
-          "tactic_type": "Quality Assurance Reframing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Reframes feature evaluation as quality assurance against standards rather than personal preference"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "I appreciate you taking location privacy seriously - I can focus on features that would have the least privacy impact.",
-          "tactic": "Privacy Impact Focus",
+          "tactic": "Hasty Generalization",
           "leads_to": "r_bad_4",
-          "tactic_type": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Makes broad claims about impact assessment without systematic evaluation methodology"
+          "justification": "Draws broad conclusions from limited examples"
         },
         {
           "choice": "Since location privacy is important to me, I'll prioritize the approaches that seem most compatible with user protection.",
-          "tactic": "Personal Priority Compatibility",
+          "tactic": "Slippery Slope",
           "leads_to": "r_bad_4",
-          "tactic_type": "Slippery Slope",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Suggests personal prioritization will lead to comprehensive location data protection"
+          "justification": "Claims one action will inevitably lead to extreme consequences"
         }
       ]
     },
@@ -270,35 +270,35 @@
       "user_choices": [
         {
           "choice": "Location data governance requires dedicated privacy officers, formal impact assessments, and legal review for all feature decisions.",
-          "tactic": "Comprehensive Governance Framework",
+          "tactic": "Precedent Reference",
           "leads_to": "r_good_5",
-          "tactic_type": "Policy Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References policy requirements for systematic location data governance with proper roles and processes"
+          "justification": "Uses past decisions or industry practices to support an action"
         },
         {
           "choice": "Location feature evaluation needs cross-functional teams including privacy, legal, and product stakeholders with clear decision criteria.",
-          "tactic": "Cross-Functional Evaluation Teams",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_5",
-          "tactic_type": "Stakeholder Alignment",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns stakeholder roles in systematic cross-functional location data evaluation processes"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "I appreciate you recognizing the position this puts me in - systematic location data governance would definitely be better.",
-          "tactic": "Position Recognition Appreciation",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_5",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to gratitude for recognition rather than systematic governance advocacy"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Since you're asking about proper governance, I could outline what location data oversight should look like for feature decisions.",
-          "tactic": "Governance Outline Offer",
+          "tactic": "Red Herring",
           "leads_to": "r_bad_5",
-          "tactic_type": "Red Herring",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Diverts from organizational governance implementation to personal outline creation"
+          "justification": "Introduces irrelevant info to distract from the real issue"
         }
       ]
     },
@@ -307,35 +307,35 @@
       "user_choices": [
         {
           "choice": "Leading location data strategy requires dedicated organizational role allocation with appropriate authority and resources, not individual volunteer coordination.",
-          "tactic": "Strategy Leadership Requirements",
+          "tactic": "Risk Management Framing",
           "leads_to": "r_good_5",
-          "tactic_type": "Business Risk",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Identifies business risk of informal volunteer coordination versus proper organizational role allocation"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
           "choice": "Location data coordination is a specialized function that should be formally assigned with cross-functional support and decision authority.",
-          "tactic": "Specialized Function Assignment",
+          "tactic": "Technical Feasibility Framing",
           "leads_to": "r_good_5",
-          "tactic_type": "Technical Responsibility",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames location data coordination as requiring formal technical responsibility assignment with proper support"
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
         },
         {
           "choice": "I do have good insight into user protection - taking the lead could help ensure location features respect privacy properly.",
-          "tactic": "User Protection Leadership",
+          "tactic": "Appeal to Popularity",
           "leads_to": "r_bad_5",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Defers to personal user protection authority rather than systematic organizational planning"
+          "justification": "Justifies decisions because 'everyone else does it'"
         },
         {
           "choice": "This does seem like a good opportunity to shape our location privacy approach - I could coordinate the product development privacy integration.",
-          "tactic": "Privacy Shaping Opportunity",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_5",
-          "tactic_type": "Personal Integrity Anchor",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Anchors on personal desire to influence privacy rather than proper resource allocation"
+          "justification": "Appears open but subtly avoids change"
         }
       ]
     },
@@ -344,35 +344,35 @@
       "user_choices": [
         {
           "choice": "Leadership communication about location data governance should emphasize regulatory compliance requirements and business risk mitigation.",
-          "tactic": "Leadership Risk Communication",
+          "tactic": "Legal Compliance Anchor",
           "leads_to": "r_good_6",
-          "tactic_type": "Legal Compliance Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References legal compliance framework for leadership communication about location data governance"
+          "justification": "Grounds the argument in legal obligations and rights"
         },
         {
           "choice": "Proper location data infrastructure creates competitive advantages through user trust and compliance while enabling responsible features.",
-          "tactic": "Infrastructure Competitive Advantage",
+          "tactic": "Comparative Framing",
           "leads_to": "r_good_6",
-          "tactic_type": "Comparative Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Compares location data infrastructure benefits against ad-hoc feature privacy approaches"
+          "justification": "Compares different approaches to highlight the benefits of one option"
         },
         {
           "choice": "I'm glad our discussion helped clarify the governance requirements - honest leadership communication about location data infrastructure is important.",
-          "tactic": "Discussion Value Acknowledgment",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_6",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to satisfaction about helpful discussion rather than systematic governance implementation"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Either investing in proper location data processes or being selective about features would be better than the informal approach we've been considering.",
-          "tactic": "Process vs Informal Comparison",
+          "tactic": "False Dilemma",
           "leads_to": "r_bad_6",
-          "tactic_type": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Presents investment or selectivity options, missing immediate proper governance implementation"
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
         }
       ]
     },
@@ -381,35 +381,35 @@
       "user_choices": [
         {
           "choice": "Individual ownership of location data creates unsustainable single points of failure and bypasses necessary organizational governance.",
-          "tactic": "Sustainable Governance Requirements",
+          "tactic": "Appeal to Consequences",
           "leads_to": "r_good_6",
-          "tactic_type": "Scalable Solution Argument",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Argues for scalable organizational governance rather than individual ownership dependencies"
+          "justification": "Argues a decision based on its practical or moral outcomes"
         },
         {
           "choice": "Location data decisions should be integrated into standard product processes with formal review, not managed through individual ownership.",
-          "tactic": "Process Integration Requirements",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_6",
-          "tactic_type": "Quality Assurance Reframing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Reframes location privacy as integrated product process quality assurance rather than individual responsibility"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "I appreciate the support offer - let's discuss how to structure effective location privacy leadership for feature decisions.",
-          "tactic": "Support Appreciation with Structure Discussion",
+          "tactic": "Appeal to Emotion",
           "leads_to": "r_bad_6",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Relies on appreciation for support rather than systematic organizational role planning"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Since I'm committed to user protection, taking ownership could ensure location features get the privacy attention they deserve.",
-          "tactic": "Commitment-Based Ownership",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_6",
-          "tactic_type": "Personal Integrity Anchor",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Anchors on personal commitment rather than systematic organizational location data planning"
+          "justification": "Appears open but subtly avoids change"
         }
       ]
     },
@@ -418,35 +418,35 @@
       "user_choices": [
         {
           "choice": "Location data infrastructure conversations should include compliance frameworks, resource requirements, and governance accountability structures.",
-          "tactic": "Comprehensive Infrastructure Discussion",
+          "tactic": "Appeal to Standards",
           "leads_to": "end_good",
-          "tactic_type": "Evidence-Based Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References evidence-based approach to infrastructure conversation including multiple governance elements"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "Location feature governance requires dedicated privacy roles with clear authority, not ad-hoc individual responsibility assignments.",
-          "tactic": "Dedicated Role Authority Requirements",
+          "tactic": "Precedent Reference",
           "leads_to": "end_good",
-          "tactic_type": "Policy Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References policy requirements for dedicated location data roles with appropriate organizational authority"
+          "justification": "Uses past decisions or industry practices to support an action"
         },
         {
           "choice": "I'm glad you're recognizing the need for proper processes - comprehensive leadership conversations about location data infrastructure are definitely important.",
-          "tactic": "Process Recognition Appreciation",
+          "tactic": "Appeal to Emotion",
           "leads_to": "end_bad",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to satisfaction about recognition rather than systematic infrastructure implementation"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "Building location data processes instead of relying on individual responsibility makes much more sense for feature governance.",
-          "tactic": "Process vs Individual Validation",
+          "tactic": "Bandwagon",
           "leads_to": "end_bad",
-          "tactic_type": "Bandwagon",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Validates process approach because it sounds like proper methodology without ensuring implementation"
+          "justification": "Follows the crowd rather than proper methodology"
         }
       ]
     },
@@ -455,35 +455,35 @@
       "user_choices": [
         {
           "choice": "Location privacy leadership success requires organizational commitment and proper governance infrastructure, not individual commitment and support promises.",
-          "tactic": "Organizational vs Individual Leadership",
+          "tactic": "Appeal to Standards",
           "leads_to": "end_good",
-          "tactic_type": "Best Practice Advocacy",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References external best practices for organizational location privacy leadership rather than individual commitment"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
           "choice": "Professional location data governance needs systematic methodology and formal authority, not personal understanding within arbitrary constraints.",
-          "tactic": "Professional Governance Standards",
+          "tactic": "Technical Feasibility Framing",
           "leads_to": "end_good",
-          "tactic_type": "Technical Responsibility",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames technical responsibility as requiring systematic professional governance approaches"
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
         },
         {
           "choice": "I appreciate your confidence in my ability to develop location privacy leadership - I'll work to find approaches that balance feature opportunities with protection.",
-          "tactic": "Confidence Appreciation with Balance Promise",
+          "tactic": "Appeal to Emotion",
           "leads_to": "end_bad",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Relies on gratitude and balance promises rather than systematic governance implementation"
+          "justification": "Uses emotional reasoning instead of systematic approach"
         },
         {
           "choice": "With your support for my location privacy leadership, I'm confident we can make meaningful progress on location feature privacy standards.",
-          "tactic": "Supported Leadership Confidence",
+          "tactic": "Hasty Generalization",
           "leads_to": "end_bad",
-          "tactic_type": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Makes broad claims about progress based on support promise rather than governance analysis"
+          "justification": "Draws broad conclusions from limited examples"
         }
       ]
     }

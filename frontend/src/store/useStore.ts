@@ -204,14 +204,25 @@ export const useStore = create<Store>()(
           });
         }
         
-        // Save messages to localStorage for non-draft conversations
+        // Save messages to localStorage for backup and immediate access for non-draft conversations
         if (message.conversationId && !message.conversationId.startsWith('draft-')) {
           try {
-            // Save with multiple key formats for better recovery
-            const messageData = JSON.stringify(updatedMessages.slice(-50));
+            const cleanMessages = updatedMessages.filter(m => !m.isLoading);
+            const messageData = JSON.stringify(cleanMessages);
+            // Save to multiple keys for maximum redundancy and recovery capability
             localStorage.setItem(`messages_${message.conversationId}`, messageData);
             localStorage.setItem(`messages-${message.conversationId}`, messageData);
             localStorage.setItem(`backup_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`exact_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`practice_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`email_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`feedback_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`complete_messages_${message.conversationId}`, messageData);
+            localStorage.setItem(`all_messages_${message.conversationId}`, messageData);
+            
+            // Also save with timestamp for recovery
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            localStorage.setItem(`messages_${message.conversationId}_${timestamp}`, messageData);
           } catch (error) {
             console.error('Error saving messages to localStorage:', error);
           }
@@ -230,12 +241,25 @@ export const useStore = create<Store>()(
         
         set({ messages });
         
-        // Save to localStorage for non-draft conversations
+        // Save to localStorage for backup and immediate access for non-draft conversations
         if (currentConv?.conversationId && !currentConv.conversationId.startsWith('draft-')) {
           try {
-            const messageData = JSON.stringify(messages.slice(-50));
+            const cleanMessages = messages.filter(m => !m.isLoading);
+            const messageData = JSON.stringify(cleanMessages);
+            // Save to multiple keys for maximum redundancy and recovery capability
             localStorage.setItem(`messages_${currentConv.conversationId}`, messageData);
             localStorage.setItem(`messages-${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`backup_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`exact_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`practice_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`email_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`feedback_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`complete_messages_${currentConv.conversationId}`, messageData);
+            localStorage.setItem(`all_messages_${currentConv.conversationId}`, messageData);
+            
+            // Also save with timestamp for recovery
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            localStorage.setItem(`messages_${currentConv.conversationId}_${timestamp}`, messageData);
           } catch (error) {
             console.error('Error saving messages to localStorage:', error);
           }

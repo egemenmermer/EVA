@@ -14,6 +14,7 @@ import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import PracticeModule from '../practice/PracticeModule';
 import './KnowledgePanelToggle.css';
 import { Message } from '@/types/conversation';
+import { backendApi } from '@/services/axiosConfig';
 
 // Format token to include Bearer prefix if needed
 const formatToken = (token: string | null): string | null => {
@@ -40,6 +41,11 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   const [isQuizRetake, setIsQuizRetake] = useState(false);
   // State for tactics modal
   const [showTacticsModal, setShowTacticsModal] = useState(false);
+  const [practiceData, setPracticeData] = useState<{
+    tacticCounts: Record<string, number>;
+    scenarioTitle: string;
+    issue: string;
+  } | null>(null);
   // State for survey modal
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [surveyType, setSurveyType] = useState<'consent' | 'pre' | 'post'>('pre');
@@ -127,8 +133,45 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       setShowQuizModal(true);
     };
 
-    const handleShowTacticsModal = (event: Event) => {
+    const handleShowTacticsModal = async (event: Event) => {
       console.log('Received show-tactics-modal event');
+      
+      // Try to get practice data from database first
+      try {
+        const response = await backendApi.get('/api/v1/practice/latest-session-data');
+        if (response.data) {
+          setPracticeData({
+            tacticCounts: response.data.tacticCounts || {},
+            scenarioTitle: response.data.scenarioTitle || 'Practice Scenario',
+            issue: response.data.issue || 'Ethical Decision-Making'
+          });
+          console.log('Loaded practice data from database for tactics modal:', response.data);
+        } else {
+          setPracticeData(null);
+        }
+      } catch (error) {
+        console.error('Error loading practice data from database:', error);
+        
+        // Fallback to localStorage
+        try {
+          const lastPracticeData = localStorage.getItem('last_practice_session_data');
+          if (lastPracticeData) {
+            const practiceSessionData = JSON.parse(lastPracticeData);
+            setPracticeData({
+              tacticCounts: practiceSessionData.tacticCounts || {},
+              scenarioTitle: practiceSessionData.scenarioTitle || 'Practice Scenario',
+              issue: practiceSessionData.issue || 'Ethical Decision-Making'
+            });
+            console.log('Loaded practice data from localStorage fallback:', practiceSessionData);
+          } else {
+            setPracticeData(null);
+          }
+        } catch (localStorageError) {
+          console.error('Error loading practice data from localStorage:', localStorageError);
+          setPracticeData(null);
+        }
+      }
+      
       setShowTacticsModal(true);
     };
 
@@ -465,6 +508,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       <SimplifiedTacticsModal
         isOpen={showTacticsModal}
         onClose={() => setShowTacticsModal(false)}
+        practiceData={practiceData}
       />
 
       {/* Survey Modal */}

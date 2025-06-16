@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { X, RefreshCw } from 'lucide-react';
+import { conversationApi } from '@/services/api';
 
 interface ScenarioSelectionModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
   onClose,
   onSelectScenario
 }) => {
-  const { darkMode, user, setUser, token } = useStore();
+  const { darkMode, user, setUser, token, currentConversation } = useStore();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check scenario completion status
@@ -89,6 +90,28 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
     }
   };
 
+  // Handle scenario selection with conversation preservation
+  const handleSelectScenario = async (scenario: 'privacy' | 'accessibility') => {
+    // Store current conversation ID if it exists and is not a draft
+    if (currentConversation && 
+        currentConversation.conversationId && 
+        !currentConversation.conversationId.startsWith('draft-')) {
+      console.log('🔒 Preserving conversation ID:', currentConversation.conversationId);
+      localStorage.setItem('originalConversationId', currentConversation.conversationId);
+      
+      // Don't delete the conversation - we'll continue using it
+      // This prevents errors with artifacts trying to be saved to a deleted conversation
+    }
+    
+    // Store the selected scenario in localStorage
+    localStorage.setItem('last_selected_scenario', scenario);
+    console.log('📝 Stored selected scenario in localStorage:', scenario);
+    
+    // Call the provided callback with the selected scenario
+    onSelectScenario(scenario);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -137,7 +160,7 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
               Your manager is pressuring you to collect unnecessary user location data for analytics purposes. You're concerned about user privacy, consent, and potential legal compliance issues. Navigate this situation while advocating for ethical data practices.
             </p>
             <button
-              onClick={() => !scenarioStatus.privacyCompleted && onSelectScenario('privacy')}
+              onClick={() => !scenarioStatus.privacyCompleted && handleSelectScenario('privacy')}
               disabled={scenarioStatus.privacyCompleted}
               className={`mt-2 w-full py-2 rounded-md transition-colors ${
                 scenarioStatus.privacyCompleted
@@ -173,7 +196,7 @@ export const ScenarioSelectionModal: React.FC<ScenarioSelectionModalProps> = ({
               Your team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. The new interface design looks modern but no longer works properly with assistive technologies. Practice advocating for inclusive design and accessibility standards.
             </p>
             <button
-              onClick={() => !scenarioStatus.accessibilityCompleted && onSelectScenario('accessibility')}
+              onClick={() => !scenarioStatus.accessibilityCompleted && handleSelectScenario('accessibility')}
               disabled={scenarioStatus.accessibilityCompleted}
               className={`mt-2 w-full py-2 rounded-md transition-colors ${
                 scenarioStatus.accessibilityCompleted

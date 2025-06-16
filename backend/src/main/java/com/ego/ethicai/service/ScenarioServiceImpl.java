@@ -72,8 +72,11 @@ public class ScenarioServiceImpl implements ScenarioService {
                 Map<String, Object> choiceMap = new HashMap<>();
                 choiceMap.put("index", i);
                 choiceMap.put("text", choice.get("choice").asText());
-                // Handle both field name variations (old scenarios use "category", new ones use "tactic")
+                // Handle both field name variations (old scenarios use "category", new ones use "tactic_type")
                 JsonNode categoryNode = choice.get("category");
+                if (categoryNode == null) {
+                    categoryNode = choice.get("tactic_type");
+                }
                 if (categoryNode == null) {
                     categoryNode = choice.get("tactic");
                 }
@@ -171,6 +174,9 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Handle both field name variations for category
         JsonNode categoryNode = selectedChoice.get("category");
+        if (categoryNode == null) {
+            categoryNode = selectedChoice.get("tactic_type");
+        }
         if (categoryNode == null) {
             categoryNode = selectedChoice.get("tactic");
         }
@@ -331,6 +337,9 @@ public class ScenarioServiceImpl implements ScenarioService {
                         choiceMap.put("text", choice.get("choice").asText());
                         // Handle both field name variations for category
                         JsonNode nextCategoryNode = choice.get("category");
+                        if (nextCategoryNode == null) {
+                            nextCategoryNode = choice.get("tactic_type");
+                        }
                         if (nextCategoryNode == null) {
                             nextCategoryNode = choice.get("tactic");
                         }

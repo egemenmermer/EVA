@@ -210,6 +210,62 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Error boundary-like error handling
   const [componentError, setComponentError] = useState<string | null>(null);
+  
+  // Function to determine if this is the first practice scenario
+  const isFirstPracticeScenario = (): boolean => {
+    // Check if user has completed any practice scenarios before
+    const hasCompletedAccessibility = user?.accessibilityScenariosCompleted || false;
+    const hasCompletedPrivacy = user?.privacyScenariosCompleted || false;
+    
+    // If neither scenario type is completed, this is the first practice
+    return !hasCompletedAccessibility && !hasCompletedPrivacy;
+  };
+  
+  // Function to get tactic type color
+  const getTacticTypeColor = (category: string): string => {
+    const lowerCategory = category.toLowerCase();
+    
+    // Map tactic categories to types and colors
+    if (lowerCategory.includes('direct') || lowerCategory.includes('confrontation')) {
+      return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'; // Direct Confrontation
+    } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric') || 
+               lowerCategory.includes('evidence') || lowerCategory.includes('legal') ||
+               lowerCategory.includes('compliance') || lowerCategory.includes('standards') ||
+               lowerCategory.includes('appeal')) {
+      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'; // Persuasive Rhetoric
+    } else if (lowerCategory.includes('process') || lowerCategory.includes('advocacy') ||
+               lowerCategory.includes('review') || lowerCategory.includes('systematic')) {
+      return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'; // Process-Based Advocacy
+    } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance') ||
+               lowerCategory.includes('subtle') || lowerCategory.includes('indirect')) {
+      return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'; // Soft Resistance
+    }
+    
+    // Default color for unknown categories
+    return 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400';
+  };
+  
+  // Function to get simplified tactic type name
+  const getTacticTypeName = (category: string): string => {
+    const lowerCategory = category.toLowerCase();
+    
+    if (lowerCategory.includes('direct') || lowerCategory.includes('confrontation')) {
+      return 'Direct';
+    } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric') || 
+               lowerCategory.includes('evidence') || lowerCategory.includes('legal') ||
+               lowerCategory.includes('compliance') || lowerCategory.includes('standards') ||
+               lowerCategory.includes('appeal')) {
+      return 'Persuasive';
+    } else if (lowerCategory.includes('process') || lowerCategory.includes('advocacy') ||
+               lowerCategory.includes('review') || lowerCategory.includes('systematic')) {
+      return 'Process';
+    } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance') ||
+               lowerCategory.includes('subtle') || lowerCategory.includes('indirect')) {
+      return 'Soft';
+    }
+    
+    return 'Mixed';
+  };
 
   // Catch any runtime errors
   useEffect(() => {
@@ -1004,6 +1060,35 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
         localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
         localStorage.setItem('force_conversation_id', originalConversationId);
         
+        // Set flag to auto-open tactics guide after returning to chat using database
+        try {
+          const practiceSessionData = {
+            tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
+            scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
+            issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
+          };
+          
+          // Store the auto-open flag and practice data in the database
+          await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
+            conversationId: originalConversationId,
+            practiceData: practiceSessionData
+          });
+          
+          console.log('Saved auto-open tactics flag and practice session data to database:', practiceSessionData);
+        } catch (error) {
+          console.error('Failed to save auto-open tactics flag to database:', error);
+          // Fallback to localStorage as backup
+          localStorage.setItem('auto_open_tactics_guide', 'true');
+          if (currentScenario.sessionSummary) {
+            const practiceSessionData = {
+              tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
+              scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
+              issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
+            };
+            localStorage.setItem('last_practice_session_data', JSON.stringify(practiceSessionData));
+          }
+        }
+        
         console.log('Practice feedback integration set up, navigating to chat...');
         
         // Navigate back to the main chat
@@ -1409,29 +1494,37 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                   }
                 </h3>
                 <div className="space-y-1.5 mb-1">
-                  {currentScenario.currentChoices.map((choice, index) => (
-                    <button
-                      key={index}
-                      className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
-                        processingChoice || isTyping
-                          ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
-                          : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
-                      }`}
-                      onClick={() => handleChoice(index)}
-                      disabled={processingChoice || isTyping}
-                    >
-                      <div className="flex justify-between items-start">
-                        <span className="flex-1">{choice.text}</span>
-                        <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
+                  {currentScenario.currentChoices.map((choice, index) => {
+                    const isFirstPractice = isFirstPracticeScenario();
+                    const tacticTypeColor = getTacticTypeColor(choice.category);
+                    const tacticTypeName = getTacticTypeName(choice.category);
+                    
+                    return (
+                      <button
+                        key={index}
+                        className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
                           processingChoice || isTyping
-                            ? 'bg-gray-200/30 dark:bg-gray-600/20 text-gray-400 dark:text-gray-500'
-                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        }`}>
-                          {choice.category}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                            ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                            : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
+                        }`}
+                        onClick={() => handleChoice(index)}
+                        disabled={processingChoice || isTyping}
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="flex-1">{choice.text}</span>
+                          {!isFirstPractice && (
+                            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
+                              processingChoice || isTyping
+                                ? 'bg-gray-200/30 dark:bg-gray-600/20 text-gray-400 dark:text-gray-500'
+                                : tacticTypeColor
+                            }`}>
+                              {tacticTypeName}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

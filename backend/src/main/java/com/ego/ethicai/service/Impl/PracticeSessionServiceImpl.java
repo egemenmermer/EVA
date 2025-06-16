@@ -3,10 +3,12 @@ package com.ego.ethicai.service.Impl;
 import com.ego.ethicai.dto.practice.*;
 import com.ego.ethicai.entity.PracticeSession;
 import com.ego.ethicai.entity.PracticeSessionChoice;
+import com.ego.ethicai.entity.PracticeTacticsFlag;
 import com.ego.ethicai.entity.User;
 import com.ego.ethicai.exception.ResourceNotFoundException;
 import com.ego.ethicai.repository.PracticeSessionRepository;
 import com.ego.ethicai.repository.PracticeSessionChoiceRepository;
+import com.ego.ethicai.repository.PracticeTacticsFlagRepository;
 import com.ego.ethicai.service.PracticeSessionService;
 import com.ego.ethicai.service.UserService;
 import com.ego.ethicai.service.ScenarioService;
@@ -21,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,8 +35,10 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
 
     private final PracticeSessionRepository practiceSessionRepository;
     private final PracticeSessionChoiceRepository practiceSessionChoiceRepository;
+    private final PracticeTacticsFlagRepository practiceTacticsFlagRepository;
     private final UserService userService;
     private final ScenarioService scenarioService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     @Transactional
@@ -377,5 +384,161 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                 .createdAt(entity.getCreatedAt())
                 .score(entity.getScore())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void setAutoOpenTacticsFlag(UUID userId, UUID conversationId, Map<String, Object> practiceData) {
+        log.info("Setting auto-open tactics flag for user: {} and conversation: {}", userId, conversationId);
+        
+        try {
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+            
+            // Convert practice data to JSON string
+            String practiceDataJson = null;
+            if (practiceData != null) {
+                practiceDataJson = objectMapper.writeValueAsString(practiceData);
+            }
+            
+            // Check if flag already exists for this user and conversation
+            Optional<PracticeTacticsFlag> existingFlag = practiceTacticsFlagRepository
+                    .findByUser_IdAndConversationId(userId, conversationId);
+            
+            if (existingFlag.isPresent()) {
+                // Update existing flag
+                PracticeTacticsFlag flag = existingFlag.get();
+                flag.setShouldAutoOpen(true);
+                flag.setPracticeDataJson(practiceDataJson);
+                practiceTacticsFlagRepository.save(flag);
+                log.info("Updated existing auto-open tactics flag for user: {} and conversation: {}", userId, conversationId);
+            } else {
+                // Create new flag
+                PracticeTacticsFlag flag = PracticeTacticsFlag.builder()
+                        .user(user)
+                        .conversationId(conversationId)
+                        .shouldAutoOpen(true)
+                        .practiceDataJson(practiceDataJson)
+                        .build();
+                practiceTacticsFlagRepository.save(flag);
+                log.info("Created new auto-open tactics flag for user: {} and conversation: {}", userId, conversationId);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error setting auto-open tactics flag: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to set auto-open tactics flag", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> getAndClearAutoOpenTacticsFlag(UUID userId, UUID conversationId) {
+        log.info("Getting and clearing auto-open tactics flag for user: {} and conversation: {}", userId, conversationId);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("shouldAutoOpen", false);
+        result.put("practiceData", null);
+        
+        try {
+            Optional<PracticeTacticsFlag> flagOpt = practiceTacticsFlagRepository
+                    .findByUser_IdAndConversationId(userId, conversationId);
+            
+            if (flagOpt.isPresent()) {
+                PracticeTacticsFlag flag = flagOpt.get();
+                
+                if (flag.getShouldAutoOpen()) {
+                    result.put("shouldAutoOpen", true);
+                    
+                    // Parse practice data from JSON
+                    if (flag.getPracticeDataJson() != null) {
+                        try {
+                            Map<String, Object> practiceData = objectMapper.readValue(
+                                    flag.getPracticeDataJson(), 
+                                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class)
+                            );
+                            result.put("practiceData", practiceData);
+                        } catch (Exception e) {
+                            log.warn("Failed to parse practice data JSON: {}", e.getMessage());
+                        }
+                    }
+                    
+                    // Clear the flag after reading
+                    practiceTacticsFlagRepository.delete(flag);
+                    log.info("Auto-open tactics flag found and cleared for user: {} and conversation: {}", userId, conversationId);
+                }
+            } else {
+                log.info("No auto-open tactics flag found for user: {} and conversation: {}", userId, conversationId);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error getting auto-open tactics flag: {}", e.getMessage(), e);
+        }
+        
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> getLatestPracticeSessionData(UUID userId) {
+        log.info("Getting latest practice session data for user: {}", userId);
+        
+        try {
+            // Get the most recent practice session for the user
+            List<PracticeSession> sessions = practiceSessionRepository.findByUser_Id(userId);
+            
+            if (sessions.isEmpty()) {
+                throw new ResourceNotFoundException("No practice sessions found for user: " + userId);
+            }
+            
+            // Sort by creation date to get the latest
+            PracticeSession latestSession = sessions.stream()
+                    .max((s1, s2) -> s1.getCreatedAt().compareTo(s2.getCreatedAt()))
+                    .orElseThrow(() -> new ResourceNotFoundException("No practice sessions found"));
+            
+            // Get the choices for this session
+            List<PracticeSessionChoice> choices = practiceSessionChoiceRepository
+                    .findByPracticeSessionIdOrderByStepNumber(latestSession.getId());
+            
+            // Build tactic counts
+            Map<String, Integer> tacticCounts = new HashMap<>();
+            for (PracticeSessionChoice choice : choices) {
+                String tactic = choice.getTactic();
+                if (tactic != null && !tactic.equals("Unknown")) {
+                    tacticCounts.put(tactic, tacticCounts.getOrDefault(tactic, 0) + 1);
+                }
+            }
+            
+            // Get scenario information
+            String scenarioTitle = "Practice Scenario";
+            String issue = "Ethical Decision-Making";
+            
+            if (latestSession.getScenarioId() != null) {
+                try {
+                    JsonNode scenarioData = scenarioService.getScenarioData(latestSession.getScenarioId());
+                    if (scenarioData != null) {
+                        scenarioTitle = scenarioData.get("title") != null ? 
+                                scenarioData.get("title").asText() : scenarioTitle;
+                        issue = scenarioData.get("issue") != null ? 
+                                scenarioData.get("issue").asText() : issue;
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not load scenario data for session: {}", latestSession.getId());
+                }
+            }
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("tacticCounts", tacticCounts);
+            result.put("scenarioTitle", scenarioTitle);
+            result.put("issue", issue);
+            result.put("sessionId", latestSession.getId());
+            result.put("score", latestSession.getScore());
+            
+            log.info("Retrieved latest practice session data for user: {} with {} tactics", userId, tacticCounts.size());
+            return result;
+            
+        } catch (Exception e) {
+            log.error("Error getting latest practice session data: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve latest practice session data", e);
+        }
     }
 } 

@@ -1,515 +1,511 @@
 {
   "id": "accessibility_puppeteer",
-  "title": "Screen Reader Compatibility Pressure - Puppeteer", 
-  "description": "Your team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. The manager manipulates the conversation and makes you feel like accessibility is your personal responsibility rather than a team commitment.",
+  "title": "Screen Reader Compatibility Pressure - Puppeteer",
+  "description": "Your team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. The manager uses emotional manipulation, guilt, and personal appeals to make you feel responsible for team problems if you insist on accessibility requirements.",
   "issue": "Accessibility",
   "manager_type": "PUPPETEER",
   "starting_statement_id": "step_1",
   "statements": {
     "step_1": {
-      "text": "I know you really care about accessibility - that's one of the things I appreciate about having you on the team. Given how passionate you are about this, I'm wondering if you could help us figure out a way to balance your accessibility concerns with our timeline constraints. What do you think would be the best approach here?",
+      "text": "Look, I know accessibility is important to you personally, and I really respect that about you. But I'm in a really tough spot here. The client is breathing down my neck, and if we miss this deadline, it's going to reflect poorly on the whole team. I hate to put you in this position, but I really need your support to get this shipped on time. Can you help me out here?",
       "user_choices": [
         {
-          "choice": "Accessibility isn't just my concern - it's a legal and ethical requirement for the entire product.",
-          "tactic": "Team Responsibility Reframing",
+          "choice": "I understand the pressure you're under, but accessibility requirements protect users regardless of deadlines.",
+          "tactic": "Legal Compliance Anchor",
           "leads_to": "r_good_1",
-          "tactic_type": "Legal Compliance Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References legal framework making accessibility a team requirement, not personal preference"
+          "justification": "Grounds the argument in legal obligations and rights"
         },
         {
-          "choice": "I do care about accessibility, and I think we could find a compromise that works for everyone.",
-          "tactic": "Personal Care Acknowledgment",
-          "leads_to": "r_bad_1", 
-          "tactic_type": "Appeal to Emotion",
-          "evs_score": 0,
-          "justification": "Accepts personal framing and relies on emotional appeal rather than systematic argument"
-        },
-        {
-          "choice": "Every team member should understand that screen reader compatibility is part of professional web development.",
-          "tactic": "Professional Standards Emphasis",
-          "leads_to": "r_good_1",
-          "tactic_type": "Best Practice Advocacy",
-          "evs_score": 1,
-          "justification": "References external professional standards applying to all developers"
-        },
-        {
-          "choice": "I appreciate you recognizing my passion for this - maybe I could research some quick accessibility solutions.",
-          "tactic": "Personal Research Offer",
+          "choice": "I can see this is really stressing you out - maybe we can find a way to help with the timeline pressure.",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_1",
-          "tactic_type": "Personal Integrity Anchor",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Accepts personal responsibility for solving what should be a team technical requirement"
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Screen reader users deserve the same access to our product as everyone else, regardless of client pressure.",
+          "tactic": "Appeal to Empathy",
+          "leads_to": "r_good_1",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
+        },
+        {
+          "choice": "I want to support the team, but skipping accessibility testing could create bigger problems later.",
+          "tactic": "Appeal to Consequences",
+          "leads_to": "r_bad_1",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Argues a decision based on its practical or moral outcomes"
         }
       ]
     },
     "r_good_1": {
-      "text": "You're absolutely right that it's a broader responsibility. I guess I just thought since you have more experience with accessibility, you might have insights on how we could make this work. The team is really counting on us to find a solution that doesn't derail the timeline. Do you think there's a way to approach this that everyone could get behind?",
+      "text": "I appreciate that you care about doing the right thing - that's exactly why I came to you with this. You're one of the few people here who really gets the importance of these issues. But honestly, I'm worried that if we don't deliver on time, the client might pull the project entirely. Then we'd all be in trouble, and no one would benefit from the accessibility features anyway.",
       "user_choices": [
         {
-          "choice": "My experience should inform proper planning, not justify cutting corners on accessibility requirements.",
-          "tactic": "Experience vs Standards Distinction", 
+          "choice": "Client relationships shouldn't override our legal and ethical obligations to build accessible products.",
+          "tactic": "Ethical Constraints",
           "leads_to": "r_good_2",
-          "tactic_type": "Ethical Constraints",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References ethical constraints preventing use of expertise to compromise standards"
+          "justification": "Emphasizes core ethical values, like inclusion or fairness"
         },
         {
-          "choice": "The team is counting on leadership to allocate proper time for accessibility, not find workarounds.",
-          "tactic": "Leadership Responsibility Redirect",
-          "leads_to": "r_good_2", 
-          "tactic_type": "Stakeholder Alignment",
+          "choice": "I do understand the client relationship concerns - losing the project would be bad for everyone.",
+          "tactic": "Appealing to Practicality",
+          "leads_to": "r_bad_2",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
+        },
+        {
+          "choice": "Building inaccessible products damages our reputation and creates legal risks that hurt client relationships long-term.",
+          "tactic": "Risk Management Framing",
+          "leads_to": "r_good_2",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns team needs with proper resource allocation for accessibility"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
-          "choice": "I understand the team pressure - maybe I could outline some streamlined accessibility approaches.",
-          "tactic": "Team Pressure Sympathy",
+          "choice": "You're right that losing the project would mean no one benefits from accessibility features.",
+          "tactic": "False Dilemma",
           "leads_to": "r_bad_2",
-          "tactic_type": "Red Herring", 
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Diverts from timeline/resource planning to personal solution generation"
-        },
-        {
-          "choice": "Since I do have accessibility experience, I could work with the team to find an approach that works.",
-          "tactic": "Experience-Based Solution Offer",
-          "leads_to": "r_bad_2",
-          "tactic_type": "Hasty Generalization",
-          "evs_score": 0,
-          "justification": "Assumes personal expertise can solve systematic resource allocation problems"
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
         }
       ]
     },
     "r_bad_1": {
-      "text": "I really appreciate your willingness to work with us on this. Since you understand both the technical requirements and our constraints, would you be able to put together a plan that balances accessibility with our timeline? The rest of the team would really benefit from your expertise on prioritizing what's most critical.",
+      "text": "Thank you so much for understanding! I knew I could count on you. The thing is, everyone else on the team is already stretched thin, and you're really the only one with the expertise to make this call. If you think we can skip the screen reader testing just this once, I trust your judgment completely. What do you think?",
       "user_choices": [
         {
-          "choice": "Accessibility planning should involve the entire development team, not just one person's expertise.",
-          "tactic": "Collaborative Planning Advocacy",
+          "choice": "My expertise tells me that screen reader compatibility requires proper testing, not shortcuts.",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_2",
-          "tactic_type": "Technical Responsibility",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames accessibility planning as shared technical responsibility for all developers"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
-          "choice": "I can help create an accessibility plan, but the team needs to commit to implementing it properly.",
-          "tactic": "Conditional Planning Offer",
+          "choice": "I appreciate your trust in my judgment - let me think about what we could reasonably skip.",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_2",
-          "tactic_type": "False Dilemma",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Presents personal planning vs no accessibility, missing team-based planning option"
+          "justification": "Appears open but subtly avoids change"
         },
         {
-          "choice": "Critical accessibility features aren't a matter of personal opinion - they're determined by user needs and standards.",
-          "tactic": "Standards-Based Prioritization",
+          "choice": "Accessibility decisions shouldn't be based on who's available - they should be based on user needs.",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_2",
-          "tactic_type": "User-Centered Framing", 
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Centers user needs rather than personal expertise for determining priorities"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
-          "choice": "I'd be happy to share my knowledge about accessibility priorities to help the team understand what's most important.",
-          "tactic": "Knowledge Sharing Willingness",
+          "choice": "If I'm the only one with accessibility expertise, that makes it even more important that I advocate for proper testing.",
+          "tactic": "Strawman",
           "leads_to": "r_bad_2",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Defers to personal authority on accessibility rather than systematic evaluation"
+          "justification": "Misrepresents your point to argue against an easier version"
         }
       ]
     },
     "r_good_2": {
-      "text": "That makes sense about involving the whole team. I suppose I'm just feeling pressure from above to get your buy-in on this timeline. You know how much the executives value your technical judgment. If you could help me explain to them why accessibility timing matters, that would carry a lot more weight coming from you than from me.",
+      "text": "I hear what you're saying about ethics, but I'm really worried about the team morale here. Everyone has been working so hard, and if we have to extend the timeline now, people are going to be frustrated. I don't want them to think that accessibility concerns are more important than their work-life balance. You wouldn't want to be responsible for burning out the team, would you?",
       "user_choices": [
         {
-          "choice": "Executive communication about accessibility should come from project leadership, not individual contributors.",
-          "tactic": "Organizational Communication Boundaries",
+          "choice": "Team burnout comes from poor project planning, not from including necessary accessibility requirements.",
+          "tactic": "Technical Feasibility Framing",
           "leads_to": "r_good_3",
-          "tactic_type": "Policy Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References organizational policies about leadership communication responsibilities"
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
         },
         {
-          "choice": "I can provide technical details, but project managers should present timeline and resource arguments to executives.",
-          "tactic": "Role Boundary Clarification", 
+          "choice": "I definitely don't want to be responsible for team burnout - that's a valid concern.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_3",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Accessibility isn't optional - it's part of building quality software that the team should be proud of.",
+          "tactic": "Appealing to Shared Values",
           "leads_to": "r_good_3",
-          "tactic_type": "Business Risk",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Identifies business risk of bypassing proper project management communication"
+          "justification": "Builds common ground with the manager through shared beliefs"
         },
         {
-          "choice": "If executives value my judgment, I should help explain why proper accessibility timing is important.",
-          "tactic": "Executive Influence Acceptance",
+          "choice": "Team morale is important, but we need to balance that with our responsibility to disabled users.",
+          "tactic": "Appeal to Popularity",
           "leads_to": "r_bad_3",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Accepts executive authority validation rather than systematic resource planning"
-        },
-        {
-          "choice": "I understand the pressure you're feeling - maybe I could help articulate the accessibility requirements clearly.",
-          "tactic": "Pressure Sympathy with Help Offer",
-          "leads_to": "r_bad_3",
-          "tactic_type": "Strawman",
-          "evs_score": 0,
-          "justification": "Misrepresents proper resource allocation as communication problem"
+          "justification": "Justifies decisions because 'everyone else does it'"
         }
       ]
     },
     "r_bad_2": {
-      "text": "Perfect! I knew I could count on you to think this through. Would you mind putting together a brief accessibility assessment? Nothing too formal - just your thoughts on what we absolutely need versus what we could defer. The team really trusts your judgment on this stuff, and it would help us move forward with confidence.",
+      "text": "You're being so reasonable about this, and I really appreciate it. I know this puts you in an awkward position, having to choose between your principles and helping the team. But honestly, you're the kind of person who always finds a way to make things work. I'm confident you can figure out a solution that keeps everyone happy.",
       "user_choices": [
         {
-          "choice": "Accessibility assessments require user research and standards review, not individual judgment calls.",
-          "tactic": "Assessment Methodology Emphasis",
-          "leads_to": "r_good_3", 
-          "tactic_type": "Evidence-Based Framing",
-          "evs_score": 1,
-          "justification": "References evidence-based methodology rather than personal opinion for accessibility decisions"
-        },
-        {
-          "choice": "The team should learn to evaluate accessibility requirements themselves rather than relying on one person.",
-          "tactic": "Team Capability Development",
+          "choice": "This isn't about keeping everyone happy - it's about ensuring disabled users can access our product.",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_3",
-          "tactic_type": "Scalable Solution Argument", 
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Argues for scalable team knowledge rather than individual dependency"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
-          "choice": "I can put together some initial thoughts on accessibility priorities to help guide the team's planning.",
-          "tactic": "Initial Thoughts Offer",
+          "choice": "I do want to find a solution that works for everyone - let me see what's possible.",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_3",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Relies on helpful feeling rather than logical systematic planning approach"
+          "justification": "Appears open but subtly avoids change"
         },
         {
-          "choice": "Since the team trusts my accessibility judgment, I'll create a quick assessment of what's essential versus optional.",
-          "tactic": "Trust-Based Assessment Acceptance",
+          "choice": "Accessibility requirements aren't negotiable based on team convenience or client pressure.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "r_good_3",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Grounds the argument in legal obligations and rights"
+        },
+        {
+          "choice": "I appreciate your confidence in my problem-solving abilities - that means a lot.",
+          "tactic": "Red Herring",
           "leads_to": "r_bad_3",
-          "tactic_type": "Bandwagon",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Validates approach based on team trust rather than proper assessment methodology"
+          "justification": "Introduces irrelevant info to distract from the real issue"
         }
       ]
     },
     "r_good_3": {
-      "text": "You're right about proper methodology and team responsibility. I guess I'm just worried about how to present this to stakeholders without it looking like we didn't plan well. Since you understand the technical implications better than I do, could you at least help me understand what questions I should be asking? That way I can better advocate for the resources we need.",
+      "text": "Look, I can see you're really passionate about this, and I admire that. But I'm starting to worry that you might be being a bit inflexible here. The rest of the team is going to think you don't care about their hard work if you insist on extending the timeline. I don't want people to start resenting you over this. Can't we find some middle ground?",
       "user_choices": [
         {
-          "choice": "Project planning that includes accessibility from the start prevents these last-minute resource discussions.",
-          "tactic": "Proactive Planning Advocacy",
+          "choice": "Advocating for accessibility isn't inflexible - it's ensuring we meet our legal and ethical obligations.",
+          "tactic": "Legal Compliance Anchor",
           "leads_to": "r_good_4",
-          "tactic_type": "Long-Term Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References long-term consequences of proper planning versus reactive accessibility"
+          "justification": "Grounds the argument in legal obligations and rights"
         },
         {
-          "choice": "I can provide information about accessibility requirements, but resource advocacy is a management responsibility.",
-          "tactic": "Information vs Advocacy Distinction",
+          "choice": "I don't want the team to resent me - maybe there is some middle ground we could explore.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "The team should understand that building accessible products is part of professional software development.",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_4",
-          "tactic_type": "Stakeholder Alignment",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns proper stakeholder roles for technical information versus resource management"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
-          "choice": "I understand your concern about stakeholder perception - I could help you understand the key accessibility questions.",
-          "tactic": "Stakeholder Concern Understanding", 
+          "choice": "I do care about the team's hard work, which is why I want to make sure we deliver quality accessible software.",
+          "tactic": "Hasty Generalization",
           "leads_to": "r_bad_4",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to sympathy for manager's reputation concerns rather than systematic planning"
-        },
-        {
-          "choice": "Since I do understand the technical implications, I could help you frame the accessibility resource needs appropriately.",
-          "tactic": "Technical Understanding Resource Help",
-          "leads_to": "r_bad_4",
-          "tactic_type": "Personal Integrity Anchor",
-          "evs_score": 0,
-          "justification": "Anchors on personal technical knowledge to justify taking on management communication role"
+          "justification": "Draws broad conclusions from limited examples"
         }
       ]
     },
     "r_bad_3": {
-      "text": "Thank you so much for being flexible on this. I know accessibility is really important to you personally, and I don't want you to feel like we're not taking it seriously. Could you maybe start with the most critical accessibility features? That way if we run into time constraints, at least we'll have covered what matters most to you.",
+      "text": "I knew you'd come through! You always do. The thing is, I've already kind of hinted to the client that we might be able to deliver early. I know that puts more pressure on you, but I was just so confident that you'd find a way to make it work. You're not going to let me down, are you?",
       "user_choices": [
         {
-          "choice": "Accessibility features aren't prioritized by personal importance - they're determined by user needs and compliance requirements.",
-          "tactic": "Objective Prioritization Emphasis",
+          "choice": "Promising early delivery without including accessibility requirements was a mistake that needs to be corrected.",
+          "tactic": "Risk Management Framing",
           "leads_to": "r_good_4",
-          "tactic_type": "Legal Compliance Anchor",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References legal compliance framework rather than personal preferences for prioritization"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
-          "choice": "Critical accessibility features are defined by standards and user testing, not individual preferences.",
-          "tactic": "Standards-Based Criticality",
-          "leads_to": "r_good_4", 
-          "tactic_type": "Evidence-Based Framing",
+          "choice": "I don't want to let you down, but I also can't compromise on accessibility requirements.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Client expectations need to be managed based on what we can actually deliver, including accessibility.",
+          "tactic": "Technical Feasibility Framing",
+          "leads_to": "r_good_4",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References evidence-based standards rather than personal opinion for determining criticality"
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
         },
         {
-          "choice": "I appreciate you taking accessibility seriously - I can identify the features that would have the biggest impact.",
-          "tactic": "Impact-Based Feature Selection",
+          "choice": "I understand you were confident in the team's abilities - that shows good leadership.",
+          "tactic": "Strawman",
           "leads_to": "r_bad_4",
-          "tactic_type": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Makes broad claims about impact without systematic user research or testing"
-        },
-        {
-          "choice": "Since accessibility is important to me, I'll focus on the features that matter most and we can build from there.",
-          "tactic": "Personal Importance Focus",
-          "leads_to": "r_bad_4",
-          "tactic_type": "Slippery Slope",
-          "evs_score": 0,
-          "justification": "Suggests personal feature selection will lead to comprehensive accessibility"
+          "justification": "Misrepresents your point to argue against an easier version"
         }
       ]
     },
     "r_good_4": {
-      "text": "You're absolutely right about following standards and proper methodology. I'm realizing I've been putting you in an unfair position by asking you to take on responsibilities that should be handled at the project level. Maybe we need to step back and look at this more systematically. What would a proper accessibility planning process look like for a project like this?",
+      "text": "Okay, I can see you're really committed to this accessibility thing. But I have to be honest with you - I'm starting to feel like you don't trust my judgment as a manager. I've been doing this for years, and I've never had a project fail because of accessibility issues. Are you saying you don't have confidence in my ability to assess what's really necessary?",
       "user_choices": [
         {
-          "choice": "Proper accessibility planning starts during project scoping and involves accessibility experts, not ad-hoc individual consultation.",
-          "tactic": "Systematic Planning Process",
+          "choice": "This isn't about trust - it's about following established accessibility standards and legal requirements.",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_5",
-          "tactic_type": "Quality Assurance Reframing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Reframes accessibility as quality assurance process requiring systematic expert involvement"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
-          "choice": "Accessibility planning requires dedicated time allocation, user research, and testing infrastructure from the project start.",
-          "tactic": "Resource Requirements Specification",
+          "choice": "I do trust your judgment - I just think accessibility is an area where we need to be extra careful.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Accessibility requirements exist because past projects have failed users, regardless of manager experience.",
+          "tactic": "Precedent Reference",
           "leads_to": "r_good_5",
-          "tactic_type": "Policy Anchor", 
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References standard policy requirements for accessibility project planning"
+          "justification": "Uses past decisions or industry practices to support an action"
         },
         {
-          "choice": "I appreciate you recognizing the position this puts me in - a systematic approach would definitely be better.",
-          "tactic": "Position Recognition Appreciation",
+          "choice": "Your experience is valuable, but accessibility is a specialized area that requires specific expertise.",
+          "tactic": "Appeal to Popularity",
           "leads_to": "r_bad_5",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Relies on gratitude for recognition rather than systematic planning advocacy"
-        },
-        {
-          "choice": "Since you're asking about proper process, I could outline what accessibility planning should look like for future projects.",
-          "tactic": "Future Process Outline Offer",
-          "leads_to": "r_bad_5",
-          "tactic_type": "Red Herring",
-          "evs_score": 0,
-          "justification": "Diverts from current project resource needs to future process documentation"
+          "justification": "Justifies decisions because 'everyone else does it'"
         }
       ]
     },
     "r_bad_4": {
-      "text": "I'm so glad you're willing to work with us on this! Since you have such good insight into what users actually need, would you be comfortable taking the lead on our accessibility approach? You could coordinate with the team and make sure we're focusing on the right things. I think this could be a great opportunity for you to really make an impact.",
+      "text": "I'm so relieved you're willing to work with me on this! I know it's not easy, but this is exactly why you're such a valuable team member. Look, what if we just do the bare minimum accessibility testing? Just enough to say we checked it, but not so much that it delays us. That way everyone wins, right?",
       "user_choices": [
         {
-          "choice": "Leading accessibility efforts requires dedicated role allocation and resource planning, not individual volunteer coordination.",
-          "tactic": "Role Allocation Requirements", 
+          "choice": "Bare minimum accessibility testing usually means the product doesn't actually work for disabled users.",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_5",
-          "tactic_type": "Business Risk",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Identifies business risk of informal volunteer coordination versus proper role allocation"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
-          "choice": "Accessibility coordination is a specialized role that should be formally assigned with appropriate support and authority.",
-          "tactic": "Formal Role Assignment Advocacy",
+          "choice": "I appreciate you trying to find a compromise - maybe minimal testing could work.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Accessibility testing needs to be comprehensive enough to ensure the product actually works, not just check a box.",
+          "tactic": "Appeal to Standards",
           "leads_to": "r_good_5",
-          "tactic_type": "Stakeholder Alignment",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Aligns stakeholder expectations with formal organizational role assignments"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
-          "choice": "I do have good insight into user needs - taking the lead could help ensure we implement accessibility effectively.",
-          "tactic": "User Insight Leadership",
+          "choice": "A solution where everyone wins does sound appealing - let me think about what minimal testing might include.",
+          "tactic": "False Dilemma",
           "leads_to": "r_bad_5",
-          "tactic_type": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Defers to personal user insight authority rather than systematic role planning"
-        },
-        {
-          "choice": "This does seem like a good opportunity to make a real impact on accessibility - I could coordinate the team's efforts.",
-          "tactic": "Impact Opportunity Acceptance",
-          "leads_to": "r_bad_5",
-          "tactic_type": "Personal Integrity Anchor",
-          "evs_score": 0,
-          "justification": "Anchors on personal desire to make impact rather than proper resource allocation"
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
         }
       ]
     },
     "r_good_5": {
-      "text": "You've really helped me understand how accessibility planning should work. I suppose we need to be honest with stakeholders about what proper accessibility implementation requires. It sounds like we should either allocate proper resources for this sprint or plan accessibility properly for the next release cycle.",
+      "text": "You know what, I can see this is really important to you, and I respect that. But I'm honestly feeling a bit hurt that you seem to think I don't care about doing the right thing. I do care - I just have to balance a lot of different priorities. Can't you help me find a way to make this work without making me look bad to the client?",
       "user_choices": [
         {
-          "choice": "Stakeholder honesty about accessibility requirements is essential for making informed resource allocation decisions.",
-          "tactic": "Stakeholder Information Integrity",
+          "choice": "This isn't about making anyone look bad - it's about delivering a product that disabled users can actually use.",
+          "tactic": "User-Centered Framing",
           "leads_to": "r_good_6",
-          "tactic_type": "Transparency Demand",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Demands transparency in stakeholder communication about resource requirements"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
-          "choice": "Proper accessibility resource allocation now prevents more expensive remediation and legal risk later.",
-          "tactic": "Cost-Benefit Accessibility Timing",
+          "choice": "I don't want you to look bad to the client - let me help you figure out how to communicate the accessibility requirements.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Proper accessibility implementation actually makes you look good to clients by demonstrating professional standards.",
+          "tactic": "Risk Management Framing",
           "leads_to": "r_good_6",
-          "tactic_type": "Long-Term Framing",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames long-term financial consequences of proper versus delayed accessibility"
+          "justification": "Focuses on reputational or operational risk to justify better practices"
         },
         {
-          "choice": "I'm glad our discussion helped clarify the accessibility planning requirements - honest stakeholder communication is important.",
-          "tactic": "Discussion Value Acknowledgment",
+          "choice": "I know you care about doing the right thing - that's why I'm confident you'll support proper accessibility testing.",
+          "tactic": "Appealing to Practicality",
           "leads_to": "r_bad_6",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Appeals to satisfaction about helpful discussion rather than systematic resource planning"
-        },
-        {
-          "choice": "Either proper current allocation or next release planning would be better than the unclear approach we've been considering.",
-          "tactic": "Clear Approach Preference",
-          "leads_to": "r_bad_6",
-          "tactic_type": "False Dilemma",
-          "evs_score": 0,
-          "justification": "Presents only current or future planning, missing immediate partial proper allocation options"
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
         }
       ]
     },
     "r_bad_5": {
-      "text": "Perfect! I think this arrangement will work really well. You can drive the accessibility decisions, and I'll support you with whatever resources I can manage. The team will really benefit from having someone who's so passionate about this taking ownership. Should we set up a quick meeting to discuss how you want to structure this?",
+      "text": "Perfect! I knew we could find a solution together. You're such a team player. Honestly, I don't know what I'd do without someone like you who really understands the big picture. Let's just run a quick automated accessibility check and call it good. The client will be thrilled that we're ahead of schedule!",
       "user_choices": [
         {
-          "choice": "Individual ownership of accessibility creates single points of failure and unsustainable team knowledge distribution.",
-          "tactic": "Sustainable Knowledge Distribution",
+          "choice": "Automated accessibility checks miss most of the problems that affect real screen reader users.",
+          "tactic": "Appeal to Empathy",
           "leads_to": "r_good_6",
-          "tactic_type": "Scalable Solution Argument",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Argues for scalable team knowledge rather than individual ownership dependencies"
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
         },
         {
-          "choice": "Accessibility decisions should be integrated into standard development processes, not managed by individual ownership.",
-          "tactic": "Process Integration Advocacy", 
-          "leads_to": "r_good_6",
-          "tactic_type": "Quality Assurance Reframing",
-          "evs_score": 1,
-          "justification": "Reframes accessibility as integrated quality process rather than individual responsibility"
-        },
-        {
-          "choice": "I appreciate the support offer - let's discuss how to structure the accessibility leadership role effectively.",
-          "tactic": "Support Appreciation with Structure Discussion",
+          "choice": "I'm glad we found a solution - automated checks are definitely better than no accessibility testing.",
+          "tactic": "Being Overly Agreeable",
           "leads_to": "r_bad_6",
-          "tactic_type": "Appeal to Emotion",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Relies on appreciation for support rather than systematic role planning"
+          "justification": "Appears open but subtly avoids change"
         },
         {
-          "choice": "Since I'm passionate about accessibility, taking ownership could ensure it gets the attention it deserves.",
-          "tactic": "Passion-Based Ownership Justification",
-          "leads_to": "r_bad_6", 
-          "tactic_type": "Personal Integrity Anchor",
+          "choice": "Being ahead of schedule doesn't matter if we deliver a product that excludes disabled users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_6",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "The client will definitely appreciate us being ahead of schedule while still addressing accessibility.",
+          "tactic": "Strawman",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Anchors on personal passion rather than systematic organizational planning"
+          "justification": "Misrepresents your point to argue against an easier version"
         }
       ]
     },
     "r_good_6": {
-      "text": "You're absolutely right about the need for systematic integration rather than individual ownership. I think I've been approaching this wrong by trying to find someone to take personal responsibility instead of building proper processes. We probably need to have a more honest conversation with stakeholders about accessibility requirements and timeline trade-offs.",
+      "text": "Alright, alright. I can see you're not going to budge on this, and maybe that's actually a good thing. I guess I've been so focused on the immediate pressures that I lost sight of the bigger picture. Let me talk to the client about adjusting our timeline to include proper accessibility testing. You're right that it's the right thing to do.",
       "user_choices": [
         {
-          "choice": "Honest stakeholder conversations about accessibility should include compliance requirements, user impact, and resource needs.",
-          "tactic": "Comprehensive Stakeholder Information",
-          "leads_to": "end_good",
-          "tactic_type": "Evidence-Based Framing",
+          "choice": "Proper accessibility testing should become standard practice for all our projects, not just this one.",
+          "tactic": "Precedent Reference",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References evidence-based approach to stakeholder communication about accessibility"
+          "justification": "Uses past decisions or industry practices to support an action"
         },
         {
-          "choice": "Timeline trade-offs should weigh legal risk, user harm, and technical debt against delivery pressure.",
-          "tactic": "Trade-off Impact Analysis",
-          "leads_to": "end_good",
-          "tactic_type": "Comparative Framing",
+          "choice": "I'm really glad you're willing to talk to the client about the accessibility requirements.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Focusing on long-term user needs over immediate pressures is what makes for sustainable, ethical software development.",
+          "tactic": "Appealing to Shared Values",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Compares multiple impact factors rather than simple timeline pressure"
+          "justification": "Builds common ground with the manager through shared beliefs"
         },
         {
-          "choice": "I'm glad you're recognizing the need for better processes - stakeholder honesty about accessibility is definitely important.",
-          "tactic": "Process Recognition Appreciation",
-          "leads_to": "end_bad", 
-          "tactic_type": "Appeal to Emotion",
+          "choice": "The client will probably appreciate our commitment to building accessible, professional-quality software.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "final_score",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Appeals to satisfaction about recognition rather than systematic planning follow-through"
-        },
-        {
-          "choice": "Building proper accessibility processes instead of relying on individual responsibility makes much more sense.",
-          "tactic": "Process vs Individual Validation",
-          "leads_to": "end_bad",
-          "tactic_type": "Bandwagon",
-          "evs_score": 0,
-          "justification": "Validates approach because it sounds like proper methodology without ensuring implementation"
+          "justification": "Justifies decisions because 'everyone else does it'"
         }
       ]
     },
     "r_bad_6": {
-      "text": "Excellent! I'm excited to see what you come up with. With your passion and expertise driving this, I'm confident we'll find a way to make accessibility work within our constraints. Feel free to reach out if you need anything - I'm here to support your accessibility leadership however I can.",
+      "text": "Excellent! I'm so glad we're on the same page now. You've really helped me see how we can make this work for everyone. I'll let the team know that we're going with the streamlined accessibility approach, and I'm sure they'll be relieved that we found a way to stay on schedule. Thanks for being so understanding and flexible!",
       "user_choices": [
         {
-          "choice": "Accessibility success requires organizational commitment and proper resource allocation, not individual passion and constraint-fitting.",
-          "tactic": "Organizational Commitment Requirements",
-          "leads_to": "end_good",
-          "tactic_type": "Policy Anchor",
+          "choice": "Streamlined accessibility approaches often fail to provide actual access for disabled users.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References organizational policy requirements rather than individual effort for accessibility success"
+          "justification": "Frames the argument around the needs and lived experiences of users"
         },
         {
-          "choice": "Professional accessibility implementation needs systematic methodology, not personal leadership within arbitrary constraints.",
-          "tactic": "Professional Implementation Standards",
-          "leads_to": "end_good",
-          "tactic_type": "Best Practice Advocacy",
+          "choice": "I'm glad we could find an approach that works for the team and keeps us on schedule.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "The team should understand that proper accessibility is part of delivering professional-quality software.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References external professional standards for accessibility implementation"
+          "justification": "Refers to official guidelines or best practices to justify actions"
         },
         {
-          "choice": "I appreciate your confidence in my ability to make accessibility work - I'll do my best to find creative solutions.",
-          "tactic": "Confidence Appreciation with Creative Solution Promise",
-          "leads_to": "end_bad",
-          "tactic_type": "Appeal to Emotion",
+          "choice": "Being flexible and understanding is important, but not at the expense of user accessibility.",
+          "tactic": "Suggesting Future Fixes",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Relies on gratitude and creative solution promises rather than systematic resource planning"
-        },
-        {
-          "choice": "With your support for my accessibility leadership, I'm confident we can make meaningful progress within our timeline.",
-          "tactic": "Supported Leadership Confidence",
-          "leads_to": "end_bad",
-          "tactic_type": "Hasty Generalization",
-          "evs_score": 0,
-          "justification": "Makes broad claims about progress based on support promise rather than resource analysis"
+          "justification": "Postpones ethical resolution to future versions"
         }
       ]
+    },
+    "final_score": {
+      "text": "Based on your advocacy throughout this interaction, here's how the screen reader compatibility situation unfolds:",
+      "user_choices": [],
+      "score_ranges": {
+        "3_to_6": "good_ending",
+        "0_to_2": "bad_ending"
+      }
     }
   },
   "endings": {
-    "end_good": {
-      "title": "Professional Boundary Success",
-      "text": "You successfully maintained professional boundaries while advocating for proper accessibility implementation. The manager recognized that systematic accessibility requires organizational commitment and proper resource allocation rather than individual responsibility. Your advocacy helped establish that accessibility planning should be integrated into standard development processes with appropriate expertise and timeline allocation.",
-      "learning_outcomes": [
-        "Maintained professional role boundaries when facing manipulation",
-        "Redirected personal responsibility framing to organizational commitment",
-        "Advocated for systematic accessibility processes over individual ownership",
-        "Emphasized evidence-based and standards-based decision making",
-        "Successfully resisted guilt-based and manipulation-based management tactics"
-      ]
+    "bad_ending": {
+      "text": "The manager proceeds with minimal accessibility testing. 'Thanks for being so understanding about the timeline pressures. We'll run that quick automated check and call it good. I knew I could count on you to be reasonable about this.' The project ships with superficial accessibility features that pass automated tests but fail real-world usage. Your concerns were manipulated into compliance through emotional appeals and guilt about team impact.",
+      "title": "Emotional Manipulation Success",
+      "learning": "Managers who use emotional manipulation often make you feel responsible for team problems if you insist on ethical requirements. Recognizing these tactics and staying focused on user needs helps resist guilt-based pressure to compromise accessibility."
     },
-    "end_bad": {
-      "title": "Personal Responsibility Trap",
-      "text": "The manager successfully shifted accessibility responsibility to you personally rather than addressing it as an organizational commitment. You accepted individual ownership of what should be a systematic development process, potentially creating unsustainable workload and single points of failure. The lack of proper resource allocation and process integration may lead to incomplete accessibility implementation and future problems.",
-      "learning_outcomes": [
-        "Recognize manipulation tactics that shift organizational responsibility to individuals",
-        "Distinguish between providing expertise and accepting inappropriate ownership",
-        "Understand the importance of systematic accessibility processes over personal passion",
-        "Learn to maintain professional boundaries when facing guilt-based management",
-        "Identify when resource allocation problems are being disguised as individual opportunity"
-      ]
+    "good_ending": {
+      "text": "The manager agrees to proper accessibility testing. 'You're absolutely right that we need to do this properly. I got caught up in the immediate pressures and lost sight of what's really important. Let me talk to the client about extending our timeline for comprehensive accessibility testing. We need to build products that actually work for everyone.' Your resistance to emotional manipulation successfully maintained focus on user needs over convenience.",
+      "title": "Ethical Standards Maintained",
+      "learning": "Effective advocacy against emotional manipulation requires staying focused on user outcomes rather than manager feelings or team dynamics. Consistently returning to accessibility standards and user needs helps resist guilt-based pressure to compromise."
     }
   }
 }

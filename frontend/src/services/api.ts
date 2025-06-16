@@ -364,7 +364,9 @@ export const conversationApi = {
       };
 
       // Make the request to our agent
+      console.log('Making request to agent API with payload:', payload);
       const response = await agentApi.post('/api/v1/conversation/message', payload);
+      console.log('Agent API response:', response.status, response.data);
       debugResponse('POST', '/api/v1/conversation/message', response.status, response.data);
       
       return response.data;
@@ -855,6 +857,46 @@ export const savePracticeSession = async (
     return response.data;
   } catch (error) {
     console.error('Error saving practice session:', error);
+    throw error;
+  }
+};
+
+// New API functions for database-based practice session management
+export const setAutoOpenTacticsFlag = async (
+  conversationId: string,
+  practiceData: any
+) => {
+  try {
+    setAuthHeader();
+    const response = await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
+      conversationId,
+      practiceData
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error setting auto-open tactics flag:', error);
+    throw error;
+  }
+};
+
+export const getAutoOpenTacticsFlag = async (conversationId: string) => {
+  try {
+    setAuthHeader();
+    const response = await backendApi.get(`/api/v1/practice/get-auto-open-tactics?conversationId=${conversationId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting auto-open tactics flag:', error);
+    return { shouldAutoOpen: false, practiceData: null };
+  }
+};
+
+export const getLatestPracticeSessionData = async () => {
+  try {
+    setAuthHeader();
+    const response = await backendApi.get('/api/v1/practice/latest-session-data');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting latest practice session data:', error);
     throw error;
   }
 };

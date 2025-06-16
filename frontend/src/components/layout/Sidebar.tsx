@@ -647,7 +647,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               // Dispatch event to show tactics modal in main layout
               window.dispatchEvent(new CustomEvent('show-tactics-modal'));
             }}
-            className={`group relative px-3 py-2 text-sm rounded-lg overflow-hidden
+            className="group relative px-3 py-2 text-sm rounded-lg overflow-hidden
                       bg-gradient-to-r from-green-500 to-emerald-600
                       hover:from-green-600 hover:to-emerald-700
                       text-white shadow-md hover:shadow-lg
@@ -656,12 +656,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       before:absolute before:inset-0 before:bg-gradient-to-r 
                       before:from-green-400 before:via-emerald-500 before:to-green-600
                       before:opacity-0 before:transition-opacity before:duration-700
-                      hover:before:opacity-100 w-full flex items-center gap-2
-                      ${!hasViewedTactics ? 'eva-tactics-flash' : ''}`}
-            style={{
-              '--flash-color': 'rgba(34, 197, 94, 0.8)',
-              '--glow-size': '8px'
-            } as React.CSSProperties}
+                      hover:before:opacity-100 w-full flex items-center gap-2"
           >
             <span className="relative z-10 flex items-center space-x-1.5">
               <span className="text-sm">💡</span>
@@ -673,49 +668,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </button>
         )}
         
-        {/* Post-Survey Button - Only show after completing both accessibility and privacy scenarios and if user hasn't completed post-survey */}
-        {/* Check database fields for scenario completion */}
-        {(
-          user?.accessibilityScenariosCompleted &&
-          user?.privacyScenariosCompleted &&
-          !user?.postSurveyCompleted &&
-          !postSurveySubmitted
-        ) && (
-          <button
-            onClick={() => {
-              // Mark that the user has clicked the button to hide the prompt next time
-              if (!hasClickedPostSurvey) {
-                setHasClickedPostSurvey(true);
-                localStorage.setItem('eva-post-survey-clicked', 'true');
-              }
-              // Dispatch event to show post-survey modal
-              window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
-            }}
-            className="group relative px-3 py-2 text-sm rounded-lg overflow-hidden
-                      bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500
-                      hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600
-                      text-white shadow-md hover:shadow-lg
-                      transform hover:scale-[1.02] active:scale-[0.98]
-                      transition-all duration-500 ease-out
-                      before:absolute before:inset-0 before:bg-gradient-to-r 
-                      before:from-pink-500 before:via-purple-500 before:to-blue-500
-                      before:opacity-0 before:transition-opacity before:duration-700
-                      hover:before:opacity-100 w-full flex items-center gap-2"
-                      >
-              <span className="relative z-10 flex items-center space-x-1.5">
-                <span className="text-sm">📋</span>
-                <span>Post Survey</span>
-                {!hasClickedPostSurvey && (
-                  <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold animate-pulse ml-2">
-                    Click at the end!
-                  </span>
-                )}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
-                             translate-x-[-100%] group-hover:translate-x-[100%] 
-                             transition-transform duration-1500 ease-in-out"></div>
-            </button>
-        )}
+
       </div>
 
       {/* Conversations List */}

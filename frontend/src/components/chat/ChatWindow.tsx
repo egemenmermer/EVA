@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import logoSvg from "@/assets/logo.svg";
 import { markAccessibilityScenariosCompletedAPI, markPrivacyScenariosCompletedAPI } from '../../utils/surveyUtils';
 import { backendApi } from '../../services/axiosConfig';
+import { MessageRecovery } from '../../utils/messageRecovery';
 
 // Add custom styles for message formatting
 const styles = {
@@ -501,6 +502,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setStoreMessages(prev => [...prev, summaryMessage]);
   };
   
+  // Function to clear used email scenarios (useful for testing or new conversations)
+  const clearUsedEmailScenarios = () => {
+    localStorage.removeItem('used_email_scenarios');
+    console.log('🧹 Cleared used email scenarios');
+  };
+
   const generateEmailWithData = async () => {
     console.log('📧 EMAIL GENERATION DEBUG START:');
     console.log('- Email assistant active before generation:', emailAssistantActive);
@@ -525,6 +532,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     // Create enhanced prompt with collected data
     const currentScenario = determineCurrentScenario();
+    console.log('📧 Email generation detected scenario:', currentScenario);
+    
+    // Store the detected scenario for future reference
+    if (currentScenario) {
+      localStorage.setItem('last_selected_scenario', currentScenario);
+    }
+    
     const scenarioContext = currentScenario === 'accessibility' ? 'accessibility' : 
                            currentScenario === 'privacy' ? 'privacy' : 'ethical';
     
@@ -576,11 +590,49 @@ Format: Include subject line, greeting (based on address style), body paragraphs
           createdAt: assistantResponse.createdAt || new Date().toISOString()
         };
         
-        setStoreMessages(prev => [...prev.filter(m => !m.isLoading), newAssistantMessage]);
+        const updatedMessages = [...storeMessages.filter(m => !m.isLoading), newAssistantMessage];
+        setStoreMessages(updatedMessages);
         
+        // CRITICAL: Save email generation messages to database immediately
         if (currentConversation?.conversationId) {
-          saveConversationState(currentConversation.conversationId, 
-            [...storeMessages.filter(m => !m.isLoading), newAssistantMessage]);
+          try {
+            // Save the email generation request (user message) to database
+            await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: currentConversation.conversationId,
+              messageId: `email-request-${Date.now()}`,
+              content: enhancedPrompt,
+              role: 'user',
+              createdAt: new Date().toISOString()
+            });
+            console.log('Email generation request saved to database successfully');
+            
+            // Save the email response (assistant message) to database
+            await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: currentConversation.conversationId,
+              messageId: newAssistantMessage.id,
+              content: newAssistantMessage.content,
+              role: 'assistant',
+              createdAt: newAssistantMessage.createdAt
+            });
+            console.log('Email generation response saved to database successfully');
+          } catch (error) {
+            console.error('Failed to save email generation messages to database:', error);
+          }
+          
+          // Save to localStorage with comprehensive backup
+          saveConversationState(currentConversation.conversationId, updatedMessages);
+          
+          try {
+            const messageData = JSON.stringify(updatedMessages);
+            localStorage.setItem(`messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`messages-${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`backup_messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`exact_messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`email_messages_${currentConversation.conversationId}`, messageData);
+            console.log('Comprehensive localStorage backup completed for email messages');
+          } catch (error) {
+            console.error('Failed to save comprehensive localStorage backup for email:', error);
+          }
         }
       }
     } catch (error) {
@@ -781,7 +833,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     }
   }, [loading]);
 
-  // Add utility functions for state preservation
+  // Add utility functions for dual storage (database + localStorage backup)
   const saveConversationState = (conversationId: string, messages: Message[]) => {
     if (!conversationId) return;
     
@@ -789,21 +841,18 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       // Filter out any temporary loading messages
       const cleanMessages = messages.filter(m => !m.isLoading);
       
-      // Only save if we have actual messages
+      // Save if we have actual messages
       if (cleanMessages.length > 0) {
-        const messageData = JSON.stringify(cleanMessages);
+        // Use the comprehensive MessageRecovery utility for saving
+        MessageRecovery.saveToLocalStorage(conversationId, cleanMessages);
         
-        // Save to multiple formats for redundancy
-        localStorage.setItem(`messages_${conversationId}`, messageData);
-        localStorage.setItem(`messages-${conversationId}`, messageData);
-        localStorage.setItem(`backup_messages_${conversationId}`, messageData);
-        localStorage.setItem(`backup-messages-${conversationId}`, messageData);
-        localStorage.setItem(`exact_messages_${conversationId}`, messageData);
+        // Also clean up old backups to prevent localStorage bloat
+        MessageRecovery.cleanupOldBackups(conversationId);
         
-        console.log(`Saved ${cleanMessages.length} messages for conversation ${conversationId}`);
+        console.log(`Saved ${cleanMessages.length} messages using MessageRecovery for conversation ${conversationId}`);
       }
     } catch (e) {
-      console.error('Failed to save conversation state:', e);
+      console.error('Failed to save conversation state to localStorage:', e);
     }
   };
   
@@ -811,12 +860,17 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     if (!conversationId) return null;
     
     try {
-      // Try all possible key formats for backward compatibility
+      // Try all localStorage key formats for maximum recovery capability
       const keyFormats = [
+        `exact_messages_${conversationId}`,
+        `complete_messages_${conversationId}`,
+        `all_messages_${conversationId}`,
+        `practice_messages_${conversationId}`,
+        `email_messages_${conversationId}`,
+        `feedback_messages_${conversationId}`,
         `messages_${conversationId}`,
         `messages-${conversationId}`,
         `backup_messages_${conversationId}`,
-        `backup-messages-${conversationId}`
       ];
       
       for (const key of keyFormats) {
@@ -824,13 +878,31 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         if (savedState) {
           const messages = JSON.parse(savedState);
           if (Array.isArray(messages) && messages.length > 0) {
-            console.log(`Loaded ${messages.length} messages for conversation ${conversationId} from key ${key}`);
+            console.log(`Loaded ${messages.length} messages for conversation ${conversationId} from localStorage key ${key}`);
+            return messages;
+          }
+        }
+      }
+      
+      // If no exact match, try to find any timestamped backup
+      const allKeys = Object.keys(localStorage);
+      const timestampedKeys = allKeys.filter(key => 
+        key.startsWith(`messages_${conversationId}_`) && 
+        key.includes('-') // Contains timestamp format
+      ).sort().reverse(); // Most recent first
+      
+      for (const key of timestampedKeys) {
+        const savedState = localStorage.getItem(key);
+        if (savedState) {
+          const messages = JSON.parse(savedState);
+          if (Array.isArray(messages) && messages.length > 0) {
+            console.log(`Loaded ${messages.length} messages for conversation ${conversationId} from timestamped backup ${key}`);
             return messages;
           }
         }
       }
     } catch (e) {
-      console.error('Failed to load conversation state:', e);
+      console.error('Failed to load conversation state from localStorage:', e);
     }
     
     return null;
@@ -851,16 +923,21 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     
     console.log('Current conversation changed to:', currentConversation.conversationId);
       
-    // Try to recover messages from localStorage first
+    // Try comprehensive recovery from localStorage first
     if (currentConversation.conversationId) {
-      const recoveredMessages = loadConversationState(currentConversation.conversationId);
+      const recoveredMessages = MessageRecovery.recoverMessages(currentConversation.conversationId);
       if (recoveredMessages && recoveredMessages.length > 0) {
-        console.log('Recovered messages from localStorage for conversation', currentConversation.conversationId);
+        console.log('Recovered messages using MessageRecovery for conversation', currentConversation.conversationId);
         setMessages(recoveredMessages);
         setStoreMessages(recoveredMessages); // Also update storeMessages to ensure UI reflects state
+        
+        // Ensure messages are synced to database in background
+        MessageRecovery.ensureMessagesInDatabase(currentConversation.conversationId, recoveredMessages)
+          .catch(error => console.error('Failed to sync recovered messages to database:', error));
+        
         return;
       } else {
-        console.log('No messages in localStorage for conversation', currentConversation.conversationId);
+        console.log('No messages found using MessageRecovery for conversation', currentConversation.conversationId);
       }
       }
       
@@ -894,72 +971,51 @@ Format: Include subject line, greeting (based on address style), body paragraphs
             setError(null);
 
     try {
-      // Try to get messages from localStorage first
-      const cachedMessages = loadConversationState(currentConversation.conversationId);
-      if (cachedMessages && cachedMessages.length > 0) {
-        console.log('Using cached messages from localStorage');
-        setMessages(cachedMessages);
-        setStoreMessages(cachedMessages); // Also update storeMessages to ensure UI displays correctly
-        setIsRefreshing(false);
-        return;
-      }
-
-      // Log API request attempt
-      console.log('Attempting to fetch messages from API...');
+      // Always try database first for all non-draft conversations
+      console.log('Fetching messages from database...');
       
       try {
-        // The backend returns an array of ConversationContentResponseDTO, not a MessagesResponse object
-        const response = await api.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${currentConversation.conversationId}`);
-        console.log('API Response raw data:', response.data);
+        // The backend returns an array of ConversationContentResponseDTO
+        const response = await conversationApi.getConversationMessages(currentConversation.conversationId);
+        console.log('Database response:', response);
         
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          // Add more detailed logging for debugging
-          response.data.forEach((dto, index) => {
-            console.log(`Message ${index + 1} fields:`, {
-              id: dto.id,
-              role: dto.role,
-              content: dto.content ? `${dto.content.substring(0, 50)}...` : 'undefined',
-              userQuery: dto.userQuery ? `${dto.userQuery.substring(0, 50)}...` : 'undefined',
-              agentResponse: dto.agentResponse ? `${dto.agentResponse.substring(0, 50)}...` : 'undefined',
-              conversationId: dto.conversationId
-            });
-          });
+        if (Array.isArray(response) && response.length > 0) {
+          console.log(`Loaded ${response.length} messages from database`);
+          setMessages(response);
+          setStoreMessages(response);
           
-          // Direct mapping from response array to Message[]
-          const formattedMessages: Message[] = response.data.map(dto => ({
-            id: dto.id || uuidv4(),
-            role: dto.role as Role,
-            content: dto.content || dto.userQuery || dto.agentResponse || '',
-            conversationId: dto.conversationId || currentConversation.conversationId,
-            createdAt: dto.createdAt || new Date().toISOString()
-          }));
-
-          console.log('Formatted messages:', formattedMessages);
-          setMessages(formattedMessages);
-          setStoreMessages(formattedMessages);
-          
-          // Save to localStorage for future use
-          saveConversationState(currentConversation.conversationId, formattedMessages);
-            } else {
-          console.warn('No messages returned from API or empty array');
+          // Save to localStorage for backup
+          saveConversationState(currentConversation.conversationId, response);
+          setIsRefreshing(false);
+          return;
+        } else {
+          console.log('No messages found in database');
+          // For empty conversations, set empty state
           setMessages([]);
           setStoreMessages([]);
+          setIsRefreshing(false);
+          return;
         }
       } catch (apiError) {
-        console.error('Error fetching from API:', apiError);
-        setError('Failed to load messages from API. Please try again.');
+        console.error('Error fetching from database:', apiError);
+        console.log('Database fetch failed, trying localStorage backup...');
         
-        // Try one more time to recover from localStorage before giving up
-        const lastResortMessages = loadConversationState(currentConversation.conversationId);
-        if (lastResortMessages && lastResortMessages.length > 0) {
-          console.log('API failed but recovered messages from localStorage');
-          setMessages(lastResortMessages);
-          setStoreMessages(lastResortMessages);
-              } else {
-          setMessages([]);
-          setStoreMessages([]);
+        // Only use localStorage as emergency fallback
+        const cachedMessages = loadConversationState(currentConversation.conversationId);
+        if (cachedMessages && cachedMessages.length > 0) {
+          console.log('Using backup messages from localStorage');
+          setMessages(cachedMessages);
+          setStoreMessages(cachedMessages);
+          setIsRefreshing(false);
+          return;
         }
+        
+        // If database fails and no backup, show error
+        setError('Failed to load messages from database. Please try refreshing.');
+        setMessages([]);
+        setStoreMessages([]);
       }
+
     } catch (error) {
       console.error('Error in fetchMessages function:', error);
       setError('Failed to load messages. Please try again.');
@@ -989,15 +1045,19 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       if (currentConversation?.conversationId) {
         // Check if messages are empty or if storeMessages are empty
         if (messages.length === 0 || storeMessages.length === 0) {
-          console.log('State check: messages are empty! Attempting recovery...');
-          const recoveredMessages = loadConversationState(currentConversation.conversationId);
+          console.log('State check: messages are empty! Attempting comprehensive recovery...');
+          const recoveredMessages = MessageRecovery.recoverMessages(currentConversation.conversationId);
           if (recoveredMessages && recoveredMessages.length > 0) {
             console.log('Auto-recovery: found and restored', recoveredMessages.length, 'messages');
             setMessages(recoveredMessages);
             setStoreMessages(recoveredMessages);
+            
+            // Ensure messages are synced to database in background
+            MessageRecovery.ensureMessagesInDatabase(currentConversation.conversationId, recoveredMessages)
+              .catch(error => console.error('Failed to sync auto-recovered messages to database:', error));
           } else if (!currentConversation.conversationId.startsWith('draft-')) {
             // If no messages in localStorage and not a draft, try API
-            console.log('No messages in localStorage, forcing API refresh');
+            console.log('No messages found in any localStorage key, forcing API refresh');
             fetchMessages();
           }
         } else if (messages.length > 0 && storeMessages.length === 0) {
@@ -1123,482 +1183,236 @@ Format: Include subject line, greeting (based on address style), body paragraphs
   };
 
   // Simplify message handling to ensure user messages remain visible
-  const handleSendMessage = useCallback(async (inputValue: string, skipUserMessageUI: boolean = false) => {
-    console.log("📨 SEND MESSAGE DEBUG START:");
-    console.log("- Input value:", inputValue);
-    console.log("- Current conversation:", currentConversation);
-    console.log("- Store messages count:", storeMessages.length);
-    console.log("- Email assistant active:", emailAssistantActive);
-    console.log("- Current email question:", currentEmailQuestion);
-    console.log("- skipUserMessageUI:", skipUserMessageUI);
+  const handleSendMessage = async (content: string, temperature?: number, request_type?: string) => {
+    if (!content.trim() || loading) return;
 
-    // Trim the input value
-    const trimmedValue = inputValue.trim();
-    if (!trimmedValue) return;
-
-    // ** Get user ID from the store **
-    const userId = useStore.getState().user?.id;
-
-    // ** Add check for userId **
-    if (!userId) {
-      console.error("Cannot send message: User not authenticated.");
-      setError("You must be logged in to send messages.");
-      setLoading(false); // Ensure loading indicator is turned off
-      return; // Stop execution if no user ID
-    }
-
-    isMessageSending.current = true;
-    setLoading(true); // Fix: Use setLoading
+    // Set loading state and processing flag
+    setLoading(true);
     setError(null);
+    isMessageSending.current = true;
 
-    // Initialize local variables first
-    let currentConv = currentConversation; // Work with a local copy
-    let conversationId = currentConv?.conversationId;
-    let isPersisted = currentConv?.isPersisted ?? false;
-
-    // CRITICAL FIX: Add validation for current conversation state
-    // Check if we need to recover the conversation state
-    if (localStorage.getItem('originalConversationId') && (!currentConversation || !currentConversation.conversationId || currentConversation.conversationId.startsWith('draft-'))) {
-      const originalConversationId = localStorage.getItem('originalConversationId');
-      console.log('Attempting to recover conversation from originalConversationId:', originalConversationId);
-      
-      try {
-        // Try to fetch the conversation from the API
-        const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
-        if (response.data) {
-          // Restore the conversation
-          console.log('Recovered conversation from API:', response.data);
-          
-          // Update currentConv with recovered data
-          currentConv = {
-            conversationId: response.data.id,
-            title: response.data.title || 'Recovered Conversation',
-            managerType: response.data.managerType || 'PUPPETEER',
-            createdAt: response.data.createdAt || new Date().toISOString(),
-            isPersisted: true
-          };
-          
-          // Update conversationId and isPersisted
-          conversationId = currentConv.conversationId;
-          isPersisted = true;
-          
-          // Also update the store
-          setCurrentConversation({...currentConv});
-          
-          console.log('Successfully restored conversation state');
-        }
-      } catch (err) {
-        console.error('Failed to recover conversation:', err);
-      }
-    }
-    
-    // Now continue with the rest of the function using the potentially updated currentConv, conversationId, etc.
     try {
-      // --- Draft Conversation Handling --- 
-      // IMPORTANT FIX: Only create a new conversation if we truly don't have one
-      // Check if we actually need a new conversation (not just if conversationId exists)
-      if ((!conversationId || conversationId.startsWith('draft-') || !isPersisted) && 
-          !(currentConv && currentConv.conversationId && !currentConv.conversationId.startsWith('draft-'))) {
-        console.log('Sending first message for a draft conversation. Creating on backend first...');
-
-        // Generate title from the first message
-        const titleForNewConv = trimmedValue.substring(0, 35) + (trimmedValue.length > 35 ? '...' : '');
-        console.log(`Generated initial title: ${titleForNewConv}`);
-
+      let conversationToUse = currentConversation;
+      
+      // If this is a draft conversation, create a real conversation first
+      if (currentConversation?.isDraft || currentConversation?.conversationId.startsWith('draft-')) {
+        console.log('Converting draft conversation to real conversation...');
+        
         try {
-          const activeManagerType = managerType || 'PUPPETEER';
-          // Pass the generated title to the agent creation call
-          const persistedConvData = await agentCreateConversation(
-            userId, // ** Pass the retrieved userId **
-            managerType, // Pass managerType from state
-            undefined // Explicitly pass undefined for title if none is provided
-          );
+          // Create a real conversation in the database
+          const realConversation = await conversationApi.createConversation(currentConversation.managerType);
+          console.log('Created real conversation:', realConversation);
           
-          if (!persistedConvData || !persistedConvData.conversationId) {
-            throw new Error('Agent did not return a valid conversation ID.');
-          }
-
-          conversationId = persistedConvData.conversationId;
-          isPersisted = true;
-          
-          // Create the new conversation object for the store, using the generated title
-          const newPersistedConversation: Conversation = {
-            ...persistedConvData,
-            conversationId: conversationId, 
+          // Update the conversation object
+          conversationToUse = {
+            conversationId: realConversation.conversationId,
+            title: realConversation.title || 'New Conversation',
+            managerType: realConversation.managerType,
+            createdAt: realConversation.createdAt?.toString() || new Date().toISOString(),
             isDraft: false,
             isPersisted: true,
-            managerType: persistedConvData.managerType || activeManagerType,
-            title: titleForNewConv, // Use generated title immediately
-            createdAt: persistedConvData.createdAt || new Date().toISOString(),
+            userId: realConversation.userId?.toString()
           };
           
-          // Set the current conversation state immediately
-          setCurrentConversation(newPersistedConversation);
-          currentConv = newPersistedConversation;
-
-          console.log('Draft conversation successfully persisted with ID:', conversationId, 'and Title:', newPersistedConversation.title);
+          // Update the current conversation in the store
+          setCurrentConversation(conversationToUse);
           
-          // Trigger sidebar refresh immediately with the new title
-          triggerSidebarRefresh({ 
-              type: 'new-conversation', 
-              conversationId: conversationId, 
-              title: newPersistedConversation.title 
+          // Clear any localStorage data for the draft conversation
+          if (currentConversation?.conversationId) {
+            localStorage.removeItem(`messages_${currentConversation.conversationId}`);
+            localStorage.removeItem(`messages-${currentConversation.conversationId}`);
+          }
+          
+          // Trigger sidebar refresh to show the new conversation
+          triggerSidebarRefresh({
+            type: 'conversation-created',
+            conversationId: conversationToUse.conversationId,
+            title: conversationToUse.title
+          });
+          
+        } catch (error) {
+          console.error('Failed to create real conversation:', error);
+          setError('Failed to create conversation. Please try again.');
+          setLoading(false);
+          isMessageSending.current = false;
+          return;
+        }
+      }
+
+      if (!conversationToUse?.conversationId) {
+        setError('No conversation available. Please create a new chat.');
+        setLoading(false);
+        isMessageSending.current = false;
+        return;
+      }
+
+      // Create user message
+      const userMessage: Message = {
+        id: uuidv4(),
+        role: 'user',
+        content: content.trim(),
+        conversationId: conversationToUse.conversationId,
+        createdAt: new Date().toISOString()
+      };
+
+      // Add user message to UI immediately
+      const updatedMessages = [...storeMessages, userMessage];
+      setMessages(updatedMessages);
+      setStoreMessages(updatedMessages);
+
+      // Save user message to database immediately
+      try {
+        await backendApi.post('/api/v1/conversation/message/save', {
+          conversationId: conversationToUse.conversationId,
+          messageId: userMessage.id,
+          content: userMessage.content,
+          role: 'user',
+          createdAt: userMessage.createdAt
+        });
+        console.log('User message saved to database successfully');
+      } catch (error) {
+        console.error('Failed to save user message to database:', error);
+      }
+
+      // Save to localStorage for immediate backup
+      saveConversationState(conversationToUse.conversationId, updatedMessages);
+
+      try {
+        // Send message to API
+        console.log('Sending message to API with params:', {
+          conversationId: conversationToUse.conversationId,
+          content: content.trim(),
+          temperature: temperature || 0.7,
+          request_type
+        });
+        
+        const response = await conversationApi.sendMessage(
+          conversationToUse.conversationId,
+          content.trim(),
+          temperature || 0.7,
+          request_type
+        );
+
+        console.log('Received response from API:', response);
+
+        // Handle different response formats from the API
+        let assistantContent = '';
+        let assistantId = uuidv4();
+        let assistantCreatedAt = new Date().toISOString();
+        let receivedUserMessage: Message | null = null;
+
+        if (response) {
+          // Handle new format with messages array
+          if (response.messages && Array.isArray(response.messages)) {
+            const assistantMsg = response.messages.find(msg => msg.role === 'assistant');
+            const userMsg = response.messages.find(msg => msg.role === 'user');
+            
+            if (assistantMsg) {
+              assistantContent = assistantMsg.content;
+              assistantId = assistantMsg.id || uuidv4();
+              assistantCreatedAt = assistantMsg.createdAt || new Date().toISOString();
+            }
+            
+            // Check if agent returned a user message (this happens in practice scenarios)
+            if (userMsg && userMsg.id !== userMessage.id) {
+              receivedUserMessage = {
+                id: userMsg.id || uuidv4(),
+                role: 'user',
+                content: userMsg.content,
+                conversationId: conversationToUse.conversationId,
+                createdAt: userMsg.createdAt || new Date().toISOString()
+              };
+            }
+          }
+          // Handle legacy format with agentResponse
+          else if (response.agentResponse) {
+            assistantContent = response.agentResponse;
+            assistantCreatedAt = response.createdAt || new Date().toISOString();
+          }
+          // Handle direct content format
+          else if (response.content) {
+            assistantContent = response.content;
+            assistantCreatedAt = response.createdAt || new Date().toISOString();
+          }
+        }
+
+        if (assistantContent) {
+          // Create assistant message
+          const assistantMessage: Message = {
+            id: assistantId,
+            role: 'assistant',
+            content: assistantContent,
+            conversationId: conversationToUse.conversationId,
+            createdAt: assistantCreatedAt
+          };
+
+          // Build final messages array - only add received user message if it's different from our local one
+          let finalMessages = [...updatedMessages];
+          if (receivedUserMessage) {
+            console.log('Agent returned a user message, checking for duplicates');
+            const existingUserMsg = finalMessages.find(m => m.content === receivedUserMessage.content && m.role === 'user');
+            if (!existingUserMsg) {
+              console.log('Adding received user message from agent');
+              finalMessages.push(receivedUserMessage);
+            } else {
+              console.log('User message already exists, skipping duplicate');
+            }
+          }
+          finalMessages.push(assistantMessage);
+
+          // Update UI
+          setMessages(finalMessages);
+          setStoreMessages(finalMessages);
+
+          // Save assistant message to database immediately
+          try {
+            await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: conversationToUse.conversationId,
+              messageId: assistantMessage.id,
+              content: assistantMessage.content,
+              role: 'assistant',
+              createdAt: assistantMessage.createdAt
+            });
+            console.log('Assistant message saved to database successfully');
+          } catch (error) {
+            console.error('Failed to save assistant message to database:', error);
+          }
+
+          // Save to localStorage for immediate backup
+          saveConversationState(conversationToUse.conversationId, finalMessages);
+
+          // Trigger sidebar refresh to update conversation list
+          triggerSidebarRefresh({
+            type: 'message-sent',
+            conversationId: conversationToUse.conversationId
           });
 
-        } catch (createError: any) {
-          console.error('Failed to create/persist draft conversation on backend:', createError);
-          setError('Error saving conversation. Please try again.');
-          setLoading(false);
-          isMessageSending.current = false;
-          return;
+          // Don't dispatch messages-updated event here since we're handling the response directly
+          // This prevents the handleMessagesUpdated from fetching and potentially duplicating messages
+
+        } else {
+          console.error('No valid assistant response found in API response:', response);
+          throw new Error('No response from API');
         }
-      } else {
-        // IMPROVEMENT: Add logging for when we're using an existing conversation
-        console.log('Using existing conversation with ID:', conversationId, 'Maintaining conversation context');
-      }
-      // --- End Draft Conversation Handling ---
-      
-      // IMPROVED: More robust conversation state validation
-      if (!conversationId || !isPersisted) {
-        console.warn('Conversation state invalid, attempting comprehensive recovery...');
+
+      } catch (error) {
+        console.error('Error sending message:', error);
         
-        // Try multiple recovery strategies
-        const originalConversationId = localStorage.getItem('originalConversationId');
-        const currentConversationId = localStorage.getItem('current-conversation-id');
+        // Remove the user message from UI on error
+        setMessages(storeMessages);
+        setStoreMessages(storeMessages);
         
-        // Strategy 1: Use originalConversationId if available
-        if (originalConversationId) {
-          console.log('Attempting recovery using originalConversationId:', originalConversationId);
-          try {
-            const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
-            if (response.data && response.data.id) {
-              conversationId = response.data.id;
-              isPersisted = true;
-              
-              // Update the current conversation in the store
-              const recoveredConversation = {
-                conversationId: response.data.id,
-                title: response.data.title || 'Recovered Conversation',
-                managerType: response.data.managerType || managerType || 'PUPPETEER',
-                isPersisted: true,
-                createdAt: response.data.createdAt || new Date().toISOString()
-              };
-              
-              setCurrentConversation(recoveredConversation);
-              currentConv = recoveredConversation;
-              console.log('Successfully recovered conversation using originalConversationId');
-            }
-          } catch (err) {
-            console.warn('Failed to recover using originalConversationId:', err);
-          }
-        }
-        
-        // Strategy 2: Use current-conversation-id if Strategy 1 failed
-        if ((!conversationId || !isPersisted) && currentConversationId && currentConversationId !== originalConversationId) {
-          console.log('Attempting recovery using current-conversation-id:', currentConversationId);
-          try {
-            const response = await api.get(`/api/v1/conversation/${currentConversationId}`);
-            if (response.data && response.data.id) {
-              conversationId = response.data.id;
-              isPersisted = true;
-              
-              // Update the current conversation in the store
-              const recoveredConversation = {
-                conversationId: response.data.id,
-                title: response.data.title || 'Recovered Conversation',
-                managerType: response.data.managerType || managerType || 'PUPPETEER',
-                isPersisted: true,
-                createdAt: response.data.createdAt || new Date().toISOString()
-              };
-              
-              setCurrentConversation(recoveredConversation);
-              currentConv = recoveredConversation;
-              console.log('Successfully recovered conversation using current-conversation-id');
-            }
-          } catch (err) {
-            console.warn('Failed to recover using current-conversation-id:', err);
-          }
-        }
-        
-        // Strategy 3: Create a new conversation if all recovery attempts failed
-        if (!conversationId || !isPersisted) {
-          console.log('All recovery attempts failed, creating new conversation...');
-          try {
-            const titleForNewConv = trimmedValue.substring(0, 35) + (trimmedValue.length > 35 ? '...' : '');
-            const activeManagerType = managerType || 'PUPPETEER';
-            
-            const persistedConvData = await agentCreateConversation(
-              userId,
-              activeManagerType,
-              undefined
-            );
-            
-            if (persistedConvData && persistedConvData.conversationId) {
-              conversationId = persistedConvData.conversationId;
-              isPersisted = true;
-              
-              const newPersistedConversation: Conversation = {
-                ...persistedConvData,
-                conversationId: conversationId,
-                isDraft: false,
-                isPersisted: true,
-                managerType: persistedConvData.managerType || activeManagerType,
-                title: titleForNewConv,
-                createdAt: persistedConvData.createdAt || new Date().toISOString(),
-              };
-              
-              setCurrentConversation(newPersistedConversation);
-              currentConv = newPersistedConversation;
-              
-              console.log('Successfully created new conversation as fallback:', conversationId);
-              
-              // Trigger sidebar refresh
-              triggerSidebarRefresh({ 
-                type: 'new-conversation', 
-                conversationId: conversationId, 
-                title: newPersistedConversation.title 
-              });
-            }
-          } catch (createError: any) {
-            console.error('Failed to create fallback conversation:', createError);
-            setError('Unable to create conversation. Please refresh the page and try again.');
-            setLoading(false);
-            isMessageSending.current = false;
-            return;
-          }
-        }
-        
-        // Final validation - this should now always pass
-        if (!conversationId || !isPersisted) {
-          console.error('Conversation state could not be recovered after all attempts');
-          setError('Unable to establish conversation context. Please refresh the page and try again.');
-          setLoading(false);
-          isMessageSending.current = false;
-          return;
-        }
+        setError('Failed to send message. Please try again.');
       }
-
-      // DISABLED: Redundant validation - comprehensive validation above handles all cases
-      // if (!conversationId || !isPersisted) {
-      //    console.error('Cannot send message: No valid persisted conversation ID.');
-      //    setError('Cannot send message. Invalid conversation state.');
-      //    setLoading(false);
-      //    isMessageSending.current = false;
-      //    return;
-      // }
-
-      // Add debug logging for conversation tracking
-      console.log("Message history tracking:", {
-        conversationId,
-        existingMessages: storeMessages.length,
-        messagePreview: storeMessages.slice(-3).map(m => ({
-          role: m.role,
-          preview: m.content.substring(0, 30) + (m.content.length > 30 ? '...' : '')
-        }))
-      });
-
-    // IMPORTANT: Create a snapshot of the current messages to avoid state issues
-    const currentMessagesSnapshot = [...storeMessages];
-
-      // Create user message variable outside the if block so it's accessible throughout the function
-      let userMessageId: string | undefined;
-      
-      // 1. Create and immediately display the user message, unless skipUserMessageUI is true
-      if (!skipUserMessageUI) {
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user' as Role,
-      content: trimmedValue,
-        conversationId: conversationId, // Use the (potentially updated) real ID
-      createdAt: new Date().toISOString()
-    };
-        
-        // Store the ID for later reference
-        userMessageId = userMessage.id;
-    
-    // Add to UI immediately - use functional update to ensure latest state
-    setStoreMessages(prev => [...prev, userMessage]);
-    
-    // Save to localStorage immediately to preserve user message
-      saveConversationState(conversationId, [...currentMessagesSnapshot, userMessage]);
-      }
-    
-    // 2. Add a loading message
-    const loadingMessage: Message = {
-      id: `loading-${Date.now()}`,
-      role: 'assistant' as Role,
-      content: 'Thinking...',
-        conversationId: conversationId, // Use the real ID
-      createdAt: new Date().toISOString(),
-      isLoading: true
-    };
-
-    // Add loading message to UI state
-    setStoreMessages(prev => [...prev.filter(m => !m.isLoading), loadingMessage]);
-
-      // 3. Send message to the AGENT API (using the real conversationId)
-      const activeManagerType = currentConv?.managerType || managerType || 'PUPPETEER' as ManagerType;
-            
-      // IMPROVEMENT: Extra check to confirm we're using the correct conversation ID
-      if (currentConv && currentConv.conversationId && conversationId !== currentConv.conversationId) {
-        console.log('Detected conversation ID mismatch. Correcting from:', conversationId, 'to:', currentConv.conversationId);
-        conversationId = currentConv.conversationId;
-      }
-      
-      // Additional check for originalConversationId in localStorage (important for simulation/practice flows)
-      const originalConversationId = localStorage.getItem('originalConversationId');
-      if (originalConversationId && (conversationId === undefined || conversationId === null || conversationId.startsWith('draft-'))) {
-        console.log('Found originalConversationId in localStorage. Using it instead of:', conversationId);
-        
-        try {
-          // Try to retrieve the conversation from backend
-          const response = await api.get(`/api/v1/conversation/${originalConversationId}`);
-          if (response.data && response.data.id) {
-            console.log('Successfully retrieved original conversation from API:', response.data.id);
-            
-            // Update our conversation ID
-            conversationId = response.data.id;
-            isPersisted = true;
-            
-            // Update the current conversation in the store for future messages
-            const recoveredConversation = {
-              conversationId: response.data.id,
-              title: response.data.title || 'Recovered Conversation',
-              managerType: response.data.managerType || activeManagerType,
-              isPersisted: true,
-              createdAt: response.data.createdAt || new Date().toISOString()
-            };
-            
-            // Update the store and local working copy
-            setCurrentConversation(recoveredConversation);
-            currentConv = recoveredConversation;
-            
-            console.log('Successfully restored conversation state for messaging');
-          }
-        } catch (err) {
-          console.error('Failed to recover conversation from originalConversationId:', err);
-          // Continue with current values, don't return/exit
-        }
-      }
-      
-      // Special handling for "how would I respond" type questions after simulations
-      if (trimmedValue.toLowerCase().includes('how would i respond') && 
-          localStorage.getItem('originalConversationId') === conversationId) {
-        console.log('Detected "how would I respond" question after simulation - ensuring same conversation context');
-        // No need to do anything special, the prior code fixes ensure we use the same conversation ID
-      }
-            
-      console.log('Sending message to AGENT API:', {
-        conversationId,
-        userQuery: trimmedValue,
-        managerType: activeManagerType,
-        temperature
-      });
-      
-      const agentPayload = {
-          conversationId: conversationId,
-          userQuery: trimmedValue, 
-          managerType: activeManagerType,
-        temperature: temperature,
-        includeHistory: true, // Add this parameter to request full history
-        historyLimit: 20 // Request more history for better context
-      };
-      
-      // Explicitly type the expected response from the AGENT
-      // It should now return the IDs for both messages
-      interface AgentApiResponse {
-          messages: [
-              { id: string, role: 'user', content: string, conversationId: string, createdAt: string },
-              { id: string, role: 'assistant', content: string, conversationId: string, createdAt: string }
-          ]
-      }
-      
-      const agentResponse = await agentApi.post<AgentApiResponse>('/api/v1/conversation/message', agentPayload);
-
-      // Log response for debugging
-      console.log('Agent API response received, messages length:', 
-        agentResponse.data?.messages?.length || 0);
-
-      const responseData = agentResponse.data;
-      
-      // Basic validation
-      if (!responseData || !Array.isArray(responseData.messages) || responseData.messages.length < 2) {
-          console.error("Invalid response structure from agent: Expected messages array with user and assistant entries", responseData);
-          throw new Error("Invalid response structure from agent");
-      }
-
-      // Extract messages and IDs from agent response
-      const userMessageFromAgent = responseData.messages.find(m => m.role === 'user');
-      const agentMessageFromAgent = responseData.messages.find(m => m.role === 'assistant');
-
-      if (!userMessageFromAgent || !agentMessageFromAgent || !userMessageFromAgent.id || !agentMessageFromAgent.id) {
-          console.error("Missing user or assistant message or their IDs in agent response", responseData);
-          throw new Error("Missing message data from agent response");
-      }
-      
-      const finalUserMessage: Message = { ...userMessageFromAgent };
-      const finalAgentMessage: Message = { ...agentMessageFromAgent, isLoading: false }; // Ensure isLoading is false
-
-      // --- Update UI State --- 
-      // Get the current messages *before* adding the agent response,
-      // AND also filter out the *original* optimistic user message (using its temporary ID)
-      const messagesBeforeAgentResponse = storeMessages.filter(
-          m => m.id !== loadingMessage.id && 
-              (!userMessageId || m.id !== userMessageId) // Only filter if userMessageId exists
-      );
-      
-      // Also filter out any other assistant loading messages that might be present
-      const messagesWithoutAnyLoading = messagesBeforeAgentResponse.filter(m => !m.isLoading);
-      
-      // Update UI state to include the final user message (with ID from agent) AND the final agent message
-      setStoreMessages([...messagesWithoutAnyLoading, finalUserMessage, finalAgentMessage]); // Add BOTH back
-      let finalMessagesForLocalStorage = [...messagesWithoutAnyLoading, finalUserMessage, finalAgentMessage];
-      saveConversationState(conversationId, finalMessagesForLocalStorage);
-      // --- End UI State Update --- 
-      
-      // --- Save Messages to Backend --- 
-      // Now call the backend save endpoint for BOTH messages
-      try {
-        console.log('Calling backend to save user message');
-        await saveMessage({
-            conversationId: conversationId,
-            messageId: finalUserMessage.id,
-            content: finalUserMessage.content,
-            role: 'user'
-        });
-        console.log('Calling backend to save assistant message');
-        await saveMessage({
-            conversationId: conversationId,
-            messageId: finalAgentMessage.id,
-            content: finalAgentMessage.content,
-            role: 'assistant'
-        });
-      } catch (saveError) {
-         // Log error but don't necessarily block UI
-         console.error('Failed to save one or both messages to backend:', saveError);
-         // Optionally update UI to show a save error?
-         // setError('Failed to save message history.'); 
-      }
-      // --- End Save Messages --- 
-
-      // Refresh sidebar (title update logic is now handled during conversation creation)
-      triggerSidebarRefresh({
-        type: 'new-message',
-        conversationId: conversationId,
-        title: currentConv?.title // Just use current title
-      });
 
     } catch (error) {
-      console.error('Error sending message or processing agent response:', error);
-      // On error, remove loading message but keep user message
-      setStoreMessages(prev => prev.filter(m => !m.isLoading));
-      setError('Failed to send message or get response. Please try again.');
+      console.error('Error in handleSendMessage:', error);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
-      // Ensure loading state is always turned off
       setLoading(false);
       isMessageSending.current = false;
     }
-  }, [currentConversation, storeMessages, temperature, managerType, user, setStoreMessages, setCurrentConversation]); // Added dependencies
+  };
 
   // Update the ref whenever handleSendMessage changes
   useEffect(() => {
@@ -1626,26 +1440,6 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     return history.length > 0;
   };
 
-  // Helper function to determine current scenario based on conversation content
-  const determineCurrentScenario = (): 'accessibility' | 'privacy' | null => {
-    // Look through messages to determine the scenario type
-    const relevantMessages = storeMessages.filter(msg => 
-      msg.role === 'user' && msg.content && msg.content.length > 20
-    );
-    
-    for (const message of relevantMessages) {
-      const content = message.content.toLowerCase();
-      if (content.includes('accessibility') || content.includes('screen reader')) {
-        return 'accessibility';
-      }
-      if (content.includes('privacy') || content.includes('location data')) {
-        return 'privacy';
-      }
-    }
-    
-    return null;
-  };
-
   // Function to refresh user data from API
   const refreshUserData = async () => {
     try {
@@ -1659,6 +1453,94 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       console.error('Failed to refresh user data:', error);
       return null;
     }
+  };
+
+  // Helper function to determine current scenario based on conversation content
+  const determineCurrentScenario = (): 'accessibility' | 'privacy' | null => {
+    // Get list of scenarios that have already been used for email generation
+    const usedScenarios = JSON.parse(localStorage.getItem('used_email_scenarios') || '[]') as string[];
+    console.log('📧 Previously used email scenarios:', usedScenarios);
+    
+    // Find all completed scenarios in chronological order
+    const completedScenarios: Array<{index: number, type: 'accessibility' | 'privacy'}> = [];
+    
+    for (let i = 0; i < storeMessages.length; i++) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for practice scenario completion messages with explicit issue type
+      if (content.includes('practice scenario completed')) {
+        if (content.includes('- issue: accessibility')) {
+          completedScenarios.push({index: i, type: 'accessibility'});
+        } else if (content.includes('- issue: privacy')) {
+          completedScenarios.push({index: i, type: 'privacy'});
+        }
+      }
+    }
+    
+    console.log('📊 All completed scenarios found:', completedScenarios);
+    
+    // Find the first scenario that hasn't been used for email generation yet
+    for (const scenario of completedScenarios) {
+      const scenarioKey = `${scenario.type}_${scenario.index}`;
+      if (!usedScenarios.includes(scenarioKey)) {
+        console.log('🎯 Found unused completed scenario:', scenario.type, 'at index', scenario.index);
+        
+        // Mark this scenario as used for email generation
+        usedScenarios.push(scenarioKey);
+        localStorage.setItem('used_email_scenarios', JSON.stringify(usedScenarios));
+        
+        return scenario.type;
+      }
+    }
+    
+    console.log('🔍 All completed scenarios have been used, checking for scenario initiation messages...');
+    
+    // If all completed scenarios have been used, check for scenario initiation messages (most recent first)
+    for (let i = storeMessages.length - 1; i >= 0; i--) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for exact scenario selection messages
+      if (content.includes("my manager is pressuring me to collect unnecessary user location data")) {
+        console.log('🎯 Found most recent initiation: PRIVACY (location data)');
+        return 'privacy';
+      }
+      if (content.includes("my team is facing pressure to skip screen reader compatibility testing")) {
+        console.log('🎯 Found most recent initiation: ACCESSIBILITY (screen reader)');
+        return 'accessibility';
+      }
+    }
+    
+    console.log('🔍 No specific scenario initiation found, using keyword fallback...');
+    
+    // Look through all messages to determine the scenario type as a fallback (most recent first)
+    for (let i = storeMessages.length - 1; i >= 0; i--) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for specific keywords that strongly indicate a scenario type
+      if (content.includes('screen reader') || content.includes('wcag') || content.includes('section 508') || 
+          content.includes('ada compliance') || content.includes('accessibility testing')) {
+        console.log('🎯 Found keyword match: ACCESSIBILITY');
+        return 'accessibility';
+      }
+      if (content.includes('location data') || content.includes('user privacy') || content.includes('gdpr') || 
+          content.includes('data collection') || content.includes('unnecessary data')) {
+        console.log('🎯 Found keyword match: PRIVACY');
+        return 'privacy';
+      }
+    }
+    
+    // If no scenario detected, check localStorage for last selected scenario
+    const lastScenario = localStorage.getItem('last_selected_scenario');
+    if (lastScenario === 'privacy' || lastScenario === 'accessibility') {
+      console.log('🎯 Using localStorage scenario:', lastScenario);
+      return lastScenario as 'privacy' | 'accessibility';
+    }
+    
+    console.log('❌ No scenario could be determined');
+    return null;
   };
 
   // Complete replacement of the handlePracticeFeedbackRequest function with proper structure
@@ -1849,6 +1731,62 @@ Format: Include subject line, greeting (based on address style), body paragraphs
               if (!hasAgentResponseAlready) {
                 console.log('Appending new agent feedback response message');
                 finalMessages = [...baseMessages, agentMessage];
+                
+                // CRITICAL: Save both user and assistant messages to database immediately
+                try {
+                  // Save user message to database if it doesn't exist
+                  const userMessage = messagesWithUserRequest[messagesWithUserRequest.length - 1];
+                  if (userMessage && userMessage.role === 'user') {
+                    await backendApi.post('/api/v1/conversation/message/save', {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    });
+                    console.log('User feedback message saved to database successfully');
+                  }
+                  
+                  // Save assistant message to database
+                  await backendApi.post('/api/v1/conversation/message/save', {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  });
+                  console.log('Assistant feedback message saved to database successfully');
+                } catch (error) {
+                  console.error('Failed to save feedback messages to database:', error);
+                }
+                
+                // CRITICAL: Save both user and assistant messages to database immediately
+                try {
+                  // Save user message to database if it doesn't exist
+                  const userMessage = messagesWithUserRequest[messagesWithUserRequest.length - 1];
+                  if (userMessage && userMessage.role === 'user') {
+                    await backendApi.post('/api/v1/conversation/message/save', {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    });
+                    console.log('User feedback message saved to database successfully');
+                  }
+                  
+                  // Save assistant message to database
+                  await backendApi.post('/api/v1/conversation/message/save', {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  });
+                  console.log('Assistant feedback message saved to database successfully');
+                } catch (error) {
+                  console.error('Failed to save feedback messages to database:', error);
+                }
               } else {
                 console.log('Agent feedback response already exists, not appending duplicate');
                   finalMessages = baseMessages;
@@ -1858,7 +1796,21 @@ Format: Include subject line, greeting (based on address style), body paragraphs
               setMessages(finalMessages);
               setStoreMessages(finalMessages);
               
+              // CRITICAL: Save conversation state to multiple localStorage keys for maximum backup
               saveConversationState(conversationId, finalMessages);
+              
+              // Additional comprehensive localStorage backup
+              try {
+                const messageData = JSON.stringify(finalMessages);
+                localStorage.setItem(`messages_${conversationId}`, messageData);
+                localStorage.setItem(`messages-${conversationId}`, messageData);
+                localStorage.setItem(`backup_messages_${conversationId}`, messageData);
+                localStorage.setItem(`exact_messages_${conversationId}`, messageData);
+                localStorage.setItem(`practice_feedback_messages_${conversationId}`, messageData);
+                console.log('Comprehensive localStorage backup completed for feedback messages');
+              } catch (error) {
+                console.error('Failed to save comprehensive localStorage backup:', error);
+              }
               localStorage.setItem(`exact_messages_${conversationId}`, JSON.stringify(finalMessages));
               localStorage.setItem(`backup_messages_${conversationId}`, JSON.stringify(finalMessages));
               
@@ -2260,25 +2212,75 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       return;
     }
     
-    const handleMessagesUpdated = (event: Event) => {
+    const handleMessagesUpdated = async (event: Event) => {
       const customEvent = event as CustomEvent;
       const updatedConversationId = customEvent.detail?.conversationId;
       
       console.log('Messages updated event received for conversation:', updatedConversationId);
       
       if (updatedConversationId && currentConversation?.conversationId === updatedConversationId) {
-        console.log('Messages updated for current conversation - reloading');
+        console.log('Messages updated for current conversation - reloading from database');
         
-        // First try to load from localStorage with all possible key formats
-        const recoveredMessages = loadConversationState(updatedConversationId);
-        if (recoveredMessages && recoveredMessages.length > 0) {
-          console.log('Successfully loaded updated messages from localStorage');
-          setMessages(recoveredMessages);
-          setStoreMessages(recoveredMessages);
-        } else {
-          // If no messages in localStorage, fetch from API
-          console.log('No updated messages found in localStorage, fetching from API');
-          fetchMessages();
+        // Always fetch from database first
+        try {
+          const response = await conversationApi.getConversationMessages(updatedConversationId);
+          if (Array.isArray(response) && response.length > 0) {
+            console.log('Successfully loaded updated messages from database');
+            setMessages(response);
+            setStoreMessages(response);
+            
+            // Save as backup
+            saveConversationState(updatedConversationId, response);
+          } else {
+            console.log('No messages found in database, checking localStorage');
+            const recoveredMessages = loadConversationState(updatedConversationId);
+            if (recoveredMessages && recoveredMessages.length > 0) {
+              console.log('Using messages from localStorage');
+              setMessages(recoveredMessages);
+              setStoreMessages(recoveredMessages);
+            } else {
+              console.log('No messages found anywhere, fetching via fetchMessages');
+              fetchMessages();
+            }
+          }
+        } catch (error) {
+          console.error('Error loading updated messages from database:', error);
+          // Fallback to localStorage
+          const recoveredMessages = loadConversationState(updatedConversationId);
+          if (recoveredMessages && recoveredMessages.length > 0) {
+            console.log('Using localStorage messages after database error');
+            setMessages(recoveredMessages);
+            setStoreMessages(recoveredMessages);
+          } else {
+            fetchMessages();
+          }
+        }
+        
+        // Check if we should auto-open tactics guide after practice feedback
+        if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+          try {
+            const response = await backendApi.get(`/api/v1/practice/get-auto-open-tactics?conversationId=${currentConversation.conversationId}`);
+            
+            if (response.data.shouldAutoOpen) {
+              console.log('🎯 Auto-opening tactics guide after practice feedback (from database)...');
+              
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+              }, 2000); // Wait 2 seconds for the message to appear
+            }
+          } catch (error) {
+            console.error('Failed to check auto-open tactics flag from database:', error);
+            
+            // Fallback to localStorage check
+            const autoOpenTactics = localStorage.getItem('auto_open_tactics_guide');
+            if (autoOpenTactics === 'true') {
+              console.log('🎯 Auto-opening tactics guide after practice feedback (localStorage fallback)...');
+              localStorage.removeItem('auto_open_tactics_guide');
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+              }, 2000);
+            }
+          }
         }
       }
     };
@@ -2668,7 +2670,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         // Now send the message through the normal flow to get a contextual response
         // Use setTimeout to ensure the user message is rendered first
         setTimeout(() => {
-          handleSendMessage(optionText, true); // Pass true to skip adding user message again
+          handleSendMessage(optionText, 0.7); // Use default temperature
         }, 100);
       }
       else {
@@ -2705,12 +2707,15 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       
       // Mark scenario as completed in database
       await markCurrentScenarioCompleted();
+      
+      // Generate congratulations message based on completion status
+      const congratsContent = await generateCongratulationsMessage();
         
       // Add congratulations message from EVA
       const congratsMessage: Message = {
         id: `eva-congrats-${Date.now()}`,
           role: 'assistant' as Role,
-        content: "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.",
+        content: congratsContent,
           conversationId: currentConversation?.conversationId || '',
           createdAt: new Date().toISOString(),
         isScenarioCompletionMessage: true
@@ -2761,6 +2766,25 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       }
     } catch (error) {
       console.error('Error marking scenario as completed:', error);
+    }
+  };
+
+  // Function to generate congratulations message based on scenario completion status
+  const generateCongratulationsMessage = async (): Promise<string> => {
+    // Wait a bit for user data to be refreshed after marking scenario complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Get current user data from store
+    const { user } = useStore.getState();
+    
+    const bothScenariosCompleted = user?.accessibilityScenariosCompleted && user?.privacyScenariosCompleted;
+    
+    if (bothScenariosCompleted) {
+      // Both scenarios completed - congratulate and offer post-survey
+      return "🎉 **Outstanding Achievement!** You've successfully completed **both** practice scenarios and drafted professional emails for each ethical situation.\n\nYour emails have been copied to your clipboard and are ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout **all** practice sessions.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.";
+    } else {
+      // Only one scenario completed - standard message
+      return "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.";
     }
   };
 
@@ -3323,6 +3347,36 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                 </code>
             );
         },
+        a({ node, href, children, ...props }: any) {
+            // Handle post-survey link
+            if (href === '#post-survey') {
+                return (
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            console.log('Post-survey link clicked, dispatching event...');
+                            window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
+                        }}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        {...props}
+                    >
+                        {children}
+                    </button>
+                );
+            }
+            // Regular links
+            return (
+                <a 
+                    href={href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    {...props}
+                >
+                    {children}
+                </a>
+            );
+        },
     };
     
     return (
@@ -3593,30 +3647,56 @@ Format: Include subject line, greeting (based on address style), body paragraphs
                   <>📧 Generate Email</>
                 )}
               </Button>
-              
-              {/* Removed Start Over button to allow multiple email generations */}
             </div>
           </div>
         )}
 
         {/* Scenario Completion Button - Show after congratulations message */}
-        {message.isScenarioCompletionMessage && (
-          <div className="mt-3 ml-7">
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={() => setShowScenarioModal(true)}
-                className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              >
-                <span className="mr-1">🎯</span> Continue to Other Scenarios
-              </Button>
+        {message.isScenarioCompletionMessage && (() => {
+          const bothScenariosCompleted = user?.accessibilityScenariosCompleted && user?.privacyScenariosCompleted;
+          
+          return (
+            <div className="mt-3 ml-7">
+              <div className="flex gap-2">
+                {bothScenariosCompleted ? (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => {
+                      console.log('Post-survey button clicked, dispatching event...');
+                      window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
+                    }}
+                    className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <span className="mr-1">📋</span> Complete Post-Survey
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => {
+                      // Store the current conversation ID in localStorage to ensure we continue using it
+                      if (currentConversation && currentConversation.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+                        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+                        console.log('📝 Storing current conversation ID for scenario continuation:', currentConversation.conversationId);
+                      }
+                      setShowScenarioModal(true);
+                    }}
+                    className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <span className="mr-1">🎯</span> Continue to Other Scenarios
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
+                {bothScenariosCompleted 
+                  ? "Share your experience with EVA and how it has influenced your ethical decision-making approach"
+                  : "Practice more scenarios to further develop your ethical decision-making skills"
+                }
+              </p>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
-              Practice more scenarios to further develop your ethical decision-making skills
-            </p>
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   }, [darkMode, user, handleOptionClick, handleCopyToClipboard, handleEditDraft, handleDiscardDraft, activeMessageFeedbackSection, toggleMessageSection]); // Removed expandedMessageSections and handleMessageAccordionValueChange, added activeMessageFeedbackSection and toggleMessageSection
@@ -3850,26 +3930,32 @@ Format: Include subject line, greeting (based on address style), body paragraphs
           console.log('- Current conversation ID:', currentConversation?.conversationId);
           console.log('- Is draft conversation:', currentConversation?.conversationId?.startsWith('draft-'));
           console.log('- Current messages count:', storeMessages.length);
-          console.log('- Email assistant active (SHOULD STAY TRUE):', emailAssistantActive);
-          console.log('- Current email question:', currentEmailQuestion);
-          console.log('- Email draft data:', emailDraftData);
+          console.log('- Email assistant active:', emailAssistantActive);
+          console.log('🎯 SCENARIO SELECTION DEBUG END');
           
-          // Close the modal first
+          // Close the modal
           setShowScenarioModal(false);
           
-          // Determine prompt based on selected scenario with detailed context
-          const prompt = scenario === 'privacy' 
+          // Clear existing messages in UI to start fresh with the scenario
+          // But don't delete the conversation from the database
+          setMessages([]);
+          setStoreMessages([]);
+          
+          // Make sure we're using the current conversation ID
+          if (currentConversation && 
+              currentConversation.conversationId && 
+              !currentConversation.conversationId.startsWith('draft-')) {
+            console.log('Using existing conversation for new scenario:', currentConversation.conversationId);
+            localStorage.setItem('originalConversationId', currentConversation.conversationId);
+          }
+          
+          // Send the appropriate scenario message
+          const scenarioMessage = scenario === 'privacy' 
             ? "I'd like to practice a new scenario now. My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
             : "I'd like to practice a new scenario now. My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?";
-          
-          console.log('- Generated prompt:', prompt);
-          console.log('🔄 PRESERVING EMAIL ASSISTANT STATE - NOT RESETTING');
-          console.log('- Email assistant will remain active:', emailAssistantActive);
-          
-          setTimeout(() => {
-            console.log('⏰ Sending message to continue conversation...');
-            handleSendMessage(prompt);
-          }, 100);
+            
+          // Use the existing handleSendMessage function to send the message
+          handleSendMessage(scenarioMessage, 0.7);
         }}
       />
 
