@@ -71,12 +71,16 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         
         // Also mark the specific scenario type as completed
         String scenarioType = extractScenarioType(requestDTO.getScenarioId());
+        log.info("🔍 SCENARIO COMPLETION DEBUG - Scenario ID: {}, Extracted Type: {}", requestDTO.getScenarioId(), scenarioType);
+        
         if ("accessibility".equals(scenarioType)) {
             user.markAccessibilityScenariosCompleted();
-            log.info("Marked user {} as having completed accessibility scenarios", user.getId());
+            log.info("✅ Marked user {} as having completed ACCESSIBILITY scenarios", user.getId());
         } else if ("privacy".equals(scenarioType)) {
             user.markPrivacyScenariosCompleted();
-            log.info("Marked user {} as having completed privacy scenarios", user.getId());
+            log.info("✅ Marked user {} as having completed PRIVACY scenarios", user.getId());
+        } else {
+            log.warn("⚠️ Unknown scenario type '{}' for scenario ID '{}' - NO scenarios marked as completed", scenarioType, requestDTO.getScenarioId());
         }
         
         userService.saveUser(user);
@@ -348,36 +352,58 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     
     // Helper method to map entity to response DTO
     private String extractScenarioType(String scenarioId) {
-        if (scenarioId == null) return "unknown";
+        log.info("🔍 EXTRACT SCENARIO TYPE DEBUG - Input scenarioId: '{}'", scenarioId);
+        
+        if (scenarioId == null) {
+            log.warn("⚠️ EXTRACT SCENARIO TYPE - scenarioId is null, returning 'unknown'");
+            return "unknown";
+        }
         
         try {
             // Get the actual scenario data to determine the type
+            log.info("🔍 EXTRACT SCENARIO TYPE - Calling scenarioService.getScenarioData for: '{}'", scenarioId);
             JsonNode scenarioData = scenarioService.getScenarioData(scenarioId);
+            
             if (scenarioData != null && scenarioData.has("concern")) {
                 String concern = scenarioData.get("concern").asText().toLowerCase();
+                log.info("🔍 EXTRACT SCENARIO TYPE - Found concern: '{}'", concern);
                 
                 // Map concern types to our scenario completion types
                 if (concern.contains("privacy")) {
+                    log.info("✅ EXTRACT SCENARIO TYPE - Detected PRIVACY scenario");
                     return "privacy";
                 } else if (concern.contains("inequality") || concern.contains("bias") || concern.contains("accessibility")) {
+                    log.info("✅ EXTRACT SCENARIO TYPE - Detected ACCESSIBILITY scenario");
                     return "accessibility";
                 } else if (concern.contains("transparency")) {
                     // For now, map transparency to accessibility scenarios
                     // This can be adjusted based on your categorization needs
+                    log.info("✅ EXTRACT SCENARIO TYPE - Detected TRANSPARENCY scenario, mapping to ACCESSIBILITY");
                     return "accessibility";
+                } else {
+                    log.warn("⚠️ EXTRACT SCENARIO TYPE - Unknown concern type: '{}'", concern);
+                }
+            } else {
+                log.warn("⚠️ EXTRACT SCENARIO TYPE - scenarioData is null or missing 'concern' field");
+                if (scenarioData != null) {
+                    log.info("🔍 EXTRACT SCENARIO TYPE - Available fields in scenarioData: {}", scenarioData.fieldNames());
                 }
             }
         } catch (Exception e) {
-            log.warn("Could not determine scenario type for scenarioId: {}, error: {}", scenarioId, e.getMessage());
+            log.warn("⚠️ EXTRACT SCENARIO TYPE - Could not determine scenario type for scenarioId: {}, error: {}", scenarioId, e.getMessage());
         }
         
         // Fallback to old method if scenario data is not available
+        log.info("🔍 EXTRACT SCENARIO TYPE - Falling back to string parsing method");
         if (scenarioId.startsWith("accessibility")) {
+            log.info("✅ EXTRACT SCENARIO TYPE - Fallback detected ACCESSIBILITY (string starts with 'accessibility')");
             return "accessibility";
         } else if (scenarioId.startsWith("privacy")) {
+            log.info("✅ EXTRACT SCENARIO TYPE - Fallback detected PRIVACY (string starts with 'privacy')");
             return "privacy";
         }
         
+        log.warn("⚠️ EXTRACT SCENARIO TYPE - Returning 'unknown' for scenarioId: '{}'", scenarioId);
         return "unknown";
     }
 
