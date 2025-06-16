@@ -119,4 +119,24 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @PostMapping("/reset-accessibility-scenarios")
+    public ResponseEntity<String> resetAccessibilityScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        log.info("🔄 API CALL - reset-accessibility-scenarios for user: {}", currentUser.getId());
+        
+        userService.resetAccessibilityScenariosCompleted(currentUser.getId());
+        
+        log.info("✅ API CALL COMPLETED - Accessibility scenarios reset to false for user: {}", currentUser.getId());
+        return ResponseEntity.ok("Accessibility scenarios reset to false");
+    }
+
+    @PostMapping("/reset-privacy-scenarios")
+    public ResponseEntity<String> resetPrivacyScenariosCompleted(@CurrentUser CustomUserDetails currentUser) {
+        log.info("🔄 API CALL - reset-privacy-scenarios for user: {}", currentUser.getId());
+        
+        userService.resetPrivacyScenariosCompleted(currentUser.getId());
+        
+        log.info("✅ API CALL COMPLETED - Privacy scenarios reset to false for user: {}", currentUser.getId());
+        return ResponseEntity.ok("Privacy scenarios reset to false");
+    }
+
 }

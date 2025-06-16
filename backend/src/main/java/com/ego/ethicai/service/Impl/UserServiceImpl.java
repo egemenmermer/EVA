@@ -328,6 +328,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public User resetAccessibilityScenariosCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.setAccessibilityScenariosCompleted(false);
+        user.setAccessibilityScenariosCompletedAt(null);
+        user = userRepository.save(user);
+        logger.debug("Reset accessibility scenarios to false for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User resetPrivacyScenariosCompleted(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        User user = findById(userId).orElseThrow(
+                () -> new UserNotFoundException("User not found with ID: " + userId));
+
+        user.setPrivacyScenariosCompleted(false);
+        user.setPrivacyScenariosCompletedAt(null);
+        user = userRepository.save(user);
+        logger.debug("Reset privacy scenarios to false for user with ID: {}", userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
     public UserResponseDTO resetScenarioCompletions(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");

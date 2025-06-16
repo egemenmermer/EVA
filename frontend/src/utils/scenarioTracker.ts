@@ -928,6 +928,57 @@ export const testScenarioDetection = (messageContent: string): void => {
   console.log('=================================');
 };
 
+/**
+ * Reset both scenarios to false in the database - for testing purposes
+ * Usage: window.resetScenariosInDatabase()
+ */
+export const resetScenariosInDatabase = async (): Promise<void> => {
+  try {
+    console.log('🔄 RESETTING SCENARIOS IN DATABASE');
+    
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      console.error('No auth token available');
+      return;
+    }
+
+    // Call both reset APIs
+    const response1 = await fetch('/api/v1/user/reset-accessibility-scenarios', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const response2 = await fetch('/api/v1/user/reset-privacy-scenarios', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response1.ok && response2.ok) {
+      console.log('✅ Both scenarios reset to false in database');
+      
+      // Also clear localStorage
+      clearAllScenarioData();
+      
+      // Force refresh user state
+      forceResetUserState();
+      
+      console.log('✅ Database and localStorage reset complete');
+    } else {
+      console.error('❌ Failed to reset scenarios in database');
+      console.error('Accessibility reset response:', response1.status);
+      console.error('Privacy reset response:', response2.status);
+    }
+  } catch (error) {
+    console.error('❌ Error resetting scenarios in database:', error);
+  }
+};
+
 // Make the manual reset function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).manualResetScenarios = manualResetScenarios;
@@ -939,4 +990,5 @@ if (typeof window !== 'undefined') {
   (window as any).debugPracticeContext = debugPracticeContext;
   (window as any).debugScenarioIssue = debugScenarioIssue;
   (window as any).testScenarioDetection = testScenarioDetection;
+  (window as any).resetScenariosInDatabase = resetScenariosInDatabase;
 } 
