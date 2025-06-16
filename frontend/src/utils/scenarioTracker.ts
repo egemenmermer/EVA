@@ -187,6 +187,7 @@ export const markScenarioTypeCompleted = async (scenarioType: ScenarioType): Pro
 /**
  * Analyze a message to detect scenario completion and automatically track it
  * ONLY marks the specific scenario that was actually completed
+ * ONLY runs during practice sessions, not during feedback sessions
  */
 export const analyzeMessageForScenarioCompletion = async (messageContent: string): Promise<void> => {
   // Prevent multiple simultaneous analyses
@@ -202,15 +203,35 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
     console.log('🔍 SCENARIO ANALYSIS START');
     console.log('🔍 Analyzing message for scenario completion:', messageContent.substring(0, 500) + '...');
     
+    // CRITICAL: Check if this is a feedback message from EVA
+    // Feedback messages contain completion summaries but should NOT trigger new completions
+    const isFeedbackMessage = messageContent.includes('**Practice Scenario Completed**') && 
+                             (messageContent.includes('**Performance Summary:**') || 
+                              messageContent.includes('**Tactical Analysis:**') ||
+                              messageContent.includes('**Available Argumentation Tactics**') ||
+                              messageContent.includes('Do you feel ready to discuss this with your manager'));
+    
+    if (isFeedbackMessage) {
+      console.log('🔍 DETECTED FEEDBACK MESSAGE - This is EVA providing feedback, not a new completion');
+      console.log('🔍 Skipping scenario completion analysis to prevent false positives');
+      return;
+    }
+    
+    // CRITICAL: Check if we're currently in a practice session
+    const practiceContext = getCurrentPracticeContext();
+    console.log('🔍 Current practice context:', practiceContext);
+    
+    // If no practice context, this might not be a practice session
+    if (!practiceContext.scenarioType) {
+      console.log('🔍 No practice context found - this might not be a practice session');
+      console.log('🔍 Proceeding with caution...');
+    }
+    
     // Get current completion status
     const currentAccessibilityStatus = hasCompletedScenarioType('accessibility');
     const currentPrivacyStatus = hasCompletedScenarioType('privacy');
     
     console.log('🔍 Current completion status - Accessibility:', currentAccessibilityStatus, 'Privacy:', currentPrivacyStatus);
-    
-    // Get practice context FIRST to understand what scenario should be completed
-    const practiceContext = getCurrentPracticeContext();
-    console.log('🔍 Current practice context:', practiceContext);
     
     // CRITICAL: Only proceed if we have a completion indicator
     const completionIndicators = [
