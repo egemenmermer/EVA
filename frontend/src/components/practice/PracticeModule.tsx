@@ -891,8 +891,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setSessionSaved(true);
       
       // **IMPORTANT: Refresh user data to update completion flags for Post Survey button**
-      await refreshUserData();
-      console.log('User data refreshed after practice completion');
+      // TEMPORARILY DISABLED FOR DEBUGGING - This was causing both scenarios to be marked as completed
+      // await refreshUserData();
+      console.log('User data refresh DISABLED for debugging - this was fetching old database state');
       
       return true;
     } catch (error: any) {
