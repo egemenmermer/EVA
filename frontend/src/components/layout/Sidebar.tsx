@@ -657,7 +657,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               w-full flex items-center gap-2 transition-all duration-300
               ${
                 showGlow
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 animate-glow'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 animate-glow border-2 border-green-400'
                   : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/90'
               }
             `}

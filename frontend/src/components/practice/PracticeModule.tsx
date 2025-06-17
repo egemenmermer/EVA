@@ -1002,12 +1002,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       
       console.log('Query sent to EVA:', query);
       
-      const debugInfo = `
-## Practice Session Debug Info for EVA:
-- Final Score: ${currentScore}/10 (scaled score from EVS)
-- Performance Level: ${calculatePerformanceRating(currentScore).rating}
-`;
-      
       // FIRST: Ensure practice session data is saved before getting feedback (only if not already saved)
       if (currentScenario.sessionSummary && !sessionSaved) {
         const saveResult = await savePracticeSessionData(currentScenario.sessionSummary);
@@ -1024,17 +1018,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const originalConversationId = localStorage.getItem('originalConversationId');
       
       if (originalConversationId) {
-        // Clear any existing practice feedback to prevent duplication
-        localStorage.removeItem('practice_to_chat');
-        localStorage.removeItem('practice_feedback_simple');
-        localStorage.removeItem('practice_feedback_prompt');
-        
-        // Set up practice to chat integration
-      localStorage.setItem('practice_to_chat', 'true');
-        localStorage.setItem('practice_feedback_simple', query);
-        
-        // Store detailed practice data for the backend
-        const detailedPracticeInfo = `
+        try {
+          // Clear any existing practice feedback to prevent duplication
+          localStorage.removeItem('practice_to_chat');
+          localStorage.removeItem('practice_feedback_simple');
+          localStorage.removeItem('practice_feedback_prompt');
+          
+          // Set up practice to chat integration
+          localStorage.setItem('practice_to_chat', 'true');
+          localStorage.setItem('practice_feedback_simple', query);
+          
+          // Store detailed practice data for the backend
+          const detailedPracticeInfo = `
 **Practice Scenario Completed**
 - Scenario: ${currentScenario.scenario.title}
 - Issue: ${currentScenario.scenario.issue}
@@ -1097,83 +1092,139 @@ ${currentScenario.sessionSummary?.choiceHistory?.map((choice: string, i: number)
 
 IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical strategy - what I did well with my chosen tactics and how I could strategically use other available tactics in similar situations.
 `;
-        
-        localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
-        localStorage.setItem('force_conversation_id', originalConversationId);
-        
-        // Set flag to auto-open tactics guide after returning to chat using database
-        try {
-          const practiceSessionData = {
-            tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
-            scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
-            issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
-          };
           
-          // Store the auto-open flag and practice data in the database
-          await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
-            conversationId: originalConversationId,
-            practiceData: practiceSessionData
-          });
+          localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
+          localStorage.setItem('force_conversation_id', originalConversationId);
           
-          console.log('Saved auto-open tactics flag and practice session data to database:', practiceSessionData);
-        } catch (error) {
-          console.error('Failed to save auto-open tactics flag to database:', error);
-          // Fallback to localStorage as backup
-          localStorage.setItem('auto_open_tactics_guide', 'true');
-          if (currentScenario.sessionSummary) {
+          // Set flag to auto-open tactics guide after returning to chat using database
+          try {
             const practiceSessionData = {
               tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
               scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
               issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
             };
-            localStorage.setItem('last_practice_session_data', JSON.stringify(practiceSessionData));
+            
+            // Store the auto-open flag and practice data in the database
+            await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
+              conversationId: originalConversationId,
+              practiceData: practiceSessionData
+            });
+            
+            console.log('Saved auto-open tactics flag and practice session data to database:', practiceSessionData);
+          } catch (dbError) {
+            console.error('Failed to save auto-open tactics flag to database:', dbError);
+            // Fallback to localStorage as backup
+            localStorage.setItem('auto_open_tactics_guide', 'true');
+            if (currentScenario.sessionSummary) {
+              const practiceSessionData = {
+                tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
+                scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
+                issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
+              };
+              localStorage.setItem('last_practice_session_data', JSON.stringify(practiceSessionData));
+            }
           }
+          
+          console.log('Practice feedback integration set up, navigating to chat...');
+          
+          // Navigate back to the main chat
+          if (onExit) {
+            onExit();
+          } else {
+            window.location.href = '/';
+          }
+        } catch (integrationError) {
+          console.error('Error setting up practice feedback integration:', integrationError);
+          // Fall back to direct feedback
+          showDirectFeedback();
         }
-        
-        console.log('Practice feedback integration set up, navigating to chat...');
-        
-        // Navigate back to the main chat
-        if (onExit) {
-          onExit();
-        } else {
-          window.location.href = '/';
-        }
-        
       } else {
-        // Fallback: try to get feedback directly 
-        const response = await backendApi.get<any>(
-          `/api/v1/scenarios/${currentScenario.scenario.id}/feedback`,
-          {
-            params: { sessionId: currentScenario.sessionId }
-          }
-        );
-        
-        setSessionFeedback(response.data);
-        setShowFeedbackOptions(false);
-        
-        // Add EVA feedback message
-        if (currentScenario) {
-          setCurrentScenario(prev => prev ? {
-            ...prev,
-            conversation: [
-              ...prev.conversation,
-              {
-                role: 'final_evaluation',
-                content: `🎯 **Performance Analysis**\n\n` +
-                        `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/10 (${response.data.performanceLevel})\n\n` +
-                        `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
-                        `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
-              } as FinalEvaluationMessage
-            ]
-          } : null);
-        }
+        // No original conversation ID, show feedback directly
+        showDirectFeedback();
       }
       
     } catch (error) {
       console.error('Error getting feedback from EVA:', error);
       setError('Failed to get feedback from EVA. Please try again.');
+      // Show a fallback message if we have scenario data
+      if (currentScenario?.sessionSummary) {
+        const performanceData = calculatePerformanceRating(currentScenario.sessionSummary.totalEvs || 0);
+        setCurrentScenario(prev => prev ? {
+          ...prev,
+          conversation: [
+            ...prev.conversation,
+            {
+              role: 'final_evaluation',
+              content: `🎯 **Performance Analysis**\n\n` +
+                      `You did well in this scenario! Your tactical choices were effective.\n\n` +
+                      `Remember that you can use different tactics in different situations:\n\n` +
+                      `- **Direct Confrontation** when ethical issues need immediate attention\n` +
+                      `- **Persuasive Rhetoric** to convince others using logical arguments\n` +
+                      `- **Process-Based Advocacy** to suggest systematic improvements\n` +
+                      `- **Soft Resistance** when subtle pushback is more appropriate\n\n` +
+                      `Try practicing with different approaches next time!`
+            } as FinalEvaluationMessage
+          ]
+        } : null);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Helper function to show direct feedback when chat integration fails
+  const showDirectFeedback = async () => {
+    try {
+      // Fallback: try to get feedback directly 
+      const response = await backendApi.get<any>(
+        `/api/v1/scenarios/${currentScenario?.scenario.id}/feedback`,
+        {
+          params: { sessionId: currentScenario?.sessionId }
+        }
+      );
+      
+      setSessionFeedback(response.data);
+      setShowFeedbackOptions(false);
+      
+      // Add EVA feedback message
+      if (currentScenario) {
+        setCurrentScenario(prev => prev ? {
+          ...prev,
+          conversation: [
+            ...prev.conversation,
+            {
+              role: 'final_evaluation',
+              content: `🎯 **Performance Analysis**\n\n` +
+                      `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/10 (${response.data.performanceLevel})\n\n` +
+                      `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
+                      `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
+            } as FinalEvaluationMessage
+          ]
+        } : null);
+      }
+    } catch (feedbackError) {
+      console.error('Error getting direct feedback:', feedbackError);
+      // Show a generic feedback message as last resort
+      if (currentScenario) {
+        const performanceData = calculatePerformanceRating(currentScenario?.sessionSummary?.totalEvs || 0);
+        setCurrentScenario(prev => prev ? {
+          ...prev,
+          conversation: [
+            ...prev.conversation,
+            {
+              role: 'final_evaluation',
+              content: `🎯 **Performance Analysis**\n\n` +
+                      `You completed this scenario with a ${performanceData.rating.toLowerCase()} approach to ethical decision-making.\n\n` +
+                      `Remember that you can use different tactics in different situations:\n\n` +
+                      `- **Direct Confrontation** when ethical issues need immediate attention\n` +
+                      `- **Persuasive Rhetoric** to convince others using logical arguments\n` +
+                      `- **Process-Based Advocacy** to suggest systematic improvements\n` +
+                      `- **Soft Resistance** when subtle pushback is more appropriate\n\n` +
+                      `Try practicing with different approaches next time!`
+            } as FinalEvaluationMessage
+          ]
+        } : null);
+      }
     }
   };
 

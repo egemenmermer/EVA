@@ -114,8 +114,11 @@ module.exports = {
       }),
       keyframes: {
         glow: {
-          '0%, 100%': { opacity: 0.9, boxShadow: '0 0 5px rgba(74, 222, 128, 0.5)' },
-          '50%': { opacity: 1, boxShadow: '0 0 15px rgba(74, 222, 128, 0.8)' },
+          '0%': { boxShadow: '0 0 5px rgba(74, 222, 128, 0.5)', borderColor: 'rgba(74, 222, 128, 0.5)' },
+          '25%': { boxShadow: '0 0 10px rgba(74, 222, 128, 0.7)', borderColor: 'rgba(74, 222, 128, 0.7)' },
+          '50%': { boxShadow: '0 0 15px rgba(74, 222, 128, 0.9)', borderColor: 'rgba(74, 222, 128, 0.9)' },
+          '75%': { boxShadow: '0 0 10px rgba(74, 222, 128, 0.7)', borderColor: 'rgba(74, 222, 128, 0.7)' },
+          '100%': { boxShadow: '0 0 5px rgba(74, 222, 128, 0.5)', borderColor: 'rgba(74, 222, 128, 0.5)' },
         },
       },
       animation: {
