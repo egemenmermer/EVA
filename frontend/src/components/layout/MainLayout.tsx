@@ -385,6 +385,14 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     // Additional logic can be added here if needed
   };
 
+  const handleCloseTacticsModal = () => {
+    setShowTacticsModal(false);
+    // Mark that the user has seen the guide, so the glow effect stops
+    localStorage.setItem('eva-tactics-viewed', 'true');
+    // Notify the sidebar to update its state
+    window.dispatchEvent(new CustomEvent('tactics-viewed'));
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">
       {/* Header - Responsive padding */}
@@ -528,7 +536,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       {/* Tactics Modal */}
       <SimplifiedTacticsModal
         isOpen={showTacticsModal}
-        onClose={() => setShowTacticsModal(false)}
+        onClose={handleCloseTacticsModal}
         practiceData={practiceData}
       />
 

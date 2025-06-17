@@ -357,6 +357,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
 
+  useEffect(() => {
+    const handleTacticsViewed = () => {
+      setHasViewedTactics(true);
+    };
+    window.addEventListener('tactics-viewed', handleTacticsViewed);
+    return () => {
+      window.removeEventListener('tactics-viewed', handleTacticsViewed);
+    };
+  }, []);
+
   const handleNewChat = async () => {
     // Create draft conversation with user's determined manager type
     setError(null);

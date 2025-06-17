@@ -74,6 +74,7 @@ interface ScenarioChoiceResponse {
     managerType: string;
     endingMessage?: string;
     endingType?: string;
+    endingKey?: string;
   };
 }
 
@@ -124,6 +125,13 @@ interface Scenario {
   description: string;
   issue: string;
   managerType: string;
+  endings?: {
+    [key: string]: {
+      text: string;
+      title: string;
+      learning: string;
+    };
+  };
 }
 
 interface ScenarioState {
@@ -607,12 +615,27 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         console.log('🎉 COMPLETION TRIGGERED! Backend says complete with summary');
         console.log('📊 Session summary received:', sessionSummary);
         
+        // Add a temporary ending message, which will be replaced by the full summary
+        const performanceData = calculatePerformanceRating(sessionSummary.totalEvs);
+        const endingType = sessionSummary.endingType || (performanceData.score >= 6.0 ? "good_ending" : "bad_ending");
+        const endingKey = sessionSummary.endingKey || (performanceData.score >= 6.0 ? "good_ending" : "bad_ending");
+
+        // Find the scenario definition to get the ending text
+        const scenarioDefinition = scenarios.find(s => s.id === currentScenario.scenario.id);
+        const endingMessage = scenarioDefinition?.endings?.[endingKey]?.text || sessionSummary.endingMessage || "Your practice session is complete.";
+
+        const finalSessionSummary = {
+          ...sessionSummary,
+          endingMessage: endingMessage,
+          endingType: endingKey,
+        };
+
         setCurrentScenario(prev => prev ? {
           ...prev,
           conversation: updatedConversation,
           isComplete: true,
           currentChoices: [],
-          sessionSummary
+          sessionSummary: finalSessionSummary,
         } : null);
         
         setFinalScore(sessionSummary.totalEvs || 0);
@@ -622,7 +645,12 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         
         // Save practice session data
         if (!sessionSaved) {
-          await savePracticeSessionData(sessionSummary, updatedConversation);
+          await savePracticeSessionData(finalSessionSummary, updatedConversation);
+        }
+        
+        // Also set the localstorage flag as a robust fallback
+        if (isFirstPracticeScenario()) {
+            localStorage.setItem('auto_open_tactics_guide', 'true');
         }
         
         // Show completion popup immediately
@@ -1183,38 +1211,30 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
   // EVS feedback removed for cleaner conversation experience
 
   // Calculate final performance rating based on total EVS
-  const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string } => {
+  const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string; score: number } => {
+    let rating = 'Needs Improvement';
+    let emoji = '🔴';
+    let description = 'Significant room for growth in navigating ethical challenges.';
+    
     if (totalScore >= 8.0) {
-      return {
-        rating: 'Excellent Ethical Advocate',
-        emoji: '🌟',
-        description: 'Outstanding ethical leadership with strong resistance to unethical requests.'
-      };
+      rating = 'Excellent Ethical Advocate';
+      emoji = '🌟';
+      description = 'Outstanding ethical leadership with strong resistance to unethical requests.';
     } else if (totalScore >= 6.0) {
-      return {
-        rating: 'Good Ethical Awareness',
-        emoji: '👍',
-        description: 'Solid ethical reasoning with good resistance to problematic requests.'
-      };
+      rating = 'Good Ethical Awareness';
+      emoji = '👍';
+      description = 'Solid ethical reasoning with good resistance to problematic requests.';
     } else if (totalScore >= 4.0) {
-      return {
-        rating: 'Passive Ethics',
-        emoji: '😐',
-        description: 'Some ethical awareness but inconsistent resistance to unethical requests.'
-      };
-    } else if (totalScore >= 0.0) {
-      return {
-        rating: 'Ethical Risk Zone',
-        emoji: '⚠️',
-        description: 'Concerning compliance with unethical requests. Needs improvement.'
-      };
-    } else {
-      return {
-        rating: 'Ethical Blindspot',
-        emoji: '❌',
-        description: 'Significant ethical concerns. Strong tendency to enable harmful actions.'
-      };
+      rating = 'Passive Ethics';
+      emoji = '😐';
+      description = 'Some ethical awareness but inconsistent resistance to unethical requests.';
+    } else if (totalScore >= 2.0) {
+      rating = 'Fair';
+      emoji = '🟠';
+      description = 'Developing ethical awareness, but missed key opportunities.';
     }
+    
+    return { rating, emoji, description, score: totalScore };
   };
 
   // Show loading while scenario is being set up
