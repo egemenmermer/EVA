@@ -45,6 +45,9 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     tacticCounts: Record<string, number>;
     scenarioTitle: string;
     issue: string;
+    isFirstTime?: boolean;
+    totalPracticesCompleted?: number;
+    scenarioType?: 'privacy' | 'accessibility';
   } | null>(null);
   // State for survey modal
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -140,10 +143,18 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
       try {
         const response = await backendApi.get('/api/v1/practice/latest-session-data');
         if (response.data) {
+          // Check if this is the first time for this scenario type
+          const scenarioType = response.data.issue?.toLowerCase().includes('privacy') ? 'privacy' : 'accessibility';
+          const isFirstTime = response.data.isFirstTimeForScenario || false;
+          const totalPracticesCompleted = response.data.totalPracticesCompleted || 1;
+          
           setPracticeData({
             tacticCounts: response.data.tacticCounts || {},
             scenarioTitle: response.data.scenarioTitle || 'Practice Scenario',
-            issue: response.data.issue || 'Ethical Decision-Making'
+            issue: response.data.issue || 'Ethical Decision-Making',
+            isFirstTime: isFirstTime,
+            totalPracticesCompleted: totalPracticesCompleted,
+            scenarioType: scenarioType
           });
           console.log('Loaded practice data from database for tactics modal:', response.data);
         } else {
@@ -157,10 +168,20 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
           const lastPracticeData = localStorage.getItem('last_practice_session_data');
           if (lastPracticeData) {
             const practiceSessionData = JSON.parse(lastPracticeData);
+            const scenarioType = practiceSessionData.issue?.toLowerCase().includes('privacy') ? 'privacy' : 'accessibility';
+            
+            // Check localStorage for first-time status
+            const privacyCompleted = localStorage.getItem('privacy_scenarios_completed') === 'true';
+            const accessibilityCompleted = localStorage.getItem('accessibility_scenarios_completed') === 'true';
+            const isFirstTime = scenarioType === 'privacy' ? !privacyCompleted : !accessibilityCompleted;
+            
             setPracticeData({
               tacticCounts: practiceSessionData.tacticCounts || {},
               scenarioTitle: practiceSessionData.scenarioTitle || 'Practice Scenario',
-              issue: practiceSessionData.issue || 'Ethical Decision-Making'
+              issue: practiceSessionData.issue || 'Ethical Decision-Making',
+              isFirstTime: isFirstTime,
+              totalPracticesCompleted: practiceSessionData.totalPracticesCompleted || 1,
+              scenarioType: scenarioType
             });
             console.log('Loaded practice data from localStorage fallback:', practiceSessionData);
           } else {

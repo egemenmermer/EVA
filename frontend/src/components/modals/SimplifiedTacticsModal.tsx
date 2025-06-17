@@ -8,6 +8,9 @@ interface SimplifiedTacticsModalProps {
     tacticCounts: Record<string, number>;
     scenarioTitle: string;
     issue: string;
+    isFirstTime?: boolean;
+    totalPracticesCompleted?: number;
+    scenarioType?: 'privacy' | 'accessibility';
   } | null;
 }
 
@@ -109,9 +112,16 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">🎯</span>
                 <div>
-                  <h3 className="text-xl font-bold text-green-800 dark:text-green-300">Your Practice Session Results</h3>
+                  <h3 className="text-xl font-bold text-green-800 dark:text-green-300">
+                    {practiceData.isFirstTime ? 'Your First Practice Session Results' : 'Your Latest Practice Session Results'}
+                  </h3>
                   <p className="text-sm text-green-700 dark:text-green-400">
                     {practiceData.scenarioTitle} - {practiceData.issue}
+                    {practiceData.totalPracticesCompleted && practiceData.totalPracticesCompleted > 1 && (
+                      <span className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+                        Practice #{practiceData.totalPracticesCompleted}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -134,12 +144,25 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
                 <div>
                   <h4 className="font-semibold text-green-800 dark:text-green-300 mb-3">Learning Opportunity:</h4>
                   <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                      Now that you've completed your first practice scenario, explore the tactics below to learn about different approaches you could use in future ethical discussions.
-                    </p>
-                    <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-                      💡 In your next practice scenario, you'll see these tactic types color-coded to help you recognize different strategic approaches!
-                    </p>
+                    {practiceData.isFirstTime ? (
+                      <>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                          Great job completing your first practice scenario! Explore the tactics below to learn about different approaches you could use in future ethical discussions.
+                        </p>
+                        <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                          💡 In your next practice scenario, you'll see these tactic types color-coded to help you recognize different strategic approaches!
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                          You're building your ethical decision-making skills! Review the tactics below to continue improving your approach to ethical discussions.
+                        </p>
+                        <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                          💡 Notice how different tactics work better in different situations. Keep experimenting with various approaches!
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
