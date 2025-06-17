@@ -7,6 +7,7 @@ import { useStore } from '@/store/useStore'; // Import the global store
 import { AnimatePresence, motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Sparkles } from 'lucide-react';
 
 // Import manager icons
 import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
@@ -984,193 +985,12 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   };
 
   const handleGetFeedbackFromEVA = async () => {
-    if (!currentScenario) return;
-    
-    try {
-      setLoading(true);
-      console.log('Getting feedback from EVA for practice module with query...');
-      
-      // Get the current score from the scenario session
-      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
-      
-      // Create a comprehensive query about the practice session
-      const query = `I just completed an ethical decision-making practice scenario. My ethical decision-making score was ${currentScore}/10. Can you provide detailed feedback on my performance?`;
-      
-      console.log('Query sent to EVA:', query);
-      
-      const debugInfo = `
-## Practice Session Debug Info for EVA:
-- Final Score: ${currentScore}/10 (scaled score from EVS)
-- Performance Level: ${calculatePerformanceRating(currentScore).rating}
-`;
-      
-      // FIRST: Ensure practice session data is saved before getting feedback (only if not already saved)
-      if (currentScenario.sessionSummary && !sessionSaved) {
-        const saveResult = await savePracticeSessionData(currentScenario.sessionSummary);
-        if (saveResult) {
-          console.log('Practice session data saved before getting feedback');
-        } else {
-          console.warn('Failed to save practice session data to server, but continuing with feedback');
-        }
-      } else if (sessionSaved) {
-        console.log('Practice session already saved, skipping duplicate save');
-      }
-      
-      // Get the original conversation ID we returned from
-      const originalConversationId = localStorage.getItem('originalConversationId');
-      
-      if (originalConversationId) {
-        // Clear any existing practice feedback to prevent duplication
-        localStorage.removeItem('practice_to_chat');
-        localStorage.removeItem('practice_feedback_simple');
-        localStorage.removeItem('practice_feedback_prompt');
-        
-        // Set up practice to chat integration
-      localStorage.setItem('practice_to_chat', 'true');
-        localStorage.setItem('practice_feedback_simple', query);
-        
-        // Store detailed practice data for the backend
-        const detailedPracticeInfo = `
-**Practice Scenario Completed**
-- Scenario: ${currentScenario.scenario.title}
-- Issue: ${currentScenario.scenario.issue}
-- Manager Type: ${currentScenario.scenario.managerType}
+    // Set flags to trigger guide opening and glow effect on return to dashboard
+    localStorage.setItem('show_tactics_guide_on_return', 'true');
+    localStorage.setItem('show_tactics_glow', 'true');
 
-**Performance Summary:**
-- Final Score: ${currentScore}/10 (scaled EVS score)
-- Performance Level: ${calculatePerformanceRating(currentScore).rating}
-- Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length || 0}
-
-**Available Argumentation Tactics (Focus on tactics relevant to this practice scenario):**
-
-${currentScenario.sessionSummary ? (() => {
-  // Get all tactics the user actually chose
-  const usedTactics = currentScenario.sessionSummary.categoryHistory || [];
-  const uniqueUsedTactics = [...new Set(usedTactics.filter(t => t !== 'None'))];
-  
-  // Practice scenarios include these 4 tactics in various choices
-  const tacticDescriptions = {
-    'Direct Confrontation': '🔸 **Direct Confrontation**: Directly challenge unethical decisions with evidence and strong ethical positions',
-    'Persuasive Rhetoric': '🔹 **Persuasive Rhetoric**: Use logical arguments, evidence, and emotional appeals to convince others',
-    'Process-Based Advocacy': '📋 **Process-Based Advocacy**: Suggest processes, reviews, or systematic approaches to address concerns',
-    'Soft Resistance': '🤲 **Soft Resistance**: Subtle pushback that doesn\'t directly confront but raises ethical concerns'
-  };
-  
-  const allTacticDescriptions = Object.values(tacticDescriptions).join('\n');
-  
-  return `These are the 4 main tactics used in practice scenarios (reference any of these in your feedback):\n\n${allTacticDescriptions}\n\n**Tactics the user actually chose:** ${uniqueUsedTactics.join(', ') || 'None'}`;
-})() : 'No tactical data available.'}
-
-**Tactical Analysis:**
-${currentScenario.sessionSummary?.categoryHistory ? (() => {
-  const tactics = currentScenario.sessionSummary.categoryHistory;
-  const tacticCounts = tactics.reduce((acc: any, tactic: string) => {
-    acc[tactic] = (acc[tactic] || 0) + 1;
-    return acc;
-  }, {});
-  const mostFrequentTactic = Object.entries(tacticCounts).reduce((a: any, b: any) => 
-    tacticCounts[a[0]] > tacticCounts[b[0]] ? a : b
-  )[0];
-  
-  return `- Tactics Used: ${tactics.join(', ')}
-- Most Frequent Tactic: ${mostFrequentTactic} (used ${tacticCounts[mostFrequentTactic]} times)
-- All Tactics Employed: ${Object.entries(tacticCounts).map(([tactic, count]: [string, any]) => `${tactic} (${count}x)`).join(', ')}`;
-})() : '- No tactical data available'}
-
-**Decision-by-Decision Breakdown:**
-${currentScenario.sessionSummary?.choiceHistory?.map((choice: string, i: number) => 
-  `${i+1}. "${choice.substring(0, 80)}${choice.length > 80 ? '...' : ''}" 
-   → Tactic: ${currentScenario.sessionSummary?.categoryHistory?.[i] || 'Unknown'}`
-).join('\n') || '- No decision data available'}
-
-**Please provide tactical feedback that:**
-1. Comments on the specific tactics I actually used and their appropriateness for the situation  
-2. Suggests alternative tactics I could have chosen from the 4 main tactics available in practice scenarios
-3. ONLY reference the 4 tactics listed above - these are the ones used in EVA practice scenarios
-4. Explains when and why different tactics work well in similar ethical dilemmas
-5. Focuses on tactical strategy rather than numerical scores
-6. Helps me understand how to choose between different tactics for various ethical challenges
-
-IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical strategy - what I did well with my chosen tactics and how I could strategically use other available tactics in similar situations.
-`;
-        
-        localStorage.setItem('practice_feedback_prompt', detailedPracticeInfo);
-        localStorage.setItem('force_conversation_id', originalConversationId);
-        
-        // Set flag to auto-open tactics guide after returning to chat using database
-        try {
-          const practiceSessionData = {
-            tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
-            scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
-            issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
-          };
-          
-          // Store the auto-open flag and practice data in the database
-          await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
-            conversationId: originalConversationId,
-            practiceData: practiceSessionData
-          });
-          
-          console.log('Saved auto-open tactics flag and practice session data to database:', practiceSessionData);
-        } catch (error) {
-          console.error('Failed to save auto-open tactics flag to database:', error);
-          // Fallback to localStorage as backup
-          localStorage.setItem('auto_open_tactics_guide', 'true');
-          if (currentScenario.sessionSummary) {
-            const practiceSessionData = {
-              tacticCounts: currentScenario.sessionSummary.tacticCounts || {},
-              scenarioTitle: currentScenario.sessionSummary.scenarioTitle || currentScenario.scenario.title,
-              issue: currentScenario.sessionSummary.issue || currentScenario.scenario.issue
-            };
-            localStorage.setItem('last_practice_session_data', JSON.stringify(practiceSessionData));
-          }
-        }
-        
-        console.log('Practice feedback integration set up, navigating to chat...');
-        
-        // Navigate back to the main chat
-        if (onExit) {
-          onExit();
-        } else {
-          window.location.href = '/';
-        }
-        
-      } else {
-        // Fallback: try to get feedback directly 
-        const response = await backendApi.get<any>(
-          `/api/v1/scenarios/${currentScenario.scenario.id}/feedback`,
-          {
-            params: { sessionId: currentScenario.sessionId }
-          }
-        );
-        
-        setSessionFeedback(response.data);
-        setShowFeedbackOptions(false);
-        
-        // Add EVA feedback message
-        if (currentScenario) {
-          setCurrentScenario(prev => prev ? {
-            ...prev,
-            conversation: [
-              ...prev.conversation,
-              {
-                role: 'final_evaluation',
-                content: `🎯 **Performance Analysis**\n\n` +
-                        `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/10 (${response.data.performanceLevel})\n\n` +
-                        `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
-                        `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
-              } as FinalEvaluationMessage
-            ]
-          } : null);
-        }
-      }
-      
-    } catch (error) {
-      console.error('Error getting feedback from EVA:', error);
-      setError('Failed to get feedback from EVA. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    setFinalReport(false);
+    navigate('/dashboard');
   };
 
   // Initialize the component with auto-start
@@ -1437,9 +1257,18 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                   <h3 className="font-semibold text-lg mb-1 text-center">🎉 {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}</h3>
                   
                   {currentScenario?.sessionSummary?.endingMessage && (
-                    <p className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4">
-                      {currentScenario.sessionSummary.endingMessage}
-                    </p>
+                    <div className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4 prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {(() => {
+                          const fullMessage = currentScenario.sessionSummary.endingMessage;
+                          const feedbackPrefix = "**Overall Feedback:**";
+                          const overallFeedback = fullMessage.includes(feedbackPrefix)
+                            ? `**Overall Feedback:**${fullMessage.split(feedbackPrefix)[1]}`
+                            : fullMessage;
+                          return overallFeedback;
+                        })()}
+                      </ReactMarkdown>
+                    </div>
                   )}
                   
                   {/* Updated Total Score Display with smaller, more compact sizing */}
@@ -1484,7 +1313,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
                     >
                       <span>🤖</span>
-                      <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
+                      <span>{loading ? 'Getting Feedback...' : 'Get EVA\'s Feedback on Your Choices'}</span>
                     </button>
                     
                     {/* <button
@@ -1540,7 +1369,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                                   return 'bg-gray-50 dark:bg-gray-900/20 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900/40 cursor-pointer';
                                 }
                               })()
-                            : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
+                            : 'bg-gray-50 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
                         }`}
                         onClick={() => handleChoice(index)}
                         disabled={processingChoice || isTyping}
