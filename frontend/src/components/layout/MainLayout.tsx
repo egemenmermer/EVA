@@ -206,25 +206,10 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     window.addEventListener('show-tactics-modal', handleShowTacticsModal);
     window.addEventListener('show-post-survey-modal', handleShowPostSurveyModal);
 
-    // Check for auto-opening the tactics guide
-    const checkAutoOpen = () => {
-      if (localStorage.getItem('auto_open_tactics_guide') === 'true') {
-        localStorage.removeItem('auto_open_tactics_guide');
-        // Use the event to trigger the data loading and modal opening
-        window.dispatchEvent(new CustomEvent('show-tactics-modal', { detail: { isAutoOpen: true } }));
-      }
-    };
-
-    // Check immediately and also when the user focuses the window,
-    // as they might be coming back from another tab.
-    checkAutoOpen();
-    window.addEventListener('focus', checkAutoOpen);
-
     return () => {
       window.removeEventListener('show-manager-quiz', handleShowQuizModal);
       window.removeEventListener('show-tactics-modal', handleShowTacticsModal);
       window.removeEventListener('show-post-survey-modal', handleShowPostSurveyModal);
-      window.removeEventListener('focus', checkAutoOpen);
     };
   }, []);
 
@@ -402,11 +387,17 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
 
   const handleCloseTacticsModal = () => {
     setShowTacticsModal(false);
-    // Mark that the user has seen the guide, so the glow effect stops
-    localStorage.setItem('eva-tactics-viewed', 'true');
-    // Notify the sidebar to update its state
-    window.dispatchEvent(new CustomEvent('tactics-viewed'));
   };
+
+  useEffect(() => {
+    if (localStorage.getItem('auto_open_tactics_guide') === 'true') {
+      // Small delay to allow the page to render before showing the modal
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+        localStorage.removeItem('auto_open_tactics_guide');
+      }, 500);
+    }
+  }, [user]); // Reruns when user data (like practice status) changes
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">

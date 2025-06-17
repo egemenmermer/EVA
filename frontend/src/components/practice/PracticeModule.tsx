@@ -73,6 +73,7 @@ interface ScenarioChoiceResponse {
     issue: string;
     managerType: string;
     endingMessage?: string;
+    endingTitle?: string;
     endingType?: string;
     endingKey?: string;
   };
@@ -172,34 +173,6 @@ const getManagerDescription = (managerType: string): string => {
     default:
       console.log(`Warning: Unknown manager type '${managerType}', normalized to '${normalizedManagerType}'`);
       return "This manager type focuses on making decisions that balance business needs with ethical considerations.";
-  }
-};
-
-// Helper function to determine color based on tactic category
-const getTacticTypeColor = (category: string): string => {
-  const lowerCategory = category.toLowerCase();
-  if (lowerCategory.includes('logical') || lowerCategory.includes('fallac')) {
-    return 'border-red-300/80 bg-red-50/80 dark:bg-red-900/10 dark:border-red-800/20 text-red-800 dark:text-red-300';
-  } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric')) {
-    return 'border-blue-300/80 bg-blue-50/80 dark:bg-blue-900/10 dark:border-blue-800/20 text-blue-800 dark:text-blue-300';
-  } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance')) {
-    return 'border-yellow-300/80 bg-yellow-50/80 dark:bg-yellow-900/10 dark:border-yellow-800/20 text-yellow-800 dark:text-yellow-300';
-  } else { // Mixed
-    return 'border-gray-300/80 bg-gray-100/80 dark:bg-gray-800/10 dark:border-gray-700/20 text-gray-800 dark:text-gray-300';
-  }
-};
-
-// Helper function for the small badge inside the button
-const getTacticTypeBadgeColor = (category: string): string => {
-  const lowerCategory = category.toLowerCase();
-  if (lowerCategory.includes('logical') || lowerCategory.includes('fallac')) {
-    return 'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-200';
-  } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric')) {
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-800/30 dark:text-blue-200';
-  } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance')) {
-    return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/30 dark:text-yellow-200';
-  } else { // Mixed
-    return 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   }
 };
 
@@ -643,18 +616,20 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         console.log('🎉 COMPLETION TRIGGERED! Backend says complete with summary');
         console.log('📊 Session summary received:', sessionSummary);
         
-        // Add a temporary ending message, which will be replaced by the full summary
+        // Determine the ending key
         const performanceData = calculatePerformanceRating(sessionSummary.totalEvs);
-        const endingType = sessionSummary.endingType || (performanceData.score >= 6.0 ? "good_ending" : "bad_ending");
-        const endingKey = sessionSummary.endingKey || (performanceData.score >= 6.0 ? "good_ending" : "bad_ending");
+        const endingKey = sessionSummary.endingType || (sessionSummary.totalEvs >= 6.0 ? "good_ending" : "bad_ending");
 
         // Find the scenario definition to get the ending text
         const scenarioDefinition = scenarios.find(s => s.id === currentScenario.scenario.id);
-        const endingMessage = scenarioDefinition?.endings?.[endingKey]?.text || sessionSummary.endingMessage || "Your practice session is complete.";
+        const ending = scenarioDefinition?.endings?.[endingKey];
+        const endingMessage = ending?.text || sessionSummary.endingMessage || "Your practice session is complete.";
+        const endingTitle = ending?.title || "Practice Complete";
 
         const finalSessionSummary = {
           ...sessionSummary,
           endingMessage: endingMessage,
+          endingTitle: endingTitle,
           endingType: endingKey,
         };
 
@@ -679,12 +654,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         // Also set the localstorage flag as a robust fallback
         if (isFirstPracticeScenario()) {
             localStorage.setItem('auto_open_tactics_guide', 'true');
+            localStorage.setItem('show_tactics_glow', 'true'); // For the glow effect
         }
         
         // Show completion popup immediately
         setFinalReport(true);
         setShowFeedbackOptions(true);
         setProcessingChoice(false);
+        navigate('/dashboard');
         return;
       }
       
@@ -731,6 +708,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             setFinalReport(true);
             setShowFeedbackOptions(true);
             setProcessingChoice(false);
+            navigate('/dashboard');
             return;
           }
         } catch (error) {
@@ -1455,24 +1433,51 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
 
               {/* Show final summary if scenario is complete */}
               {finalReport && (
-                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  {/* Show ending message from scenario as informational */}
+                <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-1 text-center">🎉 {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}</h3>
+                  
                   {currentScenario?.sessionSummary?.endingMessage && (
-                    <div className="mb-4 p-3 bg-blue-50/70 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-800/30 rounded-lg">
-                      <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center justify-center">
-                        <span className="mr-2">📋</span>
-                        Scenario Outcome
-                      </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none text-center">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {currentScenario.sessionSummary.endingMessage}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
+                    <p className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4">
+                      {currentScenario.sessionSummary.endingMessage}
+                    </p>
                   )}
                   
-                  {/* Get Feedback Button */}
-                  <div className="flex">
+                  {/* Updated Total Score Display with smaller, more compact sizing */}
+                  <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                    {(() => {
+                      // Use the most current score from session summary, fall back to finalScore state
+                      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+                      const performanceData = calculatePerformanceRating(currentScore);
+                      
+                      return (
+                        <>
+                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                            {currentScore.toFixed(1)}/10
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
+                          <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
+                            currentScore >= 8.0 
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                              : currentScore >= 6.0
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                              : currentScore >= 4.0
+                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                              : currentScore >= 2.0
+                              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          }`}>
+                            {performanceData.emoji} {performanceData.rating}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 px-1">
+                            {performanceData.description}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  
+                  {/* Compact button layout - side by side */}
+                  <div className="flex space-x-3">
                     <button
                       onClick={handleGetFeedbackFromEVA}
                       disabled={loading}
@@ -1481,6 +1486,14 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                       <span>🤖</span>
                       <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
                     </button>
+                    
+                    {/* <button
+                      onClick={handlePracticeAgain}
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2"
+                    >
+                      <span>🔄</span>
+                      <span>Practice Again</span>
+                    </button> */}
                   </div>
                 </div>
               )}
@@ -1515,7 +1528,18 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                           processingChoice || isTyping
                             ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
                             : !isFirstPractice 
-                            ? getTacticTypeColor(choice.category) + ' hover:opacity-90 cursor-pointer'
+                            ? (() => {
+                                const lowerCategory = choice.category.toLowerCase();
+                                if (lowerCategory.includes('logical') || lowerCategory.includes('fallac')) {
+                                  return 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 cursor-pointer';
+                                } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric')) {
+                                  return 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 cursor-pointer';
+                                } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance')) {
+                                  return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 cursor-pointer';
+                                } else {
+                                  return 'bg-gray-50 dark:bg-gray-900/20 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900/40 cursor-pointer';
+                                }
+                              })()
                             : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
                         }`}
                         onClick={() => handleChoice(index)}
@@ -1524,7 +1548,7 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                         <div className="flex justify-between items-start">
                           <span className="flex-1">{choice.text}</span>
                           {!isFirstPractice && (
-                            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${getTacticTypeBadgeColor(choice.category)}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${getTacticTypeColor(choice.category)}`}>
                               {tacticTypeName}
                             </span>
                           )}

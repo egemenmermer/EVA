@@ -214,9 +214,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
+  const [showGlow, setShowGlow] = useState(false);
   
   // Check if tactics modal has been viewed
   const [hasViewedTactics, setHasViewedTactics] = useState(() => {
@@ -357,28 +357,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
 
-  useEffect(() => {
-    const handleTacticsViewed = () => {
-      setHasViewedTactics(true);
-    };
-    window.addEventListener('tactics-viewed', handleTacticsViewed);
-    return () => {
-      window.removeEventListener('tactics-viewed', handleTacticsViewed);
-    };
-  }, []);
-
-  // Reset viewed state if user has no practice history,
-  // ensuring the glow appears for their first-ever completion.
-  useEffect(() => {
-    if (user && !user.hasCompletedPractice) {
-      if (hasViewedTactics) {
-        localStorage.removeItem('eva-tactics-viewed');
-        setHasViewedTactics(false);
-      }
-    }
-  }, [user, hasViewedTactics]);
-
   const handleNewChat = async () => {
+    // If there's a draft, select it first
+    if (currentConversation && currentConversation.isDraft) {
+      handleSelectConversation(currentConversation);
+      return;
+    }
+
     // Create draft conversation with user's determined manager type
     setError(null);
     try {
@@ -660,37 +645,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {(user?.hasCompletedPractice || currentConversationHasPractice()) && (
           <button
             onClick={() => {
-              // Mark tactics as viewed
-              if (!hasViewedTactics) {
-                setHasViewedTactics(true);
-                localStorage.setItem('eva-tactics-viewed', 'true');
-              }
               // Dispatch event to show tactics modal in main layout
               window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+              // Remove the glow effect after click
+              if (showGlow) {
+                setShowGlow(false);
+                localStorage.removeItem('show_tactics_glow');
+              }
             }}
             className={`group relative px-3 py-2 text-sm rounded-lg overflow-hidden
-                      bg-gradient-to-r from-green-500 to-emerald-600
-                      hover:from-green-600 hover:to-emerald-700
-                      text-white shadow-md hover:shadow-lg
-                      transform hover:scale-[1.02] active:scale-[0.98]
-                      transition-all duration-500 ease-out
-                      w-full flex items-center justify-center gap-2
-                      ${!hasViewedTactics ? 'animate-glow' : ''}`}
+              w-full flex items-center gap-2 transition-all duration-300
+              ${
+                showGlow
+                  ? 'bg-blue-500/90 text-white animate-glow hover:bg-blue-600'
+                  : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/90'
+              }
+            `}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
-                           translate-x-[-100%] group-hover:translate-x-[100%] 
-                           transition-transform duration-1500 ease-in-out"></div>
-            <span className="relative z-10 flex items-center space-x-1.5">
-              <span className="text-sm">💡</span>
-              <span>Tactics Guide</span>
-            </span>
-            {!hasViewedTactics && (
-                <span className="absolute -top-7 left-1/2 -translate-x-1/2 z-20">
-                  <span className="block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md animate-bounce">
-                    Click Me!
-                  </span>
-                  <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-red-500"></span>
-                </span>
+            <BookOpen className="w-5 h-5" />
+            <span className="truncate">Tactics Guide</span>
+            {showGlow && (
+              <span className="absolute top-1/2 right-2 -translate-y-1/2 bg-white text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
+                Click Me!
+              </span>
             )}
           </button>
         )}
