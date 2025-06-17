@@ -2813,9 +2813,10 @@ Format: Include subject line, greeting (based on address style), body paragraphs
       console.log(`🎯 Marking ONLY ${scenarioType} scenario as completed`);
       console.log('🎯 MARK SCENARIO COMPLETED - About to make API call');
 
+      const backendBaseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
       const endpoint = scenarioType === 'accessibility' 
-        ? '/api/v1/user/mark-accessibility-scenarios-completed'
-        : '/api/v1/user/mark-privacy-scenarios-completed';
+        ? `${backendBaseURL}/api/v1/user/mark-accessibility-scenarios-completed`
+        : `${backendBaseURL}/api/v1/user/mark-privacy-scenarios-completed`;
         
       console.log('🎯 MARK SCENARIO COMPLETED - API endpoint:', endpoint);
       console.log('🎯 MARK SCENARIO COMPLETED - Auth token (first 20 chars):', authToken.substring(0, 20) + '...');
