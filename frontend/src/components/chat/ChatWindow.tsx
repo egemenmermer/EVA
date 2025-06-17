@@ -336,7 +336,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       id: 'address',
       question: "How would you like to address the manager?",
       type: 'choice',
-      choices: ['By name (e.g., "Hi James")', 'General ("Hi team")', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+      choices: ['By name (e.g., "Hi [Manager Name]}")', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
     },
     {
       id: 'goal',
