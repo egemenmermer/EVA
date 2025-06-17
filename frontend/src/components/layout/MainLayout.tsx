@@ -206,10 +206,25 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
     window.addEventListener('show-tactics-modal', handleShowTacticsModal);
     window.addEventListener('show-post-survey-modal', handleShowPostSurveyModal);
 
+    // Check for auto-opening the tactics guide
+    const checkAutoOpen = () => {
+      if (localStorage.getItem('auto_open_tactics_guide') === 'true') {
+        localStorage.removeItem('auto_open_tactics_guide');
+        // Use the event to trigger the data loading and modal opening
+        window.dispatchEvent(new CustomEvent('show-tactics-modal', { detail: { isAutoOpen: true } }));
+      }
+    };
+
+    // Check immediately and also when the user focuses the window,
+    // as they might be coming back from another tab.
+    checkAutoOpen();
+    window.addEventListener('focus', checkAutoOpen);
+
     return () => {
       window.removeEventListener('show-manager-quiz', handleShowQuizModal);
       window.removeEventListener('show-tactics-modal', handleShowTacticsModal);
       window.removeEventListener('show-post-survey-modal', handleShowPostSurveyModal);
+      window.removeEventListener('focus', checkAutoOpen);
     };
   }, []);
 

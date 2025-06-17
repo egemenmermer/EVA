@@ -367,6 +367,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     };
   }, []);
 
+  // Reset viewed state if user has no practice history,
+  // ensuring the glow appears for their first-ever completion.
+  useEffect(() => {
+    if (user && !user.hasCompletedPractice) {
+      if (hasViewedTactics) {
+        localStorage.removeItem('eva-tactics-viewed');
+        setHasViewedTactics(false);
+      }
+    }
+  }, [user, hasViewedTactics]);
+
   const handleNewChat = async () => {
     // Create draft conversation with user's determined manager type
     setError(null);
