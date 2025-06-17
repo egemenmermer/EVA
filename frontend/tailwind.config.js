@@ -112,6 +112,15 @@ module.exports = {
           },
         },
       }),
+      keyframes: {
+        glow: {
+          '0%, 100%': { opacity: 0.9, boxShadow: '0 0 5px rgba(74, 222, 128, 0.5)' },
+          '50%': { opacity: 1, boxShadow: '0 0 15px rgba(74, 222, 128, 0.8)' },
+        },
+      },
+      animation: {
+        glow: 'glow 2s ease-in-out infinite',
+      },
     },
   },
   plugins: [
