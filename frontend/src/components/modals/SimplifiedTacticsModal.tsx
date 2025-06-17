@@ -158,7 +158,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400/80 mt-auto">
                 <strong>Examples:</strong> Referencing standards, proposing alternatives, highlighting consequences. <br/>
-                <i>Source: Rose & Tenenberg (2016)</i>
+                <i>Source: <a href="https://doi.org/10.1145/2987592.2987608" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors">Rose & Tenenberg (2016)</a></i>
               </p>
             </div>
             
@@ -172,7 +172,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
               </p>
               <p className="text-xs text-orange-600 dark:text-orange-400/80 mt-auto">
                 <strong>Examples:</strong> Shifting responsibility, vague support, suggesting future action without commitment. <br/>
-                <i>Source: Wong (2021)</i>
+                <i>Source: <a href="https://dl.acm.org/doi/pdf/10.1145/3479499" target="_blank" rel="noopener noreferrer" className="underline hover:text-orange-800 dark:hover:text-orange-300 transition-colors">Wong (2021)</a></i>
               </p>
             </div>
             
@@ -186,7 +186,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
               </p>
               <p className="text-xs text-red-600 dark:text-red-400/80 mt-auto">
                 <strong>Examples:</strong> Appeals to popularity, false equivalence, minimum compliance arguments. <br/>
-                <i>Source: Petric et al. (2022)</i>
+                <i>Source: <a href="https://www.researchgate.net/profile/Domina-Petric/publication/339288684_Logical_Fallacies/links/5e47e51f92851c7f7f3c08dc/Logical-Fallacies.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-800 dark:hover:text-red-300 transition-colors">Petric et al. (2022)</a></i>
               </p>
             </div>
           </div>

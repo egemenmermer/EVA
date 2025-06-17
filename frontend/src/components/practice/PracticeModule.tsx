@@ -1506,19 +1506,28 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                         className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
                           processingChoice || isTyping
                             ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                            : !isFirstPractice 
+                            ? (() => {
+                                const lowerCategory = choice.category.toLowerCase();
+                                if (lowerCategory.includes('logical') || lowerCategory.includes('fallac')) {
+                                  return 'bg-red-500 dark:bg-red-600 text-white border-red-600 dark:border-red-700 hover:bg-red-600 dark:hover:bg-red-700 cursor-pointer';
+                                } else if (lowerCategory.includes('persuasive') || lowerCategory.includes('rhetoric')) {
+                                  return 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 dark:border-blue-700 hover:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer';
+                                } else if (lowerCategory.includes('soft') || lowerCategory.includes('resistance')) {
+                                  return 'bg-yellow-500 dark:bg-yellow-600 text-white border-yellow-600 dark:border-yellow-700 hover:bg-yellow-600 dark:hover:bg-yellow-700 cursor-pointer';
+                                } else {
+                                  return 'bg-gray-500 dark:bg-gray-600 text-white border-gray-600 dark:border-gray-700 hover:bg-gray-600 dark:hover:bg-gray-700 cursor-pointer';
+                                }
+                              })()
                             : 'bg-gray-50/70 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
                         }`}
                         onClick={() => handleChoice(index)}
                         disabled={processingChoice || isTyping}
                       >
                         <div className="flex justify-between items-start">
-                          <span className="flex-1">{choice.text}</span>
+                          <span className={`flex-1 ${!isFirstPractice ? 'text-white' : ''}`}>{choice.text}</span>
                           {!isFirstPractice && (
-                            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
-                              processingChoice || isTyping
-                                ? 'bg-gray-200/30 dark:bg-gray-600/20 text-gray-400 dark:text-gray-500'
-                                : tacticTypeColor
-                            }`}>
+                            <span className="text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 bg-white/20 text-white">
                               {tacticTypeName}
                             </span>
                           )}
