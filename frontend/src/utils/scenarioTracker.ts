@@ -56,7 +56,7 @@ const isAccessibilityScenarioComplete = (content: string): boolean => {
   
   if (hasExplicitPrivacyIndicators) {
     console.log('🔍 Found explicit privacy indicators, not accessibility');
-    return false;
+  return false;
   }
   
   // Additional check for accessibility-specific keywords (only if no explicit type found)
@@ -128,7 +128,7 @@ const isPrivacyScenarioComplete = (content: string): boolean => {
   
   if (hasExplicitAccessibilityIndicators) {
     console.log('🔍 Found explicit accessibility indicators, not privacy');
-    return false;
+  return false;
   }
   
   // Additional check for privacy-specific keywords (only if no explicit type found)
@@ -350,27 +350,27 @@ export const analyzeMessageForScenarioCompletion = async (messageContent: string
         
         if (isAccessibilityComplete) {
           console.log('✅ Detected NEW accessibility scenario completion (keyword-based, validated by context)');
-          await markScenarioTypeCompleted('accessibility');
-          
-          // Trigger UI refresh
-          window.dispatchEvent(new CustomEvent('scenario-completed', { 
-            detail: { scenarioType: 'accessibility' } 
-          }));
-        }
-        
+      await markScenarioTypeCompleted('accessibility');
+      
+      // Trigger UI refresh
+      window.dispatchEvent(new CustomEvent('scenario-completed', { 
+        detail: { scenarioType: 'accessibility' } 
+      }));
+    }
+    
       } else if (practiceContext.scenarioType === 'privacy' && !currentPrivacyStatus) {
         const isPrivacyComplete = isPrivacyScenarioComplete(messageContent);
         console.log('🔍 Privacy scenario complete check result:', isPrivacyComplete);
         
         if (isPrivacyComplete) {
           console.log('✅ Detected NEW privacy scenario completion (keyword-based, validated by context)');
-          await markScenarioTypeCompleted('privacy');
-          
-          // Trigger UI refresh
-          window.dispatchEvent(new CustomEvent('scenario-completed', { 
-            detail: { scenarioType: 'privacy' } 
-          }));
-        }
+      await markScenarioTypeCompleted('privacy');
+      
+      // Trigger UI refresh
+      window.dispatchEvent(new CustomEvent('scenario-completed', { 
+        detail: { scenarioType: 'privacy' } 
+      }));
+    }
       }
       
       // Skip the general keyword-based detection since we have context
@@ -466,7 +466,7 @@ export const getAllScenarioStatuses = () => {
       completedAt: localStorage.getItem('scenario_completed_privacy_timestamp')
     }
   };
-};
+}; 
 
 /**
  * Log current scenario completion status for debugging

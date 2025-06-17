@@ -146,12 +146,12 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
                   <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
                     {practiceData.isFirstTime ? (
                       <>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                           Great job completing your first practice scenario! Explore the tactics below to learn about different approaches you could use in future ethical discussions.
-                        </p>
-                        <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-                          💡 In your next practice scenario, you'll see these tactic types color-coded to help you recognize different strategic approaches!
-                        </p>
+                    </p>
+                    <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                      💡 In your next practice scenario, you'll see these tactic types color-coded to help you recognize different strategic approaches!
+                    </p>
                       </>
                     ) : (
                       <>

@@ -390,18 +390,14 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
   };
 
   useEffect(() => {
-    if (localStorage.getItem('show_tactics_guide_on_return') === 'true') {
-      const hasViewed = localStorage.getItem('eva_tactics_viewed') === 'true';
-      if (!hasViewed) {
-        // Only auto-open if they haven't seen the guide before
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('show-tactics-modal'));
-        }, 500);
-      }
-      // Clean up the flag
-      localStorage.removeItem('show_tactics_guide_on_return');
+    if (localStorage.getItem('auto_open_tactics_guide') === 'true') {
+      // Small delay to allow the page to render before showing the modal
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+        localStorage.removeItem('auto_open_tactics_guide');
+      }, 500);
     }
-  }, [user]); // Reruns when user data might have changed, or on navigation
+  }, [user]); // Reruns when user data (like practice status) changes
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dashboard">

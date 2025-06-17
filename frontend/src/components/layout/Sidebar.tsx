@@ -650,25 +650,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               // Remove the glow effect after click
               if (showGlow) {
                 setShowGlow(false);
-                localStorage.setItem('eva_tactics_viewed', 'true');
                 localStorage.removeItem('show_tactics_glow');
               }
             }}
             className={`group relative px-3 py-2 text-sm rounded-lg overflow-hidden
-              w-full flex items-center gap-2 transition-all duration-300 justify-center
+              w-full flex items-center gap-2 transition-all duration-300
               ${
                 showGlow
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white animate-glow shadow-lg'
+                  ? 'bg-green-500/90 text-white animate-glow hover:bg-green-600'
                   : 'bg-gray-100/80 text-gray-700 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/90'
               }
             `}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-5 h-5" />
             <span className="truncate">Tactics Guide</span>
             {showGlow && (
-              <span className="absolute -top-2 right-0 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce">
+              <span className="absolute top-1/2 right-2 -translate-y-1/2 bg-white text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
                 Click Me!
-              </span>
+            </span>
             )}
           </button>
         )}

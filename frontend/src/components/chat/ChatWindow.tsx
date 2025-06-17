@@ -782,10 +782,17 @@ Format: Include subject line, greeting (based on address style), body paragraphs
 
   // Replace the existing scroll useEffect with this smarter version
   useEffect(() => {
+    // If auto-opening tactics guide, dispatch the event
+    if (localStorage.getItem('auto_open_tactics_guide') === 'true' && messages.length > 0) {
+      console.log('Dispatching show-tactics-modal from ChatWindow');
+      window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+      localStorage.removeItem('auto_open_tactics_guide');
+    }
+
     if (shouldAutoScroll && messagesEndRef.current) {
       // Use requestAnimationFrame to ensure DOM updates before scrolling
       requestAnimationFrame(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       });
     }
   }, [storeMessages, shouldAutoScroll, loading]);
