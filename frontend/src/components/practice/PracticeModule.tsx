@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import './practice.css'; // Import the CSS file for animations
 import { useStore } from '@/store/useStore'; // Import the global store
-
+import { AnimatePresence, motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Import manager icons
 import puppeteerLightPng from '@/assets/manager-icons/puppeteer-manager-light.png';
@@ -1415,8 +1417,10 @@ IMPORTANT: Do NOT mention EVS scores or numerical performance. Focus on tactical
                         <span className="mr-2">📋</span>
                         Scenario Outcome
                       </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {currentScenario.sessionSummary.endingMessage}
+                      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {currentScenario.sessionSummary.endingMessage}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   )}

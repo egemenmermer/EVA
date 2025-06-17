@@ -65,13 +65,13 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
     { name: "Circular Reasoning", description: "Repeats the claim as evidence, without real support." },
   ];
 
-  const renderTacticList = (tactics: { name: string; description: string }[], iconColor: string) => (
+  const renderTacticList = (tactics: { name: string; description: string }[], iconColor: string, IconComponent: React.ElementType) => (
     <div className="grid gap-4">
       {tactics.map((tactic, index) => (
         <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700/50">
           <div className="flex items-start gap-3">
             <div className={`w-8 h-8 bg-${iconColor}-100 dark:bg-${iconColor}-900/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-              <span className={`text-${iconColor}-600 dark:text-${iconColor}-400 text-sm font-bold`}>{index + 1}</span>
+              <IconComponent className={`w-5 h-5 text-${iconColor}-600 dark:text-${iconColor}-400`} />
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{tactic.name}</h4>
@@ -260,9 +260,9 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
 
             {/* Content Display */}
             <div className="p-1">
-              {activeTab === 'rhetorical' && renderTacticList(rhetoricalTactics, 'blue')}
-              {activeTab === 'resistance' && renderTacticList(softResistanceTactics, 'orange')}
-              {activeTab === 'fallacies' && renderTacticList(logicalFallacies, 'red')}
+              {activeTab === 'rhetorical' && renderTacticList(rhetoricalTactics, 'blue', BrainCircuit)}
+              {activeTab === 'resistance' && renderTacticList(softResistanceTactics, 'orange', Puzzle)}
+              {activeTab === 'fallacies' && renderTacticList(logicalFallacies, 'red', X)}
             </div>
           </div>
         </div>

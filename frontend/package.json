@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.0",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.18.1",
     "lucide-react": "^0.344.0",
     "openai": "^4.89.0",
     "react": "^18.2.0",
@@ -29,6 +30,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.11.1",
     "react-syntax-highlighter": "^15.6.1",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.6.0",
     "uuid": "^9.0.0",
     "zustand": "^5.0.3"
