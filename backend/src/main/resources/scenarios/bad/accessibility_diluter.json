@@ -1,0 +1,511 @@
+{
+  "id": "accessibility_diluter",
+  "title": "Screen Reader Compatibility Pressure - Diluter",
+  "description": "Your team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. The manager acknowledges accessibility concerns but consistently offers watered-down solutions that sound reasonable but don't adequately address the problem.",
+  "issue": "Accessibility",
+  "manager_type": "DILUTER",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "I totally get the accessibility concern - it's really important that we're inclusive. What if we make sure our color contrast is good and add some alt text? That should cover most of the accessibility basics, and we can always enhance the screen reader experience in future iterations when we have more time.",
+      "user_choices": [
+        {
+          "choice": "Color contrast and alt text are good starts, but screen reader compatibility requires comprehensive testing and proper markup.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "r_good_1",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        },
+        {
+          "choice": "I appreciate you thinking about accessibility - color contrast and alt text would definitely help some users.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_1",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Screen reader users need full keyboard navigation, proper headings, and ARIA labels, not just visual improvements.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_1",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "Those are thoughtful accessibility improvements that could make a real difference for users.",
+          "tactic": "Hasty Generalization",
+          "leads_to": "r_bad_1",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Draws broad conclusions from limited examples"
+        }
+      ]
+    },
+    "r_good_1": {
+      "text": "Right, you make good points about the technical requirements. What if we focus on the most critical screen reader features first? Maybe we could get keyboard navigation working and add some basic ARIA labels. That should address the major accessibility concerns while keeping us on schedule.",
+      "user_choices": [
+        {
+          "choice": "Partial keyboard navigation often creates confusing user experiences - we need complete navigation paths.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_2",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "I appreciate the focus on critical features - that sounds like a practical compromise.",
+          "tactic": "False Dilemma",
+          "leads_to": "r_bad_2",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
+        },
+        {
+          "choice": "Basic ARIA labels without proper testing often fail to work correctly with actual screen readers.",
+          "tactic": "Appeal to Empathy",
+          "leads_to": "r_good_2",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
+        },
+        {
+          "choice": "Focusing on keyboard navigation and ARIA labels does seem like the most important accessibility features.",
+          "tactic": "Appealing to Practicality",
+          "leads_to": "r_bad_2",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
+        }
+      ]
+    },
+    "r_bad_1": {
+      "text": "Exactly! I'm glad you see we're being thoughtful about this. We could also add some tooltips and maybe use semantic HTML where it's easy. The key is making steady progress on accessibility without overwhelming the timeline. Small improvements add up over time.",
+      "user_choices": [
+        {
+          "choice": "Semantic HTML and tooltips are good practices, but they don't replace comprehensive screen reader compatibility.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "r_good_2",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        },
+        {
+          "choice": "Small accessibility improvements over time does seem like a sustainable approach.",
+          "tactic": "Slippery Slope",
+          "leads_to": "r_bad_2",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Claims one action will inevitably lead to extreme consequences"
+        },
+        {
+          "choice": "Screen reader users need working functionality now, not gradual improvements that may never reach full compatibility.",
+          "tactic": "Appeal to Empathy",
+          "leads_to": "r_good_2",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
+        },
+        {
+          "choice": "It's great that you're finding ways to make accessibility progress within our constraints.",
+          "tactic": "Strawman",
+          "leads_to": "r_bad_2",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Misrepresents your point to argue against an easier version"
+        }
+      ]
+    },
+    "r_good_2": {
+      "text": "I hear what you're saying about comprehensive testing. What if we run our accessibility through one of those automated tools? That should catch most of the screen reader issues, and we could supplement it with some quick manual testing if time allows.",
+      "user_choices": [
+        {
+          "choice": "Automated tools miss most real-world screen reader problems - we need testing with actual users.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "r_good_3",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        },
+        {
+          "choice": "Automated accessibility tools are definitely a good starting point for catching basic issues.",
+          "tactic": "Red Herring",
+          "leads_to": "r_bad_3",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Introduces irrelevant info to distract from the real issue"
+        },
+        {
+          "choice": "Quick manual testing usually means developers clicking through without understanding screen reader workflows.",
+          "tactic": "Technical Feasibility Framing",
+          "leads_to": "r_good_3",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
+        },
+        {
+          "choice": "Combining automated tools with manual testing sounds like a thorough approach to accessibility validation.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "r_bad_3",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Justifies decisions because 'everyone else does it'"
+        }
+      ]
+    },
+    "r_bad_2": {
+      "text": "I love that you're being realistic about this! What if we also create a basic accessibility guide for the team? Nothing too complex - just some quick dos and don'ts. That way we're building accessibility awareness while delivering on our timeline commitments.",
+      "user_choices": [
+        {
+          "choice": "Team accessibility guides are valuable, but they don't replace proper implementation and testing for this release.",
+          "tactic": "Appeal to Consequences",
+          "leads_to": "r_good_3",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Argues a decision based on its practical or moral outcomes"
+        },
+        {
+          "choice": "Building team accessibility awareness while meeting timeline commitments is a smart balanced approach.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_3",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Accessibility awareness doesn't help users who can't access the product we're shipping.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_3",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "Creating accessibility documentation for future projects shows good long-term thinking.",
+          "tactic": "Appealing to Practicality",
+          "leads_to": "r_bad_3",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
+        }
+      ]
+    },
+    "r_good_3": {
+      "text": "You know, you're right that real user testing would be more valuable. What if we reach out to one or two users with screen readers for some quick feedback? We probably can't do a full usability study, but even brief input would help us catch the major issues.",
+      "user_choices": [
+        {
+          "choice": "One or two quick feedback sessions won't reveal systematic navigation and interaction problems.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "r_good_4",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        },
+        {
+          "choice": "Getting feedback from actual screen reader users would definitely be more valuable than automated testing.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Proper accessibility testing requires structured scenarios and multiple users, not just quick feedback.",
+          "tactic": "Technical Feasibility Framing",
+          "leads_to": "r_good_4",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
+        },
+        {
+          "choice": "Brief input from screen reader users is definitely better than no user testing at all.",
+          "tactic": "False Dilemma",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
+        }
+      ]
+    },
+    "r_bad_3": {
+      "text": "Perfect! I knew you'd understand the balance we need to strike. What if we also set up a quick accessibility checklist for future projects? That way we're not just solving this immediate challenge, but building better processes for the long term. It's all about sustainable improvement.",
+      "user_choices": [
+        {
+          "choice": "Future process improvements don't address the accessibility problems users will face with this release.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_4",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "Building better accessibility processes for future projects is definitely valuable long-term thinking.",
+          "tactic": "Suggesting Future Fixes",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Postpones ethical resolution to future versions"
+        },
+        {
+          "choice": "Accessibility checklists are helpful, but they need to be backed by actual testing and user feedback.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "r_good_4",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        },
+        {
+          "choice": "Sustainable improvement through better processes is exactly the kind of strategic thinking we need.",
+          "tactic": "Strawman",
+          "leads_to": "r_bad_4",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Misrepresents your point to argue against an easier version"
+        }
+      ]
+    },
+    "r_good_4": {
+      "text": "You're making some really good points about proper testing methodology. I guess I'm just worried about how to present this timeline extension to stakeholders. Maybe you could help me understand what the minimum viable accessibility testing would look like? That way I can make a more informed case for the resources we need.",
+      "user_choices": [
+        {
+          "choice": "Minimum viable accessibility means users can complete core tasks with screen readers, not just pass automated checks.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_5",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "I can help outline what basic accessibility testing would need to include for stakeholder discussions.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Accessibility testing requirements should be determined by user needs and legal standards, not stakeholder comfort.",
+          "tactic": "Legal Compliance Anchor",
+          "leads_to": "r_good_5",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Grounds the argument in legal obligations and rights"
+        },
+        {
+          "choice": "Finding the right balance between thorough testing and timeline constraints is definitely challenging.",
+          "tactic": "Appealing to Practicality",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
+        }
+      ]
+    },
+    "r_bad_4": {
+      "text": "I really appreciate your collaborative approach to this. What if we compromise and do a hybrid approach? We'll implement the basic accessibility features we discussed, run the automated tools, and maybe do one quick user session if we can arrange it. That gives us multiple layers of coverage while staying realistic about our constraints.",
+      "user_choices": [
+        {
+          "choice": "Hybrid approaches to accessibility often result in partially accessible products that frustrate users more than helping them.",
+          "tactic": "Appeal to Empathy",
+          "leads_to": "r_good_5",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
+        },
+        {
+          "choice": "A hybrid approach with multiple layers of coverage does sound like a reasonable compromise.",
+          "tactic": "False Dilemma",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames the issue as a black-or-white choice when other options exist"
+        },
+        {
+          "choice": "Multiple layers of accessibility coverage need to be comprehensive in each layer, not superficial across many.",
+          "tactic": "Technical Feasibility Framing",
+          "leads_to": "r_good_5",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Acknowledges technical limitations while proposing realistic solutions"
+        },
+        {
+          "choice": "I appreciate the effort to find a solution that balances accessibility needs with project constraints.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_5",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        }
+      ]
+    },
+    "r_good_5": {
+      "text": "You know what, you're absolutely right about user needs driving the requirements. Let me talk to the project stakeholders about adjusting our timeline to do this properly. I think if I frame it in terms of legal compliance and user experience quality, they'll understand the necessity.",
+      "user_choices": [
+        {
+          "choice": "Legal compliance and user experience are exactly the right framework for stakeholder discussions about accessibility.",
+          "tactic": "Appealing to Shared Values",
+          "leads_to": "r_good_6",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Builds common ground with the manager through shared beliefs"
+        },
+        {
+          "choice": "I'm glad you're willing to advocate for proper accessibility timeline with stakeholders.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Stakeholder education about accessibility requirements should emphasize both legal obligations and business benefits.",
+          "tactic": "Risk Management Framing",
+          "leads_to": "r_good_6",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Focuses on reputational or operational risk to justify better practices"
+        },
+        {
+          "choice": "Framing accessibility in terms of compliance and quality should help stakeholders understand the importance.",
+          "tactic": "Strawman",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Misrepresents your point to argue against an easier version"
+        }
+      ]
+    },
+    "r_bad_5": {
+      "text": "Great! I think we've found a really workable solution here. The hybrid approach gives us the best of both worlds - we're addressing accessibility concerns while being mindful of project realities. I'll document our plan and get started on implementation. Thanks for being so reasonable about finding middle ground.",
+      "user_choices": [
+        {
+          "choice": "Middle ground on accessibility often means compromising user access in ways that aren't immediately visible to the team.",
+          "tactic": "Appeal to Empathy",
+          "leads_to": "r_good_6",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses human stories or emotional reasoning to highlight user impact"
+        },
+        {
+          "choice": "I'm glad we could find a solution that balances accessibility concerns with project constraints.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Documenting our accessibility plan is important, but implementation quality will determine actual user outcomes.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "r_good_6",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "The hybrid approach does seem like a practical way to address multiple priorities simultaneously.",
+          "tactic": "Appealing to Practicality",
+          "leads_to": "r_bad_6",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Emphasizes speed, efficiency, or deadlines over ethical values"
+        }
+      ]
+    },
+    "r_good_6": {
+      "text": "You've really opened my eyes to the importance of thinking about this from the user perspective. I'm going to push for a proper accessibility testing phase, even if it means extending our timeline. The stakeholders need to understand that this isn't optional - it's about building products that actually work for everyone.",
+      "user_choices": [
+        {
+          "choice": "Accessibility testing should become a standard part of our development process, not a special exception.",
+          "tactic": "Precedent Reference",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses past decisions or industry practices to support an action"
+        },
+        {
+          "choice": "I'm excited that you're committed to advocating for proper accessibility testing with stakeholders.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Building products that work for everyone should be a core value that influences all our project planning.",
+          "tactic": "Appealing to Shared Values",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Builds common ground with the manager through shared beliefs"
+        },
+        {
+          "choice": "Extending timelines for accessibility shows real commitment to inclusive design principles.",
+          "tactic": "Appeal to Popularity",
+          "leads_to": "final_score",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Justifies decisions because 'everyone else does it'"
+        }
+      ]
+    },
+    "r_bad_6": {
+      "text": "Perfect! I think we've reached a really good understanding here. The key is being pragmatic while still caring about accessibility. We'll implement our hybrid approach and see how it goes. If we learn things that help us improve the process for next time, even better. Thanks for being such a thoughtful collaborator on this.",
+      "user_choices": [
+        {
+          "choice": "Pragmatic accessibility approaches need to prioritize user outcomes, not just process completion.",
+          "tactic": "User-Centered Framing",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames the argument around the needs and lived experiences of users"
+        },
+        {
+          "choice": "I appreciate the collaborative approach to finding accessibility solutions within our constraints.",
+          "tactic": "Being Overly Agreeable",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Appears open but subtly avoids change"
+        },
+        {
+          "choice": "Learning from this process should help us build better accessibility practices for future projects.",
+          "tactic": "Suggesting Future Fixes",
+          "leads_to": "final_score",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "Postpones ethical resolution to future versions"
+        },
+        {
+          "choice": "Accessibility implementation should be measured by user success, not by completion of planned activities.",
+          "tactic": "Appeal to Standards",
+          "leads_to": "final_score",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refers to official guidelines or best practices to justify actions"
+        }
+      ]
+    },
+    "final_score": {
+      "text": "Based on your advocacy throughout this interaction, here's how the screen reader compatibility situation unfolds:",
+      "user_choices": [],
+      "score_ranges": {
+        "3_to_6": "good_ending",
+        "0_to_2": "bad_ending"
+      }
+    }
+  },
+  "endings": {
+    "bad_ending": {
+      "text": "The manager proceeds with the watered-down accessibility approach. 'I think we've found a really balanced solution here. We'll add the basic accessibility features, run some automated checks, and call it good for this release. We can always enhance things later if users report issues.' The project ships with minimal accessibility support that passes automated tests but fails real-world usage. Your concerns about comprehensive testing were acknowledged but ultimately diluted into ineffective compromises.",
+      "title": "Diluted Accessibility",
+      "learning": "Managers who dilute accessibility concerns often sound reasonable while offering solutions that don't actually work for users. Focusing on real user outcomes and comprehensive testing standards can help resist these watered-down approaches."
+    },
+    "good_ending": {
+      "text": "The manager decides to implement proper accessibility testing. 'You've convinced me that we need to do this right. I'll talk to stakeholders about extending our timeline to include comprehensive screen reader testing with actual users. We can't ship something that only works for some people.' Your persistence in advocating for real user needs over convenient compromises successfully shifted the project toward genuine accessibility. The product launches with proper screen reader support that actually works.",
+      "title": "Comprehensive Accessibility",
+      "learning": "Effective advocacy against dilution tactics requires consistently returning focus to actual user outcomes rather than accepting convenient compromises. Emphasizing the difference between surface-level and comprehensive accessibility helps managers understand what users really need."
+    }
+  }
+}

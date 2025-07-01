@@ -544,28 +544,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     // Determine appropriate references based on scenario
     const relevantReferences = currentScenario === 'accessibility' 
-      ? 'WCAG guidelines, ADA compliance, Section 508' 
+      ? 'accessibility standards, WCAG guidelines, disability rights laws' 
       : currentScenario === 'privacy'
-      ? 'GDPR, CCPA, company privacy policy'
-      : 'company ethics policy, industry standards';
+      ? 'privacy laws, data protection rules, company privacy policy'
+      : 'ethics guidelines, company policies';
     
-    const enhancedPrompt = `Generate a professional email based on the user's communication preferences and scenario context:
+    // Handle addressing style
+    const addressingInstruction = emailDraftData.address.includes('By name') 
+      ? 'Use "[Manager Name]" as placeholder for the manager\'s name in the greeting (e.g., "Hi [Manager Name],")'
+      : emailDraftData.address.includes('No greeting') 
+      ? 'Skip the greeting and go straight to the main content'
+      : 'Choose an appropriate greeting style';
+    
+    const enhancedPrompt = `Please help me draft an email to my manager about this ${scenarioContext} issue:
 
-**Scenario Context**: This email addresses ${scenarioContext} concerns from a workplace ethical situation the user just practiced.
+Original issue: ${emailDraftData.originalEthicalIssue}
 
-**Original Ethical Issue**: ${emailDraftData.originalEthicalIssue}
-
-**Communication Preferences**:
+Here's how I want this email to sound:
 - Tone: ${emailDraftData.tone}
-- Address style: ${emailDraftData.address}
-- Main goal: ${emailDraftData.action}
-- Include policy references: ${emailDraftData.references.length > 0 ? `Yes (suggest: ${relevantReferences})` : 'No'}
-- User customization: ${emailDraftData.concern || 'Use professional best practices'}
+- How to address my manager: ${emailDraftData.address}
+- What I want to accomplish: ${emailDraftData.action}
+- ${emailDraftData.references.length > 0 ? `Include references to relevant guidelines (like ${relevantReferences.split(', ').slice(0, 2).join(' and ')})` : 'No need to reference specific policies'} 
+- ${emailDraftData.concern && emailDraftData.concern !== 'Use best practices' && emailDraftData.concern !== 'Keep it simple and brief' ? `Also: ${emailDraftData.concern}` : 'Keep it professional but natural'}
 
-**Instructions**: 
-Generate a well-structured email that reflects the specified tone and communication style. The email should address the ${scenarioContext} concerns professionally while achieving the stated goal. ${emailDraftData.references.length > 0 ? `Include appropriate references to ${relevantReferences} to strengthen the argument.` : ''} ${emailDraftData.concern && emailDraftData.concern !== 'Use best practices' && emailDraftData.concern !== 'Keep it simple and brief' ? `Important: ${emailDraftData.concern}` : ''}
-
-Format: Include subject line, greeting (based on address style), body paragraphs, and professional closing.`;
+Make it sound like how I would actually write to my manager, not like a formal document. Just give me the email with a subject line.`;
     
     try {
       const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
@@ -2879,7 +2881,34 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     }
   };
 
-  // Function to generate congratulations message based on scenario completion status
+  // Function to calculate performance rating (copied from PracticeModule)
+  const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string; score: number } => {
+    let rating = 'Needs Improvement';
+    let emoji = '🔴';
+    let description = 'Significant room for growth in navigating ethical challenges.';
+    
+    if (totalScore >= 8.0) {
+      rating = 'Excellent Ethical Advocate';
+      emoji = '🌟';
+      description = 'Outstanding ethical leadership with strong resistance to unethical requests.';
+    } else if (totalScore >= 6.0) {
+      rating = 'Good Ethical Awareness';
+      emoji = '👍';
+      description = 'Solid ethical reasoning with good resistance to problematic requests.';
+    } else if (totalScore >= 4.0) {
+      rating = 'Passive Ethics';
+      emoji = '😐';
+      description = 'Some ethical awareness but inconsistent resistance to unethical requests.';
+    } else if (totalScore >= 2.0) {
+      rating = 'Fair';
+      emoji = '🟠';
+      description = 'Developing ethical awareness, but missed key opportunities.';
+    }
+    
+    return { rating, emoji, description, score: totalScore };
+  };
+
+  // Function to generate congratulations message based on scenario completion status and performance
   const generateCongratulationsMessage = async (): Promise<string> => {
     // Wait a bit for user data to be refreshed after marking scenario complete
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -2889,12 +2918,70 @@ Format: Include subject line, greeting (based on address style), body paragraphs
     
     const bothScenariosCompleted = user?.accessibilityScenariosCompleted && user?.privacyScenariosCompleted;
     
+    // Try to get practice score data from localStorage
+    let latestScore: number | null = null;
+    let performanceData: { rating: string; emoji: string; description: string; score: number } | null = null;
+    
+    try {
+      // Check the most recent practice data
+      const practiceDetailedData = localStorage.getItem('practice_detailed_data');
+      const lastPracticeSessionData = localStorage.getItem('last_practice_session_data');
+      
+      if (practiceDetailedData) {
+        const data = JSON.parse(practiceDetailedData);
+        latestScore = data.score || data.sessionSummary?.totalEvs;
+      } else if (lastPracticeSessionData) {
+        const data = JSON.parse(lastPracticeSessionData);
+        latestScore = data.score;
+      }
+      
+      if (latestScore !== null) {
+        performanceData = calculatePerformanceRating(latestScore);
+      }
+    } catch (error) {
+      console.warn('Could not parse practice score data from localStorage:', error);
+    }
+    
     if (bothScenariosCompleted) {
-      // Both scenarios completed - congratulate and offer post-survey
-      return "🎉 **Outstanding Achievement!** You've successfully completed **both** practice scenarios and drafted professional emails for each ethical situation.\n\nYour emails have been copied to your clipboard and are ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout **all** practice sessions.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.";
+      // Both scenarios completed - generate message based on overall performance
+      const baseMessage = "🎉 **Outstanding Achievement!** You've successfully completed **both** practice scenarios and drafted professional emails for each ethical situation.\n\nYour emails have been copied to your clipboard and are ready to use.";
+      
+      if (performanceData) {
+        if (performanceData.score >= 8.0) {
+          return `${baseMessage} ${performanceData.emoji} **Exceptional Performance!** You demonstrated excellent ethical leadership and strong advocacy skills throughout **all** practice sessions. Your tactical choices showed outstanding ethical reasoning!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 6.0) {
+          return `${baseMessage} ${performanceData.emoji} **Strong Performance!** You showed solid ethical awareness and good resistance to problematic requests across **all** practice sessions. Well done!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 4.0) {
+          return `${baseMessage} ${performanceData.emoji} **Good Progress!** You completed both scenarios and demonstrated developing ethical awareness. There's room to strengthen your advocacy approach in future situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 2.0) {
+          return `${baseMessage} ${performanceData.emoji} **Keep Practicing!** You've completed both scenarios, which is great progress. Consider strengthening your ethical advocacy skills through more practice with different scenarios.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else {
+          return `${baseMessage} ${performanceData.emoji} **Learning Experience!** You've completed both scenarios, which is the first step in developing stronger ethical advocacy skills. Consider practicing more to build confidence in challenging situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        }
+      } else {
+        // Fallback if no score data available
+        return `${baseMessage} You've gained valuable experience in ethical decision-making throughout **all** practice sessions.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+      }
     } else {
-      // Only one scenario completed - standard message
-      return "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use. You've demonstrated excellent ethical reasoning and communication skills throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.";
+      // Only one scenario completed - generate message based on performance
+      const baseMessage = "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+      
+      if (performanceData) {
+        if (performanceData.score >= 8.0) {
+          return `${baseMessage} ${performanceData.emoji} **Excellent work!** You demonstrated outstanding ethical leadership and strong advocacy skills in this practice session. Your tactical choices showed exceptional ethical reasoning!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 6.0) {
+          return `${baseMessage} ${performanceData.emoji} **Well done!** You showed solid ethical awareness and good resistance to problematic requests throughout this practice session. Strong performance!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 4.0) {
+          return `${baseMessage} ${performanceData.emoji} **Good progress!** You completed the scenario and demonstrated developing ethical awareness. Consider practicing different advocacy approaches to strengthen your skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 2.0) {
+          return `${baseMessage} ${performanceData.emoji} **Keep building!** You've completed this scenario, which is valuable practice. Focus on strengthening your ethical advocacy skills in future challenging situations.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else {
+          return `${baseMessage} ${performanceData.emoji} **Learning opportunity!** Completing this scenario is a good first step. Consider practicing more to build confidence and skills in ethical advocacy.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        }
+      } else {
+        // Fallback if no score data available
+        return `${baseMessage} You've gained valuable experience in ethical decision-making throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+      }
     }
   };
 
@@ -3581,7 +3668,7 @@ Format: Include subject line, greeting (based on address style), body paragraphs
         {isPracticeFeedback && !isSimulatedEmailReply && (
           <div className="mt-1 ml-10 py-2">
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                    Do you feel ready to discuss this with your manager, or would you like to practice again?
+                    Do you feel ready to discuss this with your manager?
                   </p>
             <div className="flex flex-wrap gap-1.5">
                     <Button 

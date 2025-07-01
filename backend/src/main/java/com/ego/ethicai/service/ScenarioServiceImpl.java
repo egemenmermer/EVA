@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Iterator;
 
 @Slf4j
 @Service
@@ -60,6 +59,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         session.setChoiceHistory(new ArrayList<>());
         session.setEvsHistory(new ArrayList<>());
         session.setCategoryHistory(new ArrayList<>());
+        session.setRecoveryUsed(false);
         
         activeSessions.put(sessionId, session);
         
@@ -72,13 +72,13 @@ public class ScenarioServiceImpl implements ScenarioService {
                 Map<String, Object> choiceMap = new HashMap<>();
                 choiceMap.put("index", i);
                 choiceMap.put("text", choice.get("choice").asText());
-                // Handle both field name variations (old scenarios use "category", new ones use "tactic_type")
-                JsonNode categoryNode = choice.get("category");
+                // Handle both field name variations, prioritizing actual tactic name over tactic type
+                JsonNode categoryNode = choice.get("tactic");
                 if (categoryNode == null) {
                     categoryNode = choice.get("tactic_type");
                 }
                 if (categoryNode == null) {
-                    categoryNode = choice.get("tactic");
+                    categoryNode = choice.get("category");
                 }
                 choiceMap.put("category", categoryNode != null ? categoryNode.asText() : "Unknown");
                 choices.add(choiceMap);
@@ -115,7 +115,11 @@ public class ScenarioServiceImpl implements ScenarioService {
         }
         
         // Check if session is already complete (prevent duplicate processing)
-        if (session.getCurrentStatementId() != null && session.getCurrentStatementId().startsWith("end")) {
+        if (session.getCurrentStatementId() != null && 
+            (session.getCurrentStatementId().endsWith("_ending") || 
+             session.getCurrentStatementId().equals("bad_ending") ||
+             session.getCurrentStatementId().equals("mid_ending") ||
+             session.getCurrentStatementId().equals("good_ending"))) {
             log.info("Session {} is at ending: {}. Completing scenario.", 
                     sessionId, session.getCurrentStatementId());
             
@@ -128,7 +132,9 @@ public class ScenarioServiceImpl implements ScenarioService {
             if (endings != null && endings.has(endingId)) {
                 JsonNode ending = endings.get(endingId);
                 summary.put("endingMessage", ending.get("text").asText());
-                summary.put("endingType", endingId.equals("end_good") ? "SUCCESS" : "PARTIAL");
+                summary.put("endingTitle", ending.get("title").asText());
+                summary.put("endingLearning", ending.get("learning").asText());
+                summary.put("endingType", endingId);
             }
             
             ScenarioChoiceResponseDTO response = ScenarioChoiceResponseDTO.builder()
@@ -169,211 +175,137 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         JsonNode selectedChoice = userChoices.get(choiceIndex);
         
+        // Check if choice is disabled due to recovery system
+        JsonNode recoveryDisabled = selectedChoice.get("disabled_if_recovery_used");
+        if (recoveryDisabled != null && recoveryDisabled.asBoolean() && session.isRecoveryUsed()) {
+            throw new RuntimeException("Choice disabled: recovery already used");
+        }
+        
         // Record choice
         String choiceText = selectedChoice.get("choice").asText();
         
-        // Handle both field name variations for category
-        JsonNode categoryNode = selectedChoice.get("category");
-        if (categoryNode == null) {
-            categoryNode = selectedChoice.get("tactic_type");
-        }
-        if (categoryNode == null) {
-            categoryNode = selectedChoice.get("tactic");
-        }
-        String category = categoryNode != null ? categoryNode.asText() : "Unknown";
+        // Handle field name variations for category/tactic
+        // Prioritize actual tactic name over tactic type for better user feedback
+        JsonNode tacticNode = selectedChoice.get("tactic");
+        JsonNode tacticTypeNode = selectedChoice.get("tactic_type");
+        String category = tacticNode != null ? tacticNode.asText() : 
+                         (tacticTypeNode != null ? tacticTypeNode.asText() : "Unknown");
         
-        // Handle both field name variations for EVS score
-        JsonNode evsNode = selectedChoice.get("EVS");
+        // Handle EVS score
+        JsonNode evsNode = selectedChoice.get("evs_score");
         if (evsNode == null) {
-            evsNode = selectedChoice.get("evs_score");
+            evsNode = selectedChoice.get("EVS");
         }
         int evs = evsNode != null ? evsNode.asInt() : 0;
+        
         String nextStatementId = selectedChoice.get("leads_to").asText();
         
-        // Don't generate hardcoded feedback - let EVA handle feedback naturally
+        // Mark recovery as used if this is a recovery choice
+        if (recoveryDisabled != null && recoveryDisabled.asBoolean()) {
+            session.setRecoveryUsed(true);
+        }
         
-        log.info("Processing choice for session {}: step={}, nextStatementId={}", 
-                sessionId, session.getCurrentStep() + 1, nextStatementId);
+        // Update session with current choice
+        session.getChoiceHistory().add(choiceText);
+        session.getEvsHistory().add(evs);
+        session.getCategoryHistory().add(category);
+        session.setCurrentStep(session.getCurrentStep() + 1);
         
-        ScenarioChoiceResponseDTO.ScenarioChoiceResponseDTOBuilder responseBuilder = ScenarioChoiceResponseDTO.builder()
-                .sessionId(sessionId)
-                .scenarioId(scenarioId)
-                .currentStep(session.getCurrentStep() + 1)  // Will be incremented
-                .evs(evs)
-                .category(category)
-                .isComplete(false); // Default to not complete
+        // Check if we're at step 5 and current statement has score_ranges (cumulative scoring logic)
+        JsonNode scoreRanges = currentStatement.get("score_ranges");
+        if (scoreRanges != null && !scoreRanges.isNull() && session.getCurrentStep() >= 5) {
+            // Calculate cumulative EVS score from all steps
+            int cumulativeScore = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
+            nextStatementId = determineNextStatementFromScore(scoreRanges, cumulativeScore);
+            log.info("Using cumulative scoring at step {} for session {}: totalEVS={}, nextStatement={}", 
+                    session.getCurrentStep(), sessionId, cumulativeScore, nextStatementId);
+        }
         
-        // Check if we've reached an ending or final score
-        if (nextStatementId.startsWith("end") || nextStatementId.equals("final_score")) {
+        log.info("Processing choice for session {}: step={}, nextStatementId={}, evs={}, cumulativeEVS={}", 
+                sessionId, session.getCurrentStep(), nextStatementId, evs, 
+                session.getEvsHistory().stream().mapToInt(Integer::intValue).sum());
+        
+        // Check if we've reached an ending
+        if (nextStatementId.equals("bad_ending") || nextStatementId.equals("mid_ending") || 
+            nextStatementId.equals("good_ending")) {
+            
             log.info("Reached ending for session {}: {}", sessionId, nextStatementId);
             
-            // Update session with current choice ONCE here
-            session.getChoiceHistory().add(choiceText);
-            session.getEvsHistory().add(evs);
-            session.getCategoryHistory().add(category);
             session.setCurrentStatementId(nextStatementId);
-            session.setCurrentStep(session.getCurrentStep() + 1);
             
-            // Mark scenario as complete
-            responseBuilder.isComplete(true);
-            
-            // Handle different ending types
-            if (nextStatementId.equals("final_score")) {
-                log.info("Handling final_score completion for session {}", sessionId);
-                
-                // Calculate final score using updated history
-                int totalEvs = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
-                log.info("Final score calculation: totalEvs={}, evsHistory={}", totalEvs, session.getEvsHistory());
-                
-                // Get the final_score statement to check for score ranges
-                JsonNode finalScoreStatement = statements.get("final_score");
-                if (finalScoreStatement != null && finalScoreStatement.has("score_ranges")) {
-                    JsonNode scoreRanges = finalScoreStatement.get("score_ranges");
-                    
-                    // Find the correct ending key based on EVS score
-                    String endingKey = null;
-                    for (Iterator<Map.Entry<String, JsonNode>> it = scoreRanges.fields(); it.hasNext(); ) {
-                        Map.Entry<String, JsonNode> entry = it.next();
-                        String range = entry.getKey();
-                        String[] parts = range.split("_to_");
-                        log.info("🔍 Checking score range: {} -> {}", range, entry.getValue().asText());
-                        if (parts.length == 2) {
-                            try {
-                                int minScore = Integer.parseInt(parts[0]);
-                                int maxScore = Integer.parseInt(parts[1]);
-                                log.info("📊 Range {}-{}, user score: {}", minScore, maxScore, totalEvs);
-                                if (totalEvs >= minScore && totalEvs <= maxScore) {
-                                    endingKey = entry.getValue().asText();
-                                    log.info("✅ Found matching range! Using ending: {}", endingKey);
-                                    break;
-                                }
-                            } catch (NumberFormatException e) {
-                                log.warn("⚠️ Invalid score range format: {}", range);
-                            }
-                        }
-                    }
-                    
-                    if (endingKey != null) {
-                        // Get the actual ending from the endings section
-                        JsonNode endings = scenario.get("endings");
-                        if (endings != null && endings.has(endingKey)) {
-                            JsonNode ending = endings.get(endingKey);
-                            String endingText = ending.get("text").asText();
-                            
-                            // Generate session summary for frontend
-                            Map<String, Object> summary = generateSessionSummary(session, scenario);
-                            // Add the ending message to the summary so the frontend can display it
-                            summary.put("endingMessage", endingText);
-                            
-                            responseBuilder
-                                    .nextStatementId(endingKey)
-                                    .nextStatement(endingText)
-                                    .nextChoices(List.of())
-                                    .isComplete(true)  // Mark as complete!
-                                    .sessionSummary(summary);
-                        } else {
-                            log.error("Ending not found: {} for session {}", endingKey, sessionId);
-                            throw new RuntimeException("Ending not found: " + endingKey);
-                        }
-                    } else {
-                        // Fallback to custom message if no matching range found
-                        Map<String, Object> summary = generateSessionSummary(session, scenario);
-                        String endingText = formatFinalScoreMessage(summary);
-                        // Add the ending message to the summary so the frontend can display it
-                        summary.put("endingMessage", endingText);
-                        
-                        responseBuilder
-                                .nextStatementId("final_score")
-                                .nextStatement(endingText)
-                                .nextChoices(List.of())
-                                .isComplete(true)  // Mark as complete!
-                                .sessionSummary(summary);
-                    }
-                }
-            } else {
-                // Get ending message from scenarios endings section
-                JsonNode endings = scenario.get("endings");
-                if (endings != null && endings.has(nextStatementId)) {
-                    JsonNode ending = endings.get(nextStatementId);
-                    String endingText = ending.get("text").asText();
-                    
-                    // Generate session summary for completion
+            // Generate session summary for completion
             Map<String, Object> summary = generateSessionSummary(session, scenario);
-                    // Add the ending message to the summary so the frontend can display it
-                    summary.put("endingMessage", endingText);
-                    
-                    // Return ending as the final manager statement (without choices)
-                    responseBuilder
-                            .nextStatementId(nextStatementId)
-                            .nextStatement(endingText)
-                            .nextChoices(List.of()) // No choices for ending
-                            .isComplete(true)       // Mark as complete!
-                            .sessionSummary(summary); // Include summary for frontend
-                } else {
-                    log.error("Ending not found for session {}: {}", sessionId, nextStatementId);
-                    throw new RuntimeException("Ending not found: " + nextStatementId);
-                }
-            }
-        } else {
-            // Update session with current choice for non-ending cases
-            session.getChoiceHistory().add(choiceText);
-            session.getEvsHistory().add(evs);
-            session.getCategoryHistory().add(category);
-            session.setCurrentStatementId(nextStatementId);
-            session.setCurrentStep(session.getCurrentStep() + 1);
             
-            // Get next statement and choices from statements section
-            JsonNode nextStatement = statements.get(nextStatementId);
-            if (nextStatement != null) {
-                log.info("Found next statement for session {}: {}", sessionId, nextStatementId);
-                List<Map<String, Object>> nextChoices = new ArrayList<>();
-                JsonNode nextUserChoices = nextStatement.get("user_choices");
+            // Add ending message from scenarios endings section
+            JsonNode endings = scenario.get("endings");
+            if (endings != null && endings.has(nextStatementId)) {
+                JsonNode ending = endings.get(nextStatementId);
+                summary.put("endingMessage", ending.get("text").asText());
+                summary.put("endingTitle", ending.get("title").asText());
+                summary.put("endingLearning", ending.get("learning").asText());
+                summary.put("endingType", nextStatementId);
+            }
+            
+            return ScenarioChoiceResponseDTO.builder()
+                    .sessionId(sessionId)
+                    .scenarioId(scenarioId)
+                    .currentStep(session.getCurrentStep())
+                    .evs(evs)
+                    .category(category)
+                    .isComplete(true)
+                    .sessionSummary(summary)
+                    .build();
+        }
+        
+        // Get next statement
+        JsonNode nextStatement = statements.get(nextStatementId);
+        if (nextStatement == null) {
+            throw new RuntimeException("Next statement not found: " + nextStatementId);
+        }
+        
+        session.setCurrentStatementId(nextStatementId);
+        
+        // Get statement text
+        String nextStatementText = nextStatement.get("text").asText();
+        
+        // Build choices list
+        List<Map<String, Object>> choices = new ArrayList<>();
+        JsonNode nextUserChoices = nextStatement.get("user_choices");
+        if (nextUserChoices != null) {
+            for (int i = 0; i < nextUserChoices.size(); i++) {
+                JsonNode choice = nextUserChoices.get(i);
                 
-                if (nextUserChoices != null) {
-                    for (int i = 0; i < nextUserChoices.size(); i++) {
-                        JsonNode choice = nextUserChoices.get(i);
-                        Map<String, Object> choiceMap = new HashMap<>();
-                        choiceMap.put("index", i);
-                        choiceMap.put("text", choice.get("choice").asText());
-                        // Handle both field name variations for category
-                        JsonNode nextCategoryNode = choice.get("category");
-                        if (nextCategoryNode == null) {
-                            nextCategoryNode = choice.get("tactic_type");
-                        }
-                        if (nextCategoryNode == null) {
-                            nextCategoryNode = choice.get("tactic");
-                        }
-                        choiceMap.put("category", nextCategoryNode != null ? nextCategoryNode.asText() : "Unknown");
-                        nextChoices.add(choiceMap);
-                    }
+                // Check recovery system
+                JsonNode disabledIfRecovery = choice.get("disabled_if_recovery_used");
+                if (disabledIfRecovery != null && disabledIfRecovery.asBoolean() && session.isRecoveryUsed()) {
+                    continue; // Skip this choice if recovery was already used
                 }
                 
-                responseBuilder
-                        .nextStatementId(nextStatementId)
-                        .nextStatement(nextStatement.get("text").asText())
-                        .nextChoices(nextChoices);
-            } else {
-                log.error("Next statement not found for session {}: {}", sessionId, nextStatementId);
-                throw new RuntimeException("Next statement not found: " + nextStatementId);
+                Map<String, Object> choiceMap = new HashMap<>();
+                choiceMap.put("index", i);
+                choiceMap.put("text", choice.get("choice").asText());
+                
+                // Handle category/tactic
+                JsonNode choiceTacticType = choice.get("tactic_type");
+                JsonNode choiceTactic = choice.get("tactic");
+                String choiceCategory = choiceTacticType != null ? choiceTacticType.asText() : 
+                                       (choiceTactic != null ? choiceTactic.asText() : "Unknown");
+                choiceMap.put("category", choiceCategory);
+                choices.add(choiceMap);
             }
         }
         
-        // Debug logging before building response
-        ScenarioChoiceResponseDTO response = responseBuilder.build();
-        log.info("🔍 Response debug for session {}: isComplete={}, sessionSummary={}, nextChoices={}",
-                sessionId, response.isComplete(), 
-                response.getSessionSummary() != null ? "present" : "null",
-                response.getNextChoices() != null ? response.getNextChoices().size() : "null");
-        
-        // Additional debug: log the actual JSON that will be sent
-        try {
-            String jsonResponse = objectMapper.writeValueAsString(response);
-            log.info("📤 JSON Response for session {}: {}", sessionId, jsonResponse);
-        } catch (Exception e) {
-            log.error("Failed to serialize response to JSON", e);
-        }
-        
-        return response;
+        return ScenarioChoiceResponseDTO.builder()
+                .sessionId(sessionId)
+                .scenarioId(scenarioId)
+                .nextStatementId(nextStatementId)
+                .nextStatement(nextStatementText)
+                .nextChoices(choices)
+                .currentStep(session.getCurrentStep())
+                .evs(evs)
+                .category(category)
+                .isComplete(false)
+                .build();
     }
     
     @Override
@@ -721,6 +653,62 @@ public class ScenarioServiceImpl implements ScenarioService {
         return choice.length() > 50 ? choice.substring(0, 47) + "..." : choice;
     }
     
+    /**
+     * Determines the next statement based on cumulative EVS score and score ranges
+     */
+    private String determineNextStatementFromScore(JsonNode scoreRanges, int cumulativeScore) {
+        log.info("Determining next statement from cumulative score: {}", cumulativeScore);
+        
+        // Iterate through score ranges to find the matching range
+        Iterator<Map.Entry<String, JsonNode>> fields = scoreRanges.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            String range = entry.getKey();
+            String nextStatement = entry.getValue().asText();
+            
+            if (isScoreInRange(cumulativeScore, range)) {
+                log.info("Score {} matches range '{}', next statement: {}", cumulativeScore, range, nextStatement);
+                return nextStatement;
+            }
+        }
+        
+        // Default fallback - this shouldn't happen if ranges are properly defined
+        log.warn("No matching score range found for score: {}, using default ending", cumulativeScore);
+        return "ending_4_balanced_compromise"; // Safe middle ground
+    }
+    
+    /**
+     * Checks if a score falls within a given range string (e.g., "6_to_7", "-2_to_-1", "7_and_above")
+     */
+    private boolean isScoreInRange(int score, String range) {
+        try {
+            if (range.contains("_to_")) {
+                // Handle ranges like "6_to_7", "-2_to_-1"
+                String[] parts = range.split("_to_");
+                int min = Integer.parseInt(parts[0]);
+                int max = Integer.parseInt(parts[1]);
+                return score >= min && score <= max;
+            } else if (range.endsWith("_and_above")) {
+                // Handle ranges like "7_and_above"
+                String minStr = range.replace("_and_above", "");
+                int min = Integer.parseInt(minStr);
+                return score >= min;
+            } else if (range.endsWith("_and_below")) {
+                // Handle ranges like "-7_and_below"
+                String maxStr = range.replace("_and_below", "");
+                int max = Integer.parseInt(maxStr);
+                return score <= max;
+            } else {
+                // Handle exact matches like "0"
+                int exactScore = Integer.parseInt(range);
+                return score == exactScore;
+            }
+        } catch (NumberFormatException e) {
+            log.error("Error parsing score range '{}': {}", range, e.getMessage());
+            return false;
+        }
+    }
+    
     // Inner class for session management
     private static class ScenarioSession {
         private UUID userId;
@@ -731,6 +719,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         private List<String> choiceHistory;
         private List<Integer> evsHistory;
         private List<String> categoryHistory;
+        private boolean recoveryUsed;
         
         // Getters and setters
         public UUID getUserId() { return userId; }
@@ -756,5 +745,8 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         public List<String> getCategoryHistory() { return categoryHistory; }
         public void setCategoryHistory(List<String> categoryHistory) { this.categoryHistory = categoryHistory; }
+        
+        public boolean isRecoveryUsed() { return recoveryUsed; }
+        public void setRecoveryUsed(boolean recoveryUsed) { this.recoveryUsed = recoveryUsed; }
     }
 } 

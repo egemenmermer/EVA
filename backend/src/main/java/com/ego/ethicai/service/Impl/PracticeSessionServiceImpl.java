@@ -337,7 +337,9 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                         .step(step)
                                         .choice(userChoice)
                                         .evs((double) choice.get("EVS").asInt())
-                                        .tactic(choice.get("category").asText())
+                                        .tactic(choice.get("tactic") != null ? choice.get("tactic").asText() : 
+                                                (choice.get("tactic_type") != null ? choice.get("tactic_type").asText() : 
+                                                 (choice.get("category") != null ? choice.get("category").asText() : "Unknown")))
                                         .build();
                             }
                         }
