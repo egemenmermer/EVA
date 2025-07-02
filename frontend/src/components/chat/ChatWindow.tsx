@@ -324,7 +324,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     address: '',
     references: [] as string[],
     action: '',
-    originalEthicalIssue: ''
+    originalEthicalIssue: '',
+    managerName: '' // Add manager name field
   });
 
   // Add state for scenario transition
@@ -348,7 +349,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       id: 'address',
       question: "How would you like to address the manager?",
       type: 'choice',
-      choices: ['Polite greeting', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+      choices: ['Address by name', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+    },
+    {
+      id: 'managerName',
+      question: "What is the manager's name?",
+      type: 'conditional',
+      parentId: 'address',
+      parentValue: 'Address by name',
+      placeholder: "Enter manager's name (optional)",
+      shouldSkip: (responses: string[]) => responses[1] !== 'Address by name'
     },
     {
       id: 'goal',
@@ -396,7 +406,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       address: '',
       references: [],
       action: '',
-      originalEthicalIssue
+      originalEthicalIssue,
+      managerName: '' // Add manager name field
     });
     
     console.log('✅ Email assistant activated and state reset');
@@ -451,6 +462,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
         break;
       case 'address':
         updatedDraftData.address = response;
+        break;
+      case 'managerName':
+        updatedDraftData.managerName = response;
         break;
       case 'goal':
         updatedDraftData.action = response; // Store goal in action field
@@ -568,9 +582,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       ? 'privacy laws, data protection rules, company privacy policy'
       : 'ethics guidelines, company policies';
     
-        // Handle addressing style
-    const addressingInstruction = emailDraftData.address.includes('Polite greeting') 
-      ? 'Use a polite, professional greeting'
+        // Handle addressing style with actual manager name if provided
+    const managerNameToUse = emailDraftData.managerName?.trim() || "";
+    const addressingInstruction = emailDraftData.address.includes('By name') 
+      ? managerNameToUse 
+        ? `Use "${managerNameToUse}" as the manager's name in the greeting (e.g., "Hi ${managerNameToUse},")`
+        : 'Use "Manager" as a placeholder in the greeting'
       : emailDraftData.address.includes('No greeting') 
       ? 'Skip the greeting and go straight to the main content'
       : 'Choose an appropriate greeting style';
@@ -585,12 +602,12 @@ ${currentScenario === 'accessibility'
 
 Here's how I want this email to sound:
 - Tone: ${emailDraftData.tone}
-- How to address my manager: ${emailDraftData.address}
+- How to address my manager: ${emailDraftData.address}${managerNameToUse ? ` (use the name "${managerNameToUse}")` : ''}
 - What I want to accomplish: ${emailDraftData.action}
 - ${emailDraftData.references.length > 0 ? `Include references to relevant guidelines (like ${relevantReferences.split(', ').slice(0, 2).join(' and ')})` : 'No need to reference specific policies'} 
 - ${emailDraftData.concern && emailDraftData.concern !== 'Use best practices' && emailDraftData.concern !== 'Keep it simple and brief' ? `Also: ${emailDraftData.concern}` : 'Keep it professional but natural'}
 
-Write this as a real workplace email that focuses on the ethical concern and the need for discussion/action. Do not mention any practice exercises, scoring, or training scenarios. Make it sound like how I would actually write to my manager about a genuine workplace ethical issue. Just give me the email with a subject line.`;
+Write this as a real workplace email that focuses on the ethical concern and the need for discussion/action. Do not mention any practice exercises, scoring, or training scenarios. Make it sound like how I would actually write to my manager about a genuine workplace ethical issue. Just give me the email with a subject line.${managerNameToUse ? ` Use "${managerNameToUse}" exactly as provided in the greeting.` : ''}`;
     
     try {
       const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {

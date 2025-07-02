@@ -504,7 +504,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           currentStatement: sessionResponse.data.currentStatement,
           currentStatementId: sessionResponse.data.currentStatementId,
           currentChoices: [...sessionResponse.data.choices]
-          .map((choice, originalIndex) => ({ ...choice, originalIndex }))
+          .map((choice, index) => ({ ...choice, originalIndex: index }))
           .sort(() => Math.random() - 0.5),
           currentStep: sessionResponse.data.currentStep,
           isComplete: sessionResponse.data.isComplete
@@ -565,7 +565,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         currentStatement: response.data.currentStatement,
         currentStatementId: response.data.currentStatementId,
         currentChoices: [...response.data.choices]
-          .map((choice, originalIndex) => ({ ...choice, originalIndex }))
+          .map((choice, index) => ({ ...choice, originalIndex: index }))
           .sort(() => Math.random() - 0.5),
         currentStep: response.data.currentStep,
         isComplete: response.data.isComplete
@@ -632,12 +632,30 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setProcessingChoice(true);
 
     try {
+      // Validate choiceIndex first
+      if (choiceIndex < 0 || choiceIndex >= currentScenario.currentChoices.length) {
+        console.error('❌ choiceIndex out of bounds:', choiceIndex, 'Max:', currentScenario.currentChoices.length - 1);
+        throw new Error(`Choice index ${choiceIndex} is out of bounds`);
+      }
+      
       const selectedChoice = currentScenario.currentChoices[choiceIndex];
       console.log('👤 User choice:', selectedChoice);
 
       // Use original index for backend API call (to handle randomized display order)
       const originalChoiceIndex = selectedChoice.originalIndex !== undefined ? selectedChoice.originalIndex : choiceIndex;
       console.log('🔄 Display index:', choiceIndex, 'Original index:', originalChoiceIndex);
+      
+      // Validate that the original index is within bounds
+      if (originalChoiceIndex < 0 || !Number.isInteger(originalChoiceIndex)) {
+        console.error('❌ Invalid originalChoiceIndex:', originalChoiceIndex, 'Using display index instead');
+        throw new Error(`Invalid choice index: ${originalChoiceIndex}`);
+      }
+      
+      // Validate that the original index is within bounds
+      if (originalChoiceIndex < 0 || !Number.isInteger(originalChoiceIndex)) {
+        console.error('❌ Invalid originalChoiceIndex:', originalChoiceIndex, 'Using display index instead');
+        throw new Error(`Invalid choice index: ${originalChoiceIndex}`);
+      }
 
       // Add user message to conversation
       const userMessage: UserMessage = {
@@ -917,7 +935,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           // Randomize choice order while preserving original indices
           const randomizedChoices = response.data.nextChoices ? 
             [...response.data.nextChoices]
-              .map((choice, originalIndex) => ({ ...choice, originalIndex }))
+              .map((choice, index) => ({ ...choice, originalIndex: index }))
               .sort(() => Math.random() - 0.5) : [];
 
           // After manager finishes typing, update with new choices
