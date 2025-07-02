@@ -267,6 +267,18 @@ interface ActiveFeedbackSectionState {
   [messageId: string]: string | null; // messageId maps to the key of the active section or null
 }
 
+// Define EmailQuestion interface
+interface EmailQuestion {
+  id: string;
+  question: string;
+  type: 'choice' | 'text' | 'conditional';
+  choices?: string[];
+  placeholder?: string;
+  parentId?: string;
+  parentValue?: string;
+  shouldSkip?: (responses: string[]) => boolean;
+}
+
 export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, currentConversation, setStoreMessages, storeMessages }) => {
   const { 
     setCurrentConversation,
@@ -325,7 +337,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
   const [selectedChoices, setSelectedChoices] = useState<{ [questionIndex: number]: string }>({});
   
   // Email Assistant Questions - Meta-communication focused
-  const emailQuestions = [
+  const emailQuestions: EmailQuestion[] = [
     {
       id: 'tone',
       question: "What tone would you like this email to have?",
@@ -336,7 +348,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       id: 'address',
       question: "How would you like to address the manager?",
       type: 'choice',
-      choices: ['By name (e.g., "Hi [Manager Name]}")', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+      choices: ['Polite greeting', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
     },
     {
       id: 'goal',
@@ -453,10 +465,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     
     setEmailDraftData(updatedDraftData);
     
-    // No follow-up questions needed anymore
+    // Find the next question index considering conditional questions
+    let nextQuestionIndex = currentEmailQuestion + 1;
     
-    // Move to next question or finish
-    const nextQuestionIndex = currentEmailQuestion + 1;
+    // Check if we need to skip the next question based on previous answers
+    if (nextQuestionIndex < emailQuestions.length) {
+      const nextQuestion = emailQuestions[nextQuestionIndex];
+      if (nextQuestion.type === 'conditional' && nextQuestion.shouldSkip && nextQuestion.shouldSkip(newResponses)) {
+        // Skip this conditional question
+        nextQuestionIndex++;
+      }
+    }
     
     if (nextQuestionIndex < emailQuestions.length) {
       setCurrentEmailQuestion(nextQuestionIndex);
@@ -549,16 +568,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
       ? 'privacy laws, data protection rules, company privacy policy'
       : 'ethics guidelines, company policies';
     
-    // Handle addressing style
-    const addressingInstruction = emailDraftData.address.includes('By name') 
-      ? 'Use "[Manager Name]" as placeholder for the manager\'s name in the greeting (e.g., "Hi [Manager Name],")'
+        // Handle addressing style
+    const addressingInstruction = emailDraftData.address.includes('Polite greeting') 
+      ? 'Use a polite, professional greeting'
       : emailDraftData.address.includes('No greeting') 
       ? 'Skip the greeting and go straight to the main content'
       : 'Choose an appropriate greeting style';
     
-    const enhancedPrompt = `Please help me draft an email to my manager about this ${scenarioContext} issue:
+    const enhancedPrompt = `Please help me draft an email to my manager about an ethical concern I've identified:
 
-Original issue: ${emailDraftData.originalEthicalIssue}
+${currentScenario === 'accessibility' 
+  ? `I've encountered an accessibility issue in our software/product that could affect users with disabilities. I want to raise this concern and discuss how we can address it to ensure our product is inclusive and meets accessibility standards.`
+  : currentScenario === 'privacy'
+  ? `I've identified a privacy concern in our software/product regarding how we handle user data. I want to discuss this with my manager and explore ways to better protect user privacy while maintaining our business objectives.`
+  : `I've encountered an ethical concern in our work that I'd like to discuss and address appropriately.`}
 
 Here's how I want this email to sound:
 - Tone: ${emailDraftData.tone}
@@ -567,7 +590,7 @@ Here's how I want this email to sound:
 - ${emailDraftData.references.length > 0 ? `Include references to relevant guidelines (like ${relevantReferences.split(', ').slice(0, 2).join(' and ')})` : 'No need to reference specific policies'} 
 - ${emailDraftData.concern && emailDraftData.concern !== 'Use best practices' && emailDraftData.concern !== 'Keep it simple and brief' ? `Also: ${emailDraftData.concern}` : 'Keep it professional but natural'}
 
-Make it sound like how I would actually write to my manager, not like a formal document. Just give me the email with a subject line.`;
+Write this as a real workplace email that focuses on the ethical concern and the need for discussion/action. Do not mention any practice exercises, scoring, or training scenarios. Make it sound like how I would actually write to my manager about a genuine workplace ethical issue. Just give me the email with a subject line.`;
     
     try {
       const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
@@ -3744,8 +3767,8 @@ Make it sound like how I would actually write to my manager, not like a formal d
               const selectedChoice = selectedChoices[questionIndex];
               const isQuestionAnswered = selectedChoice !== undefined;
               
-              if (currentQ?.type === 'text') {
-                // Text input for the last question
+              if (currentQ?.type === 'text' || currentQ?.type === 'conditional') {
+                // Text input for the last question or conditional input
                 return (
                   <div className="mb-2">
                     <div className="flex gap-2 mb-2">
@@ -3772,10 +3795,22 @@ Make it sound like how I would actually write to my manager, not like a formal d
                         className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Send
-              </Button>
-            </div>
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 mb-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEmailQuestionResponse("", true)}
+                        className="text-xs h-auto py-2 px-3"
+                      >
+                        Skip
+                      </Button>
+                    </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      You can leave this empty if you have no specific preferences
+                      {currentQ.id === 'managerName' ? 
+                        "Enter manager's name or skip to use a placeholder" : 
+                        "You can leave this empty if you have no specific preferences"}
                     </div>
                   </div>
                 );
@@ -3824,6 +3859,7 @@ Make it sound like how I would actually write to my manager, not like a formal d
 
 
 
+        {/* Email Assistant Summary and Generate Button */}
         {/* Email Assistant Summary and Generate Button */}
         {isEmailSummaryMessage && (
           <div className="mt-3 ml-7">
