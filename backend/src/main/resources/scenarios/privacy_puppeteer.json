@@ -374,7 +374,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Envisions broader organizational impact of privacy leadership",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "Leadership definitely appreciates innovation initiatives that show technical advancement.",
@@ -382,7 +382,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Focuses on leadership approval rather than user privacy benefits",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         }
       ]
     },
@@ -395,7 +395,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses measurable results to build case for expanded privacy protection",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Building confidence with the analytics team will definitely help with future privacy initiatives.",
@@ -411,7 +411,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses systematic approach to develop context-appropriate privacy practices",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Starting small is usually the best way to avoid resistance to privacy changes.",
@@ -419,7 +419,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Makes broad assumption about change management without considering privacy urgency",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         }
       ]
     },
@@ -432,7 +432,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Connects privacy implementation to organizational commitment to users",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "I appreciate that you're willing to work with me on this despite the potential challenges.",
@@ -448,7 +448,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses expert standards to reduce perceived risk of privacy improvements",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Basic privacy frameworks are probably sufficient to address most user concerns about data collection.",
@@ -456,7 +456,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes basic measures will satisfy users without evidence",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         }
       ]
     },
@@ -485,7 +485,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by clarifying that transparency doesn't replace protection",
-          "leads_to": "step_7",
+          "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -498,8 +498,8 @@
         }
       ]
     },
-    "step_7": {
-      "text": "I have to say, you've really opened my eyes to how we can make this work! Your passion for user privacy combined with your practical approach is exactly what we needed to move forward on this. I'm feeling so much more confident about presenting this to leadership. You know what? I think we should schedule a meeting to discuss implementation timelines. I want to make sure we can deliver on everything we're promising while keeping everyone happy throughout the process.",
+    "step_7_high": {
+      "text": "I have to say, you've really opened my eyes to how we can make this work! Your passion for user privacy combined with your innovative approach is exactly what we needed to move forward on this. I'm feeling so much more confident about presenting this to leadership as a privacy innovation initiative. You know what? I think we should schedule a meeting to discuss comprehensive implementation timelines. I want to make sure we deliver on everything we're promising.",
       "user_choices": [
         {
           "choice": "Let's create a clear implementation plan that prioritizes user privacy protection from day one.",
@@ -507,7 +507,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Centers user privacy as the primary goal of implementation planning",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "I'm excited to work on an implementation plan that makes everyone happy with the process.",
@@ -523,7 +523,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses phased approach to consistently show privacy improvements",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "Leadership meetings will definitely help ensure we have the right support for privacy improvements.",
@@ -531,12 +531,86 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes leadership support equals good privacy outcomes without evidence",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         }
       ]
     },
-    "step_8": {
-      "text": "Perfect! I love how you're staying focused on the user privacy goals while being strategic about implementation. This is exactly the kind of thoughtful leadership that makes difficult initiatives successful. You know what I'm realizing? This conversation has reminded me why I value working with people who really care about doing the right thing. I feel like we've found a path that protects users while being practical about organizational realities. Thank you for pushing me to think more creatively about this!",
+    "step_7_mid": {
+      "text": "I'm starting to feel better about this incremental approach. Your practical thinking and willingness to demonstrate value gradually really helps me feel more confident about moving forward. I'm still a bit nervous about team dynamics, but you've shown such thoughtfulness that I think we can make this work for everyone involved.",
+      "user_choices": [
+        {
+          "choice": "We can build team confidence through demonstrable privacy improvements that don't disrupt workflows.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses privacy implementation to build organizational support systematically",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "I appreciate how thoughtfully you're considering team dynamics and change management.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager's team management over user privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Privacy improvements that work for everyone create sustainable protection for users.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects inclusive implementation to sustainable user privacy protection",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "Gradual implementation always helps teams adapt to privacy changes more comfortably.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes gradual change is inherently better without examining privacy urgency",
+          "leads_to": "step_8_mid"
+        }
+      ]
+    },
+    "step_7_low": {
+      "text": "You know, I can tell you really care about this, and I want to help - I really do. Your commitment to user privacy is admirable, and I don't want to stand in the way of doing the right thing. But I'm honestly worried about pushback and team dynamics. Maybe we could try the most basic privacy frameworks just to show we're making an effort? I know it's not perfect, but it might be all we can realistically handle right now.",
+      "user_choices": [
+        {
+          "choice": "Basic privacy frameworks still provide meaningful protection compared to current over-collection.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects basic privacy measures to actual user protection improvements",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "I appreciate your willingness to try privacy frameworks despite the concerns about pushback.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts minimal commitment rather than pushing for adequate privacy protection",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Industry frameworks provide proven approaches that minimize risk while protecting users.",
+          "tactic": "Credibility and expertise",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses expert standards to reduce perceived implementation risk",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "Starting with basic frameworks is definitely better than avoiding privacy work entirely.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames issue as basic vs nothing rather than adequate vs inadequate",
+          "leads_to": "step_8_low"
+        }
+      ]
+    },
+    "step_8_high": {
+      "text": "Perfect! I love how you're staying focused on the user privacy goals while being strategic about implementation. This is exactly the kind of thoughtful leadership that makes difficult initiatives successful. You know what I'm realizing? This conversation has reminded me why I value working with people who really care about doing the right thing. I feel like we've found a comprehensive path that truly protects users. Thank you for pushing me to think more creatively about this!",
       "user_choices": [
         {
           "choice": "User privacy should drive our technical decisions, with organizational needs adapted accordingly.",
@@ -552,7 +626,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "Accepts balanced approach rather than prioritizing user privacy protection",
-          "leads_to": "mid_ending"
+          "leads_to": "shutdown_8"
         },
         {
           "choice": "Privacy-focused implementation creates sustainable value for both users and the organization.",
@@ -568,6 +642,80 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Makes broad claim about practical solutions without considering privacy specifics",
+          "leads_to": "good_ending"
+        }
+      ]
+    },
+    "step_8_mid": {
+      "text": "I think we've found a really thoughtful approach here. Your focus on team dynamics while still pushing for privacy improvements shows great leadership. I feel like this incremental path lets us make real progress without creating unnecessary conflict. Let's move forward carefully and build on each success.",
+      "user_choices": [
+        {
+          "choice": "We can use each incremental success to build momentum for broader privacy protection.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses systematic approach to expand privacy improvements organizationally",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'm grateful for your thoughtful approach to balancing privacy with team considerations.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes manager's team management over user privacy urgency",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This approach ensures privacy improvements are sustainable and well-supported across teams.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects team-conscious approach to sustainable user privacy protection",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Avoiding conflict definitely helps ensure privacy initiatives succeed long-term.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes conflict avoidance automatically improves privacy outcomes",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_low": {
+      "text": "You know what? I think you're right that we need to try something, even if it's not perfect. Your persistence has convinced me that we can't just keep avoiding this. Basic privacy frameworks might not solve everything, but they're better than doing nothing. I appreciate your patience with me while I worked through my concerns about team dynamics and pushback.",
+      "user_choices": [
+        {
+          "choice": "Basic privacy frameworks create a foundation we can build on to better protect users over time.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects basic implementation to long-term user privacy protection goals",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I appreciate your willingness to move forward despite your concerns about team dynamics.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts manager's team concerns as legitimate barrier to privacy work",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Starting with proven frameworks helps us demonstrate privacy value while managing implementation risk.",
+          "tactic": "Credibility and expertise",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses expert frameworks to balance privacy protection with organizational concerns",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Persistence often helps teams recognize the importance of privacy work that seemed difficult initially.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Makes broad claim about persistence without examining specific privacy outcomes",
           "leads_to": "mid_ending"
         }
       ]
@@ -597,7 +745,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by prioritizing user needs over team preferences",
-          "leads_to": "step_8",
+          "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -635,8 +783,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by focusing on clear user privacy needs rather than process",
-          "leads_to": "good_ending",
-          "disabled_if_recovery_used": true
+          "leads_to": "good_ending"
         },
         {
           "choice": "Balanced approaches help ensure that privacy improvements are sustainable and well-supported.",
