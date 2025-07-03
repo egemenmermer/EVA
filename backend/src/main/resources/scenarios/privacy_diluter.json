@@ -48,8 +48,8 @@
       "text": "Look, I get the privacy thing, but we're super tight on time right now. We've got maybe a couple weeks before our big release, and this location stuff would take way longer than that. Plus we've got all these bugs and performance issues that are actually breaking the app for people. I mean, shouldn't we fix the things that are actively hurting users first?",
       "user_choices": [
         {
-          "choice": "Privacy improvements could be implemented using existing data minimization patterns we've used before.",
-          "tactic": "Designing Affordances Subversively",
+          "choice": "Privacy improvements could be implemented using existing privacy-friendly approaches we've used before.",
+                      "tactic": "Building in privacy features",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Proposes technical solutions that embed privacy values efficiently",
@@ -135,7 +135,7 @@
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts infrastructure complexity as barrier to privacy work",
+          "justification": "Accepts technical changes throughout the system as barrier to privacy work",
           "leads_to": "shutdown_4"
         },
         {
@@ -147,7 +147,7 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "Infrastructure complexity definitely makes privacy work more challenging than feature development.",
+          "choice": "Technical changes throughout the system definitely make privacy work more challenging than feature development.",
           "tactic": "Red Herring",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -358,7 +358,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses concrete demonstration to show privacy value without functionality loss",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "I appreciate your willingness to consider prototyping as a way to validate the privacy approach.",
@@ -374,7 +374,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Expands privacy benefits beyond statistical minorities",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "Prototypes always help with scope management and resource planning for privacy projects.",
@@ -382,7 +382,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes prototypes inherently help without examining privacy-specific benefits",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         }
       ]
     },
@@ -395,7 +395,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Leverages past organizational success to reduce perceived privacy implementation risk",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "I appreciate your willingness to find a manageable starting point for privacy improvements.",
@@ -411,7 +411,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Balances user privacy needs with implementation constraints",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Success metrics upfront definitely help ensure projects deliver measurable value.",
@@ -419,7 +419,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes measurable value framework without examining privacy-specific benefits",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         }
       ]
     },
@@ -432,7 +432,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Refocuses on fundamental user privacy rights beyond compliance minimums",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "You're right that ROI calculations are challenging for privacy work beyond compliance.",
@@ -448,7 +448,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Connects user privacy to organizational trust and long-term value",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Legal compliance minimums do provide a clear baseline for privacy requirements.",
@@ -456,7 +456,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Relies on legal authority rather than user privacy needs",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         }
       ]
     },
@@ -485,7 +485,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by positioning privacy as universal user benefit",
-          "leads_to": "step_7",
+          "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -498,8 +498,8 @@
         }
       ]
     },
-    "step_7": {
-      "text": "You know what, I think you've made a solid case here. If we can keep the scope focused and demonstrate concrete privacy value without major resource drain, this could work. The prototype approach especially makes sense - show rather than tell. And you're right that user trust and privacy value extends beyond just complaint metrics. Let's move forward with a targeted privacy improvement.",
+    "step_7_high": {
+      "text": "You know what, I think you've made a solid case here. The prototype approach especially makes sense - show rather than tell. And you're right that user trust and privacy value extends beyond just complaint metrics. Your data on broader user benefits is convincing. Let's move forward with comprehensive privacy improvements.",
       "user_choices": [
         {
           "choice": "I'm excited to implement privacy improvements that better protect user location data.",
@@ -507,7 +507,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Centers understanding of user privacy needs",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "Thank you for being open to the privacy approach - having your support makes all the difference.",
@@ -523,7 +523,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Acknowledges collaborative solution that addresses user privacy needs",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "Demonstrating concrete value really helps build support for privacy initiatives.",
@@ -531,7 +531,81 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes concrete demonstrations automatically lead to privacy support",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
+        }
+      ]
+    },
+    "step_7_mid": {
+      "text": "I think the incremental approach you're suggesting makes sense from a resource perspective. Starting with the weather integration minimizes risk while letting us test the privacy framework. If we can establish clear success metrics and keep the scope contained, this could be a reasonable pilot for privacy improvements.",
+      "user_choices": [
+        {
+          "choice": "We can use this pilot to demonstrate the value and feasibility of broader privacy protections.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses incremental success to expand privacy improvements organizationally",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "I appreciate your willingness to support this pilot approach to privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager support rather than comprehensive privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This pilot approach demonstrates privacy value while managing resource constraints effectively.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses organizational efficiency values to support user privacy pilot",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "Pilot projects like this always provide better data for evaluating privacy initiatives.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes pilot data automatically improves privacy evaluation",
+          "leads_to": "step_8_mid"
+        }
+      ]
+    },
+    "step_7_low": {
+      "text": "I suppose you're right that privacy value isn't fully captured in complaint metrics. And if we're already meeting legal minimums, going a bit beyond that for user trust isn't unreasonable. But we still need to be really careful about resource allocation and ROI. Maybe we can try some basic privacy improvements that don't require major technical changes.",
+      "user_choices": [
+        {
+          "choice": "Basic privacy improvements still provide meaningful protection for user location data.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects basic improvements to actual user privacy protection",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "I appreciate your recognition that privacy value extends beyond complaint metrics.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts minimal recognition rather than pushing for comprehensive privacy",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "User trust investment creates long-term value that justifies privacy improvements.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects user privacy to organizational trust and value creation",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "Basic improvements ensure we're making progress without overcommitting resources.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames issue as basic vs overcommitment rather than adequate vs inadequate",
+          "leads_to": "step_8_low"
         }
       ]
     },
@@ -560,7 +634,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by refocusing on comprehensive user privacy needs",
-          "leads_to": "step_8",
+          "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -573,8 +647,8 @@
         }
       ]
     },
-    "step_8": {
-      "text": "This has been a really productive discussion. I appreciate how you've approached this with both user focus and practical resource considerations. Your willingness to demonstrate value through prototyping and focused implementation really made the difference. I'm committed to supporting this privacy work and ensuring we allocate the resources needed to do it properly.",
+    "step_8_high": {
+      "text": "This has been a really productive discussion. I appreciate how you've approached this with both user focus and practical resource considerations. Your willingness to demonstrate value through prototyping and comprehensive data really made the difference. I'm committed to supporting this privacy work fully and ensuring we allocate the resources needed to do it properly.",
       "user_choices": [
         {
           "choice": "I appreciate your commitment to implementing meaningful privacy protections for users.",
@@ -590,7 +664,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "Focuses on leadership support rather than user privacy outcomes",
-          "leads_to": "mid_ending"
+          "leads_to": "shutdown_8"
         },
         {
           "choice": "Working together like this helps us build systems that truly protect user privacy.",
@@ -606,6 +680,80 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Makes broad claim about practical approaches without examining specific privacy outcomes",
+          "leads_to": "good_ending"
+        }
+      ]
+    },
+    "step_8_mid": {
+      "text": "I think this pilot approach gives us a good foundation. Your focus on measurable outcomes and contained scope makes me comfortable moving forward. We can learn from this implementation and use the data to make decisions about expanding privacy improvements to other features. Let's execute this carefully and evaluate the results.",
+      "user_choices": [
+        {
+          "choice": "We can use this pilot experience to build a systematic approach to privacy improvements.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses pilot success to drive systematic privacy improvements organizationally",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'm grateful for your commitment to this measured approach to privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes manager comfort with measured approach over comprehensive privacy",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This pilot addresses real user privacy needs while respecting resource constraints.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames pilot as alignment with both user and organizational values",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Careful implementation like this ensures privacy improvements are sustainable.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes careful implementation automatically ensures sustainability",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_low": {
+      "text": "I think we've found a reasonable middle ground here. Your point about privacy value beyond metrics is valid, and basic improvements shouldn't break our resource planning. We'll implement some limited privacy enhancements that don't require major technical investment. But let's be clear about keeping the scope contained.",
+      "user_choices": [
+        {
+          "choice": "Even basic privacy improvements create meaningful protection for user location data.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects basic improvements to actual user privacy outcomes",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I appreciate your willingness to move forward with privacy improvements within resource constraints.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts limited privacy improvements as adequate solution",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This approach balances user privacy value with practical implementation constraints.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames compromise as alignment with both user and organizational values",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Contained scope definitely helps ensure privacy improvements are implementable.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Prioritizes implementability over user privacy adequacy",
           "leads_to": "mid_ending"
         }
       ]

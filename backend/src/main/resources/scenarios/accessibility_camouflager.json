@@ -45,7 +45,7 @@
       ]
     },
     "step_2": {
-      "text": "I get where you're coming from with the user focus. But here's the thing - if we want to change the interface now, we'd have to go through the whole accessibility committee process, get sign-offs from legal, design, and engineering. That paperwork alone could push our launch back by weeks. It's a real mess.",
+      "text": "I get where you're coming from with the user focus. But here's the thing - if we want to change the interface now, we'd have to go through the whole approval process, get sign-offs from legal, design, and engineering. That paperwork alone could push our launch back by weeks. It's a real mess.",
       "user_choices": [
         {
           "choice": "What if we implemented a small, practical fix that doesn't require the full committee process?",
@@ -119,7 +119,7 @@
       ]
     },
     "step_3": {
-      "text": "Look, I understand your passion for user experience, but let's be realistic here. We're talking about maybe 2-3% of our user base who use screen readers. If we hold up the entire launch for this small group, we risk losing our competitive advantage in the market. Our competitors are already moving fast, and we can't afford to fall behind over what is essentially an edge case scenario.",
+      "text": "Look, I understand your passion for user experience, but let's be realistic here. We're talking about maybe 2-3% of our user base who use screen readers. If we hold up the entire launch for this small group, we risk losing our competitive advantage in the market. Our competitors are already moving fast, and we can't afford to fall behind over what is essentially a small user group.",
       "user_choices": [
         {
           "choice": "Imagine a user trying this with a screen reader - they'd be completely stuck without this fix.",
@@ -193,7 +193,7 @@
       ]
     },
     "step_4": {
-      "text": "Look, I've been trying to be diplomatic here, but let me be completely direct with you. The choice is simple: we either delay the entire launch to fix this for a handful of users, or we ship on time and stay competitive. We can't have both. The executives are breathing down my neck about deadlines, and frankly, I need team members who understand business priorities, not ones who create roadblocks over edge cases.",
+      "text": "Look, I've been trying to be diplomatic here, but let me be completely direct with you. The choice is simple: we either delay the entire launch to fix this for a handful of users, or we ship on time and stay competitive. We can't have both. The executives are breathing down my neck about deadlines, and frankly, I need team members who understand business priorities, not ones who create roadblocks over uncommon situations.",
       "user_choices": [
         {
           "choice": "Last time we skipped accessibility testing, it came back to bite us post-launch.",
@@ -498,7 +498,7 @@
       "user_choices": [
         {
           "choice": "What if we added an optional feedback mechanism to give users more control over their accessibility experience?",
-          "tactic": "Designing Affordances Subversively",
+                      "tactic": "Building in accessibility features",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Subtly introduces design elements that support ethical values",

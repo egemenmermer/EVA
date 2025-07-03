@@ -103,30 +103,30 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
           {/* Tactics Overview Cards */}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             {/* Soft Resistance Card */}
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+            <div className="bg-teal-50 dark:bg-teal-900/20 border-2 border-teal-200 dark:border-teal-800 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
-                  <Target className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center">
+                  <Target className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-yellow-800 dark:text-yellow-200">🔸 Soft Resistance Tactics</h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">From Wong (2021)</p>
+                  <h4 className="text-lg font-bold text-teal-800 dark:text-teal-200">🔸 Soft Resistance Tactics</h4>
+                  <p className="text-sm text-teal-700 dark:text-teal-300">From Wong (2021)</p>
                 </div>
               </div>
               
-              <p className="text-yellow-800 dark:text-yellow-200 mb-4 font-medium">
+              <p className="text-teal-800 dark:text-teal-200 mb-4 font-medium">
                 Ideal when you want to push back gently within a rigid workplace.
               </p>
               
               <div className="mb-4">
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-2"><strong>Description:</strong></p>
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
+                <p className="text-teal-700 dark:text-teal-300 text-sm mb-2"><strong>Description:</strong></p>
+                <p className="text-teal-700 dark:text-teal-300 text-sm mb-3">
                   These tactics help you resist unethical or questionable decisions without directly confronting your manager. 
                   They work well in hierarchical environments or when you're early in your career.
                 </p>
                 
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-2"><strong>Examples:</strong></p>
-                <ul className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1 mb-3">
+                <p className="text-teal-700 dark:text-teal-300 text-sm mb-2"><strong>Examples:</strong></p>
+                <ul className="text-teal-700 dark:text-teal-300 text-sm space-y-1 mb-3">
                   <li>• Proposing extra user testing to slow down a rushed launch</li>
                   <li>• Logging concerns quietly in documentation</li>
                   <li>• Asking for legal review without making accusations</li>
@@ -134,38 +134,38 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
               </div>
               
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm font-medium">
+                <Lightbulb className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                <p className="text-teal-700 dark:text-teal-300 text-sm font-medium">
                   Good for: Defusing pressure, planting ethical concerns, protecting yourself quietly.
                 </p>
               </div>
             </div>
 
             {/* Rhetorical Tactics Card */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-blue-800 dark:text-blue-200">🔹 Rhetorical Tactics</h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">From Rose & Tenenberg (2016)</p>
+                  <h4 className="text-lg font-bold text-purple-800 dark:text-purple-200">🔹 Rhetorical Tactics</h4>
+                  <p className="text-sm text-purple-700 dark:text-purple-300">From Rose & Tenenberg (2016)</p>
                 </div>
               </div>
               
-              <p className="text-blue-800 dark:text-blue-200 mb-4 font-medium">
+              <p className="text-purple-800 dark:text-purple-200 mb-4 font-medium">
                 Great for building persuasive arguments.
               </p>
               
               <div className="mb-4">
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2"><strong>Description:</strong></p>
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
+                <p className="text-purple-700 dark:text-purple-300 text-sm mb-2"><strong>Description:</strong></p>
+                <p className="text-purple-700 dark:text-purple-300 text-sm mb-3">
                   These tactics help you convince your manager by using logic, emotion, credibility, and real-world evidence. 
                   They're more assertive and visible than soft resistance.
                 </p>
                 
-                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2"><strong>Examples:</strong></p>
-                <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-1 mb-3">
+                <p className="text-purple-700 dark:text-purple-300 text-sm mb-2"><strong>Examples:</strong></p>
+                <ul className="text-purple-700 dark:text-purple-300 text-sm space-y-1 mb-3">
                   <li>• Citing legal fines or research data to support your position</li>
                   <li>• Referring to user sentiment or public backlash</li>
                   <li>• Framing ethical choices as business opportunities</li>
@@ -173,8 +173,8 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
               </div>
               
               <div className="flex items-center gap-2">
-                <Flame className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
+                <Flame className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <p className="text-purple-700 dark:text-purple-300 text-sm font-medium">
                   Good for: Making strong, evidence-based ethical arguments, shifting the conversation.
                 </p>
               </div>
@@ -223,7 +223,7 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                 onClick={() => setActiveTab('soft')}
                 className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'soft'
-                    ? 'bg-white dark:bg-gray-800 text-yellow-600 dark:text-yellow-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-800 text-teal-600 dark:text-teal-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
                 }`}
               >
@@ -234,7 +234,7 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                 onClick={() => setActiveTab('rhetoric')}
                 className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'rhetoric'
-                    ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
                 }`}
               >
@@ -246,24 +246,24 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
             {/* Tactics Descriptions */}
             <div className="mb-6">
               {activeTab === 'soft' && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-2 flex items-center gap-2">
+                <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-teal-700 dark:text-teal-300 mb-2 flex items-center gap-2">
                     <Target className="h-4 w-4" />
                     🔸 Soft Resistance Tactics
                   </h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  <p className="text-sm text-teal-700 dark:text-teal-300">
                     Subtle strategies to redirect, delay, or ethically influence decisions within existing power structures, without direct confrontation. 
                     These tactics help you resist unethical decisions without directly confronting your manager.
                   </p>
                 </div>
               )}
               {activeTab === 'rhetoric' && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-2">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2 flex items-center gap-2">
                     <Zap className="h-4 w-4" />
                     🔹 Rhetorical Tactics
                   </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-sm text-purple-700 dark:text-purple-300">
                     Overt persuasive strategies to justify ethical or user-centered decisions to stakeholders using logical argument and moral reasoning. 
                     These tactics are more assertive and visible than soft resistance.
                   </p>
@@ -289,24 +289,24 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                    {activeTab === 'soft' && (
+                                        {activeTab === 'soft' && (
                       <>
                         {softResistanceTactics.map((tactic, index) => {
                           const isGlowing = shouldGlow(tactic.name);
                           return (
-                            <tr key={index} className={index % 2 === 0 ? "bg-yellow-50/50 dark:bg-yellow-900/10" : "bg-yellow-50/30 dark:bg-yellow-900/5"}>
+                            <tr key={index} className={index % 2 === 0 ? "bg-teal-50/50 dark:bg-teal-900/10" : "bg-teal-50/30 dark:bg-teal-900/5"}>
                               {index === 0 && (
-                                                              <td className="px-4 py-3 text-sm font-medium text-yellow-800 dark:text-yellow-200" rowSpan={softResistanceTactics.length}>
+                                <td className="px-4 py-3 text-sm font-medium text-teal-800 dark:text-teal-200" rowSpan={softResistanceTactics.length}>
                                 Soft Resistance
                               </td>
                             )}
                             <td className={`px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium 
-                              ${isGlowing ? 'bg-yellow-100/70 dark:bg-yellow-800/30 text-yellow-900 dark:text-yellow-100 shadow-sm border-l-2 border-yellow-400 dark:border-yellow-500' : ''}`}>
-                              {isGlowing && <span className="mr-2 text-yellow-500">✨</span>}
+                              ${isGlowing ? 'bg-teal-100/70 dark:bg-teal-800/30 text-teal-900 dark:text-teal-100 shadow-sm border-l-2 border-teal-400 dark:border-teal-500' : ''}`}>
+                              {isGlowing && <span className="mr-2 text-teal-500">✨</span>}
                               {tactic.name}
                             </td>
                             <td className={`px-4 py-3 text-sm text-gray-700 dark:text-gray-300 
-                              ${isGlowing ? 'bg-yellow-100/50 dark:bg-yellow-800/20 text-yellow-800 dark:text-yellow-200 shadow-sm border-r-2 border-yellow-400 dark:border-yellow-500' : ''}`}>
+                              ${isGlowing ? 'bg-teal-100/50 dark:bg-teal-800/20 text-teal-800 dark:text-teal-200 shadow-sm border-r-2 border-teal-400 dark:border-teal-500' : ''}`}>
                               {tactic.description}
                             </td>
                             </tr>
@@ -319,19 +319,19 @@ export const EVATacticsInfoModal: React.FC<EVATacticsInfoModalProps> = ({
                         {rhetoricalTactics.map((tactic, index) => {
                           const isGlowing = shouldGlow(tactic.name);
                           return (
-                            <tr key={index} className={index % 2 === 0 ? "bg-blue-50/50 dark:bg-blue-900/10" : "bg-blue-50/30 dark:bg-blue-900/5"}>
+                            <tr key={index} className={index % 2 === 0 ? "bg-purple-50/50 dark:bg-purple-900/10" : "bg-purple-50/30 dark:bg-purple-900/5"}>
                               {index === 0 && (
-                                                              <td className="px-4 py-3 text-sm font-medium text-blue-800 dark:text-blue-200" rowSpan={rhetoricalTactics.length}>
+                                <td className="px-4 py-3 text-sm font-medium text-purple-800 dark:text-purple-200" rowSpan={rhetoricalTactics.length}>
                                 Rhetorical
                               </td>
                             )}
                             <td className={`px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium 
-                              ${isGlowing ? 'bg-blue-100/70 dark:bg-blue-800/30 text-blue-900 dark:text-blue-100 shadow-sm border-l-2 border-blue-400 dark:border-blue-500' : ''}`}>
-                              {isGlowing && <span className="mr-2 text-blue-500">✨</span>}
+                              ${isGlowing ? 'bg-purple-100/70 dark:bg-purple-800/30 text-purple-900 dark:text-purple-100 shadow-sm border-l-2 border-purple-400 dark:border-purple-500' : ''}`}>
+                              {isGlowing && <span className="mr-2 text-purple-500">✨</span>}
                               {tactic.name}
                             </td>
                             <td className={`px-4 py-3 text-sm text-gray-700 dark:text-gray-300 
-                              ${isGlowing ? 'bg-blue-100/50 dark:bg-blue-800/20 text-blue-800 dark:text-blue-200 shadow-sm border-r-2 border-blue-400 dark:border-blue-500' : ''}`}>
+                              ${isGlowing ? 'bg-purple-100/50 dark:bg-purple-800/20 text-purple-800 dark:text-purple-200 shadow-sm border-r-2 border-purple-400 dark:border-purple-500' : ''}`}>
                               {tactic.description}
                             </td>
                             </tr>

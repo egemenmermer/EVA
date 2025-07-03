@@ -49,7 +49,7 @@
       "user_choices": [
         {
           "choice": "We could implement privacy-preserving techniques that maintain analytics value while protecting users.",
-          "tactic": "Designing Affordances Subversively",
+                      "tactic": "Building in privacy features",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Proposes technical solutions that embed privacy values while addressing business needs",
@@ -358,7 +358,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses quantifiable evidence to show privacy improvements work with business needs",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "I'm excited that you see this as an innovation opportunity too!",

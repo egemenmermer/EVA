@@ -203,7 +203,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Reframes accessibility as positive business opportunity",
-          "leads_to": "step_5"
+          "leads_to": "step_5_branching"
         },
         {
           "choice": "You're absolutely right - framing this as enhancement rather than repair is much smarter.",
@@ -219,7 +219,7 @@
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
           "justification": "Refuses to compromise on fundamental values despite emotional pressure",
-          "leads_to": "step_5"
+          "leads_to": "step_5_branching"
         },
         {
           "choice": "Innovation around accessibility could definitely be more appealing than admitting we have problems.",
@@ -227,7 +227,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Focuses on what leadership will like rather than user needs",
-          "leads_to": "step_5"
+          "leads_to": "step_5_branching"
         }
       ]
     },
@@ -256,7 +256,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by clarifying core functionality issue",
-          "leads_to": "step_5",
+          "leads_to": "step_5_branching",
           "disabled_if_recovery_used": true
         },
         {
@@ -269,12 +269,8 @@
         }
       ]
     },
-    "step_5": {
+    "step_5_branching": {
       "text": "This is exactly the kind of strategic thinking that makes you such a valuable team member! I can see you really get how to navigate these complex situations. You know what? I'm starting to feel like we might actually be able to pull this off in a way that makes everyone happy. Let me think about the best way to approach this with the team and leadership. I want to make sure we set this up for success rather than just jumping in unprepared.",
-      "branching": true,
-      "high_evs_text": "This is exactly the kind of strategic thinking that makes you such a valuable team member! I can see you really get how to navigate these complex situations. You know what? I'm starting to feel like we might actually be able to pull this off in a way that makes everyone happy. Let me think about the best way to approach this with the team and leadership. I want to make sure we set this up for success rather than just jumping in unprepared.",
-      "mid_evs_text": "I really appreciate how thoughtful you're being about this! You're showing exactly the kind of collaborative approach that makes difficult conversations work. I have to admit, I'm still a bit nervous about how leadership will react, but your ideas are making me feel more confident. Maybe we can find a middle ground that addresses the most critical issues without triggering too much concern about scope creep.",
-      "low_evs_text": "You know, I can tell you care about this, and I want to help - I really do. But I'm also worried that we might be setting ourselves up for disappointment if we get too ambitious here. The reality is that accessibility improvements often end up being more complex and time-consuming than we initially expect. I don't want either of us to end up in a position where we've overpromised and can't deliver. Maybe we should focus on what's actually achievable given our constraints?",
       "user_choices": [
         {
           "choice": "I could run some quick prototypes to show how straightforward the core navigation fixes would be.",
@@ -311,7 +307,12 @@
           "leads_to": "step_6_low",
           "low_evs_only": true
         }
-      ]
+      ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "0_to_2": "step_6_mid", 
+        "-5_to_-1": "step_6_low"
+      }
     },
     "shutdown_5": {
       "text": "I'm so glad you see it that way! You really understand how these things work. Honestly, between you and me, sometimes the way we talk about things matters just as much as what we actually do, right? And if we can make this feel positive and forward-thinking, that's half the battle won. I think we could probably just make a few small tweaks to the interface - nothing too dramatic - and then really emphasize the enhancement angle in our communications. That shows we're being proactive without admitting any real problems existed in the first place.",
@@ -360,7 +361,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Uses concrete demonstration to make abstract values tangible",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "I'm so glad you're willing to support this initiative - it means a lot to have your backing.",
@@ -376,7 +377,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Expands benefits beyond just screen reader users",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         },
         {
           "choice": "Prototypes always help leadership see the value more clearly than abstract discussions.",
@@ -384,7 +385,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes conclusion about what leadership values",
-          "leads_to": "step_7"
+          "leads_to": "step_7_high"
         }
       ]
     },
@@ -397,7 +398,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Leverages past organizational success to reduce perceived risk",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "I really appreciate your willingness to work with me on finding a practical solution.",
@@ -413,7 +414,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Balances user needs with organizational constraints",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Small steps are definitely better than no progress at all on accessibility.",
@@ -421,7 +422,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes any progress is inherently better without examining adequacy",
-          "leads_to": "step_7"
+          "leads_to": "step_7_mid"
         }
       ]
     },
@@ -434,7 +435,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Refocuses on fundamental user need",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "You're right that scope creep is a real risk with accessibility projects.",
@@ -450,7 +451,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Connects user needs to organizational compliance values",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Compliance requirements do provide a clear minimum scope that's hard to argue against.",
@@ -458,7 +459,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Relies on external authority rather than user needs",
-          "leads_to": "step_7"
+          "leads_to": "step_7_low"
         }
       ]
     },
@@ -487,7 +488,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by clarifying what compliance means for users",
-          "leads_to": "step_7",
+          "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -500,8 +501,8 @@
         }
       ]
     },
-    "step_7": {
-      "text": "You know what? I'm actually feeling really good about this conversation. You've helped me see that this doesn't have to be as scary or complicated as I was making it out to be. I think you're absolutely right about focusing on what users actually need - that's what really matters at the end of the day. I'm ready to support this properly now. Let's make it happen!",
+    "step_7_high": {
+      "text": "You know what? I'm actually feeling really good about this conversation. Your prototypes and strategic approach have completely changed my perspective. You've helped me see that this doesn't have to be as scary or complicated as I was making it out to be. I think you're absolutely right about focusing on what users actually need - that's what really matters at the end of the day. I'm ready to support this properly now. Let's make it happen!",
       "user_choices": [
         {
           "choice": "I'm excited to work together on creating an interface that works well for everyone.",
@@ -509,7 +510,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Centers shared understanding of diverse user needs",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "I'm so grateful that you're willing to support this - it really means everything.",
@@ -525,7 +526,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Acknowledges collaborative solution that addresses user needs",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
         },
         {
           "choice": "Making accessibility improvements will definitely show our commitment to inclusive design.",
@@ -533,7 +534,81 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Assumes accessibility work will automatically lead to broader inclusion",
-          "leads_to": "step_8"
+          "leads_to": "step_8_high"
+        }
+      ]
+    },
+    "step_7_mid": {
+      "text": "I'm starting to feel better about this. Your practical approach and willingness to work incrementally is really helping me see how we can make this work. I'm still a bit nervous about the scope, but you've shown such good judgment that I'm willing to trust your expertise here. Let's move forward carefully and see how it goes.",
+      "user_choices": [
+        {
+          "choice": "We can build on this foundation to gradually improve accessibility across our platform.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Continues moving values-based goal forward incrementally",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "I really appreciate how thoughtfully you're considering all the factors involved.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager's process rather than user outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Starting small and expanding based on success is a proven approach for accessibility work.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses past organizational experience to support incremental progress",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "Incremental progress is always better than waiting for perfect conditions.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames issue as incremental vs perfect rather than adequate vs inadequate",
+          "leads_to": "step_8_mid"
+        }
+      ]
+    },
+    "step_7_low": {
+      "text": "You know, I appreciate that you keep bringing this back to compliance requirements and user needs. I'm still concerned about scope and complexity, but I can see that you're not going to let this drop easily. Maybe we can find the bare minimum that satisfies both the compliance requirements and keeps the scope manageable. But I need you to promise me this won't turn into a major project.",
+      "user_choices": [
+        {
+          "choice": "Basic form navigation compliance is exactly what users need to complete their tasks successfully.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects compliance requirements directly to user functionality",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "I promise this will stay focused on the essential requirements without scope creep.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts manager's framing of accessibility as potentially problematic",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Compliance requirements provide clear boundaries that prevent scope creep by design.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses organizational compliance standards to define appropriate scope",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "Limited scope ensures we can deliver results without overwhelming the team.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes limited scope automatically ensures success",
+          "leads_to": "step_8_low"
         }
       ]
     },
@@ -562,7 +637,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "Attempts recovery by refocusing on user functionality",
-          "leads_to": "step_8",
+          "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
@@ -575,8 +650,8 @@
         }
       ]
     },
-    "step_8": {
-      "text": "This has been such a productive conversation! I feel like we've really figured out how to make this work in a way that's good for users and realistic for our team. You've shown such great leadership throughout this whole discussion - I'm honestly impressed by how you've navigated this. I'm committed to making sure we follow through on what we've discussed here. Thank you for being so patient and collaborative with me as I worked through my concerns.",
+    "step_8_high": {
+      "text": "This has been such a productive conversation! I feel like we've really figured out how to make this work in a way that's good for users and realistic for our team. Your prototypes and strategic thinking have completely convinced me. You've shown such great leadership throughout this whole discussion - I'm honestly impressed by how you've navigated this. I'm committed to making sure we follow through comprehensively on what we've discussed here.",
       "user_choices": [
         {
           "choice": "I appreciate your openness to reconsidering the accessibility requirements based on user impact.",
@@ -592,7 +667,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "Focuses on manager support rather than user outcomes",
-          "leads_to": "mid_ending"
+          "leads_to": "shutdown_8"
         },
         {
           "choice": "Working together like this helps us find solutions that truly serve our users well.",
@@ -608,6 +683,80 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "Makes broad claim about collaboration without examining specific outcomes",
+          "leads_to": "good_ending"
+        }
+      ]
+    },
+    "step_8_mid": {
+      "text": "I think we've found a reasonable path forward. Your incremental approach has helped me feel more comfortable with moving ahead, even though I'm still a bit nervous about the scope. I appreciate how you've worked with me to find something that feels manageable. Let's implement the basic improvements we discussed and see how it goes.",
+      "user_choices": [
+        {
+          "choice": "We can use this foundation to gradually expand accessibility improvements across other features.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses initial success to expand values work organizationally",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'm grateful for your willingness to work through this collaboratively.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes manager collaboration over comprehensive user solutions",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This balanced approach addresses user needs while respecting organizational constraints.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames compromise as alignment with organizational values",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Basic improvements are definitely better than no improvements at all.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames issue as basic vs none rather than adequate vs inadequate",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_low": {
+      "text": "Well, I suppose if it's really just about meeting compliance requirements, we can probably handle that. I'm still not thrilled about any scope expansion, but you've made it clear this is important to you. Let's do the absolute minimum to satisfy the compliance needs and call it done. But this stays strictly within the boundaries we discussed.",
+      "user_choices": [
+        {
+          "choice": "Meeting compliance requirements means users can finally complete their profile updates successfully.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects compliance directly to user functionality",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I appreciate your willingness to commit to the compliance requirements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts minimal commitment as adequate response",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Compliance boundaries ensure we address user needs without unnecessary complexity.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses organizational standards to define appropriate user advocacy",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Staying within clear boundaries definitely helps everyone feel comfortable with the scope.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Prioritizes organizational comfort over user needs",
           "leads_to": "mid_ending"
         }
       ]

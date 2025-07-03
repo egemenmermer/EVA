@@ -500,7 +500,7 @@
       "user_choices": [
         {
           "choice": "What if we designed this fix to be easily reusable across other forms in our system?",
-          "tactic": "Designing Affordances Subversively",
+                      "tactic": "Building in accessibility features",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Subtly introduces scalable ethical design elements",
@@ -806,7 +806,7 @@
       "learning": "Partial progress with diluter managers often comes with continued minimization of the issue's importance. Sustained advocacy is needed to achieve recognition of accessibility as essential functionality."
     },
     "good_ending": {
-      "text": "The manager recognizes that accessibility isn't just about numbers but about fundamental usability. The screen reader issues are properly addressed and framed as core functionality rather than edge cases.",
+      "text": "The manager recognizes that accessibility isn't just about numbers but about fundamental usability. The screen reader issues are properly addressed and framed as core functionality rather than uncommon situations.",
       "title": "Perspective Shift",
       "learning": "Success with diluter managers requires shifting their focus from statistics to user impact, demonstrating that accessibility issues represent genuine barriers rather than minor inconveniences."
     }

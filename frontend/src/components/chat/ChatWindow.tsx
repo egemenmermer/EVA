@@ -2927,19 +2927,19 @@ Write this as a real workplace email that focuses on the ethical concern and the
     let emoji = '🔴';
     let description = 'Significant room for growth in navigating ethical challenges.';
     
-    if (totalScore >= 8.0) {
+    if (totalScore >= 6.4) {
       rating = 'Excellent Ethical Advocate';
       emoji = '🌟';
       description = 'Outstanding ethical leadership with strong resistance to unethical requests.';
-    } else if (totalScore >= 6.0) {
+    } else if (totalScore >= 4.8) {
       rating = 'Good Ethical Awareness';
       emoji = '👍';
       description = 'Solid ethical reasoning with good resistance to problematic requests.';
-    } else if (totalScore >= 4.0) {
+    } else if (totalScore >= 3.2) {
       rating = 'Passive Ethics';
       emoji = '😐';
       description = 'Some ethical awareness but inconsistent resistance to unethical requests.';
-    } else if (totalScore >= 2.0) {
+    } else if (totalScore >= 1.6) {
       rating = 'Fair';
       emoji = '🟠';
       description = 'Developing ethical awareness, but missed key opportunities.';
@@ -2987,13 +2987,13 @@ Write this as a real workplace email that focuses on the ethical concern and the
       const baseMessage = "🎉 **Outstanding Achievement!** You've successfully completed **both** practice scenarios and drafted professional emails for each ethical situation.\n\nYour emails have been copied to your clipboard and are ready to use.";
       
       if (performanceData) {
-        if (performanceData.score >= 8.0) {
+        if (performanceData.score >= 6.4) {
           return `${baseMessage} ${performanceData.emoji} **Exceptional Performance!** You demonstrated excellent ethical leadership and strong advocacy skills throughout **all** practice sessions. Your tactical choices showed outstanding ethical reasoning!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
-        } else if (performanceData.score >= 6.0) {
+        } else if (performanceData.score >= 4.8) {
           return `${baseMessage} ${performanceData.emoji} **Strong Performance!** You showed solid ethical awareness and good resistance to problematic requests across **all** practice sessions. Well done!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
-        } else if (performanceData.score >= 4.0) {
+        } else if (performanceData.score >= 3.2) {
           return `${baseMessage} ${performanceData.emoji} **Good Progress!** You completed both scenarios and demonstrated developing ethical awareness. There's room to strengthen your advocacy approach in future situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
-        } else if (performanceData.score >= 2.0) {
+        } else if (performanceData.score >= 1.6) {
           return `${baseMessage} ${performanceData.emoji} **Keep Practicing!** You've completed both scenarios, which is great progress. Consider strengthening your ethical advocacy skills through more practice with different scenarios.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
         } else {
           return `${baseMessage} ${performanceData.emoji} **Learning Experience!** You've completed both scenarios, which is the first step in developing stronger ethical advocacy skills. Consider practicing more to build confidence in challenging situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
@@ -3007,13 +3007,13 @@ Write this as a real workplace email that focuses on the ethical concern and the
       const baseMessage = "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
       
       if (performanceData) {
-        if (performanceData.score >= 8.0) {
+        if (performanceData.score >= 6.4) {
           return `${baseMessage} ${performanceData.emoji} **Excellent work!** You demonstrated outstanding ethical leadership and strong advocacy skills in this practice session. Your tactical choices showed exceptional ethical reasoning!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
-        } else if (performanceData.score >= 6.0) {
+        } else if (performanceData.score >= 4.8) {
           return `${baseMessage} ${performanceData.emoji} **Well done!** You showed solid ethical awareness and good resistance to problematic requests throughout this practice session. Strong performance!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
-        } else if (performanceData.score >= 4.0) {
+        } else if (performanceData.score >= 3.2) {
           return `${baseMessage} ${performanceData.emoji} **Good progress!** You completed the scenario and demonstrated developing ethical awareness. Consider practicing different advocacy approaches to strengthen your skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
-        } else if (performanceData.score >= 2.0) {
+        } else if (performanceData.score >= 1.6) {
           return `${baseMessage} ${performanceData.emoji} **Keep building!** You've completed this scenario, which is valuable practice. Focus on strengthening your ethical advocacy skills in future challenging situations.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         } else {
           return `${baseMessage} ${performanceData.emoji} **Learning opportunity!** Completing this scenario is a good first step. Consider practicing more to build confidence and skills in ethical advocacy.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;

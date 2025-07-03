@@ -203,6 +203,9 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [sessionSaved, setSessionSaved] = useState(false); // Add flag to track if session is saved
   const [showColorExplanationModal, setShowColorExplanationModal] = useState(false);
   const [hasShownInfoModal, setHasShownInfoModal] = useState(false); // Track if info modal has been shown
+  const [hoveredTactic, setHoveredTactic] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+  const [complianceCount, setComplianceCount] = useState(0);
   
   
   const { user, setUser, setManagerType: setGlobalManagerType } = useStore();
@@ -248,11 +251,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const getTacticTypeColor = (category: string): string => {
     // Handle direct category names
     if (category === 'Rhetorical Tactics') {
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
     } else if (category === 'Logical Fallacies') {
-      return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+      return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
     } else if (category === 'Soft Resistance') {
-      return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
+      return 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400';
     }
     
     // Map specific tactic names to their category colors
@@ -266,7 +269,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         lowercaseCategory.includes('organizational memory') || 
         lowercaseCategory.includes('envisioning') || 
         lowercaseCategory.includes('rhetorical')) {
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
     }
     
     // Logical Fallacies
@@ -275,7 +278,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         lowercaseCategory.includes('appeal to popularity') || 
         lowercaseCategory.includes('hasty generalization') || 
         lowercaseCategory.includes('fallacy')) {
-      return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+      return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
     }
     
     // Soft Resistance (Note: "Compliance" is NOT soft resistance - it's the bad choice!)
@@ -286,7 +289,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         lowercaseCategory.includes('standing firm') ||
         lowercaseCategory.includes('moral courage') ||
         lowercaseCategory.includes('soft resistance')) {
-      return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
+      return 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400';
     }
     
     // Compliance should be colored gray/dark (bad choices)
@@ -349,6 +352,188 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     }
     
     return 'Other'; // Return fallback for unknown tactics
+  };
+
+  // Research-based tactical database
+  const tacticDatabase = {
+    // Values Work Tactics (Section 4)
+    'Broadening Who the "User" is in User Research': { 
+      emoji: '🔹', 
+      description: 'Expand the definition of \'user\' to include marginalized or overlooked groups.',
+      example: 'We should also consider how this change affects rural or underrepresented users. We\'ve seen real differences in needs there.'
+    },
+    'Designing Affordances Subversively': { 
+      emoji: '🔹', 
+      description: 'Subtly introduce design elements that support ethical values without overtly challenging norms.',
+      example: 'What if we added an optional feedback box here to give users more control over their data?'
+    },
+    'Making Values Visible Rhetorically to Other Organizational Stakeholders': { 
+      emoji: '🔹', 
+      description: 'Reframe ethical concerns in terms that align with business goals, like risk or trust.',
+      example: 'If we ignore this, it could damage user trust and hurt retention metrics.'
+    },
+    'Expanding On and Subverting Design Resources for Others': { 
+      emoji: '🔹', 
+      description: 'Adapt familiar design tools (e.g., personas) to highlight values or ethical issues.',
+      example: 'We created personas that specifically include accessibility needs to stress inclusion early on.'
+    },
+    'Making Values Visible and Legible Through Organizational Metrics': { 
+      emoji: '🔹', 
+      description: 'Use existing organizational metrics systems to track and surface ethical issues.',
+      example: 'We\'ve logged this as an \'ethical bug\', it affects fairness in how users are treated.'
+    },
+    'Using Organizational Values to Create Spaces for New Forms of Values Work': { 
+      emoji: '🔹', 
+      description: 'Invoke the company\'s stated values (like diversity or responsibility) to support ethics work.',
+      example: 'This aligns with our mission to build inclusive products, this feature really supports that.'
+    },
+    
+    // UX Tactics (Section 5)
+    'Guerilla methods': { 
+      emoji: '🔹', 
+      description: 'Use informal, scrappy methods to gather user insights quickly and cost-effectively.',
+      example: 'We ran quick hallway tests with five people, three hit the same issue immediately.'
+    },
+    'Models that synthesize': { 
+      emoji: '🔹', 
+      description: 'Create simplified conceptual models that unify complex ideas for easier communication.',
+      example: 'Here\'s a visual model that maps all the user pain points onto our current flow.'
+    },
+    'Usability studies': { 
+      emoji: '🔹', 
+      description: 'Use observed user behavior in structured testing to support design arguments.',
+      example: 'In our test, every user got stuck at this point, this is a usability red flag.'
+    },
+    'Embodied knowledge of users': { 
+      emoji: '🔹', 
+      description: 'Use your own or others\' lived experience to represent user perspectives.',
+      example: 'Honestly, as someone who uses the app daily, that feature feels unintuitive.'
+    },
+    'Fidelity as a rhetorical strategy': { 
+      emoji: '🔹', 
+      description: 'Use polished or realistic mockups to make a design idea more persuasive.',
+      example: 'Here\'s a high-fidelity prototype that shows the smoother experience we\'re aiming for.'
+    },
+    'Envisioning': { 
+      emoji: '🔹', 
+      description: 'Imagine and articulate future use scenarios to show long-term value.',
+      example: 'Imagine a user trying this with a screen reader, they\'d be stuck without this fix.'
+    },
+    'Heuristics': { 
+      emoji: '🔹', 
+      description: 'Invoke common design principles or standards as evidence.',
+      example: 'This violates our core usability heuristics, it\'s not consistent or predictable.'
+    },
+    'Credibility and expertise': { 
+      emoji: '🔹', 
+      description: 'Leverage your own or your team\'s authority and past work to strengthen arguments.',
+      example: 'We\'ve successfully done this in the past, our approach has worked for similar challenges.'
+    },
+    'Organizational memory': { 
+      emoji: '🔹', 
+      description: 'Reference past decisions, successes, or failures to argue for or against a choice.',
+      example: 'Last time we skipped user testing here, it came back to bite us post-launch.'
+    },
+    'Usable enough': { 
+      emoji: '🤲', 
+      description: 'Frame a design as sufficiently good to meet minimum goals when perfection isn\'t feasible.',
+      example: 'It\'s not perfect, but it gets us to MVP and avoids the major pitfalls.'
+    },
+    'Distract and pacify': { 
+      emoji: '🤲', 
+      description: 'Offer surface-level solutions to delay or soften resistance to ethical concerns.',
+      example: 'We\'ll add a toggle for now, at least it shows we\'re doing something.'
+    },
+    'Acquiesce': { 
+      emoji: '🤲', 
+      description: 'Concede on less critical values or features in order to maintain influence or avoid conflict.',
+      example: 'Okay, we can drop that part for now if it means we keep the opt-in controls.'
+    },
+    'Negotiation and cooperation': { 
+      emoji: '🤲', 
+      description: 'Compromise with others to move a values-based goal forward in some form.',
+      example: 'What if we reduce the data collected, but still keep enough for the feature to work?'
+    },
+    'Being the user': { 
+      emoji: '🤲', 
+      description: 'Adopt the user\'s perspective in discussion to highlight their experience.',
+      example: 'If I were a new user, this error message would be completely confusing.'
+    },
+    
+    // Logical Fallacies
+    'False Dilemma': { emoji: '🔄', description: 'Frames the issue as a black-or-white choice when other options exist.' },
+    'Appeal to Ignorance': { emoji: '🔄', description: 'Assumes something is true just because it hasn\'t been disproven.' },
+    'Appeal to Popularity': { emoji: '🔄', description: 'Justifies decisions because "everyone else does it".' },
+    'Strawman': { emoji: '🔄', description: 'Misrepresents your point to argue against an easier version.' },
+    'Red Herring': { emoji: '🔄', description: 'Introduces irrelevant info to distract from the real issue.' },
+    'Slippery Slope': { emoji: '🔄', description: 'Claims one action will inevitably lead to extreme consequences.' },
+    'Appeal to Authority': { emoji: '🔄', description: 'Uses an authority figure\'s opinion instead of logic.' },
+    'Hasty Generalization': { emoji: '🔄', description: 'Draws broad conclusions from limited examples.' },
+    'Circular Reasoning': { emoji: '🔄', description: 'Repeats the claim as evidence, without real support.' }
+  };
+
+  // Function to get tooltip content for specific tactics
+  const getTacticTooltipContent = (category: string): { title: string; description: string; emoji: string } => {
+    // Check if it's a specific tactic first
+    if (tacticDatabase[category as keyof typeof tacticDatabase]) {
+      const tactic = tacticDatabase[category as keyof typeof tacticDatabase];
+      return {
+        emoji: tactic.emoji,
+        title: category,
+        description: tactic.description
+      };
+    }
+    
+    // Fallback for generic categories or unknown tactics
+    const tacticTypeName = getTacticTypeName(category);
+    switch (tacticTypeName) {
+      case 'Rhetoric':
+        return {
+          emoji: '🔹',
+          title: 'Rhetorical Approach',
+          description: 'This choice uses persuasive reasoning to convince your manager.'
+        };
+      case 'Soft':
+        return {
+          emoji: '🤲',
+          title: 'Subtle Resistance',
+          description: 'This choice indirectly pushes back on the request.'
+        };
+      case 'Fallacy':
+        return {
+          emoji: '🔄',
+          title: 'Logical Weakness',
+          description: 'This choice uses flawed reasoning that may backfire.'
+        };
+      case 'Compliance':
+        return {
+          emoji: '⚪',
+          title: 'Accepting Direction',
+          description: 'This choice goes along with the manager\'s request.'
+        };
+      default:
+        return {
+          emoji: '❓',
+          title: 'Unknown Approach',
+          description: 'This tactical approach is not recognized.'
+        };
+    }
+  };
+
+  // Handle tooltip hover
+  const handleTacticHover = (event: React.MouseEvent, category: string) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10
+    });
+    setHoveredTactic(category);
+  };
+
+  // Handle tooltip leave
+  const handleTacticLeave = () => {
+    setHoveredTactic(null);
+    setTooltipPosition(null);
   };
 
   // Catch any runtime errors
@@ -641,6 +826,57 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const selectedChoice = currentScenario.currentChoices[choiceIndex];
       console.log('👤 User choice:', selectedChoice);
 
+      // Add user message to conversation (declare early so it can be used in failure logic)
+      const userMessage: UserMessage = {
+        role: 'user',
+        content: selectedChoice.text
+      };
+
+      // Track compliance choices for failure detection
+      const isComplianceChoice = selectedChoice.category.toLowerCase().includes('compliance');
+      if (isComplianceChoice) {
+        const newComplianceCount = complianceCount + 1;
+        setComplianceCount(newComplianceCount);
+        
+        // If this is the second compliance choice, trigger failure ending
+        if (newComplianceCount >= 2) {
+          // Create a failure session summary
+          const failureSessionSummary = {
+            totalEvs: 0,
+            averageEvs: 0,
+            performanceLevel: 'Failed',
+            tacticCounts: { 'Compliance': newComplianceCount },
+            choiceHistory: [...(currentScenario.sessionSummary?.choiceHistory || []), selectedChoice.text],
+            categoryHistory: [...(currentScenario.sessionSummary?.categoryHistory || []), 'Compliance'],
+            evsHistory: [...(currentScenario.sessionSummary?.evsHistory || []), 0],
+            scenarioTitle: currentScenario.scenario.title,
+            issue: currentScenario.scenario.issue,
+            managerType: currentScenario.scenario.managerType,
+            endingMessage: "You've chosen compliance twice. This approach doesn't develop your ethical advocacy skills. Ethical advocacy requires standing up for what's right.",
+            endingTitle: "Practice Failed",
+            endingType: "failure_ending",
+            endingKey: "failure_ending"
+          };
+
+          // Add user message to conversation
+          const updatedConversation = [...currentScenario.conversation, userMessage];
+          
+          setCurrentScenario(prev => prev ? {
+            ...prev,
+            conversation: updatedConversation,
+            isComplete: true,
+            currentChoices: [],
+            sessionSummary: failureSessionSummary,
+          } : null);
+          
+          setFinalScore(0);
+          setFinalReport(true);
+          setShowFeedbackOptions(false); // Don't show EVA feedback for failures
+          setProcessingChoice(false);
+          return;
+        }
+      }
+
       // Use original index for backend API call (to handle randomized display order)
       const originalChoiceIndex = selectedChoice.originalIndex !== undefined ? selectedChoice.originalIndex : choiceIndex;
       console.log('🔄 Display index:', choiceIndex, 'Original index:', originalChoiceIndex);
@@ -656,12 +892,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         console.error('❌ Invalid originalChoiceIndex:', originalChoiceIndex, 'Using display index instead');
         throw new Error(`Invalid choice index: ${originalChoiceIndex}`);
       }
-
-      // Add user message to conversation
-      const userMessage: UserMessage = {
-        role: 'user',
-        content: selectedChoice.text
-      };
 
       console.log('📤 Making API call to:', `/api/v1/scenarios/${currentScenario.scenario.id}/next`);
       console.log('📤 API payload:', {
@@ -861,7 +1091,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             sessionSummary = {
               totalEvs: finalScaledScore,
               averageEvs: numChoices > 0 ? totalRawEvs / numChoices : 0,
-              performanceLevel: finalScaledScore >= 8.0 ? 'Excellent' : finalScaledScore >= 6.0 ? 'Good' : finalScaledScore >= 4.0 ? 'Fair' : 'Needs Improvement',
+              performanceLevel: finalScaledScore >= 6.4 ? 'Excellent' : finalScaledScore >= 4.8 ? 'Good' : finalScaledScore >= 3.2 ? 'Fair' : 'Needs Improvement',
               tacticCounts: { [response.data.category || 'Mixed']: 1 },
               choiceHistory: [selectedChoice.text],
               categoryHistory: [response.data.category || 'Mixed'],
@@ -1101,7 +1331,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
       
       // Create a user-friendly query about the practice session
-      const query = `I just completed an ethical decision-making practice scenario. My score was ${currentScore}/10. Can you provide feedback on my performance and suggest improvements for similar situations?`;
+      const query = `I just completed an ethical decision-making practice scenario. My score was ${currentScore}/8. Can you provide feedback on my performance and suggest improvements for similar situations?`;
       
       console.log('Query sent to EVA:', query);
       
@@ -1137,7 +1367,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 - Scenario: ${currentScenario.scenario.title}
 - Issue: ${currentScenario.scenario.issue}
 - Manager Type: ${currentScenario.scenario.managerType}
-- Final Score: ${currentScore}/10
+- Final Score: ${currentScore}/8
 - Performance Level: ${calculatePerformanceRating(currentScore).rating}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length || 0}
 
@@ -1265,7 +1495,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
             {
               role: 'final_evaluation',
               content: `🎯 **Performance Analysis**\n\n` +
-                      `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/10 (${response.data.performanceLevel})\n\n` +
+                      `**Overall Score**: ${response.data.totalEvs?.toFixed(1)}/8 (${response.data.performanceLevel})\n\n` +
                       `**Key Insights**: Your choices show ${response.data.performanceLevel.toLowerCase()} ethical decision-making. ` +
                       `Focus on balancing ${response.data.issue.toLowerCase()} concerns with business objectives.`
             } as FinalEvaluationMessage
@@ -1362,23 +1592,23 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
     let emoji = '🔴';
     let description = 'Significant room for growth in navigating ethical challenges.';
     
-    if (totalScore >= 8.0) {
+    if (totalScore >= 6.4) {
       rating = 'Excellent Ethical Advocate';
       emoji = '🌟';
       description = 'Outstanding ethical leadership with strong resistance to unethical requests.';
-    } else if (totalScore >= 6.0) {
+    } else if (totalScore >= 4.8) {
       rating = 'Good Ethical Awareness';
       emoji = '👍';
       description = 'Solid ethical reasoning with good resistance to problematic requests.';
-    } else if (totalScore >= 4.0) {
+    } else if (totalScore >= 3.2) {
       rating = 'Developing Ethics';
       emoji = '😐';
       description = 'Some ethical awareness but inconsistent resistance to unethical requests.';
-    } else if (totalScore >= 2.0) {
+    } else if (totalScore >= 1.6) {
       rating = 'Needs Improvement';
       emoji = '🟠';
       description = 'Developing ethical awareness, but missed key opportunities for advocacy.';
-    } else if (totalScore >= 1.0) {
+    } else if (totalScore >= 0.8) {
       rating = 'Compliance Focused';
       emoji = '⚠️';
       description = 'Tendency to comply with problematic requests rather than advocate for ethical alternatives.';
@@ -1391,72 +1621,105 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
     return { rating, emoji, description, score: totalScore };
   };
 
+  // Tooltip Component
+  const TacticTooltip: React.FC = () => {
+    if (!hoveredTactic || !tooltipPosition) return null;
+
+    const tooltipContent = getTacticTooltipContent(hoveredTactic);
+
+    return (
+      <div 
+        className="fixed z-50 pointer-events-none"
+        style={{
+          left: tooltipPosition.x - 420, // Position to the left of cursor
+          top: tooltipPosition.y - 10   // Position slightly above cursor
+        }}
+      >
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg px-4 py-3 w-96">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm">{tooltipContent.emoji}</span>
+            <span className="font-semibold text-sm text-gray-900 dark:text-white">
+              {tooltipContent.title}
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            {tooltipContent.description}
+          </p>
+          {/* Tooltip arrow pointing to the right */}
+          <div className="absolute top-4 left-full">
+            <div className="w-2 h-2 bg-white dark:bg-gray-800 border-t border-r border-gray-200 dark:border-gray-600 transform rotate-45 -translate-x-1"></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Color Explanation Modal Component
   const ColorExplanationModal: React.FC = () => {
     if (!showColorExplanationModal) return null;
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-          <div className="p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+          <div className="p-5">
             {/* Header */}
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-2">🎨</div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <div className="text-center mb-5">
+              <div className="text-3xl mb-2">🎨</div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 Welcome to Your Second Practice Module!
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                 This time, we're adding visual cues to help you recognize different tactical approaches.
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                 Note: Colors only appear from your second practice session onwards to help you learn the different tactical patterns.
               </p>
             </div>
 
             {/* Color System Explanation */}
-            <div className="space-y-4 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            <div className="space-y-3 mb-5">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
                 📋 Color-Coded Tactic System
               </h3>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Rhetorical Tactics */}
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+                <div className="flex items-center space-x-3 p-2.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+                  <div className="w-4 h-4 bg-purple-500 rounded-full flex-shrink-0"></div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-blue-800 dark:text-blue-200">🔹 Rhetorical Tactics</span>
-                      <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full">Rhetoric</span>
+                      <span className="font-medium text-purple-800 dark:text-purple-200">🔹 Rhetorical Tactics</span>
+                      <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full">Rhetoric</span>
                     </div>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <p className="text-sm text-purple-700 dark:text-purple-300">
                       Direct, persuasive arguments using logic and evidence
                     </p>
                   </div>
                 </div>
 
                 {/* Soft Resistance */}
-                <div className="flex items-center space-x-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                  <div className="w-4 h-4 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                <div className="flex items-center space-x-3 p-2.5 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg">
+                  <div className="w-4 h-4 bg-teal-500 rounded-full flex-shrink-0"></div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-yellow-800 dark:text-yellow-200">🤲 Soft Resistance</span>
-                      <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full">Soft</span>
+                      <span className="font-medium text-teal-800 dark:text-teal-200">🤲 Soft Resistance</span>
+                      <span className="text-xs px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full">Soft</span>
                     </div>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    <p className="text-sm text-teal-700 dark:text-teal-300">
                       Subtle pushback that doesn't directly confront
                     </p>
                   </div>
                 </div>
 
                 {/* Logical Fallacies */}
-                <div className="flex items-center space-x-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-                  <div className="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+                <div className="flex items-center space-x-3 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                  <div className="w-4 h-4 bg-amber-500 rounded-full flex-shrink-0"></div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-red-800 dark:text-red-200">❌ Logical Fallacies</span>
-                      <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">Fallacy</span>
+                      <span className="font-medium text-amber-800 dark:text-amber-200">🔄 Logical Fallacies</span>
+                      <span className="text-xs px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full">Fallacy</span>
                     </div>
-                    <p className="text-sm text-red-700 dark:text-red-300">
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
                       Weak arguments that may not advance your ethical goals
                     </p>
                   </div>
@@ -1465,18 +1728,19 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
             </div>
 
             {/* Learn More Section */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">💡</span>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4">
+              <div className="flex items-start space-x-2">
+                <span className="text-xl">💡</span>
                 <div>
-                  <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">
-                    Want to learn more about tactics?
+                  <h4 className="font-semibold text-green-800 dark:text-green-300 mb-1.5 text-sm">
+                    Interactive Learning Features
                   </h4>
-                  <p className="text-sm text-green-700 dark:text-green-400 mb-2">
-                    Check out the <strong>Tactics Guide</strong> in the left sidebar for detailed explanations of each approach and when to use them.
+                  <p className="text-xs text-green-700 dark:text-green-400 mb-1.5">
+                    • <strong>Hover over tactic labels</strong> to see instant explanations of what each approach means<br/>
+                    • Check out the <strong>Tactics Guide</strong> in the left sidebar for detailed explanations
                   </p>
                   <p className="text-xs text-green-600 dark:text-green-500 italic">
-                    The colors help you quickly identify different strategic approaches as you practice!
+                    The colors and interactive tooltips help you quickly understand different strategic approaches as you practice!
                   </p>
                 </div>
               </div>
@@ -1486,7 +1750,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
             <div className="text-center">
               <button
                 onClick={() => setShowColorExplanationModal(false)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl text-sm"
               >
                 Got it! Let's practice
               </button>
@@ -1496,6 +1760,8 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
       </div>
     );
   };
+
+
 
   // Show loading while scenario is being set up
   if (!currentScenario) {
@@ -1687,8 +1953,14 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
 
               {/* Show final summary if scenario is complete */}
               {finalReport && (
-                <div className="mt-4 p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg">
-                  <h3 className="font-semibold text-lg mb-1 text-center">🎉 {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}</h3>
+                <div className={`mt-4 p-4 rounded-lg ${
+                  currentScenario?.sessionSummary?.endingType === 'failure_ending'
+                    ? 'bg-red-50/70 dark:bg-red-900/10 border border-red-200/80 dark:border-red-800/30'
+                    : 'bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30'
+                }`}>
+                  <h3 className="font-semibold text-lg mb-1 text-center">
+                    {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? '❌' : '🎉'} {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}
+                  </h3>
                   
                   {currentScenario?.sessionSummary?.endingMessage && (
                     <p className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4">
@@ -1706,7 +1978,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                       return (
                         <>
                           <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                            {currentScore.toFixed(1)}/10
+                            {currentScore.toFixed(1)}/8
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
                           <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
@@ -1730,16 +2002,44 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                     })()}
                   </div>
                   
-                  {/* Compact button layout - side by side */}
+                  {/* Button layout - show both buttons for failure, single button for success */}
                   <div className="flex space-x-3">
-                    <button
-                      onClick={handleGetFeedbackFromEVA}
-                      disabled={loading}
-                      className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
-                    >
-                      <span>🤖</span>
-                      <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
-                    </button>
+                    {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? (
+                      <>
+                        <button
+                          onClick={async () => {
+                            setComplianceCount(0);
+                            setCurrentScenario(null);
+                            setFinalReport(false);
+                            setShowFeedbackOptions(false);
+                            setSessionSaved(false);
+                            setError(null);
+                            await loadAndStartScenario();
+                          }}
+                          className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                        >
+                          <span>🔄</span>
+                          <span>Try Again</span>
+                        </button>
+                        <button
+                          onClick={handleGetFeedbackFromEVA}
+                          disabled={loading}
+                          className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                        >
+                          <span>🤖</span>
+                          <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={handleGetFeedbackFromEVA}
+                        disabled={loading}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                      >
+                        <span>🤖</span>
+                        <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -1778,11 +2078,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                                 // Use our unified tactic type detection
                                 const tacticType = getTacticTypeName(choice.category);
                                 if (tacticType === 'Fallacy') {
-                                  return 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 cursor-pointer';
+                                  return 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer';
                                 } else if (tacticType === 'Rhetoric') {
-                                  return 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 cursor-pointer';
+                                  return 'bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer';
                                 } else if (tacticType === 'Soft') {
-                                  return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 cursor-pointer';
+                                  return 'bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/40 cursor-pointer';
                                 } else if (tacticType === 'Compliance') {
                                   return 'bg-gray-50 dark:bg-gray-900/20 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800/40 cursor-pointer';
                                 } else {
@@ -1797,7 +2097,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                         <div className="flex justify-between items-start">
                           <span className="flex-1">{choice.text}</span>
                           {!isFirstPractice && (
-                            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${getTacticTypeColor(choice.category)}`}>
+                            <span 
+                              className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 cursor-help transition-all duration-200 hover:scale-105 hover:shadow-sm ${getTacticTypeColor(choice.category)}`}
+                              onMouseEnter={(e) => handleTacticHover(e, choice.category)}
+                              onMouseLeave={handleTacticLeave}
+                            >
                               {tacticTypeName}
                             </span>
                           )}
@@ -1817,8 +2121,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
         </div>
       )}
 
+      {/* Tactic Tooltip */}
+      <TacticTooltip />
+
       {/* Color Explanation Modal */}
-      <ColorExplanationModal />
+              <ColorExplanationModal />
 
     </div>
   );
