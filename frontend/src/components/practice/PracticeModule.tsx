@@ -1972,7 +1972,9 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                   <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
                     {(() => {
                       // Use the most current score from session summary, fall back to finalScore state
-                      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+                      let currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+                      const maxScore = 8;
+                      if (currentScore > maxScore) currentScore = maxScore;
                       const performanceData = calculatePerformanceRating(currentScore);
                       
                       return (
