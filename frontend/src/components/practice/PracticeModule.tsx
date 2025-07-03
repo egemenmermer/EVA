@@ -1835,117 +1835,117 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
   return (
     <>
       <PracticeIntroModal isOpen={showIntroModal} onClose={handleCloseIntroModal} />
-      <div className="h-full flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
-            {currentScenario?.scenario && (
-              <h2 className="text-base text-gray-600 dark:text-gray-300">
-                  {currentScenario.scenario.issue || 'Practice Scenario'}
-              </h2>
-            )}
-          </div>
-          {/* {onExit && (
-            <div className="flex items-center space-x-2">
-            <button
-              onClick={handleReturnToChat}
-              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              Return to Chat
-            </button>
-            </div>
-          )} */}
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
+          {currentScenario?.scenario && (
+            <h2 className="text-base text-gray-600 dark:text-gray-300">
+                {currentScenario.scenario.issue || 'Practice Scenario'}
+            </h2>
+          )}
         </div>
-
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300">Loading scenario...</p>
-            </div>
+        {/* {onExit && (
+          <div className="flex items-center space-x-2">
+          <button
+            onClick={handleReturnToChat}
+            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            Return to Chat
+          </button>
           </div>
-        ) : (
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
-              {currentScenario?.scenario && (
-                <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
-                  <p className="text-sm">
-                      <strong>Issue:</strong> {currentScenario.scenario.issue || 'Unknown'}
-                  </p>
-                  <p className="text-sm">
-                      <strong>Manager Type:</strong> {currentScenario.scenario.managerType || 'Unknown'}
-                  </p>
-                  <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
-                      {getManagerDescription(currentScenario.scenario.managerType)}
-                  </p>
-                </div>
-              )}
+        )} */}
+      </div>
 
-                {currentScenario?.conversation && Array.isArray(currentScenario.conversation) && currentScenario.conversation.length > 0 ? (
-                <div className="space-y-2 mb-2">
-                  {currentScenario.conversation.map((message, index) => {
-                    // Skip feedback messages for cleaner conversation
-                    if (message.role === 'feedback') {
-                        return null;
-                      }
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="flex space-x-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300">Loading scenario...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
+            {currentScenario?.scenario && (
+              <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
+                <p className="text-sm">
+                    <strong>Issue:</strong> {currentScenario.scenario.issue || 'Unknown'}
+                </p>
+                <p className="text-sm">
+                    <strong>Manager Type:</strong> {currentScenario.scenario.managerType || 'Unknown'}
+                </p>
+                <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
+                    {getManagerDescription(currentScenario.scenario.managerType)}
+                </p>
+              </div>
+            )}
 
-                      if (message.role === 'final_evaluation') {
-                        return (
-                          <div key={index} className="p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3">
-                            <div className="mb-2 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center">
-                              🎯 EVA Analysis
-                            </div>
-                            <div className="whitespace-pre-line text-sm">{message.content}</div>
+              {currentScenario?.conversation && Array.isArray(currentScenario.conversation) && currentScenario.conversation.length > 0 ? (
+              <div className="space-y-2 mb-2">
+                {currentScenario.conversation.map((message, index) => {
+                  // Skip feedback messages for cleaner conversation
+                  if (message.role === 'feedback') {
+                      return null;
+                    }
+
+                    if (message.role === 'final_evaluation') {
+                      return (
+                        <div key={index} className="p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3">
+                          <div className="mb-2 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center">
+                            🎯 EVA Analysis
                           </div>
-                        );
-                      }
-                    
-                    return (
-                        <div key={index} className="mb-2">
-                        {(message.role === 'manager' || message.role === 'user') && (
-                          <div className={message.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start ml-12'}>
-                              <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center`}>
-                                {message.role === 'manager' ? 'Manager' : 'You'}
-                            </div>
-                            <div className={getMessageStyle(message.role)} data-role={message.role}>
-                                {message.role === 'manager' && (
-                                <div className="absolute -left-12 -top-5">
-                                  <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
-                                    <img 
-                                        src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
-                                      alt="Manager" 
-                                      className="w-14 h-14 object-cover manager-icon" 
-                                    />
-                                  </div>
-                                </div>
-                              )}
-                                <div className="pl-1">{message.content}</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          <div className="whitespace-pre-line text-sm">{message.content}</div>
+                        </div>
+                      );
+                    }
                   
-                    {/* Show typing indicator at the bottom of conversation */}
-                    {isTyping && (
-                      <div className="mb-2">
-                        <div className="flex flex-col items-start ml-12">
-                          <div className="mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center">
-                            Manager
+                  return (
+                      <div key={index} className="mb-2">
+                      {(message.role === 'manager' || message.role === 'user') && (
+                        <div className={message.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start ml-12'}>
+                            <div className={`mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center`}>
+                              {message.role === 'manager' ? 'Manager' : 'You'}
+                          </div>
+                          <div className={getMessageStyle(message.role)} data-role={message.role}>
+                              {message.role === 'manager' && (
+                              <div className="absolute -left-12 -top-5">
+                                <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                                  <img 
+                                      src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
+                                    alt="Manager" 
+                                    className="w-14 h-14 object-cover manager-icon" 
+                                  />
+                                </div>
+                              </div>
+                            )}
+                              <div className="pl-1">{message.content}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                          <div className="p-3 pl-5 bg-amber-50/70 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-none max-w-[80%] mr-auto relative mt-3">
-                            <div className="absolute -left-12 -top-5">
-                              <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
-                                <img 
-                                  src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
-                                  alt="Manager" 
-                                  className="w-14 h-14 object-cover manager-icon" 
-                                />
+                  );
+                })}
+                
+                  {/* Show typing indicator at the bottom of conversation */}
+                  {isTyping && (
+                    <div className="mb-2">
+                      <div className="flex flex-col items-start ml-12">
+                        <div className="mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400 mx-2 flex items-center">
+                          Manager
+                  </div>
+                        <div className="p-3 pl-5 bg-amber-50/70 dark:bg-amber-900/10 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-none max-w-[80%] mr-auto relative mt-3">
+                          <div className="absolute -left-12 -top-5">
+                            <div className="relative w-16 h-16 rounded-full manager-icon-container border-2 border-amber-300 dark:border-amber-700 flex items-center justify-center overflow-hidden shadow-lg">
+                              <img 
+                                src={getManagerIcon(currentScenario?.scenario?.managerType, isDarkMode)} 
+                                alt="Manager" 
+                                className="w-14 h-14 object-cover manager-icon" 
+                              />
               </div>
               </div>
                           <div className="pl-1 flex items-center space-x-1">
@@ -1960,92 +1960,82 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
               </div>
             )}
 
-                    <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
-            </div>
-                ) : null}
+                  <div ref={messagesEndRef} id="messages-end" style={{ height: "5px" }}></div>
+          </div>
+              ) : null}
 
-                {/* Show final summary if scenario is complete */}
-                {finalReport && (
-                  <div className={`mt-4 p-4 rounded-lg ${
-                    currentScenario?.sessionSummary?.endingType === 'failure_ending'
-                      ? 'bg-red-50/70 dark:bg-red-900/10 border border-red-200/80 dark:border-red-800/30'
-                      : 'bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30'
-                  }`}>
-                    <h3 className="font-semibold text-lg mb-1 text-center">
-                      {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? '❌' : '🎉'} {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}
-                    </h3>
-                    
-                    {currentScenario?.sessionSummary?.endingMessage && (
-                      <p className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4">
-                          {currentScenario.sessionSummary.endingMessage}
-                      </p>
-                    )}
-                    
-                    {/* Updated Total Score Display with smaller, more compact sizing */}
-                    <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-                      {(() => {
-                        // Use the most current score from session summary, fall back to finalScore state
+              {/* Show final summary if scenario is complete */}
+              {finalReport && (
+                <div className={`mt-4 p-4 rounded-lg ${
+                  currentScenario?.sessionSummary?.endingType === 'failure_ending'
+                    ? 'bg-red-50/70 dark:bg-red-900/10 border border-red-200/80 dark:border-red-800/30'
+                    : 'bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30'
+                }`}>
+                  <h3 className="font-semibold text-lg mb-1 text-center">
+                    {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? '❌' : '🎉'} {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}
+                  </h3>
+                  
+                  {currentScenario?.sessionSummary?.endingMessage && (
+                    <p className="text-center text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4 px-4">
+                        {currentScenario.sessionSummary.endingMessage}
+                    </p>
+                  )}
+                  
+                  {/* Updated Total Score Display with smaller, more compact sizing */}
+                  <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                    {(() => {
+                      // Use the most current score from session summary, fall back to finalScore state
                         let currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
                         const maxScore = 8;
                         if (currentScore > maxScore) currentScore = maxScore;
-                        const performanceData = calculatePerformanceRating(currentScore);
-                        
-                        return (
-                          <>
-                            <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                              {currentScore.toFixed(1)}/8
-                            </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
-                            <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
-                              currentScore >= 8.0 
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                : currentScore >= 6.0
-                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                                : currentScore >= 4.0
-                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                                : currentScore >= 2.0
-                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                                : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                            }`}>
-                              {performanceData.emoji} {performanceData.rating}
-                            </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400 px-1">
-                              {performanceData.description}
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                    
-                    {/* Button layout - show both buttons for failure, single button for success */}
-                    <div className="flex space-x-3">
-                      {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? (
+                      const performanceData = calculatePerformanceRating(currentScore);
+                      
+                      return (
                         <>
-                          <button
-                            onClick={async () => {
-                              setComplianceCount(0);
-                              setCurrentScenario(null);
-                              setFinalReport(false);
-                              setShowFeedbackOptions(false);
-                              setSessionSaved(false);
-                              setError(null);
-                              await loadAndStartScenario();
-                            }}
-                            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
-                          >
-                            <span>🔄</span>
-                            <span>Try Again</span>
-                          </button>
-                          <button
-                            onClick={handleGetFeedbackFromEVA}
-                            disabled={loading}
-                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
-                          >
-                            <span>🤖</span>
-                            <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
-                          </button>
+                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                            {currentScore.toFixed(1)}/8
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
+                          <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
+                            currentScore >= 8.0 
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                              : currentScore >= 6.0
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                              : currentScore >= 4.0
+                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                              : currentScore >= 2.0
+                              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          }`}>
+                            {performanceData.emoji} {performanceData.rating}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 px-1">
+                            {performanceData.description}
+                          </div>
                         </>
-                      ) : (
+                      );
+                    })()}
+                  </div>
+                  
+                  {/* Button layout - show both buttons for failure, single button for success */}
+                  <div className="flex space-x-3">
+                    {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? (
+                      <>
+                        <button
+                          onClick={async () => {
+                            setComplianceCount(0);
+                            setCurrentScenario(null);
+                            setFinalReport(false);
+                            setShowFeedbackOptions(false);
+                            setSessionSaved(false);
+                            setError(null);
+                            await loadAndStartScenario();
+                          }}
+                          className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                        >
+                          <span>🔄</span>
+                          <span>Try Again</span>
+                        </button>
                         <button
                           onClick={handleGetFeedbackFromEVA}
                           disabled={loading}
@@ -2054,95 +2044,105 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                           <span>🤖</span>
                           <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
                         </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Show choices if available and scenario is not complete */}
-              {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
-                <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
-                  
-                  <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
-                    processingChoice || isTyping 
-                      ? 'text-gray-400 dark:text-gray-500' 
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}>
-                    {processingChoice 
-                      ? 'Processing your choice...' 
-                      : isTyping 
-                      ? 'Manager is responding...'
-                      : 'How do you respond?'
-                    }
-                  </h3>
-                  <div className="space-y-1.5 mb-1">
-                    {currentScenario.currentChoices.map((choice, index) => {
-                      const isFirstPractice = isFirstPracticeScenario();
-                      const tacticTypeColor = getTacticTypeColor(choice.category);
-                      const tacticTypeName = getTacticTypeName(choice.category);
-                      
-                      return (
-                        <button
-                          key={index}
-                          className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
-                            processingChoice || isTyping
-                              ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
-                              : !isFirstPractice 
-                              ? (() => {
-                                  // Use our unified tactic type detection
-                                  const tacticType = getTacticTypeName(choice.category);
-                                  if (tacticType === 'Fallacy') {
-                                    return 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer';
-                                  } else if (tacticType === 'Rhetoric') {
-                                    return 'bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer';
-                                  } else if (tacticType === 'Soft') {
-                                    return 'bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/40 cursor-pointer';
-                                  } else if (tacticType === 'Compliance') {
-                                    return 'bg-gray-50 dark:bg-gray-900/20 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800/40 cursor-pointer';
-                                  } else {
-                                    return 'bg-gray-50 dark:bg-gray-900/20 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900/40 cursor-pointer';
-                                  }
-                                })()
-                              : 'bg-gray-50 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
-                          }`}
-                          onClick={() => handleChoice(index)}
-                          disabled={processingChoice || isTyping}
-                        >
-                          <div className="flex justify-between items-start">
-                            <span className="flex-1">{choice.text}</span>
-                            {!isFirstPractice && (
-                              <span 
-                                className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 cursor-help transition-all duration-200 hover:scale-105 hover:shadow-sm ${getTacticTypeColor(choice.category)}`}
-                                onMouseEnter={(e) => handleTacticHover(e, choice.category)}
-                                onMouseLeave={handleTacticLeave}
-                              >
-                                {tacticTypeName}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
+                      </>
+                    ) : (
+                      <button
+                        onClick={handleGetFeedbackFromEVA}
+                        disabled={loading}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 font-medium flex items-center justify-center space-x-2 transition-all duration-200"
+                      >
+                        <span>🤖</span>
+                        <span>{loading ? 'Getting Feedback...' : 'Get Feedback from EVA'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
-          </div>
-        )}
+            </div>
 
-        {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
+            {/* Show choices if available and scenario is not complete */}
+            {currentScenario?.currentChoices && currentScenario.currentChoices.length > 0 && !currentScenario.isComplete && !finalReport && (
+              <div className="bg-white/90 dark:bg-gray-900/90 p-3 shadow-sm backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-700/30">
+                
+                <h3 className={`text-sm font-medium mb-1.5 transition-opacity duration-300 ${
+                  processingChoice || isTyping 
+                    ? 'text-gray-400 dark:text-gray-500' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}>
+                  {processingChoice 
+                    ? 'Processing your choice...' 
+                    : isTyping 
+                    ? 'Manager is responding...'
+                    : 'How do you respond?'
+                  }
+                </h3>
+                <div className="space-y-1.5 mb-1">
+                  {currentScenario.currentChoices.map((choice, index) => {
+                    const isFirstPractice = isFirstPracticeScenario();
+                    const tacticTypeColor = getTacticTypeColor(choice.category);
+                    const tacticTypeName = getTacticTypeName(choice.category);
+                    
+                    return (
+                      <button
+                        key={index}
+                        className={`w-full text-left p-2.5 border rounded-lg transition-all duration-300 text-sm ${
+                          processingChoice || isTyping
+                            ? 'bg-gray-50/30 dark:bg-gray-800/20 border-gray-200/50 dark:border-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                            : !isFirstPractice 
+                            ? (() => {
+                                // Use our unified tactic type detection
+                                const tacticType = getTacticTypeName(choice.category);
+                                if (tacticType === 'Fallacy') {
+                                  return 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer';
+                                } else if (tacticType === 'Rhetoric') {
+                                  return 'bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer';
+                                } else if (tacticType === 'Soft') {
+                                  return 'bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/40 cursor-pointer';
+                                } else if (tacticType === 'Compliance') {
+                                  return 'bg-gray-50 dark:bg-gray-900/20 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800/40 cursor-pointer';
+                                } else {
+                                  return 'bg-gray-50 dark:bg-gray-900/20 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900/40 cursor-pointer';
+                                }
+                              })()
+                            : 'bg-gray-50 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
+                        }`}
+                        onClick={() => handleChoice(index)}
+                        disabled={processingChoice || isTyping}
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="flex-1">{choice.text}</span>
+                          {!isFirstPractice && (
+                            <span 
+                              className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 cursor-help transition-all duration-200 hover:scale-105 hover:shadow-sm ${getTacticTypeColor(choice.category)}`}
+                              onMouseEnter={(e) => handleTacticHover(e, choice.category)}
+                              onMouseLeave={handleTacticLeave}
+                            >
+                              {tacticTypeName}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+        </div>
+      )}
 
-        {/* Tactic Tooltip */}
-        <TacticTooltip />
+      {error && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
-        {/* Color Explanation Modal */}
-                <ColorExplanationModal />
+      {/* Tactic Tooltip */}
+      <TacticTooltip />
 
-      </div>
+      {/* Color Explanation Modal */}
+              <ColorExplanationModal />
+
+    </div>
     </>
   );
   } catch (error) {

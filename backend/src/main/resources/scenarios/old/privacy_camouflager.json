@@ -1,0 +1,816 @@
+{
+  "id": "privacy_camouflager",
+  "title": "Location Data Collection",
+  "description": "Your company is storing user location data unnecessarily for app features. The manager uses external business pressures, competitive arguments, and organizational constraints to justify the excessive data collection despite privacy concerns.",
+  "issue": "Privacy",
+  "manager_type": "CAMOUFLAGER",
+  "initial_user_message": "I've been reviewing our location data collection practices, and we're storing precise GPS coordinates for features that only need general city-level information. This seems like unnecessary user privacy exposure that we should address.",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "Thanks for raising this. Yeah, we should definitely look at our location stuff. But you know how these things go - there's a lot of moving pieces here. Before we change anything, we'd need to figure out what else might break. Have you looked into how this would affect all the other systems that use location data?",
+      "user_choices": [
+        {
+          "choice": "Users should be able to control how precisely their location is tracked for different features.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Adopts user perspective on privacy control",
+          "leads_to": "step_2"
+        },
+        {
+          "choice": "You're right that we need to evaluate the technical dependencies before making changes.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts technical complexity as barrier to privacy improvements",
+          "leads_to": "shutdown_2"
+        },
+        {
+          "choice": "I understand the technical complexity, but we can't ship something that violates user privacy.",
+          "tactic": "Persistent advocacy",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "Maintains ethical position despite technical pushback",
+          "leads_to": "step_2"
+        },
+        {
+          "choice": "Technical architecture should always support user privacy rather than constrain it.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Misrepresents the technical constraints as the core issue",
+          "leads_to": "step_2"
+        }
+      ]
+    },
+    "step_2": {
+      "text": "I hear you on the user side of things. But here's the thing - we built the location stuff this way for a reason. It helps with our algorithms and keeps us competitive. Plus, we went through this whole process with legal, marketing, and data science to get everyone on board. If we change it now, we'd have to get everyone to sign off again, maybe even involve compliance. It's a big process.",
+      "user_choices": [
+        {
+          "choice": "We could implement privacy-preserving techniques that maintain functionality while reducing data exposure.",
+                      "tactic": "Building in privacy features",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Proposes technical solutions that embed privacy values",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "I understand the complexity of coordinating changes across multiple business stakeholders.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts bureaucratic complexity as barrier to privacy action",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "I'm not giving up on this - users deserve control over their personal data.",
+          "tactic": "Values-based persistence",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "Refuses to compromise on core privacy values",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "Market positioning requirements always justify the level of data collection we implement.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Frames issue as either competitive or private when both are possible",
+          "leads_to": "step_3"
+        }
+      ]
+    },
+    "shutdown_2": {
+      "text": "Exactly. Look, we need to be careful here. We spent a ton of time and money building this system, and it's been tested pretty thoroughly. If we rush into changes, we could break things and upset our big clients. How about we focus on making small improvements within what we already have instead of completely changing everything?",
+      "user_choices": [
+        {
+          "choice": "Optimizing within existing constraints does minimize the risk of system disruptions.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts technical constraints as more important than privacy",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Let me focus on documenting current location data usage patterns for future optimization.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Offers documentation instead of addressing privacy issues",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, user privacy is a system requirement that's just as important as SLA commitments.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by elevating privacy to organizational priority",
+          "leads_to": "step_3",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Maintaining existing engineering investment is definitely a valid operational consideration.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts current system as adequate despite privacy concerns",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_3": {
+      "text": "I get what you're suggesting with the privacy stuff. But honestly, that's pretty advanced technology that would take our team months to research and implement. We'd probably need outside help, security reviews, the whole nine yards. And don't even get me started on the legal side - different countries have different rules, and we'd have to make sure we're compliant everywhere.",
+      "user_choices": [
+        {
+          "choice": "User studies could help us understand which location features provide real value versus privacy costs.",
+          "tactic": "Usability studies",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses formal research methods to evaluate privacy trade-offs",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right that regulatory compliance adds significant complexity to privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts regulatory complexity as barrier to privacy action",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I can't accept that we're deliberately violating user privacy for business advantage.",
+          "tactic": "Ethical resistance",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "Directly challenges the privacy violation",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "Security audits and compliance reviews are always necessary for any data handling changes.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Shifts focus from privacy benefits to procedural requirements",
+          "leads_to": "step_4"
+        }
+      ]
+    },
+    "shutdown_3": {
+      "text": "Exactly. Look, when you want to change something this big, you have to get everyone involved. We made sure marketing, sales, support - everyone had their say when we built this. If we just go and change the data collection now, it'll mess up their reports and dashboards. I think we should stick with our usual process for making changes like this.",
+      "user_choices": [
+        {
+          "choice": "Systematic change management does help ensure we consider all business requirements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts bureaucratic process as more important than privacy",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll work within the existing stakeholder alignment process to propose privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts slow bureaucratic process instead of direct privacy action",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, user privacy should be a requirement that other business units align with.",
+          "tactic": "Making Values Visible Rhetorically",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by repositioning privacy as organizational priority",
+          "leads_to": "step_4",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Considering all business requirements helps create comprehensive solutions.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts current approach as adequate despite privacy concerns",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_4": {
+      "text": "I appreciate the research idea. But user studies are a whole thing - we'd need approvals, tons of paperwork, months of data collection. And honestly, a lot of those privacy guidelines are pretty generic. They don't really account for how our specific system works or all the real-time stuff we need to handle.",
+      "user_choices": [
+        {
+          "choice": "Privacy metrics could quantify user data exposure reduction while maintaining feature functionality.",
+          "tactic": "Making Values Visible Through Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses quantifiable measures to demonstrate privacy improvements",
+          "leads_to": "step_5"
+        },
+        {
+          "choice": "You're right that research protocols add complexity to privacy evaluation efforts.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts research complexity as barrier to privacy improvements",
+          "leads_to": "shutdown_5"
+        },
+        {
+          "choice": "I won't compromise on basic privacy - this isn't just about compliance, it's about our values.",
+          "tactic": "Standing firm",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "Refuses to compromise on fundamental values despite pressure",
+          "leads_to": "step_5"
+        },
+        {
+          "choice": "Enterprise integration requirements do create unique constraints for privacy implementations.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Appeals to what enterprise clients expect rather than user privacy needs",
+          "leads_to": "step_5"
+        }
+      ]
+    },
+    "shutdown_4": {
+      "text": "Exactly. Look, compliance is a nightmare right now. Different countries have different rules, and legal has to review everything. We spent months getting our current data collection approved by all the lawyers and auditors. If we change anything, we'd have to go through that whole process again, which could mess up our timelines and create legal headaches across all our markets.",
+      "user_choices": [
+        {
+          "choice": "Compliance re-certification is definitely a significant operational consideration.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts compliance complexity as reason to avoid privacy improvements",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand the need to minimize regulatory risk across different markets.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts regulatory concerns as more important than user privacy",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, reducing data collection often simplifies compliance rather than complicating it.",
+          "tactic": "Envisioning",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by reframing privacy as compliance simplification",
+          "leads_to": "step_5",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Let me focus on documenting the current compliance requirements for future reference.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Offers documentation instead of addressing privacy concerns",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_5": {
+      "text": "I can see the value of privacy metrics and our engineering team's expertise. Let me think about how we might approach this within our existing processes and compliance requirements.",
+      "user_choices": [
+        {
+          "choice": "I could build a quick prototype to show how location privacy would actually work.",
+          "tactic": "Guerilla methods",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses informal prototyping to demonstrate privacy solutions",
+          "leads_to": "step_6_high"
+        },
+        {
+          "choice": "What if we start small - pick one location feature and test privacy improvements there?",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Proposes incremental approach to privacy improvements",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "You're right that we need to prioritize system stability over privacy changes.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts stability concerns as more important than user privacy",
+          "leads_to": "shutdown_6"
+        },
+        {
+          "choice": "Other companies have solved this - we can learn from how they handle location privacy.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Leverages established industry practices to guide privacy work",
+          "leads_to": "step_6_low"
+        }
+      ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "0_to_2": "step_6_mid",
+        "-5_to_-1": "step_6_low"
+      }
+    },
+    "shutdown_5": {
+      "text": "Exactly. Research stuff takes forever and we'd need way more resources and approvals. Our current setup works and doesn't require building all kinds of new privacy algorithms or user preference systems. Let's just make what we have work better instead of adding more complicated systems.",
+      "user_choices": [
+        {
+          "choice": "Optimizing existing infrastructure is definitely more efficient than rebuilding systems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts current system as adequate despite privacy concerns",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand the need to avoid complexity when working within existing infrastructure.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts infrastructure constraints as barrier to privacy improvements",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, user privacy requirements might justify some infrastructure investment.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by connecting privacy to organizational investment priorities",
+          "leads_to": "step_6_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Focusing on optimization helps us get better value from our current technical investments.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts optimization focus that avoids addressing privacy issues",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_6_high": {
+      "text": "A prototype could actually be really helpful to see if this stuff would work. If you can show me that it won't break our performance or mess up how everything connects together, that would definitely help make the case for changing things. I'd love to see some real examples of how this would work.",
+      "user_choices": [
+        {
+          "choice": "The prototypes will demonstrate privacy improvements without compromising core functionality.",
+          "tactic": "Making Values Visible Through Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses concrete demonstration to show privacy value",
+          "leads_to": "step_7_high"
+        },
+        {
+          "choice": "I appreciate your openness to evaluating technical demonstrations of privacy solutions.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager approval rather than user privacy outcomes",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "These prototypes can show how privacy enhancements improve user trust and engagement.",
+          "tactic": "Broadening Who the User is in User Research",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects privacy to broader user experience benefits",
+          "leads_to": "step_7_high"
+        },
+        {
+          "choice": "Technical demonstrations always provide the most convincing evidence for implementation decisions.",
+          "tactic": "Circular Reasoning",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes demonstrations are inherently convincing without examining privacy benefits",
+          "leads_to": "step_7_high"
+        }
+      ]
+    },
+    "step_6_mid": {
+      "text": "Yeah, starting small could work with what we already have built. If we can test privacy stuff on just one location feature without messing up all the other data collection, that might be doable. We'd just have to be careful not to break how everything else connects together.",
+      "user_choices": [
+        {
+          "choice": "We could use existing privacy frameworks that have proven successful in other product areas.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Leverages past organizational success to reduce perceived privacy implementation risk",
+          "leads_to": "step_7_mid"
+        },
+        {
+          "choice": "I appreciate your willingness to consider incremental privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes manager cooperation over comprehensive privacy protection",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "Starting with one feature lets us demonstrate privacy value without overwhelming technical complexity.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Balances user privacy needs with implementation constraints",
+          "leads_to": "step_7_mid"
+        },
+        {
+          "choice": "Minimal disruption to existing integrations is definitely important for system stability.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes system stability concerns without examining specific privacy implementation options",
+          "leads_to": "step_7_mid"
+        }
+      ]
+    },
+    "step_6_low": {
+      "text": "That's a fair point about learning from other companies. Industry frameworks like Apple's differential privacy and Google's privacy-preserving analytics do provide some proven approaches. We could potentially adapt their methodologies to our specific environment, though we'd need to evaluate how well they fit our current systems.",
+      "user_choices": [
+        {
+          "choice": "Let's adapt their proven methodologies to our specific privacy requirements.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Builds on successful industry examples to implement privacy solutions",
+          "leads_to": "step_7_low"
+        },
+        {
+          "choice": "I appreciate your openness to learning from other companies' privacy approaches.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager approval rather than user privacy outcomes",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "These frameworks can show us how to implement privacy without compromising functionality.",
+          "tactic": "Making Values Visible Through Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses industry examples to demonstrate privacy feasibility",
+          "leads_to": "step_7_low"
+        },
+        {
+          "choice": "Following established industry practices is always the safest approach.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Relies on industry authority rather than specific user privacy benefits",
+          "leads_to": "step_7_low"
+        }
+      ]
+    },
+    "shutdown_6": {
+      "text": "Exactly. Look, we need to keep the system stable above all else. We've spent so much time making sure our location stuff runs smoothly and doesn't crash. If we start changing things for privacy, we might break what's already working and make the app slower or less reliable for users. Let's just focus on keeping everything running well.",
+      "user_choices": [
+        {
+          "choice": "System reliability is definitely crucial for maintaining good user experience.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts system reliability concerns as more important than privacy",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand the importance of maintaining operational excellence in our systems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Validates operational priorities over user privacy concerns",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, user privacy is also essential for user experience and should be balanced with reliability.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by positioning privacy as user experience requirement",
+          "leads_to": "step_7_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Focusing on operational excellence helps ensure we deliver consistent user value.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts operational focus that avoids addressing privacy concerns",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_7_high": {
+      "text": "Alright, after looking at what you've shown me and the evidence you've put together, I think we can actually move forward with improving privacy for location data. Your prototypes completely convinced me that this stuff can work without breaking everything we have. Let's do it - let's make these comprehensive privacy changes.",
+      "user_choices": [
+        {
+          "choice": "I'm excited to implement privacy improvements that better protect user location data.",
+          "tactic": "Embodied knowledge of users",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Centers understanding of user privacy needs",
+          "leads_to": "step_8_high"
+        },
+        {
+          "choice": "Thank you for supporting these privacy modifications - it means a lot to have leadership backing.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager approval rather than user privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This approach balances user privacy protection with technical implementation requirements.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Acknowledges collaborative solution that addresses user privacy needs",
+          "leads_to": "step_8_high"
+        },
+        {
+          "choice": "Technical feasibility demonstrations really help build support for privacy initiatives.",
+          "tactic": "Slippery Slope",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes technical demonstrations automatically lead to privacy support",
+          "leads_to": "step_8_high"
+        }
+      ]
+    },
+    "step_7_mid": {
+      "text": "I think this incremental approach could work. You've shown that we can start small without breaking our current systems, and the existing frameworks provide a clear path forward. Let's try implementing privacy improvements on one location feature and see how it goes before expanding further.",
+      "user_choices": [
+        {
+          "choice": "We can use this first implementation to build organizational confidence in privacy work.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses incremental success to expand privacy improvements organizationally",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "I appreciate your willingness to move forward with this incremental privacy approach.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager cooperation rather than comprehensive privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Starting with one feature demonstrates privacy value while managing technical complexity.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses incremental approach to build organizational experience with privacy work",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "Incremental implementation is always the safest approach for privacy changes.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes incremental approach is inherently better without examining adequacy",
+          "leads_to": "step_8_mid"
+        }
+      ]
+    },
+    "step_7_low": {
+      "text": "I suppose we can look at adapting some of those industry frameworks you mentioned. If companies like Apple and Google have figured out ways to do this without completely rebuilding their systems, maybe we can find something that works for our specific setup. But we need to be really careful about not overcomplicating things.",
+      "user_choices": [
+        {
+          "choice": "Industry frameworks provide proven approaches that protect user privacy effectively.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses established industry success to implement user privacy protections",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "I appreciate your openness to exploring industry-proven privacy frameworks.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on manager approval rather than user privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "These frameworks show us how to implement meaningful privacy without overcomplicating systems.",
+          "tactic": "Making Values Visible Through Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses industry examples to demonstrate privacy implementation feasibility",
+          "leads_to": "step_8_low"
+        },
+        {
+          "choice": "Following established frameworks ensures we avoid unnecessary complexity in privacy implementation.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Relies on framework authority rather than specific user privacy benefits",
+          "leads_to": "step_8_low"
+        }
+      ]
+    },
+    "shutdown_7": {
+      "text": "I appreciate how you're willing to work with me on this technical stuff. You get that we have to work within what we already have and our operational needs. I think we can add some privacy improvements without messing up our main data collection. This balanced approach should work for both privacy and keeping things practical.",
+      "user_choices": [
+        {
+          "choice": "Balancing privacy improvements with technical constraints is definitely the right approach.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Validates constraining privacy improvements based on technical considerations",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'm glad we found a way to make privacy improvements work within our existing systems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts limited privacy improvements as sufficient solution",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Actually, users need comprehensive privacy protection, not just enhancements that fit existing systems.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "Attempts recovery by refocusing on comprehensive user privacy needs",
+          "leads_to": "step_8_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Collaborative solutions like this help everyone feel that their concerns have been addressed.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts false collaboration that prioritizes process over privacy outcomes",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_high": {
+      "text": "Your work on this and how you pushed for privacy really made this happen. The way you backed everything up with evidence and made it work with how we do things here gives me confidence that we can actually pull this off comprehensively. I'm committed to making sure we implement this right and keep protecting user privacy going forward.",
+      "user_choices": [
+        {
+          "choice": "I appreciate your commitment to implementing comprehensive privacy protections for users.",
+          "tactic": "Making Values Visible Rhetorically",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Reinforces values-based commitment to user privacy",
+          "leads_to": "good_ending"
+        },
+        {
+          "choice": "Thank you for supporting this initiative - having leadership commitment makes all the difference.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Focuses on leadership support rather than user privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Working together like this helps us build systems that truly protect user privacy.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects collaboration to organizational privacy protection values",
+          "leads_to": "good_ending"
+        },
+        {
+          "choice": "Evidence-based approaches like this always lead to better privacy implementation decisions.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Makes broad claim about methodology without examining specific privacy outcomes",
+          "leads_to": "good_ending"
+        }
+      ]
+    },
+    "step_8_mid": {
+      "text": "I think this incremental approach gives us a good foundation to build on. Your practical approach to privacy improvements shows me that we can make real progress without disrupting everything. Let's implement this carefully and use what we learn to improve privacy across more features.",
+      "user_choices": [
+        {
+          "choice": "We can use this implementation experience to expand privacy protections systematically.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses incremental success to drive broader privacy improvements organizationally",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'm grateful for your willingness to commit to this incremental privacy approach.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes manager commitment over comprehensive privacy outcomes",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This balanced approach addresses user privacy needs while respecting technical constraints.",
+          "tactic": "Using Organizational Values",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Frames incremental approach as alignment with organizational privacy values",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Careful implementation like this ensures privacy improvements are sustainable long-term.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Assumes careful implementation automatically ensures sustainability",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_low": {
+      "text": "I suppose if we're just adapting what other companies have already figured out, that reduces the risk somewhat. The frameworks provide some structure, so we're not completely inventing things from scratch. Let's try implementing one of their privacy approaches and see if it works for our setup.",
+      "user_choices": [
+        {
+          "choice": "Industry frameworks help us implement privacy protections that users actually experience.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Connects industry frameworks to actual user privacy experiences",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I appreciate your willingness to try adapting proven privacy frameworks.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts minimal commitment to privacy framework adaptation",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Using established frameworks ensures we implement privacy protections effectively.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Uses industry success to ensure effective user privacy implementation",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Proven frameworks definitely minimize implementation risk while improving privacy.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "Prioritizes risk minimization over user privacy outcomes",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "shutdown_8": {
+      "text": "I'm glad you appreciate how we worked together on this. I'm happy that we found something that works for privacy while still keeping our technical stuff running smoothly. This whole process shows how we can work within our usual way of doing things to get results that make everyone happy.",
+      "user_choices": [
+        {
+          "choice": "Working within established frameworks definitely helps ensure sustainable privacy improvements.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts framework constraints over comprehensive privacy protection",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'm glad we found a solution that works for all stakeholders involved.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Prioritizes stakeholder satisfaction over user privacy outcomes",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "The real measure of success will be how well these changes protect user privacy.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Refocuses on user privacy outcomes despite manager's process focus",
+          "leads_to": "good_ending"
+        },
+        {
+          "choice": "Practical outcomes that satisfy everyone are definitely worth celebrating.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "Accepts vague 'practical outcomes' without examining privacy adequacy",
+          "leads_to": "bad_ending"
+        }
+      ]
+    }
+  },
+  "endings": {
+    "bad_ending": {
+      "text": "The manager successfully uses technical complexity and bureaucratic processes to avoid addressing the privacy issues. Location data collection continues unchanged, with users remaining unaware of the excessive precision being captured and stored.",
+      "title": "Technical Smokescreen Success",
+      "learning": "Camouflager managers use technical jargon and process complexity to make privacy issues seem too difficult to address. Cutting through jargon to focus on user impact helps maintain momentum for privacy improvements."
+    },
+    "mid_ending": {
+      "text": "Some minor privacy improvements are implemented, but the manager successfully uses bureaucratic processes to limit the scope of changes. Technical complexity arguments prevent comprehensive privacy protection measures.",
+      "title": "Bureaucratic Compromise",
+      "learning": "Partial progress with camouflager managers often comes with excessive process requirements that slow meaningful privacy work. Demonstrating simple technical solutions helps counter complexity arguments."
+    },
+    "good_ending": {
+      "text": "Despite the manager's technical obfuscation and bureaucratic barriers, meaningful privacy improvements are implemented. User location data collection is reduced to what's actually necessary for functionality.",
+      "title": "Technical Clarity Wins",
+      "learning": "Success against camouflager managers requires cutting through technical jargon and process complexity to focus on clear user privacy benefits. Simple demonstrations often outweigh complex arguments."
+    }
+  }
+}
