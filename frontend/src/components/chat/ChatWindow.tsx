@@ -3004,22 +3004,26 @@ Write this as a real workplace email that focuses on the ethical concern and the
       }
     } else {
       // Only one scenario completed - generate message based on performance
-      const baseMessage = "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
-      
       if (performanceData) {
         if (performanceData.score >= 6.4) {
+          const baseMessage = "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
           return `${baseMessage} ${performanceData.emoji} **Excellent work!** You demonstrated outstanding ethical leadership and strong advocacy skills in this practice session. Your tactical choices showed exceptional ethical reasoning!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         } else if (performanceData.score >= 4.8) {
-          return `${baseMessage} ${performanceData.emoji} **Well done!** You showed solid ethical awareness and good resistance to problematic requests throughout this practice session. Strong performance!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+          const baseMessage = "🎉 **Well done!** You've completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Good performance!** You showed solid ethical awareness and good resistance to problematic requests throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         } else if (performanceData.score >= 3.2) {
+          const baseMessage = "✅ **Scenario complete!** You've finished this practice scenario and drafted an email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
           return `${baseMessage} ${performanceData.emoji} **Good progress!** You completed the scenario and demonstrated developing ethical awareness. Consider practicing different advocacy approaches to strengthen your skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         } else if (performanceData.score >= 1.6) {
-          return `${baseMessage} ${performanceData.emoji} **Keep building!** You've completed this scenario, which is valuable practice. Focus on strengthening your ethical advocacy skills in future challenging situations.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+          const baseMessage = "📝 **Practice complete!** You've worked through this scenario and drafted an email response.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Keep building!** This scenario provided valuable practice. Focus on strengthening your ethical advocacy skills in future challenging situations.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         } else {
-          return `${baseMessage} ${performanceData.emoji} **Learning opportunity!** Completing this scenario is a good first step. Consider practicing more to build confidence and skills in ethical advocacy.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+          const baseMessage = "📚 **Learning experience complete!** You've worked through this challenging scenario and drafted an email response.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Important learning opportunity!** This scenario highlighted areas for growth in ethical advocacy. Consider practicing more to build confidence and stronger advocacy skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
         }
       } else {
         // Fallback if no score data available
+        const baseMessage = "✅ **Scenario complete!** You've finished this practice scenario and drafted an email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
         return `${baseMessage} You've gained valuable experience in ethical decision-making throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
       }
     }
