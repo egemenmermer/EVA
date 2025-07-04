@@ -1104,8 +1104,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               choiceHistory: [selectedChoice.text],
               categoryHistory: [response.data.category || 'Mixed'],
               evsHistory: [response.data.evs || 0],
-              scenarioTitle: currentScenario.scenario.title,
-              issue: currentScenario.scenario.issue,
+            scenarioTitle: currentScenario.scenario.title,
+            issue: currentScenario.scenario.issue,
               managerType: currentScenario.scenario.managerType
             };
             
@@ -1119,15 +1119,15 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             });
           }
         }
-        
-        setCurrentScenario(prev => prev ? {
-          ...prev,
+          
+          setCurrentScenario(prev => prev ? {
+            ...prev,
           conversation: updatedConversation,
-          isComplete: true,
+            isComplete: true,
           currentChoices: [], // Clear choices when complete
           sessionSummary
-        } : null);
-        
+          } : null);
+          
         setFinalScore(sessionSummary?.totalEvs || 0);
         setProcessingChoice(false); // Reset processing state immediately
         
@@ -1186,8 +1186,27 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       }
       
     } catch (error) {
-      console.error('Error processing choice:', error);
-      setError('Failed to process your choice. Please try again.');
+      console.error('❌ An error occurred in handleChoice:', error);
+      
+      const userMessage: UserMessage = {
+        role: 'user',
+        content: "An error occurred while processing your choice. Please try again or restart the practice." // Generic message
+      };
+
+      // Attempt to update the UI with an error message
+      if (currentScenario) {
+          const updatedConversation = [...currentScenario.conversation, userMessage];
+          
+          setCurrentScenario(prev => prev ? {
+            ...prev,
+            conversation: updatedConversation,
+          } : null);
+      }
+      
+      setError('An error occurred. Please refresh and try again.');
+      
+      // Ensure processing is reset on error
+      console.log('✅ Resetting processingChoice due to error.');
       setProcessingChoice(false);
     }
   };
@@ -1348,7 +1367,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         const saveResult = await savePracticeSessionData(currentScenario.sessionSummary);
         if (saveResult) {
           console.log('Practice session data saved before getting feedback');
-        } else {
+      } else {
           console.warn('Failed to save practice session data to server, but continuing with feedback');
         }
       } else if (sessionSaved) {
@@ -1582,11 +1601,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
       role: 'manager',
       content: content
     };
-
-    setCurrentScenario(prev => prev ? {
-      ...prev,
+          
+          setCurrentScenario(prev => prev ? {
+            ...prev,
       conversation: [...prev.conversation, managerMessage]
-    } : null);
+          } : null);
 
     setIsTyping(false);
     setTimeout(scrollToBottom, 100);
