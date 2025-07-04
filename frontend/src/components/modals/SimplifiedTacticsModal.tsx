@@ -24,33 +24,29 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
   if (!isOpen) return null;
 
   const rhetoricalTactics = [
-    { name: "Appeal to Consequences", description: "Argues a decision based on its practical or moral outcomes." },
-    { name: "Appeal to Standards", description: "Refers to official guidelines or best practices to justify actions." },
-    { name: "Appeal to Empathy", description: "Uses human stories or emotional reasoning to highlight user impact." },
-    { name: "Legal Compliance Anchor", description: "Grounds the argument in legal obligations and rights." },
-    { name: "Precedent Reference", description: "Uses past decisions or industry practices to support an action." },
-    { name: "Ethical Constraints", description: "Emphasizes core ethical values, like inclusion or fairness." },
-    { name: "Design Tradeoff Framing", description: "Highlights a balanced compromise between competing design values." },
-    { name: "Technical Feasibility Framing", description: "Acknowledges technical limitations while proposing realistic solutions." },
-    { name: "User-Centered Framing", description: "Frames the argument around the needs and lived experiences of users." },
-    { name: "Escalating to Review", description: "Suggests involving higher authorities or independent review." },
-    { name: "Risk Management Framing", description: "Focuses on reputational or operational risk to justify better practices." },
-    { name: "Appealing to Shared Values", description: "Builds common ground with the manager through shared beliefs." },
+    { name: "Models that synthesize", description: "Conceptual simplification to communicate values." },
+    { name: "Usability studies", description: "Empirical evidence for design decisions." },
+    { name: "Embodied knowledge of users", description: "Using personal experience to add weight to claims." },
+    { name: "Fidelity as a rhetorical strategy", description: "High-fidelity prototypes as persuasion." },
+    { name: "Envisioning", description: "Future-oriented ethical framing." },
+    { name: "Heuristics", description: "Appealing to established design norms." },
+    { name: "Credibility and expertise", description: "Building authority and trust." },
+    { name: "Organizational memory", description: "Historical reasoning." }
   ];
 
   const softResistanceTactics = [
-    { name: "Minimizing", description: "Downplays ethical concerns or risks as unimportant or overblown." },
-    { name: "Appealing to Practicality", description: "Emphasizes speed, efficiency, or deadlines over ethical values." },
-    { name: "Redirecting Responsibility", description: "Shifts accountability to others (e.g., legal, tech team)." },
-    { name: "Calling It a One-Off", description: "Frames the issue as a temporary or isolated situation." },
-    { name: "Reframing the Concern", description: "Pivots the discussion to make the concern seem irrelevant." },
-    { name: "Suggesting Future Fixes", description: "Postpones ethical resolution to future versions." },
-    { name: "Pointing to Resource Limits", description: "Uses lack of time, money, or people to justify inaction." },
-    { name: "Aligning with Authority", description: "Leans on approvals or leadership backing to silence debate." },
-    { name: "Being Overly Agreeable", description: "Appears open but subtly avoids change." },
-    { name: "Changing the Subject", description: "Avoids engaging with the ethical issue by pivoting elsewhere." },
-    { name: "Flooding with Technicalities", description: "Uses complex terms to confuse or end the conversation." },
-    { name: "Normalizing the Problem", description: "Claims the issue is common and nothing to worry about." },
+    { name: "Broadening Who the \"User\" is in User Research", description: "Expanding scope of user empathy ethically." },
+    { name: "Designing Affordances Subversively", description: "Indirect ethical action via UI tweaks." },
+    { name: "Making Values Visible Rhetorically to Other Stakeholders", description: "Rhetorical but framed as organizational strategy." },
+    { name: "Expanding/Subverting Design Resources", description: "Adapting standard tools for values work." },
+    { name: "Making Values Visible Through Metrics", description: "Surfacing ethics through system language." },
+    { name: "Using Organizational Values to Justify Values Work", description: "Strategically aligning with company values." },
+    { name: "Guerilla methods", description: "Informal methods to bypass organizational barriers." },
+    { name: "Usable enough", description: "Strategic concession." },
+    { name: "Distract and pacify", description: "Temporary, often cosmetic ethical fixes." },
+    { name: "Acquiesce", description: "Giving up smaller fights to win larger ones." },
+    { name: "Negotiation and cooperation", description: "Compromise as values advocacy." },
+    { name: "Being the user", description: "Adopting user identity to advocate values." }
   ];
 
   const logicalFallacies = [
@@ -177,25 +173,25 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
                 <h4 className="text-lg font-bold text-purple-800 dark:text-purple-300">Rhetorical Tactics</h4>
               </div>
               <p className="text-sm text-purple-700 dark:text-purple-300/90 mb-2">
-                These are constructive, ethical strategies used to frame concerns, persuade others, or request changes in a professional environment. They help advocate for ethical practices without confrontation.
+                Rhetorical strategies emphasize persuasive argumentation in UX decision-making, using evidence and reasoning to convince stakeholders.
               </p>
               <p className="text-xs text-purple-600 dark:text-purple-400/80 mt-auto">
-                <strong>Examples:</strong> Referencing standards, proposing alternatives, highlighting consequences. <br/>
+                <strong>Examples:</strong> Using empirical evidence, building authority, appealing to design norms, historical reasoning. <br/>
                 <i>Source: <a href="https://doi.org/10.1145/2987592.2987608" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-800 dark:hover:text-purple-300 transition-colors">Rose & Tenenberg (2016)</a></i>
               </p>
             </div>
             
-            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-xl p-6 flex flex-col">
+            <div className="bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 rounded-xl p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-3">
-                <Puzzle className="h-6 w-6 text-teal-600 dark:text-teal-400 flex-shrink-0"/>
-                <h4 className="text-lg font-bold text-teal-800 dark:text-teal-300">Soft Resistance</h4>
+                <Puzzle className="h-6 w-6 text-pink-600 dark:text-pink-400 flex-shrink-0"/>
+                <h4 className="text-lg font-bold text-pink-800 dark:text-pink-300">Soft Resistance</h4>
               </div>
-              <p className="text-sm text-teal-700 dark:text-teal-300/90 mb-2">
-                Soft resistance includes subtle techniques used by managers or peers to delay, redirect, or reduce the urgency of ethical issues. These responses often sound agreeable on the surface but avoid meaningful action.
+              <p className="text-sm text-pink-700 dark:text-pink-300/90 mb-2">
+                Soft resistance tactics focus on subtle, non-confrontational forms of ethical advocacy within organizations, working within existing systems.
               </p>
-              <p className="text-xs text-teal-600 dark:text-teal-400/80 mt-auto">
-                <strong>Examples:</strong> Shifting responsibility, vague support, suggesting future action without commitment. <br/>
-                <i>Source: <a href="https://dl.acm.org/doi/pdf/10.1145/3479499" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal-800 dark:hover:text-teal-300 transition-colors">Wong (2021)</a></i>
+              <p className="text-xs text-pink-600 dark:text-pink-400/80 mt-auto">
+                <strong>Examples:</strong> Expanding user scope ethically, adapting standard tools for values work, strategic organizational alignment. <br/>
+                <i>Source: <a href="https://dl.acm.org/doi/pdf/10.1145/3479499" target="_blank" rel="noopener noreferrer" className="underline hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">Wong (2021)</a></i>
               </p>
             </div>
             
@@ -238,7 +234,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
                 onClick={() => setActiveTab('resistance')}
                 className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'resistance'
-                    ? 'bg-white dark:bg-gray-800 text-teal-600 dark:text-teal-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
                 }`}
               >
@@ -261,7 +257,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
             {/* Content Display */}
             <div className="p-1">
               {activeTab === 'rhetorical' && renderTacticList(rhetoricalTactics, 'purple', BrainCircuit)}
-              {activeTab === 'resistance' && renderTacticList(softResistanceTactics, 'teal', Puzzle)}
+              {activeTab === 'resistance' && renderTacticList(softResistanceTactics, 'pink', Puzzle)}
               {activeTab === 'fallacies' && renderTacticList(logicalFallacies, 'amber', X)}
             </div>
           </div>

@@ -4199,10 +4199,17 @@ Write this as a real workplace email that focuses on the ethical concern and the
             localStorage.setItem('originalConversationId', currentConversation.conversationId);
           }
           
+          // Check if this is the user's first scenario
+          const isFirstScenario = !user?.accessibilityScenariosCompleted && !user?.privacyScenariosCompleted;
+          
           // Send the appropriate scenario message
           const scenarioMessage = scenario === 'privacy' 
-            ? "I'd like to practice a new scenario now. My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
-            : "I'd like to practice a new scenario now. My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?";
+            ? (isFirstScenario 
+               ? "I'd like to practice an ethical scenario. My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?"
+               : "I'd like to practice a new scenario now. My manager is pressuring me to collect unnecessary user location data for analytics purposes. What should I do?")
+            : (isFirstScenario 
+               ? "I'd like to practice an ethical scenario. My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?"
+               : "I'd like to practice a new scenario now. My team is facing pressure to skip screen reader compatibility testing to meet a tight deadline. What should I do?");
             
           // Use the existing handleSendMessage function to send the message
           handleSendMessage(scenarioMessage, 0.7);

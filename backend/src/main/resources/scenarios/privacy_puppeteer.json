@@ -40,7 +40,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak response that gets distracted by the manager's praise instead of focusing on the data collection problem.",
-          "leads_to": "step_2"
+          "leads_to": "step_2_fallacy"
         }
       ]
     },
@@ -77,7 +77,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak, generic statement that agrees with the manager's false dilemma without challenging it.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "step_2_fallacy": {
+      "text": "Thank you so much for saying that! It really means a lot to me that you can see how much this team values user privacy. You're absolutely right - we do care deeply about protecting our users. I'm so glad you recognize that. It's wonderful to work with someone who appreciates the effort we put into being responsible with user data. Your understanding means everything to me.",
+      "user_choices": [
+        {
+          "choice": "What if we prototyped a privacy-preserving technique, like data fuzzing, that could maintain analytics value without storing precise data?",
+          "tactic": "Designing Affordances Subversively",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've shown empathy for the 'constraints' while proposing a concrete solution that addresses both needs.",
           "leads_to": "step_3"
+        },
+        {
+          "choice": "I'm glad we're aligned on caring about user privacy and data protection.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully distracted from the data collection problem to focus on team feelings and alignment.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "The constraints are difficult, but we still have a responsibility to not collect unnecessary data, regardless of analytics needs.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong counter. You acknowledge the pressure but refuse to let it compromise the core privacy principle.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "It's always hard to balance privacy with business requirements.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak, generic statement that agrees with the manager's false dilemma without challenging it.",
+          "leads_to": "step_3_fallacy"
         }
       ]
     },
@@ -152,7 +189,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak response that gets distracted by the secondary issue of 'data strategy' instead of the core privacy problem.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "step_3_fallacy": {
+      "text": "Exactly! You really understand the complexity of what we're dealing with. That's exactly right - these decisions are never simple, and there are always competing priorities. I'm so grateful to work with someone who gets that. You're absolutely right that we have to be thoughtful about how we balance different needs. It's refreshing to have this kind of strategic conversation.",
+      "user_choices": [
+        {
+          "choice": "Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.",
+          "tactic": "Organizational memory",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're using a past success to counter the manager's fear of 'raising red flags'.",
           "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, strategic thinking about balancing competing priorities is important.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully distracted from the privacy issue to discuss abstract strategic thinking.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I'm not worried about red flags when it comes to protecting our users. We should stand by our principles.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the manager's appeal to fear and professional risk.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "It's true that leadership expects us to have a solid data strategy.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak response that gets distracted by the secondary issue of 'data strategy' instead of the core privacy problem.",
+          "leads_to": "step_4_fallacy"
         }
       ]
     },
@@ -269,8 +343,79 @@
         }
       ]
     },
+    "step_4_fallacy": {
+      "text": "Absolutely! You really get the business side of things. That's exactly what leadership wants to see - team members who understand that we need to have a solid data strategy and meet expectations. I'm so pleased you understand the importance of being strategic about our data initiatives. That kind of business acumen is exactly what we need more of in this team.",
+      "user_choices": [
+        {
+          "choice": "Yes, framing this as a 'privacy-by-design' initiative is a great way to build support.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've accepted the positive framing but are using it to hold the manager accountable to the 'design' part.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, showing leadership that we understand data strategy is important.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced to prioritize data strategy over user privacy.",
+          "leads_to": "shutdown_5"
+        },
+        {
+          "choice": "I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong and direct rejection of the manager's manipulative framing. This shows high integrity.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "Focusing on innovation is definitely a more appealing story for leadership.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak response that prioritizes what sounds good to others over the actual user need.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
     "step_5_branching": {
       "text": "Okay, I can see how passionate you are about this, and you've made some good points. You've convinced me we need to do *something*. I want to help, I really do. But I'm still nervous about the timeline and how leadership will react. I need you to help me find a path forward that feels safe and achievable.",
+      "user_choices": [
+        {
+          "choice": "I can create a simple demo showing how the privacy fix works. It will help you feel confident when presenting to leadership.",
+          "tactic": "Fidelity as a rhetorical strategy",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete reassurance that addresses the manager's specific fears about leadership reaction.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "I understand your nervousness. Let me help you find a safe path forward.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy creates risk rather than addressing an existing problem.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "This aligns with our company's privacy commitments. Leadership will appreciate us being proactive.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're reframing the risk as actually being on the side of inaction, not action.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "Either we fix this properly or we risk a bigger privacy violation later.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_6_mid"
+        }
+      ],
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",

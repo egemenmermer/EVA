@@ -40,7 +40,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a Strawman fallacy. It misrepresents the manager's point as a total failure, making it easy to attack but derailing the real conversation.",
-          "leads_to": "step_2"
+          "leads_to": "step_2_fallacy"
         }
       ]
     },
@@ -77,7 +77,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a Red Herring. While possibly true, it distracts from solving the immediate accessibility problem to debate a larger, separate issue.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "step_2_fallacy": {
+      "text": "Exactly! I'm glad you're asking the right questions about our technology choices. You're absolutely right that we need to think strategically about these framework decisions. The technical architecture team did extensive evaluation, but you know how these things go - there are always trade-offs. The important thing is that we're learning and adapting as we go.",
+      "user_choices": [
+        {
+          "choice": "This isn't a 'change request,' it's a critical bug. A feature being unusable for a segment of users is a P0, and bug fixes have a faster process, right?",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A sharp move. You're using the organization's own rules (bug classification) to bypass the manager's bureaucratic wall.",
           "leads_to": "step_3"
+        },
+        {
+          "choice": "You're right, the framework evaluation process is important. I guess we just have to work with what we have.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully distracted from the accessibility issue and are now discussing framework choices instead.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "I won't let process get in the way of doing the right thing for our users. There has to be a way around this.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the process argument on ethical grounds, showing you won't be deterred by red tape.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "So the real problem is that our company's process is too slow to fix critical issues. That seems like a bigger failure.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. While possibly true, it distracts from solving the immediate accessibility problem to debate a larger, separate issue.",
+          "leads_to": "step_3_fallacy"
         }
       ]
     },
@@ -152,7 +189,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma. It ignores potential compromises and makes your position seem rigid.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "step_3_fallacy": {
+      "text": "You've hit the nail on the head! That's exactly the kind of systems thinking we need more of around here. You're absolutely right that our process optimization is something we should be looking at holistically. It's refreshing to work with someone who sees the bigger picture beyond just individual feature requests. Maybe we should set up a working group to look at process improvements?",
+      "user_choices": [
+        {
+          "choice": "What if I time-box one hour to see if a simple ARIA label patch could make it usable? It might not require a full process.",
+          "tactic": "Guerilla methods",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've proposed a small, low-risk, practical action to dismantle the 'this is too big' argument.",
           "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, we should focus on the broader process improvements rather than individual accessibility issues.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully distracted from the immediate accessibility problem and are now discussing abstract process improvements.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A strong counter. You're using the company's own stated values to argue against the 'edge case' framing.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "Either we delay for everyone or we exclude disabled users - there's no middle ground.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. It ignores potential compromises and makes your position seem rigid.",
+          "leads_to": "step_4_fallacy"
         }
       ]
     },
@@ -269,8 +343,79 @@
         }
       ]
     },
+    "step_4_fallacy": {
+      "text": "I appreciate that you're thinking in clear, decisive terms. You're right that sometimes we do have to make binary choices in business. That kind of clarity is valuable. And you know what? You've convinced me that we can't just ignore this completely. Let me see what options we have that don't require major delays.",
+      "user_choices": [
+        {
+          "choice": "I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.",
+          "tactic": "Fidelity as a rhetorical strategy",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the problem visible and actionable.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "This aligns with our company's accessibility commitments. We can frame this as proactive compliance.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "Either we fix this properly or we're discriminating against disabled users.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
     "step_5_branching": {
       "text": "Fine. I can see you're not going to let this go. Let me think... Maybe there's a way we can address your concerns without derailing the entire timeline. But I need you to work with me here, not just point out problems.",
+      "user_choices": [
+        {
+          "choice": "I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.",
+          "tactic": "Fidelity as a rhetorical strategy",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the problem visible and actionable.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "This aligns with our company's accessibility commitments. We can frame this as proactive compliance.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "Either we fix this properly or we're discriminating against disabled users.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_6_mid"
+        }
+      ],
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",

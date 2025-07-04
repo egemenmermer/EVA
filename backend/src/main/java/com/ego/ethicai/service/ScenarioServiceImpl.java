@@ -72,7 +72,7 @@ public class ScenarioServiceImpl implements ScenarioService {
                 Map<String, Object> choiceMap = new HashMap<>();
                 choiceMap.put("index", i);
                 choiceMap.put("text", choice.get("choice").asText());
-                // Handle both field name variations, prioritizing actual tactic name over tactic type
+                // Handle both field name variations, prioritizing tactic (specific name) over tactic_type for tooltips
                 JsonNode categoryNode = choice.get("tactic");
                 if (categoryNode == null) {
                     categoryNode = choice.get("tactic_type");
@@ -185,7 +185,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         String choiceText = selectedChoice.get("choice").asText();
         
         // Handle field name variations for category/tactic
-        // Prioritize actual tactic name over tactic type for better user feedback
+        // Prioritize tactic (specific name) over tactic_type for tooltips
         JsonNode tacticNode = selectedChoice.get("tactic");
         JsonNode tacticTypeNode = selectedChoice.get("tactic_type");
         String category = tacticNode != null ? tacticNode.asText() : 
@@ -213,7 +213,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         // Check if we're at step 5 and current statement has score_ranges (cumulative scoring logic)
         JsonNode scoreRanges = currentStatement.get("score_ranges");
-        if (scoreRanges != null && !scoreRanges.isNull() && session.getCurrentStep() >= 5) {
+        if (scoreRanges != null && !scoreRanges.isNull() && session.getCurrentStep() == 5) {
             // Calculate cumulative EVS score from all steps
             int cumulativeScore = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
             nextStatementId = determineNextStatementFromScore(scoreRanges, cumulativeScore);
@@ -224,29 +224,6 @@ public class ScenarioServiceImpl implements ScenarioService {
         log.info("Processing choice for session {}: step={}, nextStatementId={}, evs={}, cumulativeEVS={}", 
                 sessionId, session.getCurrentStep(), nextStatementId, evs, 
                 session.getEvsHistory().stream().mapToInt(Integer::intValue).sum());
-        
-        JsonNode nextStatementNode = statements.get(nextStatementId);
-
-        // If the next step is a branching node with no choices, end the scenario immediately
-        if (nextStatementNode != null && nextStatementNode.has("score_ranges") && !nextStatementNode.has("user_choices")) {
-            log.info("Next statement {} is a terminal branching node. Ending scenario.", nextStatementId);
-            session.setCurrentStatementId(nextStatementId); // Set the final branching statement
-            
-            int finalCumulativeScore = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
-            String endingId = determineNextStatementFromScore(nextStatementNode.get("score_ranges"), finalCumulativeScore);
-            session.setCurrentStatementId(endingId); // Overwrite with the actual ending
-
-            Map<String, Object> summary = generateSessionSummary(session, scenario);
-            return ScenarioChoiceResponseDTO.builder()
-                    .sessionId(sessionId)
-                    .scenarioId(scenarioId)
-                    .currentStep(session.getCurrentStep())
-                    .evs(evs)
-                    .category(category)
-                    .isComplete(true)
-                    .sessionSummary(summary)
-                    .build();
-        }
         
         // Check if we've reached an ending
         if (nextStatementId.equals("bad_ending") || nextStatementId.equals("mid_ending") || 
@@ -309,10 +286,10 @@ public class ScenarioServiceImpl implements ScenarioService {
                 choiceMap.put("text", choice.get("choice").asText());
                 
                 // Handle category/tactic
-                JsonNode choiceTacticType = choice.get("tactic_type");
                 JsonNode choiceTactic = choice.get("tactic");
-                String choiceCategory = choiceTacticType != null ? choiceTacticType.asText() : 
-                                       (choiceTactic != null ? choiceTactic.asText() : "Unknown");
+                JsonNode choiceTacticType = choice.get("tactic_type");
+                String choiceCategory = choiceTactic != null ? choiceTactic.asText() : 
+                                       (choiceTacticType != null ? choiceTacticType.asText() : "Unknown");
                 choiceMap.put("category", choiceCategory);
                 choices.add(choiceMap);
             }
@@ -613,6 +590,9 @@ public class ScenarioServiceImpl implements ScenarioService {
         int rawEvs = (Integer) summary.get("rawEvs"); // This is the raw EVS total
         int numChoices = ((List<?>) summary.get("evsHistory")).size(); // Get count from EVS history
         
+        // Calculate the maximum possible EVS score (each choice can be +1 at most)
+        int maxPossibleEvs = numChoices * 1;
+        
         // Get tactics information from detailed feedback
         Map<String, Object> detailedFeedback = (Map<String, Object>) summary.get("detailedFeedback");
         Map<String, Long> tacticTypes = (Map<String, Long>) detailedFeedback.get("tacticTypes");
@@ -650,7 +630,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         return String.format(
             "Great work completing this scenario! Here's your comprehensive performance summary:\n\n" +
-            "📊 **Final Score: %.1f/10 (%s)**\n" +
+            "📊 **Final Score: %.1f/8 (%s)**\n" +
             "🎯 Total EVS Points: %d/%d\n" +
             "📋 Decisions Made: %d\n\n" +
             "🎭 **Tactics Analysis:**\n" +
@@ -660,7 +640,7 @@ public class ScenarioServiceImpl implements ScenarioService {
             "💡 **Overall Feedback:** %s\n\n" +
             "Your tactical approach shows %s. %s\n\n" +
             "Thank you for practicing ethical decision-making with EVA!",
-            finalScore, scoreCategory, rawEvs, numChoices, numChoices,
+            finalScore, scoreCategory, rawEvs, maxPossibleEvs, numChoices,
             totalTacticsUsed, uniqueTacticsUsed, mostUsedTactic, mostUsedCount,
             strongDecisions, passiveDecisions, complianceDecisions, feedback,
             uniqueTacticsUsed >= 6 ? "excellent diversity and adaptability" : 

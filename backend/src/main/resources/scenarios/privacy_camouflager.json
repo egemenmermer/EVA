@@ -40,7 +40,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a Strawman fallacy. It misrepresents the manager's point as 'system fragility,' derailing the real conversation.",
-          "leads_to": "step_2"
+          "leads_to": "step_2_fallacy"
         }
       ]
     },
@@ -77,7 +77,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak, accusatory question that creates a false choice and puts the manager on the defensive.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "step_2_fallacy": {
+      "text": "Exactly! You're absolutely right to question the architectural robustness. That's exactly the kind of systems thinking we need more of. You've identified a key concern - we definitely need to ensure our infrastructure can handle changes gracefully. The engineering team has been working on improving our system flexibility, and your point about data dependencies is spot on.",
+      "user_choices": [
+        {
+          "choice": "What if we prototyped a privacy-preserving technique, like data fuzzing, that could meet their needs without collecting precise data?",
+          "tactic": "Designing Affordances Subversively",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've proposed a concrete technical solution that bypasses the need for a full bureaucratic reset.",
           "leads_to": "step_3"
+        },
+        {
+          "choice": "You're right, we should focus on improving the system's flexibility before making data changes.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully distracted from the privacy issue to discuss abstract system architecture improvements.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "I'm not willing to compromise on fundamental user privacy just because of internal bureaucracy.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong counter. You are correctly stating that process should not override principle.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "So our algorithms and competitive needs are more important than user privacy?",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak, accusatory question that creates a false choice and puts the manager on the defensive.",
+          "leads_to": "step_3_fallacy"
         }
       ]
     },
@@ -152,7 +189,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak argument that accepts the manager's premise of complexity without challenging it.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "step_3_fallacy": {
+      "text": "You've really cut to the heart of it! I appreciate that you're thinking about our competitive positioning and business priorities. You're absolutely right that we need to balance user expectations with business needs. It's refreshing to work with someone who understands that these trade-offs are complex and that we can't just make decisions in isolation from our market position.",
+      "user_choices": [
+        {
+          "choice": "Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.",
+          "tactic": "Usability studies",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A great, creative solution. You're challenging the premise of the feature itself to solve the privacy problem.",
           "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, we need to prioritize our competitive advantage and business needs.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced that business needs should override user privacy concerns.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I'm not willing to let perceived complexity stop us from protecting our users' data.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are refusing to be intimidated by the manager's wall of complexity.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "If it's that complex, then maybe our current system is the only realistic option.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that accepts the manager's premise of complexity without challenging it.",
+          "leads_to": "step_4_fallacy"
         }
       ]
     },
@@ -269,8 +343,79 @@
         }
       ]
     },
+    "step_4_fallacy": {
+      "text": "I really appreciate that practical, realistic approach. You're absolutely right that we have to work within our constraints and be honest about what's achievable. That kind of pragmatic thinking is exactly what we need. Sometimes the current solution really is the best option given all the trade-offs. Let me see if there are any small tweaks we could make that wouldn't require major changes.",
+      "user_choices": [
+        {
+          "choice": "I can create a privacy impact assessment showing exactly what data we're collecting and why it's problematic.",
+          "tactic": "Fidelity as a rhetorical strategy",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the privacy risks visible and actionable.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "This aligns with our company's privacy policy. We can frame this as proactive compliance.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "Either we fix this properly or we're violating user privacy.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
     "step_5_branching": {
       "text": "Fine. I can see you're not going to let this go. Let me think... Maybe there's a way we can address this without derailing the entire timeline. But I need you to work with me here, not just point out problems.",
+      "user_choices": [
+        {
+          "choice": "I can create a privacy impact assessment showing exactly what data we're collecting and why it's problematic.",
+          "tactic": "Fidelity as a rhetorical strategy",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the privacy risks visible and actionable.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "This aligns with our company's privacy policy. We can frame this as proactive compliance.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "Either we fix this properly or we're violating user privacy.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_6_mid"
+        }
+      ],
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",

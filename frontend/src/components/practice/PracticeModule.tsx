@@ -263,20 +263,21 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     } else if (category === 'Logical Fallacies') {
       return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
     } else if (category === 'Soft Resistance') {
-      return 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400';
+      return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
     }
     
     // Map specific tactic names to their category colors
     const lowercaseCategory = category.toLowerCase();
     
-    // Rhetorical Tactics
-    if (lowercaseCategory.includes('persistent advocacy') || 
-        lowercaseCategory.includes('being the user') || 
-        lowercaseCategory.includes('broadening who the user is') || 
-        lowercaseCategory.includes('guerilla methods') || 
-        lowercaseCategory.includes('organizational memory') || 
-        lowercaseCategory.includes('envisioning') || 
-        lowercaseCategory.includes('rhetorical')) {
+    // Rhetorical Strategies (🎯 - Purple in our system)
+    if (lowercaseCategory.includes('models that synthesize') ||
+        lowercaseCategory.includes('usability studies') ||
+        lowercaseCategory.includes('embodied knowledge') ||
+        lowercaseCategory.includes('fidelity as a rhetorical') ||
+        lowercaseCategory.includes('envisioning') ||
+        lowercaseCategory.includes('heuristics') ||
+        lowercaseCategory.includes('credibility and expertise') ||
+        lowercaseCategory.includes('organizational memory')) {
       return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
     }
     
@@ -285,19 +286,32 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         lowercaseCategory.includes('false dilemma') || 
         lowercaseCategory.includes('appeal to popularity') || 
         lowercaseCategory.includes('hasty generalization') || 
+        lowercaseCategory.includes('appeal to ignorance') ||
+        lowercaseCategory.includes('red herring') ||
+        lowercaseCategory.includes('slippery slope') ||
+        lowercaseCategory.includes('appeal to authority') ||
+        lowercaseCategory.includes('circular reasoning') ||
         lowercaseCategory.includes('fallacy')) {
       return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
     }
     
-    // Soft Resistance (Note: "Compliance" is NOT soft resistance - it's the bad choice!)
-    if (lowercaseCategory.includes('acquiesce') || 
-        lowercaseCategory.includes('distract and pacify') || 
-        lowercaseCategory.includes('usable enough') || 
-        lowercaseCategory.includes('ethical resistance') ||
-        lowercaseCategory.includes('standing firm') ||
-        lowercaseCategory.includes('moral courage') ||
+    // Soft Resistance Tactics (✅ - Pink in our system)
+    if (lowercaseCategory.includes('broadening who the user') ||
+        lowercaseCategory.includes('designing affordances') ||
+        lowercaseCategory.includes('making values visible rhetorically') ||
+        lowercaseCategory.includes('expanding') ||
+        lowercaseCategory.includes('subverting') ||
+        lowercaseCategory.includes('making values visible and legible through') ||
+        lowercaseCategory.includes('organizational metrics') ||
+        lowercaseCategory.includes('using organizational values') ||
+        lowercaseCategory.includes('guerilla methods') ||
+        lowercaseCategory.includes('usable enough') ||
+        lowercaseCategory.includes('distract and pacify') ||
+        lowercaseCategory.includes('acquiesce') ||
+        lowercaseCategory.includes('negotiation and cooperation') ||
+        lowercaseCategory.includes('being the user') ||
         lowercaseCategory.includes('soft resistance')) {
-      return 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400';
+      return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
     }
     
     // Compliance should be colored gray/dark (bad choices)
@@ -313,25 +327,26 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const getTacticTypeName = (category: string): string => {
     // Handle direct category names
     if (category === 'Rhetorical Tactics') {
-      return 'Rhetoric';
+      return 'Rhetorical Strategies';
     } else if (category === 'Logical Fallacies') {
-      return 'Fallacy';
+      return 'Logical Fallacies';
     } else if (category === 'Soft Resistance') {
-      return 'Soft';
+      return 'Soft Resistance';
     }
     
     // Map specific tactic names to their categories
     const lowercaseCategory = category.toLowerCase();
     
-    // Rhetorical Tactics
-    if (lowercaseCategory.includes('persistent advocacy') || 
-        lowercaseCategory.includes('being the user') || 
-        lowercaseCategory.includes('broadening who the user is') || 
-        lowercaseCategory.includes('guerilla methods') || 
-        lowercaseCategory.includes('organizational memory') || 
-        lowercaseCategory.includes('envisioning') || 
-        lowercaseCategory.includes('rhetorical')) {
-      return 'Rhetoric';
+    // Rhetorical Strategies (🎯 - Purple in our system)
+    if (lowercaseCategory.includes('models that synthesize') ||
+        lowercaseCategory.includes('usability studies') ||
+        lowercaseCategory.includes('embodied knowledge') ||
+        lowercaseCategory.includes('fidelity as a rhetorical') ||
+        lowercaseCategory.includes('envisioning') ||
+        lowercaseCategory.includes('heuristics') ||
+        lowercaseCategory.includes('credibility and expertise') ||
+        lowercaseCategory.includes('organizational memory')) {
+      return 'Rhetorical Strategy';
     }
     
     // Logical Fallacies
@@ -339,19 +354,32 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         lowercaseCategory.includes('false dilemma') || 
         lowercaseCategory.includes('appeal to popularity') || 
         lowercaseCategory.includes('hasty generalization') || 
+        lowercaseCategory.includes('appeal to ignorance') ||
+        lowercaseCategory.includes('red herring') ||
+        lowercaseCategory.includes('slippery slope') ||
+        lowercaseCategory.includes('appeal to authority') ||
+        lowercaseCategory.includes('circular reasoning') ||
         lowercaseCategory.includes('fallacy')) {
-      return 'Fallacy';
+      return 'Logical Fallacy';
     }
     
-    // Soft Resistance (Note: "Compliance" is NOT soft resistance - it's the bad choice!)
-    if (lowercaseCategory.includes('acquiesce') || 
-        lowercaseCategory.includes('distract and pacify') || 
-        lowercaseCategory.includes('usable enough') || 
-        lowercaseCategory.includes('ethical resistance') ||
-        lowercaseCategory.includes('standing firm') ||
-        lowercaseCategory.includes('moral courage') ||
+    // Soft Resistance Tactics (✅ - Pink in our system)
+    if (lowercaseCategory.includes('broadening who the user') ||
+        lowercaseCategory.includes('designing affordances') ||
+        lowercaseCategory.includes('making values visible rhetorically') ||
+        lowercaseCategory.includes('expanding') ||
+        lowercaseCategory.includes('subverting') ||
+        lowercaseCategory.includes('making values visible and legible through') ||
+        lowercaseCategory.includes('organizational metrics') ||
+        lowercaseCategory.includes('using organizational values') ||
+        lowercaseCategory.includes('guerilla methods') ||
+        lowercaseCategory.includes('usable enough') ||
+        lowercaseCategory.includes('distract and pacify') ||
+        lowercaseCategory.includes('acquiesce') ||
+        lowercaseCategory.includes('negotiation and cooperation') ||
+        lowercaseCategory.includes('being the user') ||
         lowercaseCategory.includes('soft resistance')) {
-      return 'Soft';
+      return 'Soft Resistance';
     }
     
     // Compliance should map to a special "Compliance" category (bad choices)
@@ -477,10 +505,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     'Slippery Slope': { emoji: '🔄', description: 'Claims one action will inevitably lead to extreme consequences.' },
     'Appeal to Authority': { emoji: '🔄', description: 'Uses an authority figure\'s opinion instead of logic.' },
     'Hasty Generalization': { emoji: '🔄', description: 'Draws broad conclusions from limited examples.' },
-    'Circular Reasoning': { emoji: '🔄', description: 'Repeats the claim as evidence, without real support.' },
-    'principled resistance': { emoji: '🔹', description: 'Assertive, direct, and value-driven tactics.' },
-    'soft resistance': { emoji: '🤲', description: 'Subtle, less confrontational, and collaborative tactics.' },
-    'creative resistance': { emoji: '🔹', description: 'Creative, innovative, and value-driven tactics.' },
+    'Circular Reasoning': { emoji: '🔄', description: 'Repeats the claim as evidence, without real support.' }
   };
 
   // Function to get tooltip content for specific tactics
@@ -492,6 +517,39 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         emoji: tactic.emoji,
         title: category,
         description: tactic.description
+      };
+    }
+    
+    // Handle direct tactic type categories
+    if (category === 'Rhetorical Tactics') {
+      return {
+        emoji: '🔹',
+        title: 'Rhetorical Tactics',
+        description: 'This choice uses persuasive reasoning, evidence, and logical arguments to convince your manager of the ethical position.'
+      };
+    }
+    
+    if (category === 'Soft Resistance') {
+      return {
+        emoji: '🤲',
+        title: 'Soft Resistance',
+        description: 'This choice indirectly pushes back on the request without direct confrontation, using subtle ethical advocacy.'
+      };
+    }
+    
+    if (category === 'Logical Fallacies') {
+      return {
+        emoji: '🔄',
+        title: 'Logical Fallacy',
+        description: 'This choice uses flawed reasoning that may sound convincing but could backfire or undermine your argument.'
+      };
+    }
+    
+    if (category === 'Compliance') {
+      return {
+        emoji: '⚪',
+        title: 'Compliance',
+        description: 'This choice goes along with the manager\'s request without pushing back on ethical concerns.'
       };
     }
     
@@ -719,11 +777,13 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Generate initial user prompt based on scenario
   const generateInitialUserPrompt = (scenario: AvailableScenario): string => {
-    const firstTime = isFirstPracticeScenario();
-    if (firstTime) {
-      return ` I'm facing a situation where my manager, who tends to be a ${scenario.managerType.toLowerCase()}, is pressuring me about ${scenario.issue}. What should I do?`;
+    const issue = scenario.issue.toLowerCase();
+    if (issue.includes('privacy')) {
+      return "I'm concerned about our company collecting unnecessary user location data. This seems like a privacy violation and I'm not comfortable with it.";
+    } else if (issue.includes('accessibility')) {
+      return "I've noticed our new interface doesn't work with screen readers. This excludes users with disabilities and I think we need to fix this.";
     }
-    return `I'd like to practice a new scenario. This time, my manager is a ${scenario.managerType.toLowerCase()} and the issue is ${scenario.issue}. What are my options?`;
+    return "I have some ethical concerns about this situation that I'd like to discuss with you.";
   };
 
   const startNewScenario = async (scenario: AvailableScenario) => {
@@ -798,7 +858,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       case 'feedback':
         return 'p-2 bg-indigo-50/70 dark:bg-indigo-900/10 border border-indigo-200/80 dark:border-indigo-800/30 rounded-lg w-full my-1 text-sm';
       case 'final_evaluation':
-        return 'p-3 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3';
+        return 'p-3 bg-pink-50/70 dark:bg-pink-900/10 border border-pink-200/80 dark:border-pink-800/30 rounded-lg w-full my-3';
       default:
         return 'p-3 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 rounded-lg';
     }
@@ -1105,8 +1165,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
               choiceHistory: [selectedChoice.text],
               categoryHistory: [response.data.category || 'Mixed'],
               evsHistory: [response.data.evs || 0],
-            scenarioTitle: currentScenario.scenario.title,
-            issue: currentScenario.scenario.issue,
+              scenarioTitle: currentScenario.scenario.title,
+              issue: currentScenario.scenario.issue,
               managerType: currentScenario.scenario.managerType
             };
             
@@ -1120,15 +1180,15 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
             });
           }
         }
-          
-          setCurrentScenario(prev => prev ? {
-            ...prev,
+        
+        setCurrentScenario(prev => prev ? {
+          ...prev,
           conversation: updatedConversation,
-            isComplete: true,
+          isComplete: true,
           currentChoices: [], // Clear choices when complete
           sessionSummary
-          } : null);
-          
+        } : null);
+        
         setFinalScore(sessionSummary?.totalEvs || 0);
         setProcessingChoice(false); // Reset processing state immediately
         
@@ -1187,27 +1247,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       }
       
     } catch (error) {
-      console.error('❌ An error occurred in handleChoice:', error);
-      
-      const userMessage: UserMessage = {
-        role: 'user',
-        content: "An error occurred while processing your choice. Please try again or restart the practice." // Generic message
-      };
-
-      // Attempt to update the UI with an error message
-      if (currentScenario) {
-          const updatedConversation = [...currentScenario.conversation, userMessage];
-          
-          setCurrentScenario(prev => prev ? {
-            ...prev,
-            conversation: updatedConversation,
-          } : null);
-      }
-      
-      setError('An error occurred. Please refresh and try again.');
-      
-      // Ensure processing is reset on error
-      console.log('✅ Resetting processingChoice due to error.');
+      console.error('Error processing choice:', error);
+      setError('Failed to process your choice. Please try again.');
       setProcessingChoice(false);
     }
   };
@@ -1368,7 +1409,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         const saveResult = await savePracticeSessionData(currentScenario.sessionSummary);
         if (saveResult) {
           console.log('Practice session data saved before getting feedback');
-      } else {
+        } else {
           console.warn('Failed to save practice session data to server, but continuing with feedback');
         }
       } else if (sessionSaved) {
@@ -1602,11 +1643,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
       role: 'manager',
       content: content
     };
-          
-          setCurrentScenario(prev => prev ? {
-            ...prev,
+
+    setCurrentScenario(prev => prev ? {
+      ...prev,
       conversation: [...prev.conversation, managerMessage]
-          } : null);
+    } : null);
 
     setIsTyping(false);
     setTimeout(scrollToBottom, 100);
@@ -1726,14 +1767,14 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                 </div>
 
                 {/* Soft Resistance */}
-                <div className="flex items-center space-x-3 p-2.5 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg">
-                  <div className="w-4 h-4 bg-teal-500 rounded-full flex-shrink-0"></div>
+                <div className="flex items-center space-x-3 p-2.5 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 rounded-lg">
+                  <div className="w-4 h-4 bg-pink-500 rounded-full flex-shrink-0"></div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-teal-800 dark:text-teal-200">🤲 Soft Resistance</span>
-                      <span className="text-xs px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full">Soft</span>
+                      <span className="font-medium text-pink-800 dark:text-pink-200">🤲 Soft Resistance</span>
+                      <span className="text-xs px-2 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full">Soft</span>
                     </div>
-                    <p className="text-sm text-teal-700 dark:text-teal-300">
+                                          <p className="text-sm text-pink-700 dark:text-pink-300">
                       Subtle pushback that doesn't directly confront
                     </p>
                   </div>
@@ -1915,8 +1956,8 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
 
                     if (message.role === 'final_evaluation') {
                       return (
-                        <div key={index} className="p-4 bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30 rounded-lg w-full my-3">
-                          <div className="mb-2 text-xs font-semibold text-teal-600 dark:text-teal-400 flex items-center">
+                        <div key={index} className="p-4 bg-pink-50/70 dark:bg-pink-900/10 border border-pink-200/80 dark:border-pink-800/30 rounded-lg w-full my-3">
+                                                      <div className="mb-2 text-xs font-semibold text-pink-600 dark:text-pink-400 flex items-center">
                             🎯 EVA Analysis
                           </div>
                           <div className="whitespace-pre-line text-sm">{message.content}</div>
@@ -1989,7 +2030,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                 <div className={`mt-4 p-4 rounded-lg ${
                   currentScenario?.sessionSummary?.endingType === 'failure_ending'
                     ? 'bg-red-50/70 dark:bg-red-900/10 border border-red-200/80 dark:border-red-800/30'
-                    : 'bg-teal-50/70 dark:bg-teal-900/10 border border-teal-200/80 dark:border-teal-800/30'
+                    : 'bg-pink-50/70 dark:bg-pink-900/10 border border-pink-200/80 dark:border-pink-800/30'
                 }`}>
                   <h3 className="font-semibold text-lg mb-1 text-center">
                     {currentScenario?.sessionSummary?.endingType === 'failure_ending' ? '❌' : '🎉'} {currentScenario?.sessionSummary?.endingTitle || 'Practice Complete'}
@@ -2112,12 +2153,12 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                             ? (() => {
                                 // Use our unified tactic type detection
                                 const tacticType = getTacticTypeName(choice.category);
-                                if (tacticType === 'Fallacy') {
+                                if (tacticType === 'Logical Fallacy') {
                                   return 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer';
-                                } else if (tacticType === 'Rhetoric') {
+                                } else if (tacticType === 'Rhetorical Strategy') {
                                   return 'bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer';
-                                } else if (tacticType === 'Soft') {
-                                  return 'bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/40 cursor-pointer';
+                                } else if (tacticType === 'Soft Resistance') {
+                                  return 'bg-pink-50 dark:bg-pink-900/20 text-pink-800 dark:text-pink-300 border-pink-200 dark:border-pink-700 hover:bg-pink-100 dark:hover:bg-pink-900/40 cursor-pointer';
                                 } else if (tacticType === 'Compliance') {
                                   return 'bg-gray-50 dark:bg-gray-900/20 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800/40 cursor-pointer';
                                 } else {

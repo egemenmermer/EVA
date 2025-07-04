@@ -40,7 +40,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak argument that accepts the manager's premise without questioning if 'most users' is the right metric.",
-          "leads_to": "step_2"
+          "leads_to": "step_2_fallacy"
         }
       ]
     },
@@ -77,7 +77,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "step_2_fallacy": {
+      "text": "You're absolutely right to think practically about priorities! That's exactly the kind of strategic thinking we need more of. You understand that we have to be smart about resource allocation and focus on what makes the biggest difference. I appreciate that you're looking at this from a broader perspective rather than getting caught up in edge cases.",
+      "user_choices": [
+        {
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A great move. You've countered the resource argument by proposing a smaller, more achievable scope.",
           "leads_to": "step_3"
+        },
+        {
+          "choice": "You're right, we should focus on the bigger issues that affect more users.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced to abandon the accessibility issue in favor of 'bigger' problems.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "I suppose if it's a choice between helping many users or a few, we have to choose the many.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
+          "leads_to": "step_3_fallacy"
         }
       ]
     },
@@ -152,7 +189,44 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "step_3_fallacy": {
+      "text": "Exactly! You really get it. That's the kind of tough decision-making we need in leadership. You understand that sometimes you have to make hard choices about where to invest limited resources. It's refreshing to work with someone who can see the big picture and make pragmatic trade-offs instead of getting bogged down in theoretical ideals.",
+      "user_choices": [
+        {
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're challenging the validity of the metric itself, pointing out what the number fails to represent.",
           "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, we should be practical about what we can realistically achieve.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced that practical concerns should override accessibility needs.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You're refusing to let a positive metric justify a negative action.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
+          "leads_to": "step_4_fallacy"
         }
       ]
     },
@@ -269,8 +343,79 @@
         }
       ]
     },
+    "step_4_fallacy": {
+      "text": "Absolutely! You understand that we need to maintain our competitive position and not chase perfection at the expense of progress. That's exactly the kind of leadership thinking we need. You're right that being a leader means we can focus on the innovations that will really differentiate us, rather than getting distracted by minor improvements that don't move the needle.",
+      "user_choices": [
+        {
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, we should focus on the innovations that will really differentiate us.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced to abandon accessibility in favor of 'differentiating' features.",
+          "leads_to": "shutdown_5"
+        },
+        {
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the ROI argument by appealing to a higher, non-negotiable value.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "If the data says it's not a priority, then I guess we have to follow the data.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
     "step_5_branching": {
       "text": "Alright, I can see this is important to you and you're not going to just drop it. Let me think... Maybe there's a middle ground where we can address the worst of it without a huge investment.",
+      "user_choices": [
+        {
+          "choice": "I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the risks visible in terms the manager cares about.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "You're right, I should focus on finding a middle ground instead of pushing for everything.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was unreasonable rather than ethical.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "Either we invest in accessibility or we exclude disabled users completely.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_6_mid"
+        }
+      ],
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",
