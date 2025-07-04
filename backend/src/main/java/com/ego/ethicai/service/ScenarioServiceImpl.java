@@ -225,6 +225,29 @@ public class ScenarioServiceImpl implements ScenarioService {
                 sessionId, session.getCurrentStep(), nextStatementId, evs, 
                 session.getEvsHistory().stream().mapToInt(Integer::intValue).sum());
         
+        JsonNode nextStatementNode = statements.get(nextStatementId);
+
+        // If the next step is a branching node with no choices, end the scenario immediately
+        if (nextStatementNode != null && nextStatementNode.has("score_ranges") && !nextStatementNode.has("user_choices")) {
+            log.info("Next statement {} is a terminal branching node. Ending scenario.", nextStatementId);
+            session.setCurrentStatementId(nextStatementId); // Set the final branching statement
+            
+            int finalCumulativeScore = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
+            String endingId = determineNextStatementFromScore(nextStatementNode.get("score_ranges"), finalCumulativeScore);
+            session.setCurrentStatementId(endingId); // Overwrite with the actual ending
+
+            Map<String, Object> summary = generateSessionSummary(session, scenario);
+            return ScenarioChoiceResponseDTO.builder()
+                    .sessionId(sessionId)
+                    .scenarioId(scenarioId)
+                    .currentStep(session.getCurrentStep())
+                    .evs(evs)
+                    .category(category)
+                    .isComplete(true)
+                    .sessionSummary(summary)
+                    .build();
+        }
+        
         // Check if we've reached an ending
         if (nextStatementId.equals("bad_ending") || nextStatementId.equals("mid_ending") || 
             nextStatementId.equals("good_ending")) {

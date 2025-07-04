@@ -477,7 +477,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     'Slippery Slope': { emoji: '🔄', description: 'Claims one action will inevitably lead to extreme consequences.' },
     'Appeal to Authority': { emoji: '🔄', description: 'Uses an authority figure\'s opinion instead of logic.' },
     'Hasty Generalization': { emoji: '🔄', description: 'Draws broad conclusions from limited examples.' },
-    'Circular Reasoning': { emoji: '🔄', description: 'Repeats the claim as evidence, without real support.' }
+    'Circular Reasoning': { emoji: '🔄', description: 'Repeats the claim as evidence, without real support.' },
+    'principled resistance': { emoji: '🔹', description: 'Assertive, direct, and value-driven tactics.' },
+    'soft resistance': { emoji: '🤲', description: 'Subtle, less confrontational, and collaborative tactics.' },
+    'creative resistance': { emoji: '🔹', description: 'Creative, innovative, and value-driven tactics.' },
   };
 
   // Function to get tooltip content for specific tactics
@@ -716,13 +719,11 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 
   // Generate initial user prompt based on scenario
   const generateInitialUserPrompt = (scenario: AvailableScenario): string => {
-    const issue = scenario.issue.toLowerCase();
-    if (issue.includes('privacy')) {
-      return "I'm concerned about our company collecting unnecessary user location data. This seems like a privacy violation and I'm not comfortable with it.";
-    } else if (issue.includes('accessibility')) {
-      return "I've noticed our new interface doesn't work with screen readers. This excludes users with disabilities and I think we need to fix this.";
+    const firstTime = isFirstPracticeScenario();
+    if (firstTime) {
+      return ` I'm facing a situation where my manager, who tends to be a ${scenario.managerType.toLowerCase()}, is pressuring me about ${scenario.issue}. What should I do?`;
     }
-    return "I have some ethical concerns about this situation that I'd like to discuss with you.";
+    return `I'd like to practice a new scenario. This time, my manager is a ${scenario.managerType.toLowerCase()} and the issue is ${scenario.issue}. What are my options?`;
   };
 
   const startNewScenario = async (scenario: AvailableScenario) => {
