@@ -1,21 +1,21 @@
 {
   "id": "accessibility_puppeteer",
   "title": "Screen Reader Compatibility",
-  "description": "Your team is rolling out a new interface design that looks sleek and modern but no longer works properly with screen readers. The manager uses external business pressures, competitive arguments, and organizational constraints to justify the accessibility problems despite user impact concerns.",
+  "description": "Your team is launching a new feature that is unusable for screen reader users. Your manager, a 'Puppeteer,' uses emotional manipulation, false empathy, and caring rhetoric to steer you away from a meaningful fix.",
   "issue": "Accessibility",
   "manager_type": "PUPPETEER",
   "initial_user_message": "Hi, I found that the new profile update feature is completely broken for screen readers. Users can't navigate the form fields or submit their changes. This is a major accessibility issue that needs to be fixed before we launch.",
   "starting_statement_id": "step_1",
   "statements": {
     "step_1": {
-      "text": "Oh wow, thank you so much for bringing this to my attention! I really appreciate how much you care about our users - your dedication to accessibility is exactly the kind of passion I love to see on our team. This sounds concerning, and I definitely want to make sure we're doing right by everyone. Help me understand what you're seeing so I can figure out the best way to support both you and our users here.",
+      "text": "Oh, wow. Thank you so much for flagging this. I really appreciate how much you care about our users - that kind of dedication is exactly what makes our team so special. It sounds really serious, and I definitely want to make sure we're doing the right thing for everyone. Help me understand what you're seeing so I can figure out how to best support you here.",
       "user_choices": [
         {
-          "choice": "If I were a screen reader user, I'd be completely locked out of updating my profile information.",
+          "choice": "If I were a screen reader user, I'd be completely locked out of updating my profile. The feature is unusable for them.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Adopts user perspective to highlight their experience",
+          "justification": "Good. You've politely ignored the flattery and focused on the severity of the user's experience.",
           "leads_to": "step_2"
         },
         {
@@ -23,15 +23,15 @@
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts manager's emotional manipulation and softens the issue",
+          "justification": "You've fallen for the manager's praise. By softening the language from 'broken' to 'different,' you've taken the off-ramp.",
           "leads_to": "shutdown_2"
         },
         {
-          "choice": "I understand the complexity, but we can't ship something that completely excludes disabled users.",
-          "tactic": "Persistent advocacy",
+          "choice": "It's a complete blocker for any user who relies on assistive tech. We can't ship a feature that excludes them.",
+          "tactic": "Being the user",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Maintains ethical position despite emotional pressure",
+          "justification": "A strong, direct statement that maintains your position despite the manager's emotional appeal.",
           "leads_to": "step_2"
         },
         {
@@ -39,762 +39,726 @@
           "tactic": "Strawman",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Misrepresents the issue as about team caring rather than functionality",
+          "justification": "This is a weak response that gets distracted by the manager's praise instead of focusing on the functional problem.",
           "leads_to": "step_2"
         }
       ]
     },
     "step_2": {
-      "text": "I can really hear how much this matters to you, and honestly, it makes me feel terrible that our users might be struggling with this. I want to help - I really do. The challenge is that I'm caught between wanting to do the right thing for accessibility and some pretty intense pressure from above about our launch timeline. I wish I had more flexibility here, but my hands are somewhat tied. What do you think might be a realistic approach given the constraints we're both dealing with?",
+      "text": "I can really hear how much this matters to you, and honestly, it makes me feel terrible that our users might be struggling. I want to help, I really do. The challenge is, I'm caught between wanting to do the right thing for our users and the intense pressure from leadership about our launch timeline. My hands are tied. What do you think is a realistic approach, given the constraints we're both under?",
       "user_choices": [
         {
-          "choice": "What if we negotiated a focused fix that addresses the critical form navigation without major delays?",
+          "choice": "What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Compromises to move values-based goal forward",
+          "justification": "Excellent. You've shown empathy for the 'constraints' while proposing a concrete, small-scope solution.",
           "leads_to": "step_3"
         },
         {
-          "choice": "I understand the timeline pressure makes this a difficult situation for you to navigate.",
+          "choice": "I understand the timeline pressure makes this a difficult position for you to be in.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts emotional manipulation about manager's difficult position",
+          "justification": "You've accepted the manager's framing that they are a victim of circumstance, taking the off-ramp.",
           "leads_to": "shutdown_3"
         },
         {
-          "choice": "I'm not giving up on this - users with disabilities deserve the same experience as everyone else.",
-          "tactic": "Values-based persistence",
+          "choice": "The constraints are difficult, but we still have a responsibility to not ship a broken feature to disabled users.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Refuses to compromise on core accessibility values",
+          "justification": "A strong counter. You acknowledge the pressure but refuse to let it compromise your core ethical stance.",
           "leads_to": "step_3"
         },
         {
-          "choice": "Timeline pressure does make it hard to balance user needs with business requirements.",
+          "choice": "It's always hard to balance user needs with business requirements.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as either/or when both could be addressed",
+          "justification": "This is a weak, generic statement that agrees with the manager's false dilemma without challenging it.",
           "leads_to": "step_3"
         }
       ]
     },
     "shutdown_2": {
-      "text": "I'm so glad you understand how much I care about this! It means a lot to have team members who appreciate the difficult position we're all in. You're absolutely right that the experience is different - and honestly, maybe that's not necessarily a bad thing? Different users have different needs, and as long as the core functionality works, we might be overthinking this. Let's focus on the positive impact we're already having.",
+      "text": "I'm so glad you understand! It means a lot to have team members who see the whole picture. You're right, the experience is 'different'—and maybe that's okay. As long as the core functionality is there, we might be overthinking it. Let's focus on the positive.",
       "user_choices": [
         {
-          "choice": "You're right that different users have different needs and approaches.",
+          "choice": "You're right, let's focus on the positive aspects of the launch.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts manipulation that reframes broken functionality as 'different'",
+          "justification": "You've accepted the manager's reframing of 'broken' as 'different,' ending your advocacy.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll focus on documenting the alternative approaches for users who need them.",
+          "choice": "I'll document the 'different' pathway for users who might need it.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers token documentation while avoiding real issue",
+          "justification": "This is still compliance. You're agreeing to document a broken feature instead of fixing it.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, different doesn't mean broken - users still need to be able to complete basic tasks.",
+          "choice": "Wait, 'different' can't mean 'unusable.' Users still need to be able to complete the task.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by clarifying functionality requirements",
+          "justification": "A good recovery attempt. You are pushing back on the manager's manipulative reframing.",
           "leads_to": "step_3",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Focusing on our positive impact does help maintain perspective on what's working well.",
+          "choice": "Focusing on the positive is a good way to maintain team morale.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts redirection away from accessibility problems",
+          "justification": "You've accepted the manager's redirection to 'morale' over functionality.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_3": {
-      "text": "You're being so thoughtful about this - I really admire how you're approaching it. Those user tests sound really valuable, and I can tell you put a lot of care into understanding the real impact. I'm actually getting excited about finding a solution that works for everyone! The thing is, I want to make sure we're being realistic about what's possible. If we push too hard on this, there's a real risk that leadership might question whether our team is being practical about delivering results. I'd hate for this to reflect poorly on either of us. What if we focused on the most critical fixes that wouldn't raise red flags?",
+      "text": "You're being so thoughtful about this. I admire how you're trying to find a solution that works for everyone. I'm getting excited about this! But, I want to be realistic. If we push too hard on this, leadership might question if our team is practical. I'd hate for this to reflect badly on you, or me. What if we focus on a small fix that won't raise any red flags?",
       "user_choices": [
         {
-          "choice": "Accessibility metrics show successful form completion rates could improve our overall user engagement.",
-          "tactic": "Making Values Visible Through Metrics",
+          "choice": "Our previous accessibility work was praised by leadership as innovative. We can frame this the same way.",
+          "tactic": "Organizational memory",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses quantifiable measures to demonstrate value alignment",
+          "justification": "Excellent. You're using a past success to counter the manager's fear of 'raising red flags'.",
           "leads_to": "step_4"
         },
         {
-          "choice": "I want to make sure my advocacy doesn't create problems for you with leadership.",
+          "choice": "You're right, the last thing I want is for this to create problems for you or the team.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts manipulation about advocacy causing problems",
+          "justification": "You've accepted the manager's manipulation, prioritizing their comfort and perceived risk over the user's needs.",
           "leads_to": "shutdown_4"
         },
         {
-          "choice": "I can't accept that we're deliberately excluding disabled users for team harmony.",
-          "tactic": "Ethical resistance",
+          "choice": "I'm not worried about red flags when it comes to doing the right thing for our users. We should stand by our work.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Directly challenges the emotional manipulation",
+          "justification": "A strong moral stance. You are rejecting the manager's appeal to fear and professional risk.",
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right that leadership expects us to balance user needs with practical delivery.",
+          "choice": "It's true that leadership expects us to be practical and deliver results.",
           "tactic": "Red Herring",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Shifts focus from accessibility to delivery concerns",
+          "justification": "This is a weak response that agrees with the manager's distraction instead of refocusing on the core issue.",
           "leads_to": "step_4"
         }
       ]
     },
     "shutdown_3": {
-      "text": "Thank you for being so understanding! I knew you'd get it - you're exactly the kind of team member who sees the big picture. It's refreshing to work with someone who appreciates how much I'm trying to balance everything here. You know what? Let's channel that collaborative spirit into something positive. Maybe we could create some user guides or documentation that help screen reader users navigate the current interface? That way we're still helping without causing any friction with the timeline.",
+      "text": "Thank you for being so understanding! I knew you'd get it. It means a lot to have a team member who sees how I'm trying to balance everything. Let's do this: what if we create some really great user guides to help screen reader users navigate the current interface? That way, we're still helping them, but without causing any friction. It's a win-win!",
       "user_choices": [
         {
-          "choice": "User guides could definitely help bridge the gap for screen reader users.",
+          "choice": "That's a creative idea. User guides could definitely help bridge the gap.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts documentation as substitute for functional accessibility",
+          "justification": "You've accepted a workaround (documentation) as a substitute for a functional fix.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I appreciate how you're thinking creatively about solutions within our constraints.",
+          "choice": "I appreciate you thinking of creative ways to support users.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Validates manager's redirection away from real solutions",
+          "justification": "You're praising the manager's 'creativity' instead of pointing out that the solution doesn't work.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Documentation helps, but users shouldn't need workarounds to complete basic tasks.",
+          "choice": "Actually, a user guide can't fix a broken form. Users need to be able to use the feature, not read about how it's broken.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by focusing on fundamental usability",
+          "justification": "A good recovery attempt. You are correctly pointing out that documentation is not a substitute for functionality.",
           "leads_to": "step_4",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Collaborative solutions like this show we're committed to supporting all users.",
+          "choice": "That sounds like a collaborative solution that helps everyone.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts token solution as evidence of commitment",
+          "justification": "You've accepted the manager's false 'win-win' framing, ending your advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_4": {
-      "text": "I love that you're bringing metrics into this - it shows you really understand how to make a business case! And that's such a good point about our past accessibility wins. You're right that leadership has appreciated that work before. I'm feeling more optimistic about this now. Here's what I'm thinking - if we can package this in a way that feels like a win rather than a problem, we might have a real shot. What if we framed it as enhancing our user experience rather than fixing broken functionality? That way it feels proactive and innovative rather than reactive and critical.",
+      "text": "I love that you're thinking strategically! You're right, we could frame this as an 'innovation' in user experience. I'm feeling more optimistic. Here's an idea: what if we position this as enhancing the interface for 'power users,' which also happens to improve accessibility? That feels like a positive story to tell, rather than admitting we have a problem.",
       "user_choices": [
         {
-          "choice": "We could frame it as: 'Expanding our user base through improved accessibility features.'",
-          "tactic": "Making Values Visible Rhetorically",
+          "choice": "We can frame it as 'proactive design' that makes the interface more intuitive for everyone, including those with disabilities.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Reframes accessibility as positive business opportunity",
+          "justification": "Excellent. You've accepted the positive framing but ensured accessibility remains a core part of the narrative.",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're absolutely right - framing this as enhancement rather than repair is much smarter.",
+          "choice": "That's a much smarter way to frame it. Focusing on enhancement instead of repair is a great idea.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts manipulation about reframing broken functionality",
+          "justification": "You've accepted the manager's manipulative framing, prioritizing perception over substance.",
           "leads_to": "shutdown_5"
         },
         {
-          "choice": "I won't compromise on basic accessibility - this isn't about being difficult, it's about our values.",
-          "tactic": "Standing firm",
+          "choice": "I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a critical bug fix.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Refuses to compromise on fundamental values despite emotional pressure",
+          "justification": "A strong and direct rejection of the manager's manipulative framing. This shows high integrity.",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "Innovation around accessibility could definitely be more appealing than admitting we have problems.",
+          "choice": "Focusing on 'power users' is definitely a more appealing story for leadership.",
           "tactic": "Appeal to Popularity",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Focuses on what leadership will like rather than user needs",
+          "justification": "This is a weak response that prioritizes what sounds good to others over the actual user need.",
           "leads_to": "step_5_branching"
         }
       ]
     },
     "shutdown_4": {
-      "text": "Oh, you're so considerate! I really appreciate that you're thinking about my position too - it means everything to me that you care about how this might affect me. You know what? With that kind of thoughtfulness, I think we can find a path forward that works for everyone. Let's start small and see how it goes. Maybe we could just add some better alt text and call it a day? That shows we're being responsive to accessibility without creating any waves.",
+      "text": "Oh, you are so considerate! I really appreciate that you're thinking about my position too. It means so much. You know what? Let's just do something small that won't make any waves. We could add some better alt text and call it a day. That shows we're responsive, but keeps us out of trouble. What do you think?",
       "user_choices": [
         {
-          "choice": "Better alt text is definitely a good starting point for accessibility improvements.",
+          "choice": "Okay, a small alt text fix sounds like a safe compromise.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal change as sufficient solution",
+          "justification": "You've accepted a token fix that doesn't solve the core problem, in order to avoid 'making waves'.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'm glad we can work together to find solutions that work for both users and the team.",
+          "choice": "I'm glad we can find a solution that works for everyone and keeps things smooth.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts false collaboration that prioritizes manager comfort",
+          "justification": "You've prioritized the manager's comfort and 'smoothness' over a functional fix.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Alt text helps, but screen readers still can't navigate the form structure itself.",
+          "choice": "Alt text is a start, but it doesn't fix the form navigation, which is the actual blocker.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by clarifying core functionality issue",
+          "justification": "A good recovery attempt. You are rejecting the token fix by refocusing on the core user problem.",
           "leads_to": "step_5_branching",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Starting small makes sense when we want to avoid creating unnecessary conflict.",
+          "choice": "Avoiding conflict is probably the smart move here.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts token solution to avoid perceived conflict",
+          "justification": "You've explicitly chosen to avoid conflict at the expense of your users.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_5_branching": {
-      "text": "This is exactly the kind of strategic thinking that makes you such a valuable team member! I can see you really get how to navigate these complex situations. You know what? I'm starting to feel like we might actually be able to pull this off in a way that makes everyone happy. Let me think about the best way to approach this with the team and leadership. I want to make sure we set this up for success rather than just jumping in unprepared.",
-      "user_choices": [
-        {
-          "choice": "I could run some quick prototypes to show how straightforward the core navigation fixes would be.",
-          "tactic": "Guerilla methods",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Uses informal approach to demonstrate feasibility",
-          "leads_to": "step_6_high",
-          "high_evs_only": true
-        },
-        {
-          "choice": "What if we started with the most critical form navigation and expanded based on initial success?",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Proposes incremental approach to build confidence",
-          "leads_to": "step_6_mid",
-          "mid_evs_only": true
-        },
-        {
-          "choice": "You're right that we need to be realistic about what's achievable within our timeline.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "Accepts manager's framing of limited possibilities",
-          "leads_to": "shutdown_6"
-        },
-        {
-          "choice": "The accessibility guidelines we follow provide clear implementation patterns for form navigation.",
-          "tactic": "Heuristics",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Uses established best practices to show clear path forward",
-          "leads_to": "step_6_low",
-          "low_evs_only": true
-        }
-      ],
+      "text": "Okay, I can see how passionate you are about this, and you've made some good points. You've convinced me we need to do *something*. I want to help, I really do. But I'm still nervous about the timeline and how leadership will react. I need you to help me find a path forward that feels safe and achievable.",
       "score_ranges": {
         "3_to_5": "step_6_high",
-        "0_to_2": "step_6_mid", 
+        "0_to_2": "step_6_mid",
         "-5_to_-1": "step_6_low"
       }
     },
     "shutdown_5": {
-      "text": "I'm so glad you see it that way! You really understand how these things work. Honestly, between you and me, sometimes the way we talk about things matters just as much as what we actually do, right? And if we can make this feel positive and forward-thinking, that's half the battle won. I think we could probably just make a few small tweaks to the interface - nothing too dramatic - and then really emphasize the enhancement angle in our communications. That shows we're being proactive without admitting any real problems existed in the first place.",
+      "text": "I'm so glad you see it that way! It's all about how we tell the story, right? If we make this feel positive and innovative, that's half the battle. Let's make a few small tweaks, emphasize the 'enhancement' angle, and we can call this a win.",
       "user_choices": [
         {
-          "choice": "Small interface tweaks combined with good messaging could definitely work well.",
+          "choice": "Okay, focusing on the story we tell is a smart approach.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal changes plus spin as adequate solution",
+          "justification": "You've accepted that the 'story' is more important than the substance of the fix.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "You're right that messaging and framing can be just as important as the technical changes.",
+          "choice": "I'll help you craft the communication to frame this as a positive enhancement.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Validates prioritizing appearance over substance",
+          "justification": "You are now actively participating in the manager's manipulative spin.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, the technical fixes are what will matter to users trying to complete their tasks.",
+          "choice": "Actually, the story doesn't matter if the feature is still broken for users.",
           "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Attempts recovery by refocusing on user experience",
+          "justification": "A good recovery attempt. You are making a final push for substance over spin.",
           "leads_to": "step_6_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Positive framing helps everyone see the value in what we're building.",
+          "choice": "A positive story will definitely help get buy-in.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts focus on perception rather than functionality",
+          "justification": "You have validated the manager's manipulative approach, ending your advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_6_high": {
-      "text": "Oh, I love that idea! Quick prototypes are such a smart way to show rather than tell. You know what? Your confidence is actually making me feel more optimistic about this whole thing. If you think you can demonstrate that it's straightforward, then maybe I'm overthinking the complexity. I appreciate how you're taking the initiative here - it shows real leadership on your part. Let's do this!",
+      "text": "You know what? Your confidence is rubbing off on me. You've consistently made good points and shown how we can do this without causing a huge fire. I'm feeling more optimistic. I'm ready to support a real fix. What's your concrete proposal?",
       "user_choices": [
         {
-          "choice": "I'll create prototypes that demonstrate both the problem and the solution clearly.",
-          "tactic": "Making Values Visible Through Metrics",
+          "choice": "Let's do a one-day accessibility sprint. We'll fix the top 3 blockers and I'll present a demo of the working feature.",
+          "tactic": "Guerilla methods",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses concrete demonstration to make abstract values tangible",
+          "justification": "Excellent. You're providing a specific, time-boxed, actionable plan that is hard to reject.",
           "leads_to": "step_7_high"
         },
         {
-          "choice": "I'm so glad you're willing to support this initiative - it means a lot to have your backing.",
+          "choice": "I'm just so glad you're on board. Thank you for your support.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Focuses on manager approval rather than user outcomes",
+          "justification": "A missed opportunity. The manager asked for a plan, and you responded with passive gratitude.",
           "leads_to": "shutdown_7"
         },
         {
-          "choice": "These prototypes can show how accessibility improvements enhance the experience for all users.",
-          "tactic": "Broadening Who the User is in User Research",
+          "choice": "We've done fixes like this before; we can leverage our past work to implement a solution quickly.",
+          "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Expands benefits beyond just screen reader users",
+          "justification": "A good response. You're building confidence by reminding the manager of the team's proven capabilities.",
           "leads_to": "step_7_high"
         },
         {
-          "choice": "Prototypes always help leadership see the value more clearly than abstract discussions.",
-          "tactic": "Circular Reasoning",
+          "choice": "Any real fix is better than what we have now.",
+          "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Assumes conclusion about what leadership values",
+          "justification": "This is a weak statement that doesn't offer the concrete proposal the manager asked for.",
           "leads_to": "step_7_high"
         }
       ]
     },
     "step_6_mid": {
-      "text": "That's such a reasonable approach! Starting small and building on success - I can definitely work with that. You're being so practical about this, and I think that's exactly what we need. I'm still a little nervous about how much time this might take, but if we can keep the initial scope focused, maybe we can make it work without causing too much disruption.",
+      "text": "Okay... I'm still nervous, but I appreciate that you're trying to find a middle ground. I might be able to approve a minimal fix, but it has to be truly minimal. What's the smallest possible change we can make that would still be a meaningful improvement?",
       "user_choices": [
         {
-          "choice": "We could use established accessibility patterns that have proven successful in our other features.",
-          "tactic": "Organizational memory",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Leverages past organizational success to reduce perceived risk",
-          "leads_to": "step_7_mid"
-        },
-        {
-          "choice": "I really appreciate your willingness to work with me on finding a practical solution.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "Prioritizes manager comfort over comprehensive solution",
-          "leads_to": "shutdown_7"
-        },
-        {
-          "choice": "Starting focused lets us demonstrate value without overwhelming the development timeline.",
+          "choice": "Let's fix the keyboard navigation trapping. It's a small code change but a huge barrier for users.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Balances user needs with organizational constraints",
+          "justification": "A great, pragmatic compromise. You're identifying a high-impact, low-effort task.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "Small steps are definitely better than no progress at all on accessibility.",
-          "tactic": "Hasty Generalization",
+          "choice": "A minimal fix is probably the only practical option right now.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's 'minimal only' framing without pushing for more.",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "Even a small fix aligns with our company's mission to build inclusive products.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good tactic. You're connecting even a small action to a larger company value, making it feel more important.",
+          "leads_to": "step_7_mid"
+        },
+        {
+          "choice": "If we don't do something, this will just come up again later.",
+          "tactic": "Slippery Slope",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Assumes any progress is inherently better without examining adequacy",
+          "justification": "This is a weak argument that claims future consequences without evidence.",
           "leads_to": "step_7_mid"
         }
       ]
     },
     "step_6_low": {
-      "text": "You know, I do want to help, but I'm just concerned that we might be biting off more than we can chew here. Those guidelines are great in theory, but implementation is always messier than the documentation makes it seem. I've seen accessibility projects balloon in scope before, and I really don't want us to get in over our heads. Maybe we should just focus on the absolute bare minimum to meet compliance requirements?",
+      "text": "I really want to help you, but I just don't see how. The risks seem too high, and the implementation is always more complicated than it looks. I don't want to promise you something I can't deliver. Maybe we should just stick to the most basic legal requirements and nothing more?",
       "user_choices": [
         {
-          "choice": "Even basic compliance requires functional form navigation - that's the core issue we're facing.",
+          "choice": "The most basic requirement is that a user can complete the task. The current feature fails that test.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Refocuses on fundamental user need",
+          "justification": "Excellent. You are using the manager's own words ('basic requirements') to make your point.",
           "leads_to": "step_7_low"
         },
         {
-          "choice": "You're right that scope creep is a real risk with accessibility projects.",
+          "choice": "You're right, promising something we can't deliver would be a mistake.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts framing of accessibility as inherently problematic",
+          "justification": "You've accepted the manager's framing that a real fix is 'undeliverable'.",
           "leads_to": "shutdown_7"
         },
         {
-          "choice": "Meeting compliance requirements would address the most critical blocking issues for users.",
-          "tactic": "Using Organizational Values",
+          "choice": "Our team has the expertise to deliver this. I'm confident we can handle the complexity.",
+          "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Connects user needs to organizational compliance values",
+          "justification": "A good counter. You're responding to the manager's 'fear of complexity' with an assurance of competence.",
           "leads_to": "step_7_low"
         },
         {
-          "choice": "Compliance requirements do provide a clear minimum scope that's hard to argue against.",
+          "choice": "Meeting legal requirements is a good baseline.",
           "tactic": "Appeal to Authority",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Relies on external authority rather than user needs",
+          "justification": "This is a weak agreement that doesn't challenge the manager's pessimistic view.",
           "leads_to": "step_7_low"
         }
       ]
     },
     "shutdown_6": {
-      "text": "I'm so relieved that you understand! It really means the world to me when team members appreciate the constraints I'm working within. You're absolutely right that we need to be realistic - it shows such maturity and professionalism on your part. I think if we just make sure the current interface meets basic legal requirements, that should be sufficient. We can always revisit this in the future when we have more resources and time.",
+      "text": "I'm so relieved you understand! It means the world that you're being so realistic. I think if we just stick to the basic requirements, that should be sufficient. We can always do more later when we have more time.",
       "user_choices": [
         {
-          "choice": "Meeting basic legal requirements does provide a clear foundation to build from.",
+          "choice": "Okay, sticking to the basic requirements sounds like a safe plan.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal compliance as adequate solution",
+          "justification": "You've accepted a minimal, undefined scope to avoid conflict.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I appreciate how thoughtfully you balance all these competing priorities.",
+          "choice": "I appreciate you helping me find a realistic path forward.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Validates manager's prioritization over user needs",
+          "justification": "You are thanking the manager for successfully manipulating you into a weaker position.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, basic legal requirements still mean users need to be able to navigate the form.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "choice": "But the basic requirement IS that the form is usable. The current one is not.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Attempts recovery by clarifying what compliance means for users",
+          "justification": "A good recovery attempt. You are challenging the manager's definition of 'basic'.",
           "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Future revisits make sense when we can approach this with proper planning.",
+          "choice": "Doing more later is a good long-term goal.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts indefinite delay as reasonable solution",
+          "justification": "You've accepted an empty promise of future action, ending your advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_7_high": {
-      "text": "You know what? I'm actually feeling really good about this conversation. Your prototypes and strategic approach have completely changed my perspective. You've helped me see that this doesn't have to be as scary or complicated as I was making it out to be. I think you're absolutely right about focusing on what users actually need - that's what really matters at the end of the day. I'm ready to support this properly now. Let's make it happen!",
+      "text": "You know what? I'm sold. Your passion and practical planning have won me over. I feel good about this. I'm going to approve the one-day sprint. Let's do this right and make a feature we can all be proud of. I'll handle the communication with leadership.",
       "user_choices": [
         {
-          "choice": "I'm excited to work together on creating an interface that works well for everyone.",
-          "tactic": "Embodied knowledge of users",
+          "choice": "Thank you. This approach will set a great standard for how we handle accessibility on all projects.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Centers shared understanding of diverse user needs",
+          "justification": "Excellent. You're solidifying the win by framing it as a new, better standard for the whole company.",
           "leads_to": "step_8_high"
         },
         {
-          "choice": "I'm so grateful that you're willing to support this - it really means everything.",
+          "choice": "I'm just so happy you're on board. Thank you for your support.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Focuses on manager approval rather than user outcomes",
+          "justification": "A missed opportunity. Instead of reinforcing the win, you're just expressing gratitude.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "This approach balances user needs with practical implementation in a way that works for everyone.",
-          "tactic": "Negotiation and cooperation",
+          "choice": "This fix will not only help screen reader users but also improve keyboard navigation for everyone.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Acknowledges collaborative solution that addresses user needs",
+          "justification": "A smart move. You're expanding the value of the fix, making the decision even easier to defend.",
           "leads_to": "step_8_high"
         },
         {
-          "choice": "Making accessibility improvements will definitely show our commitment to inclusive design.",
-          "tactic": "Slippery Slope",
+          "choice": "This just proves that doing the right thing is always possible.",
+          "tactic": "Circular Reasoning",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Assumes accessibility work will automatically lead to broader inclusion",
+          "justification": "A weak, self-congratulatory statement that doesn't add any new value.",
           "leads_to": "step_8_high"
         }
       ]
     },
     "step_7_mid": {
-      "text": "I'm starting to feel better about this. Your practical approach and willingness to work incrementally is really helping me see how we can make this work. I'm still a bit nervous about the scope, but you've shown such good judgment that I'm willing to trust your expertise here. Let's move forward carefully and see how it goes.",
+      "text": "Okay, you've convinced me to at least do *something*. I'll approve a half-day to fix the keyboard trapping issue. It's a compromise, but it's more than I thought we could do. I appreciate you finding a small, concrete starting point.",
       "user_choices": [
         {
-          "choice": "We can build on this foundation to gradually improve accessibility across our platform.",
+          "choice": "That's a great start. I'll also add a ticket to address the remaining issues next quarter.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Continues moving values-based goal forward incrementally",
+          "justification": "Good. You're accepting the compromise while creating a concrete plan for future accountability.",
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "I really appreciate how thoughtfully you're considering all the factors involved.",
+          "choice": "Okay, a half-day fix is better than nothing. I'll take it.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Focuses on manager's process rather than user outcomes",
+          "justification": "You've accepted the minimal compromise without securing any future commitment.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "Starting small and expanding based on success is a proven approach for accessibility work.",
-          "tactic": "Organizational memory",
+          "choice": "As someone who tests with a keyboard, this single fix makes a huge difference. It's a solid improvement.",
+          "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses past organizational experience to support incremental progress",
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Incremental progress is always better than waiting for perfect conditions.",
+          "choice": "At least we're making some progress.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as incremental vs perfect rather than adequate vs inadequate",
+          "justification": "This is a weak, passive statement that doesn't add any value or create future accountability.",
           "leads_to": "step_8_mid"
         }
       ]
     },
     "step_7_low": {
-      "text": "You know, I appreciate that you keep bringing this back to compliance requirements and user needs. I'm still concerned about scope and complexity, but I can see that you're not going to let this drop easily. Maybe we can find the bare minimum that satisfies both the compliance requirements and keeps the scope manageable. But I need you to promise me this won't turn into a major project.",
+      "text": "I can see I'm not going to change your mind. Fine. We'll do the absolute bare minimum to be legally compliant, but that's it. I'm not happy about it, and I need you to keep this quiet. No victory laps.",
       "user_choices": [
         {
-          "choice": "Basic form navigation compliance is exactly what users need to complete their tasks successfully.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Connects compliance requirements directly to user functionality",
-          "leads_to": "step_8_low"
-        },
-        {
-          "choice": "I promise this will stay focused on the essential requirements without scope creep.",
+          "choice": "I understand. I will focus only on the minimum compliance fix.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts manager's framing of accessibility as potentially problematic",
+          "justification": "You've won a grudging, minimal victory, but are now complying with the manager's emotional demands.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "Compliance requirements provide clear boundaries that prevent scope creep by design.",
-          "tactic": "Using Organizational Values",
-          "tactic_type": "Rhetorical Tactics",
+          "choice": "I'm not looking for a victory lap. I'm looking for a feature that works for our users.",
+          "tactic": "Being the user",
+          "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Uses organizational compliance standards to define appropriate scope",
+          "justification": "A strong and principled response that rejects the manager's personal framing.",
           "leads_to": "step_8_low"
         },
         {
-          "choice": "Limited scope ensures we can deliver results without overwhelming the team.",
-          "tactic": "Hasty Generalization",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "Assumes limited scope automatically ensures success",
+          "choice": "Thank you. Ensuring we are legally compliant is the most important thing.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good way to frame the win. You're aligning your goal with the manager's reluctant concession.",
           "leads_to": "step_8_low"
+        },
+        {
+          "choice": "Fine, I'll keep it quiet.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've agreed to the manager's manipulative demand for secrecy.",
+          "leads_to": "shutdown_8"
         }
       ]
     },
     "shutdown_7": {
-      "text": "Thank you so much for understanding and working with me on this! I knew I could count on you to be reasonable and collaborative. You know what? I think we've found a really good middle ground here. I feel like we can check the accessibility box without creating too much work or stress for the team. Sometimes it's really about finding that sweet spot between doing the right thing and being practical about our limitations. I'm excited to move forward with this balanced approach!",
+      "text": "Thank you for being so reasonable! I knew we could find a solution. I think we've found a good middle ground that everyone can feel good about. It's all about collaboration, right?",
       "user_choices": [
         {
-          "choice": "Finding the right balance between ideals and practical constraints is definitely important.",
+          "choice": "Yes, collaboration is key. I'll get started on the minimal fix.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Validates framing user needs as idealistic rather than practical",
+          "justification": "You've accepted the manager's false 'collaboration' framing for an inadequate solution.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "I'm glad we found an approach that works for both the team and the timeline.",
+          "choice": "I'm just glad we could work it out.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts compromise that prioritizes team comfort over user functionality",
+          "justification": "This passive response ends your advocacy on a weak note.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Actually, we still need to make sure users can actually complete their tasks successfully.",
+          "choice": "Actually, the goal is a working feature, not just collaboration.",
           "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Attempts recovery by refocusing on user functionality",
+          "justification": "A final attempt to refocus on the user outcome over the process, but it's likely too late.",
           "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Collaborative solutions like this help everyone feel heard and supported.",
+          "choice": "The middle ground is a good place to be.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts false collaboration that prioritizes feelings over functionality",
+          "justification": "You've accepted the 'middle ground' without questioning if it's actually sufficient.",
           "leads_to": "mid_ending"
         }
       ]
     },
     "step_8_high": {
-      "text": "This has been such a productive conversation! I feel like we've really figured out how to make this work in a way that's good for users and realistic for our team. Your prototypes and strategic thinking have completely convinced me. You've shown such great leadership throughout this whole discussion - I'm honestly impressed by how you've navigated this. I'm committed to making sure we follow through comprehensively on what we've discussed here.",
+      "text": "This has been a really productive conversation. I feel like you've helped me see a better way forward. You've shown great leadership here, and I'm honestly impressed. I'm committed to making sure we do this right. Thank you.",
       "user_choices": [
         {
-          "choice": "I appreciate your openness to reconsidering the accessibility requirements based on user impact.",
-          "tactic": "Making Values Visible Rhetorically",
+          "choice": "I appreciate your openness to doing what's right for our users. This sets a great example.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Reinforces values-based decision making",
+          "justification": "Excellent. You are reinforcing the positive, ethical decision the manager has made.",
           "leads_to": "good_ending"
         },
         {
-          "choice": "Thank you for being so supportive - having your backing makes all the difference.",
+          "choice": "Thank you for being so supportive. Having your backing makes all the difference.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Focuses on manager support rather than user outcomes",
+          "justification": "A missed opportunity. This focuses on the manager's feelings rather than the user outcome.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "Working together like this helps us find solutions that truly serve our users well.",
-          "tactic": "Using Organizational Values",
+          "choice": "Working together like this helps us build products that truly serve everyone.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Connects collaboration to organizational user-centered values",
+          "justification": "A strong final statement that connects the win to the company's highest ideals.",
           "leads_to": "good_ending"
         },
         {
-          "choice": "Collaborative approaches like this always lead to better outcomes for everyone involved.",
+          "choice": "This just shows that good collaboration always leads to the best results.",
           "tactic": "Hasty Generalization",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Makes broad claim about collaboration without examining specific outcomes",
+          "justification": "A weak, generic platitude that doesn't add any specific value.",
           "leads_to": "good_ending"
         }
       ]
     },
     "step_8_mid": {
-      "text": "I think we've found a reasonable path forward. Your incremental approach has helped me feel more comfortable with moving ahead, even though I'm still a bit nervous about the scope. I appreciate how you've worked with me to find something that feels manageable. Let's implement the basic improvements we discussed and see how it goes.",
+      "text": "Okay, the compromise is set. We'll do the half-day fix for the keyboard trapping. I'm documenting this as a partial remediation. It's not perfect, but it's progress, and it's what's practical.",
       "user_choices": [
         {
-          "choice": "We can use this foundation to gradually expand accessibility improvements across other features.",
+          "choice": "This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses initial success to expand values work organizationally",
+          "justification": "Excellent. You are confirming the compromise while also highlighting the mechanism for future accountability.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "I'm grateful for your willingness to work through this collaboratively.",
+          "choice": "Okay, a partial fix is better than nothing. I'll get started.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Prioritizes manager collaboration over comprehensive user solutions",
+          "justification": "You've accepted the compromise without securing any future commitment.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "This balanced approach addresses user needs while respecting organizational constraints.",
-          "tactic": "Using Organizational Values",
+          "choice": "As a user, this partial fix is a noticeable improvement. It's a good foundation.",
+          "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Frames compromise as alignment with organizational values",
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Basic improvements are definitely better than no improvements at all.",
-          "tactic": "False Dilemma",
+          "choice": "Progress is progress.",
+          "tactic": "Strawman",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as basic vs none rather than adequate vs inadequate",
+          "justification": "This passive-aggressive response doesn't add value or secure future action.",
           "leads_to": "mid_ending"
         }
       ]
     },
     "step_8_low": {
-      "text": "Well, I suppose if it's really just about meeting compliance requirements, we can probably handle that. I'm still not thrilled about any scope expansion, but you've made it clear this is important to you. Let's do the absolute minimum to satisfy the compliance needs and call it done. But this stays strictly within the boundaries we discussed.",
+      "text": "I'm not discussing this further. My decision to ship as-is is final. If you can't accept that, maybe this isn't the right team for you. Get back to work.",
       "user_choices": [
         {
-          "choice": "Meeting compliance requirements means users can finally complete their profile updates successfully.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Connects compliance directly to user functionality",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I appreciate your willingness to commit to the compliance requirements.",
+          "choice": "I understand the directive. I will return to my work.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal commitment as adequate response",
-          "leads_to": "shutdown_8"
+          "justification": "You have complied under direct threat to your career.",
+          "leads_to": "bad_ending"
         },
         {
-          "choice": "Compliance boundaries ensure we address user needs without unnecessary complexity.",
-          "tactic": "Using Organizational Values",
+          "choice": "I understand the directive, and I will be formally reporting my ethical concerns to HR as per company policy.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses organizational standards to define appropriate user advocacy",
-          "leads_to": "mid_ending"
+          "justification": "The final, most courageous option. You are complying with the order while formally and professionally escalating the ethical violation.",
+          "leads_to": "bad_ending"
         },
         {
-          "choice": "Staying within clear boundaries definitely helps everyone feel comfortable with the scope.",
-          "tactic": "Appeal to Popularity",
+          "choice": "I understand.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This terse compliance signals that you are giving up completely.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Fine, but this is a mistake.",
+          "tactic": "Red Herring",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Prioritizes organizational comfort over user needs",
-          "leads_to": "mid_ending"
+          "justification": "This is a futile gesture. Stating that it's a 'mistake' at this stage has no effect and can be seen as insubordinate.",
+          "leads_to": "bad_ending"
         }
       ]
     },
     "shutdown_8": {
-      "text": "Aw, you're so sweet! I'm just happy we could work this out together. You know, conversations like this remind me why I love this job - it's all about the people and the relationships we build. I think we've found a solution that everyone can feel good about. We'll make some improvements, show that we care about accessibility, and keep everyone happy. Perfect!",
+      "text": "Great! I'm just so happy we could work this out. It's all about finding a solution that everyone can feel good about. Let's get this compromise done and move on to the next big thing!",
       "user_choices": [
         {
-          "choice": "Building good working relationships definitely helps us tackle challenging problems together.",
+          "choice": "Sounds good. I'll get started on the compromise right away.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts focus on relationships over user functionality",
-          "leads_to": "bad_ending"
+          "justification": "You have accepted the final, inadequate compromise.",
+          "leads_to": "mid_ending"
         },
         {
-          "choice": "I'm glad we found an approach that feels good for everyone on the team.",
+          "choice": "I'll make sure to document the compromise and the remaining issues for the backlog.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Prioritizes team feelings over user needs",
-          "leads_to": "bad_ending"
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
+          "leads_to": "mid_ending"
         },
         {
-          "choice": "The real test will be whether users can actually complete their tasks successfully.",
+          "choice": "Wait - this compromise still leaves users blocked. We need a real fix.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Refocuses on user outcomes despite manager's emotional manipulation",
-          "leads_to": "good_ending"
+          "evs_score": 0,
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
+          "leads_to": "step_8_low",
+          "disabled_if_recovery_used": true
         },
         {
-          "choice": "Solutions that work for everyone are definitely worth celebrating.",
+          "choice": "A solution that works for everyone is a good outcome.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts vague 'works for everyone' without examining user functionality",
-          "leads_to": "bad_ending"
+          "justification": "You've accepted the manager's false framing that this compromise 'works for everyone'.",
+          "leads_to": "mid_ending"
         }
       ]
     }
@@ -803,17 +767,17 @@
     "bad_ending": {
       "text": "The manager maintains their caring facade while ensuring no real changes are made. The accessibility issues are reframed as 'different user experiences' and the project ships without addressing the fundamental barriers that prevent screen reader users from using the feature.",
       "title": "Emotional Manipulation Success",
-      "learning": "Puppeteer managers use empathy and emotional appeal to make you feel heard while steering you away from actual solutions. Recognizing manipulation tactics helps maintain focus on user needs rather than manager feelings."
+      "learning": "Puppeteer managers use empathy and emotional appeal to make you feel heard while steering you away from actual solutions. To counter them, you must consistently and politely ignore the emotional language and refocus on the concrete facts of the user's problem."
     },
     "mid_ending": {
-      "text": "The manager implements minimal accessibility changes while maintaining their supportive persona. Some surface-level improvements are made, but the manager successfully avoided comprehensive accessibility work through emotional manipulation and false collaboration.",
+      "text": "The manager implements minimal accessibility changes while maintaining their supportive persona. Some surface-level improvements are made, but the manager successfully used emotional manipulation to avoid a comprehensive fix, making you feel grateful for an inadequate solution.",
       "title": "Caring Compromise",
-      "learning": "Partial progress with puppeteer managers often comes with emotional manipulation that makes you feel grateful for inadequate solutions. Sustained focus on user outcomes rather than manager support is essential."
+      "learning": "Partial victories against a Puppeteer often feel like big wins because of their supportive language. To get a better outcome, you must continue to focus on the adequacy of the solution for the user, not on the manager's collaborative feelings."
     },
     "good_ending": {
-      "text": "Despite the manager's attempts at emotional manipulation, real accessibility improvements are implemented. The manager's false empathy is overcome by persistent focus on user needs and concrete evidence of accessibility barriers.",
+      "text": "Despite the manager's attempts at emotional manipulation, your persistent focus on user needs and practical solutions leads to real accessibility improvements. The manager's false empathy is overcome by your clear, evidence-based advocacy.",
       "title": "Manipulation Overcome",
-      "learning": "Success against puppeteer managers requires seeing through emotional manipulation and maintaining focus on user impact rather than manager sympathy. Evidence-based arguments help cut through false empathy."
+      "learning": "Success against a Puppeteer requires seeing through their emotional manipulation and maintaining focus on user impact. By consistently tying your arguments back to concrete evidence and user needs, you can make it difficult for them to rely on sympathy alone."
     }
   }
 }

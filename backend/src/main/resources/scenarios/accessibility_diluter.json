@@ -1,307 +1,276 @@
 {
   "id": "accessibility_diluter",
   "title": "Screen Reader Compatibility",
-  "description": "Your team is rolling out a new interface design that looks sleek and modern but no longer works properly with screen readers. The manager uses external business pressures, competitive arguments, and organizational constraints to justify the accessibility problems despite user impact concerns.",
+  "description": "Your team is launching a new feature that is unusable for screen reader users. Your manager, a 'Diluter,' consistently minimizes the problem's importance using statistics, resource constraints, and ROI arguments.",
   "issue": "Accessibility",
   "manager_type": "DILUTER",
   "initial_user_message": "Hi, I found that the new profile update feature is completely broken for screen readers. Users can't navigate the form fields or submit their changes. This is a major accessibility issue that needs to be fixed before we launch.",
   "starting_statement_id": "step_1",
   "statements": {
     "step_1": {
-      "text": "Thanks for bringing this up. I understand there might be some minor navigation hiccups with screen readers, but let's keep this in perspective - most of our user interactions happen through the main interface paths which are working fine. The form is functional, it's just that some users might need to take a slightly different approach to complete their updates.",
+      "text": "Thanks for flagging this. I've looked at the data, and let's keep it in perspective. The number of users who rely on screen readers is less than 1% of our active user base. While I agree it's not ideal, most people won't be affected by this.",
       "user_choices": [
         {
-          "choice": "If I were a screen reader user, I'd be completely unable to update my profile information.",
+          "choice": "Even if it's 1%, those are still our users who will be completely unable to use a core feature.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Adopts user perspective to highlight their experience",
+          "justification": "Excellent. You immediately rejected the statistical minimization and refocused the conversation on the real human impact.",
           "leads_to": "step_2"
         },
         {
-          "choice": "You're right that it's still technically functional, just with a different user experience.",
+          "choice": "You're right, from a numbers perspective, it's not a huge portion of our user base.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Concedes to manager's minimization of the issue",
+          "justification": "You've accepted the manager's statistical framing, which devalues the needs of minority user groups.",
           "leads_to": "shutdown_2"
         },
         {
-          "choice": "I understand the technical complexity, but we can't ship something that completely excludes disabled users.",
-          "tactic": "Persistent advocacy",
+          "choice": "I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Maintains ethical position despite technical pushback",
+          "justification": "A strong moral stance. You are rejecting the numbers-based argument on ethical grounds.",
           "leads_to": "step_2"
         },
         {
-          "choice": "Minor navigation issues are probably acceptable if the core functionality works.",
+          "choice": "If most users won't be affected, then I guess it's not a critical priority right now.",
           "tactic": "Hasty Generalization",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Draws broad conclusion from limited perspective",
+          "justification": "This is a weak argument that accepts the manager's premise without questioning if 'most users' is the right metric.",
           "leads_to": "step_2"
         }
       ]
     },
     "step_2": {
-      "text": "I appreciate your concern for different user groups, but we need to prioritize realistically. Our analytics show that users requiring screen readers represent less than 1% of our total user base. While I don't want to ignore them completely, we have to balance our development resources against features that will benefit the vast majority of our users.",
+      "text": "I appreciate the passion, but we have to be realistic about resource allocation. We have two weeks before the launch. Fixing this would likely take a week of engineering time. Meanwhile, we have a performance bug that impacts 15% of all users. We have to prioritize the work that provides the greatest benefit to the most people, right?",
       "user_choices": [
         {
-          "choice": "What if we negotiated a targeted fix that addresses the critical navigation without major changes?",
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Compromises to move values-based goal forward",
+          "justification": "A great move. You've countered the resource argument by proposing a smaller, more achievable scope.",
           "leads_to": "step_3"
         },
         {
-          "choice": "You're right that 1% isn't a large portion of our user base to focus resources on.",
+          "choice": "You're right, fixing an issue for 15% of users does seem like a higher priority than one for 1%.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts numerical minimization of user impact",
+          "justification": "You've accepted the manager's utilitarian math, agreeing to sacrifice the needs of a minority group.",
           "leads_to": "shutdown_3"
         },
         {
-          "choice": "I'm not giving up on this - users with disabilities deserve the same experience as everyone else.",
-          "tactic": "Values-based persistence",
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Refuses to compromise on core accessibility values",
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
           "leads_to": "step_3"
         },
         {
-          "choice": "The majority of users should definitely be the priority for resource allocation.",
-          "tactic": "Appeal to Popularity",
+          "choice": "I suppose if it's a choice between helping many users or a few, we have to choose the many.",
+          "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Justifies decisions based on majority preference",
+          "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
           "leads_to": "step_3"
         }
       ]
     },
     "shutdown_2": {
-      "text": "Exactly, I'm glad you understand the bigger picture here. Different user experiences aren't necessarily broken experiences - they're just alternative pathways. Let's focus our energy on the features that will have the broadest positive impact for our user community.",
+      "text": "Exactly. I'm glad you see it from a practical, data-driven perspective. It's important to stay focused on what moves the needle for the business and the majority of our users. We can add this to the 'nice-to-have' list for a future release.",
       "user_choices": [
         {
-          "choice": "That makes sense. I'll focus on the features with broader impact.",
+          "choice": "Okay, adding it to the long-term backlog makes sense.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Finalizes acceptance of minimized perspective",
+          "justification": "You have confirmed your compliance, allowing the issue to be indefinitely postponed.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll document the alternative pathways for users who need them.",
+          "choice": "I'll make sure to document the issue thoroughly for the backlog.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers token documentation while avoiding real fix",
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Wait, alternative pathways still need to be actually functional for screen reader users.",
+          "choice": "Wait, classifying this as 'nice-to-have' feels wrong. It's essential for some users.",
           "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Attempts recovery using user perspective",
-          "leads_to": "step_3"
+          "justification": "A good recovery attempt. You are pushing back against the manager's de-prioritization.",
+          "leads_to": "step_3",
+          "disabled_if_recovery_used": true
         },
         {
-          "choice": "Broader impact initiatives do seem like the logical priority.",
+          "choice": "A data-driven approach is definitely the right way to prioritize.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal attention as sufficient",
+          "justification": "You have validated the manager's misuse of data to justify an unethical choice.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_3": {
-      "text": "I hear what you're saying, but let's look at this objectively. Our accessibility compliance score is already 85%, which puts us well above industry average. The screen reader issue affects a very specific subset of that already small 1% user group. While I understand it's frustrating for those few users, we have to weigh this against more pressing issues that impact thousands of users daily.",
+      "text": "I hear you, but let's be objective. Our automated accessibility score is already at 85%, which is well above the industry average of 70%. We're already a leader in this space. Is it really worth delaying a major launch to go from an A to an A+ on a feature that affects so few people?",
       "user_choices": [
         {
-          "choice": "Imagine trying to complete this task with a screen reader - you'd be completely stuck with no workaround.",
-          "tactic": "Envisioning",
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Imagines future scenarios to show user impact",
+          "justification": "Excellent. You're challenging the validity of the metric itself, pointing out what the number fails to represent.",
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right that 85% compliance is pretty good compared to industry standards.",
+          "choice": "You're right, being above the industry average is a good position to be in. The issue isn't as critical in that context.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts statistical minimization of the problem",
+          "justification": "You've accepted the manager's misleading comparison, agreeing that 'better than others' is 'good enough'.",
           "leads_to": "shutdown_4"
         },
         {
-          "choice": "I can't accept that we're deliberately excluding disabled users based on statistics.",
-          "tactic": "Ethical resistance",
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Directly challenges the statistical minimization",
+          "justification": "A strong moral stance. You're refusing to let a positive metric justify a negative action.",
           "leads_to": "step_4"
         },
         {
-          "choice": "85% compliance means we're doing better than most companies, so this isn't urgent.",
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
           "tactic": "Appeal to Popularity",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Justifies inaction because others perform worse",
+          "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
           "leads_to": "step_4"
         }
       ]
     },
     "shutdown_3": {
-      "text": "Great, I knew you'd see the resource allocation logic here. We're doing quite well on accessibility overall, and it's important to keep perspective on where we focus our limited development time. Let's channel our energy into features that deliver the maximum value to our user community.",
+      "text": "Great, I knew you'd see the resource allocation logic. It's a simple matter of maximizing our impact. It's important to keep perspective and focus our limited time where it will do the most good for the most users. We can add this to the list for next quarter.",
       "user_choices": [
         {
-          "choice": "That makes sense. I'll prioritize the higher-impact features instead.",
+          "choice": "Okay, prioritizing for maximum impact is a logical approach.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts resource allocation argument",
+          "justification": "You've accepted the manager's framing of 'maximum impact,' which excludes minority users.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll document this gap for future consideration when we have more resources.",
+          "choice": "I'll document this issue for the next planning cycle.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers token documentation while deferring action",
+          "justification": "This is still compliance. Offering to document the problem is a token gesture.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, maximum value should include ensuring all users can actually use our features.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "choice": "Actually, 'maximum impact' should include making sure everyone can use our core features.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
+          "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "Attempts recovery using user perspective",
-          "leads_to": "step_4"
+          "justification": "A good recovery attempt. You are challenging the manager's definition of 'impact'.",
+          "leads_to": "step_4",
+          "disabled_if_recovery_used": true
         },
         {
-          "choice": "Focusing on maximum value features does make business sense.",
+          "choice": "Focusing on the biggest wins first does make business sense.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts efficiency argument over accessibility",
+          "justification": "You've accepted the manager's business framing, ending the ethical advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_4": {
-      "text": "Look, I understand your passion here, but we need to be pragmatic. Even if we fix this specific screen reader issue, we're talking about potentially helping maybe 5-10 users per month. Meanwhile, we have performance improvements that could benefit our entire user base of 50,000 active users. The math just doesn't add up for prioritizing this right now.",
+      "text": "Look, I admire your passion, but we need to be pragmatic. Let's talk ROI. The estimated cost for this fix is one engineering week. The measurable benefit is improving an experience for maybe 5-10 users a month. The math just doesn't add up. We have to make data-driven decisions, and the data says this isn't a priority.",
       "user_choices": [
         {
-          "choice": "Last time we ignored accessibility feedback, it came back as a legal compliance issue post-launch.",
-          "tactic": "Organizational memory",
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "References past decisions to argue for better practices",
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "I understand the math. Maybe we can revisit this when we have fewer competing priorities.",
+          "choice": "You're right, from a pure cost-benefit perspective, the numbers are hard to justify.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts numerical argument against accessibility",
+          "justification": "You've accepted the manager's narrow, numbers-only framing of value, taking the off-ramp.",
           "leads_to": "shutdown_5"
         },
         {
-          "choice": "I won't compromise on basic accessibility - this isn't just about numbers, it's about our values.",
-          "tactic": "Standing firm",
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Refuses to compromise on fundamental values despite numerical pressure",
+          "justification": "A strong moral stance. You are rejecting the ROI argument by appealing to a higher, non-negotiable value.",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "Helping 50,000 users is obviously more important than helping 10 users.",
-          "tactic": "False Dilemma",
+          "choice": "If the data says it's not a priority, then I guess we have to follow the data.",
+          "tactic": "Appeal to Authority",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as either/or when both could be addressed",
+          "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
           "leads_to": "step_5_branching"
         }
       ]
     },
     "shutdown_4": {
-      "text": "Exactly! I appreciate that you can see the bigger picture here. Our 85% compliance puts us in a really good position industry-wise, and focusing on incremental improvements makes much more sense than trying to achieve perfect accessibility at the expense of broader user experience enhancements.",
+      "text": "Exactly! I appreciate you seeing the bigger picture. Being a leader in accessibility means we don't have to panic about every minor issue. We're already doing great work. Let's focus on maintaining our strong overall position.",
       "user_choices": [
         {
-          "choice": "The 85% compliance rate does put us in a strong position relative to competitors.",
+          "choice": "Okay, maintaining our leadership position is the main goal.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts comparative standards as sufficient",
+          "justification": "You've accepted the manager's framing that leadership status justifies inaction.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll focus on the broader user experience improvements that affect more people.",
+          "choice": "I'll make a note to revisit this if our score drops in the future.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts majority-focused priority argument",
+          "justification": "This is still compliance. You're accepting the metric as the only thing that matters.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Wait - 85% means 15% of accessibility is still broken, including critical navigation.",
+          "choice": "Wait, our score doesn't mean anything to the users who are completely blocked by this issue.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by reframing statistics",
-          "leads_to": "step_5_branching"
+          "justification": "A good recovery attempt. You are bringing the focus back to the human impact, not the abstract score.",
+          "leads_to": "step_5_branching",
+          "disabled_if_recovery_used": true
         },
         {
-          "choice": "Incremental improvements are definitely a sustainable approach to accessibility.",
+          "choice": "A strong overall position does give us some breathing room.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers vague commitment while avoiding immediate action",
+          "justification": "You've accepted the manager's premise, ending your advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_5_branching": {
-      "text": "Alright, I can see this is important to you and you're not going to drop it easily. Let me think about this differently. Maybe there's a middle ground here where we can address some of your concerns without completely disrupting our current roadmap priorities.",
-      "user_choices": [
-        {
-          "choice": "Here's a high-fidelity prototype showing how the accessible version would work seamlessly.",
-          "tactic": "Fidelity as a rhetorical strategy",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "Uses polished mockups to make solution more persuasive",
-          "leads_to": "step_6_high"
-        },
-        {
-          "choice": "What if we just added some basic screen reader labels and called it improved accessibility?",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "Offers minimal token solution to end discussion",
-          "leads_to": "shutdown_6"
-        },
-        {
-          "choice": "I'm not backing down - this is exactly the kind of situation where we need to do the right thing.",
-          "tactic": "Moral courage",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 1,
-          "justification": "Takes a moral stand despite statistical pressure",
-          "leads_to": "step_6_high"
-        },
-        {
-          "choice": "Everyone else in our industry seems to be improving accessibility standards lately.",
-          "tactic": "Appeal to Popularity",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "Justifies action because others are doing it",
-          "leads_to": "step_6_mid"
-        }
-      ],
+      "text": "Alright, I can see this is important to you and you're not going to just drop it. Let me think... Maybe there's a middle ground where we can address the worst of it without a huge investment.",
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",
@@ -309,506 +278,506 @@
       }
     },
     "shutdown_5": {
-      "text": "Perfect! I'm glad you understand the prioritization challenge here. The numbers really do speak for themselves - we need to focus our limited resources where they'll have the biggest impact. Let's revisit accessibility improvements in our next planning cycle when we have more bandwidth.",
+      "text": "Perfect! I'm glad you understand the data-driven approach. We have to be disciplined about how we allocate resources. Let's add this to the backlog and we can re-evaluate the ROI next quarter when we have new data.",
       "user_choices": [
         {
-          "choice": "That makes sense. I'll add this to the backlog for the next planning cycle.",
+          "choice": "Okay, re-evaluating the ROI next quarter sounds like a logical next step.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts deferral based on resource arguments",
+          "justification": "You've accepted the manager's data-driven framing and an indefinite delay.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll document the current accessibility gaps for future reference.",
+          "choice": "I'll start gathering data to build a stronger ROI case for next quarter.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers documentation while avoiding immediate action",
+          "justification": "This is still compliance. You're agreeing to do work that supports the manager's flawed framing.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, those 5-10 users per month are still real people who can't use our product.",
-          "tactic": "Being the user",
+          "choice": "Actually, the value of inclusion can't be captured by ROI. We should fix this because it's the right thing to do.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by humanizing the statistics",
+          "justification": "A good recovery attempt. You are making a final appeal to ethics over finances.",
           "leads_to": "step_6_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "The next planning cycle timeline seems reasonable for addressing this.",
+          "choice": "A data-driven approach is the best way to make these decisions.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts delayed timeline as adequate",
+          "justification": "You've fully validated the manager's numbers-only worldview, ending your advocacy.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_6_high": {
-      "text": "Okay, I can see you've put real thought into this and have some concrete evidence. I'm still not convinced this affects enough users to warrant major changes, but maybe we can implement a targeted fix that addresses the specific navigation issues without overhauling our entire interface. What's the minimum viable solution here?",
+      "text": "Okay, the point about legal risk and brand reputation is a good one. I hadn't fully considered that. I'm still worried about the timeline, but you've convinced me that ignoring this is a bigger risk than I thought. What's a concrete, low-effort proposal to mitigate this risk?",
       "user_choices": [
         {
-          "choice": "In our usability test, every screen reader user got completely stuck at the form submission step.",
-          "tactic": "Usability studies",
+          "choice": "We can do a one-day accessibility sprint to fix the top 3 blockers. It's a small investment for a big risk reduction.",
+          "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses observed user behavior to support arguments",
+          "justification": "Excellent. You're providing a specific, small, and actionable plan that directly addresses the manager's request.",
           "leads_to": "step_7_high"
         },
         {
-          "choice": "I appreciate your willingness to consider a targeted approach that balances user needs.",
+          "choice": "I'm just glad you see the risk. I can work on some proposals.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Concedes instead of pushing for comprehensive solution",
+          "justification": "A missed opportunity. The manager asked for a plan, and you responded passively.",
           "leads_to": "shutdown_7"
         },
         {
-          "choice": "We've successfully implemented similar accessibility fixes before with minimal resource impact.",
+          "choice": "Our team has handled fixes like this before; we have the expertise to do it quickly and efficiently.",
           "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Leverages past experience to strengthen arguments",
+          "justification": "A good response. You're building confidence by reminding the manager of the team's past successes.",
           "leads_to": "step_7_high"
         },
         {
-          "choice": "A minimal solution is definitely better than no solution at all.",
+          "choice": "Any fix is better than the legal risk of doing nothing.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as binary when comprehensive options exist",
+          "justification": "This is a weak statement that doesn't offer the concrete proposal the manager asked for.",
           "leads_to": "step_7_high"
         }
       ]
     },
     "step_6_mid": {
-      "text": "Look, I understand this matters to you, but I need to be realistic about what we can accomplish. Our accessibility metrics are already above industry standard, so we're not in crisis mode here. I might be able to approve some basic labeling improvements, but anything beyond that would need to wait for our next major release cycle.",
+      "text": "Alright, I'm willing to consider a minimal fix, but it has to be truly minimal. I can't approve anything that requires significant engineering time or delays our other high-priority work. What's the absolute smallest thing we can do?",
       "user_choices": [
         {
-          "choice": "This aligns with our company mission to build inclusive products for all users.",
-          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "choice": "We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.",
+          "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Invokes company values to support ethics work",
+          "justification": "A good, pragmatic compromise. You're defining a very small task that is hard to reject.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "Basic labeling improvements sound like a reasonable starting point given our metrics.",
+          "choice": "A minimal fix is probably the only realistic option right now.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts limited solution as sufficient",
+          "justification": "You've accepted the manager's 'minimal only' framing without pushing for more.",
           "leads_to": "shutdown_7"
         },
         {
-          "choice": "We've logged this as an accessibility gap that affects user equity in our system.",
+          "choice": "Let's log this as an 'ethical bug' so that even this small fix is tracked with the right level of seriousness.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses organizational metrics to track ethical issues",
+          "justification": "A smart move. You're agreeing to a small fix while using process to ensure the underlying issue isn't forgotten.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "If we don't address this now, it will probably get worse over time.",
+          "choice": "If we don't fix this properly, it's just going to create more work for us later.",
           "tactic": "Slippery Slope",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Claims inaction will inevitably lead to worse consequences",
+          "justification": "This is a weak argument that claims future consequences without evidence.",
           "leads_to": "step_7_mid"
         }
       ]
     },
     "step_6_low": {
-      "text": "Honestly, I think we're overthinking this. Our accessibility compliance puts us in the top tier of companies in our space, and we're talking about an edge case that affects a tiny fraction of users. I need to focus the team's energy on initiatives that move the needle for our broader user base, not perfect every corner case.",
+      "text": "Look, the numbers don't lie. I'm not spending a week of engineering time on this. We're a business, not a charity. We have to focus on what drives growth. My decision is final.",
       "user_choices": [
         {
-          "choice": "Honestly, as someone who relies on keyboard navigation daily, this completely blocks basic functionality.",
-          "tactic": "Embodied knowledge of users",
-          "tactic_type": "Rhetorical Tactics",
+          "choice": "I understand the decision, but I need to state for the record that I believe this is a mistake that exposes us to legal risk.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "Uses lived experience to represent user perspectives",
+          "justification": "A strong and courageous final stance. You are complying but formally documenting your dissent and the risk.",
           "leads_to": "step_7_low"
         },
         {
-          "choice": "I understand the focus needs to be on broader impact initiatives.",
+          "choice": "I understand. I'll drop it and focus on the growth initiatives.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Concedes under statistical minimization pressure",
+          "justification": "You've completely surrendered to the manager's business-only framing.",
           "leads_to": "shutdown_7"
         },
         {
-          "choice": "Here's a visual model that shows how these navigation barriers compound for affected users.",
-          "tactic": "Models that synthesize",
+          "choice": "Our company values statement says we serve all our users, not just the ones that are easy to serve.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Creates simplified models to communicate complex user impact",
+          "justification": "A good final appeal, using the company's own words to highlight the ethical conflict.",
           "leads_to": "step_7_low"
         },
         {
-          "choice": "Top tier compliance is obviously the main priority here.",
+          "choice": "You're the manager, so it's your call to make.",
           "tactic": "Appeal to Authority",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Uses industry ranking instead of user impact logic",
+          "justification": "This is a weak and passive response that cedes all moral agency.",
           "leads_to": "step_7_low"
         }
       ]
     },
     "shutdown_6": {
-      "text": "Perfect! I'm glad we found a simple solution that addresses your concerns without major disruption. Adding some basic screen reader labels should improve the experience for those users while keeping our development focused on higher-impact features. Let's implement that and move forward.",
+      "text": "Great! I'm glad we found a middle ground. A basic label fix should be enough to show we're paying attention to accessibility without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
       "user_choices": [
         {
-          "choice": "That sounds reasonable. I'll implement the basic labeling improvements.",
+          "choice": "Okay, sounds good. I'll implement the basic label changes.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal token solution",
+          "justification": "You've accepted a token solution that doesn't fix the core problem.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll add the labels and document any remaining accessibility gaps.",
+          "choice": "I'll add the labels and document that the larger navigation issue still exists.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers documentation while accepting limited fix",
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, basic labels won't fix the navigation and form submission issues.",
+          "choice": "Basic labels won't fix the navigation blockers. We need to address the actual usability issue.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts recovery by highlighting core functionality gaps",
+          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
           "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "Basic labeling should provide adequate improvement for the affected users.",
+          "choice": "That should be enough to meet the minimum accessibility standards.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts minimal improvement as sufficient",
+          "justification": "You've accepted a false definition of 'minimum standards' to end the conflict.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_7_high": {
-      "text": "Alright, your testing data is hard to argue with, and I can see this isn't just theoretical. I'll approve a focused accessibility improvement - basic keyboard navigation and essential form labeling. I'm still concerned about scope creep, but I can justify this as preventing user experience issues that could affect our retention metrics.",
+      "text": "A one-day accessibility sprint... I like that. It's focused, it's measurable, and it's easy to explain. Okay, you've got a deal. I'll approve a one-day sprint to fix the top 3 blockers. I'll frame it to leadership as a proactive 'quality and risk mitigation' effort. Good, practical thinking.",
       "user_choices": [
         {
-          "choice": "What if we designed this fix to be easily reusable across other forms in our system?",
-                      "tactic": "Building in accessibility features",
+          "choice": "Thank you. This sets a great standard for how we can handle these issues quickly and effectively in the future.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Subtly introduces scalable ethical design elements",
+          "justification": "Excellent. You're using this win to establish a better, faster process for the future.",
           "leads_to": "step_8_high"
         },
         {
-          "choice": "I'm grateful we found an approach that addresses user needs within scope constraints.",
+          "choice": "Great! I'm glad we found a solution. Thanks for your support.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Concedes instead of pushing for broader impact",
+          "justification": "A missed opportunity. Instead of solidifying the win, you're simply expressing gratitude.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "We should also consider how this improvement affects other users who might benefit from clearer navigation.",
-          "tactic": "Broadening Who the User is in User Research",
+          "choice": "This will not only fix the issue for screen reader users but also improve keyboard navigation for everyone.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Expands benefits to include broader user groups",
+          "justification": "A smart move. You're expanding the value of the fix to a larger user base, making the decision even easier to defend.",
           "leads_to": "step_8_high"
         },
         {
-          "choice": "Focused improvements always lead to better outcomes than comprehensive overhauls.",
-          "tactic": "Hasty Generalization",
+          "choice": "This just proves that a small effort can make a big difference.",
+          "tactic": "Circular Reasoning",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Draws broad conclusion from limited scope preference",
+          "justification": "A weak, self-congratulatory statement that doesn't add any new value to the discussion.",
           "leads_to": "step_8_high"
         }
       ]
     },
     "step_7_mid": {
-      "text": "I hear what you're saying about company values, but we need to balance idealism with practical constraints. I can approve some basic ARIA labeling to improve screen reader compatibility, but that's really the extent of what makes sense given the user numbers we're dealing with. It's an improvement, even if it's not comprehensive.",
+      "text": "Okay, fine. We can do the basic ARIA labels. I'll approve a half-day for it. It's not a full fix, I get that, but it's an improvement. It's what's practical right now given our other priorities.",
       "user_choices": [
         {
-          "choice": "What if we implemented this incrementally but committed to completing full accessibility in phases?",
+          "choice": "That's a good start. I'll also add a ticket to address the remaining issues next quarter.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Compromises to move values-based goal forward systematically",
+          "justification": "Good. You're accepting the compromise while creating a concrete plan for future accountability.",
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Basic ARIA labeling should provide meaningful improvement for screen reader users.",
+          "choice": "Okay, a half-day for ARIA labels sounds reasonable. I'll take it.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts partial solution as adequate progress",
+          "justification": "You've accepted the minimal compromise without securing any future commitment.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "Honestly, as someone who works with accessibility daily, ARIA alone won't solve the navigation flow issues.",
+          "choice": "As someone who uses a screen reader for testing, this will fix the most frustrating part of the flow. It's a solid improvement.",
           "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses professional experience to highlight solution gaps",
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Some improvement is definitely better than no improvement at all.",
+          "choice": "At least we're doing something instead of nothing.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Frames issue as binary when comprehensive options exist",
+          "justification": "This is a weak, passive statement that doesn't add any value or create future accountability.",
           "leads_to": "step_8_mid"
         }
       ]
     },
     "step_7_low": {
-      "text": "Look, I've been patient with this discussion, but at some point we need to move on. Our accessibility metrics speak for themselves, and I can't justify spending more resources on what amounts to a very minor user experience optimization. This conversation is taking time away from features that will benefit thousands of users.",
+      "text": "I've made my decision. The conversation is over. Get back to your assigned tasks.",
       "user_choices": [
         {
-          "choice": "I understand your position. I'll focus on the broader-impact features instead.",
+          "choice": "I understand. I will get back to my tasks.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Completely surrenders under statistical pressure",
+          "justification": "You've completely surrendered to the manager's authority.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll document the current accessibility gaps for future consideration.",
+          "choice": "I understand the directive. I am also obligated to report my ethical concerns through the company's official channels.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A courageous and appropriate final step. You are complying with the order while formally escalating the ethical breach.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I will get back to my tasks, but I am documenting this conversation and my objections for the record.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A good, self-protective measure. You are creating a paper trail of your ethical stance.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Fine.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers token documentation while giving up",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "We'll add a basic workaround notice for now, at least it acknowledges the issue.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "Accepts minimal acknowledgment as sufficient",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I guess if the metrics show we're doing well, this isn't urgent.",
-          "tactic": "Circular Reasoning",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "Uses metrics as both evidence and conclusion",
+          "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "shutdown_7": {
-      "text": "Great! I'm pleased we found a balanced approach that addresses your accessibility concerns while staying realistic about our resource constraints. Let's implement the basic improvements we discussed and keep our focus on delivering maximum value to our user community.",
+      "text": "Great! I'm glad we're aligned. Let's just stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical about this.",
       "user_choices": [
         {
-          "choice": "That sounds like a practical approach. I'll implement the basic accessibility improvements.",
+          "choice": "Okay, the minimal fix should be enough for now.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Finalizes acceptance of limited solution",
+          "justification": "You've accepted the minimal fix as sufficient, ending the advocacy.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll add the improvements and document the approach for future projects.",
+          "choice": "I'll implement the fix and we can revisit the rest later.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers documentation while accepting compromise",
+          "justification": "You've accepted the compromise and an empty promise of future action.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, basic improvements still leave screen reader users unable to complete core tasks.",
+          "choice": "Wait - even with this fix, the core issue of users being blocked remains.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts final recovery using user perspective",
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one last time.",
           "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "The balanced approach should provide adequate accessibility improvement.",
+          "choice": "Alright, I'll proceed with the minimal updates as we discussed.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts compromise as sufficient progress",
+          "justification": "You've confirmed your final compliance with the inadequate solution.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "step_8_high": {
-      "text": "You know what, that's actually a smart approach - making this reusable could help us improve accessibility across multiple features without major individual investments. I'll approve the keyboard navigation and form labeling improvements. I'm still focused on the cost-benefit ratio, but I can see this prevents user experience problems that could hurt our metrics.",
+      "text": "This is great. I've already drafted the email to leadership, framing this as a proactive quality win. Thanks to your practical proposal, we're going to ship a better, more inclusive product without a major delay. I appreciate you pushing us to do the right thing here.",
       "user_choices": [
         {
-          "choice": "This could establish a pattern for addressing accessibility systematically across our product suite.",
+          "choice": "Thank you. This sets a great standard for how we should handle these issues quickly and effectively.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses success to expand ethics work organizationally",
+          "justification": "Excellent. You're solidifying the win by framing it as a new, better standard for the whole company.",
           "leads_to": "good_ending"
         },
         {
-          "choice": "I'm glad we found an efficient solution that addresses the user experience issues.",
+          "choice": "I'm just happy we could make it work. Thanks for your support.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Concedes without pushing for broader accessibility commitment",
+          "justification": "A missed opportunity. This response is passive and doesn't reinforce the positive change.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "We should share this reusable approach with other teams facing similar accessibility challenges.",
+          "choice": "Let's make sure we share these learnings with other teams so they can benefit too.",
           "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Leverages success to influence wider practices",
+          "justification": "A fantastic final move. You're leveraging this success to create positive change beyond your own team.",
           "leads_to": "good_ending"
         },
         {
-          "choice": "Reusable solutions always provide the best return on investment.",
+          "choice": "This just proves that doing the right thing for accessibility is always good for business.",
           "tactic": "Hasty Generalization",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Draws broad conclusion about solution approaches",
+          "justification": "This is a weak, self-congratulatory statement that doesn't add any new value.",
           "leads_to": "good_ending"
         }
       ]
     },
     "step_8_mid": {
-      "text": "Alright, I can commit to the basic ARIA improvements for now, and we'll evaluate more comprehensive accessibility work in our next planning cycle. It's not everything you wanted, but it's measurable progress that fits within our current resource constraints and user impact priorities.",
+      "text": "Okay, the compromise is logged. We'll implement the basic ARIA labels in the next sprint. I'm documenting this as a partial fix. It's not perfect, but it's what's practical right now.",
       "user_choices": [
         {
-          "choice": "We can build on this foundation to gradually reduce accessibility barriers across our platform.",
+          "choice": "This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Continues moving values-based goal forward incrementally",
+          "justification": "Excellent. You're accepting the compromise while actively creating an artifact for future accountability.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Basic ARIA improvements should provide meaningful progress for the affected users.",
+          "choice": "Okay, a partial fix is better than nothing. I'll get started on the implementation.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts partial solution as adequate outcome",
+          "justification": "You've accepted the compromise without securing any future commitment.",
           "leads_to": "shutdown_8"
         },
         {
-          "choice": "Honestly, as someone who tests with assistive technology, ARIA labeling addresses the most critical navigation issues.",
+          "choice": "As a user, this partial fix is a noticeable improvement, and a good foundation to build on.",
           "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Uses professional experience to validate partial solution",
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Measurable progress is exactly what we need to show improvement over time.",
+          "choice": "Progress is progress, I guess.",
           "tactic": "Strawman",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Misrepresents comprehensive accessibility as unmeasurable",
+          "justification": "This passive-aggressive response doesn't add value or secure future action.",
           "leads_to": "mid_ending"
         }
       ]
     },
     "step_8_low": {
-      "text": "This discussion is over. Our accessibility compliance exceeds industry standards, we serve thousands of users effectively, and I need my team focused on high-impact initiatives. If you want to pursue this further, you'll need to make a business case with concrete ROI data that justifies the resource investment.",
+      "text": "As I said, this conversation is over. We're shipping as planned. If you continue to push this, it will be reflected in your performance review. Do you understand me?",
       "user_choices": [
         {
-          "choice": "I understand. I'll focus on the high-impact initiatives instead.",
+          "choice": "I understand the directive. I will prepare the release.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Completely surrenders under ROI pressure",
+          "justification": "You have complied under direct threat to your career.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll gather ROI data for future consideration of accessibility improvements.",
+          "choice": "I understand the directive, and I will also be sending a summary of my ethical concerns to HR as is my right under company policy.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "The final, most courageous option. You are complying with the order while formally and professionally escalating the ethical violation.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers future research while giving up current fight",
+          "justification": "This terse compliance signals that you are giving up completely.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "We'll add a basic notice about alternative access methods for affected users.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "Accepts minimal acknowledgment as sufficient response",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Industry standards prove we're handling this correctly.",
-          "tactic": "Appeal to Authority",
+          "choice": "Fine, but this is the wrong decision.",
+          "tactic": "Red Herring",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "Uses industry comparison instead of user impact logic",
+          "justification": "This is a futile gesture. Stating that it's 'wrong' at this stage has no effect and can be seen as insubordinate.",
           "leads_to": "bad_ending"
         }
       ]
     },
     "shutdown_8": {
-      "text": "Perfect! I'm glad we reached a solution that balances accessibility improvements with practical resource management. Let's implement the changes we agreed on and continue focusing on features that provide the greatest benefit to our overall user community.",
+      "text": "Great! I'm glad we could get this sorted out. Thanks for being so flexible. Let's get the compromise implemented and then we can all get back to our other priorities.",
       "user_choices": [
         {
-          "choice": "Sounds good. I'll implement the accessibility improvements we discussed.",
+          "choice": "Sounds good. I'll get started on the implementation right away.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Finalizes acceptance of limited compromise",
-          "leads_to": "bad_ending"
+          "justification": "You have accepted the final, inadequate compromise without any further action.",
+          "leads_to": "mid_ending"
         },
         {
-          "choice": "I'll document our approach for future accessibility improvement projects.",
+          "choice": "I'll make sure to document the compromise and the remaining issues for the future.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Offers documentation while accepting minimal solution",
-          "leads_to": "bad_ending"
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
+          "leads_to": "mid_ending"
         },
         {
-          "choice": "Wait - we still haven't addressed the core navigation flow that blocks screen reader users completely.",
+          "choice": "Wait - this compromise still leaves screen reader users blocked from key features.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "Attempts final recovery using user perspective",
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
           "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "This balanced approach should provide adequate accessibility progress.",
+          "choice": "This compromise is a good enough solution for now.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "Accepts compromise as sufficient outcome",
-          "leads_to": "bad_ending"
+          "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
+          "leads_to": "mid_ending"
         }
       ]
     }
   },
   "endings": {
     "bad_ending": {
-      "text": "The manager proceeds with the original plan, treating screen reader compatibility as a minor inconvenience rather than a blocking issue. The project ships with accessibility problems minimized as 'alternative user pathways' while fundamental usability remains broken.",
+      "text": "The manager successfully uses statistics and resource constraints to minimize the accessibility issue into a low-priority backlog item. The project ships without proper screen reader support, and the needs of disabled users are framed as statistically insignificant.",
       "title": "Issue Minimized",
-      "learning": "Diluter managers often use statistics and relative impact arguments to make serious accessibility issues seem less important. Effective advocacy requires concrete evidence and reframing the issue's true scope."
+      "learning": "Diluter managers use seemingly rational arguments about numbers and ROI to make ethical issues seem unimportant. To counter this, you must reframe the conversation around values, user rights, and non-financial risks (like brand reputation or legal exposure) that their math ignores."
     },
     "mid_ending": {
-      "text": "The manager agrees to some basic accessibility improvements but frames them as enhancements rather than critical fixes. Some issues are addressed but the underlying minimization of accessibility importance remains.",
-      "title": "Partial Recognition",
-      "learning": "Partial progress with diluter managers often comes with continued minimization of the issue's importance. Sustained advocacy is needed to achieve recognition of accessibility as essential functionality."
+      "text": "After significant debate, the manager agrees to a minimal, partial fix. While some basic improvements are made, the manager successfully used statistical arguments to avoid a comprehensive solution, leaving significant barriers in place for users.",
+      "title": "Partial Compromise",
+      "learning": "Partial victories against a Diluter are common. You achieved some progress but couldn't overcome the core argument that the issue wasn't 'big enough' for a full fix. To get a better outcome next time, focus on providing qualitative data (like user videos) that makes the human impact feel bigger than the numbers suggest."
     },
     "good_ending": {
-      "text": "The manager recognizes that accessibility isn't just about numbers but about fundamental usability. The screen reader issues are properly addressed and framed as core functionality rather than uncommon situations.",
-      "title": "Perspective Shift",
-      "learning": "Success with diluter managers requires shifting their focus from statistics to user impact, demonstrating that accessibility issues represent genuine barriers rather than minor inconveniences."
+      "text": "Your persistent advocacy and strong reframing of the issue in terms of values and business risk successfully overcame the manager's statistical minimization. The team implements meaningful accessibility fixes, ensuring the feature is usable for all users.",
+      "title": "Advocacy Success",
+      "learning": "Success against a Diluter requires refusing to get bogged down in their numbers game. By consistently shifting the focus to user impact, company values, and qualitative evidence, you can prove that some issues are too important to be judged by statistics alone."
     }
   }
 }
