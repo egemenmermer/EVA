@@ -101,6 +101,7 @@ public class SecurityConfig {
                                 "/debug/**"
                         )
                         .permitAll()
+                        .requestMatchers("/api/v1/practice/admin/**", "/api/v1/users/all").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
                 )
