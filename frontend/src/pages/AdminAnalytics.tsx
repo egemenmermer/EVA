@@ -88,11 +88,12 @@ const SessionDetailsModal: React.FC<{
               return {
                 evs: foundChoice.evs_score,
                 tactic: foundChoice.tactic || 'Unknown',
+                tactic_type: foundChoice.tactic_type || 'Unknown',
               };
             }
           }
         }
-        return { evs: null, tactic: 'Unknown' };
+        return { evs: null, tactic: 'Unknown', tactic_type: 'Unknown' };
       };
 
       const newSelectionData = selectedChoices.map((choice, index) => {
@@ -268,22 +269,20 @@ const SessionDetailsModal: React.FC<{
                             </p>
                             
                             {/* Real EVS score and tactic data */}
-                            <div className="mt-3 flex items-center space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-400">EVS Score:</span>
-                                <span className={`text-sm font-semibold ${
-                                  selectionInfo.evs >= 2 ? 'text-green-400' : 
-                                  selectionInfo.evs >= 1 ? 'text-yellow-400' : 'text-red-400'
-                                }`}>
-                                  {selectionInfo.evs !== undefined && selectionInfo.evs !== null ? `${selectionInfo.evs >= 0 ? '+' : ''}${selectionInfo.evs}` : 'N/A'}/3
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-400">Tactic:</span>
-                                <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">
-                                  {selectionInfo.tactic || 'Unknown'}
-                                </span>
-                              </div>
+                            <div className="mt-2 flex items-center space-x-4 text-xs">
+                              <span className={`px-2 py-1 rounded-full text-white font-semibold ${
+                                selectionInfo.evs > 0 ? 'bg-green-600' :
+                                selectionInfo.evs < 0 ? 'bg-red-600' :
+                                'bg-gray-600'
+                              }`}>
+                                EVS Score: {selectionInfo.evs > 0 ? `+${selectionInfo.evs}` : selectionInfo.evs ?? 'N/A'}
+                              </span>
+                              <span className="px-2 py-1 bg-indigo-600 rounded-full text-white font-semibold">
+                                Tactic: {selectionInfo.tactic || 'Unknown'}
+                              </span>
+                              <span className="px-2 py-1 bg-purple-600 rounded-full text-white font-semibold">
+                                Tactic Type: {selectionInfo.tactic_type || 'Unknown'}
+                              </span>
                             </div>
                           </div>
                         </div>
