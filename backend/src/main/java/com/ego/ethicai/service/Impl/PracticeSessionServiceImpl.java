@@ -177,64 +177,23 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         log.info("Getting user selections for session: {}", sessionId);
         
         try {
-            PracticeSession session = practiceSessionRepository.findByIdWithChoices(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Practice session not found with ID: " + sessionId));
-            log.info("DEBUG: Found session with ID: {}, scenarioId: {}", session.getId(), session.getScenarioId());
+            // Get all choices in a single query with proper ordering
+            List<PracticeSessionChoice> choices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
             
-            // First try to get data from stored choices (new format)
-            List<PracticeSessionChoice> storedChoices = session.getPracticeSessionChoices();
-            log.info("DEBUG: Found {} stored choices for session {}", storedChoices.size(), sessionId);
-            
-            if (!storedChoices.isEmpty()) {
-                log.info("DEBUG: Using stored choices data");
-                List<SelectionDataDTO> result = storedChoices.stream()
-                        .sorted((c1, c2) -> Integer.compare(c1.getStepNumber(), c2.getStepNumber()))
-                        .map(choice -> {
-                            log.info("DEBUG: Processing choice - Step: {}, Text: {}, EVS: {}, Tactic: {}", 
-                                    choice.getStepNumber(), choice.getChoiceText(), choice.getEvsScore(), choice.getTactic());
-                            return SelectionDataDTO.builder()
-                                    .step(choice.getStepNumber())
-                                    .choice(choice.getChoiceText())
-                                    .evs(choice.getEvsScore())
-                                    .tactic(choice.getTactic())
-                                    .build();
-                        })
-                        .collect(Collectors.toList());
-                log.info("DEBUG: Returning {} selection DTOs", result.size());
-                return result;
-            }
-            
-            // Fall back to legacy method for backward compatibility
-            log.info("DEBUG: No stored choices found, falling back to legacy method");
-            if (session.getScenarioId() == null || session.getSelectedChoices() == null) {
-                log.info("DEBUG: No scenario ID or selected choices, returning empty list");
+            if (choices.isEmpty()) {
+                log.info("No choices found for session {}", sessionId);
                 return new ArrayList<>();
             }
             
-            // Get scenario data from ScenarioService
-            JsonNode scenarioData = scenarioService.getScenarioData(session.getScenarioId());
-            List<SelectionDataDTO> selections = new ArrayList<>();
-            
-            // Process each user choice
-            for (int i = 0; i < session.getSelectedChoices().size(); i++) {
-                String userChoice = session.getSelectedChoices().get(i);
+            return choices.stream()
+                .map(choice -> SelectionDataDTO.builder()
+                    .step(choice.getStepNumber())
+                    .choice(choice.getChoiceText())
+                    .evs(choice.getEvsScore())
+                    .tactic(choice.getTactic())
+                    .build())
+                .collect(Collectors.toList());
                 
-                // Find the matching choice in scenario data and get its EVS and tactic
-                SelectionDataDTO selectionData = findChoiceData(scenarioData, userChoice, i + 1);
-                if (selectionData != null) {
-                    selections.add(selectionData);
-                } else {
-                    // Create a basic entry if we can't find the choice data
-                    selections.add(SelectionDataDTO.builder()
-                            .step(i + 1)
-                            .choice(userChoice)
-                            .evs(null)
-                            .tactic("Unknown")
-                            .build());
-                }
-            }
-            
-            return selections;
         } catch (Exception e) {
             log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage(), e);
             throw new RuntimeException("Failed to retrieve user selections", e);
