@@ -288,22 +288,10 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                         JsonNode choice = choices.get(i);
                         String choiceText = choice.get("choice").asText();
                         
-                        // Handle both evs_score and EVS field names
-                        JsonNode evsNode = choice.get("evs_score");
-                        if (evsNode == null) {
-                            evsNode = choice.get("EVS");
-                        }
-                        Double evsScore = evsNode != null ? (double) evsNode.asInt() : 0.0;
-                        
-                        // Handle both tactic and category field names
-                        String tactic = choice.get("tactic") != null ? choice.get("tactic").asText() : 
-                                       (choice.get("tactic_type") != null ? choice.get("tactic_type").asText() : 
-                                        (choice.get("category") != null ? choice.get("category").asText() : "Unknown"));
-                        
                         alternatives.add(DecisionTreeAlternativeDTO.builder()
                                 .text(choiceText)
-                                .tactic(tactic)
-                                .evs(evsScore)
+                                .tactic(choice.get("category").asText())
+                                .evs((double) choice.get("EVS").asInt())
                                 .build());
                         
                         // Check if this matches the user's choice
@@ -345,17 +333,10 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                     if (choices != null && choices.isArray()) {
                         for (JsonNode choice : choices) {
                             if (choice.get("choice").asText().equals(userChoice)) {
-                                // Handle both evs_score and EVS field names
-                                JsonNode evsNode = choice.get("evs_score");
-                                if (evsNode == null) {
-                                    evsNode = choice.get("EVS");
-                                }
-                                Double evsScore = evsNode != null ? (double) evsNode.asInt() : null;
-                                
                                 return SelectionDataDTO.builder()
                                         .step(step)
                                         .choice(userChoice)
-                                        .evs(evsScore)
+                                        .evs((double) choice.get("EVS").asInt())
                                         .tactic(choice.get("tactic") != null ? choice.get("tactic").asText() : 
                                                 (choice.get("tactic_type") != null ? choice.get("tactic_type").asText() : 
                                                  (choice.get("category") != null ? choice.get("category").asText() : "Unknown")))

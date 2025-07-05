@@ -191,7 +191,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         String category = tacticNode != null ? tacticNode.asText() : 
                          (tacticTypeNode != null ? tacticTypeNode.asText() : "Unknown");
         
-        // Handle EVS score - support both evs_score and EVS field names
+        // Handle EVS score
         JsonNode evsNode = selectedChoice.get("evs_score");
         if (evsNode == null) {
             evsNode = selectedChoice.get("EVS");
