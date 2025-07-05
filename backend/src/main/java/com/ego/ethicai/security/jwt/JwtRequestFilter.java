@@ -23,8 +23,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Arrays;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -168,18 +170,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         logger.debug("Checking if path should be filtered: {}", path);
-        
-        boolean shouldExclude = path.startsWith("/api/v1/auth/login") || 
-               path.startsWith("/api/v1/auth/register") || 
-               path.startsWith("/api/v1/auth/oauth2") ||
-               path.startsWith("/swagger-ui") ||
-               path.startsWith("/v3/api-docs") ||
-               path.startsWith("/api-docs") ||
-               path.startsWith("/api/v1/practice-score") ||
-               path.contains("practice-score") ||
-               path.startsWith("/debug") ||
-               request.getMethod().equals("OPTIONS");
-               
+
+        // Define public paths that should not be filtered
+        final List<String> publicPaths = Arrays.asList(
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/activate",
+            "/api/v1/auth/oauth2",
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/api-docs",
+            "/api/v1/practice-score",
+            "/debug"
+        );
+
+        boolean shouldExclude = publicPaths.stream().anyMatch(p -> path.startsWith(p)) || 
+                                request.getMethod().equals("OPTIONS");
+                               
         logger.debug("Path {} should be excluded from filtering: {}", path, shouldExclude);
         return shouldExclude;
     }
