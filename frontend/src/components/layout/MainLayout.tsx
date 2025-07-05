@@ -486,8 +486,8 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         </main>
         
         {/* Right Panel Container */}
-        {/*
         <div className={`${showKnowledgePanel ? 'relative w-[320px]' : 'absolute right-0 w-0'} transition-all duration-300 h-full`}>
+          {/* Knowledge Panel Toggle Button - Always visible */}
           <div className="hidden md:block">
             <button 
               onClick={handleKnowledgePanelToggle}
@@ -503,25 +503,32 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
             </button>
           </div>
           
-          <aside
-            className={`
-              fixed top-0 right-0 h-full w-[320px] bg-gray-50 dark:bg-gray-800/50 
-              border-l border-gray-200 dark:border-gray-700
-              transform transition-transform duration-300 ease-in-out z-40
-              ${showKnowledgePanel ? 'translate-x-0' : 'translate-x-full'}
-            `}
-            aria-label="Knowledge Panel"
+          {/* Actual Knowledge Panel */}
+          <div className={`knowledge-panel ${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} ${showKnowledgePanel ? 'md:translate-x-0' : 'md:translate-x-full'} fixed md:relative right-0 top-16 md:top-0 z-40 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-full flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
+            {/* Close button on mobile */}
+            <button 
+              onClick={() => setGuidelinesOpen(false)} 
+              className="absolute top-4 left-4 md:hidden"
+              aria-label="Close guidelines"
             >
-            {currentConversation?.conversationId && (
+              <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+            </button>
+            
             <GuidelinesPanel 
-                key={currentConversation.conversationId} 
-                onClose={handleKnowledgePanelToggle}
+              onClose={() => setShowKnowledgePanel(false)} 
               onNewKnowledge={handleNewKnowledge}
             />
-            )}
-          </aside>
+          </div>
         </div>
-        */}
+        
+        {/* Backdrop for mobile guidelines */}
+        {guidelinesOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" 
+            onClick={() => setGuidelinesOpen(false)}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       {/* Manager Type Quiz Modal */}

@@ -167,11 +167,14 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, []);
 
   const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
-    // Disable all artifact fetching
-    return;
-    /*
     addDebugLog(`Fetch requested for ${conversationId}. Skip cache: ${skipCache}`);
-    if (isLoading) {
+
+    if (!conversationId || conversationId.startsWith('draft-') || !isValidUuid(conversationId)) {
+      addDebugLog("Invalid or draft conversation ID, aborting fetch.");
+      setError("Cannot fetch artifacts for this conversation.");
+      setIsLoading(false);
+      setGuidelines([]);
+      setCaseStudies([]);
       return;
     }
 
@@ -293,8 +296,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setIsLoading(false);
       }
     }
-    */
-  }, [conversationId]);
+  }, [conversationId, retryCount, maxRetries, retryDelay, checkExistingArtifacts, addDebugLog, isValidUuid]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {

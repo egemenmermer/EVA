@@ -12,13 +12,12 @@ import com.ego.ethicai.repository.PracticeTacticsFlagRepository;
 import com.ego.ethicai.service.PracticeSessionService;
 import com.ego.ethicai.service.UserService;
 import com.ego.ethicai.service.ScenarioService;
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -173,34 +172,70 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    @Cacheable(value = "practiceSelections", key = "#sessionId", unless = "#result == null || #result.isEmpty()")
+    @Transactional
     public List<SelectionDataDTO> getUserSelections(UUID sessionId) {
-        log.info("Cache miss - Getting user selections for session: {}", sessionId);
+        log.info("Getting user selections for session: {}", sessionId);
         
         try {
-            // Get all choices in a single query with proper ordering
-            List<PracticeSessionChoice> choices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
+            PracticeSession session = getPracticeSessionEntityById(sessionId);
+            log.info("DEBUG: Found session with ID: {}, scenarioId: {}", session.getId(), session.getScenarioId());
             
-            if (choices.isEmpty()) {
-                log.info("No choices found for session {}", sessionId);
+            // First try to get data from stored choices (new format)
+            List<PracticeSessionChoice> storedChoices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
+            log.info("DEBUG: Found {} stored choices for session {}", storedChoices.size(), sessionId);
+            
+            if (!storedChoices.isEmpty()) {
+                log.info("DEBUG: Using stored choices data");
+                List<SelectionDataDTO> result = storedChoices.stream()
+                        .map(choice -> {
+                            log.info("DEBUG: Processing choice - Step: {}, Text: {}, EVS: {}, Tactic: {}", 
+                                    choice.getStepNumber(), choice.getChoiceText(), choice.getEvsScore(), choice.getTactic());
+                            return SelectionDataDTO.builder()
+                                    .step(choice.getStepNumber())
+                                    .choice(choice.getChoiceText())
+                                    .evs(choice.getEvsScore())
+                                    .tactic(choice.getTactic())
+                                    .build();
+                        })
+                        .collect(Collectors.toList());
+                log.info("DEBUG: Returning {} selection DTOs", result.size());
+                return result;
+            }
+            
+            // Fall back to legacy method for backward compatibility
+            log.info("DEBUG: No stored choices found, falling back to legacy method");
+            if (session.getScenarioId() == null || session.getSelectedChoices() == null) {
+                log.info("DEBUG: No scenario ID or selected choices, returning empty list");
                 return new ArrayList<>();
             }
             
-            List<SelectionDataDTO> selections = choices.stream()
-                .map(choice -> SelectionDataDTO.builder()
-                    .step(choice.getStepNumber())
-                    .choice(choice.getChoiceText())
-                    .evs(choice.getEvsScore())
-                    .tactic(choice.getTactic())
-                    .build())
-                .collect(Collectors.toList());
+            // Get scenario data from ScenarioService
+            JsonNode scenarioData = scenarioService.getScenarioData(session.getScenarioId());
+            List<SelectionDataDTO> selections = new ArrayList<>();
+            
+            // Process each user choice
+            for (int i = 0; i < session.getSelectedChoices().size(); i++) {
+                String userChoice = session.getSelectedChoices().get(i);
                 
-            log.info("Successfully mapped {} choices to DTOs", selections.size());
+                // Find the matching choice in scenario data and get its EVS and tactic
+                SelectionDataDTO selectionData = findChoiceData(scenarioData, userChoice, i + 1);
+                if (selectionData != null) {
+                    selections.add(selectionData);
+                } else {
+                    // Create a basic entry if we can't find the choice data
+                    selections.add(SelectionDataDTO.builder()
+                            .step(i + 1)
+                            .choice(userChoice)
+                            .evs(null)
+                            .tactic("Unknown")
+                            .build());
+                }
+            }
+            
             return selections;
         } catch (Exception e) {
-            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage());
-            throw new RuntimeException("Error getting user selections", e);
+            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve user selections", e);
         }
     }
 

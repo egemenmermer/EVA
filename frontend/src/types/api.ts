@@ -56,9 +56,4 @@ export interface FeedbackResponseDTO {
 export interface ActivationResponseDTO {
   message: string;
   activatedAt?: string;
-}
-
-export interface TokenVerificationResponse {
-  valid?: boolean;
-  status?: string;
 } 

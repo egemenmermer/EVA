@@ -174,14 +174,15 @@ public class PracticeController {
     public ResponseEntity<List<SelectionDataDTO>> getUserSelections(@PathVariable UUID sessionId) {
         log.info("=== ADMIN SELECTIONS ENDPOINT CALLED ===");
         log.info("SessionId: {}", sessionId);
+        log.info("Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
+        log.info("Principal: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        log.info("Authorities: {}", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         
         try {
-            // Get all selections in a single query
+            log.info("Retrieving user selections for session: {}", sessionId);
             List<SelectionDataDTO> selections = practiceSessionService.getUserSelections(sessionId);
             log.info("Successfully retrieved {} selections", selections.size());
-            return ResponseEntity.ok()
-                    .header("Cache-Control", "max-age=300") // Cache for 5 minutes
-                    .body(selections);
+            return ResponseEntity.ok(selections);
         } catch (Exception e) {
             log.error("Error retrieving user selections for session {}: {}", sessionId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

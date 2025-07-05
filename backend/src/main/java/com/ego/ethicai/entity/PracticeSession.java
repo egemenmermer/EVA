@@ -34,7 +34,8 @@ public class PracticeSession {
     @Column(name = "scenario_id")
     private String scenarioId;
 
-    @OneToMany(mappedBy = "practiceSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "practice_session_id")
     private List<PracticeSessionChoice> practiceSessionChoices;
 
     // Transient field for backward compatibility

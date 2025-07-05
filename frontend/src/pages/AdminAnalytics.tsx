@@ -68,22 +68,17 @@ const SessionDetailsModal: React.FC<{
   const [selectionData, setSelectionData] = useState<any[]>([]);
   const [loadingSelections, setLoadingSelections] = useState(false);
 
-  // Load selection data when tab changes to 'selections'
-  useEffect(() => {
-    if (activeTab === 'selections' && session) {
-      fetchSelectionData(session.id);
-    }
-  }, [activeTab, session?.id]); // Only depend on session.id, not the entire session object
-
   // Function to fetch user selection details from backend
   const fetchSelectionData = async (sessionId: string) => {
     console.log('=== FETCHING SELECTION DATA ===');
     console.log('sessionId:', sessionId);
+    console.log('token from localStorage:', localStorage.getItem('token'));
     
     setLoadingSelections(true);
     try {
       // Use relative URL to leverage Vite proxy
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
+      console.log('Making request to URL:', url);
       
       const response = await fetch(url, {
         headers: {
@@ -91,6 +86,9 @@ const SessionDetailsModal: React.FC<{
           'Content-Type': 'application/json'
         }
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -99,6 +97,7 @@ const SessionDetailsModal: React.FC<{
       }
 
       const data = await response.json();
+      console.log('Selection data received:', data);
       setSelectionData(data);
     } catch (error) {
       console.error('Error fetching selection data:', error);
@@ -155,7 +154,7 @@ const SessionDetailsModal: React.FC<{
     if (activeTab === 'selections' && session && selectionData.length === 0) {
       fetchSelectionData(session.id);
     }
-  }, [activeTab, session]);
+  }, [activeTab, session, selectionData.length]);
 
   // Load decision tree data when tab changes to 'tree'
   useEffect(() => {
@@ -208,7 +207,6 @@ const SessionDetailsModal: React.FC<{
             >
               📊 User Selections
             </button>
-            {/*
             <button
               onClick={() => setActiveTab('tree')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
@@ -219,7 +217,6 @@ const SessionDetailsModal: React.FC<{
             >
               🌳 Decision Tree
             </button>
-            */}
           </div>
         </div>
 
@@ -325,7 +322,7 @@ const SessionDetailsModal: React.FC<{
           )}
 
           {/* Decision Tree Tab */}
-          {/* {activeTab === 'tree' && (
+          {activeTab === 'tree' && (
             <div className="space-y-6">
               <h4 className="text-lg font-medium mb-4">Decision Tree Analysis</h4>
               <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-6">
@@ -340,22 +337,48 @@ const SessionDetailsModal: React.FC<{
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                   <span className="ml-3 text-gray-300">Loading decision tree...</span>
                 </div>
-              ) : decisionTreeData ? (
+              ) : !decisionTreeData ? (
+                <div className="text-center p-8 text-gray-400">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-300 mb-2">Decision Tree Not Available</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    The decision tree data for this session could not be loaded. This may be due to:
+                  </p>
+                  <ul className="text-sm text-gray-500 text-left max-w-md mx-auto space-y-1">
+                    <li>• Session data is incomplete</li>
+                    <li>• Backend API is not yet implemented</li>
+                    <li>• Network connectivity issues</li>
+                  </ul>
+                  <button
+                    onClick={() => session && session.scenarioId && fetchDecisionTreeData(session.id, session.scenarioId)}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
                 <>
                   <div className="space-y-8">
                     {decisionTreeData.steps.map((step, stepIndex) => (
                       <div key={stepIndex} className="relative">
+                        {/* Step connector */}
                         {stepIndex < decisionTreeData.steps.length - 1 && (
                           <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0.5 h-8 bg-gray-600"></div>
                         )}
                         
                         <div className="bg-gray-800 rounded-lg p-6">
+                          {/* Step header */}
                           <div className="text-center mb-4">
                             <span className="inline-block bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">
                               Step {step.step}
                             </span>
                           </div>
 
+                          {/* Manager statement */}
                           <div className="mb-6 text-center">
                             <div className="inline-block bg-amber-900/30 border border-amber-700 rounded-lg p-4 max-w-2xl">
                               <div className="flex items-center justify-center mb-2">
@@ -365,6 +388,7 @@ const SessionDetailsModal: React.FC<{
                             </div>
                           </div>
 
+                          {/* Choice options */}
                           <div className="mb-4">
                             <h5 className="text-center text-gray-300 text-sm mb-4">Available Response Options:</h5>
                             <div className="grid grid-cols-1 gap-3">
@@ -379,6 +403,7 @@ const SessionDetailsModal: React.FC<{
                                       : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'
                                   }`}
                                 >
+                                  {/* Chosen indicator */}
                                   {altIndex === step.chosenIndex && (
                                     <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
                                       ✓
@@ -399,13 +424,24 @@ const SessionDetailsModal: React.FC<{
                                       </div>
                                     </div>
                                     
-                                    <div className="flex-shrink-0 text-right">
-                                      <div className="text-xs text-gray-400 mb-1">
-                                        EVS Score: <span className="font-bold">{alt.evs}</span>
-                                      </div>
-                                      <div className="text-xs text-gray-400">
-                                        Tactic: <span className="font-bold">{alt.tactic}</span>
-                                      </div>
+                                    <div className="flex flex-col items-end space-y-2">
+                                      <span className={`text-sm font-semibold ${
+                                        alt.evs >= 80 ? 'text-green-400' :
+                                        alt.evs >= 60 ? 'text-yellow-400' :
+                                        'text-red-400'
+                                      }`}>
+                                        {alt.evs} EVS
+                                      </span>
+                                      
+                                      <span className={`text-xs px-2 py-1 rounded ${
+                                        alt.tactic === 'None' 
+                                          ? 'bg-red-900/50 text-red-300'
+                                          : altIndex === step.chosenIndex
+                                          ? 'bg-green-900/50 text-green-300'
+                                          : 'bg-gray-600 text-gray-300'
+                                      }`}>
+                                        {alt.tactic}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
@@ -417,6 +453,7 @@ const SessionDetailsModal: React.FC<{
                     ))}
                   </div>
 
+                  {/* Path Analysis */}
                   <div className="bg-gray-800 rounded-lg p-6 mt-8">
                     <h5 className="text-lg font-medium mb-4 text-center">Session Summary</h5>
                     <div className="grid grid-cols-2 gap-6">
@@ -424,6 +461,7 @@ const SessionDetailsModal: React.FC<{
                         <h6 className="font-medium text-blue-300 mb-3">Tactics Used</h6>
                         <div className="space-y-2">
                           {(() => {
+                            // Calculate tactics from user's actual choices
                             const tacticCounts: { [key: string]: number } = {};
                             decisionTreeData.steps.forEach(step => {
                               if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
@@ -451,6 +489,7 @@ const SessionDetailsModal: React.FC<{
                             <span>Best possible path: </span>
                             <span className="text-green-400 font-semibold">
                               {(() => {
+                                // Calculate best possible path: sum of max EVS from each step
                                 const bestPath = decisionTreeData.steps.reduce((total, step) => {
                                   const maxEvs = Math.max(...step.alternatives.map(a => a.evs));
                                   return total + maxEvs;
@@ -463,6 +502,7 @@ const SessionDetailsModal: React.FC<{
                             <span>Worst possible path: </span>
                             <span className="text-red-400 font-semibold">
                               {(() => {
+                                // Calculate worst possible path: sum of min EVS from each step
                                 const worstPath = decisionTreeData.steps.reduce((total, step) => {
                                   const minEvs = Math.min(...step.alternatives.map(a => a.evs));
                                   return total + minEvs;
@@ -475,6 +515,7 @@ const SessionDetailsModal: React.FC<{
                             <span>User achieved: </span>
                             <span className="text-blue-400 font-semibold">
                               {(() => {
+                                // Calculate user's actual total EVS from their choices
                                 let totalEvs = 0;
                                 decisionTreeData.steps.forEach(step => {
                                   if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
@@ -489,6 +530,7 @@ const SessionDetailsModal: React.FC<{
                             <span>Performance: </span>
                             <span className={`font-semibold ${
                               (() => {
+                                // Calculate performance based on user's actual EVS
                                 let totalEvs = 0;
                                 decisionTreeData.steps.forEach(step => {
                                   if (step.chosenIndex >= 0 && step.alternatives[step.chosenIndex]) {
@@ -520,32 +562,9 @@ const SessionDetailsModal: React.FC<{
                     </div>
                   </div>
                 </>
-              ) : (
-                <div className="text-center p-8 text-gray-400">
-                  <div className="mb-4">
-                    <svg className="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-300 mb-2">Decision Tree Not Available</h3>
-                  <p className="text-sm text-gray-400 mb-4">
-                    The decision tree data for this session could not be loaded. This may be due to:
-                  </p>
-                  <ul className="text-sm text-gray-500 text-left max-w-md mx-auto space-y-1">
-                    <li>• Session data is incomplete</li>
-                    <li>• Backend API is not yet implemented</li>
-                    <li>• Network connectivity issues</li>
-                  </ul>
-                  <button
-                    onClick={() => session && session.scenarioId && fetchDecisionTreeData(session.id, session.scenarioId)}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-                  >
-                    Try Again
-                  </button>
+              )}
             </div>
           )}
-            </div>
-          )} */}
         </div>
 
         <div className="px-6 py-3 border-t border-gray-700 flex justify-end">
