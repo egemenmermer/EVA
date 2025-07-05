@@ -174,9 +174,9 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
 
     @Override
     @Transactional
-    @Cacheable(value = "practiceSelections", key = "#sessionId")
+    @Cacheable(value = "practiceSelections", key = "#sessionId", unless = "#result.isEmpty()")
     public List<SelectionDataDTO> getUserSelections(UUID sessionId) {
-        log.info("Getting user selections for session: {}", sessionId);
+        log.info("Cache miss - Getting user selections for session: {}", sessionId);
         
         try {
             // Get all choices in a single query with proper ordering
@@ -187,7 +187,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                 return new ArrayList<>();
             }
             
-            return choices.stream()
+            List<SelectionDataDTO> selections = choices.stream()
                 .map(choice -> SelectionDataDTO.builder()
                     .step(choice.getStepNumber())
                     .choice(choice.getChoiceText())
@@ -195,9 +195,12 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                     .tactic(choice.getTactic())
                     .build())
                 .collect(Collectors.toList());
+                
+            log.info("Successfully mapped {} choices to DTOs", selections.size());
+            return selections;
         } catch (Exception e) {
-            log.error("Error getting user selections: {}", e.getMessage(), e);
-            throw e;
+            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage());
+            throw new RuntimeException("Error getting user selections", e);
         }
     }
 
