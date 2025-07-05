@@ -169,12 +169,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String initialPath = request.getRequestURI();
-        // Remove the /api prefix for matching
-        if (initialPath.startsWith("/api")) {
-            initialPath = initialPath.substring(4);
-        }
-        final String path = initialPath;
+        final String path = request.getRequestURI();
         logger.debug("Checking if path should be filtered: {}", path);
         
         // Define public paths that should not be filtered
