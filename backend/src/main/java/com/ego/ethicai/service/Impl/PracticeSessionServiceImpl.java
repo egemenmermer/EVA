@@ -333,28 +333,13 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                     if (choices != null && choices.isArray()) {
                         for (JsonNode choice : choices) {
                             if (choice.get("choice").asText().equals(userChoice)) {
-                                // Handle EVS score robustly, checking for multiple possible keys
-                                JsonNode evsNode = choice.get("evs_score");
-                                if (evsNode == null || evsNode.isNull()) {
-                                    evsNode = choice.get("EVS");
-                                }
-                                Double evs = evsNode != null && !evsNode.isNull() ? evsNode.asDouble() : null;
-
-                                // Handle tactic/category robustly
-                                String tactic = "Unknown";
-                                if (choice.has("tactic") && !choice.get("tactic").isNull()) {
-                                    tactic = choice.get("tactic").asText();
-                                } else if (choice.has("tactic_type") && !choice.get("tactic_type").isNull()) {
-                                    tactic = choice.get("tactic_type").asText();
-                                } else if (choice.has("category") && !choice.get("category").isNull()) {
-                                    tactic = choice.get("category").asText();
-                                }
-
                                 return SelectionDataDTO.builder()
                                         .step(step)
                                         .choice(userChoice)
-                                        .evs(evs)
-                                        .tactic(tactic)
+                                        .evs((double) choice.get("EVS").asInt())
+                                        .tactic(choice.get("tactic") != null ? choice.get("tactic").asText() : 
+                                                (choice.get("tactic_type") != null ? choice.get("tactic_type").asText() : 
+                                                 (choice.get("category") != null ? choice.get("category").asText() : "Unknown")))
                                         .build();
                             }
                         }
@@ -362,7 +347,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Could not find choice data for: '{}'. Error: {}", userChoice, e.getMessage());
+            log.warn("Could not find choice data for: {}", userChoice);
         }
         return null;
     }

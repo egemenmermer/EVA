@@ -50,10 +50,9 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-https://ethicalowl.xyz}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
+      DB_USERNAME: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
       JWT_SECRET: ${JWT_SECRET:-devsecretkey}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
       SPRING_FLYWAY_ENABLED: ${FLYWAY_ENABLED:-true}
       SPRING_FLYWAY_USER: ${DB_USER:-postgres}
       SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD:-password}
