@@ -167,6 +167,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   }, []);
 
   const fetchArtifacts = useCallback(async (skipCache: boolean = false) => {
+    /*
     addDebugLog(`Fetch requested for ${conversationId}. Skip cache: ${skipCache}`);
 
     if (!conversationId || conversationId.startsWith('draft-') || !isValidUuid(conversationId)) {
@@ -296,6 +297,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         setIsLoading(false);
       }
     }
+    */
   }, [conversationId, retryCount, maxRetries, retryDelay, checkExistingArtifacts, addDebugLog, isValidUuid]);
 
   useEffect(() => {
