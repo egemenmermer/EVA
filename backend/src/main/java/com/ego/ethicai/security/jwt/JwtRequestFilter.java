@@ -180,7 +180,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Define public paths that should not be filtered
         String[] EXCLUDED_PATHS = new String[] {
                 "/",
-                "/api",
+                "/api/**",
                 "/v1/auth/**",
                 "/v1/scenarios/**",
                 "/v2/api-docs/**",
