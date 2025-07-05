@@ -20,6 +20,20 @@ import { Conversation } from '@/types/conversation';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
 
+export const saveMessage = async (message: Message): Promise<Message> => {
+  // This is a placeholder. In a real app, you would save the message to a database.
+  console.log('Message saved:', message);
+  return Promise.resolve(message);
+};
+
+export const agentCreateConversation = async (managerType: ManagerType): Promise<Conversation> => {
+  const newConversation: Conversation = {
+    conversationId: uuid(),
+    createdAt: new Date().toISOString(),
+  };
+  return Promise.resolve(newConversation);
+};
+
 // Default manager type to use for mock conversations
 const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
 
@@ -470,6 +484,7 @@ export const getKnowledgeArtifacts = async (
 
 export const login = authApi.login;
 export const logout = authApi.logout;
+export const sendMessage = conversationApi.sendMessage;
 
 export const verifyToken = async (): Promise<boolean> => {
   try {
