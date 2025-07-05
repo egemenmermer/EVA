@@ -169,7 +169,7 @@ public class PracticeController {
         }
     }
 
-    @GetMapping("/admin/practice-sessions/{sessionId}/selections")
+    @GetMapping("/admin/get-selections/{sessionId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<SelectionDataDTO>> getUserSelections(@PathVariable UUID sessionId) {
         log.info("=== ADMIN SELECTIONS ENDPOINT CALLED ===");
@@ -189,7 +189,7 @@ public class PracticeController {
         }
     }
 
-    @GetMapping("/admin/practice-sessions/{sessionId}/decision-tree")
+    @GetMapping("/admin/get-decision-tree/{sessionId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DecisionTreeDataDTO> getDecisionTree(@PathVariable UUID sessionId) {
         log.info("=== ADMIN DECISION TREE ENDPOINT CALLED ===");
