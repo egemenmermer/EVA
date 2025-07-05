@@ -178,19 +178,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         logger.debug("Checking if path should be filtered: {}", path);
         
         // Define public paths that should not be filtered
-        final List<String> publicPaths = Arrays.asList(
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",
-            "/api/v1/auth/activate",
-            "/api/v1/auth/oauth2",
-            "/swagger-ui",
-            "/v3/api-docs",
-            "/api-docs",
-            "/api/v1/practice-score",
-            "/debug"
-        );
+        String[] EXCLUDED_PATHS = new String[] {
+                "/",
+                "/api",
+                "/v1/auth/**",
+                "/v1/scenarios/**",
+                "/v2/api-docs/**",
+                "/swagger-ui",
+                "/v3/api-docs",
+                "/api-docs",
+                "/api/v1/practice-score",
+                "/debug"
+        };
 
-        boolean shouldExclude = publicPaths.stream().anyMatch(p -> path.startsWith(p)) || 
+        boolean shouldExclude = Arrays.stream(EXCLUDED_PATHS).anyMatch(p -> path.startsWith(p)) || 
                request.getMethod().equals("OPTIONS");
                
         logger.debug("Path {} should be excluded from filtering: {}", path, shouldExclude);
