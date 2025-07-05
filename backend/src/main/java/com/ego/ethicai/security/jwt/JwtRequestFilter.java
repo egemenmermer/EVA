@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Arrays;
+import org.springframework.util.AntPathMatcher;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -167,9 +168,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        logger.debug("Checking if path should be filtered: {}", path);
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        // Remove the /api prefix for matching
+        if (path.startsWith("/api")) {
+            path = path.substring(4);
+        }
+        final String finalPath = path;
+        logger.debug("Checking if path should be filtered: {}", finalPath);
         
         // Define public paths that should not be filtered
         final List<String> publicPaths = Arrays.asList(
@@ -187,7 +193,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         boolean shouldExclude = publicPaths.stream().anyMatch(p -> path.startsWith(p)) || 
                request.getMethod().equals("OPTIONS");
                
-        logger.debug("Path {} should be excluded from filtering: {}", path, shouldExclude);
+        logger.debug("Path {} should be excluded from filtering: {}", finalPath, shouldExclude);
         return shouldExclude;
     }
 }
