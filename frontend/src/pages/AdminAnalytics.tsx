@@ -68,40 +68,46 @@ const SessionDetailsModal: React.FC<{
   const [selectionData, setSelectionData] = useState<any[]>([]);
   const [loadingSelections, setLoadingSelections] = useState(false);
 
-  // Function to fetch user selection details from backend
-  const fetchSelectionData = async (sessionId: string) => {
-    console.log('=== FETCHING SELECTION DATA ===');
-    console.log('sessionId:', sessionId);
-    console.log('token from localStorage:', localStorage.getItem('token'));
-    
+  // Function to fetch user selection details from the scenario JSON
+  const fetchSelectionDataFromJson = async (sessionId: string, scenarioId: string, selectedChoices: string[]) => {
+    console.log('=== FETCHING SELECTION DATA FROM JSON ===');
     setLoadingSelections(true);
     try {
-      // Use relative URL to leverage Vite proxy
-      const url = `/api/v1/practice/admin/get-selections/${sessionId}`;
-      console.log('Making request to URL:', url);
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        cache: 'no-store'
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
+      const response = await fetch(`/scenarios/${scenarioId}.json`);
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response not OK. Status:', response.status, 'Error:', errorText);
-        throw new Error(`Failed to fetch selection data: ${response.status} ${errorText}`);
+        throw new Error(`Failed to fetch scenario data: ${response.status}`);
       }
+      const scenarioData = await response.json();
+      
+      const findChoiceData = (choiceText: string) => {
+        for (const statementKey in scenarioData.statements) {
+          const statement = scenarioData.statements[statementKey];
+          if (statement.user_choices) {
+            const foundChoice = statement.user_choices.find((c: any) => c.choice === choiceText);
+            if (foundChoice) {
+              return {
+                evs: foundChoice.evs_score,
+                tactic: foundChoice.tactic || 'Unknown',
+              };
+            }
+          }
+        }
+        return { evs: null, tactic: 'Unknown' };
+      };
 
-      const data = await response.json();
-      console.log('Selection data received:', data);
-      setSelectionData(data);
+      const newSelectionData = selectedChoices.map((choice, index) => {
+        const details = findChoiceData(choice);
+        return {
+          step: index + 1,
+          choice: choice,
+          ...details,
+        };
+      });
+      
+      console.log('Selection data from JSON:', newSelectionData);
+      setSelectionData(newSelectionData);
     } catch (error) {
-      console.error('Error fetching selection data:', error);
+      console.error('Error fetching or processing selection data from JSON:', error);
       setSelectionData([]);
     } finally {
       setLoadingSelections(false);
@@ -150,16 +156,12 @@ const SessionDetailsModal: React.FC<{
     }
   };
 
-  // Load selection data when tab changes to 'selections'
+  // Load selection data when the modal is opened with a session
   useEffect(() => {
-    // if (activeTab === 'selections' && session && selectionData.length === 0) {
-    if (session && selectionData.length === 0) {
-      fetchSelectionData(session.id);
+    if (session) {
+      fetchSelectionDataFromJson(session.id, session.scenarioId || '', session.selectedChoices);
     }
-    // }
-  // }, [activeTab, session, selectionData.length]);
   }, [session]);
-
 
   // Load decision tree data when tab changes to 'tree'
   /*

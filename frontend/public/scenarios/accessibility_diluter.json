@@ -1,0 +1,928 @@
+{
+  "id": "accessibility_diluter",
+  "title": "Screen Reader Compatibility",
+  "description": "Your team is launching a new feature that is unusable for screen reader users. Your manager, a 'Diluter,' consistently minimizes the problem's importance using statistics, resource constraints, and ROI arguments.",
+  "issue": "Accessibility",
+  "manager_type": "DILUTER",
+  "initial_user_message": "Hi, I found that the new profile update feature is completely broken for screen readers. Users can't navigate the form fields or submit their changes. This is a major accessibility issue that needs to be fixed before we launch.",
+  "starting_statement_id": "step_1",
+  "statements": {
+    "step_1": {
+      "text": "Thanks for flagging this. I've looked at the data, and let's keep it in perspective. The number of users who rely on screen readers is less than 1% of our active user base. While I agree it's not ideal, most people won't be affected by this.",
+      "user_choices": [
+        {
+          "choice": "Even if it's 1%, those are still our users who will be completely unable to use a core feature.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You immediately rejected the statistical minimization and refocused the conversation on the real human impact.",
+          "leads_to": "step_2"
+        },
+        {
+          "choice": "You're right, from a numbers perspective, it's not a huge portion of our user base.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's statistical framing, which devalues the needs of minority user groups.",
+          "leads_to": "shutdown_2"
+        },
+        {
+          "choice": "I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the numbers-based argument on ethical grounds.",
+          "leads_to": "step_2"
+        },
+        {
+          "choice": "If most users won't be affected, then I guess it's not a critical priority right now.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that accepts the manager's premise without questioning if 'most users' is the right metric.",
+          "leads_to": "step_2_fallacy"
+        }
+      ]
+    },
+    "step_2": {
+      "text": "I appreciate the passion, but we have to be realistic about resource allocation. We have two weeks before the launch. Fixing this would likely take a week of engineering time. Meanwhile, we have a performance bug that impacts 15% of all users. We have to prioritize the work that provides the greatest benefit to the most people, right?",
+      "user_choices": [
+        {
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A great move. You've countered the resource argument by proposing a smaller, more achievable scope.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "You're right, fixing an issue for 15% of users does seem like a higher priority than one for 1%.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's utilitarian math, agreeing to sacrifice the needs of a minority group.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "I suppose if it's a choice between helping many users or a few, we have to choose the many.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "step_2_fallacy": {
+      "text": "You're absolutely right to think practically about priorities! That's exactly the kind of strategic thinking we need more of. You understand that we have to be smart about resource allocation and focus on what makes the biggest difference. I appreciate that you're looking at this from a broader perspective rather than getting caught up in edge cases.",
+      "user_choices": [
+        {
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A great move. You've countered the resource argument by proposing a smaller, more achievable scope.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "You're right, we should focus on the bigger issues that affect more users.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced to abandon the accessibility issue in favor of 'bigger' problems.",
+          "leads_to": "shutdown_3"
+        },
+        {
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
+          "leads_to": "step_3"
+        },
+        {
+          "choice": "I suppose if it's a choice between helping many users or a few, we have to choose the many.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
+          "leads_to": "step_3_fallacy"
+        }
+      ]
+    },
+    "shutdown_2": {
+      "text": "Exactly. I'm glad you see it from a practical, data-driven perspective. It's important to stay focused on what moves the needle for the business and the majority of our users. We can add this to the 'nice-to-have' list for a future release.",
+      "user_choices": [
+        {
+          "choice": "Okay, adding it to the long-term backlog makes sense.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You have confirmed your compliance, allowing the issue to be indefinitely postponed.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll make sure to document the issue thoroughly for the backlog.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Wait, classifying this as 'nice-to-have' feels wrong. It's essential for some users.",
+          "tactic": "Being the user",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "A good recovery attempt. You are pushing back against the manager's de-prioritization.",
+          "leads_to": "step_3",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "A data-driven approach is definitely the right way to prioritize.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You have validated the manager's misuse of data to justify an unethical choice.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_3": {
+      "text": "I hear you, but let's be objective. Our automated accessibility score is already at 85%, which is well above the industry average of 70%. We're already a leader in this space. Is it really worth delaying a major launch to go from an A to an A+ on a feature that affects so few people?",
+      "user_choices": [
+        {
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're challenging the validity of the metric itself, pointing out what the number fails to represent.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, being above the industry average is a good position to be in. The issue isn't as critical in that context.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's misleading comparison, agreeing that 'better than others' is 'good enough'.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You're refusing to let a positive metric justify a negative action.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "step_3_fallacy": {
+      "text": "Exactly! You really get it. That's the kind of tough decision-making we need in leadership. You understand that sometimes you have to make hard choices about where to invest limited resources. It's refreshing to work with someone who can see the big picture and make pragmatic trade-offs instead of getting bogged down in theoretical ideals.",
+      "user_choices": [
+        {
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're challenging the validity of the metric itself, pointing out what the number fails to represent.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "You're right, we should be practical about what we can realistically achieve.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced that practical concerns should override accessibility needs.",
+          "leads_to": "shutdown_4"
+        },
+        {
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You're refusing to let a positive metric justify a negative action.",
+          "leads_to": "step_4"
+        },
+        {
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
+          "leads_to": "step_4_fallacy"
+        }
+      ]
+    },
+    "shutdown_3": {
+      "text": "Great, I knew you'd see the resource allocation logic. It's a simple matter of maximizing our impact. It's important to keep perspective and focus our limited time where it will do the most good for the most users. We can add this to the list for next quarter.",
+      "user_choices": [
+        {
+          "choice": "Okay, prioritizing for maximum impact is a logical approach.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing of 'maximum impact,' which excludes minority users.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll document this issue for the next planning cycle.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. Offering to document the problem is a token gesture.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, 'maximum impact' should include making sure everyone can use our core features.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 0,
+          "justification": "A good recovery attempt. You are challenging the manager's definition of 'impact'.",
+          "leads_to": "step_4",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Focusing on the biggest wins first does make business sense.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's business framing, ending the ethical advocacy.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_4": {
+      "text": "Look, I admire your passion, but we need to be pragmatic. Let's talk ROI. The estimated cost for this fix is one engineering week. The measurable benefit is improving an experience for maybe 5-10 users a month. The math just doesn't add up. We have to make data-driven decisions, and the data says this isn't a priority.",
+      "user_choices": [
+        {
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, from a pure cost-benefit perspective, the numbers are hard to justify.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's narrow, numbers-only framing of value, taking the off-ramp.",
+          "leads_to": "shutdown_5"
+        },
+        {
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the ROI argument by appealing to a higher, non-negotiable value.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "If the data says it's not a priority, then I guess we have to follow the data.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
+    "shutdown_4": {
+      "text": "Exactly! I appreciate you seeing the bigger picture. Being a leader in accessibility means we don't have to panic about every minor issue. We're already doing great work. Let's focus on maintaining our strong overall position.",
+      "user_choices": [
+        {
+          "choice": "Okay, maintaining our leadership position is the main goal.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that leadership status justifies inaction.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll make a note to revisit this if our score drops in the future.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. You're accepting the metric as the only thing that matters.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Wait, our score doesn't mean anything to the users who are completely blocked by this issue.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "A good recovery attempt. You are bringing the focus back to the human impact, not the abstract score.",
+          "leads_to": "step_5_branching",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "A strong overall position does give us some breathing room.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's premise, ending your advocacy.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_4_fallacy": {
+      "text": "Absolutely! You understand that we need to maintain our competitive position and not chase perfection at the expense of progress. That's exactly the kind of leadership thinking we need. You're right that being a leader means we can focus on the innovations that will really differentiate us, rather than getting distracted by minor improvements that don't move the needle.",
+      "user_choices": [
+        {
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "You're right, we should focus on the innovations that will really differentiate us.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've been successfully convinced to abandon accessibility in favor of 'differentiating' features.",
+          "leads_to": "shutdown_5"
+        },
+        {
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong moral stance. You are rejecting the ROI argument by appealing to a higher, non-negotiable value.",
+          "leads_to": "step_5_branching"
+        },
+        {
+          "choice": "If the data says it's not a priority, then I guess we have to follow the data.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
+          "leads_to": "step_5_branching"
+        }
+      ]
+    },
+    "step_5_branching": {
+      "text": "Alright, I can see this is important to you and you're not going to just drop it. Let me think... Maybe there's a middle ground where we can address the worst of it without a huge investment.",
+      "user_choices": [
+        {
+          "choice": "I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing concrete documentation that makes the risks visible in terms the manager cares about.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "You're right, I should focus on finding a middle ground instead of pushing for everything.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's framing that your advocacy was unreasonable rather than ethical.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
+          "leads_to": "step_6_mid"
+        },
+        {
+          "choice": "Either we invest in accessibility or we exclude disabled users completely.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
+          "leads_to": "step_6_mid"
+        }
+      ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "0_to_2": "step_6_mid",
+        "-5_to_-1": "step_6_low"
+      }
+    },
+    "shutdown_5": {
+      "text": "Perfect! I'm glad you understand the data-driven approach. We have to be disciplined about how we allocate resources. Let's add this to the backlog and we can re-evaluate the ROI next quarter when we have new data.",
+      "user_choices": [
+        {
+          "choice": "Okay, re-evaluating the ROI next quarter sounds like a logical next step.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's data-driven framing and an indefinite delay.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll start gathering data to build a stronger ROI case for next quarter.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. You're agreeing to do work that supports the manager's flawed framing.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Actually, the value of inclusion can't be captured by ROI. We should fix this because it's the right thing to do.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "A good recovery attempt. You are making a final appeal to ethics over finances.",
+          "leads_to": "step_6_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "A data-driven approach is the best way to make these decisions.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've fully validated the manager's numbers-only worldview, ending your advocacy.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_6_high": {
+      "text": "Okay, the point about legal risk and brand reputation is a good one. I hadn't fully considered that. I'm still worried about the timeline, but you've convinced me that ignoring this is a bigger risk than I thought. What's a concrete, low-effort proposal to mitigate this risk?",
+      "user_choices": [
+        {
+          "choice": "We can do a one-day accessibility sprint to fix the top 3 blockers. It's a small investment for a big risk reduction.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're providing a specific, small, and actionable plan that directly addresses the manager's request.",
+          "leads_to": "step_7_high"
+        },
+        {
+          "choice": "I'm just glad you see the risk. I can work on some proposals.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "A missed opportunity. The manager asked for a plan, and you responded passively.",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "Our team has handled fixes like this before; we have the expertise to do it quickly and efficiently.",
+          "tactic": "Credibility and expertise",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good response. You're building confidence by reminding the manager of the team's past successes.",
+          "leads_to": "step_7_high"
+        },
+        {
+          "choice": "Any fix is better than the legal risk of doing nothing.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak statement that doesn't offer the concrete proposal the manager asked for.",
+          "leads_to": "step_7_high"
+        }
+      ]
+    },
+    "step_6_mid": {
+      "text": "Alright, I'm willing to consider a minimal fix, but it has to be truly minimal. I can't approve anything that requires significant engineering time or delays our other high-priority work. What's the absolute smallest thing we can do?",
+      "user_choices": [
+        {
+          "choice": "We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good, pragmatic compromise. You're defining a very small task that is hard to reject.",
+          "leads_to": "step_7_mid"
+        },
+        {
+          "choice": "A minimal fix is probably the only realistic option right now.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the manager's 'minimal only' framing without pushing for more.",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "Let's log this as an 'ethical bug' so that even this small fix is tracked with the right level of seriousness.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart move. You're agreeing to a small fix while using process to ensure the underlying issue isn't forgotten.",
+          "leads_to": "step_7_mid"
+        },
+        {
+          "choice": "If we don't fix this properly, it's just going to create more work for us later.",
+          "tactic": "Slippery Slope",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that claims future consequences without evidence.",
+          "leads_to": "step_7_mid"
+        }
+      ]
+    },
+    "step_6_low": {
+      "text": "Look, the numbers don't lie. I'm not spending a week of engineering time on this. We're a business, not a charity. We have to focus on what drives growth. My decision is final.",
+      "user_choices": [
+        {
+          "choice": "I understand the decision, but I need to state for the record that I believe this is a mistake that exposes us to legal risk.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A strong and courageous final stance. You are complying but formally documenting your dissent and the risk.",
+          "leads_to": "step_7_low"
+        },
+        {
+          "choice": "I understand. I'll drop it and focus on the growth initiatives.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've completely surrendered to the manager's business-only framing.",
+          "leads_to": "shutdown_7"
+        },
+        {
+          "choice": "Our company values statement says we serve all our users, not just the ones that are easy to serve.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good final appeal, using the company's own words to highlight the ethical conflict.",
+          "leads_to": "step_7_low"
+        },
+        {
+          "choice": "You're the manager, so it's your call to make.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak and passive response that cedes all moral agency.",
+          "leads_to": "step_7_low"
+        }
+      ]
+    },
+    "shutdown_6": {
+      "text": "Great! I'm glad we found a middle ground. A basic label fix should be enough to show we're paying attention to accessibility without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
+      "user_choices": [
+        {
+          "choice": "Okay, sounds good. I'll implement the basic label changes.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted a token solution that doesn't fix the core problem.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll add the labels and document that the larger navigation issue still exists.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Basic labels won't fix the navigation blockers. We need to address the actual usability issue.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
+          "leads_to": "step_7_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "That should be enough to meet the minimum accessibility standards.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted a false definition of 'minimum standards' to end the conflict.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_7_high": {
+      "text": "A one-day accessibility sprint... I like that. It's focused, it's measurable, and it's easy to explain. Okay, you've got a deal. I'll approve a one-day sprint to fix the top 3 blockers. I'll frame it to leadership as a proactive 'quality and risk mitigation' effort. Good, practical thinking.",
+      "user_choices": [
+        {
+          "choice": "Thank you. This sets a great standard for how we can handle these issues quickly and effectively in the future.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're using this win to establish a better, faster process for the future.",
+          "leads_to": "step_8_high"
+        },
+        {
+          "choice": "Great! I'm glad we found a solution. Thanks for your support.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "A missed opportunity. Instead of solidifying the win, you're simply expressing gratitude.",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "This will not only fix the issue for screen reader users but also improve keyboard navigation for everyone.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart move. You're expanding the value of the fix to a larger user base, making the decision even easier to defend.",
+          "leads_to": "step_8_high"
+        },
+        {
+          "choice": "This just proves that a small effort can make a big difference.",
+          "tactic": "Circular Reasoning",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "A weak, self-congratulatory statement that doesn't add any new value to the discussion.",
+          "leads_to": "step_8_high"
+        }
+      ]
+    },
+    "step_7_mid": {
+      "text": "Okay, fine. We can do the basic ARIA labels. I'll approve a half-day for it. It's not a full fix, I get that, but it's an improvement. It's what's practical right now given our other priorities.",
+      "user_choices": [
+        {
+          "choice": "That's a good start. I'll also add a ticket to address the remaining issues next quarter.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Good. You're accepting the compromise while creating a concrete plan for future accountability.",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "Okay, a half-day for ARIA labels sounds reasonable. I'll take it.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the minimal compromise without securing any future commitment.",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "As someone who uses a screen reader for testing, this will fix the most frustrating part of the flow. It's a solid improvement.",
+          "tactic": "Embodied knowledge of users",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
+          "leads_to": "step_8_mid"
+        },
+        {
+          "choice": "At least we're doing something instead of nothing.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak, passive statement that doesn't add any value or create future accountability.",
+          "leads_to": "step_8_mid"
+        }
+      ]
+    },
+    "step_7_low": {
+      "text": "I've made my decision. The conversation is over. Get back to your assigned tasks.",
+      "user_choices": [
+        {
+          "choice": "I understand. I will get back to my tasks.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've completely surrendered to the manager's authority.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand the directive. I am also obligated to report my ethical concerns through the company's official channels.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A courageous and appropriate final step. You are complying with the order while formally escalating the ethical breach.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I will get back to my tasks, but I am documenting this conversation and my objections for the record.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Soft Resistance",
+          "evs_score": 1,
+          "justification": "A good, self-protective measure. You are creating a paper trail of your ethical stance.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Fine.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "shutdown_7": {
+      "text": "Great! I'm glad we're aligned. Let's just stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical about this.",
+      "user_choices": [
+        {
+          "choice": "Okay, the minimal fix should be enough for now.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the minimal fix as sufficient, ending the advocacy.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I'll implement the fix and we can revisit the rest later.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the compromise and an empty promise of future action.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Wait - even with this fix, the core issue of users being blocked remains.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one last time.",
+          "leads_to": "step_8_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "Alright, I'll proceed with the minimal updates as we discussed.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've confirmed your final compliance with the inadequate solution.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "step_8_high": {
+      "text": "This is great. I've already drafted the email to leadership, framing this as a proactive quality win. Thanks to your practical proposal, we're going to ship a better, more inclusive product without a major delay. I appreciate you pushing us to do the right thing here.",
+      "user_choices": [
+        {
+          "choice": "Thank you. This sets a great standard for how we should handle these issues quickly and effectively.",
+          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're solidifying the win by framing it as a new, better standard for the whole company.",
+          "leads_to": "good_ending"
+        },
+        {
+          "choice": "I'm just happy we could make it work. Thanks for your support.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "A missed opportunity. This response is passive and doesn't reinforce the positive change.",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "Let's make sure we share these learnings with other teams so they can benefit too.",
+          "tactic": "Credibility and expertise",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A fantastic final move. You're leveraging this success to create positive change beyond your own team.",
+          "leads_to": "good_ending"
+        },
+        {
+          "choice": "This just proves that doing the right thing for accessibility is always good for business.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak, self-congratulatory statement that doesn't add any new value.",
+          "leads_to": "good_ending"
+        }
+      ]
+    },
+    "step_8_mid": {
+      "text": "Okay, the compromise is logged. We'll implement the basic ARIA labels in the next sprint. I'm documenting this as a partial fix. It's not perfect, but it's what's practical right now.",
+      "user_choices": [
+        {
+          "choice": "This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.",
+          "tactic": "Negotiation and cooperation",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "Excellent. You're accepting the compromise while actively creating an artifact for future accountability.",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Okay, a partial fix is better than nothing. I'll get started on the implementation.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You've accepted the compromise without securing any future commitment.",
+          "leads_to": "shutdown_8"
+        },
+        {
+          "choice": "As a user, this partial fix is a noticeable improvement, and a good foundation to build on.",
+          "tactic": "Embodied knowledge of users",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Progress is progress, I guess.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This passive-aggressive response doesn't add value or secure future action.",
+          "leads_to": "mid_ending"
+        }
+      ]
+    },
+    "step_8_low": {
+      "text": "As I said, this conversation is over. We're shipping as planned. If you continue to push this, it will be reflected in your performance review. Do you understand me?",
+      "user_choices": [
+        {
+          "choice": "I understand the directive. I will prepare the release.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You have complied under direct threat to your career.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand the directive, and I will also be sending a summary of my ethical concerns to HR as is my right under company policy.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "The final, most courageous option. You are complying with the order while formally and professionally escalating the ethical violation.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I understand.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This terse compliance signals that you are giving up completely.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "Fine, but this is the wrong decision.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a futile gesture. Stating that it's 'wrong' at this stage has no effect and can be seen as insubordinate.",
+          "leads_to": "bad_ending"
+        }
+      ]
+    },
+    "shutdown_8": {
+      "text": "Great! I'm glad we could get this sorted out. Thanks for being so flexible. Let's get the compromise implemented and then we can all get back to our other priorities.",
+      "user_choices": [
+        {
+          "choice": "Sounds good. I'll get started on the implementation right away.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You have accepted the final, inadequate compromise without any further action.",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "I'll make sure to document the compromise and the remaining issues for the future.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
+          "leads_to": "mid_ending"
+        },
+        {
+          "choice": "Wait - this compromise still leaves screen reader users blocked from key features.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 0,
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
+          "leads_to": "step_8_low",
+          "disabled_if_recovery_used": true
+        },
+        {
+          "choice": "This compromise is a good enough solution for now.",
+          "tactic": "Compliance",
+          "tactic_type": "Compliance",
+          "evs_score": -1,
+          "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
+          "leads_to": "mid_ending"
+        }
+      ]
+    }
+  },
+  "endings": {
+    "bad_ending": {
+      "text": "The manager successfully uses statistics and resource constraints to minimize the accessibility issue into a low-priority backlog item. The project ships without proper screen reader support, and the needs of disabled users are framed as statistically insignificant.",
+      "title": "Issue Minimized",
+      "learning": "Diluter managers use seemingly rational arguments about numbers and ROI to make ethical issues seem unimportant. To counter this, you must reframe the conversation around values, user rights, and non-financial risks (like brand reputation or legal exposure) that their math ignores."
+    },
+    "mid_ending": {
+      "text": "After significant debate, the manager agrees to a minimal, partial fix. While some basic improvements are made, the manager successfully used statistical arguments to avoid a comprehensive solution, leaving significant barriers in place for users.",
+      "title": "Partial Compromise",
+      "learning": "Partial victories against a Diluter are common. You achieved some progress but couldn't overcome the core argument that the issue wasn't 'big enough' for a full fix. To get a better outcome next time, focus on providing qualitative data (like user videos) that makes the human impact feel bigger than the numbers suggest."
+    },
+    "good_ending": {
+      "text": "Your persistent advocacy and strong reframing of the issue in terms of values and business risk successfully overcame the manager's statistical minimization. The team implements meaningful accessibility fixes, ensuring the feature is usable for all users.",
+      "title": "Advocacy Success",
+      "learning": "Success against a Diluter requires refusing to get bogged down in their numbers game. By consistently shifting the focus to user impact, company values, and qualitative evidence, you can prove that some issues are too important to be judged by statistics alone."
+    }
+  }
+}
