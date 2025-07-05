@@ -207,6 +207,7 @@ const SessionDetailsModal: React.FC<{
             >
               📊 User Selections
             </button>
+            {/* Temporarily disabled decision tree tab
             <button
               onClick={() => setActiveTab('tree')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
@@ -217,6 +218,7 @@ const SessionDetailsModal: React.FC<{
             >
               🌳 Decision Tree
             </button>
+            */}
           </div>
         </div>
 
@@ -321,8 +323,8 @@ const SessionDetailsModal: React.FC<{
             </div>
           )}
 
-          {/* Decision Tree Tab */}
-          {activeTab === 'tree' && (
+          {/* Decision Tree Tab - Temporarily disabled */}
+          {false && activeTab === 'tree' && (
             <div className="space-y-6">
               <h4 className="text-lg font-medium mb-4">Decision Tree Analysis</h4>
               <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-6">

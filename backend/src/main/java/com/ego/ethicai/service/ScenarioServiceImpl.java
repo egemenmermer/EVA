@@ -191,7 +191,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         String category = tacticNode != null ? tacticNode.asText() : 
                          (tacticTypeNode != null ? tacticTypeNode.asText() : "Unknown");
         
-        // Handle EVS score
+        // Handle EVS score - support both evs_score and EVS field names
         JsonNode evsNode = selectedChoice.get("evs_score");
         if (evsNode == null) {
             evsNode = selectedChoice.get("EVS");
@@ -630,7 +630,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         return String.format(
             "Great work completing this scenario! Here's your comprehensive performance summary:\n\n" +
-            "📊 **Final Score: %.1f/8 (%s)**\n" +
+            "📊 **Final Score: %d/8 (%s)**\n" +
             "🎯 Total EVS Points: %d/%d\n" +
             "📋 Decisions Made: %d\n\n" +
             "🎭 **Tactics Analysis:**\n" +
@@ -640,7 +640,7 @@ public class ScenarioServiceImpl implements ScenarioService {
             "💡 **Overall Feedback:** %s\n\n" +
             "Your tactical approach shows %s. %s\n\n" +
             "Thank you for practicing ethical decision-making with EVA!",
-            finalScore, scoreCategory, rawEvs, maxPossibleEvs, numChoices,
+            rawEvs, scoreCategory, rawEvs, maxPossibleEvs, numChoices,
             totalTacticsUsed, uniqueTacticsUsed, mostUsedTactic, mostUsedCount,
             strongDecisions, passiveDecisions, complianceDecisions, feedback,
             uniqueTacticsUsed >= 6 ? "excellent diversity and adaptability" : 
