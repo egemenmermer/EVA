@@ -72,24 +72,21 @@ const SessionDetailsModal: React.FC<{
   const fetchSelectionData = async (sessionId: string) => {
     console.log('=== FETCHING SELECTION DATA ===');
     console.log('sessionId:', sessionId);
-    console.log('token from localStorage:', localStorage.getItem('token'));
     
     setLoadingSelections(true);
     try {
       // Use relative URL to leverage Vite proxy
       const url = `/api/v1/practice/admin/practice-sessions/${sessionId}/selections`;
-      console.log('Making request to URL:', url);
       
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache' // Force validation with server
+        },
+        cache: 'force-cache' // Use browser's HTTP cache
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Response not OK. Status:', response.status, 'Error:', errorText);
@@ -97,7 +94,6 @@ const SessionDetailsModal: React.FC<{
       }
 
       const data = await response.json();
-      console.log('Selection data received:', data);
       setSelectionData(data);
     } catch (error) {
       console.error('Error fetching selection data:', error);

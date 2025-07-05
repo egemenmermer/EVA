@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -173,6 +174,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
 
     @Override
     @Transactional
+    @Cacheable(value = "practiceSelections", key = "#sessionId")
     public List<SelectionDataDTO> getUserSelections(UUID sessionId) {
         log.info("Getting user selections for session: {}", sessionId);
         
@@ -193,10 +195,9 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                     .tactic(choice.getTactic())
                     .build())
                 .collect(Collectors.toList());
-                
         } catch (Exception e) {
-            log.error("Error getting user selections for session {}: {}", sessionId, e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve user selections", e);
+            log.error("Error getting user selections: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
