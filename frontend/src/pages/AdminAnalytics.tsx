@@ -68,6 +68,13 @@ const SessionDetailsModal: React.FC<{
   const [selectionData, setSelectionData] = useState<any[]>([]);
   const [loadingSelections, setLoadingSelections] = useState(false);
 
+  // Load selection data when tab changes to 'selections'
+  useEffect(() => {
+    if (activeTab === 'selections' && session) {
+      fetchSelectionData(session.id);
+    }
+  }, [activeTab, session?.id]); // Only depend on session.id, not the entire session object
+
   // Function to fetch user selection details from backend
   const fetchSelectionData = async (sessionId: string) => {
     console.log('=== FETCHING SELECTION DATA ===');
@@ -81,10 +88,8 @@ const SessionDetailsModal: React.FC<{
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache' // Force validation with server
-        },
-        cache: 'force-cache' // Use browser's HTTP cache
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
