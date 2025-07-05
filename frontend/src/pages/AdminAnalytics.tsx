@@ -154,7 +154,7 @@ const SessionDetailsModal: React.FC<{
     if (activeTab === 'selections' && session && selectionData.length === 0) {
       fetchSelectionData(session.id);
     }
-  }, [activeTab, session, selectionData.length]);
+  }, [activeTab, session]);
 
   // Load decision tree data when tab changes to 'tree'
   useEffect(() => {
