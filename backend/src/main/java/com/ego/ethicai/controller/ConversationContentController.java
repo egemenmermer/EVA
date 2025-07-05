@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/conversation")
-@RequiredArgsConstructor
 public class ConversationContentController {
     
     private static final Logger logger = LoggerFactory.getLogger(ConversationContentController.class);
@@ -44,6 +43,22 @@ public class ConversationContentController {
     private final AIService aiService;
     private final AgentServiceClient agentServiceClient;
     private final RagArtifactService ragArtifactService;
+
+    @Autowired
+    public ConversationContentController(
+            ConversationContentService conversationContentService,
+            ConversationContentRepository conversationContentRepository,
+            ConversationService conversationService,
+            AIService aiService,
+            AgentServiceClient agentServiceClient,
+            @Autowired(required = false) RagArtifactService ragArtifactService) {
+        this.conversationContentService = conversationContentService;
+        this.conversationContentRepository = conversationContentRepository;
+        this.conversationService = conversationService;
+        this.aiService = aiService;
+        this.agentServiceClient = agentServiceClient;
+        this.ragArtifactService = ragArtifactService;
+    }
 
     @PostMapping("/message")
     public ResponseEntity<ConversationContentResponseDTO> createMessage(
