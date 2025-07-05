@@ -170,7 +170,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         logger.debug("Checking if path should be filtered: {}", path);
-
+        
         // Define public paths that should not be filtered
         final List<String> publicPaths = Arrays.asList(
             "/api/v1/auth/login",
@@ -185,8 +185,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         );
 
         boolean shouldExclude = publicPaths.stream().anyMatch(p -> path.startsWith(p)) || 
-                                request.getMethod().equals("OPTIONS");
-                               
+               request.getMethod().equals("OPTIONS");
+               
         logger.debug("Path {} should be excluded from filtering: {}", path, shouldExclude);
         return shouldExclude;
     }

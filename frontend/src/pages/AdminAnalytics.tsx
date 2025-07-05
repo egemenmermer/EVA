@@ -91,7 +91,7 @@ const SessionDetailsModal: React.FC<{
           'Content-Type': 'application/json'
         }
       });
-
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Response not OK. Status:', response.status, 'Error:', errorText);
@@ -398,7 +398,7 @@ const SessionDetailsModal: React.FC<{
                                         </p>
                                       </div>
                                     </div>
-
+                                    
                                     <div className="flex-shrink-0 text-right">
                                       <div className="text-xs text-gray-400 mb-1">
                                         EVS Score: <span className="font-bold">{alt.evs}</span>
@@ -542,8 +542,8 @@ const SessionDetailsModal: React.FC<{
                   >
                     Try Again
                   </button>
-                </div>
-              )}
+            </div>
+          )}
             </div>
           )} */}
         </div>

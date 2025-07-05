@@ -511,13 +511,13 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
               ${showKnowledgePanel ? 'translate-x-0' : 'translate-x-full'}
             `}
             aria-label="Knowledge Panel"
-          >
+            >
             {currentConversation?.conversationId && (
-              <GuidelinesPanel 
+            <GuidelinesPanel 
                 key={currentConversation.conversationId} 
                 onClose={handleKnowledgePanelToggle}
-                onNewKnowledge={handleNewKnowledge}
-              />
+              onNewKnowledge={handleNewKnowledge}
+            />
             )}
           </aside>
         </div>
