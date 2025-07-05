@@ -20,7 +20,7 @@ const agentApi = axios.create({
 
 // Remove AxiosInstance type
 const backendApi = axios.create({
-  baseURL: '/api',
+  baseURL: '/',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',

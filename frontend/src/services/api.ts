@@ -7,7 +7,8 @@ import type {
   ConversationContentResponseDTO,
   SendMessageRequestDTO,
   FeedbackResponseDTO,
-  ActivationResponseDTO
+  ActivationResponseDTO,
+  TokenVerificationResponse
 } from '@/types/api';
 import { Message } from '@/types/conversation';
 import { generateConversationTitle } from '@/utils/titleGenerator';
@@ -16,6 +17,8 @@ import { useStore } from '@/store/useStore';
 import api from './axiosConfig';
 import { agentApi, backendApi } from './axiosConfig';
 import { Conversation } from '@/types/conversation';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8443';
 
 // Default manager type to use for mock conversations
 const DEFAULT_MANAGER_TYPE: ManagerType = 'PUPPETEER';
@@ -162,7 +165,7 @@ export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponseDTO> => {
     try {
       console.log('Attempting login for:', email);
-      const response = await backendApi.post<LoginResponseDTO>('/api/v1/auth/login', { email, password });
+      const response = await axios.post<LoginResponseDTO>(`${BACKEND_URL}/api/v1/auth/login`, { email, password });
       console.log('Login successful:', response.data.userDetails.email);
       
       // Store token with Bearer prefix
@@ -191,7 +194,7 @@ export const authApi = {
   register: async (email: string, password: string, fullName: string): Promise<RegisterResponseDTO> => {
     try {
       console.log('Attempting registration with:', { email, fullName });
-      const response = await backendApi.post<RegisterResponseDTO>('/api/v1/auth/register', { 
+      const response = await axios.post<RegisterResponseDTO>(`${BACKEND_URL}/api/v1/auth/register`, { 
         email, 
         password, 
         fullName 
@@ -211,12 +214,14 @@ export const authApi = {
   logout: async (): Promise<void> => {
     console.log('Logging out user');
     localStorage.removeItem('token');
+    console.log("Logged out, token removed, redirecting to /login");
+    window.location.href = '/login';
   },
   
   activate: async (token: string): Promise<ActivationResponseDTO> => {
     try {
       console.log('Activating account with token:', token.substring(0, 10) + '...');
-      const response = await backendApi.post('/api/v1/auth/activate', { token });
+      const response = await axios.get(`${BACKEND_URL}/api/v1/auth/activate?token=${token}`);
       console.log('Activation response:', response.data);
       return response.data;
     } catch (error: any) {
@@ -232,7 +237,7 @@ export const authApi = {
   oauth2Callback: async (provider: string, code: string): Promise<{ token: string; user: any }> => {
     try {
       console.log(`Processing ${provider} OAuth callback`);
-      const response = await backendApi.post(`/auth/oauth2/${provider}/callback`, { code });
+      const response = await axios.post(`${BACKEND_URL}/api/v1/auth/oauth2/${provider}/callback`, { code });
       return response.data;
     } catch (error) {
       console.error('OAuth callback failed:', error);
@@ -241,15 +246,20 @@ export const authApi = {
   },
 
   submitManagerTypeQuiz: async (quizData: {
-    userId: string;
-    responses: Array<{
-      questionId: number;
-      score: number;
-      managerTypeSignal: string;
-    }>;
+    answers: Record<string, string | number>;
   }): Promise<{ determinedManagerType: string; message: string; success: boolean }> => {
-    const response = await backendApi.post('/api/v1/manager-type-quiz/submit', quizData);
+    const response = await axios.post(`${BACKEND_URL}/api/v1/manager-type-quiz/submit`, quizData);
     return response.data;
+  },
+
+  resendActivation: async (email: string): Promise<{ message: string }> => {
+    try {
+      const response = await axios.post<{ message: string }>(`${BACKEND_URL}/api/v1/auth/resend-activation`, { email });
+      return response.data;
+    } catch (error) {
+      console.error('Resend activation failed:', error);
+      throw error;
+    }
   }
 };
 
@@ -267,16 +277,16 @@ const createMockConversation = (managerType: ManagerType): ConversationResponseD
 // Conversation API methods
 export const conversationApi = {
   getConversations: async (): Promise<ConversationResponseDTO[]> => {
-    debugRequest('GET', '/api/v1/conversation');
+    debugRequest('GET', '/v1/conversation');
     
     try {
       // Ensure auth header is set
       setAuthHeader();
       
-      const response = await backendApi.get<ConversationResponseDTO[]>('/api/v1/conversation');
+      const response = await axios.get<ConversationResponseDTO[]>(`${BACKEND_URL}/api/v1/conversation`);
       const conversations = response.data;
       
-      debugResponse('GET', '/api/v1/conversation', 200, conversations);
+      debugResponse('GET', '/v1/conversation', 200, conversations);
       
       // Return empty array if no conversations instead of mock data
       if (!conversations || (Array.isArray(conversations) && conversations.length === 0)) {
@@ -296,7 +306,7 @@ export const conversationApi = {
       console.log('Creating conversation with manager type:', managerType);
       setAuthHeader();
       
-      const response = await backendApi.post<ConversationResponseDTO>('/api/v1/conversation', {
+      const response = await axios.post<ConversationResponseDTO>(`${BACKEND_URL}/api/v1/conversation`, {
         managerType,
         title: 'New Conversation' // Add a default title
       });
@@ -309,140 +319,97 @@ export const conversationApi = {
     }
   },
   
-  getConversationMessages: async (conversationId: string): Promise<Message[]> => {
-    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
-    
+  getConversationContents: async (conversationId: string): Promise<ConversationContentResponseDTO[]> => {
+    debugRequest('GET', `/v1/conversation/${conversationId}`);
     try {
       setAuthHeader();
-      
-      // Expecting an array of DTOs, each representing a single message
-      const response = await backendApi.get<ConversationContentResponseDTO[]>(`/api/v1/conversation/message/${conversationId}`);
-      
-      if (!Array.isArray(response.data)) {
-        console.error("Invalid response format: expected an array", response.data);
-        return [];
-      }
-      
-      // Map the DTOs directly to the Message format
-      const messages: Message[] = response.data.map(dto => ({
-        id: dto.id || uuid(), // Use ID from DTO if available
-        role: dto.role as 'user' | 'assistant', // Assert the role type
-        content: dto.content || dto.userQuery || dto.agentResponse || '', // Use content field primarily
-        conversationId: dto.conversationId,
-        createdAt: dto.createdAt || new Date().toISOString()
-      }));
-      
-      // Sort messages by createdAt just in case they are out of order
-      messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      
-      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, 200, messages);
-      return messages;
-    } catch (error) {
-      console.error(`Error getting messages for conversation ${conversationId}:`, error);
-      // Return empty array on error to prevent UI crashes
-      return []; 
-    }
-  },
-  
-  sendMessage: async (
-    conversationId: string, 
-    content: string,
-    temperature?: number,
-    request_type?: string
-  ): Promise<any> => {
-    debugRequest('POST', '/api/v1/conversation/message', { conversationId, content, temperature, request_type });
-    
-    try {
-      setAuthHeader();
-      
-      const payload = {
-        conversationId,
-        userQuery: content,
-        managerType: getManagerType(),
-        temperature: temperature || 0.7,
-        request_type: request_type || "initial_query"
-      };
-
-      // Make the request to our agent
-      console.log('Making request to agent API with payload:', payload);
-      const response = await agentApi.post('/api/v1/conversation/message', payload);
-      console.log('Agent API response:', response.status, response.data);
-      debugResponse('POST', '/api/v1/conversation/message', response.status, response.data);
-      
+      const response = await axios.get<ConversationContentResponseDTO[]>(`${BACKEND_URL}/api/v1/conversation/${conversationId}`);
+      debugResponse('GET', `/v1/conversation/${conversationId}`, 200, response.data);
       return response.data;
     } catch (error) {
-      console.error('Error calling sendMessage:', error);
-      throw error; // Let the UI handle the error
+      console.error(`Error getting contents for conversation ${conversationId}:`, error);
+      throw error;
     }
   },
-  
-  updateConversationTitle: async (conversationId: string, title: string): Promise<string> => {
+
+  sendMessage: async (conversationId: string, message: SendMessageRequestDTO): Promise<Message> => {
     try {
-      console.log('Updating title for conversation:', conversationId);
+      console.log(`Sending message to conversation ${conversationId}`);
       setAuthHeader();
-      
-      // Don't update title for draft conversations
-      if (!conversationId || conversationId.startsWith('draft-')) {
-        return title;
-      }
-      
-      const response = await backendApi.post<{title: string}>(`/api/v1/conversation/${conversationId}/update-title`, {
-        title
+      const response = await axios.post<Message>(`${BACKEND_URL}/api/v1/conversation/${conversationId}`, message);
+      console.log('Received response from send message:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Send message error:', error);
+      throw error;
+    }
+  },
+
+  updateMessageDraft: async (conversationId: string, messageId: number, draft: string) => {
+    try {
+      setAuthHeader();
+      const response = await axios.put(`${BACKEND_URL}/api/v1/conversation/${conversationId}/messages/${messageId}`, {
+        draft,
       });
-      
-      console.log('Title updated:', response.data.title);
-      return response.data.title;
-    } catch (error) {
-      console.error('Failed to update title:', error);
-      throw error;
-    }
-  },
-  
-  deleteConversation: async (conversationId: string): Promise<void> => {
-    try {
-      console.log('Deleting conversation:', conversationId);
-      
-      // Send delete request directly to Java backend to ensure database deletion
-      await backendApi.delete(`/api/v1/conversation/${conversationId}`);
-      console.log('Successfully deleted conversation from backend database:', conversationId);
-      
-      // Clear local storage for this conversation
-      localStorage.removeItem(`messages_${conversationId}`);
-      localStorage.removeItem(`messages-${conversationId}`);
-      localStorage.removeItem(`backup_messages_${conversationId}`);
-      localStorage.removeItem(`exact_messages_${conversationId}`);
-      localStorage.removeItem(`artifacts-${conversationId}`);
-    } catch (error) {
-      console.error('Error in deleteConversation:', error);
-      throw error;
-    }
-  },
-
-  getMessages: async (conversationId: string): Promise<any> => {
-    debugRequest('GET', `/api/v1/conversation/message/${conversationId}`);
-    
-    try {
-      const response = await api.get(`/api/v1/conversation/message/${conversationId}`);
-      debugResponse('GET', `/api/v1/conversation/message/${conversationId}`, response.status, response.data);
-      
       return response.data;
     } catch (error) {
-      console.error(`Error fetching messages for conversation ${conversationId}:`, error);
-      return [];
+      console.error('Error updating message draft:', error);
+      throw error;
     }
   },
 
-  getAllMessages: async (): Promise<ConversationContentResponseDTO[]> => {
-    // Implementation needed
-    throw new Error("Method not implemented");
-  }
+  submitFinalizedMessage: async (conversationId: string, messageId: number, content: string) => {
+    try {
+      setAuthHeader();
+      const response = await axios.post(`${BACKEND_URL}/api/v1/conversation/${conversationId}/messages/${messageId}/finalize`, {
+        content,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error finalizing message:', error);
+      throw error;
+    }
+  },
+
+  deleteMessage: async (conversationId: string, messageId: number) => {
+    try {
+      setAuthHeader();
+      const response = await axios.delete(`${BACKEND_URL}/api/v1/conversation/${conversationId}/messages/${messageId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      throw error;
+    }
+  },
+
+  updateTitle: async (conversationId: string, title: string) => {
+    try {
+      setAuthHeader();
+      const response = await axios.put(`${BACKEND_URL}/api/v1/conversation/${conversationId}/title`, { title });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating title:', error);
+      throw error;
+    }
+  },
+
+  deleteConversation: async (conversationId: string) => {
+    try {
+      setAuthHeader();
+      const response = await axios.delete(`${BACKEND_URL}/api/v1/conversation/${conversationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      throw error;
+    }
+  },
 };
 
 // Feedback API
 export const feedbackApi = {
   getFeedback: async (conversationId: string): Promise<FeedbackResponseDTO> => {
     try {
-      const response = await api.get<FeedbackResponseDTO>(`/feedback/${conversationId}`);
+      const response = await axios.get<FeedbackResponseDTO>(`${BACKEND_URL}/api/feedback/${conversationId}`);
       return response.data;
     } catch (error) {
       console.error('Get feedback error:', error);
@@ -451,264 +418,65 @@ export const feedbackApi = {
   }
 };
 
-// Helper function to generate IDs
-const generateId = () => {
-  return crypto.randomUUID?.() || `msg-${Date.now()}`;
-};
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 const AGENT_URL = import.meta.env.VITE_AGENT_URL || 'http://localhost:5001';
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
-// Agent API calls
-export const createConversation = async (title: string, managerType?: ManagerType) => {
-  setAuthHeader();
-  const response = await axios.post(`${API_URL}/api/v1/conversation`, {
-    title,
-    managerType: managerType || getManagerType()
-  });
-  return response.data;
-};
-
-export const getConversations = async () => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/api/v1/conversation`);
-  return response.data;
-};
-
-export const getConversationMessages = async (conversationId: string) => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/api/v1/conversation/message/${conversationId}`);
-  return response.data;
-};
-
-export const sendMessage = async (
-  conversationId: string,
-  content: string,
-  managerType?: ManagerType,
-  temperature?: number,
-  request_type?: string
-) => {
-  try {
-    console.log(`Sending message to conversation ${conversationId}`);
-    
-    // Check if the conversation exists
-    const conversationExists = await checkConversationExists(conversationId);
-    
-    // If conversation doesn't exist, create a new one
-    if (!conversationExists) {
-      console.log(`Conversation ${conversationId} not found, creating a new one`);
-      const title = `Chat with ${managerType || 'EVA'}`;
-      const newConversation = await createConversation(title, managerType) as unknown as { conversationId: string };
-      console.log('Created new conversation:', newConversation);
-      conversationId = newConversation.conversationId;
-    }
-    
-    const payload = {
-      conversationId,
-      userQuery: content,
-      managerType: managerType || getManagerType(),
-      temperature: temperature || 0.7,
-      request_type: request_type || "initial_query"
-    };
-
-    console.log('Sending message payload:', payload);
-    
-    const response = await agentApi.post(
-      '/api/v1/conversation/message',
-      payload
-    );
-
-    console.log('Message sent, response:', response);
-    return response.data;
-  } catch (error) {
-    console.error('Error sending message:', error);
-    throw error;
-  }
-};
-
-export const togglePracticeMode = async (conversationId: string, enter: boolean) => {
-  setAuthHeader();
-  const response = await axios.post(`${API_URL}/practice-mode`, {
-    conversationId,
-    enter
-  });
-  return response.data;
-};
-
-export const startScenario = async (conversationId: string, scenarioId: string) => {
-  setAuthHeader();
-  const response = await axios.post(`${API_URL}/scenarios/${scenarioId}/start`, {
-    sessionId: conversationId
-  });
-  return response.data;
-};
-
-export const submitResponse = async (conversationId: string, scenarioId: string, choiceIndex: number, currentStatementId: string) => {
-  setAuthHeader();
-  const response = await axios.post(`${API_URL}/scenarios/${scenarioId}/next`, {
-    sessionId: conversationId,
-    choiceIndex: choiceIndex,
-    currentStatementId: currentStatementId
-  });
-  return response.data;
-};
-
-export const getAvailableScenarios = async () => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/scenarios`);
-  return response.data;
-};
-
-export const suggestScenarioForQuery = async (userQuery: string) => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/scenarios/suggest`, {
-    params: { userQuery }
-  });
-  return response.data;
-};
-
-export const getScenarioFeedback = async (scenarioId: string, sessionId: string) => {
-  setAuthHeader();
-  const response = await axios.get(`${API_URL}/scenarios/${scenarioId}/feedback`, {
-    params: { sessionId }
-  });
-  return response.data;
-};
-
-interface KnowledgeArtifactsResponse {
-  guidelines: Array<{
-    id: string;
-    title: string;
-    description: string;
-    source: string;
-    category: string;
-    relevance: number;
-  }>;
-  caseStudies: Array<{
-    id: string;
-    title: string;
-    summary: string;
-    outcome: string;
-    source: string;
-    relevance: number;
-  }>;
-}
-
-// UPDATED getKnowledgeArtifacts function with improved endpoint handling
-export const getKnowledgeArtifacts = async (conversationId: string): Promise<KnowledgeArtifactsResponse> => {
-  try {
-    // Skip invalid conversation IDs
-    if (!conversationId || conversationId.startsWith('draft-') || conversationId.includes('mock')) {
-      console.log(`Skipping knowledge artifacts fetch for invalid conversationId: ${conversationId}`);
-      return { guidelines: [], caseStudies: [] };
-    }
-    
-    // First check local cache
-    try {
-      const cachedData = localStorage.getItem(`artifacts-${conversationId}`);
-      if (cachedData) {
-        const parsedCache = JSON.parse(cachedData);
-        const cacheAge = new Date().getTime() - new Date(parsedCache.timestamp).getTime();
-        // Use a shorter cache time (3 minutes) to ensure fresher data
-        if (cacheAge < 3 * 60 * 1000 && 
-            (parsedCache.guidelines?.length > 0 || parsedCache.caseStudies?.length > 0)) {
-          console.log(`Using cached artifacts for ${conversationId}, cache age: ${Math.round(cacheAge/1000)}s`);
-          return {
-            guidelines: parsedCache.guidelines || [],
-            caseStudies: parsedCache.caseStudies || []
-          };
-        } else {
-          console.log(`Cache expired for ${conversationId}, fetching fresh data`);
-          // Don't return here, continue to fetch fresh data
-        }
-      }
-    } catch (cacheError) {
-      console.warn('Failed to read artifact cache:', cacheError);
-      // Continue to fetch from API
-    }
-    
-    // Validate UUID format - required for backend API
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const isUuid = uuidPattern.test(conversationId);
-    if (!isUuid) {
-        console.warn(`Cannot fetch artifacts for non-UUID conversation ID: ${conversationId}`);
-        return { guidelines: [], caseStudies: [] }; 
-    }
-
-    // Fetch from backend database using backendApi instance
-    console.log(`Fetching knowledge artifacts for UUID: ${conversationId} from backend`);
-    const timestamp = new Date().getTime(); // Cache buster
-    
-    // Define the endpoint relative to the backend base URL
-    const endpointPath = `/api/v1/knowledge-artifacts/${conversationId}`;
-    
-    try {
-      // Use backendApi which already has the base URL (8443) and interceptors
-      const response = await backendApi.get<KnowledgeArtifactsResponse>(endpointPath, {
-        params: { _: timestamp } // Add cache buster as query param
-      });
-      
-      console.log(`Artifact fetch from backend: Status ${response.status}`);
-      
-      if (response.data && Array.isArray(response.data.guidelines) && Array.isArray(response.data.caseStudies)) {
-        // Cache the valid results
-        try {
-          localStorage.setItem(`artifacts-${conversationId}`, JSON.stringify({
-            guidelines: response.data.guidelines || [],
-            caseStudies: response.data.caseStudies || [],
-            timestamp: new Date().toISOString()
-          }));
-          console.log(`Cached artifacts for ${conversationId}`);
-        } catch (err) {
-          console.warn('Failed to cache artifacts to localStorage');
-        }
-        
-        // Return the successful data
-        return {
-          guidelines: response.data.guidelines || [],
-          caseStudies: response.data.caseStudies || []
-        };
-      } else {
-        console.warn(`Malformed artifact data from backend`, response.data);
-      }
-    } catch (error: any) {
-      // Axios errors have a response object
-      if (error.response) {
-        console.warn(`Backend artifact fetch failed with status ${error.response.status}`);
-        if (error.response.status === 404) {
-          console.log(`No artifacts found at backend endpoint ${endpointPath}.`);
-        }
-      } else {
-        console.error(`Error fetching artifacts from backend endpoint ${endpointPath}:`, error);
-      }
-    }
-    
-    // If the fetch failed
-    console.warn(`Artifact fetch failed for ${conversationId}.`);
-    return { guidelines: [], caseStudies: [] };
-
-  } catch (error) {
-    // Catch any unexpected errors
-    console.error('Unexpected error in getKnowledgeArtifacts:', error);
+export const getKnowledgeArtifacts = async (
+  conversationId: string
+): Promise<{ guidelines: any[]; caseStudies: any[] }> => {
+  if (!conversationId) {
+    console.warn('Cannot fetch artifacts without a conversationId');
     return { guidelines: [], caseStudies: [] };
   }
+
+  // Define the endpoint relative to the backend base URL
+  const endpointPath = `/v1/knowledge-artifacts/${conversationId}`;
+
+  try {
+    // Use backendApi which already has the base URL (8443) and interceptors
+    const response = await axios.get<any>(`${BACKEND_URL}/api${endpointPath}`, {
+      params: { _: new Date().getTime() }, // Add cache buster as query param
+    });
+
+    console.log(`Artifact fetch from backend: Status ${response.status}`);
+
+    if (
+      response.data &&
+      Array.isArray(response.data.guidelines) &&
+      Array.isArray(response.data.caseStudies)
+    ) {
+      // Return the successful data
+      return {
+        guidelines: response.data.guidelines || [],
+        caseStudies: response.data.caseStudies || [],
+      };
+    } else {
+      console.warn(`Malformed artifact data from backend`, response.data);
+    }
+  } catch (err: any) {
+    if (err.response) {
+      console.error(
+        `Error fetching artifacts from backend: ${err.response.status}`,
+        err.response.data
+      );
+    } else {
+      console.error('Network or other error fetching artifacts:', err.message);
+    }
+  }
+
+  // Fallback to returning empty artifacts if anything goes wrong
+  return { guidelines: [], caseStudies: [] };
 };
 
-interface TokenVerificationResponse {
-  valid?: boolean;
-  status?: string;
-}
-
-// Auth API calls
 export const login = authApi.login;
 export const logout = authApi.logout;
+
 export const verifyToken = async (): Promise<boolean> => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return false;
 
-    const response = await backendApi.get<TokenVerificationResponse>('/api/v1/auth/verify-token', {
+    const response = await axios.get<TokenVerificationResponse>(`${BACKEND_URL}/api/v1/auth/verify-token`, {
       headers: { Authorization: token }
     });
 
@@ -732,171 +500,13 @@ axios.interceptors.response.use(
   }
 );
 
-// Keep the original checkConversationExists that calls the backend
-export const checkConversationExists = async (conversationId: string): Promise<boolean> => {
-  try {
-    // Assuming backendApi is configured for the Java backend
-    const response = await backendApi.get<Conversation>(`/api/v1/conversation/${conversationId}`);
-    // Check if the response data includes the conversationId, indicating it exists
-    return response?.data?.conversationId === conversationId;
-  } catch (error: any) {
-    // If the error is a 404, the conversation doesn't exist
-    if (error.response && error.response.status === 404) {
-        return false;
-    }
-    // Log other errors but assume it might exist or there's another issue
-    console.error('Error checking conversation existence:', error);
-    return false; // Default to false on unexpected errors
-  }
-};
-
-// Define the expected response structure (including optional fields)
-interface CreateConversationResponse {
-  conversationId: string;
-  userId?: string;
-  title?: string;
-  managerType?: ManagerType; // Use imported ManagerType
-  createdAt?: string;
-  updatedAt?: string;
-  persisted?: boolean;
-}
-
-/**
- * Creates a new conversation via the agent service.
- * @param managerType The manager persona to use for the conversation.
- * @param title Optional initial title for the conversation.
- * @returns A promise resolving to the conversation creation response.
- */
-export const agentCreateConversation = async (
-  userId: string,
-  managerType: ManagerType,
-  title?: string
-): Promise<CreateConversationResponse> => {
-  console.log(`Creating conversation via agent with manager type: ${managerType} and title: ${title}`);
-  try {
-    // Ensure userId is provided
-    if (!userId) {
-        console.error("agentCreateConversation called without a userId!");
-        // Throw an error or return a specific error object if desired
-        // For now, let's proceed but log the error, relying on backend validation
-        // throw new Error("User ID is required to create a conversation with the agent.");
-    }
-
-    const payload = {
-      title: title || `New Conversation - ${new Date().toISOString()}`,
-      managerType: managerType || DEFAULT_MANAGER_TYPE,
-      userId: userId, // Use the passed userId
-    };
-
-    console.log("Attempting to create conversation with agent. Payload:", payload);
-
-    const response = await agentApi.post<CreateConversationResponse>('/api/v1/conversation', payload);
-    console.log('Conversation created via agent:', response.data);
-    // Ensure all necessary fields are handled, fall back where needed
-    return { 
-      conversationId: response.data.conversationId,
-      userId: response.data.userId, 
-      managerType: response.data.managerType || managerType, 
-      title: response.data.title || title, 
-      createdAt: response.data.createdAt,
-      updatedAt: response.data.updatedAt, 
-      persisted: response.data.persisted ?? false 
-    };
-  } catch (error) {
-    console.error('Error creating conversation via agent:', error);
-    // Re-throw the error so the caller can handle it
-    throw error; 
-  }
-};
-
-interface SaveMessagePayload {
-  conversationId: string;
-  messageId: string;
-  content: string;
-  role: 'user' | 'assistant';
-}
-
-/**
- * Sends a single message to the backend for saving.
- * Uses the dedicated /save endpoint.
- */
-export const saveMessage = async (payload: SaveMessagePayload): Promise<void> => {
-  console.log(`Saving message ${payload.role} with ID ${payload.messageId} for conversation ${payload.conversationId}`);
-  try {
-    setAuthHeader(); // Ensure auth header is set
-    // Use backendApi which should be configured for the Java backend
-    const response = await backendApi.post('/api/v1/conversation/message/save', payload);
-    console.log(`Save message response status: ${response.status}`);
-    if (response.status < 200 || response.status >= 300) {
-        console.warn('Backend responded with non-success status for save message:', response.status, response.data);
-    }
-  } catch (error) {
-    console.error('Error saving message to backend:', payload, error);
-    // Decide if you want to re-throw or handle silently
-    // throw error; // Option: re-throw to let caller handle
-  }
-};
-
-export const savePracticeSession = async (
-  userId: string,
-  managerType: string,
-  scenarioId: string | null,
-  selectedChoices: string[],
-  score?: number
-) => {
+export const getAdminAnalytics = async () => {
   try {
     setAuthHeader();
-    const response = await backendApi.post('/api/v1/practice/save', {
-      userId,
-      managerType,
-      scenarioId: scenarioId || undefined,
-      selectedChoices,
-      timestamp: new Date().toISOString(),
-      score
-    });
+    const response = await axios.get(`${BACKEND_URL}/api/v1/admin/analytics`);
     return response.data;
   } catch (error) {
-    console.error('Error saving practice session:', error);
-    throw error;
-  }
-};
-
-// New API functions for database-based practice session management
-export const setAutoOpenTacticsFlag = async (
-  conversationId: string,
-  practiceData: any
-) => {
-  try {
-    setAuthHeader();
-    const response = await backendApi.post('/api/v1/practice/set-auto-open-tactics', {
-      conversationId,
-      practiceData
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error setting auto-open tactics flag:', error);
-    throw error;
-  }
-};
-
-export const getAutoOpenTacticsFlag = async (conversationId: string) => {
-  try {
-    setAuthHeader();
-    const response = await backendApi.get(`/api/v1/practice/get-auto-open-tactics?conversationId=${conversationId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error getting auto-open tactics flag:', error);
-    return { shouldAutoOpen: false, practiceData: null };
-  }
-};
-
-export const getLatestPracticeSessionData = async () => {
-  try {
-    setAuthHeader();
-    const response = await backendApi.get('/api/v1/practice/latest-session-data');
-    return response.data;
-  } catch (error) {
-    console.error('Error getting latest practice session data:', error);
+    console.error('Error getting admin analytics:', error);
     throw error;
   }
 };
@@ -904,10 +514,33 @@ export const getLatestPracticeSessionData = async () => {
 export const getPracticeSessions = async () => {
   try {
     setAuthHeader();
-    const response = await backendApi.get('/api/v1/practice/all');
+    const response = await axios.get(`${BACKEND_URL}/api/v1/practice/all`);
+    return response.data;
+  } catch (error)
+  {
+    console.error('Error fetching practice sessions:', error);
+    throw error;
+  }
+};
+
+export const getPracticeSessionDetails = async (sessionId: string) => {
+  try {
+    setAuthHeader();
+    const response = await axios.get(`${BACKEND_URL}/api/v1/practice/sessions/${sessionId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching practice sessions:', error);
+    console.error('Error getting practice session details:', error);
+    throw error;
+  }
+};
+
+export const getPracticeSessionSelections = async (sessionId: string) => {
+  try {
+    setAuthHeader();
+    const response = await axios.get(`${BACKEND_URL}/api/v1/practice/admin/practice-sessions/${sessionId}/selections`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching selections for session ${sessionId}:`, error);
     throw error;
   }
 };
