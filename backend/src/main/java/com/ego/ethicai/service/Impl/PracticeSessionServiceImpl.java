@@ -12,7 +12,7 @@ import com.ego.ethicai.repository.PracticeTacticsFlagRepository;
 import com.ego.ethicai.service.PracticeSessionService;
 import com.ego.ethicai.service.UserService;
 import com.ego.ethicai.service.ScenarioService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -173,8 +173,8 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     }
 
     @Override
-    @Transactional
-    @Cacheable(value = "practiceSelections", key = "#sessionId", unless = "#result.isEmpty()")
+    @Transactional(readOnly = true)
+    @Cacheable(value = "practiceSelections", key = "#sessionId", unless = "#result == null || #result.isEmpty()")
     public List<SelectionDataDTO> getUserSelections(UUID sessionId) {
         log.info("Cache miss - Getting user selections for session: {}", sessionId);
         
