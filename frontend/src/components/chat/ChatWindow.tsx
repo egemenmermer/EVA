@@ -198,7 +198,6 @@ interface ApiResponseData {
 
 // Define props for ChatWindow
 interface ChatWindowProps {
-  showKnowledgePanel: boolean;
   currentConversation: Conversation | null;
   setStoreMessages: Dispatch<SetStateAction<Message[]>>;
   storeMessages: Message[];
@@ -209,6 +208,7 @@ interface SendMessageParams {
   userQuery: string;
   managerType: ManagerType;
   temperature: number;
+  shouldSkip?: (responses: string[]) => boolean;
 }
 
 // Enhance the sendMessage function to include more message history
@@ -279,8 +279,10 @@ interface EmailQuestion {
   shouldSkip?: (responses: string[]) => boolean;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, currentConversation, setStoreMessages, storeMessages }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ currentConversation, setStoreMessages, storeMessages }) => {
   const { 
+    user, 
+    token, 
     setCurrentConversation,
     temperature,
     darkMode,
@@ -288,7 +290,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ showKnowledgePanel, curr
     setMessages,
     addMessage,
     managerType,
-    user,
     setUser
   } = useStore();
   
@@ -4161,7 +4162,6 @@ Write this as a real workplace email that focuses on the ethical concern and the
             onSendMessage={handleSendMessage}
             isLoading={loading}
             disabled={loading}
-            showKnowledgePanel={showKnowledgePanel}
           />
         </>
       )}

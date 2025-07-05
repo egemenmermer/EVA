@@ -5,14 +5,12 @@ interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
-  showKnowledgePanel: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   isLoading = false,
   disabled = false, 
-  showKnowledgePanel
 }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
