@@ -177,16 +177,18 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
         log.info("Getting user selections for session: {}", sessionId);
         
         try {
-            PracticeSession session = getPracticeSessionEntityById(sessionId);
+            PracticeSession session = practiceSessionRepository.findByIdWithChoices(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Practice session not found with ID: " + sessionId));
             log.info("DEBUG: Found session with ID: {}, scenarioId: {}", session.getId(), session.getScenarioId());
             
             // First try to get data from stored choices (new format)
-            List<PracticeSessionChoice> storedChoices = practiceSessionChoiceRepository.findByPracticeSessionIdOrderByStepNumber(sessionId);
+            List<PracticeSessionChoice> storedChoices = session.getPracticeSessionChoices();
             log.info("DEBUG: Found {} stored choices for session {}", storedChoices.size(), sessionId);
             
             if (!storedChoices.isEmpty()) {
                 log.info("DEBUG: Using stored choices data");
                 List<SelectionDataDTO> result = storedChoices.stream()
+                        .sorted((c1, c2) -> Integer.compare(c1.getStepNumber(), c2.getStepNumber()))
                         .map(choice -> {
                             log.info("DEBUG: Processing choice - Step: {}, Text: {}, EVS: {}, Tactic: {}", 
                                     choice.getStepNumber(), choice.getChoiceText(), choice.getEvsScore(), choice.getTactic());
