@@ -2084,6 +2084,9 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                       <>
                         <button
                           onClick={async () => {
+                            if (currentScenario?.sessionSummary && !sessionSaved) {
+                              await savePracticeSessionData(currentScenario.sessionSummary);
+                            }
                             setComplianceCount(0);
                             setCurrentScenario(null);
                             setFinalReport(false);
