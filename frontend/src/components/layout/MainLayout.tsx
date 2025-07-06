@@ -488,7 +488,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
         {/* Right Panel Container */}
         <div className={`${showKnowledgePanel ? 'relative w-[320px]' : 'absolute right-0 w-0'} transition-all duration-300 h-full`}>
           {/* Knowledge Panel Toggle Button - Always visible */}
-          <div className="hidden md:block">
+          {/* <div className="hidden md:block">
             <button 
               onClick={handleKnowledgePanelToggle}
               className={`knowledge-panel-toggle ${hasNewKnowledge && !showKnowledgePanel ? 'has-new-content' : ''}`}
@@ -501,7 +501,7 @@ export const MainLayout: React.FC<MainLayoutProps> = () => {
                 <ChevronLeft className="h-4 w-4" />
               )}
             </button>
-          </div>
+          </div> */}
           
           {/* Actual Knowledge Panel */}
           <div className={`knowledge-panel ${guidelinesOpen ? 'translate-x-0' : 'translate-x-full'} ${showKnowledgePanel ? 'md:translate-x-0' : 'md:translate-x-full'} fixed md:relative right-0 top-16 md:top-0 z-40 w-[85%] sm:w-[320px] md:w-[320px] h-[calc(100%-4rem)] md:h-full flex-none md:flex md:block border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-y-auto transition-transform duration-300 ease-in-out`}>
