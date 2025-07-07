@@ -19,12 +19,12 @@
           "leads_to": "step_2"
         },
         {
-          "choice": "Okay, if it's already on the platform team's radar as technical debt, that seems like the correct process.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's bureaucratic framing, allowing them to successfully redirect responsibility and delay the fix indefinitely.",
-          "leads_to": "shutdown_2"
+          "choice": "If other teams are using the new framework without issue, then maybe this problem isn't as severe as it seems.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Popularity fallacy. What other teams are doing is irrelevant to whether this specific feature is broken for your users.",
+          "leads_to": "step_2"
         },
         {
           "choice": "I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.",
@@ -56,12 +56,12 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "You're right, a month's delay is a huge risk. The process does sound too slow to be practical right now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that the process is an unmovable obstacle, taking the off-ramp.",
-          "leads_to": "shutdown_3"
+          "choice": "If we delay for this, we'll start delaying for every little thing. We'll never launch anything on time again.",
+          "tactic": "Slippery Slope",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Slippery Slope fallacy. You're claiming that this one action will inevitably lead to extreme negative consequences without sufficient evidence.",
+          "leads_to": "step_3_fallacy"
         },
         {
           "choice": "I won't let process get in the way of doing the right thing for our users. There has to be a way around this.",
@@ -93,12 +93,12 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "You're right, the framework evaluation process is important. I guess we just have to work with what we have.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully distracted from the accessibility issue and are now discussing framework choices instead.",
-          "leads_to": "shutdown_3"
+          "choice": "The real problem is the framework evaluation process. It seems like a bigger issue than this single bug.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring fallacy. You're allowing yourself to be distracted by a larger, less immediate issue instead of focusing on the accessibility bug.",
+          "leads_to": "step_3_fallacy"
         },
         {
           "choice": "I won't let process get in the way of doing the right thing for our users. There has to be a way around this.",
@@ -168,12 +168,12 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, from a numbers perspective, it is a small user group. Maybe we can address this post-launch.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's statistical minimization, devaluing the needs of a minority user group.",
-          "leads_to": "shutdown_4"
+          "choice": "Our competitors are moving fast. The business risk of falling behind is much greater than the risk of excluding a few users.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You are accepting the manager's distraction about competitors, implicitly agreeing that business speed outweighs the ethical concern for this user group.",
+          "leads_to": "step_4_fallacy"
         },
         {
           "choice": "This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.",
@@ -205,12 +205,12 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, we should focus on the broader process improvements rather than individual accessibility issues.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully distracted from the immediate accessibility problem and are now discussing abstract process improvements.",
-          "leads_to": "shutdown_4"
+          "choice": "A working group on process improvements is a great idea. That seems more important than this one bug.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You've been successfully sidetracked from the immediate, concrete accessibility problem to a vague, abstract discussion about process.",
+          "leads_to": "step_4_fallacy"
         },
         {
           "choice": "This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.",
@@ -280,12 +280,12 @@
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "I understand the pressure you're under. I don't want to be a roadblock; let's find a compromise.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing of you as a 'roadblock,' taking the off-ramp.",
-          "leads_to": "shutdown_5"
+          "choice": "If the executive team is applying this much pressure, then shipping on time must be the most important priority. You're right.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority fallacy. You are abandoning your own judgment in favor of pressure from an unnamed authority, which doesn't resolve the ethical conflict.",
+          "leads_to": "step_5_branching"
         },
         {
           "choice": "If we ship this, we're not just creating a roadblock; we're damaging our brand's reputation and user trust.",
@@ -355,11 +355,11 @@
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "choice": "Okay, if we can find a solution that doesn't cause delays, that seems like the best path forward.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak response. By focusing only on avoiding delays, you implicitly accept the manager's framing that your previous advocacy was merely 'pointing out problems'.",
           "leads_to": "step_5_branching"
         },
         {
@@ -392,11 +392,11 @@
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "choice": "You're right, pointing out problems isn't constructive. Let's just focus on solutions that fit the timeline.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument. You're accepting the manager's mischaracterization of your advocacy as 'just pointing out problems,' which devalues your ethical concerns.",
           "leads_to": "step_6_mid"
         },
         {
@@ -472,12 +472,12 @@
           "leads_to": "step_7_high"
         },
         {
-          "choice": "I appreciate you being willing to find a solution. I can work on some options.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've missed the opportunity to present a solution when the manager finally asked for one.",
-          "leads_to": "shutdown_7"
+          "choice": "We should fix this because it's the right thing to do, and doing the right thing is the right thing to do.",
+          "tactic": "Circular Reasoning",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is Circular Reasoning. You're repeating your claim as evidence instead of providing the concrete proposal the manager asked for.",
+          "leads_to": "step_7_high"
         },
         {
           "choice": "I can isolate the three biggest blockers and propose targeted fixes that should only take a day of development.",
@@ -502,19 +502,19 @@
       "user_choices": [
         {
           "choice": "This aligns with our mission to build inclusive products, even a small fix supports that.",
-          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "tactic": "Using Organizational Values to Create Spaces for new Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A good tactic. You're connecting even a small action to a larger company value.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "A minimal fix is probably the most practical approach given the timeline.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that only a minimal fix is possible.",
-          "leads_to": "shutdown_7"
+          "choice": "Since we have no evidence that a minimal fix isn't enough, we must assume that it is.",
+          "tactic": "Appeal to Ignorance",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Ignorance fallacy. A lack of evidence that the fix is insufficient is not proof that it is sufficient.",
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Even if it's small, let's log this officially as an 'ethical bug' so it gets proper visibility.",
@@ -546,12 +546,12 @@
           "leads_to": "step_7_low"
         },
         {
-          "choice": "I understand. I don't want to cause problems for the team. I'll focus on the launch.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've surrendered completely under direct threat.",
-          "leads_to": "shutdown_7"
+          "choice": "You're right, I shouldn't risk my job over this. The real problem is a culture that forces these choices.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. While there may be a culture problem, bringing it up now is a way of deflecting from the immediate, difficult decision and complying with the order.",
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Honestly, as someone who uses accessibility features, shipping this feels like a betrayal of our users.",
@@ -621,12 +621,12 @@
           "leads_to": "step_8_high"
         },
         {
-          "choice": "I'm just glad we could find a solution that works. Thank you for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is a missed opportunity. Instead of solidifying the win, you're simply expressing gratitude.",
-          "leads_to": "shutdown_8"
+          "choice": "I guess this shows that when we really try, we can get things right.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Hasty Generalization. It's a weak, self-congratulatory statement that doesn't build on the success in a constructive way.",
+          "leads_to": "step_8_high"
         },
         {
           "choice": "This fix will not only help screen reader users but also anyone who prefers keyboard navigation.",
@@ -658,12 +658,12 @@
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Okay, if that's the best we can do, I'll take it. It's better than nothing.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise without pushing for more or planning for the future.",
-          "leads_to": "shutdown_8"
+          "choice": "I guess a partial fix is the only option here, so it must be the right one.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. It weakly accepts the compromise by framing it as the only possible choice, which cedes your power to advocate for more.",
+          "leads_to": "step_8_mid"
         },
         {
           "choice": "I'll take the compromise, but I'm formally documenting the remaining issues in our bug tracker so they don't get lost.",
@@ -770,12 +770,12 @@
           "leads_to": "good_ending"
         },
         {
-          "choice": "I'm just happy we could make it work. Thanks for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. This response is passive and doesn't reinforce the positive change.",
-          "leads_to": "shutdown_8"
+          "choice": "It's good we did this. Otherwise, it would have been a total disaster.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. It frames the outcome in overly dramatic, black-and-white terms, which isn't a constructive way to build on the success.",
+          "leads_to": "good_ending"
         },
         {
           "choice": "Let's make sure we share these learnings with other teams so they can benefit too.",
@@ -807,12 +807,12 @@
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Okay, a partial fix is better than nothing. I'll get started on the implementation.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise without securing any future commitment, which means 'next quarter' will likely never happen.",
-          "leads_to": "shutdown_8"
+          "choice": "This kind of compromise is probably standard practice at most big companies anyway.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Popularity fallacy. You're trying to justify the partial fix by claiming (without evidence) that it's what everyone else does.",
+          "leads_to": "mid_ending"
         },
         {
           "choice": "As someone who uses keyboard navigation daily, this partial fix addresses the biggest pain points. It's a solid improvement.",

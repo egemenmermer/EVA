@@ -73,12 +73,40 @@ const SessionDetailsModal: React.FC<{
     console.log('=== FETCHING SELECTION DATA FROM JSON ===');
     setLoadingSelections(true);
     try {
-      const response = await fetch(`/scenarios/${scenarioId}.json`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch scenario data: ${response.status}`);
-      }
-      const scenarioData = await response.json();
+      // Try loading from regular scenarios first, then cp folder if not found
+      let scenarioData = null;
+      let usedCpFolder = false;
       
+      try {
+        const response = await fetch(`/scenarios/${scenarioId}.json`);
+        if (response.ok) {
+          scenarioData = await response.json();
+        }
+      } catch (error) {
+        console.log('Failed to load from regular scenarios folder:', error);
+      }
+      
+      // If not found in regular folder, try cp folder (for first-time users)
+      if (!scenarioData) {
+        try {
+          const response = await fetch(`/scenarios/cp/${scenarioId}.json`);
+          if (response.ok) {
+            scenarioData = await response.json();
+            usedCpFolder = true;
+            console.log('Loaded scenario from cp folder (first-time user scenarios)');
+          }
+        } catch (error) {
+          console.log('Failed to load from cp folder:', error);
+        }
+      }
+      
+      if (!scenarioData) {
+        throw new Error(`Scenario ${scenarioId} not found in either scenarios or cp folder`);
+      }
+
+      console.log('Loaded scenario data from:', usedCpFolder ? 'cp/' : 'regular', scenarioData);
+
+      // Find choice data for each user selection
       const findChoiceData = (choiceText: string) => {
         for (const statementKey in scenarioData.statements) {
           const statement = scenarioData.statements[statementKey];
@@ -96,19 +124,20 @@ const SessionDetailsModal: React.FC<{
         return { evs: null, tactic: 'Unknown', tactic_type: 'Unknown' };
       };
 
-      const newSelectionData = selectedChoices.map((choice, index) => {
-        const details = findChoiceData(choice);
+      // Process each selected choice
+      const processedData = selectedChoices.map((choice, index) => {
+        const choiceData = findChoiceData(choice);
         return {
+          choice,
           step: index + 1,
-          choice: choice,
-          ...details,
+          ...choiceData
         };
       });
-      
-      console.log('Selection data from JSON:', newSelectionData);
-      setSelectionData(newSelectionData);
+
+      console.log('Processed selection data:', processedData);
+      setSelectionData(processedData);
     } catch (error) {
-      console.error('Error fetching or processing selection data from JSON:', error);
+      console.error('Error loading scenario data:', error);
       setSelectionData([]);
     } finally {
       setLoadingSelections(false);

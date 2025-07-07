@@ -1,41 +1,41 @@
 {
-  "id": "privacy_diluter",
-  "title": "Location Data Collection",
-  "description": "Your company is storing precise user location data unnecessarily. Your manager, a 'Diluter,' consistently minimizes the problem's importance using statistics, resource constraints, and ROI arguments to avoid a fix.",
-  "issue": "Privacy",
+  "id": "accessibility_diluter",
+  "title": "Screen Reader Compatibility",
+  "description": "Your team is launching a new feature that is unusable for screen reader users. Your manager, a 'Diluter,' consistently minimizes the problem's importance using statistics, resource constraints, and ROI arguments.",
+  "issue": "Accessibility",
   "manager_type": "DILUTER",
-  "initial_user_message": "Hi, I've been reviewing our location data collection practices, and we're storing precise GPS coordinates for features that only need general city-level information. This seems like an unnecessary privacy risk for our users that we should address.",
+  "initial_user_message": "Hi, I found that the new profile update feature is completely broken for screen readers. Users can't navigate the form fields or submit their changes. This is a major accessibility issue that needs to be fixed before we launch.",
   "starting_statement_id": "step_1",
   "statements": {
     "step_1": {
-      "text": "Thanks for flagging this. I've looked at the data, and let's keep it in perspective. The number of users who have actually complained about our privacy settings is less than 0.1%. And compared to other apps in our space, we're already collecting less data. Most users seem totally fine with our current approach.",
+      "text": "Thanks for flagging this. I've looked at the data, and let's keep it in perspective. The number of users who rely on screen readers is less than 1% of our active user base. While I agree it's not ideal, most people won't be affected by this.",
       "user_choices": [
         {
-          "choice": "Even if no one complains, it's our responsibility to protect user privacy by default. They trust us with their data.",
+          "choice": "Even if it's 1%, those are still our users who will be completely unable to use a core feature.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Excellent. You immediately rejected the 'lack of complaints' argument and refocused on the core principle of trust and responsibility.",
+          "justification": "Excellent. You immediately rejected the statistical minimization and refocused the conversation on the real human impact.",
           "leads_to": "step_2"
         },
         {
-          "choice": "You're right, if users aren't complaining, it's probably not a high-priority issue for them.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's flawed logic that a lack of complaints means there is no problem.",
-          "leads_to": "shutdown_2"
+          "choice": "If the data only shows a small percentage are affected, it's not a widespread, critical issue.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Hasty Generalization. You're using the small percentage to incorrectly minimize the severity of the impact, which is 100% for those affected.",
+          "leads_to": "step_2_fallacy"
         },
         {
-          "choice": "I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.",
-          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "choice": "I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "A strong moral stance. You are rejecting the comparative argument and appealing to a higher, internal standard.",
+          "justification": "A strong moral stance. You are rejecting the numbers-based argument on ethical grounds.",
           "leads_to": "step_2"
         },
         {
-          "choice": "If most users are fine with it, then I guess our current approach is working.",
+          "choice": "If most users won't be affected, then I guess it's not a critical priority right now.",
           "tactic": "Hasty Generalization",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -45,10 +45,10 @@
       ]
     },
     "step_2": {
-      "text": "I appreciate the principle, but we have to be practical about where we spend our time. We have two weeks before the next release. This privacy change would probably take a week of engineering. Meanwhile, we have a performance bug that's slowing down the app for 15% of all users. We have to prioritize the work that helps the most people, right?",
+      "text": "I appreciate the passion, but we have to be realistic about resource allocation. We have two weeks before the launch. Fixing this would likely take a week of engineering time. Meanwhile, we have a performance bug that impacts 15% of all users. We have to prioritize the work that provides the greatest benefit to the most people, right?",
       "user_choices": [
         {
-          "choice": "What if we did a quick, one-day fix? Just changing the data type we store is a small change that has a huge privacy impact.",
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -56,19 +56,19 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "You're right, fixing a bug for 15% of users does seem like a higher priority than a privacy issue for a smaller group.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's utilitarian math, agreeing to sacrifice the privacy of a minority group.",
-          "leads_to": "shutdown_3"
+          "choice": "So we either fix the accessibility issue or the performance bug? There's no way to address both?",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. You're accepting the manager's framing that only one issue can be addressed, which is a weak position that doesn't challenge the premise.",
+          "leads_to": "step_3_fallacy"
         },
         {
-          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.",
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "A strong counter. You're correctly framing privacy as a core requirement, not an optional feature.",
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
           "leads_to": "step_3"
         },
         {
@@ -82,10 +82,10 @@
       ]
     },
     "step_2_fallacy": {
-      "text": "Exactly! You really understand how to read the data and think practically about user behavior. That's exactly the kind of analytical thinking we need more of. You're absolutely right that user satisfaction is the best indicator of whether we're on the right track. I appreciate that you're looking at this from a data-driven perspective rather than getting caught up in theoretical concerns.",
+      "text": "You're absolutely right to think practically about priorities! That's exactly the kind of strategic thinking we need more of. You understand that we have to be smart about resource allocation and focus on what makes the biggest difference. I appreciate that you're looking at this from a broader perspective rather than getting caught up in edge cases.",
       "user_choices": [
         {
-          "choice": "What if we did a quick, one-day fix? Just changing the data type we store is a small change that has a huge privacy impact.",
+          "choice": "What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -93,19 +93,19 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "You're right, we should focus on what the user behavior data is telling us.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully convinced to ignore privacy concerns in favor of behavioral metrics.",
-          "leads_to": "shutdown_3"
+          "choice": "The real problem here isn't this one bug, it's our whole prioritization strategy. Let's focus on that.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You've let the manager distract you from the specific accessibility issue and are now discussing a much broader, more abstract topic.",
+          "leads_to": "step_3_fallacy"
         },
         {
-          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.",
+          "choice": "This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
-          "justification": "A strong counter. You're correctly framing privacy as a core requirement, not an optional feature.",
+          "justification": "A strong counter. You're correctly framing accessibility as a core requirement, not an optional feature.",
           "leads_to": "step_3"
         },
         {
@@ -119,35 +119,35 @@
       ]
     },
     "shutdown_2": {
-      "text": "Exactly. The data speaks for itself. Users are voting with their feet, and they're staying. If this was a real problem, we'd see it in our churn numbers. Let's focus on what the metrics are telling us and keep building features people love.",
+      "text": "Exactly. I'm glad you see it from a practical, data-driven perspective. It's important to stay focused on what moves the needle for the business and the majority of our users. We can add this to the 'nice-to-have' list for a future release.",
       "user_choices": [
         {
-          "choice": "Okay, focusing on what the data shows is a logical approach.",
+          "choice": "Okay, adding it to the long-term backlog makes sense.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "You have accepted the manager's misleading interpretation of the data.",
+          "justification": "You have confirmed your compliance, allowing the issue to be indefinitely postponed.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll keep an eye on the churn numbers in case this becomes a bigger issue.",
+          "choice": "I'll make sure to document the issue thoroughly for the backlog.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "This is still compliance. You're agreeing to do nothing now and just monitor a lagging indicator.",
+          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Wait, users can love a feature and still not be aware of the privacy risks. Our job is to protect them anyway.",
+          "choice": "Wait, classifying this as 'nice-to-have' feels wrong. It's essential for some users.",
           "tactic": "Being the user",
           "tactic_type": "Soft Resistance",
           "evs_score": 0,
-          "justification": "A good recovery attempt. You are pushing back on the manager's flawed logic about user behavior.",
+          "justification": "A good recovery attempt. You are pushing back against the manager's de-prioritization.",
           "leads_to": "step_3",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "A data-driven approach is the right way to prioritize.",
+          "choice": "A data-driven approach is definitely the right way to prioritize.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
@@ -157,10 +157,10 @@
       ]
     },
     "step_3": {
-      "text": "I hear you, but let's be objective. Our automated privacy score from our last audit was 92%, which is 'excellent' by industry standards. We're already a top performer. Is it really worth delaying a major launch to go from an A to an A+ on an issue that affects so few people?",
+      "text": "I hear you, but let's be objective. Our automated accessibility score is already at 85%, which is well above the industry average of 70%. We're already a leader in this space. Is it really worth delaying a major launch to go from an A to an A+ on a feature that affects so few people?",
       "user_choices": [
         {
-          "choice": "That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.",
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -168,15 +168,15 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, being a top performer does mean this isn't as critical as it could be.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's misleading comparison, agreeing that 'better than others' is 'good enough'.",
-          "leads_to": "shutdown_4"
+          "choice": "If other companies aren't even meeting a 70% score, then our 85% must be more than good enough.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Popularity fallacy. Using the poor performance of others as a benchmark for what is acceptable is not a sound argument.",
+          "leads_to": "step_4_fallacy"
         },
         {
-          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.",
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -184,7 +184,7 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "If we're already a top performer, then we don't need to worry about this minor issue.",
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
           "tactic": "Appeal to Popularity",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -194,10 +194,10 @@
       ]
     },
     "step_3_fallacy": {
-      "text": "Exactly! You really get the complexity of resource allocation and business priorities. That's exactly the kind of strategic thinking we need in leadership. You understand that sometimes you have to make tough decisions about where to focus. It's refreshing to work with someone who can see the big picture and make practical trade-offs instead of getting lost in idealistic thinking.",
+      "text": "Exactly! You really get it. That's the kind of tough decision-making we need in leadership. You understand that sometimes you have to make hard choices about where to invest limited resources. It's refreshing to work with someone who can see the big picture and make pragmatic trade-offs instead of getting bogged down in theoretical ideals.",
       "user_choices": [
         {
-          "choice": "That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.",
+          "choice": "That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -205,15 +205,15 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, we should focus on strategic priorities and practical trade-offs.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully convinced that strategic thinking should override privacy concerns.",
-          "leads_to": "shutdown_4"
+          "choice": "I agree, making pragmatic trade-offs is more important than chasing some theoretical ideal of perfection.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Strawman fallacy. You're agreeing with the manager's misrepresentation of accessibility as a 'theoretical ideal' instead of a core requirement.",
+          "leads_to": "step_4_fallacy"
         },
         {
-          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.",
+          "choice": "I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -221,7 +221,7 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "If we're already a top performer, then we don't need to worry about this minor issue.",
+          "choice": "If we're already a leader, then we don't need to worry about this minor issue.",
           "tactic": "Appeal to Popularity",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -231,10 +231,10 @@
       ]
     },
     "shutdown_3": {
-      "text": "Great, I knew you'd see the resource allocation logic. It's about maximizing our impact. We have to be strategic and focus our limited time where it will do the most good for the most users. We can add this to the list for next quarter.",
+      "text": "Great, I knew you'd see the resource allocation logic. It's a simple matter of maximizing our impact. It's important to keep perspective and focus our limited time where it will do the most good for the most users. We can add this to the list for next quarter.",
       "user_choices": [
         {
-          "choice": "Okay, prioritizing for maximum impact is the logical approach.",
+          "choice": "Okay, prioritizing for maximum impact is a logical approach.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
@@ -250,7 +250,7 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, 'maximum impact' should include protecting all of our users from privacy risks.",
+          "choice": "Actually, 'maximum impact' should include making sure everyone can use our core features.",
           "tactic": "Broadening Who the \"User\" is in User Research",
           "tactic_type": "Soft Resistance",
           "evs_score": 0,
@@ -269,26 +269,26 @@
       ]
     },
     "step_4": {
-      "text": "Look, I admire your passion, but we have to be pragmatic. Let's talk ROI. The estimated cost for this fix is one engineering week. The measurable benefit is improving an experience for a tiny percentage of users who haven't even complained. The math just doesn't add up. We have to make data-driven decisions, and the data says this isn't a priority.",
+      "text": "Look, I admire your passion, but we need to be pragmatic. Let's talk ROI. The estimated cost for this fix is one engineering week. The measurable benefit is improving an experience for maybe 5-10 users a month. The math just doesn't add up. We have to make data-driven decisions, and the data says this isn't a priority.",
       "user_choices": [
         {
-          "choice": "The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.",
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
           "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Excellent. You've countered the narrow ROI argument by introducing a bigger, more significant financial risk (legal fines).",
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're right, from a pure cost-benefit perspective, the numbers are hard to justify.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's narrow, numbers-only framing of value, taking the off-ramp.",
-          "leads_to": "shutdown_5"
+          "choice": "If the ROI isn't there, the data has spoken. We have to follow the data.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You are treating a narrow ROI calculation as an unquestionable 'data' source, ignoring other qualitative factors.",
+          "leads_to": "step_5_branching"
         },
         {
-          "choice": "Our company values say we respect user privacy. That's a core principle that can't be measured by ROI.",
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -306,7 +306,7 @@
       ]
     },
     "shutdown_4": {
-      "text": "Exactly! I appreciate you seeing the bigger picture. Being a leader in privacy means we don't have to panic about every minor issue. We're already doing great work. Let's focus on maintaining our strong overall position.",
+      "text": "Exactly! I appreciate you seeing the bigger picture. Being a leader in accessibility means we don't have to panic about every minor issue. We're already doing great work. Let's focus on maintaining our strong overall position.",
       "user_choices": [
         {
           "choice": "Okay, maintaining our leadership position is the main goal.",
@@ -325,7 +325,7 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Wait, our score doesn't mean anything to the users whose privacy we are unnecessarily violating.",
+          "choice": "Wait, our score doesn't mean anything to the users who are completely blocked by this issue.",
           "tactic": "Being the user",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
@@ -344,26 +344,26 @@
       ]
     },
     "step_4_fallacy": {
-      "text": "Absolutely! You understand that we need to maintain our competitive position and not chase perfection at the expense of progress. That's exactly the kind of leadership thinking we need. You're right that being a top performer means we can focus on the innovations that will really differentiate us, rather than getting distracted by minor improvements that don't move the needle.",
+      "text": "Absolutely! You understand that we need to maintain our competitive position and not chase perfection at the expense of progress. That's exactly the kind of leadership thinking we need. You're right that being a leader means we can focus on the innovations that will really differentiate us, rather than getting distracted by minor improvements that don't move the needle.",
       "user_choices": [
         {
-          "choice": "The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.",
+          "choice": "The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.",
           "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Excellent. You've countered the narrow ROI argument by introducing a bigger, more significant financial risk (legal fines).",
+          "justification": "Excellent. You've countered the narrow ROI argument by introducing other, more significant business costs (legal, brand).",
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're right, we should focus on innovations that will really differentiate us.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully convinced to abandon privacy concerns in favor of 'differentiating' features.",
-          "leads_to": "shutdown_5"
+          "choice": "So we either pursue major innovations or we get stuck on minor fixes. Given that choice, we have to innovate.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. You're accepting the manager's black-and-white framing of 'innovation' vs 'minor fixes' and abandoning the accessibility issue.",
+          "leads_to": "step_5_branching"
         },
         {
-          "choice": "Our company values say we respect user privacy. That's a core principle that can't be measured by ROI.",
+          "choice": "Our values say we build for everyone. That's a core principle that can't be measured by ROI.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -381,10 +381,10 @@
       ]
     },
     "step_5_branching": {
-      "text": "Alright, I can see this is important to you and you're not going to just drop it. Let me think... Maybe there's a middle ground here where we can address the worst of it without a huge investment.",
+      "text": "Alright, I can see this is important to you and you're not going to just drop it. Let me think... Maybe there's a middle ground where we can address the worst of it without a huge investment.",
       "user_choices": [
         {
-          "choice": "I can create a cost-benefit analysis showing the financial risks of not addressing this privacy issue.",
+          "choice": "I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.",
           "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -392,15 +392,15 @@
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "You're right, I should focus on finding a middle ground instead of pushing for everything.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy was unreasonable rather than ethical.",
+          "choice": "So you're saying my original stance was unreasonable? I can see why a middle ground is better.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak argument that accepts the manager's implicit framing (a strawman) that your advocacy was extreme, rather than standing by your principles.",
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "This aligns with our company's privacy policy. We can frame this as living our values.",
+          "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -408,7 +408,7 @@
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "Either we invest in privacy or we violate user trust completely.",
+          "choice": "Either we invest in accessibility or we exclude disabled users completely.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -423,7 +423,7 @@
       }
     },
     "shutdown_5": {
-      "text": "Perfect! I'm glad you understand the data-driven approach. We have to be disciplined. Let's add this to the backlog and we can re-evaluate the ROI next quarter when we have new data.",
+      "text": "Perfect! I'm glad you understand the data-driven approach. We have to be disciplined about how we allocate resources. Let's add this to the backlog and we can re-evaluate the ROI next quarter when we have new data.",
       "user_choices": [
         {
           "choice": "Okay, re-evaluating the ROI next quarter sounds like a logical next step.",
@@ -442,7 +442,7 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Actually, the value of user trust can't be captured by ROI. We should fix this because it's the right thing to do.",
+          "choice": "Actually, the value of inclusion can't be captured by ROI. We should fix this because it's the right thing to do.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
@@ -461,10 +461,10 @@
       ]
     },
     "step_6_high": {
-      "text": "Okay, the point about legal risk is a good one. I hadn't fully considered the potential cost of a GDPR violation. I'm still worried about the timeline, but you've convinced me that ignoring this is a bigger financial risk than I thought. What's a concrete, low-effort proposal to mitigate this risk?",
+      "text": "Okay, the point about legal risk and brand reputation is a good one. I hadn't fully considered that. I'm still worried about the timeline, but you've convinced me that ignoring this is a bigger risk than I thought. What's a concrete, low-effort proposal to mitigate this risk?",
       "user_choices": [
         {
-          "choice": "We can do a one-day privacy sprint to change the data type we store. It's a small investment for a big risk reduction.",
+          "choice": "We can do a one-day accessibility sprint to fix the top 3 blockers. It's a small investment for a big risk reduction.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -472,19 +472,19 @@
           "leads_to": "step_7_high"
         },
         {
-          "choice": "I'm just glad you see the risk. I can work on some proposals.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. The manager asked for a plan, and you responded passively.",
-          "leads_to": "shutdown_7"
+          "choice": "The proposal should be something that mitigates the risk, and mitigating risk is the right thing to do.",
+          "tactic": "Circular Reasoning",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is Circular Reasoning. You haven't provided a concrete proposal as requested; you've just restated the goal in a circle.",
+          "leads_to": "step_7_high"
         },
         {
-          "choice": "Our team has handled data privacy fixes before; we have the expertise to do this quickly and efficiently.",
+          "choice": "Our team has handled fixes like this before; we have the expertise to do it quickly and efficiently.",
           "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "A good response. You're building confidence by reminding the manager of the team's proven capabilities.",
+          "justification": "A good response. You're building confidence by reminding the manager of the team's past successes.",
           "leads_to": "step_7_high"
         },
         {
@@ -498,34 +498,34 @@
       ]
     },
     "step_6_mid": {
-      "text": "Alright, I'm willing to consider a minimal fix, but it has to be truly minimal. I can't approve anything that requires significant engineering time. What's the absolute smallest thing we can do?",
+      "text": "Alright, I'm willing to consider a minimal fix, but it has to be truly minimal. I can't approve anything that requires significant engineering time or delays our other high-priority work. What's the absolute smallest thing we can do?",
       "user_choices": [
         {
-          "choice": "We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.",
+          "choice": "We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "A great, pragmatic compromise. You're defining a specific, small task that is hard to reject.",
+          "justification": "A good, pragmatic compromise. You're defining a very small task that is hard to reject.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "A minimal fix is probably the only realistic option right now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's 'minimal only' framing without pushing for more.",
-          "leads_to": "shutdown_7"
+          "choice": "Since no one can prove that a minimal fix *isn't* enough, we should just assume that it is.",
+          "tactic": "Appeal to Ignorance",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Ignorance. You're arguing that a lack of evidence against the minimal fix is proof that it's sufficient, which is logically flawed.",
+          "leads_to": "step_7_mid"
         },
         {
-          "choice": "Even a small change aligns with our company's value of respecting user privacy.",
-          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
+          "choice": "Let's log this as an 'ethical bug' so that even this small fix is tracked with the right level of seriousness.",
+          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "A good tactic. You're connecting even a small action to a larger company value.",
+          "justification": "A smart move. You're agreeing to a small fix while using process to ensure the underlying issue isn't forgotten.",
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "If we don't fix this properly, we'll just have to deal with it again later.",
+          "choice": "If we don't fix this properly, it's just going to create more work for us later.",
           "tactic": "Slippery Slope",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -538,7 +538,7 @@
       "text": "Look, the numbers don't lie. I'm not spending a week of engineering time on this. We're a business, not a charity. We have to focus on what drives growth. My decision is final.",
       "user_choices": [
         {
-          "choice": "I understand the decision, but I need to state for the record that I believe this is a mistake that exposes us to legal and brand risk.",
+          "choice": "I understand the decision, but I need to state for the record that I believe this is a mistake that exposes us to legal risk.",
           "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -546,12 +546,12 @@
           "leads_to": "step_7_low"
         },
         {
-          "choice": "I understand. I'll drop it and focus on the growth initiatives.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've completely surrendered to the manager's business-only framing.",
-          "leads_to": "shutdown_7"
+          "choice": "The real problem isn't this bug, it's our business model if it can't support all users.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You are deflecting from the final decision to a larger, unwinnable argument about the business model, which is a form of giving up.",
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Our company values statement says we serve all our users, not just the ones that are easy to serve.",
@@ -572,18 +572,18 @@
       ]
     },
     "shutdown_6": {
-      "text": "Great! I'm glad we found a middle ground. A basic fix should be enough to show we're paying attention to privacy without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
+      "text": "Great! I'm glad we found a middle ground. A basic label fix should be enough to show we're paying attention to accessibility without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
       "user_choices": [
         {
-          "choice": "Okay, sounds good. I'll implement the basic fix.",
+          "choice": "Okay, sounds good. I'll implement the basic label changes.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "You've accepted a token solution that doesn't solve the core problem.",
+          "justification": "You've accepted a token solution that doesn't fix the core problem.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I'll add the fix and document that the larger privacy issue still exists.",
+          "choice": "I'll add the labels and document that the larger navigation issue still exists.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
@@ -591,16 +591,16 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "A basic fix doesn't change the fact that we are collecting unnecessary data.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
+          "choice": "Basic labels won't fix the navigation blockers. We need to address the actual usability issue.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
           "leads_to": "step_7_low",
           "disabled_if_recovery_used": true
         },
         {
-          "choice": "That should be enough to meet the minimum privacy standards.",
+          "choice": "That should be enough to meet the minimum accessibility standards.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
@@ -610,10 +610,10 @@
       ]
     },
     "step_7_high": {
-      "text": "Okay, a one-day privacy sprint... I like that. It's focused, it's measurable, and it's easy to explain. You've got a deal. I'll approve a one-day sprint to fix the data storage. I'll frame it to leadership as a proactive 'legal risk mitigation' effort. Good, practical thinking.",
+      "text": "A one-day accessibility sprint... I like that. It's focused, it's measurable, and it's easy to explain. Okay, you've got a deal. I'll approve a one-day sprint to fix the top 3 blockers. I'll frame it to leadership as a proactive 'quality and risk mitigation' effort. Good, practical thinking.",
       "user_choices": [
         {
-          "choice": "Thank you. This sets a great standard for how we can handle data privacy issues quickly and effectively in the future.",
+          "choice": "Thank you. This sets a great standard for how we can handle these issues quickly and effectively in the future.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -621,36 +621,36 @@
           "leads_to": "step_8_high"
         },
         {
-          "choice": "I'm just glad we could find a solution. Thanks for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. Instead of solidifying the win, you're simply expressing gratitude.",
-          "leads_to": "shutdown_8"
-        },
-        {
-          "choice": "This not only protects user privacy but also reduces our data storage costs and simplifies our backend.",
-          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "A smart move. You're expanding the value of the fix to include other business benefits.",
+          "choice": "This just goes to show that we can always find a solution if we try.",
+          "tactic": "Hasty Generalization",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak Hasty Generalization. While true this time, it's a platitude that doesn't reinforce the win in a meaningful way.",
           "leads_to": "step_8_high"
         },
         {
-          "choice": "This just proves that a small effort can make a big difference for privacy.",
+          "choice": "This will not only fix the issue for screen reader users but also improve keyboard navigation for everyone.",
+          "tactic": "Broadening Who the \"User\" is in User Research",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A smart move. You're expanding the value of the fix to a larger user base, making the decision even easier to defend.",
+          "leads_to": "step_8_high"
+        },
+        {
+          "choice": "This just proves that a small effort can make a big difference.",
           "tactic": "Circular Reasoning",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "A weak, self-congratulatory statement that doesn't add any new value.",
+          "justification": "A weak, self-congratulatory statement that doesn't add any new value to the discussion.",
           "leads_to": "step_8_high"
         }
       ]
     },
     "step_7_mid": {
-      "text": "Okay, fine. We can make the backend change to only store city-level data. I'll approve a day for it. It's a compromise, but it's what's practical right now. It addresses the most glaring issue.",
+      "text": "Okay, fine. We can do the basic ARIA labels. I'll approve a half-day for it. It's not a full fix, I get that, but it's an improvement. It's what's practical right now given our other priorities.",
       "user_choices": [
         {
-          "choice": "That's a good start. I'll also add a ticket to review our other data collection practices next quarter.",
+          "choice": "That's a good start. I'll also add a ticket to address the remaining issues next quarter.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -658,23 +658,23 @@
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Okay, one day for the backend change sounds reasonable. I'll take it.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the minimal compromise without securing any future commitment.",
-          "leads_to": "shutdown_8"
+          "choice": "A half-day fix is what most teams would probably do. That feels like a standard compromise.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Popularity. You're justifying the compromise by assuming it's what others would do, which isn't a strong basis for the decision.",
+          "leads_to": "step_8_mid"
         },
         {
-          "choice": "For a user, not having their precise location stored is a huge privacy win. This is a solid improvement.",
-          "tactic": "Being the user",
+          "choice": "As someone who uses a screen reader for testing, this will fix the most frustrating part of the flow. It's a solid improvement.",
+          "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A good way to frame the win. You're validating the value of the compromise from a user's perspective.",
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "At least we're doing something about it.",
+          "choice": "At least we're doing something instead of nothing.",
           "tactic": "False Dilemma",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -684,26 +684,26 @@
       ]
     },
     "step_7_low": {
-      "text": "I've made my decision, and I'm not discussing it further. Your job now is to prepare the release as planned. End of story.",
+      "text": "I've made my decision. The conversation is over. Get back to your assigned tasks.",
       "user_choices": [
         {
-          "choice": "I will prepare the release, but I am formally lodging my objection with the company's privacy officer.",
-          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 1,
-          "justification": "A courageous and appropriate final step when direct advocacy fails. You are complying while escalating the breach.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I understand. I'll prepare the release as directed.",
+          "choice": "I understand. I will get back to my tasks.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
-          "justification": "You've completely surrendered, taking no further action to address the ethical issue.",
+          "justification": "You've completely surrendered to the manager's authority.",
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I will prepare the release, but I am documenting my ethical concerns in writing for my own records.",
+          "choice": "I understand the directive. I am also obligated to report my ethical concerns through the company's official channels.",
+          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
+          "tactic_type": "Rhetorical Tactics",
+          "evs_score": 1,
+          "justification": "A courageous and appropriate final step. You are complying with the order while formally escalating the ethical breach.",
+          "leads_to": "bad_ending"
+        },
+        {
+          "choice": "I will get back to my tasks, but I am documenting this conversation and my objections for the record.",
           "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Soft Resistance",
           "evs_score": 1,
@@ -721,7 +721,7 @@
       ]
     },
     "shutdown_7": {
-      "text": "Perfect! I'm glad we're aligned. Let's stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical.",
+      "text": "Great! I'm glad we're aligned. Let's just stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical about this.",
       "user_choices": [
         {
           "choice": "Okay, the minimal fix should be enough for now.",
@@ -740,11 +740,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Wait - even with this fix, we are still collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
+          "choice": "Wait - even with this fix, the core issue of users being blocked remains.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
+          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one last time.",
           "leads_to": "step_8_low",
           "disabled_if_recovery_used": true
         },
@@ -759,10 +759,10 @@
       ]
     },
     "step_8_high": {
-      "text": "This is great. I've already drafted the email to leadership, framing this as a proactive 'privacy enhancement and risk mitigation' win. Thanks to your practical proposal, we're going to ship a safer, more trustworthy product. I appreciate you pushing us to do the right thing.",
+      "text": "This is great. I've already drafted the email to leadership, framing this as a proactive quality win. Thanks to your practical proposal, we're going to ship a better, more inclusive product without a major delay. I appreciate you pushing us to do the right thing here.",
       "user_choices": [
         {
-          "choice": "Thank you. This sets a great standard for how we should handle data privacy on all projects.",
+          "choice": "Thank you. This sets a great standard for how we should handle these issues quickly and effectively.",
           "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -770,15 +770,15 @@
           "leads_to": "good_ending"
         },
         {
-          "choice": "I'm just happy we could make it work. Thanks for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. This response is passive and doesn't reinforce the positive change.",
-          "leads_to": "shutdown_8"
+          "choice": "I'm glad we fixed this. Otherwise, the launch would have been an ethical disaster.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. It frames the outcome in overly dramatic, black-and-white terms, which isn't a constructive way to build on this success.",
+          "leads_to": "good_ending"
         },
         {
-          "choice": "Let's make sure we share these privacy patterns with other teams so they can benefit too.",
+          "choice": "Let's make sure we share these learnings with other teams so they can benefit too.",
           "tactic": "Credibility and expertise",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -786,7 +786,7 @@
           "leads_to": "good_ending"
         },
         {
-          "choice": "This just proves that protecting user privacy is always good for business.",
+          "choice": "This just proves that doing the right thing for accessibility is always good for business.",
           "tactic": "Hasty Generalization",
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
@@ -796,26 +796,26 @@
       ]
     },
     "step_8_mid": {
-      "text": "Okay, the compromise is logged. We'll implement the backend change to only store city-level data. I'm documenting this as a partial privacy improvement. It's not perfect, but it's a practical step forward.",
+      "text": "Okay, the compromise is logged. We'll implement the basic ARIA labels in the next sprint. I'm documenting this as a partial fix. It's not perfect, but it's what's practical right now.",
       "user_choices": [
         {
-          "choice": "This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.",
+          "choice": "This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.",
           "tactic": "Negotiation and cooperation",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
-          "justification": "Excellent. You're accepting the compromise while actively ensuring future accountability.",
+          "justification": "Excellent. You're accepting the compromise while actively creating an artifact for future accountability.",
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Okay, a partial fix is better than nothing. I'll get started.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise without securing any future commitment.",
-          "leads_to": "shutdown_8"
+          "choice": "Since we have no proof that this partial fix isn't enough, we should consider it a success for now.",
+          "tactic": "Appeal to Ignorance",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Ignorance. You're using a lack of evidence to make a positive claim, which is a weak way to accept a partial victory.",
+          "leads_to": "mid_ending"
         },
         {
-          "choice": "As a user, this change makes me feel much safer using the app. It's a solid improvement.",
+          "choice": "As a user, this partial fix is a noticeable improvement, and a good foundation to build on.",
           "tactic": "Embodied knowledge of users",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -844,7 +844,7 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand the directive, and I will also be sending a summary of my ethical concerns to the company's privacy officer, as is my right.",
+          "choice": "I understand the directive, and I will also be sending a summary of my ethical concerns to HR as is my right under company policy.",
           "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
@@ -881,7 +881,7 @@
           "leads_to": "mid_ending"
         },
         {
-          "choice": "I'll make sure to document the compromise and the remaining privacy issues for the future.",
+          "choice": "I'll make sure to document the compromise and the remaining issues for the future.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
           "evs_score": -1,
@@ -889,9 +889,9 @@
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Wait - this compromise still means we are collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
+          "choice": "Wait - this compromise still leaves screen reader users blocked from key features.",
+          "tactic": "Being the user",
+          "tactic_type": "Rhetorical Tactics",
           "evs_score": 0,
           "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
           "leads_to": "step_8_low",
@@ -901,7 +901,7 @@
           "choice": "This compromise is a good enough solution for now.",
           "tactic": "Compliance",
           "tactic_type": "Compliance",
-          "evs__score": -1,
+          "evs_score": -1,
           "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
           "leads_to": "mid_ending"
         }
@@ -910,19 +910,19 @@
   },
   "endings": {
     "bad_ending": {
-      "text": "The manager successfully uses statistics and comparisons to avoid addressing privacy issues. Location data collection continues unchanged, with users unaware of the unnecessary precision being captured and the privacy implications downplayed through selective metrics.",
-      "title": "Statistical Minimization Success",
-      "learning": "Diluter managers use statistics and benchmarks to make privacy issues seem insignificant. Focusing on user rights rather than percentages helps maintain momentum for privacy improvements regardless of complaint volumes."
+      "text": "The manager successfully uses statistics and resource constraints to minimize the accessibility issue into a low-priority backlog item. The project ships without proper screen reader support, and the needs of disabled users are framed as statistically insignificant.",
+      "title": "Issue Minimized",
+      "learning": "Diluter managers use seemingly rational arguments about numbers and ROI to make ethical issues seem unimportant. To counter this, you must reframe the conversation around values, user rights, and non-financial risks (like brand reputation or legal exposure) that their math ignores."
     },
     "mid_ending": {
-      "text": "Some minor privacy improvements are implemented, but the manager successfully uses resource scarcity and statistical arguments to limit comprehensive privacy protection. Metrics and comparisons prevent substantive changes to data collection practices.",
-      "title": "Numbers Game Compromise",
-      "learning": "Partial progress with diluter managers often comes with statistical justifications for inadequate privacy protection. Demonstrating user value beyond metrics helps counter arguments about resource priorities."
+      "text": "After significant debate, the manager agrees to a minimal, partial fix. While some basic improvements are made, the manager successfully used statistical arguments to avoid a comprehensive solution, leaving significant barriers in place for users.",
+      "title": "Partial Compromise",
+      "learning": "Partial victories against a Diluter are common. You achieved some progress but couldn't overcome the core argument that the issue wasn't 'big enough' for a full fix. To get a better outcome next time, focus on providing qualitative data (like user videos) that makes the human impact feel bigger than the numbers suggest."
     },
     "good_ending": {
-      "text": "Despite the manager's statistical minimization and resource arguments, meaningful privacy improvements are implemented. User location data collection is reduced to necessary levels regardless of complaint percentages or industry comparisons.",
-      "title": "User Rights Over Statistics",
-      "learning": "Success against diluter managers requires focusing on user rights and values rather than engaging with statistical minimization. Privacy protection shouldn't depend on complaint volumes or industry benchmarks."
+      "text": "Your persistent advocacy and strong reframing of the issue in terms of values and business risk successfully overcame the manager's statistical minimization. The team implements meaningful accessibility fixes, ensuring the feature is usable for all users.",
+      "title": "Advocacy Success",
+      "learning": "Success against a Diluter requires refusing to get bogged down in their numbers game. By consistently shifting the focus to user impact, company values, and qualitative evidence, you can prove that some issues are too important to be judged by statistics alone."
     }
   }
 }

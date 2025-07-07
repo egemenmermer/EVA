@@ -29,11 +29,41 @@ public class ScenarioServiceImpl implements ScenarioService {
     // Active sessions storage
     private final Map<String, ScenarioSession> activeSessions = new ConcurrentHashMap<>();
     
+    // Helper method to check if user is doing their first practice scenario
+    private boolean isFirstTimeUser(UUID userId) {
+        if (userId == null) {
+            // When userId is null (e.g., for admin panel or general scenario listing), 
+            // default to false (regular scenarios)
+            return false;
+        }
+        
+        try {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                log.warn("User not found for ID: {}, treating as first-time user", userId);
+                return true;
+            }
+            
+            // User is first-time if they haven't completed either accessibility or privacy scenarios
+            boolean hasCompletedAccessibility = user.getAccessibilityScenariosCompleted() != null && user.getAccessibilityScenariosCompleted();
+            boolean hasCompletedPrivacy = user.getPrivacyScenariosCompleted() != null && user.getPrivacyScenariosCompleted();
+            
+            boolean isFirstTime = !hasCompletedAccessibility && !hasCompletedPrivacy;
+            log.info("User {} first-time check: accessibility={}, privacy={}, isFirstTime={}", 
+                    userId, hasCompletedAccessibility, hasCompletedPrivacy, isFirstTime);
+            
+            return isFirstTime;
+        } catch (Exception e) {
+            log.error("Error checking if user is first-time: {}", e.getMessage(), e);
+            return true; // Default to first-time if there's an error
+        }
+    }
+    
     @Override
     public ScenarioSessionResponseDTO startScenario(UUID userId, String scenarioId, String sessionId) {
         log.info("Starting scenario {} for user {} with session {}", scenarioId, userId, sessionId);
         
-        JsonNode scenario = loadScenario(scenarioId);
+        JsonNode scenario = loadScenario(scenarioId, userId);
         if (scenario == null) {
             throw new RuntimeException("Scenario not found: " + scenarioId);
         }
@@ -109,7 +139,7 @@ public class ScenarioServiceImpl implements ScenarioService {
             throw new RuntimeException("Session not found: " + sessionId);
         }
         
-        JsonNode scenario = loadScenario(scenarioId);
+        JsonNode scenario = loadScenario(scenarioId, userId);
         if (scenario == null) {
             throw new RuntimeException("Scenario not found: " + scenarioId);
         }
@@ -368,7 +398,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         };
         
         for (String scenarioId : scenarioIds) {
-            JsonNode scenario = loadScenario(scenarioId);
+            JsonNode scenario = loadScenario(scenarioId, null);
             if (scenario != null) {
                 Map<String, Object> scenarioInfo = new HashMap<>();
                 scenarioInfo.put("id", scenarioId);
@@ -390,26 +420,33 @@ public class ScenarioServiceImpl implements ScenarioService {
             throw new RuntimeException("Session not found: " + sessionId);
         }
         
-        JsonNode scenario = loadScenario(scenarioId);
+        JsonNode scenario = loadScenario(scenarioId, userId);
         return generateSessionSummary(session, scenario);
     }
     
     @Override
     public JsonNode getScenarioData(String scenarioId) {
-        JsonNode scenario = loadScenario(scenarioId);
+        JsonNode scenario = loadScenario(scenarioId, null);
         if (scenario == null) {
             throw new RuntimeException("Scenario not found: " + scenarioId);
         }
         return scenario;
     }
     
-    private JsonNode loadScenario(String scenarioId) {
-        return scenarioCache.computeIfAbsent(scenarioId, id -> {
+    private JsonNode loadScenario(String scenarioId, UUID userId) {
+        // Determine if this is a first-time user and create appropriate cache key
+        boolean isFirstTime = isFirstTimeUser(userId);
+        String cacheKey = scenarioId + (isFirstTime ? "_first_time" : "_regular");
+        
+        return scenarioCache.computeIfAbsent(cacheKey, key -> {
             try {
-                ClassPathResource resource = new ClassPathResource("scenarios/" + id + ".json");
+                String folder = isFirstTime ? "scenarios/cp/" : "scenarios/";
+                ClassPathResource resource = new ClassPathResource(folder + scenarioId + ".json");
+                log.info("Loading scenario {} from {} for user {} (first-time: {})", 
+                        scenarioId, folder, userId, isFirstTime);
                 return objectMapper.readTree(resource.getInputStream());
             } catch (IOException e) {
-                log.error("Failed to load scenario: {}", id, e);
+                log.error("Failed to load scenario: {} from folder for user {}", scenarioId, userId, e);
                 return null;
             }
         });

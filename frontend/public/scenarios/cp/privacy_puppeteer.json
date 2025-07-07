@@ -19,12 +19,12 @@
           "leads_to": "step_2"
         },
         {
-          "choice": "I appreciate your supportive response. It's definitely a complex issue worth looking into.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've fallen for the manager's praise. By agreeing it's 'complex' and just 'worth looking into,' you've taken the off-ramp.",
-          "leads_to": "shutdown_2"
+          "choice": "It's wonderful to work with a manager who cares so much about the team's feelings.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You've been distracted by the manager's praise and are now discussing team culture instead of the user's privacy issue.",
+          "leads_to": "step_2_fallacy"
         },
         {
           "choice": "This isn't just a technical detail; it's a fundamental violation of the principle of data minimization.",
@@ -56,12 +56,12 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "I understand the pressure from analytics makes this a difficult position for you.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that they are a victim of circumstance, taking the off-ramp.",
-          "leads_to": "shutdown_3"
+          "choice": "If leadership's pressure is that intense, then their analytics models must be the most important thing. It's out of our hands.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're accepting the manager's claim about leadership pressure as an unchallengeable fact, surrendering your own agency in the process.",
+          "leads_to": "step_3_fallacy"
         },
         {
           "choice": "The constraints are difficult, but we still have a responsibility to not collect unnecessary data, regardless of analytics needs.",
@@ -93,12 +93,12 @@
           "leads_to": "step_3"
         },
         {
-          "choice": "I'm glad we're aligned on caring about user privacy and data protection.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully distracted from the data collection problem to focus on team feelings and alignment.",
-          "leads_to": "shutdown_3"
+          "choice": "You're right, having a shared sense of caring is what makes this a great team to be on.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You have been successfully distracted from the data collection problem and are now discussing team feelings and alignment.",
+          "leads_to": "step_3_fallacy"
         },
         {
           "choice": "The constraints are difficult, but we still have a responsibility to not collect unnecessary data, regardless of analytics needs.",
@@ -168,12 +168,12 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, the last thing I want is for this to create problems for you or the team.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's manipulation, prioritizing their comfort and perceived risk over the user's privacy.",
-          "leads_to": "shutdown_4"
+          "choice": "If this one fix raises red flags, leadership will start questioning all our decisions. We'll lose all our autonomy.",
+          "tactic": "Slippery Slope",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Slippery Slope fallacy. You are accepting the manager's fear-based premise and exaggerating it into an extreme, negative future.",
+          "leads_to": "step_4_fallacy"
         },
         {
           "choice": "I'm not worried about red flags when it comes to protecting our users. We should stand by our principles.",
@@ -205,12 +205,12 @@
           "leads_to": "step_4"
         },
         {
-          "choice": "You're right, strategic thinking about balancing competing priorities is important.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully distracted from the privacy issue to discuss abstract strategic thinking.",
-          "leads_to": "shutdown_4"
+          "choice": "Thinking about competing priorities is a much more important discussion than any single bug.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You have been successfully diverted from the concrete privacy issue to a vague, abstract discussion about 'strategic thinking'.",
+          "leads_to": "step_4_fallacy"
         },
         {
           "choice": "I'm not worried about red flags when it comes to protecting our users. We should stand by our principles.",
@@ -280,12 +280,12 @@
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "That's a much smarter way to frame it. Focusing on innovation instead of problems is a great idea.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's manipulative framing, prioritizing perception over substance.",
-          "leads_to": "shutdown_5"
+          "choice": "So the choice is between admitting failure or telling a positive story. The positive story is obviously the better business decision.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. You're accepting the manager's manipulative framing that you can only tell a negative story or a spin story, ignoring the option of honest, professional communication about a fix.",
+          "leads_to": "step_5_branching"
         },
         {
           "choice": "I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.",
@@ -355,12 +355,12 @@
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're right, showing leadership that we understand data strategy is important.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've been successfully convinced to prioritize data strategy over user privacy.",
-          "leads_to": "shutdown_5"
+          "choice": "If that's what leadership wants to see, then aligning with their data strategy is the most important thing.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You are prioritizing a perception of 'what leadership wants' over the tangible needs of users, effectively ending your advocacy.",
+          "leads_to": "step_5_branching"
         },
         {
           "choice": "I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.",
@@ -392,11 +392,11 @@
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "I understand your nervousness. Let me help you find a safe path forward.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy creates risk rather than addressing an existing problem.",
+          "choice": "So you're saying my original suggestion was unreasonable? I can see why a more moderate approach would be better.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a weak response that accepts the manager's implicit framing (a strawman) that your advocacy for privacy was extreme, rather than principled.",
           "leads_to": "step_6_mid"
         },
         {
@@ -472,12 +472,12 @@
           "leads_to": "step_7_high"
         },
         {
-          "choice": "I'm just so glad you're on board. Thank you for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. The manager asked for a plan, and you responded with passive gratitude.",
-          "leads_to": "shutdown_7"
+          "choice": "A real fix is the right choice because choosing to do the right thing is always correct.",
+          "tactic": "Circular Reasoning",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is Circular Reasoning. It fails to provide the concrete proposal the manager asked for, instead just repeating the same idea in a circle.",
+          "leads_to": "step_7_high"
         },
         {
           "choice": "Our team has done data minimization work before; we can leverage that expertise to get this done quickly.",
@@ -509,12 +509,12 @@
           "leads_to": "step_7_mid"
         },
         {
-          "choice": "A minimal fix is probably the only practical option right now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's 'minimal only' framing without pushing for more.",
-          "leads_to": "shutdown_7"
+          "choice": "So the choice is a minimal fix or no fix at all. We have to pick the minimal fix.",
+          "tactic": "False Dilemma",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a False Dilemma. You are accepting the manager's limited options as the only possibilities, which is a weak negotiating position.",
+          "leads_to": "step_7_mid"
         },
         {
           "choice": "Even a small change aligns with our company's value of user trust.",
@@ -546,12 +546,12 @@
           "leads_to": "step_7_low"
         },
         {
-          "choice": "You're right, promising something we can't deliver would be a mistake.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that a real fix is 'undeliverable'.",
-          "leads_to": "shutdown_7"
+          "choice": "You're right, it's a mistake to promise a 'perfect' privacy fix. Let's just focus on what's barely possible.",
+          "tactic": "Strawman",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Strawman. You're misrepresenting your own advocacy as a quest for an impossible 'perfect' fix, making it easy to agree with the manager's lesser option.",
+          "leads_to": "step_7_low"
         },
         {
           "choice": "Our team has the expertise to deliver this. I'm confident we can handle the complexity.",
@@ -621,12 +621,12 @@
           "leads_to": "step_8_high"
         },
         {
-          "choice": "I'm just so happy you're on board. Thank you for your support.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. Instead of reinforcing the win, you're just expressing gratitude.",
-          "leads_to": "shutdown_8"
+          "choice": "This was a great example of positive collaboration. That's the real win here.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You're focusing on the positive feeling of the conversation instead of cementing the positive outcome for the user.",
+          "leads_to": "step_8_high"
         },
         {
           "choice": "This not only protects user privacy but also reduces our data storage costs and legal surface area.",
@@ -658,12 +658,12 @@
           "leads_to": "step_8_mid"
         },
         {
-          "choice": "Okay, a half-day fix is better than nothing. I'll take it.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the minimal compromise without securing any future commitment.",
-          "leads_to": "shutdown_8"
+          "choice": "I bet most teams would settle for a half-day fix. That feels standard.",
+          "tactic": "Appeal to Popularity",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Popularity. You're justifying the compromise by assuming it's what other teams would do, which is irrelevant to whether it's the right solution.",
+          "leads_to": "step_8_mid"
         },
         {
           "choice": "For a user, this single fix makes a huge difference in their privacy. It's a solid improvement.",
@@ -687,12 +687,12 @@
       "text": "I can see I'm not going to change your mind. Fine. We'll do the absolute bare minimum to be legally compliant, but that's it. I'm not happy about it, and I need you to keep this quiet. No victory laps.",
       "user_choices": [
         {
-          "choice": "I understand. I will focus only on the minimum compliance fix.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've won a grudging, minimal victory, but are now complying with the manager's emotional demands.",
-          "leads_to": "shutdown_8"
+          "choice": "You've made the decision, and meeting the bare minimum is what you've approved, so that's what we'll do.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're passively accepting the manager's minimal concession as a final order without further pushback.",
+          "leads_to": "step_8_low"
         },
         {
           "choice": "I'm not looking for a victory lap. I'm looking for a solution that protects our users.",
@@ -711,12 +711,12 @@
           "leads_to": "step_8_low"
         },
         {
-          "choice": "Fine, I'll keep it quiet.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've agreed to the manager's manipulative demand for secrecy.",
-          "leads_to": "shutdown_8"
+          "choice": "Fine. The most important thing is to avoid conflict and keep the team atmosphere positive.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You are deflecting from the issue at hand to the unrelated topic of 'team atmosphere' as a way to comply.",
+          "leads_to": "step_8_low"
         }
       ]
     },
@@ -770,12 +770,12 @@
           "leads_to": "good_ending"
         },
         {
-          "choice": "Thank you for being so supportive. Having your backing makes all the difference.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "A missed opportunity. This focuses on the manager's feelings rather than the user outcome.",
-          "leads_to": "shutdown_8"
+          "choice": "This was a great example of positive collaboration. That's the real win here.",
+          "tactic": "Red Herring",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Red Herring. You're focusing on the positive feeling of the conversation instead of cementing the positive outcome for the user.",
+          "leads_to": "good_ending"
         },
         {
           "choice": "Working together like this helps us build products that truly protect user privacy.",
@@ -807,12 +807,12 @@
           "leads_to": "mid_ending"
         },
         {
-          "choice": "Okay, a partial fix is better than nothing. I'll get started.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise without securing any future commitment.",
-          "leads_to": "shutdown_8"
+          "choice": "Since no one can prove this partial fix is bad, we can assume it's good enough.",
+          "tactic": "Appeal to Ignorance",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Ignorance. Arguing that the partial fix is acceptable because it hasn't been proven insufficient is a weak, flawed argument.",
+          "leads_to": "mid_ending"
         },
         {
           "choice": "As a user, this partial fix is a noticeable privacy improvement. It's a good foundation.",

@@ -56,8 +56,6 @@ Today, we'll all start with the [Choose a starting scenario/manager type] scenar
 - **Action:** Let users engage with the scenario for a few minutes.
 - **Visual:** Show a scenario in progress.
 
-"You also have access to a 'Knowledge Panel' on the right. This panel contains ethical guidelines from sources like the ACM and IEEE. If you're ever unsure about a choice, you can consult these guidelines for help."
-
 - **Action:** Point out the knowledge panel.
 - **Visual:** Open and showcase the knowledge panel.
 
