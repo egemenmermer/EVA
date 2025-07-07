@@ -314,7 +314,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     }
     */
   }, [conversationId, isOpen, hasAttemptedFetch, isLoading, resetState, fetchArtifacts, addDebugLog]);
-
+  
   useEffect(() => {
     /*
     addDebugLog("Auto-refresh useEffect triggered.");
@@ -327,9 +327,9 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
     ) {
       const refreshTimer = setTimeout(() => {
         addDebugLog(`Auto-refreshing (attempt ${autoRefreshCount + 1})`);
-        setAutoRefreshCount(prev => prev + 1);
-        fetchArtifacts(true);
-      }, autoRefreshInterval);
+            setAutoRefreshCount(prev => prev + 1);
+            fetchArtifacts(true);
+        }, autoRefreshInterval);
 
       return () => clearTimeout(refreshTimer);
     }
@@ -365,7 +365,7 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
         <h3 className="panel-title">Knowledge Artifacts</h3>
         <button onClick={onClose} className="close-button">
           &times;
-        </button>
+          </button>
       </div>
       <div className="panel-content">
         {isLoading ? (
@@ -406,4 +406,4 @@ const KnowledgePanel: React.FC<KnowledgePanelProps> = ({ conversationId, isOpen,
   return null;
 };
 
-export default KnowledgePanel;
+export default KnowledgePanel; 

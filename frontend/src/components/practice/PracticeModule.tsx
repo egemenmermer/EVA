@@ -254,6 +254,60 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
     // If neither scenario type is completed, this is the first practice
     return !hasCompletedAccessibility && !hasCompletedPrivacy;
   };
+
+  // Filter choices based on user experience level to prevent early shutdown
+  const filterChoicesForExperience = (choices: Array<{
+    index: number;
+    text: string;
+    category: string;
+    originalIndex?: number;
+  }>): Array<{
+    index: number;
+    text: string;
+    category: string;
+    originalIndex?: number;
+  }> => {
+    const isFirstPractice = isFirstPracticeScenario();
+    
+    if (!isFirstPractice) {
+      // Not first practice - show all choices as normal
+      return choices;
+    }
+    
+    // First practice - hide early compliance choices to prevent shutdown
+    // Keep logical fallacy choices and other non-compliance choices
+    const filtered = choices.filter((choice, originalIndex) => {
+      const tacticType = getTacticTypeName(choice.category);
+      
+      // Keep all non-compliance choices
+      if (tacticType !== 'Compliance') {
+        return true;
+      }
+      
+      // For compliance choices, only keep the last one in the list 
+      // (this should be the logical fallacy replacement you added)
+      const complianceIndices = choices
+        .map((c, i) => getTacticTypeName(c.category) === 'Compliance' ? i : -1)
+        .filter(i => i !== -1);
+      const lastComplianceIndex = complianceIndices[complianceIndices.length - 1];
+      
+      return originalIndex === lastComplianceIndex;
+    }).map((choice, newIndex) => ({
+      ...choice,
+      originalIndex: choice.index, // Store the original index for backend communication
+    }));
+    
+    console.log('DEBUG filterChoicesForExperience:', {
+      isFirstPractice,
+      originalChoices: choices.length,
+      filteredChoices: filtered.length,
+      removedChoices: choices.length - filtered.length,
+      choiceTypes: choices.map(c => getTacticTypeName(c.category)),
+      filteredTypes: filtered.map(c => getTacticTypeName(c.category))
+    });
+    
+    return filtered;
+  };
   
   // Function to get tactic type color based on our scenario structure
   const getTacticTypeColor = (category: string): string => {
@@ -2145,7 +2199,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                   }
                 </h3>
                 <div className="space-y-1.5 mb-1">
-                  {currentScenario.currentChoices.map((choice, index) => {
+                  {filterChoicesForExperience(currentScenario.currentChoices).map((choice, index) => {
                     const isFirstPractice = isFirstPracticeScenario();
                     const tacticTypeColor = getTacticTypeColor(choice.category);
                     const tacticTypeName = getTacticTypeName(choice.category);
@@ -2174,7 +2228,7 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                               })()
                             : 'bg-gray-50 dark:bg-gray-800/30 border-gray-200/80 dark:border-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer'
                         }`}
-                        onClick={() => handleChoice(index)}
+                        onClick={() => handleChoice(choice.originalIndex !== undefined ? choice.originalIndex : index)}
                         disabled={processingChoice || isTyping}
                       >
                         <div className="flex justify-between items-start">

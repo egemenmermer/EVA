@@ -274,15 +274,15 @@ const SessionDetailsModal: React.FC<{
                                 selectionInfo.evs > 0 ? 'bg-green-600' :
                                 selectionInfo.evs < 0 ? 'bg-red-600' :
                                 'bg-gray-600'
-                              }`}>
+                                }`}>
                                 EVS Score: {selectionInfo.evs > 0 ? `+${selectionInfo.evs}` : selectionInfo.evs ?? 'N/A'}
-                              </span>
+                                </span>
                               <span className="px-2 py-1 bg-indigo-600 rounded-full text-white font-semibold">
                                 Tactic: {selectionInfo.tactic || 'Unknown'}
                               </span>
                               <span className="px-2 py-1 bg-purple-600 rounded-full text-white font-semibold">
                                 Tactic Type: {selectionInfo.tactic_type || 'Unknown'}
-                              </span>
+                                </span>
                             </div>
                           </div>
                         </div>
