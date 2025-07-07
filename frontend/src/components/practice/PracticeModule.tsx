@@ -1396,11 +1396,14 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setLoading(true);
       console.log('Getting feedback from EVA for practice module with query...');
       
-      // Get the current score from the scenario session
-      const currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
+      // Calculate the raw EVS score by summing individual choice scores
+      const evsHistory = currentScenario?.sessionSummary?.evsHistory || [];
+      const rawScore = evsHistory.reduce((sum: number, evs: number) => sum + evs, 0);
+      const totalChoices = evsHistory.length;
+      const displayScore = Math.max(0, rawScore); // Ensure non-negative display
       
       // Create a user-friendly query about the practice session
-      const query = `I just completed an ethical decision-making practice scenario. My score was ${currentScore}/8. Can you provide feedback on my performance and suggest improvements for similar situations?`;
+      const query = `I just completed an ethical decision-making practice scenario. My score was ${displayScore}/${totalChoices}. Can you provide feedback on my performance and suggest improvements for similar situations?`;
       
       console.log('Query sent to EVA:', query);
       
@@ -1436,8 +1439,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
 - Scenario: ${currentScenario.scenario.title}
 - Issue: ${currentScenario.scenario.issue}
 - Manager Type: ${currentScenario.scenario.managerType}
-- Final Score: ${currentScore}/8
-- Performance Level: ${calculatePerformanceRating(currentScore).rating}
+- Final Score: ${displayScore}/${totalChoices}
+- Performance Level: ${calculatePerformanceRating(rawScore).rating}
 - Total Decisions: ${currentScenario.sessionSummary?.choiceHistory.length || 0}
 
 **Internal Tactical Analysis:**
@@ -2045,26 +2048,27 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
                   {/* Updated Total Score Display with smaller, more compact sizing */}
                   <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
                     {(() => {
-                      // Use the most current score from session summary, fall back to finalScore state
-                        let currentScore = currentScenario?.sessionSummary?.totalEvs || finalScore || 0;
-                        const maxScore = 8;
-                        if (currentScore > maxScore) currentScore = maxScore;
-                      const performanceData = calculatePerformanceRating(currentScore);
+                      // Calculate the raw EVS score by summing individual choice scores  
+                      const evsHistory = currentScenario?.sessionSummary?.evsHistory || [];
+                      const rawScore = evsHistory.reduce((sum: number, evs: number) => sum + evs, 0);
+                      const totalChoices = evsHistory.length;
+                      const displayScore = Math.max(0, rawScore); // Ensure non-negative display
+                      const performanceData = calculatePerformanceRating(rawScore);
                       
                       return (
                         <>
                           <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                            {currentScore.toFixed(1)}/8
+                            {displayScore}/{totalChoices}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Total Ethical Valence Score</div>
                           <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
-                            currentScore >= 8.0 
+                            displayScore >= totalChoices * 0.8 
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                              : currentScore >= 6.0
+                              : displayScore >= totalChoices * 0.6
                               ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                              : currentScore >= 4.0
+                              : displayScore >= totalChoices * 0.4
                               ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                              : currentScore >= 2.0
+                              : displayScore >= totalChoices * 0.2
                               ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
                               : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                           }`}>

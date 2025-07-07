@@ -74,3 +74,11 @@ validation_report.txt
 
 # OS specific files
 Thumbs.db
+
+# Exclude sensitive data and generated files
+agent/data/artifacts/
+agent/data/processed/
+agent/ethics_index/
+agent/practice_feedback/
+agent/practice_scores/
+*.bak
