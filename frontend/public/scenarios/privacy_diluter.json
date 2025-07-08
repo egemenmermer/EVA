@@ -425,8 +425,8 @@
     "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
-        "0_to_2": "step_6_mid",
-        "-5_to_-1": "step_6_low"
+        "1_to_2": "step_6_mid",
+        "0_to_0": "step_6_low"
       }
     },
     "shutdown_5": {

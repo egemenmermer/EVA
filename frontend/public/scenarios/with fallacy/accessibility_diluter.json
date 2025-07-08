@@ -275,7 +275,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete documentation that makes the risks visible in terms the manager cares about.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "So you're saying my original stance was unreasonable? I can see why a middle ground is better.",
@@ -283,7 +283,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak argument that accepts the manager's implicit framing (a strawman) that your advocacy was extreme, rather than standing by your principles.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
@@ -291,7 +291,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "Either we invest in accessibility or we exclude disabled users completely.",
@@ -299,16 +299,9 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         }
       ],
-      "score_ranges": {
-        "3_to_5": "step_6_high",
-        "1_to_2": "step_6_mid",
-        "0_to_0": "step_6_low"
-      }
-    },
-    "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
         "1_to_2": "step_6_mid",
