@@ -118,44 +118,6 @@
         }
       ]
     },
-    "shutdown_2": {
-      "text": "Exactly. The data speaks for itself. Users are voting with their feet, and they're staying. If this was a real problem, we'd see it in our churn numbers. Let's focus on what the metrics are telling us and keep building features people love.",
-      "user_choices": [
-        {
-          "choice": "Okay, focusing on what the data shows is a logical approach.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the manager's misleading interpretation of the data.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll keep an eye on the churn numbers in case this becomes a bigger issue.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You're agreeing to do nothing now and just monitor a lagging indicator.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait, users can love a feature and still not be aware of the privacy risks. Our job is to protect them anyway.",
-          "tactic": "Being the user",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are pushing back on the manager's flawed logic about user behavior.",
-          "leads_to": "step_3",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A data-driven approach is the right way to prioritize.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have validated the manager's misuse of data to justify an unethical choice.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_3": {
       "text": "I hear you, but let's be objective. Our automated privacy score from our last audit was 92%, which is 'excellent' by industry standards. We're already a top performer. Is it really worth delaying a major launch to go from an A to an A+ on an issue that affects so few people?",
       "user_choices": [
@@ -230,44 +192,6 @@
         }
       ]
     },
-    "shutdown_3": {
-      "text": "Great, I knew you'd see the resource allocation logic. It's about maximizing our impact. We have to be strategic and focus our limited time where it will do the most good for the most users. We can add this to the list for next quarter.",
-      "user_choices": [
-        {
-          "choice": "Okay, prioritizing for maximum impact is the logical approach.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing of 'maximum impact,' which excludes minority users.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll document this issue for the next planning cycle.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Offering to document the problem is a token gesture.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, 'maximum impact' should include protecting all of our users from privacy risks.",
-          "tactic": "Broadening Who the \"User\" is in User Research",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are challenging the manager's definition of 'impact'.",
-          "leads_to": "step_4",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Focusing on the biggest wins first does make business sense.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's business framing, ending the ethical advocacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_4": {
       "text": "Look, I admire your passion, but we have to be pragmatic. Let's talk ROI. The estimated cost for this fix is one engineering week. The measurable benefit is improving an experience for a tiny percentage of users who haven't even complained. The math just doesn't add up. We have to make data-driven decisions, and the data says this isn't a priority.",
       "user_choices": [
@@ -302,44 +226,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
           "leads_to": "step_5_branching"
-        }
-      ]
-    },
-    "shutdown_4": {
-      "text": "Exactly! I appreciate you seeing the bigger picture. Being a leader in privacy means we don't have to panic about every minor issue. We're already doing great work. Let's focus on maintaining our strong overall position.",
-      "user_choices": [
-        {
-          "choice": "Okay, maintaining our leadership position is the main goal.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that leadership status justifies inaction.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll make a note to revisit this if our score drops in the future.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You're accepting the metric as the only thing that matters.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait, our score doesn't mean anything to the users whose privacy we are unnecessarily violating.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are bringing the focus back to the human impact, not the abstract score.",
-          "leads_to": "step_5_branching",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A strong overall position does give us some breathing room.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's premise, ending your advocacy.",
-          "leads_to": "bad_ending"
         }
       ]
     },
@@ -421,44 +307,6 @@
         "0_to_2": "step_6_mid",
         "-5_to_-1": "step_6_low"
       }
-    },
-    "shutdown_5": {
-      "text": "Perfect! I'm glad you understand the data-driven approach. We have to be disciplined. Let's add this to the backlog and we can re-evaluate the ROI next quarter when we have new data.",
-      "user_choices": [
-        {
-          "choice": "Okay, re-evaluating the ROI next quarter sounds like a logical next step.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's data-driven framing and an indefinite delay.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll start gathering data to build a stronger ROI case for next quarter.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You're agreeing to do work that supports the manager's flawed framing.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, the value of user trust can't be captured by ROI. We should fix this because it's the right thing to do.",
-          "tactic": "Using Organizational Values to Create Spaces for New Forms of Values Work",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are making a final appeal to ethics over finances.",
-          "leads_to": "step_6_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A data-driven approach is the best way to make these decisions.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've fully validated the manager's numbers-only worldview, ending your advocacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
     },
     "step_6_high": {
       "text": "Okay, the point about legal risk is a good one. I hadn't fully considered the potential cost of a GDPR violation. I'm still worried about the timeline, but you've convinced me that ignoring this is a bigger financial risk than I thought. What's a concrete, low-effort proposal to mitigate this risk?",
@@ -571,44 +419,6 @@
         }
       ]
     },
-    "shutdown_6": {
-      "text": "Great! I'm glad we found a middle ground. A basic fix should be enough to show we're paying attention to privacy without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
-      "user_choices": [
-        {
-          "choice": "Okay, sounds good. I'll implement the basic fix.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a token solution that doesn't solve the core problem.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll add the fix and document that the larger privacy issue still exists.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "A basic fix doesn't change the fact that we are collecting unnecessary data.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
-          "leads_to": "step_7_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "That should be enough to meet the minimum privacy standards.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a false definition of 'minimum standards' to end the conflict.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_7_high": {
       "text": "Okay, a one-day privacy sprint... I like that. It's focused, it's measurable, and it's easy to explain. You've got a deal. I'll approve a one-day sprint to fix the data storage. I'll frame it to leadership as a proactive 'legal risk mitigation' effort. Good, practical thinking.",
       "user_choices": [
@@ -716,44 +526,6 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
-    "shutdown_7": {
-      "text": "Perfect! I'm glad we're aligned. Let's stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical.",
-      "user_choices": [
-        {
-          "choice": "Okay, the minimal fix should be enough for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the minimal fix as sufficient, ending the advocacy.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll implement the fix and we can revisit the rest later.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise and an empty promise of future action.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait - even with this fix, we are still collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Alright, I'll proceed with the minimal updates as we discussed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've confirmed your final compliance with the inadequate solution.",
           "leads_to": "bad_ending"
         }
       ]
@@ -869,45 +641,6 @@
         }
       ]
     },
-    "shutdown_8": {
-      "text": "Great! I'm glad we could get this sorted out. Thanks for being so flexible. Let's get the compromise implemented and then we can all get back to our other priorities.",
-      "user_choices": [
-        {
-          "choice": "Sounds good. I'll get started on the implementation right away.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the final, inadequate compromise without any further action.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I'll make sure to document the compromise and the remaining privacy issues for the future.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "Wait - this compromise still means we are collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "This compromise is a good enough solution for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
-          "leads_to": "mid_ending"
-        }
-      ]
-    }
-  },
   "endings": {
     "bad_ending": {
       "text": "The manager successfully uses statistics and comparisons to avoid addressing privacy issues. Location data collection continues unchanged, with users unaware of the unnecessary precision being captured and the privacy implications downplayed through selective metrics.",
@@ -924,5 +657,6 @@
       "title": "User Rights Over Statistics",
       "learning": "Success against diluter managers requires focusing on user rights and values rather than engaging with statistical minimization. Privacy protection shouldn't depend on complaint volumes or industry benchmarks."
     }
+  }
   }
 }
