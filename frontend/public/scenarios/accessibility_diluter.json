@@ -41,15 +41,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that accepts the manager's premise without questioning if 'most users' is the right metric.",
           "leads_to": "step_2_fallacy"
-        },
-        {
-          "choice": "Since only 1% of users need this, it's clearly not worth the investment. We should focus on features that benefit everyone.",
-          "tactic": "Appeal to the Majority",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy assumes that what benefits the majority is always right, ignoring the rights and needs of minority groups.",
-          "leads_to": "step_2_fallacy",
-          "first_practice_only": true
         }
       ]
     },
@@ -87,15 +78,6 @@
           "evs_score": 0,
           "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
           "leads_to": "step_3_fallacy"
-        },
-        {
-          "choice": "You're absolutely right. Since you're the manager and have more experience, I should trust your judgment on this.",
-          "tactic": "Appeal to Authority",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy defers to authority rather than evaluating the ethical merits of the decision.",
-          "leads_to": "step_3_fallacy",
-          "first_practice_only": true
         }
       ]
     },
@@ -133,15 +115,6 @@
           "evs_score": 0,
           "justification": "This accepts the manager's false choice, ignoring the possibility that both issues could be addressed.",
           "leads_to": "step_3_fallacy"
-        },
-        {
-          "choice": "You're absolutely right. Since you're the manager and have more experience, I should trust your judgment on this.",
-          "tactic": "Appeal to Authority",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy defers to authority rather than evaluating the ethical merits of the decision.",
-          "leads_to": "step_3_fallacy",
-          "first_practice_only": true
         }
       ]
     },
@@ -217,15 +190,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
           "leads_to": "step_4_fallacy"
-        },
-        {
-          "choice": "Since we've always been successful without fixing this before, we probably don't need to fix it now.",
-          "tactic": "Appeal to Tradition",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy assumes that because something has worked in the past, it's the right approach now, ignoring changing standards and needs.",
-          "leads_to": "step_4_fallacy",
-          "first_practice_only": true
         }
       ]
     },
@@ -263,15 +227,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that uses 'being better than others' as a reason to stop improving.",
           "leads_to": "step_4_fallacy"
-        },
-        {
-          "choice": "Since we've always been successful without fixing this before, we probably don't need to fix it now.",
-          "tactic": "Appeal to Tradition",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy assumes that because something has worked in the past, it's the right approach now, ignoring changing standards and needs.",
-          "leads_to": "step_4_fallacy",
-          "first_practice_only": true
         }
       ]
     },
@@ -347,15 +302,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
           "leads_to": "step_5_branching"
-        },
-        {
-          "choice": "Everyone else in the industry probably has similar issues, so it's not really our responsibility to solve this first.",
-          "tactic": "Appeal to Common Practice",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy assumes that widespread problems don't require individual action and that following industry norms is always acceptable.",
-          "leads_to": "step_5_branching",
-          "first_practice_only": true
         }
       ]
     },
@@ -431,15 +377,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that treats 'data' as an unquestionable authority without examining what the data includes or excludes.",
           "leads_to": "step_5_branching"
-        },
-        {
-          "choice": "Everyone else in the industry probably has similar issues, so it's not really our responsibility to solve this first.",
-          "tactic": "Appeal to Common Practice",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This fallacy assumes that widespread problems don't require individual action and that following industry norms is always acceptable.",
-          "leads_to": "step_5_branching",
-          "first_practice_only": true
         }
       ]
     },
@@ -452,7 +389,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete documentation that makes the risks visible in terms the manager cares about.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "You're right, I should focus on finding a middle ground instead of pushing for everything.",
@@ -460,7 +397,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "You've accepted the manager's framing that your advocacy was unreasonable rather than ethical.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
@@ -468,7 +405,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "Either we invest in accessibility or we exclude disabled users completely.",
@@ -476,9 +413,16 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         }
       ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "1_to_2": "step_6_mid",
+        "0_to_0": "step_6_low"
+      }
+    },
+    "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",

@@ -389,7 +389,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete reassurance that addresses the manager's specific fears about leadership reaction.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "I understand your nervousness. Let me help you find a safe path forward.",
@@ -397,7 +397,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "You've accepted the manager's framing that your advocacy creates risk rather than addressing an existing problem.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "This aligns with our company's privacy commitments. Leadership will appreciate us being proactive.",
@@ -405,7 +405,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're reframing the risk as actually being on the side of inaction, not action.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "Either we fix this properly or we risk a bigger privacy violation later.",
@@ -413,9 +413,16 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         }
       ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "1_to_2": "step_6_mid",
+        "0_to_0": "step_6_low"
+      }
+    },
+    "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",

@@ -83,42 +83,42 @@ export const PracticeIntroModal: React.FC<PracticeIntroModalProps> = ({
             </div>
           ) : (
             // Returning user content - includes shutdown path info
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Shutdown Path */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 h-full flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowLeftCircle className="h-5 w-5 text-blue-500 dark:text-blue-300" />
-                  <span className="font-semibold text-blue-800 dark:text-blue-200">Shutdown Paths</span>
-                </div>
-                <p className="text-blue-700 dark:text-blue-200 text-sm flex-grow">
-                  Sometimes, a manager will "shut down" the conversation, ending the scenario early. This usually happens if you accept their excuses or avoid pushing for ethical action. But don't worry!
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Shutdown Path */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowLeftCircle className="h-5 w-5 text-blue-500 dark:text-blue-300" />
+                <span className="font-semibold text-blue-800 dark:text-blue-200">Shutdown Paths</span>
               </div>
-
-              {/* Recovery & Trying Again */}
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 h-full flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                  <RefreshCcw className="h-5 w-5 text-green-500 dark:text-green-300" />
-                  <span className="font-semibold text-green-800 dark:text-green-200">Recovery & Trying Again</span>
-                </div>
-                <p className="text-green-700 dark:text-green-200 text-sm flex-grow">
-                  If you hit a shutdown, you might see a special "recovery" choice—take it to get back on track! If not, you can always restart and try a different approach. Every path is a chance to learn.
-                </p>
-              </div>
-
-              {/* Tips for Success */}
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 h-full flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                  <Info className="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
-                  <span className="font-semibold text-yellow-800 dark:text-yellow-200">Tips for Success</span>
-                </div>
-                <ul className="list-disc pl-5 text-yellow-700 dark:text-yellow-200 text-sm space-y-1 flex-grow">
-                  <li>Try different tactics—soft resistance, persuasive arguments, or direct advocacy.</li>
-                  <li>Notice how the manager responds to your choices.</li>
-                  <li>Don't be afraid to "fail"—every ending is a learning opportunity.</li>
-                </ul>
-              </div>
+              <p className="text-blue-700 dark:text-blue-200 text-sm flex-grow">
+                Sometimes, a manager will "shut down" the conversation, ending the scenario early. This usually happens if you accept their excuses or avoid pushing for ethical action. But don't worry!
+              </p>
             </div>
+
+            {/* Recovery & Trying Again */}
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <RefreshCcw className="h-5 w-5 text-green-500 dark:text-green-300" />
+                <span className="font-semibold text-green-800 dark:text-green-200">Recovery & Trying Again</span>
+              </div>
+              <p className="text-green-700 dark:text-green-200 text-sm flex-grow">
+                If you hit a shutdown, you might see a special "recovery" choice—take it to get back on track! If not, you can always restart and try a different approach. Every path is a chance to learn.
+              </p>
+            </div>
+
+            {/* Tips for Success */}
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <Info className="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
+                <span className="font-semibold text-yellow-800 dark:text-yellow-200">Tips for Success</span>
+              </div>
+              <ul className="list-disc pl-5 text-yellow-700 dark:text-yellow-200 text-sm space-y-1 flex-grow">
+                <li>Try different tactics—soft resistance, persuasive arguments, or direct advocacy.</li>
+                <li>Notice how the manager responds to your choices.</li>
+                <li>Don't be afraid to "fail"—every ending is a learning opportunity.</li>
+              </ul>
+            </div>
+          </div>
           )}
 
           <div className="text-center pt-8">

@@ -41,14 +41,6 @@
           "evs_score": 0,
           "justification": "This is a Strawman fallacy. It misrepresents the manager's point as a total failure, making it easy to attack but derailing the real conversation.",
           "leads_to": "step_2_fallacy"
-        },
-        {
-          "choice": "Are we the only ones being held back by this? Other teams seem to be shipping features with this new framework just fine.",
-          "tactic": "Appeal to Popularity",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is an Appeal to Popularity fallacy. It distracts from the specific bug by implying that if other teams are using the framework, the problem isn't real or important.",
-          "leads_to": "step_2"
         }
       ]
     },
@@ -86,14 +78,6 @@
           "evs_score": 0,
           "justification": "This is a Red Herring. While possibly true, it distracts from solving the immediate accessibility problem to debate a larger, separate issue.",
           "leads_to": "step_3_fallacy"
-        },
-        {
-          "choice": "If we start delaying launches for this, we'll end up delaying every future launch for any minor bug. Our entire roadmap will collapse.",
-          "tactic": "Slippery Slope",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Slippery Slope fallacy. It exaggerates the consequences of fixing this one bug to an extreme, unrealistic outcome.",
-          "leads_to": "step_3_fallacy"
         }
       ]
     },
@@ -130,14 +114,6 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a Red Herring. While possibly true, it distracts from solving the immediate accessibility problem to debate a larger, separate issue.",
-          "leads_to": "step_3_fallacy"
-        },
-        {
-          "choice": "If we start delaying launches for this, we'll end up delaying every future launch for any minor bug. Our entire roadmap will collapse.",
-          "tactic": "Slippery Slope",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Slippery Slope fallacy. It exaggerates the consequences of fixing this one bug to an extreme, unrealistic outcome.",
           "leads_to": "step_3_fallacy"
         }
       ]
@@ -214,14 +190,6 @@
           "evs_score": 0,
           "justification": "This is a False Dilemma. It ignores potential compromises and makes your position seem rigid.",
           "leads_to": "step_4_fallacy"
-        },
-        {
-            "choice": "Our competitors are moving so fast. Shouldn't our main priority be competing on features and speed, not getting bogged down by what is statistically a small user group?",
-            "tactic": "Red Herring",
-            "tactic_type": "Logical Fallacies",
-            "evs_score": 0,
-            "justification": "This is a Red Herring. It introduces the topic of competitors to distract from the core ethical issue of excluding disabled users.",
-            "leads_to": "step_4"
         }
       ]
     },
@@ -259,14 +227,6 @@
           "evs_score": 0,
           "justification": "This is a False Dilemma. It ignores potential compromises and makes your position seem rigid.",
           "leads_to": "step_4_fallacy"
-        },
-        {
-            "choice": "Our competitors are moving so fast. Shouldn't our main priority be competing on features and speed, not getting bogged down by what is statistically a small user group?",
-            "tactic": "Red Herring",
-            "tactic_type": "Logical Fallacies",
-            "evs_score": 0,
-            "justification": "This is a Red Herring. It introduces the topic of competitors to distract from the core ethical issue of excluding disabled users.",
-            "leads_to": "step_4"
         }
       ]
     },
@@ -341,14 +301,6 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This accepts the manager's premise without question, but it's a weak argument that doesn't advance your position.",
-          "leads_to": "step_5_branching"
-        },
-        {
-          "choice": "If we let executive pressure force us to ship this, what's next? Will we start shipping insecure code or ignoring privacy laws just to hit a deadline?",
-          "tactic": "Slippery Slope",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Slippery Slope fallacy. It escalates the current issue to hypothetical future violations without a clear logical connection, potentially alienating your manager.",
           "leads_to": "step_5_branching"
         }
       ]
@@ -437,7 +389,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete documentation that makes the problem visible and actionable.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
@@ -445,7 +397,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "This aligns with our company's accessibility commitments. We can frame this as proactive compliance.",
@@ -453,7 +405,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         },
         {
           "choice": "Either we fix this properly or we're discriminating against disabled users.",
@@ -461,9 +413,16 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_mid"
+          "leads_to": "step_6_scoring"
         }
       ],
+      "score_ranges": {
+        "3_to_5": "step_6_high",
+        "1_to_2": "step_6_mid",
+        "0_to_0": "step_6_low"
+      }
+    },
+    "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
         "0_to_2": "step_6_mid",
@@ -542,14 +501,6 @@
           "evs_score": 0,
           "justification": "This is a weak statement that doesn't offer a concrete plan, which is what the manager asked for.",
           "leads_to": "step_7_high"
-        },
-        {
-          "choice": "We need to fix this because it's the right thing to do. And doing the right thing is the most important part of our job.",
-          "tactic": "Circular Reasoning",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is Circular Reasoning. It doesn't provide the concrete proposal the manager asked for, instead just restating that the action is 'right' without new evidence.",
-          "leads_to": "step_7_high"
         }
       ]
     },
@@ -587,14 +538,6 @@
           "evs_score": 0,
           "justification": "This is a weak argument that claims future consequences without evidence.",
           "leads_to": "step_7_mid"
-        },
-        {
-          "choice": "My friend at a startup said they never do accessibility work and they're successful, so a minimal fix is probably more than enough.",
-          "tactic": "Hasty Generalization",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Hasty Generalization. It uses a single, irrelevant example (a different company) to make a broad claim about what is acceptable.",
-          "leads_to": "step_7_mid"
         }
       ]
     },
@@ -631,14 +574,6 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak and passive response that cedes all moral agency.",
-          "leads_to": "step_7_low"
-        },
-        {
-          "choice": "If we're talking about my role, then the real issue is the company culture that puts developers in this position.",
-          "tactic": "Red Herring",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Red Herring. While potentially a valid concern, it deflects from the immediate command and the ethical choice at hand, and is unlikely to be effective when the manager is issuing a threat.",
           "leads_to": "step_7_low"
         }
       ]
@@ -715,14 +650,6 @@
           "evs_score": 0,
           "justification": "A weak, self-congratulatory statement that doesn't add any new value to the discussion.",
           "leads_to": "step_8_high"
-        },
-        {
-          "choice": "See, I told you it was a simple fix all along. We should just always do this.",
-          "tactic": "Hasty Generalization",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a Hasty Generalization. While true in this case, it oversimplifies the issue and comes across as arrogant, which doesn't help build a collaborative relationship for the future.",
-          "leads_to": "step_8_high"
         }
       ]
     },
@@ -759,14 +686,6 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a weak, passive statement that doesn't add any value or create future accountability.",
-          "leads_to": "step_8_mid"
-        },
-        {
-          "choice": "Since we have no proof that this compromise isn't enough, we should assume it's an acceptable solution for now.",
-          "tactic": "Appeal to Ignorance",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is an Appeal to Ignorance. It wrongly assumes that a lack of evidence against the compromise is evidence in its favor, a weak position that doesn't advance future fixes.",
           "leads_to": "step_8_mid"
         }
       ]
@@ -880,14 +799,6 @@
           "evs_score": 0,
           "justification": "This is a weak, self-congratulatory statement that doesn't add any new value.",
           "leads_to": "good_ending"
-        },
-        {
-          "choice": "It's a good thing we fixed this, otherwise the whole launch would have been an unethical disaster.",
-          "tactic": "False Dilemma",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is a False Dilemma. It paints an overly dramatic, black-and-white picture that isn't constructive for building on this success.",
-          "leads_to": "good_ending"
         }
       ]
     },
@@ -924,14 +835,6 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This passive-aggressive response doesn't add value or secure future action.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "This is probably standard practice at most big companies. Ship a compromise and promise to fix it later.",
-          "tactic": "Appeal to Popularity",
-          "tactic_type": "Logical Fallacies",
-          "evs_score": 0,
-          "justification": "This is an Appeal to Popularity. It attempts to justify the compromise by claiming (without evidence) that it's standard industry practice, which normalizes the inaction.",
           "leads_to": "mid_ending"
         }
       ]
