@@ -1898,7 +1898,11 @@ Tactical distribution: ${Object.entries(tacticCounts).map(([tactic, count]: [str
   try {
   return (
     <>
-      <PracticeIntroModal isOpen={showIntroModal} onClose={handleCloseIntroModal} />
+      <PracticeIntroModal 
+        isOpen={showIntroModal} 
+        onClose={handleCloseIntroModal} 
+        isFirstTimeUser={isFirstPracticeScenario()}
+      />
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
         <div>
