@@ -440,7 +440,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         
         return scenarioCache.computeIfAbsent(cacheKey, key -> {
             try {
-                String folder = isFirstTime ? "scenarios/cp/" : "scenarios/";
+                String folder = isFirstTime ? "scenarios/with fallacy/" : "scenarios/";
                 ClassPathResource resource = new ClassPathResource(folder + scenarioId + ".json");
                 log.info("Loading scenario {} from {} for user {} (first-time: {})", 
                         scenarioId, folder, userId, isFirstTime);

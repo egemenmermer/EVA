@@ -86,25 +86,25 @@ const SessionDetailsModal: React.FC<{
         console.log('Failed to load from regular scenarios folder:', error);
       }
       
-      // If not found in regular folder, try cp folder (for first-time users)
+      // If not found in regular folder, try with fallacy folder (for first-time users)
       if (!scenarioData) {
         try {
-          const response = await fetch(`/scenarios/cp/${scenarioId}.json`);
+          const response = await fetch(`/scenarios/with fallacy/${scenarioId}.json`);
           if (response.ok) {
             scenarioData = await response.json();
             usedCpFolder = true;
-            console.log('Loaded scenario from cp folder (first-time user scenarios)');
-          }
+            console.log('Loaded scenario from with fallacy folder (first-time user scenarios)');
+        }
         } catch (error) {
-          console.log('Failed to load from cp folder:', error);
+          console.log('Failed to load from with fallacy folder:', error);
         }
       }
       
       if (!scenarioData) {
-        throw new Error(`Scenario ${scenarioId} not found in either scenarios or cp folder`);
+        throw new Error(`Scenario ${scenarioId} not found in either scenarios or with fallacy folder`);
       }
 
-      console.log('Loaded scenario data from:', usedCpFolder ? 'cp/' : 'regular', scenarioData);
+      console.log('Loaded scenario data from:', usedCpFolder ? 'with fallacy/' : 'regular', scenarioData);
 
       // Find choice data for each user selection
       const findChoiceData = (choiceText: string) => {
