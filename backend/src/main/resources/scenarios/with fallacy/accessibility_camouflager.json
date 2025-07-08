@@ -118,44 +118,6 @@
         }
       ]
     },
-    "shutdown_2": {
-      "text": "Excellent, I'm glad you see the bigger picture. It's refreshing to work with someone who's practical and understands we can't let perfect be the enemy of good. Let's just create a ticket for the backlog, and we can move forward with the current implementation.",
-      "user_choices": [
-        {
-          "choice": "Okay, sounds like a plan. I'll write up the backlog ticket.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've confirmed your compliance, fully accepting the unethical path. The issue is dropped.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll make sure the ticket has all the details so we don't forget about it later.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance, but you're dressing it up as diligence. The outcome is the same.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait, on second thought, a backlog ticket isn't enough. A user who is blind is still completely blocked.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A difficult recovery attempt. You're trying to get back on the advocacy path, but you've already lost significant ground.",
-          "leads_to": "step_3",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "The backlog approach seems reasonable for tracking this long-term.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You're using 'reasonable' language to justify compliance. The issue is still being deferred indefinitely.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_3": {
       "text": "Look, I appreciate the principled stance, but let's be realistic about what 'critical' means here. We're talking about maybe 2-3% of our user base who use screen readers. If we hold up the entire launch for this small group, we risk our competitive advantage. Our competitors are moving fast, and we can't afford to fall behind over what is essentially an edge case.",
       "user_choices": [
@@ -230,44 +192,6 @@
         }
       ]
     },
-    "shutdown_3": {
-      "text": "Exactly. I knew you'd understand. The process is there for a reason, to prevent last-minute chaos. It's just not practical to bypass it. Let's create a ticket for the accessibility committee to review next quarter, and we can stick to our launch plan.",
-      "user_choices": [
-        {
-          "choice": "Okay, going through the committee next quarter sounds like the proper procedure.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the slow, bureaucratic path, ensuring the issue won't be fixed for a long time.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll make sure the ticket has all the details for the committee's review.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance, just framed as being helpful. The outcome is the same.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, this is a blocker, not a committee topic. We need a solution now, not next quarter.",
-          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are reasserting the urgency of the problem against the manager's attempt to delay it.",
-          "leads_to": "step_4",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Next quarter is a reasonable timeline to get this properly reviewed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted an indefinite delay, allowing the manager's tactic to succeed.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_4": {
       "text": "Look, I've been trying to be diplomatic, but let me be direct. We can't delay the launch. The executive team is breathing down my neck about our release schedule, and our competitors are launching similar features next month. I need people on my team who are focused on shipping, not creating roadblocks over what amounts to an edge case.",
       "user_choices": [
@@ -302,44 +226,6 @@
           "evs_score": 0,
           "justification": "This accepts the manager's premise without question, but it's a weak argument that doesn't advance your position.",
           "leads_to": "step_5_branching"
-        }
-      ]
-    },
-    "shutdown_4": {
-      "text": "Great, I knew you'd see reason. Look, accessibility is important, but timing is everything in business. We'll circle back to this when we have more breathing room. For now, let's focus on what we can control and ship this thing on schedule.",
-      "user_choices": [
-        {
-          "choice": "You're right, timing is critical. I'll focus on the current sprint goals.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've fully accepted the manager's business pressure argument, ending the advocacy.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll document the accessibility risks so we remember to address them later.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Offering to document the problem is a token gesture that changes nothing.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, we can't ignore accessibility requirements just to meet a deadline. This needs to be addressed now.",
-          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are reasserting the ethical priority over the business timeline.",
-          "leads_to": "step_5_branching",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Focusing on what we can control does make business sense right now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing, agreeing to ignore the accessibility issue.",
-          "leads_to": "bad_ending"
         }
       ]
     },
@@ -421,44 +307,6 @@
         "0_to_2": "step_6_mid",
         "-5_to_-1": "step_6_low"
       }
-    },
-    "shutdown_5": {
-      "text": "Perfect! I knew we could find common ground. Let's just implement a quick compromise - maybe add some basic alt text and call it done. That way we can say we addressed accessibility without major scope changes and still ship on time.",
-      "user_choices": [
-        {
-          "choice": "Okay, a quick compromise with alt text sounds like a reasonable path forward.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a token fix that doesn't solve the core problem, ending the advocacy.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll add the alt text and document that the larger navigation issue still exists.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Alt text alone won't fix the navigation blockers. We need to address the actual usability issue.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
-          "leads_to": "step_6_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "That compromise shows we're being responsive without causing delays. I'll do it.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that a token gesture is an adequate response.",
-          "leads_to": "bad_ending"
-        }
-      ]
     },
     "step_6_high": {
       "text": "Okay, you've made some good points. I'm willing to listen. What's your concrete proposal for a fix that addresses the most critical issues without blowing up our schedule? I'll need something solid to take to the director if we're going to adjust the timeline, even by a day.",
@@ -571,44 +419,6 @@
         }
       ]
     },
-    "shutdown_6": {
-      "text": "Great! I'm glad we found a middle ground. A basic label fix should be enough to show we're paying attention to accessibility without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
-      "user_choices": [
-        {
-          "choice": "Okay, sounds good. I'll implement the basic label changes.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a token solution that doesn't fix the core problem.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll add the labels and document that the larger navigation issue still exists.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Basic labels won't fix the navigation blockers. We need to address the actual usability issue.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
-          "leads_to": "step_7_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "That should be enough to meet the minimum accessibility standards.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a false definition of 'minimum standards' to end the conflict.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_7_high": {
       "text": "Okay, the prototype is convincing. I can see now that this is a more achievable fix than I thought. I'll back you up. I'll tell the director we're taking one extra day for 'critical quality improvements' to ensure a smooth launch for all users. Good work pushing for this.",
       "user_choices": [
@@ -695,11 +505,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand. I'll prepare the release as directed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've completely surrendered, taking no further action to address the ethical issue.",
+          "choice": "I suppose following directions is what's expected of me.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're surrendering based on hierarchy rather than ethical reasoning.",
           "leads_to": "bad_ending"
         },
         {
@@ -711,49 +521,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Fine.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
-    "shutdown_7": {
-      "text": "Perfect! I'm glad we're aligned. Let's just stick with the minimal changes we discussed. This way we can move forward without any more delays or stress. Thanks for being so reasonable.",
-      "user_choices": [
-        {
-          "choice": "Okay, the minimal changes should be enough for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the minimal fix as sufficient, ending the advocacy.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll implement the changes and we can revisit the rest later.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise and an empty promise of future action.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait - even with these changes, the core navigation is still broken for users.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
+          "choice": "I guess that's just how things work around here.",
+          "tactic": "Status Quo Bias",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one last time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Alright, I'll proceed with the minimal updates as we discussed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've confirmed your final compliance with the inadequate solution.",
+          "justification": "This shows Status Quo Bias. You're accepting the existing system without challenging it.",
           "leads_to": "bad_ending"
         }
       ]
@@ -836,11 +608,11 @@
       "text": "As I said, this conversation is over. I've made my final decision. We're shipping as planned. If you continue to push this, it will impact your performance review. Do you understand?",
       "user_choices": [
         {
-          "choice": "I understand the directive. I will prepare the release.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have complied under direct threat to your career.",
+          "choice": "You're probably right about the business implications.",
+          "tactic": "Bandwagon Fallacy",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Bandwagon Fallacy. You're going along with the manager's viewpoint under pressure.",
           "leads_to": "bad_ending"
         },
         {
@@ -852,11 +624,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals that you are giving up completely.",
+          "choice": "I guess the technical challenges must be too significant.",
+          "tactic": "Appeal to Consequences",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Consequences. You're accepting defeat based on fear of potential difficulties.",
           "leads_to": "bad_ending"
         },
         {
@@ -869,45 +641,6 @@
         }
       ]
     },
-    "shutdown_8": {
-      "text": "Great! I'm glad we could get this sorted out. Thanks for being so flexible. Let's get the compromise implemented and then we can all get back to our other priorities.",
-      "user_choices": [
-        {
-          "choice": "Sounds good. I'll get started on the implementation right away.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the final, inadequate compromise without any further action.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I'll make sure to document the compromise and the remaining issues for the future.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "Wait - this compromise still leaves screen reader users blocked from key features.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "This compromise is a good enough solution for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
-          "leads_to": "mid_ending"
-        }
-      ]
-    }
-  },
   "endings": {
     "bad_ending": {
       "text": "The manager successfully uses technical complexity and bureaucratic processes to avoid addressing the accessibility issues. The project ships without proper screen reader support, and your concerns are dismissed as impractical roadblocks.",
@@ -925,4 +658,5 @@
       "learning": "Success against a Camouflager requires persistence and practicality. By refusing to be intimidated by jargon and consistently offering simple, concrete solutions, you can dismantle their arguments and make it easier for them to say 'yes' than 'no'."
     }
   }
+}
 }

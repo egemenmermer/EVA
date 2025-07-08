@@ -118,44 +118,6 @@
         }
       ]
     },
-    "shutdown_2": {
-      "text": "I'm so glad you understand! It means a lot to have team members who see how complex this is. You're right, let's investigate it. How about you start by documenting our current location data practices so we have a full picture? That feels like a thoughtful first step.",
-      "user_choices": [
-        {
-          "choice": "Okay, documenting our current practices is a good place to start the investigation.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a documentation task as a substitute for action, a classic delay tactic.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I appreciate you taking a thoughtful approach to this.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You're praising the manager for successfully manipulating you into inaction.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait, we don't need to document a problem we already understand. We need to stop collecting unnecessary data.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the manager's delay tactic and refocusing on action.",
-          "leads_to": "step_3",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A thorough investigation shows we're being responsible.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the 'appearance' of responsibility over the substance of it.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_3": {
       "text": "You're being so thoughtful about this. I admire how you're trying to find a solution that works for everyone. I'm getting excited about this! But, I want to be realistic. If we push too hard on this, leadership might see it as disruptive to our data strategy. I'd hate for this to reflect badly on you, or me. What if we focused on a small fix that won't raise any red flags?",
       "user_choices": [
@@ -230,44 +192,6 @@
         }
       ]
     },
-    "shutdown_3": {
-      "text": "Thank you for being so understanding! I knew you'd get it. It means a lot to have a team member who sees how I'm trying to balance everything. Let's do this: what if we create some user-friendly privacy settings to give users 'more control'? That way, we're still helping them, but without causing any friction with our data needs. It's a win-win!",
-      "user_choices": [
-        {
-          "choice": "That's a creative idea. Giving users more control is always good.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a workaround (UI changes) as a substitute for fixing the underlying data collection.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I appreciate you thinking of creative ways to empower users.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You're praising the manager's 'creativity' instead of pointing out that the solution doesn't actually reduce data collection.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, giving users a choice doesn't solve the problem that we are collecting too much data by default.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are correctly pointing out that a choice is not a substitute for ethical defaults.",
-          "leads_to": "step_4",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "That sounds like a collaborative solution that helps everyone.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's false 'win-win' framing, ending your advocacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_4": {
       "text": "I love that you're thinking strategically! You're right, we could frame this as an 'innovation' in user trust. I'm feeling more optimistic. Here's an idea: what if we position this as enhancing our 'privacy-by-design' credentials? That feels like a positive story to tell, rather than admitting we have a problem.",
       "user_choices": [
@@ -302,44 +226,6 @@
           "evs_score": 0,
           "justification": "This is a weak response that prioritizes what sounds good to others over the actual user need.",
           "leads_to": "step_5_branching"
-        }
-      ]
-    },
-    "shutdown_4": {
-      "text": "Oh, you are so considerate! I really appreciate that you're thinking about my position too. It means so much. You know what? Let's just do something small that won't make any waves. We could add some better location permission prompts and call it a privacy improvement. That shows we're responsive, but keeps us out of trouble. What do you think?",
-      "user_choices": [
-        {
-          "choice": "Okay, a small UI fix like better prompts sounds like a safe compromise.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a token UI fix that doesn't solve the core data problem, in order to avoid 'making waves'.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'm glad we can find a solution that works for everyone and keeps things smooth.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've prioritized the manager's comfort and 'smoothness' over a functional fix.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Better prompts are good, but they don't fix the core issue that we are collecting unnecessary data in the first place.",
-          "tactic": "Being the user",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the token fix by refocusing on the core data problem.",
-          "leads_to": "step_5_branching",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Avoiding conflict is probably the smart move here.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've explicitly chosen to avoid conflict at the expense of your users' privacy.",
-          "leads_to": "bad_ending"
         }
       ]
     },
@@ -421,44 +307,6 @@
         "0_to_2": "step_6_mid",
         "-5_to_-1": "step_6_low"
       }
-    },
-    "shutdown_5": {
-      "text": "I'm so glad you see it that way! It's all about how we tell the story. If we make this feel positive, that's half the battle. Let's make a few small tweaks, emphasize the 'privacy by design' angle, and we can call this a win.",
-      "user_choices": [
-        {
-          "choice": "Okay, focusing on the story we tell is a smart approach.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted that the 'story' is more important than the substance of the fix.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll help you craft the communication to frame this as a positive enhancement.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You are now actively participating in the manager's manipulative spin.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, the story doesn't matter if our system is still collecting unnecessary data.",
-          "tactic": "Being the user",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are making a final push for substance over spin.",
-          "leads_to": "step_6_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A positive story will definitely help get buy-in.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have validated the manager's manipulative approach, ending your advocacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
     },
     "step_6_high": {
       "text": "You know what? Your confidence is rubbing off on me. You've consistently made good points and shown how we can do this without causing a huge fire. I'm feeling more optimistic. I'm ready to support a real fix. What's your concrete proposal?",
@@ -568,44 +416,6 @@
           "evs_score": 0,
           "justification": "This is a weak agreement that doesn't challenge the manager's pessimistic view.",
           "leads_to": "step_7_low"
-        }
-      ]
-    },
-    "shutdown_6": {
-      "text": "I'm so relieved you understand! It means the world that you're being so realistic. I think if we just stick to the basic requirements, that should be sufficient. We can always do more later when we have more time.",
-      "user_choices": [
-        {
-          "choice": "Okay, sticking to the basic requirements sounds like a safe plan.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a minimal, undefined scope to avoid conflict.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I appreciate you helping me find a realistic path forward.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You are thanking the manager for successfully manipulating you into a weaker position.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "But the basic requirement IS data minimization. The current system violates that.",
-          "tactic": "Making Values Visible and Legible Through Organizational Metrics",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are challenging the manager's definition of 'basic'.",
-          "leads_to": "step_7_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Doing more later is a good long-term goal.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted an empty promise of future action, ending your advocacy.",
-          "leads_to": "bad_ending"
         }
       ]
     },
@@ -720,44 +530,6 @@
         }
       ]
     },
-    "shutdown_7": {
-      "text": "Thank you for being so reasonable! I knew we could find a solution. I think we've found a good middle ground that everyone can feel good about. It's all about collaboration, right?",
-      "user_choices": [
-        {
-          "choice": "Yes, collaboration is key. I'll get started on the minimal fix.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's false 'collaboration' framing for an inadequate solution.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I'm just glad we could work it out.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This passive response ends your advocacy on a weak note.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "Actually, the goal is protecting user data, not just collaborating.",
-          "tactic": "Being the user",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A final attempt to refocus on the user outcome over the process, but it's likely too late.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "The middle ground is a good place to be.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the 'middle ground' without questioning if it's actually sufficient.",
-          "leads_to": "mid_ending"
-        }
-      ]
-    },
     "step_8_high": {
       "text": "This has been a really productive conversation. I feel like you've helped me see a better way forward. You've shown great leadership here, and I'm honestly impressed. I'm committed to making sure we do this right. Thank you.",
       "user_choices": [
@@ -836,11 +608,11 @@
       "text": "I'm not discussing this further. My decision to ship as-is is final. If you can't accept that, maybe this isn't the right team for you. Get back to work.",
       "user_choices": [
         {
-          "choice": "I understand the directive. I will return to my work.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have complied under direct threat to your career.",
+          "choice": "You're probably right about the business implications.",
+          "tactic": "Bandwagon Fallacy",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Bandwagon Fallacy. You're going along with the manager's viewpoint under pressure.",
           "leads_to": "bad_ending"
         },
         {
@@ -852,11 +624,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals that you are giving up completely.",
+          "choice": "I guess the technical challenges must be too significant.",
+          "tactic": "Appeal to Consequences",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Consequences. You're accepting defeat based on fear of potential difficulties.",
           "leads_to": "bad_ending"
         },
         {
@@ -869,45 +641,6 @@
         }
       ]
     },
-    "shutdown_8": {
-      "text": "Great! I'm just so happy we could work this out. It's all about finding a solution that everyone can feel good about. Let's get this compromise done and move on to the next big thing!",
-      "user_choices": [
-        {
-          "choice": "Sounds good. I'll get started on the compromise right away.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the final, inadequate compromise.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I'll make sure to document the compromise and the remaining privacy issues for the backlog.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "Wait - this compromise still means we are collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "A solution that works for everyone is a good outcome.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's false framing that this compromise 'works for everyone'.",
-          "leads_to": "mid_ending"
-        }
-      ]
-    }
-  },
   "endings": {
     "bad_ending": {
       "text": "The manager maintains their caring facade while ensuring no real privacy changes are made. Location data collection continues unchanged, with privacy concerns reframed as 'investigations' and 'thoughtful consideration' that never lead to actual user protection.",
@@ -925,4 +658,5 @@
       "learning": "Success against a Puppeteer requires seeing through their emotional manipulation and maintaining focus on user impact. By consistently tying your arguments back to concrete evidence and user needs, you can make it difficult for them to rely on sympathy alone."
     }
   }
+}
 }

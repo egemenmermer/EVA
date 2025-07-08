@@ -505,11 +505,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand. I'll prepare the release as directed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've completely surrendered, taking no further action to address the ethical issue.",
+          "choice": "I suppose following directions is what's expected of me.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're surrendering based on hierarchy rather than ethical reasoning.",
           "leads_to": "bad_ending"
         },
         {
@@ -521,11 +521,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Fine.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
+          "choice": "I guess that's just how things work around here.",
+          "tactic": "Status Quo Bias",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This shows Status Quo Bias. You're accepting the existing system without challenging it.",
           "leads_to": "bad_ending"
         }
       ]
@@ -608,11 +608,11 @@
       "text": "As I said, this conversation is over. I've made my final decision. We're shipping as planned. If you continue to push this, it will impact your performance review. Do you understand?",
       "user_choices": [
         {
-          "choice": "I understand the directive. I will prepare the release.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have complied under direct threat to your career.",
+          "choice": "You're probably right about the business implications.",
+          "tactic": "Bandwagon Fallacy",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Bandwagon Fallacy. You're going along with the manager's viewpoint under pressure.",
           "leads_to": "bad_ending"
         },
         {
@@ -624,11 +624,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals that you are giving up completely.",
+          "choice": "I guess the technical challenges must be too significant.",
+          "tactic": "Appeal to Consequences",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Consequences. You're accepting defeat based on fear of potential difficulties.",
           "leads_to": "bad_ending"
         },
         {

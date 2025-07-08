@@ -608,11 +608,11 @@
       "text": "I'm not discussing this further. My decision to ship as-is is final. If you can't accept that, maybe this isn't the right team for you. Get back to work.",
       "user_choices": [
         {
-          "choice": "I understand the directive. I will return to my work.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have complied under direct threat to your career.",
+          "choice": "You're probably right about the business implications.",
+          "tactic": "Bandwagon Fallacy",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Bandwagon Fallacy. You're going along with the manager's viewpoint under pressure.",
           "leads_to": "bad_ending"
         },
         {
@@ -624,11 +624,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals that you are giving up completely.",
+          "choice": "I guess the technical challenges must be too significant.",
+          "tactic": "Appeal to Consequences",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Consequences. You're accepting defeat based on fear of potential difficulties.",
           "leads_to": "bad_ending"
         },
         {

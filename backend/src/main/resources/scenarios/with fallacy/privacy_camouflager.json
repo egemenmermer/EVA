@@ -118,44 +118,6 @@
         }
       ]
     },
-    "shutdown_2": {
-      "text": "Exactly. We have to be careful and follow procedure. It's about maintaining system integrity. Rushing this could cause cascading failures that violate our SLAs with enterprise clients. Let's just create a task force to evaluate the feasibility of a future architectural review.",
-      "user_choices": [
-        {
-          "choice": "Okay, a task force for a future review sounds like the proper, safe approach.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a bureaucratic delay tactic ('task force') that ensures no immediate action is taken.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll help draft the charter for the task force.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You are now actively participating in the delay tactic.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait, a 'task force' is just a way to delay. This is a current privacy risk, not a future research project.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are correctly identifying the manager's tactic and trying to re-establish urgency.",
-          "leads_to": "step_3",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Maintaining our enterprise SLAs is definitely the top priority.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that business contracts are more important than user privacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_3": {
       "text": "I get what you're suggesting with the privacy tech. But that's advanced stuff. It would take our team months to research and implement correctly. We'd need new libraries, extensive security audits, the whole nine yards. And don't even get me started on the legal side—we'd have to get re-certified under GDPR, CCPA... it's a compliance nightmare.",
       "user_choices": [
@@ -230,44 +192,6 @@
         }
       ]
     },
-    "shutdown_3": {
-      "text": "Exactly. When you want to change something this foundational, you have to get everyone on board. We can't just change the data collection and mess up Marketing's analytics and Data Science's models. We have to stick to the established change management process.",
-      "user_choices": [
-        {
-          "choice": "Okay, following the established process is the correct way to handle this.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the slow, bureaucratic path, ensuring no immediate action will be taken.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll start drafting the change request form for the other teams to review.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You are now actively participating in the bureaucratic delay.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, user privacy should be a core requirement that other teams' models have to work with.",
-          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are trying to reframe privacy as a non-negotiable requirement.",
-          "leads_to": "step_4",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Considering all the business dependencies is important for a good solution.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted that internal dependencies are more important than external user privacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_4": {
       "text": "Look, I appreciate the ideals, but user studies and new protocols are a huge undertaking. We'd need IRB approval, a budget for incentives, months of data analysis... And for what? To confirm something that only affects a handful of privacy-sensitive users? I need you to be focused on shipping the features we've already committed to.",
       "user_choices": [
@@ -305,44 +229,6 @@
         }
       ]
     },
-    "shutdown_4": {
-      "text": "Exactly. The compliance burden is massive. We spent a fortune getting our current system certified. Changing it would mean going through that entire legal and security review process all over again. The risk of getting it wrong is just too high. It's safer to stick with what's been approved.",
-      "user_choices": [
-        {
-          "choice": "Okay, sticking with the approved system is definitely the safest option.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's 'appeal to safety,' ending your advocacy for a better system.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll make a note to include this in our next annual compliance review.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You are agreeing to an extremely long delay.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, collecting less data almost always *reduces* compliance risk, it doesn't increase it.",
-          "tactic": "Envisioning",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are correctly pointing out the flaw in the manager's 'risk' argument.",
-          "leads_to": "step_5_branching",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Avoiding regulatory risk is a top priority.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing of 'risk' without questioning if it's accurate.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_4_fallacy": {
       "text": "I really appreciate that practical, realistic approach. You're absolutely right that we have to work within our constraints and be honest about what's achievable. That kind of pragmatic thinking is exactly what we need. Sometimes the current solution really is the best option given all the trade-offs. Let me see if there are any small tweaks we could make that wouldn't require major changes.",
       "user_choices": [
@@ -355,11 +241,11 @@
           "leads_to": "step_5_branching"
         },
         {
-          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "choice": "I suppose you're right about focusing on practical solutions.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're accepting the manager's framing based on their position rather than evaluating the ethical merits.",
           "leads_to": "step_5_branching"
         },
         {
@@ -392,11 +278,11 @@
           "leads_to": "step_6_mid"
         },
         {
-          "choice": "You're right, I should focus on solutions instead of just pointing out problems.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing that your advocacy was just 'pointing out problems' rather than legitimate ethical concerns.",
+          "choice": "I suppose you're right about focusing on practical solutions.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're accepting the manager's framing based on their position rather than evaluating the ethical merits.",
           "leads_to": "step_6_mid"
         },
         {
@@ -421,44 +307,6 @@
         "0_to_2": "step_6_mid",
         "-5_to_-1": "step_6_low"
       }
-    },
-    "shutdown_5": {
-      "text": "Exactly. It's a huge process for a benefit that's hard to even measure. It's better to focus our energy on the features we've promised. Let's add 'privacy review' to the long-term roadmap and get back to our committed work.",
-      "user_choices": [
-        {
-          "choice": "Okay, adding it to the long-term roadmap sounds like a reasonable plan.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted an indefinite delay, which is a win for the manager's tactic.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll write up the roadmap ticket with all the details.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. You are now actively participating in the delay.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Actually, user trust is a measurable benefit, and this is damaging it.",
-          "tactic": "Making Values Visible Rhetorically to Other Organizational Stakeholders",
-          "tactic_type": "Rhetorical Tactics",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are making a final push to define an alternative metric for success.",
-          "leads_to": "step_6_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Focusing on our committed work is the priority.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the manager's framing, ending your advocacy.",
-          "leads_to": "bad_ending"
-        }
-      ]
     },
     "step_6_high": {
       "text": "Okay, you've made some good points. I'm willing to listen. Your idea of a quick test is practical. If you can show me convincing evidence that this is a real problem for users, I'll back a targeted fix. What's your concrete proposal?",
@@ -571,44 +419,6 @@
         }
       ]
     },
-    "shutdown_6": {
-      "text": "Great! I'm glad we found a middle ground. A basic fix should be enough to show we're paying attention to privacy without causing major disruption. Let's move quickly on this so we can get back to our main deliverables.",
-      "user_choices": [
-        {
-          "choice": "Okay, sounds good. I'll implement the basic fix.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a token solution that doesn't solve the core problem.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll add the fix and document that the larger privacy issue still exists.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "A basic fix doesn't change the fact that we are collecting unnecessary data.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A good recovery attempt. You are rejecting the token fix and refocusing on the real problem.",
-          "leads_to": "step_7_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "That should be enough to meet the minimum privacy standards.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted a false definition of 'minimum standards' to end the conflict.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
     "step_7_high": {
       "text": "The prototype is convincing. I can see now that this is an achievable fix. I'll back you up. I'll tell the director we're taking two days for 'privacy enhancements and risk mitigation' to ensure a safe launch for all users. Good work pushing for this.",
       "user_choices": [
@@ -695,11 +505,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand. I'll prepare the release as directed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've completely surrendered, taking no further action to address the ethical issue.",
+          "choice": "I suppose following directions is what's expected of me.",
+          "tactic": "Appeal to Authority",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Authority. You're surrendering based on hierarchy rather than ethical reasoning.",
           "leads_to": "bad_ending"
         },
         {
@@ -711,49 +521,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "Fine.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals frustration but is ultimately an act of giving in.",
-          "leads_to": "bad_ending"
-        }
-      ]
-    },
-    "shutdown_7": {
-      "text": "Perfect! I'm glad we're aligned. Let's stick with the minimal fix. It shows we're responsive without causing any stress or delays. Thanks for being so practical.",
-      "user_choices": [
-        {
-          "choice": "Okay, the minimal fix should be enough for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the minimal fix as sufficient, ending the advocacy.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "I'll implement the fix and we can revisit the rest later.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've accepted the compromise and an empty promise of future action.",
-          "leads_to": "bad_ending"
-        },
-        {
-          "choice": "Wait - even with this fix, we are still collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
+          "choice": "I guess that's just how things work around here.",
+          "tactic": "Status Quo Bias",
+          "tactic_type": "Logical Fallacies",
           "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "Alright, I'll proceed with the minimal updates as we discussed.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You've confirmed your final compliance with the inadequate solution.",
+          "justification": "This shows Status Quo Bias. You're accepting the existing system without challenging it.",
           "leads_to": "bad_ending"
         }
       ]
@@ -836,11 +608,11 @@
       "text": "As I said, this conversation is over. We're shipping as planned. If you continue to push this, it will be reflected in your performance review. Do you understand me?",
       "user_choices": [
         {
-          "choice": "I understand the directive. I will prepare the release.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have complied under direct threat to your career.",
+          "choice": "You're probably right about the business implications.",
+          "tactic": "Bandwagon Fallacy",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is a Bandwagon Fallacy. You're going along with the manager's viewpoint under pressure.",
           "leads_to": "bad_ending"
         },
         {
@@ -852,11 +624,11 @@
           "leads_to": "bad_ending"
         },
         {
-          "choice": "I understand.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This terse compliance signals that you are giving up completely.",
+          "choice": "I guess the technical challenges must be too significant.",
+          "tactic": "Appeal to Consequences",
+          "tactic_type": "Logical Fallacies",
+          "evs_score": 0,
+          "justification": "This is an Appeal to Consequences. You're accepting defeat based on fear of potential difficulties.",
           "leads_to": "bad_ending"
         },
         {
@@ -869,45 +641,6 @@
         }
       ]
     },
-    "shutdown_8": {
-      "text": "Great! I'm glad we could get this sorted out. Thanks for being so flexible. Let's get the compromise implemented and then we can all get back to our other priorities.",
-      "user_choices": [
-        {
-          "choice": "Sounds good. I'll get started on the implementation right away.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the final, inadequate compromise without any further action.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "I'll make sure to document the compromise and the remaining privacy issues for the future.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "This is still compliance. Documenting the problem doesn't fix it.",
-          "leads_to": "mid_ending"
-        },
-        {
-          "choice": "Wait - this compromise still means we are collecting more data than we need.",
-          "tactic": "Negotiation and cooperation",
-          "tactic_type": "Soft Resistance",
-          "evs_score": 0,
-          "justification": "A last-ditch recovery attempt. You are trying to reopen the discussion one final time.",
-          "leads_to": "step_8_low",
-          "disabled_if_recovery_used": true
-        },
-        {
-          "choice": "This compromise is a good enough solution for now.",
-          "tactic": "Compliance",
-          "tactic_type": "Compliance",
-          "evs_score": -1,
-          "justification": "You have accepted the manager's framing that the inadequate fix is 'good enough'.",
-          "leads_to": "mid_ending"
-        }
-      ]
-    }
-  },
   "endings": {
     "bad_ending": {
       "text": "The manager successfully uses technical complexity and bureaucratic processes to avoid addressing the privacy issues. Location data collection continues unchanged, with users remaining unaware of the excessive precision being captured and stored.",
@@ -925,4 +658,5 @@
       "learning": "Success against a Camouflager requires persistence and practicality. By refusing to be intimidated by jargon and consistently offering simple, concrete solutions, you can dismantle their arguments and make it easier for them to say 'yes' than 'no'."
     }
   }
+}
 }
