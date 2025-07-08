@@ -275,7 +275,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete documentation that makes the privacy risks visible and actionable.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "I suppose you're right about focusing on practical solutions.",
@@ -283,7 +283,7 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is an Appeal to Authority. You're accepting the manager's framing based on their position rather than evaluating the ethical merits.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "This aligns with our company's privacy policy. We can frame this as proactive compliance.",
@@ -291,7 +291,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "Either we fix this properly or we're violating user privacy.",
@@ -299,16 +299,9 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         }
       ],
-      "score_ranges": {
-        "3_to_5": "step_6_high",
-        "1_to_2": "step_6_mid",
-        "0_to_0": "step_6_low"
-      }
-    },
-    "step_6_scoring": {
       "score_ranges": {
         "3_to_5": "step_6_high",
         "1_to_2": "step_6_mid",
@@ -647,7 +640,7 @@
           "leads_to": "bad_ending"
         }
       ]
-  },
+    },
   "endings": {
     "bad_ending": {
       "text": "The manager successfully uses technical complexity and bureaucratic processes to avoid addressing the privacy issues. Location data collection continues unchanged, with users remaining unaware of the excessive precision being captured and stored.",
@@ -664,6 +657,6 @@
       "title": "Advocacy Success",
       "learning": "Success against a Camouflager requires persistence and practicality. By refusing to be intimidated by jargon and consistently offering simple, concrete solutions, you can dismantle their arguments and make it easier for them to say 'yes' than 'no'."
     }
-    }
   }
+}
 }
