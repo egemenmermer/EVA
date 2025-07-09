@@ -1284,6 +1284,10 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
         }
       });
       
+      // Calculate raw EVS score (sum of individual choice scores)
+      const evsHistory = sessionSummary?.evsHistory || [];
+      const rawEvsScore = evsHistory.reduce((sum: number, evs: number) => sum + evs, 0);
+      
       // Exactly match PracticeSessionRequestDTO structure
       const practiceData = {
         userId: user.id,
@@ -1300,7 +1304,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           tactic: sessionSummary?.categoryHistory?.[index] || 'Unknown'
         })) || [],
         timestamp: new Date().toISOString(), // This gets converted to LocalDateTime on server
-        score: sessionSummary?.totalEvs || 0 // Use scaled totalEvs instead of averageEvs
+        score: rawEvsScore // Use raw EVS sum instead of scaled score
       };
       
       console.log('DEBUG: Session summary data:', sessionSummary);

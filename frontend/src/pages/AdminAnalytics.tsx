@@ -57,6 +57,14 @@ interface DecisionTreeData {
   steps: DecisionTreeStep[];
 }
 
+// Add helper function to determine scenario type after the imports and before the PracticeSession interface
+const getScenarioType = (scenarioId: string | null): string => {
+  if (!scenarioId) return 'Unknown';
+  if (scenarioId.includes('privacy')) return 'Privacy';
+  if (scenarioId.includes('accessibility')) return 'Accessibility';
+  return 'Unknown';
+};
+
 // Component for viewing session details
 const SessionDetailsModal: React.FC<{
   session: PracticeSession | null;
@@ -228,7 +236,7 @@ const SessionDetailsModal: React.FC<{
             </div>
             <div>
               <p><span className="font-medium">Date:</span> {new Date(session.createdAt).toLocaleString()}</p>
-              <p><span className="font-medium">Score:</span> {session.score?.toFixed(1) || 'N/A'}/10</p>
+              <p><span className="font-medium">Score:</span> {session.score?.toFixed(1) || 'N/A'}/8</p>
             </div>
           </div>
         </div>
@@ -675,7 +683,8 @@ const AdminAnalytics: React.FC = () => {
     const headers = [
       'Name', 
       'Email', 
-      'Manager Type', 
+      'Manager Type',
+      'Scenario Type', 
       'Date', 
       'Score', 
       'Scenario ID'
@@ -686,8 +695,9 @@ const AdminAnalytics: React.FC = () => {
       session.userFullName || 'Unknown',
       session.userEmail || session.userId,
       session.managerType,
+      getScenarioType(session.scenarioId),
       new Date(session.createdAt).toLocaleString(),
-      session.score !== undefined ? session.score.toString() : 'N/A',
+      session.score !== undefined ? `${session.score}/8` : 'N/A',
       session.scenarioId || 'N/A'
     ]);
     
@@ -731,8 +741,9 @@ const AdminAnalytics: React.FC = () => {
         <td>${session.userFullName || 'Unknown'}</td>
         <td>${session.userEmail || session.userId}</td>
         <td>${session.managerType}</td>
+        <td>${getScenarioType(session.scenarioId)}</td>
         <td>${new Date(session.createdAt).toLocaleString()}</td>
-        <td>${session.score !== undefined ? session.score : 'N/A'}</td>
+        <td>${session.score !== undefined ? `${session.score}/8` : 'N/A'}</td>
       </tr>
     `).join('');
     
@@ -764,6 +775,7 @@ const AdminAnalytics: React.FC = () => {
               <th>Name</th>
               <th>Email</th>
               <th>Manager Type</th>
+              <th>Scenario Type</th>
               <th>Date</th>
               <th>Score</th>
             </tr>
@@ -959,7 +971,7 @@ const AdminAnalytics: React.FC = () => {
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Avg. Ethical Score</p>
-                <p className="text-3xl font-bold text-white">{metrics.avgScore || 'N/A'}/10</p>
+                <p className="text-3xl font-bold text-white">{metrics.avgScore || 'N/A'}/8</p>
               </div>
             </div>
           </div>
@@ -1123,6 +1135,9 @@ const AdminAnalytics: React.FC = () => {
                     Manager Type
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Scenario Type
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Date
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -1145,11 +1160,22 @@ const AdminAnalytics: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                       {session.managerType}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        getScenarioType(session.scenarioId) === 'Privacy' 
+                          ? 'bg-blue-900 text-blue-300' 
+                          : getScenarioType(session.scenarioId) === 'Accessibility'
+                          ? 'bg-green-900 text-green-300'
+                          : 'bg-gray-900 text-gray-300'
+                      }`}>
+                        {getScenarioType(session.scenarioId)}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {new Date(session.createdAt).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                      {session.score !== undefined ? session.score : 'N/A'}
+                      {session.score !== undefined ? `${session.score}/8` : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button

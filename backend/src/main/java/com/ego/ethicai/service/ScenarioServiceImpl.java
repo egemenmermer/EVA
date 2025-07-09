@@ -455,28 +455,13 @@ public class ScenarioServiceImpl implements ScenarioService {
     private Map<String, Object> generateSessionSummary(ScenarioSession session, JsonNode scenario) {
         Map<String, Object> summary = new HashMap<>();
         
-        // Calculate total EVS score
+        // Calculate total EVS score (raw sum, no scaling)
         int totalEvs = session.getEvsHistory().stream().mapToInt(Integer::intValue).sum();
         log.info("Raw EVS total: {}, EVS history: {}", totalEvs, session.getEvsHistory());
         
-        // Convert raw EVS to 0-10 scale
-        // Dynamic scaling based on actual number of choices made
-        int numChoices = session.getEvsHistory().size();
-        int minPossibleScore = numChoices * 0;    // Worst case: all 0 choices (bad choices)
-        int maxPossibleScore = numChoices * 1;    // Best case: all +1 choices (good choices)
-        
-        // Scale to 0-10 range based on actual range
-        double scaledScore;
-        if (maxPossibleScore == minPossibleScore) {
-            scaledScore = 5.0; // Default middle score if no range
-        } else {
-            scaledScore = ((double)(totalEvs - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 10.0;
-        }
-        
-        // Keep decimal precision, round to 1 decimal place
-        double finalScore = Math.max(0.0, Math.min(10.0, Math.round(scaledScore * 10.0) / 10.0));
-        log.info("Dynamic scaling: numChoices={}, raw={}, min={}, max={}, scaledScore={}, finalScore={}", 
-                numChoices, totalEvs, minPossibleScore, maxPossibleScore, scaledScore, finalScore);
+        // Use raw EVS score without scaling
+        double finalScore = totalEvs;
+        log.info("Using raw EVS score: {}", finalScore);
         
         double averageEvs = session.getEvsHistory().isEmpty() ? 0 : 
                            (double) totalEvs / session.getEvsHistory().size();
@@ -487,22 +472,28 @@ public class ScenarioServiceImpl implements ScenarioService {
             tacticCounts.put(category, tacticCounts.getOrDefault(category, 0) + 1);
         }
         
-        // Determine performance level based on final score (0-10 scale)
+        // Determine performance level based on raw EVS score
+        int numChoices = session.getEvsHistory().size();
         String performanceLevel;
-        if (finalScore >= 8.0) {
-            performanceLevel = "Excellent";
-        } else if (finalScore >= 6.0) {
-            performanceLevel = "Good";
-        } else if (finalScore >= 4.0) {
-            performanceLevel = "Fair";
+        if (numChoices == 0) {
+            performanceLevel = "No Choices Made";
         } else {
-            performanceLevel = "Needs Improvement";
+            double averageEvsPerChoice = finalScore / numChoices;
+            if (averageEvsPerChoice >= 0.8) {
+                performanceLevel = "Excellent";
+            } else if (averageEvsPerChoice >= 0.6) {
+                performanceLevel = "Good";
+            } else if (averageEvsPerChoice >= 0.4) {
+                performanceLevel = "Fair";
+            } else {
+                performanceLevel = "Needs Improvement";
+            }
         }
         
         // Generate detailed feedback about user's decisions and tactics
         Map<String, Object> detailedFeedback = generateDetailedFeedback(session, finalScore);
         
-        summary.put("totalEvs", finalScore); // Use scaled score instead of raw EVS
+        summary.put("totalEvs", finalScore); // Use raw EVS score
         summary.put("rawEvs", totalEvs); // Keep raw EVS for debugging if needed
         summary.put("averageEvs", Math.round(averageEvs * 100.0) / 100.0);
         summary.put("performanceLevel", performanceLevel);
@@ -623,8 +614,8 @@ public class ScenarioServiceImpl implements ScenarioService {
     }
     
     private String formatFinalScoreMessage(Map<String, Object> summary) {
-        double finalScore = (Double) summary.get("totalEvs"); // This is actually the scaled final score (0-10)
-        int rawEvs = (Integer) summary.get("rawEvs"); // This is the raw EVS total
+        double finalScore = (Double) summary.get("totalEvs"); // This is now the raw EVS score
+        int rawEvs = (int) Math.round(finalScore); // Convert to int for display
         int numChoices = ((List<?>) summary.get("evsHistory")).size(); // Get count from EVS history
         
         // Calculate the maximum possible EVS score (each choice can be +1 at most)
@@ -651,13 +642,16 @@ public class ScenarioServiceImpl implements ScenarioService {
         String scoreCategory;
         String feedback;
         
-        if (finalScore >= 8.0) {
+        // Use raw EVS score evaluation
+        double averageEvsPerChoice = numChoices > 0 ? finalScore / numChoices : 0;
+        
+        if (averageEvsPerChoice >= 0.8) {
             scoreCategory = "Excellent";
             feedback = "You consistently made ethical choices that prioritize user needs and company values. Your approach demonstrates strong ethical leadership.";
-        } else if (finalScore >= 6.0) {
+        } else if (averageEvsPerChoice >= 0.6) {
             scoreCategory = "Good";
             feedback = "You made mostly ethical choices with some room for improvement. Consider the long-term impact of decisions on all stakeholders.";
-        } else if (finalScore >= 4.0) {
+        } else if (averageEvsPerChoice >= 0.4) {
             scoreCategory = "Fair";
             feedback = "Your choices showed mixed ethical considerations. Reflect on how to better balance competing priorities while maintaining ethical standards.";
         } else {

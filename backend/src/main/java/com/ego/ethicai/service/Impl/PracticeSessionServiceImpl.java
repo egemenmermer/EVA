@@ -15,6 +15,7 @@ import com.ego.ethicai.service.ScenarioService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -325,6 +326,45 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
     }
 
     private SelectionDataDTO findChoiceData(JsonNode scenarioData, String userChoice, int step) {
+        // First try the provided scenario data
+        SelectionDataDTO result = searchChoiceInScenario(scenarioData, userChoice, step);
+        if (result != null) {
+            return result;
+        }
+        
+        // If not found, try to load alternative scenario versions and search there
+        String scenarioId = scenarioData.get("id") != null ? scenarioData.get("id").asText() : null;
+        if (scenarioId != null) {
+            log.info("Choice '{}' not found in primary scenario, searching alternative versions for {}", userChoice, scenarioId);
+            
+            // Try both scenario versions
+            String[] scenarioPaths = {
+                "scenarios/with fallacy/" + scenarioId + ".json",
+                "scenarios/" + scenarioId + ".json"
+            };
+            
+            for (String scenarioPath : scenarioPaths) {
+                try {
+                    ClassPathResource resource = new ClassPathResource(scenarioPath);
+                    if (resource.exists()) {
+                        JsonNode alternativeScenario = objectMapper.readTree(resource.getInputStream());
+                        result = searchChoiceInScenario(alternativeScenario, userChoice, step);
+                        if (result != null) {
+                            log.info("Found choice '{}' in alternative scenario: {}", userChoice, scenarioPath);
+                            return result;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not load alternative scenario from {}: {}", scenarioPath, e.getMessage());
+                }
+            }
+        }
+        
+        log.warn("Could not find choice data for '{}' in any scenario version", userChoice);
+        return null;
+    }
+    
+    private SelectionDataDTO searchChoiceInScenario(JsonNode scenarioData, String userChoice, int step) {
         try {
             JsonNode statements = scenarioData.get("statements");
             if (statements != null) {
@@ -333,13 +373,28 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                     if (choices != null && choices.isArray()) {
                         for (JsonNode choice : choices) {
                             if (choice.get("choice").asText().equals(userChoice)) {
+                                // Try multiple field names for EVS score
+                                JsonNode evsNode = choice.get("evs_score");
+                                if (evsNode == null) {
+                                    evsNode = choice.get("EVS");
+                                }
+                                double evsScore = (evsNode != null) ? evsNode.asDouble() : 0.0;
+                                
+                                // Try multiple field names for tactic
+                                String tactic = "Unknown";
+                                if (choice.get("tactic") != null) {
+                                    tactic = choice.get("tactic").asText();
+                                } else if (choice.get("tactic_type") != null) {
+                                    tactic = choice.get("tactic_type").asText();
+                                } else if (choice.get("category") != null) {
+                                    tactic = choice.get("category").asText();
+                                }
+                                
                                 return SelectionDataDTO.builder()
                                         .step(step)
                                         .choice(userChoice)
-                                        .evs((double) choice.get("EVS").asInt())
-                                        .tactic(choice.get("tactic") != null ? choice.get("tactic").asText() : 
-                                                (choice.get("tactic_type") != null ? choice.get("tactic_type").asText() : 
-                                                 (choice.get("category") != null ? choice.get("category").asText() : "Unknown")))
+                                        .evs(evsScore)
+                                        .tactic(tactic)
                                         .build();
                             }
                         }
@@ -347,7 +402,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Could not find choice data for: {}", userChoice);
+            log.debug("Error searching for choice '{}' in scenario: {}", userChoice, e.getMessage());
         }
         return null;
     }

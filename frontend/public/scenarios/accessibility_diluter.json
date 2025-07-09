@@ -389,7 +389,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "Excellent. You're providing concrete documentation that makes the risks visible in terms the manager cares about.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "You're right, I should focus on finding a middle ground instead of pushing for everything.",
@@ -397,7 +397,7 @@
           "tactic_type": "Compliance",
           "evs_score": -1,
           "justification": "You've accepted the manager's framing that your advocacy was unreasonable rather than ethical.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "This aligns with our company's diversity and inclusion values. We can frame this as living our values.",
@@ -405,7 +405,7 @@
           "tactic_type": "Rhetorical Tactics",
           "evs_score": 1,
           "justification": "A smart approach. You're connecting the fix to existing company values and making it easier to approve.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         },
         {
           "choice": "Either we invest in accessibility or we exclude disabled users completely.",
@@ -413,20 +413,13 @@
           "tactic_type": "Logical Fallacies",
           "evs_score": 0,
           "justification": "This is a False Dilemma that ignores potential middle-ground solutions and makes your position seem inflexible.",
-          "leads_to": "step_6_scoring"
+          "leads_to": "step_6_mid"
         }
       ],
       "score_ranges": {
         "3_to_5": "step_6_high",
-        "1_to_2": "step_6_mid",
-        "0_to_0": "step_6_low"
-      }
-    },
-    "step_6_scoring": {
-      "score_ranges": {
-        "3_to_5": "step_6_high",
-        "1_to_2": "step_6_mid",
-        "0_to_0": "step_6_low"
+        "0_to_2": "step_6_mid",
+        "-5_to_-1": "step_6_low"
       }
     },
     "shutdown_5": {
