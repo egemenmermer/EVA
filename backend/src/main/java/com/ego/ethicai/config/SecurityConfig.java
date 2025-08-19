@@ -169,4 +169,14 @@ public class SecurityConfig {
         
         return mailSender;
     }
+    @Bean
+    public UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {
+        var admin = org.springframework.security.core.userdetails.User
+            .withUsername("admin")
+            .password(encoder.encode("admin123"))
+            .roles("ADMIN")
+            .build();
+        return new org.springframework.security.provisioning.InMemoryUserDetailsManager(admin);
+    }
+    
 }
