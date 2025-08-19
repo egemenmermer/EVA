@@ -169,6 +169,7 @@ public class SecurityConfig {
         
         return mailSender;
     }
+    //trying to give myself admin access 
     @Bean
     public UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {
         var admin = org.springframework.security.core.userdetails.User
