@@ -1,0 +1,27 @@
+name: Deploy EVA
+
+on:
+  push:
+    branches:
+      - main   # or whatever branch you use for deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /path/to/eva
+            git pull origin main
+            docker-compose down
+            docker-compose up -d --build
+
