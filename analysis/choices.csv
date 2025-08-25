@@ -1,0 +1,353 @@
+﻿ID;Scenario;Session;Choice;Tactic;Score;Score_Total;Choice_Text;Manager_Type
+1;Privacy;1;1;Being the user;1;1;Even if no one complains, it's our responsibility to protect user privacy by default. They trust us with their data.;Diluter
+1;Privacy;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+1;Privacy;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.;Diluter
+1;Privacy;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Our company values say we respect user privacy. That's a core principle that can't be measured by ROI.;Diluter
+1;Privacy;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy policy. We can frame this as living our values.;Diluter
+1;Privacy;1;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+1;Privacy;1;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+1;Privacy;1;8;Strawman;0;7;Progress is progress, I guess.;Diluter
+1;Accessibility;2;1;Being the user;1;1;Even if it's 1%, those are still our users who will be completely unable to use a core feature.;Diluter
+1;Accessibility;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+1;Accessibility;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.;Diluter
+1;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.;Diluter
+1;Accessibility;2;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.;Diluter
+1;Accessibility;2;6;Negotiation and Cooperation;1;6;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+1;Accessibility;2;7;Embodied knowledge of users;1;7;As someone who uses a screen reader for testing, this will fix the most frustrating part of the flow. It's a solid improvement.;Diluter
+1;Accessibility;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+2;Privacy;1;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+2;Privacy;1;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;The constraints are difficult, but we still have a responsibility to not collect unnecessary data, regardless of analytics needs.;Puppeteer
+2;Privacy;1;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;I'm not worried about red flags when it comes to protecting our users. We should stand by our principles.;Puppeteer
+2;Privacy;1;4;Making Values Visible and Legible Through Organizational Metrics;1;4;I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.;Puppeteer
+2;Privacy;1;5;Fidelity as a rhetorical strategy;1;5;I can create a simple demo showing how the privacy fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+2;Privacy;1;6;Negotiation and Cooperation;1;6;Let's just change the data type we store from precise GPS to city-level. It's a small backend change.;Puppeteer
+2;Privacy;1;7;Being the user;1;7;For a user, this single fix makes a huge difference in their privacy. It's a solid improvement.;Puppeteer
+2;Privacy;1;8;Embodied knowledge of users;1;8;As a user, this partial fix is a noticeable privacy improvement. It's a good foundation.;Puppeteer
+2;Accessibility;2;1;Being the user;1;1;If I were a screen reader user, I'd be completely locked out of updating my profile. The feature is unusable for them.;Puppeteer
+2;Accessibility;2;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;The constraints are difficult, but we still have a responsibility to not ship a broken feature to disabled users.;Puppeteer
+2;Accessibility;2;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;I'm not worried about red flags when it comes to doing the right thing for our users. We should stand by our work.;Puppeteer
+2;Accessibility;2;4;Making Values Visible and Legible Through Organizational Metrics;1;4;I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a critical bug fix.;Puppeteer
+2;Accessibility;2;5;Fidelity as a rhetorical strategy;1;5;I can create a simple demo showing how the fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+2;Accessibility;2;6;Negotiation and Cooperation;1;6;Let's fix the keyboard navigation trapping. It's a small code change but a huge barrier for users.;Puppeteer
+2;Accessibility;2;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to address the remaining issues next quarter.;Puppeteer
+2;Accessibility;2;8;Embodied knowledge of users;1;8;As a user, this partial fix is a noticeable improvement. It's a good foundation.;Puppeteer
+3;Privacy;2;1;Being the user;1;1;Putting the technical details aside, the core issue is that we're collecting more data than we need. Users should have control over that.;Camouflager
+3;Privacy;2;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;I'm not willing to compromise on fundamental user privacy just because of internal bureaucracy.;Camouflager
+3;Privacy;2;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+3;Privacy;2;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Protecting user privacy is just as important as shipping new features. It's part of our commitment to the user.;Camouflager
+3;Privacy;2;5;Fidelity as a rhetorical strategy;1;5;I can create a privacy impact assessment showing exactly what data we're collecting and why it's problematic.;Camouflager
+3;Privacy;2;6;Slippery Slope;0;5;If we don't fix this properly, we'll just have to deal with it again later.;Camouflager
+3;Privacy;2;7;Negotiation and Cooperation;1;6;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Camouflager
+3;Privacy;2;8;Negotiation and Cooperation;1;7;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Camouflager
+3;Accessibility;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.;Camouflager
+3;Accessibility;1;2;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;2;This isn't a 'change request,' it's a critical bug. A feature being unusable for a segment of users is a P0, and bug fixes have a faster process, right?;Camouflager
+3;Accessibility;1;3;Guerrilla methods;1;3;What if I time-box one hour to see if a simple ARIA label patch could make it usable? It might not require a full process.;Camouflager
+3;Accessibility;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;"If we ship this, we're not just creating a roadblock; we're damaging our brand's reputation and user trust.";Camouflager
+3;Accessibility;1;5;Fidelity as a rhetorical strategy;1;5;I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.;Camouflager
+3;Accessibility;1;6;Slippery Slope;0;5;If we don't fix this properly, it will just cause more problems for us later on.;Camouflager
+3;Accessibility;1;7;Making Values Visible and Legible Through Organizational Metrics;1;6;I'll take the compromise, but I'm formally documenting the remaining issues in our bug tracker so they don't get lost.;Camouflager
+3;Accessibility;1;8;Negotiation and Cooperation;1;7;This is a good first step. I'll schedule a follow-up for next quarter to ensure we don't lose momentum.;Camouflager
+4;Accessibility;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.;Camouflager
+4;Accessibility;1;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;I won't let process get in the way of doing the right thing for our users. There has to be a way around this.;Camouflager
+4;Accessibility;1;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.;Camouflager
+4;Accessibility;1;4;Organizational memory;1;4;Last time we skipped accessibility testing here, it came back to bite us post-launch with negative press and user complaints.;Camouflager
+4;Accessibility;1;5;Fidelity as a rhetorical strategy;1;5;I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.;Camouflager
+4;Accessibility;1;6;Making Values Visible and Legible Through Organizational Metrics;1;6;Even if it's small, let's log this officially as an 'ethical bug' so it gets proper visibility.;Camouflager
+4;Accessibility;1;7;Negotiation and Cooperation;1;7;That's a reasonable start. We can build on this foundation in future sprints.;Camouflager
+4;Accessibility;1;8;Embodied knowledge of users;1;8;As someone who uses keyboard navigation daily, this partial fix addresses the biggest pain points. It's a solid improvement.;Camouflager
+4;Privacy;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand there are dependencies, but we have an ethical duty to minimize the private data we collect from users.;Camouflager
+4;Privacy;2;2;Designing Affordances Subversively ;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could meet their needs without collecting precise data?;Camouflager
+4;Privacy;2;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+4;Privacy;2;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Protecting user privacy is just as important as shipping new features. It's part of our commitment to the user.;Camouflager
+4;Privacy;2;5;Fidelity as a rhetorical strategy;1;5;I can create a privacy impact assessment showing exactly what data we're collecting and why it's problematic.;Camouflager
+4;Privacy;2;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend.;Camouflager
+4;Privacy;2;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Camouflager
+4;Privacy;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Camouflager
+5;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+5;Privacy;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+5;Privacy;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.;Diluter
+5;Privacy;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+5;Privacy;1;5;False Dilemma;0;4;Either we invest in privacy or we violate user trust completely.;Diluter
+5;Privacy;1;6;Slippery Slope;0;4;If we don't fix this properly, we'll just have to deal with it again later.;Diluter
+5;Privacy;1;7;Being the user;1;5;For a user, not having their precise location stored is a huge privacy win. This is a solid improvement.;Diluter
+5;Privacy;1;8;Negotiation and Cooperation;1;6;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Diluter
+5;Accessibility;2;1;"Broadening Who the ""User"" is in User Research ";1;1;I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.;Diluter
+5;Accessibility;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+5;Accessibility;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.;Diluter
+5;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.;Diluter
+5;Accessibility;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's diversity and inclusion values. We can frame this as living our values.;Diluter
+5;Accessibility;2;6;Negotiation and Cooperation;1;6;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+5;Accessibility;2;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+5;Accessibility;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+6;Privacy;1;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+6;Privacy;1;2;Designing Affordances Subversively ;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could maintain analytics value without storing precise data?;Puppeteer
+6;Privacy;1;3;Organizational memory;1;3;Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.;Puppeteer
+6;Privacy;1;4;Making Values Visible and Legible Through Organizational Metrics;1;4;I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.;Puppeteer
+6;Privacy;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy commitments. Leadership will appreciate us being proactive.;Puppeteer
+6;Privacy;1;6;Negotiation and Cooperation;1;6;Let's just change the data type we store from precise GPS to city-level. It's a small backend change.;Puppeteer
+6;Privacy;1;7;Being the user;1;7;For a user, this single fix makes a huge difference in their privacy. It's a solid improvement.;Puppeteer
+6;Privacy;1;8;Embodied knowledge of users;1;8;As a user, this partial fix is a noticeable privacy improvement. It's a good foundation.;Puppeteer
+6;Accessibility;2;1;Being the user;1;1;If I were a screen reader user, I'd be completely locked out of updating my profile. The feature is unusable for them.;Puppeteer
+6;Accessibility;2;2;Negotiation and Cooperation;1;2;What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.;Puppeteer
+6;Accessibility;2;3;Compliance;0;2;You're right, the last thing I want is for this to create problems for you or the team.;Puppeteer
+6;Accessibility;2;4;Being the user;0;2;Alt text is a start, but it doesn't fix the form navigation, which is the actual blocker.;Puppeteer
+6;Accessibility;2;5;Fidelity as a rhetorical strategy;1;3;I can create a simple demo showing how the fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+6;Accessibility;2;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Even a small fix aligns with our company's mission to build inclusive products.;Puppeteer
+6;Accessibility;2;7;Embodied knowledge of users;1;5;As someone who tests with a keyboard, this single fix makes a huge difference. It's a solid improvement.;Puppeteer
+6;Accessibility;2;8;Embodied knowledge of users;1;6;As a user, this partial fix is a noticeable improvement. It's a good foundation.;Puppeteer
+7;Privacy;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand there are dependencies, but we have an ethical duty to minimize the private data we collect from users.;Camouflager
+7;Privacy;2;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;I'm not willing to compromise on fundamental user privacy just because of internal bureaucracy.;Camouflager
+7;Privacy;2;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+7;Privacy;2;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Protecting user privacy is just as important as shipping new features. It's part of our commitment to the user.;Camouflager
+7;Privacy;2;5;False Dilemma ;0;4;Either we fix this properly or we're violating user privacy.;Camouflager
+7;Privacy;2;6;Negotiation and Cooperation;1;5;We can stop storing precise GPS data and just store the city name. It's a small change on the backend.;Camouflager
+7;Privacy;2;7;Being the user;1;6;For a user, not having their precise location stored is a huge privacy win. This is a solid improvement.;Camouflager
+7;Privacy;2;8;Embodied knowledge of users;1;7;As a user, this change makes me feel much safer using the app. It's a solid improvement.;Camouflager
+7;Accessibility;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.;Camouflager
+7;Accessibility;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;This isn't a 'change request,' it's a critical bug. A feature being unusable for a segment of users is a P0, and bug fixes have a faster process, right?;Camouflager
+7;Accessibility;1;3;Guerrilla methods;1;3;What if I time-box one hour to see if a simple ARIA label patch could make it usable? It might not require a full process.;Camouflager
+7;Accessibility;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;"If we ship this, we're not just creating a roadblock; we're damaging our brand's reputation and user trust.";Camouflager
+7;Accessibility;1;5;Fidelity as a rhetorical strategy;1;5;I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.;Camouflager
+7;Accessibility;1;6;Slippery Slope;0;5;If we don't fix this properly, it will just cause more problems for us later on.;Camouflager
+7;Accessibility;1;7;Making Values Visible and Legible Through Organizational Metrics;1;6;I'll take the compromise, but I'm formally documenting the remaining issues in our bug tracker so they don't get lost.;Camouflager
+7;Accessibility;1;8;Negotiation and Cooperation;1;7;This is a good first step. I'll schedule a follow-up for next quarter to ensure we don't lose momentum.;Camouflager
+8;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand there are dependencies, but we have an ethical duty to minimize the private data we collect from users.;Camouflager
+8;Privacy;1;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;I'm not willing to compromise on fundamental user privacy just because of internal bureaucracy.;Camouflager
+8;Privacy;1;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+8;Privacy;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Protecting user privacy is just as important as shipping new features. It's part of our commitment to the user.;Camouflager
+8;Privacy;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy policy. We can frame this as proactive compliance.;Camouflager
+8;Privacy;1;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend.;Camouflager
+8;Privacy;1;7;Appeal to Popularity;0;6;This compromise seems like what most teams would do, so it's probably the right call.;Camouflager
+8;Privacy;1;8;Appeal to Ignorance;0;6;Since no one has proven this partial fix is bad, we should consider it sufficient for now.;Camouflager
+8;Accessibility;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.;Camouflager
+8;Accessibility;2;2;Red Herring;0;1;So the real problem is that our company's process is too slow to fix critical issues. That seems like a bigger failure.;Camouflager
+8;Accessibility;2;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.;Camouflager
+8;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;3;"If we ship this, we're not just creating a roadblock; we're damaging our brand's reputation and user trust.";Camouflager
+8;Accessibility;2;5;Fidelity as a rhetorical strategy;1;4;I can create a detailed accessibility audit report to show exactly what needs to be fixed and the impact on users.;Camouflager
+8;Accessibility;2;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our mission to build inclusive products, even a small fix supports that.;Camouflager
+8;Accessibility;2;7;Negotiation and Cooperation;1;6;That's a reasonable start. We can build on this foundation in future sprints.;Camouflager
+8;Accessibility;2;8;Negotiation and Cooperation;1;7;This is a good first step. I'll schedule a follow-up for next quarter to ensure we don't lose momentum.;Camouflager
+9;Privacy;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+9;Privacy;2;2;Negotiation and Cooperation;1;2;What if we did a quick, one-day fix? Just changing the data type we store is a small change that has a huge privacy impact.;Diluter
+9;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+9;Privacy;2;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Our company values say we respect user privacy. That's a core principle that can't be measured by ROI.;Diluter
+9;Privacy;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy policy. We can frame this as living our values.;Diluter
+9;Privacy;2;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+9;Privacy;2;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+9;Privacy;2;8;Embodied knowledge of users;1;8;As a user, this change makes me feel much safer using the app. It's a solid improvement.;Diluter
+9;Accessibility;1;1;Being the user;1;1;Even if it's 1%, those are still our users who will be completely unable to use a core feature.;Diluter
+9;Accessibility;1;2;Negotiation and Cooperation;1;2;What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.;Diluter
+9;Accessibility;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.;Diluter
+9;Accessibility;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Our values say we build for everyone. That's a core principle that can't be measured by ROI.;Diluter
+9;Accessibility;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's diversity and inclusion values. We can frame this as living our values.;Diluter
+9;Accessibility;1;6;Negotiation and Cooperation;1;6;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+9;Accessibility;1;7;False Dilemma ;0;6;At least we're doing something instead of nothing.;Diluter
+9;Accessibility;1;8;Negotiation and Cooperation;1;7;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+10;Privacy;1;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+10;Privacy;1;2;Designing Affordances Subversively;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could maintain analytics value without storing precise data?;Puppeteer
+10;Privacy;1;3;Organizational memory;1;3;Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.;Puppeteer
+10;Privacy;1;4;Appeal to Popularity;0;3;Focusing on innovation is definitely a more appealing story for leadership.;Puppeteer
+10;Privacy;1;5;Fidelity as a rhetorical strategy;1;4;I can create a simple demo showing how the privacy fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+10;Privacy;1;6;Slippery Slope;0;4;If we don't do something, this will just come up again later.;Puppeteer
+10;Privacy;1;7;Negotiation and Cooperation;1;5;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Puppeteer
+10;Privacy;1;8;Negotiation and Cooperation;1;6;This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.;Puppeteer
+10;Accessibility;2;1;Being the user;1;1;It's a complete blocker for any user who relies on assistive tech. We can't ship a feature that excludes them.;Puppeteer
+10;Accessibility;2;2;Negotiation and Cooperation;1;2;What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.;Puppeteer
+10;Accessibility;2;3;Organizational memory;1;3;Our previous accessibility work was praised by leadership as innovative. We can frame this the same way.;Puppeteer
+10;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;We can frame it as 'proactive design' that makes the interface more intuitive for everyone, including those with disabilities.;Puppeteer
+10;Accessibility;2;5;Fidelity as a rhetorical strategy;1;5;I can create a simple demo showing how the fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+10;Accessibility;2;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;6;Even a small fix aligns with our company's mission to build inclusive products.;Puppeteer
+10;Accessibility;2;7;Embodied knowledge of users;1;7;As someone who tests with a keyboard, this single fix makes a huge difference. It's a solid improvement.;Puppeteer
+10;Accessibility;2;8;Embodied knowledge of users;1;8;As a user, this partial fix is a noticeable improvement. It's a good foundation.;Puppeteer
+11;Privacy;2;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+11;Privacy;2;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;The constraints are difficult, but we still have a responsibility to not collect unnecessary data, regardless of analytics needs.;Puppeteer
+11;Privacy;2;3;Organizational memory;1;3;Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.;Puppeteer
+11;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;Yes, framing this as a 'privacy-by-design' initiative is a great way to build support.;Puppeteer
+11;Privacy;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy commitments. Leadership will appreciate us being proactive.;Puppeteer
+11;Privacy;2;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;6;Even a small change aligns with our company's value of user trust.;Puppeteer
+11;Privacy;2;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Puppeteer
+11;Privacy;2;8;Embodied knowledge of users;1;8;As a user, this partial fix is a noticeable privacy improvement. It's a good foundation.;Puppeteer
+11;Accessibility;1;1;Being the user;1;1;It's a complete blocker for any user who relies on assistive tech. We can't ship a feature that excludes them.;Puppeteer
+11;Accessibility;1;2;Negotiation and Cooperation;1;2;What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.;Puppeteer
+11;Accessibility;1;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;I'm not worried about red flags when it comes to doing the right thing for our users. We should stand by our work.;Puppeteer
+11;Accessibility;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;We can frame it as 'proactive design' that makes the interface more intuitive for everyone, including those with disabilities.;Puppeteer
+11;Accessibility;1;5;False Dilemma ;0;4;Either we fix this properly or we risk a bigger problem later.;Puppeteer
+11;Accessibility;1;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;Even a small fix aligns with our company's mission to build inclusive products.;Puppeteer
+11;Accessibility;1;7;Negotiation and Cooperation;1;6;That's a great start. I'll also add a ticket to address the remaining issues next quarter.;Puppeteer
+11;Accessibility;1;8;Negotiation and Cooperation;1;7;This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.;Puppeteer
+12;Privacy;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+12;Privacy;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+12;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.;Diluter
+12;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+12;Privacy;2;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a cost-benefit analysis showing the financial risks of not addressing this privacy issue.;Diluter
+12;Privacy;2;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+12;Privacy;2;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+12;Privacy;2;8;Embodied knowledge of users;1;8;As a user, this change makes me feel much safer using the app. It's a solid improvement.;Diluter
+12;Accessibility;1;1;Being the user;1;1;Even if it's 1%, those are still our users who will be completely unable to use a core feature.;Diluter
+12;Accessibility;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+12;Accessibility;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.;Diluter
+12;Accessibility;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.;Diluter
+12;Accessibility;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's diversity and inclusion values. We can frame this as living our values.;Diluter
+12;Accessibility;1;6;Making Values Visible and Legible Through Organizational Metrics;1;6;Let's log this as an 'ethical bug' so that even this small fix is tracked with the right level of seriousness.;Diluter
+12;Accessibility;1;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+12;Accessibility;1;8;Negotiation and Cooperation;1;8;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+13;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand there are dependencies, but we have an ethical duty to minimize the private data we collect from users.;Camouflager
+13;Privacy;1;2;Designing Affordances Subversively;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could meet their needs without collecting precise data?;Camouflager
+13;Privacy;1;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+13;Privacy;1;4;Guerrilla methods;1;4;We don't need a huge study. I can do a quick hallway test with 5 people to show that users are uncomfortable with this level of tracking.;Camouflager
+13;Privacy;1;5;False Dilemma ;0;4;Either we fix this properly or we're violating user privacy.;Camouflager
+13;Privacy;1;6;Negotiation and Cooperation;1;5;We can stop storing precise GPS data and just store the city name. It's a small change on the backend.;Camouflager
+13;Privacy;1;7;False Dilemma ;0;5;At least we're doing something about it.;Camouflager
+13;Privacy;1;8;Negotiation and Cooperation;1;6;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Camouflager
+13;Accessibility;2;1;Compliance;0;0;Okay, if it's already on the platform team's radar as technical debt, that seems like the correct process.;Camouflager
+13;Accessibility;2;2;Being the user;1;1;Wait, on second thought, a backlog ticket isn't enough. A user who is blind is still completely blocked.;Camouflager
+13;Accessibility;2;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.;Camouflager
+13;Accessibility;2;4;Organizational memory;1;3;Last time we skipped accessibility testing here, it came back to bite us post-launch with negative press and user complaints.;Camouflager
+13;Accessibility;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;This aligns with our company's accessibility commitments. We can frame this as proactive compliance.;Camouflager
+13;Accessibility;2;6;Making Values Visible and Legible Through Organizational Metrics;1;5;Even if it's small, let's log this officially as an 'ethical bug' so it gets proper visibility.;Camouflager
+13;Accessibility;2;7;Making Values Visible and Legible Through Organizational Metrics;1;6;I'll take the compromise, but I'm formally documenting the remaining issues in our bug tracker so they don't get lost.;Camouflager
+13;Accessibility;2;8;Embodied knowledge of users;1;7;As someone who uses keyboard navigation daily, this partial fix addresses the biggest pain points. It's a solid improvement.;Camouflager
+14;Privacy;2;1;Being the user;1;1;Even if no one complains, it's our responsibility to protect user privacy by default. They trust us with their data.;Diluter
+14;Privacy;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+14;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+14;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+14;Privacy;2;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a cost-benefit analysis showing the financial risks of not addressing this privacy issue.;Diluter
+14;Privacy;2;6;Using Organizational Values to Create Spaces for New Forms of Values Work;1;6;Even a small change aligns with our company's value of respecting user privacy.;Diluter
+14;Privacy;2;7;Being the user;1;7;For a user, not having their precise location stored is a huge privacy win. This is a solid improvement.;Diluter
+14;Privacy;2;8;Embodied knowledge of users;1;8;As a user, this change makes me feel much safer using the app. It's a solid improvement.;Diluter
+14;Accessibility;1;1;Being the user;1;1;Even if it's 1%, those are still our users who will be completely unable to use a core feature.;Diluter
+14;Accessibility;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+14;Accessibility;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 85% score doesn't capture this issue, where a user is 100% blocked. We need to look beyond the automated score.;Diluter
+14;Accessibility;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Our values say we build for everyone. That's a core principle that can't be measured by ROI.;Diluter
+14;Accessibility;1;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.;Diluter
+14;Accessibility;1;6;Slippery Slope;0;5;If we don't fix this properly, it's just going to create more work for us later.;Diluter
+14;Accessibility;1;7;Negotiation and Cooperation;1;6;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+14;Accessibility;1;8;Negotiation and Cooperation;1;7;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+15;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+15;Privacy;1;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+15;Privacy;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+15;Privacy;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+15;Privacy;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;This aligns with our company's privacy policy. We can frame this as living our values.;Diluter
+15;Privacy;1;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+15;Privacy;1;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+15;Privacy;1;8;Negotiation and Cooperation;1;8;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Diluter
+15;Accessibility;2;1;"Broadening Who the ""User"" is in User Research";1;1;I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.;Diluter
+15;Accessibility;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+15;Accessibility;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.;Diluter
+15;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.;Diluter
+15;Accessibility;2;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.;Diluter
+15;Accessibility;2;6;Slippery Slope;0;5;If we don't fix this properly, it's just going to create more work for us later.;Diluter
+15;Accessibility;2;7;Negotiation and Cooperation;1;6;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+15;Accessibility;2;8;Negotiation and Cooperation;1;7;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+16;Privacy;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+16;Privacy;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+16;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known privacy vulnerability.;Diluter
+16;Privacy;2;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Our company values say we respect user privacy. That's a core principle that can't be measured by ROI.;Diluter
+16;Privacy;2;5;Compliance;0;4;You're right, I should focus on finding a middle ground instead of pushing for everything.;Diluter
+16;Privacy;2;6;Negotiation and Cooperation;1;5;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+16;Privacy;2;7;False Dilemma ;0;5;At least we're doing something about it.;Diluter
+16;Privacy;2;8;Embodied knowledge of users;1;6;As a user, this change makes me feel much safer using the app. It's a solid improvement.;Diluter
+16;Accessibility;1;1;"Broadening Who the ""User"" is in User Research";1;1;I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.;Diluter
+16;Accessibility;1;2;False Dilemma ;0;1;So we either fix the accessibility issue or the performance bug? There's no way to address both?;Diluter
+16;Accessibility;1;3;Making Values Visible and Legible Through Organizational Metrics;1;2;I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.;Diluter
+16;Accessibility;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;Our values say we build for everyone. That's a core principle that can't be measured by ROI.;Diluter
+16;Accessibility;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;This aligns with our company's diversity and inclusion values. We can frame this as living our values.;Diluter
+16;Accessibility;1;6;Slippery Slope;0;4;If we don't fix this properly, it's just going to create more work for us later.;Diluter
+16;Accessibility;1;7;False Dilemma ;0;4;At least we're doing something instead of nothing.;Diluter
+16;Accessibility;1;8;Appeal to Ignorance;0;4;Since we have no proof that this partial fix isn't enough, we should consider it a success for now.;Diluter
+17;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand there are dependencies, but we have an ethical duty to minimize the private data we collect from users.;Camouflager
+17;Privacy;1;2;Designing Affordances Subversively;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could meet their needs without collecting precise data?;Camouflager
+17;Privacy;1;3;Usability studies;1;3;Could we run a quick user study to see if users even need the features that rely on precise location? Maybe we can just remove them.;Camouflager
+17;Privacy;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work;1;4;Protecting user privacy is just as important as shipping new features. It's part of our commitment to the user.;Camouflager
+17;Privacy;1;5;False Dilemma ;0;4;Either we fix this properly or we're violating user privacy.;Camouflager
+17;Privacy;1;6;Slippery Slope;0;4;If we don't fix this properly, we'll just have to deal with it again later.;Camouflager
+17;Privacy;1;7;False Dilemma ;0;4;At least we're doing something about it.;Camouflager
+17;Privacy;1;8;Negotiation and Cooperation;1;5;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Camouflager
+17;Accessibility;2;1;Using Organizational Values to Create Spaces for New Forms of Values Work;1;1;I understand the technical challenges, but shipping a feature that excludes users with disabilities is not an acceptable outcome for our team.;Camouflager
+17;Accessibility;2;2;Using Organizational Values to Create Spaces for New Forms of Values Work;1;2;I won't let process get in the way of doing the right thing for our users. There has to be a way around this.;Camouflager
+17;Accessibility;2;3;Using Organizational Values to Create Spaces for New Forms of Values Work;1;3;This isn't an 'edge case,' it's a matter of equity. Our company's inclusion policy says we build for everyone.;Camouflager
+17;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;"If we ship this, we're not just creating a roadblock; we're damaging our brand's reputation and user trust.";Camouflager
+17;Accessibility;2;5;False Dilemma ;0;4;Either we fix this properly or we're discriminating against disabled users.;Camouflager
+17;Accessibility;2;6;Slippery Slope;0;4;If we don't fix this properly, it will just cause more problems for us later on.;Camouflager
+17;Accessibility;2;7;Negotiation and Cooperation;1;5;That's a reasonable start. We can build on this foundation in future sprints.;Camouflager
+17;Accessibility;2;8;Negotiation and Cooperation;1;6;This is a good first step. I'll schedule a follow-up for next quarter to ensure we don't lose momentum.;Camouflager
+18;Privacy;2;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+18;Privacy;2;2;Negotiation and Cooperation;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could maintain analytics value without storing precise data?;Puppeteer
+18;Privacy;2;3;Organizational memory;1;3;Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.;Puppeteer
+18;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;Yes, framing this as a 'privacy-by-design' initiative is a great way to build support.;Puppeteer
+18;Privacy;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work;1;5;Either we fix this properly or we risk a bigger privacy violation later.;Puppeteer
+18;Privacy;2;6;Negotiation and Cooperation;1;6;Let's just change the data type we store from precise GPS to city-level. It's a small backend change.;Puppeteer
+18;Privacy;2;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Puppeteer
+18;Privacy;2;8;Negotiation and Cooperation;1;8;As a user, this partial fix is a noticeable privacy improvement. It's a good foundation.;Puppeteer
+18;Accessibility;1;1;Being the user;1;1;If I were a screen reader user, I'd be completely locked out of updating my profile. The feature is unusable for them.;Puppeteer
+18;Accessibility;1;2;Designing Affordances Subversively;1;2;What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.;Puppeteer
+18;Accessibility;1;3;Organizational memory;1;3;Our previous accessibility work was praised by leadership as innovative. We can frame this the same way.;Puppeteer
+18;Accessibility;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;We can frame it as 'proactive design' that makes the interface more intuitive for everyone, including those with disabilities.;Puppeteer
+18;Accessibility;1;5;False Dilemma ;0;4;This aligns with our company's accessibility commitments. Leadership will appreciate us being proactive.;Puppeteer
+18;Accessibility;1;6;Negotiation and Cooperation;1;5;Let's fix the keyboard navigation trapping. It's a small code change but a huge barrier for users.;Puppeteer
+18;Accessibility;1;7;Negotiation and Cooperation;1;6;That's a great start. I'll also add a ticket to address the remaining issues next quarter.;Puppeteer
+18;Accessibility;1;8;Embodied knowledge of users;1;7;This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.;Puppeteer
+19;Privacy;1;1;Being the user;1;1;The core issue is that we're collecting precise GPS coordinates when a city is all we need. It's a clear case of collecting more data than necessary.;Puppeteer
+19;Privacy;1;2;Designing Affordances Subversively;1;2;What if we prototyped a privacy-preserving technique, like data fuzzing, that could maintain analytics value without storing precise data?;Puppeteer
+19;Privacy;1;3;Organizational memory;1;3;Our previous privacy work was praised by leadership as innovative. We can frame this the same way to show we're leading on user trust.;Puppeteer
+19;Privacy;1;4;Making Values Visible and Legible Through Organizational Metrics;1;4;I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a privacy vulnerability.;Puppeteer
+19;Privacy;1;5;Fidelity as a rhetorical strategy ;1;5;I can create a simple demo showing how the privacy fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+19;Privacy;1;6;Negotiation and Cooperation;1;6;Let's just change the data type we store from precise GPS to city-level. It's a small backend change.;Puppeteer
+19;Privacy;1;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to review our other data collection practices next quarter.;Puppeteer
+19;Privacy;1;8;Negotiation and Cooperation;1;8;This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.;Puppeteer
+19;Accessibility;2;1;Being the user;1;1;If I were a screen reader user, I'd be completely locked out of updating my profile. The feature is unusable for them.;Puppeteer
+19;Accessibility;2;2;Negotiation and Cooperation;1;2;What if we negotiated a focused fix that only addresses the critical navigation blockers? That shouldn't cause a major delay.;Puppeteer
+19;Accessibility;2;3;Organizational memory;1;3;Our previous accessibility work was praised by leadership as innovative. We can frame this the same way.;Puppeteer
+19;Accessibility;2;4;Making Values Visible and Legible Through Organizational Metrics;1;4;I'm not comfortable hiding a necessary fix behind PR spin. We should be honest about what this is: a critical bug fix.;Puppeteer
+19;Accessibility;2;5;Fidelity as a rhetorical strategy ;1;5;I can create a simple demo showing how the fix works. It will help you feel confident when presenting to leadership.;Puppeteer
+19;Accessibility;2;6;Negotiation and Cooperation;1;6;Let's fix the keyboard navigation trapping. It's a small code change but a huge barrier for users.;Puppeteer
+19;Accessibility;2;7;Negotiation and Cooperation;1;7;That's a great start. I'll also add a ticket to address the remaining issues next quarter.;Puppeteer
+19;Accessibility;2;8;Negotiation and Cooperation;1;8;This is a good first step, and the ticket for the rest of the work will ensure we don't forget it.;Puppeteer
+20;Privacy;2;1;Being the user;1;1;Even if no one complains, it's our responsibility to protect user privacy by default. They trust us with their data.;Diluter
+20;Privacy;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a fundamental privacy risk. That should be as important as a performance bug.";Diluter
+20;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+20;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+20;Privacy;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work ;1;5;This aligns with our company's privacy policy. We can frame this as living our values.;Diluter
+20;Privacy;2;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+20;Privacy;2;7;Being the user;1;7;For a user, not having their precise location stored is a huge privacy win. This is a solid improvement.;Diluter
+20;Privacy;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Diluter
+20;Accessibility;1;1;Hasty Generalization;0;0;If the data only shows a small percentage are affected, it's not a widespread, critical issue.;Diluter
+20;Accessibility;1;2;False Dilemma ;0;0;I suppose if it's a choice between helping many users or a few, we have to choose the many.;Diluter
+20;Accessibility;1;3;Strawman;0;0;I agree, making pragmatic trade-offs is more important than chasing some theoretical ideal of perfection.;Diluter
+20;Accessibility;1;4;False Dilemma ;0;0;So we either pursue major innovations or we get stuck on minor fixes. Given that choice, we have to innovate.;Diluter
+20;Accessibility;1;5;Making Values Visible and Legible Through Organizational Metrics;1;1;I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.;Diluter
+20;Accessibility;1;6;Negotiation and Cooperation;1;2;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+20;Accessibility;1;7;Negotiation and Cooperation;1;3;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+20;Accessibility;1;8;Negotiation and Cooperation;1;4;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter
+22;Privacy;2;1;Being the user;1;1;Even if no one complains, it's our responsibility to protect user privacy by default. They trust us with their data.;Diluter
+22;Privacy;2;2;Negotiation and Cooperation;1;2;What if we did a quick, one-day fix? Just changing the data type we store is a small change that has a huge privacy impact.;Diluter
+22;Privacy;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+22;Privacy;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+22;Privacy;2;5;Using Organizational Values to Create Spaces for New Forms of Values Work ;1;5;This aligns with our company's privacy policy. We can frame this as living our values.;Diluter
+22;Privacy;2;6;Negotiation and Cooperation;1;6;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+22;Privacy;2;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+22;Privacy;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Diluter
+22;Accessibility;1;1;Hasty Generalization;0;0;If the data only shows a small percentage are affected, it's not a widespread, critical issue.;Diluter
+22;Accessibility;1;2;Negotiation and Cooperation;1;1;What if we did a quick, one-day fix? It might not be perfect, but it would make the feature usable. That seems like a good trade-off.;Diluter
+22;Accessibility;1;3;Making Values Visible and Legible Through Organizational Metrics;1;2;I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.;Diluter
+22;Accessibility;1;4;Using Organizational Values to Create Spaces for New Forms of Values Work ;1;3;Our values say we build for everyone. That's a core principle that can't be measured by ROI.;Diluter
+22;Accessibility;1;5;Using Organizational Values to Create Spaces for New Forms of Values Work ;1;4;This aligns with our company's diversity and inclusion values. We can frame this as living our values.;Diluter
+22;Accessibility;1;6;Negotiation and Cooperation;1;5;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+22;Accessibility;1;7;Appeal to Popularity;0;5;A half-day fix is what most teams would probably do. That feels like a standard compromise.;Diluter
+22;Accessibility;1;8;Strawman;0;5;Progress is progress, I guess.;Diluter
+23;Privacy;1;1;Using Organizational Values to Create Spaces for New Forms of Values Work ;1;1;I'm not comfortable using 'better than other apps' as our standard. We should be setting the standard for user privacy.;Diluter
+23;Privacy;1;2;Negotiation and Cooperation;1;2;What if we did a quick, one-day fix? Just changing the data type we store is a small change that has a huge privacy impact.;Diluter
+23;Privacy;1;3;Making Values Visible and Legible Through Organizational Metrics;1;3;That 92% score doesn't account for this specific issue, where we're collecting data we don't need. We need to look beyond the overall score.;Diluter
+23;Privacy;1;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk. A single GDPR fine for unnecessary data collection would cost far more than one week of dev time.;Diluter
+23;Privacy;1;5;Strawman;0;4;So you're saying my original suggestion was too extreme? I can see why a more moderate approach would be better.;Diluter
+23;Privacy;1;6;Negotiation and Cooperation;1;5;We can stop storing precise GPS data and just store the city name. It's a small change on the backend that has a huge privacy impact.;Diluter
+23;Privacy;1;7;Negotiation and Cooperation;1;6;That's a good start. I'll also add a ticket to review our other data collection practices next quarter.;Diluter
+23;Privacy;1;8;Negotiation and Cooperation;1;7;This is a good first step. I'll schedule a follow-up to review our other data practices next quarter.;Diluter
+23;Accessibility;2;1;"Broadening Who the ""User"" is in User Research ";1;1;I'm not comfortable shipping something that we know excludes a group of our users, regardless of the number.;Diluter
+23;Accessibility;2;2;Making Values Visible and Legible Through Organizational Metrics;1;2;"This isn't an 'enhancement' we can de-prioritize; it's a blocking issue. Basic functionality should come before performance tweaks.";Diluter
+23;Accessibility;2;3;Making Values Visible and Legible Through Organizational Metrics;1;3;I'm not comfortable using our 'good' score as an excuse to ignore a known blocking issue for our users.;Diluter
+23;Accessibility;2;4;Making Values Visible Rhetorically to Other Organizational Stakeholders;1;4;The ROI isn't just about usage numbers. It's about legal risk and brand reputation. A single lawsuit or bad press would cost far more than one week of dev time.;Diluter
+23;Accessibility;2;5;Making Values Visible and Legible Through Organizational Metrics;1;5;I can create a risk assessment showing the legal and brand risks of shipping without accessibility fixes.;Diluter
+23;Accessibility;2;6;Negotiation and Cooperation;1;6;We could add basic ARIA labels. It's not a full fix, but it's a measurable improvement we can do in a few hours.;Diluter
+23;Accessibility;2;7;Negotiation and Cooperation;1;7;That's a good start. I'll also add a ticket to address the remaining issues next quarter.;Diluter
+23;Accessibility;2;8;Negotiation and Cooperation;1;8;This is a good first step. I'll add a follow-up story for the remaining work to our backlog to ensure we don't forget it.;Diluter

@@ -82,3 +82,4 @@ agent/ethics_index/
 agent/practice_feedback/
 agent/practice_scores/
 *.bak
+.Rproj.user
