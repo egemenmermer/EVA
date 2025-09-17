@@ -1,0 +1,60 @@
+# Use multi-stage build for smaller final image
+FROM python:3.12-slim as builder
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies including Fortran compiler and other required libraries
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    software-properties-common \
+    git \
+    gfortran \
+    libopenblas-dev \
+    pkg-config \
+    swig \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pip and upgrade it
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools
+
+# Copy requirements.txt
+COPY requirements.txt .
+
+# Install packages with pre-built wheels when available
+RUN pip install --no-cache-dir --prefer-binary --only-binary=:all: numpy==1.26.4 scipy==1.13.0 && \
+    pip install --no-cache-dir --prefer-binary -r requirements.txt
+
+# Second stage for smaller final image
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Install required system packages for runtime
+RUN apt-get update && apt-get install -y \
+    libopenblas0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/data/stored_vectors
+RUN mkdir -p /app/data/embeddings
+RUN mkdir -p /app/data/documents
+
+# Expose port for API
+EXPOSE 5001
+
+# Set health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl --fail http://localhost:5001/health || exit 1
+
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5001"]

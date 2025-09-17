@@ -1,0 +1,46 @@
+# Core Requirements
+fastapi
+pydantic
+pydantic-core
+typing-extensions
+uvicorn
+python-dotenv
+aiokafka
+httpx
+requests
+
+# LangChain and OpenAI
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langchain-text-splitters
+openai
+tiktoken
+
+# Text processing - installed via conda
+# numpy
+# scipy
+# regex
+
+# API utilities
+python-multipart
+redis
+
+# Web scraping - installed via conda
+# lxml
+# beautifulsoup4 
+
+# Document processing - pillow installed via conda
+pypdf
+unstructured
+pdf2image
+# pillow
+
+# File parsing
+docx2txt
+python-pptx
+
+# Note: FAISS, numpy, scipy, pillow, lxml and regex are installed via conda
+# These are commented out since they're installed in the conda environment
+faiss-cpu

@@ -1,0 +1,158 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: eva_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-eva}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - eva_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: eva_redis
+    restart: unless-stopped
+    networks:
+      - eva_network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eva_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      AI_AGENT_URL: ${AI_AGENT_URL:-http://agent:8081}
+      FRONTEND_URL: ${FRONTEND_URL:-https://ethicalowl.xyz}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
+      JWT_SECRET: ${JWT_SECRET:-devsecretkey}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
+      SPRING_FLYWAY_ENABLED: ${FLYWAY_ENABLED:-true}
+      SPRING_FLYWAY_USER: ${DB_USER:-postgres}
+      SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD:-password}
+      SPRING_MAIL_HOST: ${MAIL_HOST}
+      SPRING_MAIL_PORT: ${MAIL_PORT}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      MAIL_DEBUG: ${MAIL_DEBUG:-false}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - eva_network
+    volumes:
+      - backend_m2_cache:/root/.m2
+      - backend_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: eva_agent
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      BACKEND_URL: ${BACKEND_URL:-http://backend:8080}
+      PORT: 8081
+      PYTHONUNBUFFERED: 1
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${AGENT_PORT:-8081}:8000"
+    networks:
+      - eva_network
+    volumes:
+      - agent_logs:/app/logs
+      - agent_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_AGENT_URL: ${VITE_AGENT_URL:-/agent}
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-/api}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+    container_name: eva_frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    #   - "443:443"
+    # volumes:
+    #   - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+    networks:
+      - eva_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  eva_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  backend_m2_cache:
+  backend_logs:
+  agent_logs:
+  agent_data: 
+  redis_data: 

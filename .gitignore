@@ -1,0 +1,87 @@
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python - Agent
+**/venv/
+**/venv_py312/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.npy
+*.faiss
+*.bin
+*.pt
+*.safetensors
+**/cache/
+**/data/processed/
+**/embeddings.npy
+**/documents.json
+*.pyc
+venv/
+.env
+
+# Java - Backend
+**/target/
+**/.mvn/
+**/build/
+**/out/
+*.class
+*.jar
+*.war
+
+**/agent_config.json
+**/*_config .json
+**/*.config.json
+secrets.json
+**/secrets/
+
+# JavaScript/TypeScript - Frontend
+**/node_modules/
+**/dist/
+**/build/
+**/.next/
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+npm-debug.log
+yarn-error.log
+
+# Environment and secrets
+.env
+*.env
+.secrets
+export_env.sh
+**/agent_config.json
+**/*_config.json
+**/*.config.json
+secrets.json
+**/secrets/
+
+# Logs
+**/logs/
+*.log
+
+# Large data files and dumps
+dump.rdb
+*.rdb
+accessibility_camouflager_backup.json
+validation_report.txt
+
+# OS specific files
+Thumbs.db
+
+# Exclude sensitive data and generated files
+agent/data/artifacts/
+agent/data/processed/
+agent/ethics_index/
+agent/practice_feedback/
+agent/practice_scores/
+*.bak

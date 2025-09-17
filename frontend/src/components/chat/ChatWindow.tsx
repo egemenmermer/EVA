@@ -1,0 +1,4294 @@
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction, useCallback } from 'react';
+import { MessageList } from './MessageList';
+import { ChatInput } from './ChatInput';
+import { EditDraftModal } from './EditDraftModal'; // Import the modal component
+import { ScenarioSelectionModal } from '@/components/modals/ScenarioSelectionModal'; // Import our new modal
+import { SimplifiedTacticsModal } from '../modals/SimplifiedTacticsModal'; // Import simplified tactics modal
+import { analyzeMessageForScenarioCompletion } from '@/utils/scenarioTracker';
+import { useStore, ManagerType, Conversation, Message } from '@/store/useStore';
+import { Role } from '@/types/index';
+import { conversationApi, saveMessage, getManagerType, sendMessage as apiSendMessage, agentCreateConversation } from '@/services/api'; // Import saveMessage, getManagerType, sendMessage, and agentCreateConversation
+import { v4 as uuidv4 } from 'uuid';
+import type { ConversationContentResponseDTO } from '@/types/api';
+import PracticeModule from '../practice/PracticeModule';
+import { BookOpen, RefreshCw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import api, { agentApi } from '../../services/axiosConfig'; // Restored agentApi
+import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'; // Import Options
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"; // Changed to relative path
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'; // Corrected import for PrismLight
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Import oneDark style
+import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx'; // Example: register language
+import logoLight from '@/assets/logo-light.svg';
+import logoDark from '@/assets/logo-dark.svg';
+import { Button } from "@/components/ui/button"; // Reverted to alias path
+import { cn } from "@/lib/utils";
+import logoSvg from "@/assets/logo.svg";
+import { markAccessibilityScenariosCompletedAPI, markPrivacyScenariosCompletedAPI } from '../../utils/surveyUtils';
+import { backendApi } from '../../services/axiosConfig';
+import { MessageRecovery } from '../../utils/messageRecovery';
+import { v4 as uuid } from 'uuid';
+import type { ScenarioSessionResponse, ScenarioState } from '@/types/scenario';
+
+// Add custom styles for message formatting
+const styles = {
+  messageContent: {
+    lineHeight: '1.5',
+    whiteSpace: 'pre-wrap',
+  },
+  paragraph: {
+    marginBottom: '1rem',
+  },
+  bulletPoint: {
+    marginLeft: '1.5rem',
+    position: 'relative',
+  },
+  feedbackContent: {
+    '& p': {
+      marginBottom: '0.75rem',
+    },
+    '& .ml-4': {
+      marginLeft: '1rem',
+      display: 'flex',
+      alignItems: 'flex-start',
+    },
+    '& strong': {
+      fontWeight: '600',
+    },
+  }
+};
+
+// Add WebKit scrollbar styles
+import './scrollbar.css';
+
+// Add animation styles
+const animationStyles = `
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .message-enter-user {
+    animation: fadeInRight 0.3s ease-out forwards;
+  }
+
+  .message-enter-assistant {
+    animation: fadeInLeft 0.3s ease-out forwards;
+  }
+
+  .loading-animation {
+    animation: fadeSlideIn 0.2s ease-out forwards;
+  }
+`;
+
+// Extended ConversationContentResponseDTO with additional fields from backend
+interface ExtendedConversationDTO extends ConversationContentResponseDTO {
+  userQuery?: string;
+  agentResponse?: string;
+  isUserMessage?: boolean;
+  isLoading?: boolean;
+  managerType?: ManagerType;
+  title?: string;
+  preview?: string;
+  modelName?: string;
+  personaUsed?: string;
+}
+
+
+// Function to get the current persona from the store
+const getCurrentPersona = (): string => {
+  const managerType = useStore.getState().managerType;
+  return managerType || 'CAPITALIST';
+};
+
+// Add a new interface for the updated response format
+interface MessageResponseDTO {
+  messages: Message[];
+}
+
+interface APIResponse {
+  messages: Message[];
+}
+
+interface MessageListProps {
+  messages: Message[];
+  loading: boolean;
+  renderMessage: (message: Message) => JSX.Element;
+}
+
+type SetMessagesAction = Dispatch<SetStateAction<Message[]>>;
+
+type MessageUpdater = (messages: Message[]) => Message[];
+
+// Add this with the other interfaces at the top
+interface CreateConversationResponse {
+  conversationId: string;
+  title?: string;
+  createdAt?: string;
+}
+
+// Message response interfaces
+interface MessageResponse {
+  content?: string;
+  agentResponse?: string;
+  conversationId: string;
+  createdAt: string;
+  messages?: Array<{
+    id?: string;
+    role: Role;
+  content: string;
+    conversationId?: string;
+    createdAt?: string;
+  }>;
+}
+
+interface MessagesResponse {
+  messages: Message[];
+  warning?: string;
+  error?: string;
+}
+
+// Add this interface near the top of the file with the other interfaces
+interface AgentMessagesResponse {
+  messages: Array<{
+    id: string;
+    conversationId: string;
+    role: Role;
+    content: string;
+    createdAt: string;
+    isLoading?: boolean;
+  }>;
+  warning?: string | null;
+  error?: string | null;
+}
+
+// Add the ApiResponseData type definition at the top of the file with other type definitions
+interface ApiResponseData {
+  id?: string;
+  agentResponse?: string;
+  content?: string;
+  createdAt?: string;
+  conversationId?: string;
+}
+
+interface ChatWindowProps {
+  currentScenario: ScenarioState | null;
+  setCurrentScenario: React.Dispatch<React.SetStateAction<ScenarioState | null>>;
+  showKnowledgePanel?: boolean;
+  currentConversation?: any;
+  setStoreMessages?: React.Dispatch<React.SetStateAction<any[]>>;
+  storeMessages?: any[];
+}
+
+
+interface SendMessageParams {
+  conversationId: string;
+  userQuery: string;
+  managerType: ManagerType;
+  temperature: number;
+}
+
+// Enhance the sendMessage function to include more message history
+const sendMessage = async (conversationId: string, userQuery: string, managerType: ManagerType, temperature: number) => {
+  try {
+    // Log the request parameters for debugging
+    console.log('SendMessage API call with params:', {
+      conversationId,
+      messageLength: userQuery.length,
+      managerType,
+      temperature
+    });
+
+    // Add extra request parameter to include more context
+    const response = await api.post<MessageResponse>('/api/v1/conversation/message', {
+      conversationId,
+      userQuery,
+      managerType,
+      temperature: temperature || 0.7,
+      includeHistory: true, // Add this parameter to request full history
+      historyLimit: 20 // Request at least 20 previous messages for context
+    });
+
+    if (!response.data) {
+      throw new Error('Empty response from API');
+    }
+
+    // Handle both new and old response formats
+    console.log("ooo ooo check here:", response.data.content);
+    const messageContent = response.data.content || response.data.agentResponse;
+    if (!messageContent) {
+      throw new Error('No message content in response');
+    }
+
+    return {
+      ...response.data,
+      content: messageContent
+    };
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+// Define the expected structure of the agent's response
+interface AgentMessageResponse {
+  messages: Message[];
+}
+
+// Define a type for the expanded sections state
+interface ExpandedSectionsState {
+  [messageId: string]: string[]; // messageId maps to an array of expanded section keys for that message
+}
+
+// Define a type for the active feedback section state
+interface ActiveFeedbackSectionState {
+  [messageId: string]: string | null; // messageId maps to the key of the active section or null
+}
+
+// Define EmailQuestion interface
+interface EmailQuestion {
+  id: string;
+  question: string;
+  type: 'choice' | 'text' | 'conditional';
+  choices?: string[];
+  placeholder?: string;
+  parentId?: string;
+  parentValue?: string;
+  shouldSkip?: (responses: string[]) => boolean;
+}
+
+export const ChatWindow: React.FC<ChatWindowProps> = ({ currentScenario, setCurrentScenario, showKnowledgePanel, currentConversation, setStoreMessages, storeMessages }) => {
+  const { 
+    setCurrentConversation,
+    temperature,
+    darkMode,
+    messages,
+    setMessages,
+    addMessage,
+    managerType,
+    user,
+    setUser
+  } = useStore();
+  
+  // Add state for scenario selection modal
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
+  
+  // Add state for tactics modal
+  const [showTacticsModal, setShowTacticsModal] = useState(false);
+  
+  const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Add state for practice mode
+  const [practiceMode, setPracticeMode] = useState(false);
+  const [activeManagerType, setActiveManagerType] = useState<string | undefined>(undefined);
+  const [concern, setConcern] = useState<string>('');
+  const [difficulty, setDifficulty] = useState<number>(-1);
+
+  // Add a ref to track if feedback is being processed
+  const isProcessingFeedback = useRef(false);
+  
+  // Add state to track if we're currently processing an email draft request
+  const [isDraftingEmail, setIsDraftingEmail] = useState(false);
+  // Ref to prevent multiple clicks
+  const isProcessingOption = useRef(false);
+  
+  // Enhanced Email Assistant State
+  const [emailAssistantActive, setEmailAssistantActive] = useState(false);
+  const [emailDraftData, setEmailDraftData] = useState({
+    tone: '',
+    concern: '',
+    address: '',
+    references: [] as string[],
+    action: '',
+    originalEthicalIssue: '',
+    managerName: '' // Add manager name field
+  });
+
+  // Add state for scenario transition
+  const [showScenarioTransition, setShowScenarioTransition] = useState(false);
+  
+  // Add state to track copied emails
+  const [copiedEmails, setCopiedEmails] = useState<Set<string>>(new Set());
+  const [currentEmailQuestion, setCurrentEmailQuestion] = useState(0);
+  const [emailQuestionResponses, setEmailQuestionResponses] = useState<string[]>([]);
+  const [selectedChoices, setSelectedChoices] = useState<{ [questionIndex: number]: string }>({});
+  
+  // Email Assistant Questions - Meta-communication focused
+  const emailQuestions: EmailQuestion[] = [
+    {
+      id: 'tone',
+      question: "What tone would you like this email to have?",
+      type: 'choice' as const,
+      choices: ['Confident and assertive', 'Polite but firm', 'Curious and questioning', 'Formal and diplomatic', 'Friendly and open']
+    },
+    {
+      id: 'address',
+      question: "How would you like to address the manager?",
+      type: 'choice',
+      choices: ['Address by name', 'No greeting, go straight to the point', 'You decide (let EVA pick)']
+    },
+    {
+      id: 'managerName',
+      question: "What is the manager's name?",
+      type: 'conditional',
+      parentId: 'address',
+      parentValue: 'Address by name',
+      placeholder: "Enter manager's name (optional)",
+      shouldSkip: (responses: string[]) => responses[1] !== 'Address by name'
+    },
+    {
+      id: 'goal',
+      question: "What's your main goal with this email?",
+      type: 'choice',
+      choices: ['Ask for a meeting', 'Raise concern for documentation', 'Escalate to someone higher up', 'Recommend an alternative approach', 'Just express disagreement respectfully']
+    },
+    {
+      id: 'references',
+      question: "Should I include references to existing policies or frameworks?",
+      type: 'choice',
+      choices: ['Yes', 'No']
+    },
+    {
+      id: 'customization',
+      question: "Is there anything you definitely want to say or avoid?",
+      type: 'text',
+      placeholder: "e.g., I want to avoid sounding too aggressive, or I want to include a line about users being left out... (optional)"
+    }
+  ];
+  
+  // State for Edit Draft Modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [draftToEdit, setDraftToEdit] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null); // Keep track of which message is being edited
+  
+  // Create a ref to the handleSendMessage function to use in the useEffect
+  const handleSendMessageRef = useRef<(content: string) => Promise<void>>();
+  
+  // Email Assistant Functions
+  const startEmailAssistant = (originalEthicalIssue: string) => {
+    console.log('📧 STARTING EMAIL ASSISTANT:');
+    console.log('- Original ethical issue:', originalEthicalIssue);
+    console.log('- Email assistant active before start:', emailAssistantActive);
+    console.log('- Current conversation ID:', currentConversation?.conversationId);
+    console.log('- Current scenario:', determineCurrentScenario());
+    
+    setEmailAssistantActive(true);
+    setCurrentEmailQuestion(0);
+    setEmailQuestionResponses([]);
+    setSelectedChoices({});
+    setEmailDraftData({
+      tone: '',
+      concern: '',
+      address: '',
+      references: [],
+      action: '',
+      originalEthicalIssue,
+      managerName: '' // Add manager name field
+    });
+    
+    console.log('✅ Email assistant activated and state reset');
+    
+
+    
+    // Add EVA's first question as a message
+    const evaMessage: Message = {
+      id: `eva-email-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: "Let's get your email ready. " + emailQuestions[0].question,
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isEmailAssistant: true,
+      emailQuestionIndex: 0
+    };
+    
+    setStoreMessages(prev => [...prev, evaMessage]);
+  };
+  
+  const handleEmailQuestionResponse = async (response: string, isTextInput: boolean = false) => {
+    // Mark choice as selected for choice questions
+    if (!isTextInput) {
+      setSelectedChoices(prev => ({ ...prev, [currentEmailQuestion]: response }));
+    }
+    
+    // Add user's response as a message (only if not empty for text input)
+    if (!isTextInput || response.trim()) {
+      const userMessage: Message = {
+        id: `user-email-${Date.now()}`,
+        role: 'user' as Role,
+        content: response || "(No specific preferences)",
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isEmailAssistant: true
+      };
+      
+      setStoreMessages(prev => [...prev, userMessage]);
+    }
+    
+    // Update responses array
+    const newResponses = [...emailQuestionResponses, response];
+    setEmailQuestionResponses(newResponses);
+    
+    // Update draft data based on current question
+    const currentQ = emailQuestions[currentEmailQuestion];
+    const updatedDraftData = { ...emailDraftData };
+    
+    switch (currentQ.id) {
+      case 'tone':
+        updatedDraftData.tone = response;
+        break;
+      case 'address':
+        updatedDraftData.address = response;
+        break;
+      case 'managerName':
+        updatedDraftData.managerName = response;
+        break;
+      case 'goal':
+        updatedDraftData.action = response; // Store goal in action field
+        break;
+      case 'references':
+        updatedDraftData.references = response === 'Yes' ? ['Will include relevant frameworks'] : [];
+        break;
+      case 'customization':
+        updatedDraftData.concern = response || 'Use best practices'; // Store customization input (can be empty)
+        break;
+    }
+    
+    setEmailDraftData(updatedDraftData);
+    
+    // Find the next question index considering conditional questions
+    let nextQuestionIndex = currentEmailQuestion + 1;
+    
+    // Check if we need to skip the next question based on previous answers
+    if (nextQuestionIndex < emailQuestions.length) {
+      const nextQuestion = emailQuestions[nextQuestionIndex];
+      if (nextQuestion.type === 'conditional' && nextQuestion.shouldSkip && nextQuestion.shouldSkip(newResponses)) {
+        // Skip this conditional question
+        nextQuestionIndex++;
+      }
+    }
+    
+    if (nextQuestionIndex < emailQuestions.length) {
+      setCurrentEmailQuestion(nextQuestionIndex);
+      
+      // Add next question after a brief delay
+      setTimeout(() => {
+        const nextMessage: Message = {
+          id: `eva-email-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: emailQuestions[nextQuestionIndex].question,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+          isEmailAssistant: true,
+          emailQuestionIndex: nextQuestionIndex
+        };
+        
+        setStoreMessages(prev => [...prev, nextMessage]);
+      }, 500);
+    } else {
+      // All questions answered, generate the email
+      await generateFinalEmail();
+    }
+  };
+  
+  const generateFinalEmail = async () => {
+    // Show summary and generate button
+    const summaryMessage: Message = {
+      id: `eva-email-summary-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: "Perfect! Here's what I've gathered:\n\n" +
+        `• **Tone**: ${emailDraftData.tone}\n` +
+        `• **Address style**: ${emailDraftData.address}\n` +
+        `• **Main goal**: ${emailDraftData.action}\n` +
+        `• **Include references**: ${emailDraftData.references.length > 0 ? 'Yes' : 'No'}\n` +
+        `• **Customization**: ${emailDraftData.concern || 'Use best practices'}\n\n` +
+        "Ready to generate your email?",
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isEmailAssistant: true,
+      isEmailSummary: true
+    };
+    
+    setStoreMessages(prev => [...prev, summaryMessage]);
+  };
+  
+  // Function to clear used email scenarios (useful for testing or new conversations)
+  const clearUsedEmailScenarios = () => {
+    localStorage.removeItem('used_email_scenarios');
+    console.log('🧹 Cleared used email scenarios');
+  };
+
+  const generateEmailWithData = async () => {
+    console.log('📧 EMAIL GENERATION DEBUG START:');
+    console.log('- Email assistant active before generation:', emailAssistantActive);
+    console.log('- Current email draft data:', emailDraftData);
+    console.log('- Current scenario:', determineCurrentScenario());
+    console.log('- Current conversation ID:', currentConversation?.conversationId);
+    
+    // Keep email assistant active for multiple email generations - DON'T disable it
+    setIsDraftingEmail(true);
+    
+    // Create loading message
+    const loadingMessage: Message = {
+      id: `assistant-loading-${Date.now()}`,
+      role: 'assistant' as Role,
+      content: 'Generating your personalized email...',
+      conversationId: currentConversation?.conversationId || '',
+      createdAt: new Date().toISOString(),
+      isLoading: true
+    };
+    
+    setStoreMessages(prev => [...prev, loadingMessage]);
+    
+    // Create enhanced prompt with collected data
+    const currentScenario = determineCurrentScenario();
+    console.log('📧 Email generation detected scenario:', currentScenario);
+    
+    // Store the detected scenario for future reference
+    if (currentScenario) {
+      localStorage.setItem('last_selected_scenario', currentScenario);
+    }
+    
+
+    
+        // Handle addressing style with actual manager name if provided
+        const managerNameToUse = emailDraftData.managerName?.trim() || "";
+        const addressingInstruction = emailDraftData.address.includes("By name")
+          ? managerNameToUse
+            ? `Use "${managerNameToUse}" as the manager's name in the greeting (e.g., "Hi ${managerNameToUse},")`
+            : 'Use "Manager" as a placeholder in the greeting'
+          : emailDraftData.address.includes("No greeting")
+          ? "Skip the greeting and go straight to the main content"
+          : "Choose an appropriate greeting style";
+        
+        // ✅ Format the conversation into a readable transcript
+        const conversationContent = currentConversation?.messages
+          ?.map(
+            (msg) =>
+              `${msg.role === "user" ? "Me" : "Manager"}: ${msg.content}`
+          )
+          .join("\n");
+        
+        const enhancedPrompt = `Please help me draft an email to my manager about an ethical concern I've identified.
+        
+        Here’s how I want this email to sound:
+        - Tone: ${emailDraftData.tone}
+        - How to address my manager: ${emailDraftData.address}${
+          managerNameToUse ? ` (use the name "${managerNameToUse}")` : ""
+        }
+        - What I want to accomplish: ${emailDraftData.action}
+        - ${
+          emailDraftData.references.length > 0
+            ? `Include references to relevant guidelines`
+            : "No need to reference specific policies"
+        }
+        - ${
+          emailDraftData.concern &&
+          emailDraftData.concern !== "Use best practices" &&
+          emailDraftData.concern !== "Keep it simple and brief"
+            ? `Also: ${emailDraftData.concern}`
+            : "Keep it professional but natural"
+        }
+        
+        Here is the conversation that led me to write this email (use it to inform the draft, but do not copy it word-for-word):
+        ${conversationContent || "No prior conversation available."}
+        
+        Write this as a real workplace email that focuses on the ethical concern and the need for discussion/action. 
+        Do not mention any practice exercises, scoring, or training scenarios. 
+        Make it sound like how I would actually write to my manager about a genuine workplace ethical issue. 
+        Just give me the email with a subject line.${
+          managerNameToUse ? ` Use "${managerNameToUse}" exactly as provided in the greeting.` : ""
+        }`;
+        
+    try {
+      const response = await api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
+        conversationId: currentConversation?.conversationId,
+        userQuery: enhancedPrompt,
+        managerType: currentConversation?.managerType || managerType,
+        temperature: temperature || 0.7,
+        includeHistory: true,
+        historyLimit: 20
+      });
+      
+      setStoreMessages(prev => prev.filter(m => !m.isLoading));
+      
+      if (response.data && response.data.messages && response.data.messages.length > 0) {
+        const assistantResponse = response.data.messages[response.data.messages.length - 1];
+        
+        const newAssistantMessage: Message = {
+          id: assistantResponse.id || `assistant-${Date.now()}`,
+          role: 'assistant' as Role,
+          content: assistantResponse.content,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: assistantResponse.createdAt || new Date().toISOString()
+        };
+        
+        const updatedMessages = [...storeMessages.filter(m => !m.isLoading), newAssistantMessage];
+        setStoreMessages(updatedMessages);
+        
+        
+        // CRITICAL: Save email generation messages to database immediately
+        if (currentConversation?.conversationId) {
+          try {
+            // Save the email generation request (user message) to database
+              await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: currentConversation.conversationId,
+              messageId: `email-request-${Date.now()}`,
+              content: enhancedPrompt,
+              role: 'user',
+              createdAt: new Date().toISOString()
+            });
+            console.log('Email generation request saved to database successfully');
+            // Save the email response (assistant message) to database
+            await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: currentConversation.conversationId,
+              messageId: newAssistantMessage.id,
+              content: newAssistantMessage.content,
+              role: 'assistant',
+              createdAt: newAssistantMessage.createdAt
+            });
+            console.log('Email generation response saved to database successfully');
+          } catch (error) {
+            console.error('Failed to save email generation messages to database:', error);
+          }
+          
+          // Save to localStorage with comprehensive backup
+          saveConversationState(currentConversation.conversationId, updatedMessages);
+          
+          try {
+            const messageData = JSON.stringify(updatedMessages);
+            localStorage.setItem(`messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`messages-${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`backup_messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`exact_messages_${currentConversation.conversationId}`, messageData);
+            localStorage.setItem(`email_messages_${currentConversation.conversationId}`, messageData);
+            console.log('Comprehensive localStorage backup completed for email messages');
+          } catch (error) {
+            console.error('Failed to save comprehensive localStorage backup for email:', error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error generating email:', error);
+      setStoreMessages(prev => prev.filter(m => !m.isLoading));
+      setError('Failed to generate email. Please try again.');
+    } finally {
+      setIsDraftingEmail(false);
+    }
+  };
+  
+  // Add this state and ref near the other refs and state declarations
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Track if a message is being sent to prevent auto-recovery
+  const isMessageSending = useRef(false);
+
+  // State for managing expanded accordion sections for ALL messages
+  const [expandedMessageSections, setExpandedMessageSections] = useState<ExpandedSectionsState>({});
+  const [activeMessageFeedbackSection, setActiveMessageFeedbackSection] = useState<ActiveFeedbackSectionState>({});
+
+  // Add useEffect for feedback content styling
+  useEffect(() => {
+    // Add custom CSS for feedback formatting
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      .feedback-content p {
+        margin-bottom: 0.75rem;
+        color: inherit;
+      }
+      .feedback-content ul, 
+      .feedback-content ol {
+        margin-left: 0;
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+      }
+      .feedback-content ul {
+        list-style-type: disc;
+      }
+      .feedback-content ol {
+        list-style-type: decimal;
+      }
+      .feedback-content li {
+        margin-bottom: 0.25rem;
+        color: inherit;
+        display: list-item;
+        padding-left: 0.25rem;
+      }
+      .feedback-content ul li::marker {
+        content: "•";
+        font-size: 1.2em;
+      }
+      .feedback-content strong {
+        font-weight: 600;
+        color: inherit;
+      }
+      .feedback-content em {
+        font-style: italic;
+        color: inherit;
+      }
+      .dark .feedback-content p,
+      .dark .feedback-content li,
+      .dark .feedback-content {
+        color: #e2e8f0;
+      }
+      .dark .feedback-content strong {
+        color: #ffffff;
+      }
+      .light .feedback-content p,
+      .light .feedback-content li,
+      .light .feedback-content {
+        color: #1a202c;
+      }
+      .light .feedback-content strong {
+        color: #000000;
+      }
+      .introduction-text {
+        color: inherit;
+      }
+      .dark .introduction-text {
+        color: #e2e8f0;
+      }
+      .light .introduction-text {
+        color: #1a202c;
+      }
+      .summary-content {
+        color: inherit;
+      }
+      .dark .summary-content {
+        color: #e2e8f0;
+      }
+      .light .summary-content {
+        color: #1a202c;
+      }
+    `;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      // Clean up on unmount
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+
+  // Add useEffect for animation styles
+  useEffect(() => {
+    // Add animation styles to document head
+    const styleEl = document.createElement('style');
+    styleEl.textContent = animationStyles;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      // Clean up on unmount
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+
+  // Toggle function for accordion items (will be replaced or repurposed for new design)
+  const toggleMessageSection = (messageId: string, sectionKey: string) => {
+    // For the new design, this will set the active section
+    setActiveMessageFeedbackSection(prev => ({
+      ...prev,
+      [messageId]: prev[messageId] === sectionKey ? null : sectionKey, // Toggle active section
+    }));
+  };
+
+  // This handler might not be needed if we move away from Accordion's onValueChange
+  const handleMessageAccordionValueChange = (messageId: string, value: string | string[] | undefined) => {
+    // If we are using simple buttons, this might be deprecated.
+    // For now, let's assume it might still be used if a single section is shown/hidden.
+    let newActiveSection: string | null = null;
+    if (typeof value === 'string') {
+      newActiveSection = value;
+    } else if (Array.isArray(value) && value.length > 0) {
+      newActiveSection = value[0]; // If multiple, just take the first for active display
+    }
+    setActiveMessageFeedbackSection(prev => ({
+      ...prev,
+      [messageId]: newActiveSection,
+    }));
+  };
+
+  // Set the ref value whenever loading changes
+  useEffect(() => {
+    isMessageSending.current = loading;
+  }, [loading]);
+
+  // Replace the existing scroll useEffect with this smarter version
+  useEffect(() => {
+    // If auto-opening tactics guide, dispatch the event
+    if (localStorage.getItem('auto_open_tactics_guide') === 'true' && messages.length > 0) {
+      console.log('Dispatching show-tactics-modal from ChatWindow');
+      window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+      localStorage.removeItem('auto_open_tactics_guide');
+    }
+
+    if (shouldAutoScroll && messagesEndRef.current) {
+      // Use requestAnimationFrame to ensure DOM updates before scrolling
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  }, [storeMessages, shouldAutoScroll, loading]);
+
+  // Update the scroll handler for better detection of user scrolling
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    const handleScroll = () => {
+      // Only auto-scroll if user is already at or near the bottom
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const scrollBottom = scrollTop + clientHeight;
+      const isNearBottom = scrollBottom >= scrollHeight - 150; // More generous threshold
+      
+      if (isNearBottom !== shouldAutoScroll) {
+        setShouldAutoScroll(isNearBottom);
+        console.log(`Auto-scroll ${isNearBottom ? 'enabled' : 'disabled'} - user is ${isNearBottom ? 'near' : 'away from'} bottom`);
+      }
+    };
+    
+    container.addEventListener('scroll', handleScroll);
+    
+    // Also check scroll position after content changes
+    const checkScrollPositionAfterUpdate = () => {
+      requestAnimationFrame(handleScroll);
+    };
+    
+    // Run on initial load and whenever messages change
+    checkScrollPositionAfterUpdate();
+    
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [storeMessages.length, shouldAutoScroll]);
+  
+  // Force scroll to bottom when sending a new message
+  useEffect(() => {
+    if (loading) {
+      // When loading a new message, force scroll to bottom
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setShouldAutoScroll(true);
+      });
+    }
+  }, [loading]);
+
+  // Add utility functions for dual storage (database + localStorage backup)
+  const saveConversationState = (conversationId: string, messages: Message[]) => {
+    if (!conversationId) return;
+    
+    try {
+      // Filter out any temporary loading messages
+      const cleanMessages = messages.filter(m => !m.isLoading);
+      
+      // Save if we have actual messages
+      if (cleanMessages.length > 0) {
+        // Use the comprehensive MessageRecovery utility for saving
+        MessageRecovery.saveToLocalStorage(conversationId, cleanMessages);
+        
+        // Also clean up old backups to prevent localStorage bloat
+        MessageRecovery.cleanupOldBackups(conversationId);
+        
+        console.log(`Saved ${cleanMessages.length} messages using MessageRecovery for conversation ${conversationId}`);
+      }
+    } catch (e) {
+      console.error('Failed to save conversation state to localStorage:', e);
+    }
+  };
+  
+  const loadConversationState = (conversationId: string): Message[] | null => {
+    if (!conversationId) return null;
+    
+    try {
+      // Try all localStorage key formats for maximum recovery capability
+      const keyFormats = [
+        `exact_messages_${conversationId}`,
+        `complete_messages_${conversationId}`,
+        `all_messages_${conversationId}`,
+        `practice_messages_${conversationId}`,
+        `email_messages_${conversationId}`,
+        `feedback_messages_${conversationId}`,
+        `messages_${conversationId}`,
+        `messages-${conversationId}`,
+        `backup_messages_${conversationId}`,
+      ];
+      
+      for (const key of keyFormats) {
+        const savedState = localStorage.getItem(key);
+        if (savedState) {
+          const messages = JSON.parse(savedState);
+          if (Array.isArray(messages) && messages.length > 0) {
+            console.log(`Loaded ${messages.length} messages for conversation ${conversationId} from localStorage key ${key}`);
+            return messages;
+          }
+        }
+      }
+      
+      // If no exact match, try to find any timestamped backup
+      const allKeys = Object.keys(localStorage);
+      const timestampedKeys = allKeys.filter(key => 
+        key.startsWith(`messages_${conversationId}_`) && 
+        key.includes('-') // Contains timestamp format
+      ).sort().reverse(); // Most recent first
+      
+      for (const key of timestampedKeys) {
+        const savedState = localStorage.getItem(key);
+        if (savedState) {
+          const messages = JSON.parse(savedState);
+          if (Array.isArray(messages) && messages.length > 0) {
+            console.log(`Loaded ${messages.length} messages for conversation ${conversationId} from timestamped backup ${key}`);
+            return messages;
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load conversation state from localStorage:', e);
+    }
+    
+    return null;
+  };
+
+  // Add conversation recovery to existing useEffect
+  useEffect(() => {
+    // Don't fetch if feedback is being processed
+    if (isProcessingFeedback.current) {
+      console.log('Skipping fetchMessages because feedback is processing.');
+      return;
+    }
+    
+    if (!currentConversation) {
+      console.log('No current conversation, skipping message fetch');
+        return;
+      }
+    
+    console.log('Current conversation changed to:', currentConversation.conversationId);
+      
+    // Try comprehensive recovery from localStorage first
+    if (currentConversation.conversationId) {
+      const recoveredMessages = MessageRecovery.recoverMessages(currentConversation.conversationId);
+      if (recoveredMessages && recoveredMessages.length > 0) {
+        console.log('Recovered messages using MessageRecovery for conversation', currentConversation.conversationId);
+        setMessages(recoveredMessages);
+        setStoreMessages(recoveredMessages); // Also update storeMessages to ensure UI reflects state
+        
+        // Ensure messages are synced to database in background
+        MessageRecovery.ensureMessagesInDatabase(currentConversation.conversationId, recoveredMessages)
+          .catch(error => console.error('Failed to sync recovered messages to database:', error));
+        
+        return;
+      } else {
+        console.log('No messages found using MessageRecovery for conversation', currentConversation.conversationId);
+      }
+      }
+      
+    // Don't fetch messages for draft conversations
+    if (currentConversation.conversationId.startsWith('draft-')) {
+      console.log('Draft conversation, not fetching messages');
+        return;
+      }
+
+    // For real conversations with no recovered messages, fetch from API
+    console.log('Fetching messages from API for conversation', currentConversation.conversationId);
+    fetchMessages();
+  }, [currentConversation?.conversationId]);
+
+  // Add debug logging
+  useEffect(() => {
+    console.log('Current conversation:', currentConversation); // here conversationId was incorrect 
+    console.log('Store messages:', storeMessages);
+    console.log('Messages length:', messages.length);
+  }, [currentConversation, storeMessages, messages.length]);
+
+  const fetchMessages = async () => {
+    console.log('Fetching messages for conversation:', currentConversation?.conversationId);
+    
+    if (!currentConversation || currentConversation.conversationId.startsWith('draft-')) {
+      console.log('Skipping message fetch - no conversation or draft conversation');
+        return;
+      }
+
+    setIsRefreshing(true);
+            setError(null);
+
+    try {
+      // Always try database first for all non-draft conversations
+      console.log('Fetching messages from database...');
+      
+      try {
+        // The backend returns an array of ConversationContentResponseDTO
+        const response = await conversationApi.getConversationMessages(currentConversation.conversationId);
+        console.log('Database response:', response);
+        
+        if (Array.isArray(response) && response.length > 0) {
+          console.log(`Loaded ${response.length} messages from database`);
+          setMessages(response);
+          setStoreMessages(response);
+          
+          // Save to localStorage for backup
+          saveConversationState(currentConversation.conversationId, response);
+          setIsRefreshing(false);
+          return;
+        } else {
+          console.log('No messages found in database');
+          // For empty conversations, set empty state
+          setMessages([]);
+          setStoreMessages([]);
+          setIsRefreshing(false);
+          return;
+        }
+      } catch (apiError) {
+        console.error('Error fetching from database:', apiError);
+        console.log('Database fetch failed, trying localStorage backup...');
+        
+        // Only use localStorage as emergency fallback
+        const cachedMessages = loadConversationState(currentConversation.conversationId);
+        if (cachedMessages && cachedMessages.length > 0) {
+          console.log('Using backup messages from localStorage');
+          setMessages(cachedMessages);
+          setStoreMessages(cachedMessages);
+          setIsRefreshing(false);
+          return;
+        }
+        
+        // If database fails and no backup, show error
+        setError('Failed to load messages from database. Please try refreshing.');
+        setMessages([]);
+        setStoreMessages([]);
+      }
+
+    } catch (error) {
+      console.error('Error in fetchMessages function:', error);
+      setError('Failed to load messages. Please try again.');
+      setMessages([]);
+      setStoreMessages([]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Add auto-recovery for messages - run more frequently and be more aggressive
+  useEffect(() => {
+    // Skip recovery if feedback is being processed
+    if (isProcessingFeedback.current) {
+      console.log('Auto-recovery skipped: practice feedback is processing');
+      return;
+    }
+    
+    // Check periodically if messages disappeared and recover them
+    const intervalId = setInterval(() => {
+      // Skip recovery if loading is true (message is being sent)
+      if (isMessageSending.current) {
+        console.log('Auto-recovery skipped: message is being sent');
+        return;
+      }
+      
+      if (currentConversation?.conversationId) {
+        // Check if messages are empty or if storeMessages are empty
+        if (messages.length === 0 || storeMessages.length === 0) {
+          console.log('State check: messages are empty! Attempting comprehensive recovery...');
+          const recoveredMessages = MessageRecovery.recoverMessages(currentConversation.conversationId);
+          if (recoveredMessages && recoveredMessages.length > 0) {
+            console.log('Auto-recovery: found and restored', recoveredMessages.length, 'messages');
+            setMessages(recoveredMessages);
+            setStoreMessages(recoveredMessages);
+            
+            // Ensure messages are synced to database in background
+            MessageRecovery.ensureMessagesInDatabase(currentConversation.conversationId, recoveredMessages)
+              .catch(error => console.error('Failed to sync auto-recovered messages to database:', error));
+          } else if (!currentConversation.conversationId.startsWith('draft-')) {
+            // If no messages in localStorage and not a draft, try API
+            console.log('No messages found in any localStorage key, forcing API refresh');
+            fetchMessages();
+          }
+        } else if (messages.length > 0 && storeMessages.length === 0) {
+          // Fix state sync issues between messages and storeMessages
+          console.log('Syncing storeMessages with messages');
+          setStoreMessages([...messages]);
+        } else if (storeMessages.length > 0 && messages.length === 0) {
+          // Fix state sync issues between messages and storeMessages
+          console.log('Syncing messages with storeMessages');
+          setMessages([...storeMessages]);
+        }
+      }
+    }, 1000); // Check every second for more responsive recovery
+    
+    return () => clearInterval(intervalId);
+  }, [currentConversation?.conversationId, messages.length, storeMessages.length]);
+
+  // Update the useEffect for checking practice feedback in localStorage
+  useEffect(() => {
+    // Skip check if feedback is already processing
+    if (isProcessingFeedback.current) {
+      console.log('Practice feedback check skipped: feedback is processing');
+      return;
+    }
+    
+    // Check for practice data that needs to be displayed in the current conversation
+    const checkForPracticeFeedback = () => {
+      const practiceToChat = localStorage.getItem('practice_to_chat') === 'true';
+      const feedbackPrompt = localStorage.getItem('feedbackRequest') || localStorage.getItem('practice_feedback_prompt');
+      const returningFromPractice = localStorage.getItem('returning_from_practice') === 'true';
+      
+      // Log all practice-related data for debugging
+      console.log('Practice feedback check:', {
+        practiceToChat,
+        hasFeedbackPrompt: !!feedbackPrompt,
+        returningFromPractice,
+        currentConversationId: currentConversation?.conversationId
+      });
+      
+      // If we have a returning_from_practice flag and a current conversation
+      if (returningFromPractice && currentConversation?.conversationId) {
+        console.log('Processing returning from practice...');
+        
+        // Load existing messages for this conversation to ensure we don't lose them
+        const existingMessages = loadConversationState(currentConversation.conversationId) || [];
+        
+        if (existingMessages.length > 0) {
+          console.log(`Loaded ${existingMessages.length} existing messages from conversation`);
+          setMessages(existingMessages);
+          setStoreMessages(existingMessages);
+        }
+        
+        // Clear the flag after processing
+        localStorage.removeItem('returning_from_practice');
+      }
+      
+      // If we find evidence of a pending practice feedback request
+      if (practiceToChat && feedbackPrompt && !isProcessingFeedback.current) {
+        console.log('Found practice feedback request, processing...');
+        
+        // Make sure we've loaded existing messages before processing feedback
+        const currentConvId = currentConversation?.conversationId;
+        if (currentConvId) {
+          // Try to load existing messages if the current message list is empty
+          if (messages.length === 0) {
+            const existingMessages = loadConversationState(currentConvId);
+            if (existingMessages && existingMessages.length > 0) {
+              console.log(`Loaded ${existingMessages.length} existing messages before processing feedback`);
+              setMessages(existingMessages);
+              setStoreMessages(existingMessages);
+            }
+          }
+        }
+        
+        // Trigger feedback processing
+        setTimeout(() => {
+          const event = new Event('practice-feedback-request');
+          window.dispatchEvent(event);
+        }, 500); // Small delay to ensure messages are loaded first
+      }
+    };
+    
+    // Run the check once when the component mounts or conversation changes
+    checkForPracticeFeedback();
+    
+    // Set up interval to check for feedback requests
+    const checkInterval = setInterval(checkForPracticeFeedback, 2000);
+    
+    return () => {
+      clearInterval(checkInterval);
+    };
+  }, [currentConversation?.conversationId, messages.length]);
+
+  // Update the convertToMessage function to handle multiple content field possibilities
+  const convertToMessage = (dto: ConversationContentResponseDTO): Message => {
+    // First try to get content from various possible fields
+    const content = dto.content || dto.agentResponse || dto.userQuery || '';
+    
+    return {
+      id: dto.id || uuidv4(),
+      role: dto.role || (dto.userQuery ? 'user' : 'assistant'),
+      content: content,
+      conversationId: dto.conversationId,
+      createdAt: dto.createdAt || new Date().toISOString()
+    };
+  };
+
+  // Enhance the triggerSidebarRefresh function to include more detail
+  const triggerSidebarRefresh = (details?: { type: string, conversationId?: string, title?: string }) => {
+    // Include default title and conversationId from current conversation if not provided
+    const enhancedDetails = {
+      type: details?.type || 'general-refresh',
+      conversationId: details?.conversationId || currentConversation?.conversationId,
+      title: details?.title || currentConversation?.title || 'New Conversation'
+    };
+    
+    // Create and dispatch a custom event to notify the sidebar to refresh conversations
+    const refreshEvent = new CustomEvent('refresh-conversations', { 
+      detail: enhancedDetails
+    });
+    window.dispatchEvent(refreshEvent);
+    console.log('Dispatched refresh-conversations event with details:', enhancedDetails);
+  };
+
+  // Simplify message handling to ensure user messages remain visible
+  const handleSendMessage = async (content: string, temperature?: number, request_type?: string) => {
+    if (!content.trim() || loading) return;
+
+    // Set loading state and processing flag
+    setLoading(true);
+    setError(null);
+    isMessageSending.current = true;
+
+    try {
+      console.log('CURRENT CONVERSATION:', currentConversation);
+      let conversationToUse = currentConversation;
+      
+      // If this is a draft conversation, create a real conversation first
+      if (currentConversation?.isDraft || currentConversation?.conversationId.startsWith('draft-')) {
+        console.log('Converting draft conversation to real conversation...');
+        
+        try {
+          // Create a real conversation in the database
+          const realConversation = await conversationApi.createConversation(currentConversation.managerType);
+          console.log('Created real conversation:', realConversation);
+          
+          // Update the conversation object
+          conversationToUse = {
+            conversationId: realConversation.conversationId,
+            title: realConversation.title || 'New Conversation',
+            managerType: realConversation.managerType,
+            createdAt: realConversation.createdAt?.toString() || new Date().toISOString(),
+            isDraft: false,
+            isPersisted: true,
+            userId: realConversation.userId?.toString()
+          };
+          
+          // Update the current conversation in the store
+          setCurrentConversation(conversationToUse);
+          
+          // Clear any localStorage data for the draft conversation
+          if (currentConversation?.conversationId) {
+            localStorage.removeItem(`messages_${currentConversation.conversationId}`);
+            localStorage.removeItem(`messages-${currentConversation.conversationId}`);
+          }
+          
+          // Trigger sidebar refresh to show the new conversation
+          triggerSidebarRefresh({
+            type: 'conversation-created',
+            conversationId: conversationToUse.conversationId,
+            title: conversationToUse.title
+          });
+          
+        } catch (error) {
+          console.error('Failed to create real conversation:', error);
+          setError('Failed to create conversation. Please try again.');
+          setLoading(false);
+          isMessageSending.current = false;
+          return;
+        }
+      }
+      console.log('Using conversation:', conversationToUse);
+
+      if (!conversationToUse?.conversationId) {
+        setError('No conversation available. Please create a new chat.');
+        setLoading(false);
+        isMessageSending.current = false;
+        return;
+      }
+
+      // Create user message
+      const userMessage: Message = {
+        id: uuidv4(),
+        role: 'user',
+        content: content.trim(),
+        conversationId: conversationToUse.conversationId,
+        createdAt: new Date().toISOString()
+      };
+
+      // Add user message to UI immediately
+      const updatedMessages = [...storeMessages, userMessage];
+      setMessages(updatedMessages);
+      setStoreMessages(updatedMessages);
+
+      // Save user message to database immediately
+      try {
+
+        await backendApi.post('/api/v1/conversation/message/save', {
+          conversationId: conversationToUse.conversationId,
+          messageId: userMessage.id,
+          content: userMessage.content,
+          role: 'user',
+          createdAt: userMessage.createdAt
+        });
+        console.log('User message saved to database successfully');
+      } catch (error) {
+        console.error('Failed to save user message to database:', error);
+      }
+
+      // Save to localStorage for immediate backup
+      saveConversationState(conversationToUse.conversationId, updatedMessages);
+
+      try {
+        // Send message to API
+        console.log('Sending message to API with params:', {
+          conversationId: conversationToUse.conversationId,
+          content: content.trim(),
+          temperature: temperature || 0.7,
+          request_type
+        });
+        
+        const response = await conversationApi.sendMessage(
+          conversationToUse.conversationId,
+          content.trim(),
+          temperature || 0.7,
+          request_type
+        );
+
+        console.log('Received response from API:', response);
+
+        // Handle different response formats from the API
+        let assistantContent = '';
+        let assistantId = uuidv4();
+        let assistantCreatedAt = new Date().toISOString();
+        let receivedUserMessage: Message | null = null;
+
+        if (response) {
+          // Handle new format with messages array
+          if (response.messages && Array.isArray(response.messages)) {
+            const assistantMsg = response.messages.find(msg => msg.role === 'assistant');
+            const userMsg = response.messages.find(msg => msg.role === 'user');
+            
+            if (assistantMsg) {
+              assistantContent = assistantMsg.content;
+              assistantId = assistantMsg.id || uuidv4();
+              assistantCreatedAt = assistantMsg.createdAt || new Date().toISOString();
+            }
+            
+            // Check if agent returned a user message (this happens in practice scenarios)
+            if (userMsg && userMsg.id !== userMessage.id) {
+              receivedUserMessage = {
+                id: userMsg.id || uuidv4(),
+                role: 'user',
+                content: userMsg.content,
+                conversationId: conversationToUse.conversationId,
+                createdAt: userMsg.createdAt || new Date().toISOString()
+              };
+            }
+          }
+          // Handle legacy format with agentResponse
+          else if (response.agentResponse) {
+            assistantContent = response.agentResponse;
+            assistantCreatedAt = response.createdAt || new Date().toISOString();
+          }
+          // Handle direct content format
+          else if (response.content) {
+            assistantContent = response.content;
+            assistantCreatedAt = response.createdAt || new Date().toISOString();
+          }
+        }
+
+        if (assistantContent) {
+          // Create assistant message
+          const assistantMessage: Message = {
+            id: assistantId,
+            role: 'assistant',
+            content: assistantContent,
+            conversationId: conversationToUse.conversationId,
+            createdAt: assistantCreatedAt
+          };
+
+          // Build final messages array - only add received user message if it's different from our local one
+          let finalMessages = [...updatedMessages];
+          if (receivedUserMessage) {
+            console.log('Agent returned a user message, checking for duplicates');
+            const existingUserMsg = finalMessages.find(m => m.content === receivedUserMessage.content && m.role === 'user');
+            if (!existingUserMsg) {
+              console.log('Adding received user message from agent');
+              finalMessages.push(receivedUserMessage);
+            } else {
+              console.log('User message already exists, skipping duplicate');
+            }
+          }
+          finalMessages.push(assistantMessage);
+
+          // Update UI
+          setMessages(finalMessages);
+          setStoreMessages(finalMessages);
+
+          // Save assistant message to database immediately
+          try {
+
+            await backendApi.post('/api/v1/conversation/message/save', {
+              conversationId: conversationToUse.conversationId,
+              messageId: assistantMessage.id,
+              content: assistantMessage.content,
+              role: 'assistant',
+              createdAt: assistantMessage.createdAt
+            });
+            console.log('Assistant message saved to database successfully');
+          } catch (error) {
+            console.error('Failed to save assistant message to database:', error);
+          }
+
+          // Save to localStorage for immediate backup
+          saveConversationState(conversationToUse.conversationId, finalMessages);
+
+          // Trigger sidebar refresh to update conversation list
+          triggerSidebarRefresh({
+            type: 'message-sent',
+            conversationId: conversationToUse.conversationId
+          });
+
+          // Don't dispatch messages-updated event here since we're handling the response directly
+          // This prevents the handleMessagesUpdated from fetching and potentially duplicating messages
+
+        } else {
+          console.error('No valid assistant response found in API response:', response);
+          throw new Error('No response from API');
+        }
+
+      } catch (error) {
+        console.error('Error sending message:', error);
+        
+        // Remove the user message from UI on error
+        setMessages(storeMessages);
+        setStoreMessages(storeMessages);
+        
+        setError('Failed to send message. Please try again.');
+      }
+
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+      isMessageSending.current = false;
+    }
+  };
+
+  // Update the ref whenever handleSendMessage changes
+  useEffect(() => {
+    // This ref pattern is not strictly necessary with useCallback, but keep if used elsewhere
+    // handleSendMessageRef.current = handleSendMessage;
+  }, [handleSendMessage]); // Dependency is handleSendMessage itself
+
+  // Add a function to retrieve practice history in the ChatWindow component
+  const getPracticeHistory = () => {
+    try {
+      const historyStr = localStorage.getItem('practice_history');
+      if (!historyStr) return [];
+      
+      const history = JSON.parse(historyStr);
+      return Array.isArray(history) ? history : [];
+    } catch (e) {
+      console.error('Error parsing practice history:', e);
+      return [];
+    }
+  };
+
+  // Function to check if user has completed at least one practice module
+  const hasCompletedPractice = () => {
+    const history = getPracticeHistory();
+    return history.length > 0;
+  };
+
+  // Function to refresh user data from API
+  const refreshUserData = async () => {
+    try {
+      console.log('Refreshing user data after scenario completion...');
+      const response = await backendApi.get('/api/v1/user/profile');
+      const updatedUser = response.data;
+      console.log('Updated user data:', updatedUser);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return null;
+    }
+  };
+
+  // Helper function to determine current scenario based on conversation content
+  const determineCurrentScenario = (): 'accessibility' | 'privacy' | null => {
+    // Get list of scenarios that have already been used for email generation
+    const usedScenarios = JSON.parse(localStorage.getItem('used_email_scenarios') || '[]') as string[];
+    console.log('📧 Previously used email scenarios:', usedScenarios);
+    
+    // Find all completed scenarios in chronological order
+    const completedScenarios: Array<{index: number, type: 'accessibility' | 'privacy'}> = [];
+    
+    for (let i = 0; i < storeMessages.length; i++) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for practice scenario completion messages with explicit issue type
+      if (content.includes('practice scenario completed')) {
+        if (content.includes('- issue: accessibility')) {
+          completedScenarios.push({index: i, type: 'accessibility'});
+        } else if (content.includes('- issue: privacy')) {
+          completedScenarios.push({index: i, type: 'privacy'});
+        }
+      }
+    }
+    
+    console.log('📊 All completed scenarios found:', completedScenarios);
+    
+    // Find the first scenario that hasn't been used for email generation yet
+    for (const scenario of completedScenarios) {
+      const scenarioKey = `${scenario.type}_${scenario.index}`;
+      if (!usedScenarios.includes(scenarioKey)) {
+        console.log('🎯 Found unused completed scenario:', scenario.type, 'at index', scenario.index);
+        
+        // Mark this scenario as used for email generation
+        usedScenarios.push(scenarioKey);
+        localStorage.setItem('used_email_scenarios', JSON.stringify(usedScenarios));
+        
+        return scenario.type;
+      }
+    }
+    
+    console.log('🔍 All completed scenarios have been used, checking for scenario initiation messages...');
+    
+    // If all completed scenarios have been used, check for scenario initiation messages (most recent first)
+    for (let i = storeMessages.length - 1; i >= 0; i--) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for exact scenario selection messages
+      if (content.includes("my manager is pressuring me to collect unnecessary user location data")) {
+        console.log('🎯 Found most recent initiation: PRIVACY (location data)');
+        return 'privacy';
+      }
+      if (content.includes("my team is facing pressure to skip screen reader compatibility testing")) {
+        console.log('🎯 Found most recent initiation: ACCESSIBILITY (screen reader)');
+        return 'accessibility';
+      }
+    }
+    
+    console.log('🔍 No specific scenario initiation found, using keyword fallback...');
+    
+    // Look through all messages to determine the scenario type as a fallback (most recent first)
+    for (let i = storeMessages.length - 1; i >= 0; i--) {
+      const message = storeMessages[i];
+      const content = message.content?.toLowerCase() || '';
+      
+      // Check for specific keywords that strongly indicate a scenario type
+      if (content.includes('screen reader') || content.includes('wcag') || content.includes('section 508') || 
+          content.includes('ada compliance') || content.includes('accessibility testing')) {
+        console.log('🎯 Found keyword match: ACCESSIBILITY');
+        return 'accessibility';
+      }
+      if (content.includes('location data') || content.includes('user privacy') || content.includes('gdpr') || 
+          content.includes('data collection') || content.includes('unnecessary data')) {
+        console.log('🎯 Found keyword match: PRIVACY');
+        return 'privacy';
+      }
+    }
+    
+    // If no scenario detected, check localStorage for last selected scenario
+    const lastScenario = localStorage.getItem('last_selected_scenario');
+    if (lastScenario === 'privacy' || lastScenario === 'accessibility') {
+      console.log('🎯 Using localStorage scenario:', lastScenario);
+      return lastScenario as 'privacy' | 'accessibility';
+    }
+    
+    console.log('❌ No scenario could be determined');
+    return null;
+  };
+
+  // Complete replacement of the handlePracticeFeedbackRequest function with proper structure
+    const handlePracticeFeedbackRequest = async () => {
+    // Set processing flag at the very beginning
+      isProcessingFeedback.current = true;
+    console.log('Set isProcessingFeedback to true');
+    
+    try {
+      console.log('Handling practice feedback request');
+      console.log('Current conversation:', currentConversation); //here conversationid was correct
+      console.log('Current messages count:', messages.length);
+      console.log('Current store messages count:', storeMessages.length);
+      
+      const practiceToChat = localStorage.getItem('practice_to_chat');
+      
+      if (practiceToChat === 'true') {
+        console.log('Practice to chat flag is true');
+        
+        // If we have existing messages, log them for debugging
+        if (messages.length > 0) {
+          console.log('Existing messages before processing feedback:');
+          messages.forEach((msg, idx) => {
+            console.log(`Message ${idx}: ${msg.role}, content: ${msg.content.substring(0, 30)}...`);
+          });
+        } else {
+          console.log('No existing messages found before processing feedback');
+        }
+          
+        // IMPORTANT: Get both the simple prompt (for UI) and the detailed prompt (for API)
+        const simplePrompt = localStorage.getItem('practice_feedback_simple') || localStorage.getItem('feedbackRequest');
+        const detailedPrompt = localStorage.getItem('practice_feedback_prompt');
+        
+        // Use the simple prompt for the UI, but the detailed one for the API
+        const displayPrompt = simplePrompt;
+        const apiPrompt = detailedPrompt || simplePrompt; // Fallback to simple if detailed not available
+        
+        const practiceManagerType = (localStorage.getItem('practice_manager_type') as ManagerType) || managerType;
+        
+        // CRITICAL: Force using the original conversation ID
+        const forcedConversationId = localStorage.getItem('force_conversation_id');
+        const originalConvId = localStorage.getItem('originalConversationId');
+        const conversationId = forcedConversationId || originalConvId;
+                                 
+        console.log('Determined conversation ID for feedback:', conversationId);
+        console.log('Sources:', { forcedConversationId, originalConvId });
+        
+        if (!conversationId) {
+          console.error('CRITICAL ERROR: Could not determine original conversation ID for feedback. Aborting.');
+          // Clear flags to prevent loops
+          isProcessingFeedback.current = false;
+          localStorage.removeItem('practice_to_chat');
+          localStorage.removeItem('practice_feedback_prompt');
+          localStorage.removeItem('practice_feedback_simple');
+          localStorage.removeItem('feedbackRequest');
+          localStorage.removeItem('force_conversation_id');
+          setError('Could not link feedback to the original conversation. Please start a new chat.');
+          return; // Stop execution
+        }
+        
+        // Set the current conversation to the target ID *before* doing anything else
+        if (setCurrentConversation) {
+          // Try to get existing conversation details if possible
+          const conversationsJSON = localStorage.getItem('conversations');
+          let existingTitle = "Conversation";
+          let existingManager = practiceManagerType;
+          let existingCreatedAt = new Date().toISOString();
+          
+          if (conversationsJSON) {
+            try {
+              const conversations = JSON.parse(conversationsJSON);
+              const existingConvData = conversations.find((conv: any) => conv.conversationId === conversationId);
+              if (existingConvData) {
+                existingTitle = existingConvData.title || existingTitle;
+                existingManager = existingConvData.managerType || existingManager;
+                existingCreatedAt = existingConvData.createdAt || existingCreatedAt;
+              }
+            } catch (e) { 
+              console.error('Error parsing conversations:', e); 
+            }
+          }
+          
+          console.log('Setting current conversation to original ID:', conversationId);
+          setCurrentConversation({
+            conversationId: conversationId,
+            title: existingTitle,
+            managerType: existingManager,
+            createdAt: existingCreatedAt,
+          });
+        } else {
+          console.error('setCurrentConversation function is not available!');
+          // Even if we can't set it in the store, proceed with the ID we have
+        }
+        
+        // Load existing messages for this conversation
+        // Use a temporary variable to avoid state update delays
+         let loadedMessages = loadConversationState(conversationId);
+        if (loadedMessages && loadedMessages.length > 0) {
+          console.log('Loaded existing messages for original conversation:', loadedMessages);
+          // Update UI immediately if messages were loaded
+          setMessages(loadedMessages);
+          setStoreMessages(loadedMessages);
+        } else {
+          console.log('No stored messages found for original conversation, starting fresh.');
+          loadedMessages = []; // Ensure it's an empty array
+          setMessages([]);
+          setStoreMessages([]);
+        }
+        
+        // Now proceed with adding the feedback request message and calling the API
+        const temperature = 0.7;
+        
+        if (displayPrompt) {
+          // Check if feedback message already exists in the loaded messages
+          const feedbackExists = loadedMessages.some(m => 
+            m.role === 'user' && 
+            m.content === displayPrompt // Check for exact content match, not just keywords
+          );
+          
+          let messagesWithUserRequest = loadedMessages;
+          
+          if (!feedbackExists) {
+            console.log('Adding new user feedback request message to UI');
+            // Create a new user message with the SIMPLE feedback prompt for UI display
+            messagesWithUserRequest = [...loadedMessages];
+            
+            // Update UI and store immediately
+            setMessages(messagesWithUserRequest);
+            setStoreMessages(messagesWithUserRequest);
+            
+            // Save conversation state
+            saveConversationState(conversationId, messagesWithUserRequest);
+          } else {
+            console.log('Feedback request message already exists, not adding again.');
+          }
+          
+          // Send the API request with the detailed prompt
+          console.log('Sending detailed practice feedback directly to API...');
+          try {
+            const activeManagerType = practiceManagerType || managerType || 'CAPITALIST' as ManagerType;
+            setLoading(true);
+            
+            console.log('Calling API with detailed practice feedback prompt');
+            console.log("Feedback API Prompt Content:", apiPrompt);
+            
+            const response = await apiSendMessage(
+              conversationId, 
+              apiPrompt || '',
+              activeManagerType,
+              temperature,
+              "post_feedback"
+            ) as any;
+
+            console.log('Raw Practice feedback API response object:', JSON.stringify(response, null, 2));
+            console.log('Practice feedback API response received:', response);
+
+            // Process the response
+            if (response && response.messages && Array.isArray(response.messages) && response.messages.length > 1) {
+              // Look for the assistant's message in the messages array
+              const assistantMessage = response.messages.find(m => m.role === 'assistant');
+              
+              if (assistantMessage && assistantMessage.content) {
+                // Found assistant message with content - use this instead of response.agentResponse
+                const agentMessage: Message = {
+                  id: assistantMessage.id || `assistant-${Date.now()}`,
+                  role: 'assistant' as Role,
+                  content: assistantMessage.content,
+                conversationId: conversationId,
+                  createdAt: assistantMessage.createdAt || new Date().toISOString()
+              };
+              
+              console.log('Practice feedback agent message:', agentMessage);
+              
+              const baseMessages = messagesWithUserRequest.filter(m => !m.isLoading);
+              console.log('Base messages count (including user request):', baseMessages.length);
+              
+              const hasAgentResponseAlready = baseMessages.some(m => m.id === agentMessage.id);
+              let finalMessages;
+                
+              if (!hasAgentResponseAlready) {
+                console.log('Appending new agent feedback response message');
+                finalMessages = [...baseMessages, agentMessage];
+                
+                // CRITICAL: Save both user and assistant messages to database immediately
+                try {
+                  // Save user message to database if it doesn't exist
+                  const userMessage = messagesWithUserRequest[messagesWithUserRequest.length - 1];
+
+                  if (userMessage && userMessage.role === 'user') {
+                    console.log("1 USER MESSAGE CONTENT: ", {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    })
+                    await backendApi.post('/api/v1/conversation/message/save', {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    });
+                    console.log('User feedback message saved to database successfully');
+                  }
+                  console.log("1 AGENT MESSAGE CONTENT: ", {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  })
+
+                  // Save assistant message to database
+                  await backendApi.post('/api/v1/conversation/message/save', {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  });
+                  console.log('Assistant feedback message saved to database successfully');
+                } catch (error) {
+                  if (error.response) {
+                    console.error('❌ Failed to save feedback messages to database:');
+                    console.error('Status:', error.response.status);
+                    console.error('Data:', error.response.data);
+                    console.error('Headers:', error.response.headers);
+                  } else if (error.request) {
+                    console.error('❌ No response received from server:', error.request);
+                  } else {
+                    console.error('❌ Error setting up request:', error.message);
+                  }
+                  console.error('Config:', error.config);
+                }
+                
+                // CRITICAL: Save both user and assistant messages to database immediately
+                try {
+                  // Save user message to database if it doesn't exist
+                  const userMessage = messagesWithUserRequest[messagesWithUserRequest.length - 1];
+                  if (userMessage && userMessage.role === 'user') {
+                    console.log("2 USER MESSAGE CONTENT: ", {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    })
+
+                    await backendApi.post('/api/v1/conversation/message/save', {
+                      conversationId: conversationId,
+                      messageId: userMessage.id,
+                      content: userMessage.content,
+                      role: 'user',
+                      createdAt: userMessage.createdAt
+                    });
+                    console.log('User feedback message saved to database successfully');
+                  }
+                  console.log("2 AGENT MESSAGE CONTENT: ", {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  })
+
+                  // Save assistant message to database
+                  await backendApi.post('/api/v1/conversation/message/save', {
+                    conversationId: conversationId,
+                    messageId: agentMessage.id,
+                    content: agentMessage.content,
+                    role: 'assistant',
+                    createdAt: agentMessage.createdAt
+                  });
+                  console.log('Assistant feedback message saved to database successfully');
+                } catch (error) {
+                  if (error.response) {
+                    console.error('❌ Failed to save feedback messages to database:');
+                    console.error('Status:', error.response.status);
+                    console.error('Data:', error.response.data);
+                    console.error('Headers:', error.response.headers);
+                  } else if (error.request) {
+                    console.error('❌ No response received from server:', error.request);
+                  } else {
+                    console.error('❌ Error setting up request:', error.message);
+                  }
+                  console.error('Config:', error.config);
+                }
+              } else {
+                console.log('Agent feedback response already exists, not appending duplicate');
+                  finalMessages = baseMessages;
+              }
+              
+              console.log('Setting final messages count:', finalMessages.length);
+              setMessages(finalMessages);
+              setStoreMessages(finalMessages);
+              
+              // CRITICAL: Save conversation state to multiple localStorage keys for maximum backup
+              saveConversationState(conversationId, finalMessages);
+              
+              // Additional comprehensive localStorage backup
+              try {
+                const messageData = JSON.stringify(finalMessages);
+                localStorage.setItem(`messages_${conversationId}`, messageData);
+                localStorage.setItem(`messages-${conversationId}`, messageData);
+                localStorage.setItem(`backup_messages_${conversationId}`, messageData);
+                localStorage.setItem(`exact_messages_${conversationId}`, messageData);
+                localStorage.setItem(`practice_feedback_messages_${conversationId}`, messageData);
+                console.log('Comprehensive localStorage backup completed for feedback messages');
+              } catch (error) {
+                console.error('Failed to save comprehensive localStorage backup:', error);
+              }
+              localStorage.setItem(`exact_messages_${conversationId}`, JSON.stringify(finalMessages));
+              localStorage.setItem(`backup_messages_${conversationId}`, JSON.stringify(finalMessages));
+              
+              try {
+                const updateEvent = new CustomEvent('messages-updated', {
+                  detail: { conversationId: conversationId }
+                });
+                window.dispatchEvent(updateEvent);
+                console.log('Dispatched messages-updated event');
+              } catch (e) {
+                console.error('Error dispatching message update event:', e);
+              }
+              
+              // Clean up flags after successful response
+              localStorage.removeItem('practice_to_chat');
+              localStorage.removeItem('practice_feedback_prompt');
+              localStorage.removeItem('practice_feedback_simple');
+              localStorage.removeItem('feedbackRequest');
+              localStorage.removeItem('currentPracticeInfo');
+              localStorage.removeItem('force_conversation_id');
+          localStorage.removeItem('practice_data');
+            } else {
+                // Messages exist but no assistant message with content found
+                console.error('No assistant message with content found in the messages array:', response.messages);
+                setError('Could not extract feedback content from response. Please try again.');
+                
+                // Clean up flags
+              localStorage.removeItem('practice_to_chat');
+              localStorage.removeItem('practice_feedback_prompt');
+              localStorage.removeItem('practice_feedback_simple');
+              localStorage.removeItem('feedbackRequest');
+              localStorage.removeItem('force_conversation_id');
+        }
+            } else {
+              // Invalid or incomplete response structure
+              console.error('Invalid or incomplete practice feedback API response structure:', response);
+              setError('Received an invalid response format. Please try again.');
+              
+              // Clean up flags
+              localStorage.removeItem('practice_to_chat');
+              localStorage.removeItem('practice_feedback_prompt');
+              localStorage.removeItem('practice_feedback_simple');
+              localStorage.removeItem('feedbackRequest');
+              localStorage.removeItem('force_conversation_id');
+            }
+          } catch (apiError) {
+            // Handle API call errors
+            console.error('Error sending practice feedback to API:', apiError);
+            setError('Failed to get feedback response. Please try again.');
+            
+            // Clean up flags on error
+            localStorage.removeItem('practice_to_chat');
+            localStorage.removeItem('practice_feedback_prompt');
+            localStorage.removeItem('practice_feedback_simple');
+            localStorage.removeItem('feedbackRequest');
+            localStorage.removeItem('force_conversation_id');
+      } finally {
+            // Always reset loading state
+        setLoading(false);
+          }
+          
+          console.log('Practice feedback request processing finished for displayPrompt path');
+        } else { // No display prompt
+          console.error('No display prompt available, cannot process feedback request');
+          
+          // Clean up flags if there's no prompt to proceed
+          localStorage.removeItem('practice_to_chat');
+          localStorage.removeItem('practice_feedback_prompt');
+          localStorage.removeItem('practice_feedback_simple');
+          localStorage.removeItem('feedbackRequest');
+          localStorage.removeItem('force_conversation_id');
+        }
+      } else { // practiceToChat !== 'true'
+        console.log('practice_to_chat was not true. No feedback request processed.');
+      }
+    } catch (error) {
+      // Handle any unexpected errors in the overall process
+      console.error('Error in handlePracticeFeedbackRequest:', error);
+      setError('An error occurred while processing feedback.');
+      
+      // Clean up flags on outer error
+      localStorage.removeItem('practice_to_chat');
+      localStorage.removeItem('practice_feedback_prompt');
+      localStorage.removeItem('practice_feedback_simple');
+      localStorage.removeItem('feedbackRequest');
+      localStorage.removeItem('force_conversation_id');
+    } finally {
+      // Ensure the flag is always reset if it hasn't been already
+      if (isProcessingFeedback.current) {
+          isProcessingFeedback.current = false;
+          console.log('Set isProcessingFeedback to false in outer finally block');
+      }
+    }
+  };
+
+  // Check for practice feedback on mount (only place where practice feedback should be handled)
+  useEffect(() => {
+    const handlePracticeFeedbackEvent = () => {
+      console.log('🎯 Practice feedback event received, triggering feedback request handler');
+      handlePracticeFeedbackRequest();
+    };
+    
+    window.addEventListener('practice-feedback-request', handlePracticeFeedbackEvent);
+    
+    // Check for practice feedback request on component mount - single source of truth
+    const practiceToChat = localStorage.getItem('practice_to_chat');
+    if (practiceToChat === 'true' && !isProcessingFeedback.current) {
+      console.log('Found practice_to_chat flag on mount, processing feedback request');
+      // Set flag immediately to prevent duplicate processing
+      isProcessingFeedback.current = true;
+        handlePracticeFeedbackRequest();
+    }
+    
+    return () => {
+      window.removeEventListener('practice-feedback-request', handlePracticeFeedbackEvent);
+    };
+  }, []);
+
+  // REMOVED: Removed the second useEffect that was causing duplicate practice feedback processing
+  // All practice feedback should be handled in the mount useEffect above
+
+  // Check for practice feedback request from localStorage
+  useEffect(() => {
+    // REMOVED: Large duplicate practice feedback processing logic
+    // Practice feedback is now handled only in the mount useEffect above to prevent duplicates
+    // This useEffect now only monitors dependencies without triggering practice feedback
+    console.log('useEffect dependency update - practice feedback handled in mount useEffect only');
+  }, [currentConversation?.conversationId, messages.length, storeMessages.length]);
+
+  // REMOVED: Second duplicate useEffect for practice-feedback-request event listener
+  // This was causing the duplication - only one event listener should exist
+
+  // Add a listener for forced message loading
+  useEffect(() => {
+    const handleForceLoadMessages = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const conversationId = customEvent.detail?.conversationId;
+      
+      console.log('Force load messages event received for conversation:', conversationId);
+      
+      if (conversationId && currentConversation?.conversationId === conversationId) {
+        console.log('Forcing message reload from all sources');
+        
+        // First try to load from localStorage with all possible key formats
+        const recoveredMessages = loadConversationState(conversationId);
+        if (recoveredMessages && recoveredMessages.length > 0) {
+          console.log('Successfully loaded messages from localStorage');
+          setMessages(recoveredMessages);
+        } else {
+          // If no messages in localStorage, fetch from API
+          console.log('No messages found in localStorage, fetching from API');
+          fetchMessages();
+        }
+      }
+    };
+    
+    window.addEventListener('force-load-messages', handleForceLoadMessages);
+    
+    return () => {
+      window.removeEventListener('force-load-messages', handleForceLoadMessages);
+    };
+  }, [currentConversation]);
+
+  // Add a listener for the clear-messages event
+  useEffect(() => {
+    const handleClearMessages = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const newConversationId = customEvent.detail?.conversationId;
+      
+      console.log('Clear messages event received for conversation:', newConversationId);
+      
+      // Clear both state objects
+      setMessages([]);
+      setStoreMessages([]);
+      
+      // Reset any error state
+      setError(null);
+      
+      // If we have the new conversation ID from the event, update our state
+      if (newConversationId && (!currentConversation || currentConversation.conversationId !== newConversationId)) {
+        console.log('Setting up UI for new draft conversation');
+      }
+    };
+    
+    window.addEventListener('clear-messages', handleClearMessages);
+    
+    return () => {
+      window.removeEventListener('clear-messages', handleClearMessages);
+    };
+  }, []);
+
+  // Add a listener for conversation deletion events
+  useEffect(() => {
+    const handleConversationDeleted = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const deletedConversationId = customEvent.detail?.conversationId;
+      
+      console.log('Conversation deleted event received for:', deletedConversationId);
+      
+      // If this is the current conversation we're viewing, clear the messages
+      if (currentConversation?.conversationId === deletedConversationId) {
+        console.log('Clearing messages for deleted conversation');
+        setMessages([]);
+        setStoreMessages([]);
+        // Remove the error message that was previously set
+        // setError('This conversation has been deleted.');
+      }
+    };
+    
+    const handleScenarioReset = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Scenario reset event received:', customEvent.detail);
+      
+      // Refresh user data to get updated completion status
+      try {
+        await refreshUserData();
+        console.log('User data refreshed after scenario reset');
+      } catch (error) {
+        console.error('Failed to refresh user data after scenario reset:', error);
+      }
+      
+      // Clear any cached scenario-related state
+      setError(null);
+      
+      // Force a re-render by updating a timestamp or similar
+      console.log('Scenario reset processed successfully');
+    };
+
+    const handleForceUserUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Force user update event received:', customEvent.detail);
+      
+      if (customEvent.detail?.userData) {
+        console.log('Updating user state with fresh data:', customEvent.detail.userData);
+        setUser(customEvent.detail.userData);
+        console.log('User state updated successfully');
+      }
+    };
+
+    const handleForceUserReset = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Force user reset event received:', customEvent.detail);
+      
+      if (customEvent.detail?.resetData && user) {
+        const resetUser = {
+          ...user,
+          ...customEvent.detail.resetData
+        };
+        console.log('Resetting user state to:', resetUser);
+        setUser(resetUser);
+        console.log('User state reset successfully - both scenarios should now show as incomplete');
+      }
+    };
+
+    window.addEventListener('conversation-deleted', handleConversationDeleted);
+    window.addEventListener('scenario-reset', handleScenarioReset);
+    window.addEventListener('force-user-update', handleForceUserUpdate);
+    window.addEventListener('force-user-reset', handleForceUserReset);
+    
+    return () => {
+      window.removeEventListener('conversation-deleted', handleConversationDeleted);
+      window.removeEventListener('scenario-reset', handleScenarioReset);
+      window.removeEventListener('force-user-update', handleForceUserUpdate);
+      window.removeEventListener('force-user-reset', handleForceUserReset);
+    };
+  }, [currentConversation, refreshUserData]);
+
+  // Add new useEffect to keep track of current conversation ID in localStorage
+  useEffect(() => {
+    // Only update localStorage if we have a valid non-draft conversation
+    if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+      console.log('Setting current-conversation-id in localStorage:', currentConversation.conversationId); //here conversationId is correct
+      localStorage.setItem('current-conversation-id', currentConversation.conversationId);
+      
+      // DO NOT clean up originalConversationId automatically, as we need it for context recovery
+      // Instead, only clear it if explicitly switching to a different conversation (not for same conversation updates)
+      const originalConversationId = localStorage.getItem('originalConversationId');
+      const lastKnownConversationId = localStorage.getItem('last-known-conversation-id');
+      
+      if (lastKnownConversationId && 
+          lastKnownConversationId !== currentConversation.conversationId && 
+          originalConversationId && 
+          originalConversationId !== currentConversation.conversationId) {
+        console.log('Switching conversations, cleaning up originalConversationId');
+        localStorage.removeItem('originalConversationId');
+      }
+      
+      // Always track last known conversation ID for comparison
+      localStorage.setItem('last-known-conversation-id', currentConversation.conversationId);
+    }
+    
+    // Return cleanup function to remove localStorage items when component unmounts
+    return () => {
+      // Only clean up if this is a non-draft conversation
+      if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+        localStorage.removeItem('current-conversation-id');
+      }
+    };
+  }, [currentConversation?.conversationId]);
+
+  // Add an additional useEffect to ensure message persistence
+  useEffect(() => {
+    // Skip recovery if feedback is being processed
+    if (isProcessingFeedback.current) {
+      console.log('Auto-recovery skipped: practice feedback is processing');
+      return;
+    }
+    
+    // This function will ensure messages don't disappear during transitions
+    const ensureMessagesLoaded = () => {
+      if (currentConversation?.conversationId && messages.length === 0) {
+        console.log('Messages empty but conversation exists, attempting recovery');
+        
+        // Try to recover from localStorage first
+        const storedMessages = loadConversationState(currentConversation.conversationId);
+        if (storedMessages && storedMessages.length > 0) {
+          console.log('Recovered messages from localStorage');
+          setMessages(storedMessages);
+          setStoreMessages(storedMessages);
+        } else if (!currentConversation.conversationId.startsWith('draft-')) {
+          // If not in localStorage and not a draft, try to fetch from API
+          console.log('No stored messages found, fetching from API');
+          fetchMessages();
+        }
+      }
+    };
+    
+    // Run immediately
+    ensureMessagesLoaded();
+    
+    // And set up an interval to run occasionally
+    const intervalId = setInterval(ensureMessagesLoaded, 2000);
+    
+    return () => clearInterval(intervalId);
+  }, [currentConversation?.conversationId, messages.length]);
+
+  // Add a special effect to handle returning from practice mode
+  useEffect(() => {
+    // Skip check if feedback is already processing
+    if (isProcessingFeedback.current) {
+      console.log('Returning from practice check skipped: feedback is processing');
+      return;
+    }
+    
+    const handleReturnFromPractice = () => {
+      const returningFromPractice = localStorage.getItem('returning_from_practice') === 'true';
+      
+      if (returningFromPractice && currentConversation?.conversationId) {
+        console.log('Detected return from practice mode, reloading messages');
+        
+        // Try to load from localStorage first
+        const storedMessages = loadConversationState(currentConversation.conversationId);
+        if (storedMessages && storedMessages.length > 0) {
+          console.log(`Loaded ${storedMessages.length} messages from localStorage after practice`);
+          setMessages(storedMessages);
+          setStoreMessages(storedMessages);
+        } else if (!currentConversation.conversationId.startsWith('draft-')) {
+          // If not in localStorage and not a draft, try API
+          console.log('Fetching messages from API after practice');
+          fetchMessages();
+        }
+        
+        // Clear the flag
+        localStorage.removeItem('returning_from_practice');
+      }
+    };
+    
+    // Run on mount and when currentConversation changes
+    handleReturnFromPractice();
+  }, [currentConversation?.conversationId]);
+
+  // Add a special effect to check for pending practice feedback responses
+  useEffect(() => {
+    // Skip check if feedback is already processing
+    if (isProcessingFeedback.current) {
+      console.log('Pending response check skipped: feedback is processing');
+      return;
+    }
+    
+    const checkForPendingResponses = () => {
+      // Check if we have any pending agent responses from practice feedback
+      const pendingResponseStr = localStorage.getItem('last_practice_feedback_response');
+      
+      if (pendingResponseStr && currentConversation?.conversationId) {
+        try {
+          console.log('Found pending practice feedback response');
+          const pendingResponse = JSON.parse(pendingResponseStr);
+          
+          // Make sure this response belongs to the current conversation
+          if (pendingResponse.conversationId === currentConversation.conversationId) {
+            console.log('Processing pending practice feedback response for current conversation');
+            
+            // Check if we already have a matching agent response
+            const hasMatchingResponse = messages.some(msg => 
+              msg.role === 'assistant' && 
+              msg.id === pendingResponse.id
+            );
+            
+            if (!hasMatchingResponse && pendingResponse.agentResponse) {
+              console.log('Adding missing agent response to UI');
+              
+              // Create the agent message
+              const agentMessage: Message = {
+                id: pendingResponse.id || `assistant-${Date.now()}`,
+                role: 'assistant' as Role,
+                content: pendingResponse.agentResponse,
+                conversationId: currentConversation.conversationId,
+                createdAt: pendingResponse.createdAt || new Date().toISOString()
+              };
+              
+              // Update messages without loading indicators
+              const messagesWithoutLoading = messages.filter(m => !m.isLoading);
+              
+              // Add the agent message
+              const updatedMessages = [...messagesWithoutLoading, agentMessage];
+              setMessages(updatedMessages);
+              setStoreMessages(updatedMessages);
+              
+              // Save to localStorage
+              saveConversationState(currentConversation.conversationId, updatedMessages);
+              
+              // Clear the pending response
+              localStorage.removeItem('last_practice_feedback_response');
+            } else {
+              // We already have this response or it's invalid - clear it
+              localStorage.removeItem('last_practice_feedback_response');
+            }
+          }
+        } catch (e) {
+          console.error('Error processing pending response:', e);
+          localStorage.removeItem('last_practice_feedback_response');
+        }
+      }
+    };
+    
+    // Run immediately
+    checkForPendingResponses();
+    
+    // And set up an interval to check periodically
+    const intervalId = setInterval(checkForPendingResponses, 2000);
+    
+    return () => clearInterval(intervalId);
+  }, [currentConversation?.conversationId, messages]);
+
+  // Add a listener for message update events
+  useEffect(() => {
+    // Skip check if feedback is already processing
+    if (isProcessingFeedback.current) {
+      console.log('Messages updated listener skipped: feedback is processing');
+      return;
+    }
+    
+    const handleMessagesUpdated = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const updatedConversationId = customEvent.detail?.conversationId;
+      
+      console.log('Messages updated event received for conversation:', updatedConversationId);
+      
+      if (updatedConversationId && currentConversation?.conversationId === updatedConversationId) {
+        console.log('Messages updated for current conversation - reloading from database');
+        
+        // Always fetch from database first
+        try {
+          const response = await conversationApi.getConversationMessages(updatedConversationId);
+          if (Array.isArray(response) && response.length > 0) {
+            console.log('Successfully loaded updated messages from database');
+            setMessages(response);
+            setStoreMessages(response);
+            
+            // Save as backup
+            saveConversationState(updatedConversationId, response);
+          } else {
+            console.log('No messages found in database, checking localStorage');
+            const recoveredMessages = loadConversationState(updatedConversationId);
+            if (recoveredMessages && recoveredMessages.length > 0) {
+              console.log('Using messages from localStorage');
+              setMessages(recoveredMessages);
+              setStoreMessages(recoveredMessages);
+            } else {
+              console.log('No messages found anywhere, fetching via fetchMessages');
+              fetchMessages();
+            }
+          }
+        } catch (error) {
+          console.error('Error loading updated messages from database:', error);
+          // Fallback to localStorage
+          const recoveredMessages = loadConversationState(updatedConversationId);
+          if (recoveredMessages && recoveredMessages.length > 0) {
+            console.log('Using localStorage messages after database error');
+            setMessages(recoveredMessages);
+            setStoreMessages(recoveredMessages);
+          } else {
+            fetchMessages();
+          }
+        }
+        
+        // Check if we should auto-open tactics guide after practice feedback
+        if (currentConversation?.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+          try {
+            const response = await backendApi.get(`/api/v1/practice/get-auto-open-tactics?conversationId=${currentConversation.conversationId}`);
+            
+            if (response.data.shouldAutoOpen) {
+              console.log('🎯 Auto-opening tactics guide after practice feedback (from database)...');
+              
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+              }, 2000); // Wait 2 seconds for the message to appear
+            }
+          } catch (error) {
+            console.error('Failed to check auto-open tactics flag from database:', error);
+            
+            // Fallback to localStorage check
+            const autoOpenTactics = localStorage.getItem('auto_open_tactics_guide');
+            if (autoOpenTactics === 'true') {
+              console.log('🎯 Auto-opening tactics guide after practice feedback (localStorage fallback)...');
+              localStorage.removeItem('auto_open_tactics_guide');
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('show-tactics-modal'));
+              }, 2000);
+            }
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('messages-updated', handleMessagesUpdated);
+    
+    return () => {
+      window.removeEventListener('messages-updated', handleMessagesUpdated);
+    };
+  }, [currentConversation]);
+
+  // Add a final check for practice feedback after a delay
+  useEffect(() => {
+    // Skip check if feedback is already processing
+    if (isProcessingFeedback.current) {
+      console.log('Final feedback check skipped: feedback is processing');
+      return;
+    }
+    
+    // If we have a practice feedback request in the UI but no response, re-check after a delay
+    const checkForMissingFeedbackResponse = () => {
+      const hasFeedbackRequest = messages.some(m => 
+        m.role === 'user' && 
+        m.content.includes('practice scenario') && 
+        m.content.includes('ethical decision-making score')
+      );
+      
+      const hasFeedbackResponse = messages.some(m => 
+        m.role === 'assistant' && 
+        messages.findIndex(msg => 
+          msg.role === 'user' && 
+          msg.content.includes('practice scenario') && 
+          msg.content.includes('ethical decision-making score')
+        ) < messages.indexOf(m)
+      );
+      
+      if (hasFeedbackRequest && !hasFeedbackResponse && currentConversation) {
+        console.log('Found practice feedback request without response - attempting to recover');
+        
+        // Force load messages to ensure we have the latest state
+        const forceLoadEvent = new CustomEvent('force-load-messages', {
+          detail: { conversationId: currentConversation.conversationId }
+        });
+        window.dispatchEvent(forceLoadEvent);
+      }
+    };
+    
+    // Check after 3 seconds to allow time for the API to respond
+    const timeoutId = setTimeout(checkForMissingFeedbackResponse, 3000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [messages, currentConversation]);
+
+  // Find and modify the handleOptionClick function
+  const handleOptionClick = useCallback(async (optionText: string, event?: React.MouseEvent) => {
+    // Prevent event propagation if event is provided
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    console.log('Option clicked:', optionText);
+    
+    // If already processing an option, don't allow another click
+    if (isProcessingOption.current) {
+      console.log('Already processing an option, ignoring this click');
+      return;
+    }
+    
+    // Set processing flag
+    isProcessingOption.current = true;
+    
+    try {
+    
+    const lowerCaseOption = optionText.toLowerCase();
+
+    // For "Practice again" or "Yes, practice" options
+    if (lowerCaseOption.includes('yes, practice') || lowerCaseOption.includes('practice again')) {
+      console.log('Triggering practice mode...');
+      const recentUserMessage = storeMessages.slice().reverse().find(m => m.role === 'user');
+      if (recentUserMessage && currentConversation) {
+        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+        // Store original problem - find the first substantial user message in the conversation
+        const originalProblem = storeMessages.find(m => m.role === 'user' && m.id?.startsWith('user-'))?.content;
+        if (originalProblem) {
+          localStorage.setItem('practice_original_problem', originalProblem);
+        }
+        localStorage.setItem('practice_user_query', recentUserMessage.content);
+        const activeManagerType = currentConversation?.managerType || 'CAPITALIST';
+        localStorage.setItem('practice_manager_type', activeManagerType);
+        setActiveManagerType(activeManagerType);
+        setPracticeMode(true);
+      } else {
+        console.error('Could not initiate practice: missing context.');
+        setError('Could not start practice mode. Missing conversation context.');
+      }
+    } 
+    // For "Practice responding to a positive/negative reply" options
+    else if (lowerCaseOption.includes('practice responding to a')) {
+      // Track scenario completion based on current conversation using database API
+      if (currentConversation?.conversationId) {
+        const currentScenario = determineCurrentScenario();
+        if (currentScenario) {
+          try {
+            // Mark this scenario as completed in the database
+            if (currentScenario === 'accessibility') {
+              await markAccessibilityScenariosCompletedAPI();
+              console.log('Accessibility scenario marked as completed in database');
+            } else if (currentScenario === 'privacy') {
+              await markPrivacyScenariosCompletedAPI();
+              console.log('Privacy scenario marked as completed in database');
+            }
+            
+                         // Refresh user data to get updated completion status
+             await refreshUserData();
+             
+             // Trigger sidebar refresh to update UI and show post survey if both scenarios are complete
+             setTimeout(() => {
+               window.dispatchEvent(new CustomEvent('refresh-sidebar'));
+             }, 500);
+          } catch (error) {
+            console.error('Failed to mark scenario as completed:', error);
+            // Continue with the flow even if the API call fails
+          }
+        }
+      }
+      
+      // Create a simplified user message
+      const isPositive = lowerCaseOption.includes('positive');
+      const replyType = isPositive ? 'positive' : 'negative';
+      const userFriendlyMessage = `Yes, simulate a ${replyType} reply.`;
+      
+      // IMPROVEMENT: Store the conversation ID for later recovery
+      if (currentConversation && currentConversation.conversationId) {
+        console.log('Storing original conversation ID before simulation:', currentConversation.conversationId);
+        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+      }
+      
+      // Create a user message with just the display text
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user' as Role,
+        content: userFriendlyMessage,
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isLoading: false
+      };
+      
+      // Add this message to the UI immediately
+      // Use functional update to ensure we have the latest state before adding
+      setStoreMessages(prev => {
+          const updatedMessages = [...prev, userMessage];
+          // Save to conversation state immediately to preserve user message
+      if (currentConversation?.conversationId) {
+        saveConversationState(currentConversation.conversationId, updatedMessages);
+      }
+          return updatedMessages;
+      });
+      
+      // Set a loading message to show the user something is happening
+      const loadingMessage: Message = {
+        id: `assistant-loading-${Date.now()}`,
+        role: 'assistant' as Role,
+        content: 'Thinking about a simulated response...',
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString(),
+        isLoading: true
+      };
+      
+      // Add a small delay before showing the loading indicator to ensure UI updates
+      setTimeout(() => {
+        setStoreMessages(prev => [...prev, loadingMessage]);
+        setLoading(true); // Set global loading state to true
+        
+        // Wait a moment to simulate typing, then send the API request with the HIDDEN detailed prompt
+        setTimeout(() => {
+          // Create a more detailed prompt that includes clear instructions for formatting
+          const detailedPrompt = `Please simulate a ${replyType} reply from my boss regarding the ethical email I sent. \\nStart your response with \\"Sure! Here's a simulated ${replyType} reply your boss might send:\\" \\nThen on a new line start with \\"Subject: Re: \\" followed by the email subject. \\nFormat the rest like a real email reply with greeting, body, and signature. \\nDo not include any practice instructions, buttons, or options like [Yes, practice] in your response.`;
+          
+          // Send this prompt directly to the API without displaying it in the UI
+          if (currentConversation && currentConversation.conversationId) { // Ensure currentConversation and its ID exist
+            // Use the API function directly to bypass UI message creation
+            // Ensure conversationId is correctly passed in the payload
+            console.log('Sending simulated reply with conversationId:', currentConversation.conversationId); // Added log
+            api.post<AgentMessagesResponse>('/api/v1/conversation/message', {
+              conversationId: currentConversation.conversationId, // Use the existing conversation ID
+              userQuery: detailedPrompt,
+              managerType: currentConversation.managerType || managerType,
+              temperature: temperature || 0.7,
+              includeHistory: true, // Add this to ensure context is preserved
+              historyLimit: 20 // Request more history for better context
+            })
+            .then((response) => {
+              // Add a slight delay before removing the loading message to ensure it's visible
+              setTimeout(() => {
+                // Remove the loading message
+                setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
+                setLoading(false); // Set global loading state back to false
+                
+                // Create a properly typed assistant message from the response
+                if (response.data && response.data.messages && response.data.messages.length > 0) {
+                  // Get the last message from the response (should be the assistant's response)
+                  const lastMessage = response.data.messages[response.data.messages.length - 1];
+                  
+                  // Create a well-formed assistant message
+                  const assistantMessage: Message = {
+                    id: lastMessage.id || `assistant-${Date.now()}`,
+                    role: 'assistant' as Role,
+                    content: lastMessage.content || '',
+                    conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
+                    createdAt: lastMessage.createdAt || new Date().toISOString()
+                  };
+                  
+                  // CRITICAL FIX: Make sure we preserve the current conversation in state after simulation
+                  // This ensures that any follow-up messages will use the same conversation
+                  if (currentConversation && currentConversation.conversationId) {
+                    // Re-apply the existing conversation to the store to ensure it's active
+                    setCurrentConversation({
+                      ...currentConversation,
+                      isPersisted: true // Ensure this is marked as persisted
+                    });
+                  
+                    // Also update the original conversation ID in localStorage for recovery
+                    localStorage.setItem('originalConversationId', currentConversation.conversationId);
+                    console.log('Updated originalConversationId in localStorage after simulation:', currentConversation.conversationId);
+                  }
+
+                  // Only add the AI response to the UI, not the prompt
+                  // Use functional update to ensure latest state
+                  setStoreMessages(prevMessages => {
+                      const updatedMessages = [...prevMessages, assistantMessage];
+                       // Save updated conversation state
+                      saveConversationState(currentConversation.conversationId, updatedMessages);
+                      return updatedMessages;
+                  });
+
+    } else {
+                  // If we couldn't get a proper response, show an error
+                  const errorMessage: Message = {
+                    id: `assistant-${Date.now()}`,
+                    role: 'assistant' as Role,
+                    content: 'Sorry, I was unable to generate a response. Please try again.',
+                    conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
+                    createdAt: new Date().toISOString()
+                  };
+                  
+                  setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
+                }
+              }, 600); // Ensure loading indicator is visible for at least 600ms
+            })
+            .catch(err => {
+              setLoading(false);
+              // Remove the loading message
+              setStoreMessages(prev => prev.filter(m => m.id !== loadingMessage.id));
+              
+              console.error('Error getting rehearsal response:', err);
+              setError('Failed to get rehearsal response');
+              
+              // Show an error message in the UI
+              const errorMessage: Message = {
+                id: `assistant-${Date.now()}`,
+                role: 'assistant' as Role,
+                content: 'Sorry, there was an error generating the response. Please try again.',
+                conversationId: currentConversation.conversationId, // Ensure this uses the existing ID
+                createdAt: new Date().toISOString()
+              };
+              
+              setStoreMessages(prevMessages => [...prevMessages, errorMessage]);
+            })
+            .finally(() => { 
+                // Processing flag will be reset in main finally block
+            });
+          } else {
+            console.error('Cannot send simulated reply: No current conversation ID.');
+            setError('Cannot send simulated reply. Please start a new chat.');
+            setLoading(false);
+          }
+        }, 500);
+      }, 100); // Small delay to ensure UI state is updated
+      // isProcessingOption.current = false; // Removed from here to move into finally block
+    }
+    // For "Yes, help draft email" options - Enhanced Interactive Flow
+    else if (lowerCaseOption.includes('yes, help draft') || lowerCaseOption.includes('draft email')) {
+      console.log('Enhanced email assistant requested');
+      
+      // Find the most recent ethical issue/concern that the user raised
+      const userMessages = storeMessages.filter(m => m.role === 'user');
+      let originalEthicalIssue = '';
+      
+      // Strategy 1: Look for the most recent substantial user message that came after any practice feedback
+      const lastFeedbackIndex = (() => {
+        for (let i = storeMessages.length - 1; i >= 0; i--) {
+          const msg = storeMessages[i];
+          if (msg.role === 'assistant' && 
+              (msg.content.includes('practice scenario') || 
+               msg.content.includes('Strengths') || 
+               msg.content.includes('Areas for Improvement'))) {
+            return i;
+          }
+        }
+        return -1;
+      })();
+      
+      if (lastFeedbackIndex !== -1) {
+        // Find user messages that came after the last practice feedback
+        const messagesAfterFeedback = storeMessages.slice(lastFeedbackIndex + 1);
+        const userMessagesAfterFeedback = messagesAfterFeedback.filter(m => m.role === 'user');
+        
+        // Look for the most recent substantial user message after feedback
+        for (let i = userMessagesAfterFeedback.length - 1; i >= 0; i--) {
+          const msg = userMessagesAfterFeedback[i];
+          if (!msg.content.toLowerCase().includes('practice') && 
+              !msg.content.toLowerCase().includes('draft') &&
+              !msg.content.toLowerCase().includes('simulate') &&
+              !msg.content.toLowerCase().includes('yes, help') &&
+              !msg.content.toLowerCase().includes('copy') &&
+              msg.content.length > 15) {
+            originalEthicalIssue = msg.content;
+            console.log('Found recent ethical issue after feedback:', originalEthicalIssue.substring(0, 50) + '...');
+            break;
+          }
+        }
+      }
+      
+      // Strategy 2: If no recent issue found after feedback, look for the most recent substantial user message overall
+      if (!originalEthicalIssue && userMessages.length > 0) {
+        for (let i = userMessages.length - 1; i >= 0; i--) {
+          const msg = userMessages[i];
+          if (!msg.content.toLowerCase().includes('practice') && 
+              !msg.content.toLowerCase().includes('draft') &&
+              !msg.content.toLowerCase().includes('simulate') &&
+              !msg.content.toLowerCase().includes('yes, help') &&
+              !msg.content.toLowerCase().includes('copy') &&
+              msg.content.length > 15) {
+            originalEthicalIssue = msg.content;
+            console.log('Found most recent ethical issue:', originalEthicalIssue.substring(0, 50) + '...');
+            break;
+          }
+        }
+      }
+      
+      // Strategy 3: Final fallback - use the last user message if nothing else found
+      if (!originalEthicalIssue && userMessages.length > 0) {
+        originalEthicalIssue = userMessages[userMessages.length - 1].content;
+        console.log('Using last user message as fallback:', originalEthicalIssue.substring(0, 50) + '...');
+      }
+      
+      // Add user's request message
+      const emailRequestMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user' as Role,
+        content: optionText,
+        conversationId: currentConversation?.conversationId || '',
+        createdAt: new Date().toISOString()
+      };
+      
+      setStoreMessages(prev => [...prev, emailRequestMessage]);
+      
+      // Start the enhanced email assistant flow
+      setTimeout(() => {
+        startEmailAssistant(originalEthicalIssue);
+      }, 500);
+    } 
+    // For other options, keep the existing handling
+    else {
+      // Existing code for other options
+      if (lowerCaseOption.includes('not now')) {
+        console.log('User chose not to proceed for now.');
+        
+        // Create a user message to show in the chat
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user' as Role,
+          content: optionText,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Add the user message to the UI first
+        setStoreMessages(prev => [...prev, userMessage]);
+        
+        // Save to localStorage if we have a valid conversation ID
+        if (currentConversation?.conversationId) {
+          saveConversationState(currentConversation.conversationId, [...storeMessages, userMessage]);
+        }
+        
+        // Now send the message through the normal flow to get a contextual response
+        // Use setTimeout to ensure the user message is rendered first
+        setTimeout(() => {
+          handleSendMessage(optionText, 0.7); // Use default temperature
+        }, 100);
+      }
+      else {
+      handleSendMessage(optionText);
+    }
+    }
+    } catch (error) {
+      console.error('Error in handleOptionClick:', error);
+      setError('An error occurred while processing your selection. Please try again.');
+    } finally {
+      // Always reset processing flag
+      isProcessingOption.current = false;
+    }
+  }, [storeMessages, currentConversation, managerType, temperature, setStoreMessages, setActiveManagerType, setPracticeMode, setError, handleSendMessage]); // Added dependencies
+
+  const handleCopyToClipboard = async (text: string, messageId?: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+        console.log('Email draft copied to clipboard');
+        
+      // Mark this email as copied
+      if (messageId) {
+        setCopiedEmails(prev => new Set(prev).add(messageId));
+        
+        // Reset the copy button after 1 second
+        setTimeout(() => {
+          setCopiedEmails(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(messageId);
+            return newSet;
+          });
+        }, 1000);
+      }
+      
+      // Mark scenario as completed in database
+      await markCurrentScenarioCompleted();
+      
+      // Generate congratulations message based on completion status
+      const congratsContent = await generateCongratulationsMessage();
+        
+      // Add congratulations message from EVA
+      const congratsMessage: Message = {
+        id: `eva-congrats-${Date.now()}`,
+          role: 'assistant' as Role,
+        content: congratsContent,
+          conversationId: currentConversation?.conversationId || '',
+          createdAt: new Date().toISOString(),
+        isScenarioCompletionMessage: true
+        };
+        
+      setStoreMessages(prev => [...prev, congratsMessage]);
+      
+    } catch (err) {
+        console.error('Failed to copy email draft: ', err);
+        setError('Failed to copy draft to clipboard.');
+    }
+  };
+
+  // Add a flag to prevent multiple simultaneous scenario completion calls
+  const isMarkingScenarioCompleted = useRef(false);
+
+  // Function to mark the current scenario as completed
+  const markCurrentScenarioCompleted = async () => {
+    // Prevent multiple simultaneous calls
+    if (isMarkingScenarioCompleted.current) {
+      console.log('⚠️ Scenario completion already in progress - skipping duplicate call');
+      return;
+    }
+    
+    isMarkingScenarioCompleted.current = true;
+    console.log('🎯 MARK SCENARIO COMPLETED - START');
+    
+    try {
+      const authToken = localStorage.getItem('token');
+      if (!authToken) {
+        console.error('No auth token available');
+        return;
+      }
+
+      // Determine which scenario we're completing based on the conversation content
+      const scenarioType = determineCurrentScenario();
+      console.log('🎯 MARK SCENARIO COMPLETED - Determined scenario type:', scenarioType);
+      
+      if (!scenarioType) {
+        console.error('Could not determine current scenario type');
+        return;
+      }
+
+      console.log(`🎯 Marking ONLY ${scenarioType} scenario as completed`);
+      console.log('🎯 MARK SCENARIO COMPLETED - About to make API call');
+
+      const backendBaseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+      const endpoint = scenarioType === 'accessibility' 
+        ? `${backendBaseURL}/api/v1/user/mark-accessibility-scenarios-completed`
+        : `${backendBaseURL}/api/v1/user/mark-privacy-scenarios-completed`;
+        
+      console.log('🎯 MARK SCENARIO COMPLETED - API endpoint:', endpoint);
+      console.log('🎯 MARK SCENARIO COMPLETED - Auth token (first 20 chars):', authToken.substring(0, 20) + '...');
+      console.log('🎯 MARK SCENARIO COMPLETED - Making fetch request...');
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('🎯 MARK SCENARIO COMPLETED - API response status:', response.status);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response ok:', response.ok);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response statusText:', response.statusText);
+      console.log('🎯 MARK SCENARIO COMPLETED - API response URL:', response.url);
+      
+      // Try to get response text for debugging
+      try {
+        const responseText = await response.text();
+        console.log('🎯 MARK SCENARIO COMPLETED - API response text:', responseText);
+      } catch (textError) {
+        console.log('🎯 MARK SCENARIO COMPLETED - Could not read response text:', textError);
+      }
+
+      if (response.ok) {
+        console.log(`✅ ${scenarioType} scenario marked as completed successfully`);
+        
+        // Update the user state directly in the store instead of calling refreshUserData
+        // This prevents fetching old database state that might have both scenarios as true
+        const { user, setUser } = useStore.getState();
+        if (user) {
+          const updatedUser = {
+            ...user,
+            [scenarioType === 'accessibility' ? 'accessibilityScenariosCompleted' : 'privacyScenariosCompleted']: true
+          };
+          setUser(updatedUser);
+          console.log(`🎯 Updated user state - ${scenarioType} scenario marked as completed`);
+        }
+      } else {
+        console.error('❌ Failed to mark scenario as completed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Error marking scenario as completed:', error);
+    } finally {
+      console.log('🎯 MARK SCENARIO COMPLETED - END');
+      // Reset the flag after a delay to prevent rapid successive calls
+      setTimeout(() => {
+        isMarkingScenarioCompleted.current = false;
+        console.log('🎯 MARK SCENARIO COMPLETED - Flag reset');
+      }, 2000);
+    }
+  };
+
+  // Function to calculate performance rating (copied from PracticeModule)
+  const calculatePerformanceRating = (totalScore: number): { rating: string; emoji: string; description: string; score: number } => {
+    let rating = 'Needs Improvement';
+    let emoji = '🔴';
+    let description = 'Significant room for growth in navigating ethical challenges.';
+    
+    if (totalScore >= 6.4) {
+      rating = 'Excellent Ethical Advocate';
+      emoji = '🌟';
+      description = 'Outstanding ethical leadership with strong resistance to unethical requests.';
+    } else if (totalScore >= 4.8) {
+      rating = 'Good Ethical Awareness';
+      emoji = '👍';
+      description = 'Solid ethical reasoning with good resistance to problematic requests.';
+    } else if (totalScore >= 3.2) {
+      rating = 'Passive Ethics';
+      emoji = '😐';
+      description = 'Some ethical awareness but inconsistent resistance to unethical requests.';
+    } else if (totalScore >= 1.6) {
+      rating = 'Fair';
+      emoji = '🟠';
+      description = 'Developing ethical awareness, but missed key opportunities.';
+    }
+    
+    return { rating, emoji, description, score: totalScore };
+  };
+
+  // Function to generate congratulations message based on scenario completion status and performance
+  const generateCongratulationsMessage = async (): Promise<string> => {
+    // Wait a bit for user data to be refreshed after marking scenario complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Get current user data from store
+    const { user } = useStore.getState();
+    
+    const bothScenariosCompleted = user?.accessibilityScenariosCompleted && user?.privacyScenariosCompleted;
+    
+    // Try to get practice score data from localStorage
+    let latestScore: number | null = null;
+    let performanceData: { rating: string; emoji: string; description: string; score: number } | null = null;
+    
+    try {
+      // Check the most recent practice data
+      const practiceDetailedData = localStorage.getItem('practice_detailed_data');
+      const lastPracticeSessionData = localStorage.getItem('last_practice_session_data');
+      
+      if (practiceDetailedData) {
+        const data = JSON.parse(practiceDetailedData);
+        latestScore = data.score || data.sessionSummary?.totalEvs;
+      } else if (lastPracticeSessionData) {
+        const data = JSON.parse(lastPracticeSessionData);
+        latestScore = data.score;
+      }
+      
+      if (latestScore !== null) {
+        performanceData = calculatePerformanceRating(latestScore);
+      }
+    } catch (error) {
+      console.warn('Could not parse practice score data from localStorage:', error);
+    }
+    
+    if (bothScenariosCompleted) {
+      // Both scenarios completed - generate message based on overall performance
+      const baseMessage = "🎉 **Outstanding Achievement!** You've successfully completed **both** practice scenarios and drafted professional emails for each ethical situation.\n\nYour emails have been copied to your clipboard and are ready to use.";
+      
+      if (performanceData) {
+        if (performanceData.score >= 6.4) {
+          return `${baseMessage} ${performanceData.emoji} **Exceptional Performance!** You demonstrated excellent ethical leadership and strong advocacy skills throughout **all** practice sessions. Your tactical choices showed outstanding ethical reasoning!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 4.8) {
+          return `${baseMessage} ${performanceData.emoji} **Strong Performance!** You showed solid ethical awareness and good resistance to problematic requests across **all** practice sessions. Well done!\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 3.2) {
+          return `${baseMessage} ${performanceData.emoji} **Good Progress!** You completed both scenarios and demonstrated developing ethical awareness. There's room to strengthen your advocacy approach in future situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else if (performanceData.score >= 1.6) {
+          return `${baseMessage} ${performanceData.emoji} **Keep Practicing!** You've completed both scenarios, which is great progress. Consider strengthening your ethical advocacy skills through more practice with different scenarios.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        } else {
+          return `${baseMessage} ${performanceData.emoji} **Learning Experience!** You've completed both scenarios, which is the first step in developing stronger ethical advocacy skills. Consider practicing more to build confidence in challenging situations.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+        }
+      } else {
+        // Fallback if no score data available
+        return `${baseMessage} You've gained valuable experience in ethical decision-making throughout **all** practice sessions.\n\n✨ **You've finished all scenarios!** You can now proceed to the final survey.`;
+      }
+    } else {
+      // Only one scenario completed - generate message based on performance
+      if (performanceData) {
+        if (performanceData.score >= 6.4) {
+          const baseMessage = "🎉 **Congratulations!** You've successfully completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Excellent work!** You demonstrated outstanding ethical leadership and strong advocacy skills in this practice session. Your tactical choices showed exceptional ethical reasoning!\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 4.8) {
+          const baseMessage = "🎉 **Well done!** You've completed this scenario and drafted a professional email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Good performance!** You showed solid ethical awareness and good resistance to problematic requests throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 3.2) {
+          const baseMessage = "✅ **Scenario complete!** You've finished this practice scenario and drafted an email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Good progress!** You completed the scenario and demonstrated developing ethical awareness. Consider practicing different advocacy approaches to strengthen your skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else if (performanceData.score >= 1.6) {
+          const baseMessage = "📝 **Practice complete!** You've worked through this scenario and drafted an email response.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Keep building!** This scenario provided valuable practice. Focus on strengthening your ethical advocacy skills in future challenging situations.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        } else {
+          const baseMessage = "📚 **Learning experience complete!** You've worked through this challenging scenario and drafted an email response.\n\nYour email has been copied to your clipboard and is ready to use.";
+          return `${baseMessage} ${performanceData.emoji} **Important learning opportunity!** This scenario highlighted areas for growth in ethical advocacy. Consider practicing more to build confidence and stronger advocacy skills.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+        }
+      } else {
+        // Fallback if no score data available
+        const baseMessage = "✅ **Scenario complete!** You've finished this practice scenario and drafted an email addressing the ethical issue.\n\nYour email has been copied to your clipboard and is ready to use.";
+        return `${baseMessage} You've gained valuable experience in ethical decision-making throughout this practice session.\n\nIf you'd like to continue using EVA for more ethical scenarios or general guidance, feel free to continue our conversation.`;
+      }
+    }
+  };
+
+  // --- Modal Control Functions --- Define them here ---
+  const handleCloseEditModal = useCallback(() => {
+      setIsEditModalOpen(false);
+      setDraftToEdit(null);
+      setEditingMessageId(null);
+  }, []); // No dependencies needed for resetting state
+
+  const handleSaveEditedDraft = useCallback((editedContent: string) => {
+      handleCloseEditModal(); // Close modal first
+      console.log('Sending edited draft to agent...');
+      
+      // Remove the original draft message before sending the new one
+      if (editingMessageId) {
+          const messagesWithoutOriginalDraft = storeMessages.filter(m => m.id !== editingMessageId);
+          setStoreMessages(messagesWithoutOriginalDraft);
+          // No need to save state here, handleSendMessage will update and save
+      }
+
+      // Send the edited content as a new user message
+      const submissionPrompt = `Here is the edited version of the draft email:\n\n${editedContent}`;
+      handleSendMessage(submissionPrompt);
+  }, [editingMessageId, storeMessages, setStoreMessages, handleSendMessage, handleCloseEditModal]);
+
+  // --- Component-Level Edit/Discard Handlers --- Define them here ---
+  const handleEditDraft = useCallback((messageId: string, draftContent: string) => {
+      console.log('Edit draft requested for message:', messageId);
+      setDraftToEdit(draftContent);
+      setEditingMessageId(messageId);
+      setIsEditModalOpen(true);
+  }, []); // No dependencies needed for setting state
+  
+  const handleDiscardDraft = useCallback((messageId: string | undefined) => {
+      if (!messageId) return;
+      console.log('Discarding draft message:', messageId);
+      const updatedMessages = storeMessages.filter(m => m.id !== messageId);
+      setStoreMessages(updatedMessages);
+      saveConversationState(currentConversation?.conversationId || '', updatedMessages);
+  }, [storeMessages, setStoreMessages, currentConversation]); // Added dependencies
+
+  // Add this function somewhere before the renderMessage function
+  const formatMessageContent = (content: string): string => {
+    if (!content) return '';
+    
+    // Ensure proper bullet point formatting
+    let formatted = content;
+    
+    // Remove debug labels and redundant section headers
+    formatted = formatted.replace(/^Introductory Paragraph:?\s*/i, '');
+    formatted = formatted.replace(/^Detailed Feedback:?\s*/i, '');
+    formatted = formatted.replace(/Detailed Feedback:\s*$/im, '');
+    formatted = formatted.replace(/^"Detailed Feedback:"\s*/im, '');
+    formatted = formatted.replace(/Detailed Feedback\s*$/im, '');
+    formatted = formatted.replace(/\*+"?Detailed Feedback:?"?\s*/g, ''); // Remove *Detailed Feedback:
+    formatted = formatted.replace(/"\*?Detailed Feedback:?\*?"\s*/g, ''); // Handle quoted version
+    
+    // First, clean up any existing HTML tags to avoid duplication
+    formatted = formatted.replace(/<\/?strong>/g, '');
+    formatted = formatted.replace(/<\/?em>/g, '');
+    
+    // Format markdown-style headings with double asterisks
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Clean up any remaining Markdown-style formatting
+    formatted = formatted.replace(/\*([^*\s][^*]*[^*\s])\*/g, '<em>$1</em>');
+    
+    // Improved formatting for decision points
+    formatted = formatted.replace(
+      /(Decision \d+):\s*([^\n]+)/g, 
+      '<strong>$1:</strong> $2'
+    );
+    
+    // Format section headings
+    formatted = formatted.replace(
+      /^(Strengths|Areas for Improvement|Reasoning Process|Practical Advice for the Future|Detailed Feedback)(?:\s*:)?/gm,
+      '<strong>$1:</strong>'
+    );
+    
+    // Remove standalone asterisks and bullet points AFTER handling formatting
+    formatted = formatted.replace(/^\s*\*\*\s*/gm, ''); // Remove ** at beginning of lines
+    formatted = formatted.replace(/^\s*\*\s*$/gm, ''); // Remove isolated asterisks on their own lines
+    formatted = formatted.replace(/^\s*•\s*$/gm, ''); // Remove isolated bullet points on their own lines
+    formatted = formatted.replace(/\s\*\s/g, ' '); // Remove asterisks surrounded by spaces
+    formatted = formatted.replace(/\*$/gm, ''); // Remove asterisks at end of lines
+
+    // IMPORTANT: Preserve and convert bullet points
+    // First mark all potential bullet points with a special marker to prevent interference with other regex
+    formatted = formatted
+      // Convert dash bullet points to the marker
+      .replace(/^[ \t]*-[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Convert asterisk bullet points to the marker
+      .replace(/^[ \t]*\*[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Convert standard bullet points to the marker
+      .replace(/^[ \t]*•[ \t]+(.+)$/gm, '••BULLET••$1')
+      // Also handle numbered lists
+      .replace(/^[ \t]*(\d+)\.[ \t]+(.+)$/gm, '••NUMBER••$1••$2');
+    
+    // Now process bullet points into proper HTML lists
+    let lines = formatted.split('\n');
+    let inList = false;
+    let inNumberedList = false;
+    let processedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Check if this line is a bullet point
+      if (line.includes('••BULLET••')) {
+        if (!inList) {
+          // Start a new list
+          processedLines.push('<ul>');
+          inList = true;
+        }
+        
+        // Close any open numbered list
+        if (inNumberedList) {
+          processedLines.push('</ol>');
+          inNumberedList = false;
+        }
+        
+        // Add as list item (extract content from the marker)
+        const itemContent = line.replace('••BULLET••', '').trim();
+        processedLines.push(`  <li>${itemContent}</li>`);
+      } 
+      // Check if this line is a numbered list item
+      else if (line.includes('••NUMBER••')) {
+        if (!inNumberedList) {
+          // Start a new numbered list
+          processedLines.push('<ol>');
+          inNumberedList = true;
+        }
+        
+        // Close any open bullet list
+        if (inList) {
+          processedLines.push('</ul>');
+          inList = false;
+        }
+        
+        // Extract number and content
+        const parts = line.split('••');
+        const number = parts[1];
+        const itemContent = parts[2] || '';
+        processedLines.push(`  <li>${itemContent}</li>`);
+      }
+      else {
+        // Not a list item - close any open lists
+        if (inList) {
+          processedLines.push('</ul>');
+          inList = false;
+        }
+        if (inNumberedList) {
+          processedLines.push('</ol>');
+          inNumberedList = false;
+        }
+        
+        // Add the line as normal if it's not empty
+        if (line.trim()) {
+          processedLines.push(line);
+        }
+      }
+    }
+    
+    // Close any open lists at the end
+    if (inList) {
+      processedLines.push('</ul>');
+    }
+    if (inNumberedList) {
+      processedLines.push('</ol>');
+    }
+    
+    // Join the processed lines back together
+    formatted = processedLines.join('\n');
+    
+    // Now add paragraph tags for better spacing
+    formatted = formatted.replace(/\n\n+/g, '</p><p>');
+    
+    // Make any scoring or metrics bold
+    formatted = formatted.replace(/(\d+\/\d+|score of \d+)/gi, '<strong>$1</strong>');
+    
+    // Wrap in paragraph tags for proper spacing
+    formatted = '<p>' + formatted + '</p>';
+    
+    // Fix any doubled paragraph tags
+    formatted = formatted.replace(/<\/p><p><\/p><p>/g, '</p><p>');
+    
+    return formatted;
+  };
+
+  // --- Message Rendering Logic ---
+  const renderMessage = useCallback((message: Message, index: number) => {
+    const isUser = message.role === 'user';
+    // Use let instead of const to allow reassignment
+    let isAssistant = message.role === 'assistant';
+    const isSystemMessage = message.role === 'system';
+    const isLoading = message.isLoading === true;
+    
+    // Determine animation class based on message type
+    const animationClass = isLoading 
+      ? 'loading-animation' 
+      : isUser 
+        ? 'message-enter-user' 
+        : 'message-enter-assistant';
+    
+    // Simplify detailed email draft requests for display
+    if (isUser && message.content && typeof message.content === 'string') {
+      const content = message.content;
+      if (content.includes('professional email') && 
+          content.includes('manager') && 
+          content.includes('ethical concern') &&
+          content.length > 100) {
+        
+        // This is the detailed prompt - replace it with simple version
+        message = {
+          ...message,
+          content: "Please draft an email about this ethical concern."
+        };
+      }
+    }
+    
+    // Use type safety - compare with string literals 
+    let isPracticeAssistant = message.role === 'assistant' && message.content?.includes('practice-assistant');
+    
+    // For rendering purposes, treat practice-assistant same as assistant
+    if (isPracticeAssistant) {
+      isAssistant = true;
+    }
+    
+    const currentMessageActiveSectionKey = activeMessageFeedbackSection[message.id || ''];
+    
+    // Initialize variables
+    let displayContent = '';
+    let rawContentForActions = message.content || 'No response content';
+    let extractedOptions: string[] = [];
+    let isEmailDraft = false;
+    
+    let isPracticeFeedback = false;
+    
+    // Variables for the new feedback structure
+    let introductoryText = '';
+    let overallSummaryTitle = ''; // e.g., "Summary of Feedback"
+    let overallSummaryContent = '';
+    let detailedFeedbackMainTitle = 'Detailed Feedback'; // Static or could be parsed
+    let parsedDetailedFeedbackSections: { title: string; content: string; key: string; emoji?: string; originalHeading?: string; }[] = [];
+    
+    const optionRegex = /\[(.*?)\]/g; // Simplified regex for single brackets
+    
+    if (typeof message.content === 'string') {
+      const rawContent = message.content || 'No response content';
+      rawContentForActions = rawContent;
+      displayContent = rawContent; // Default to raw content
+      
+      if (isAssistant) {
+        const lowerContent = rawContent.toLowerCase();
+        // More lenient check for practice feedback - look for key markers that indicate this is feedback
+        const hasSummaryMarker = rawContent.includes("Summary of Feedback") || rawContent.includes("summary of feedback");
+        const hasDetailedMarker = rawContent.includes("Detailed Feedback") || rawContent.includes("detailed feedback");
+        const hasStrengthsMarker = rawContent.includes("Strengths") || rawContent.includes("strengths");
+        const hasAreasMarker = rawContent.includes("Areas for Improvement") || rawContent.includes("areas for improvement");
+        const hasReasoningMarker = rawContent.includes("Reasoning Process") || rawContent.includes("reasoning process");
+        const hasAdviceMarker = rawContent.includes("Practical Advice") || rawContent.includes("practical advice");
+        const hasScoreMarker = rawContent.includes("score of") || /\d+\/\d+/.test(rawContent);
+        const hasActionPrompt = rawContent.includes("Do you feel ready") || rawContent.includes("Would you like to practice again");
+
+        // More lenient detection that checks for multiple feedback indicators
+        isPracticeFeedback = (hasStrengthsMarker && hasAreasMarker) || 
+                            (hasDetailedMarker && (hasStrengthsMarker || hasAreasMarker)) ||
+                            (hasSummaryMarker && (hasStrengthsMarker || hasAreasMarker || hasReasoningMarker)) ||
+                            (hasScoreMarker && (hasStrengthsMarker || hasAreasMarker)) ||
+                            (hasReasoningMarker && hasAdviceMarker) ||
+                            (hasActionPrompt && (hasStrengthsMarker || hasAreasMarker));
+
+        if (isPracticeFeedback) {
+            console.log("[renderMessage] Detected practice feedback for message:", message.id);
+            try {
+                // Initialize section containers
+                parsedDetailedFeedbackSections = [];
+                
+                // Define expected section headings with more variations for better matching
+                const sectionDefinitions = [
+                    { 
+                        heading: "Strengths", 
+                        alternateHeadings: ["Strengths:", "**Strengths**", "**Strengths:**", "* Strengths", "Strength"],
+                        key: "strengths", 
+                        emoji: "💪" 
+                    },
+                    { 
+                        heading: "Areas for Improvement", 
+                        alternateHeadings: ["Areas for Improvement:", "**Areas for Improvement**", "**Areas for Improvement:**", 
+                                           "Weaknesses:", "**Weaknesses**", "* Areas for Improvement", "Improvement"],
+                        key: "improvement", 
+                        emoji: "📈" 
+                    },
+                    { 
+                        heading: "Reasoning Process", 
+                        alternateHeadings: ["Reasoning Process:", "**Reasoning Process**", "**Reasoning Process:**", 
+                                           "Reasoning:", "**Reasoning**", "* Reasoning Process", "Your reasoning"],
+                        key: "reasoning", 
+                        emoji: "🧠" 
+                    },
+                    { 
+                        heading: "Practical Advice for the Future", 
+                        alternateHeadings: ["Practical Advice for the Future:", "**Practical Advice**", "**Practical Advice:**", 
+                                           "Advice:", "**Advice**", "Future Steps:", "Practical Advice:", "* Practical Advice",
+                                           "In similar situations"],
+                        key: "advice", 
+                        emoji: "🛠️" 
+                    }
+                ];
+                
+                const contentToParse = rawContent
+                  .replace(/Detailed Feedback:?\s*$/im, '')
+                  .replace(/^"Detailed Feedback:"\s*/im, '')
+                  .replace(/^Detailed Feedback:?\s*/im, '')
+                  .replace(/\*+"?Detailed Feedback:?"?\s*/g, '') // Remove *Detailed Feedback:
+                  .replace(/"\*?Detailed Feedback:?\*?"\s*/g, '') // Handle quoted version
+                  .replace(/^\s*\*\*\s*/gm, '') // Remove ** at beginning of lines
+                  .replace(/^\s*\*\s*$/gm, '') // Remove standalone asterisks
+                  .replace(/^\s*•\s*$/gm, ''); // Remove standalone bullet points
+                
+                // Identify introductory content - anything before the first section heading
+                let introText = "";
+                let restOfContent = contentToParse;
+                
+                // Find the first occurrence of any section heading
+                const firstSectionIndex = Math.min(
+                    ...sectionDefinitions.flatMap(def => 
+                        [def.heading, ...def.alternateHeadings].map(heading => {
+                            const idx = contentToParse.indexOf(heading);
+                            return idx !== -1 ? idx : Infinity;
+                        })
+                    )
+                );
+
+                if (firstSectionIndex !== Infinity) {
+                    introText = contentToParse.substring(0, firstSectionIndex).trim();
+                    // Clean up any debug headers or stray asterisks in the intro text
+                    introText = introText.replace(/^Introductory Paragraph:?\s*/i, '');
+                    introText = introText.replace(/^\*+\s*/m, '');
+                    introText = introText.replace(/\s\*\s/g, ' ');
+                    restOfContent = contentToParse.substring(firstSectionIndex);
+                    }
+                   
+                // Extract summary from intro if present
+                let summaryText = "";
+                const summaryStartMarker = "Summary of Feedback:";
+                const summaryIndex = introText.indexOf(summaryStartMarker);
+                
+                    if (summaryIndex !== -1) {
+                    // Extract everything from summary marker to end of intro
+                    summaryText = introText.substring(summaryIndex + summaryStartMarker.length).trim();
+                    // Update intro to exclude summary
+                    introText = introText.substring(0, summaryIndex).trim();
+                    } else {
+                    // Try alternative markers
+                    const altSummaryMarkers = ["Overall,", "In summary,", "To summarize,"];
+                    for (const marker of altSummaryMarkers) {
+                        const altIndex = introText.indexOf(marker);
+                        if (altIndex !== -1) {
+                            // Found an alternative summary marker
+                            summaryText = introText.substring(altIndex).trim();
+                            introText = introText.substring(0, altIndex).trim();
+                            break;
+                        }
+                    }
+                }
+                
+                // Set intro and summary content
+                introductoryText = introText;
+                overallSummaryTitle = "Summary of Feedback";
+                overallSummaryContent = summaryText || "Your feedback highlights specific strengths and areas for improvement in your ethical decision-making.";
+                
+                // Process each section in the remaining content
+                for (const sectionDef of sectionDefinitions) {
+                    let sectionContent = "";
+                    const allHeadings = [sectionDef.heading, ...sectionDef.alternateHeadings];
+                            
+                    // Try to find the section in the content
+                    for (const heading of allHeadings) {
+                        const sectionIndex = restOfContent.indexOf(heading);
+                        if (sectionIndex !== -1) {
+                            // Found the section heading
+                            const sectionStart = sectionIndex + heading.length;
+                            let sectionEnd = restOfContent.length;
+                            
+                            // Look for the next section heading
+                            const otherHeadings = sectionDefinitions
+                                .filter(def => def.key !== sectionDef.key)
+                                .flatMap(def => [def.heading, ...def.alternateHeadings]);
+                                
+                            for (const nextHeading of otherHeadings) {
+                                const nextIndex = restOfContent.indexOf(nextHeading, sectionStart);
+                                if (nextIndex !== -1 && nextIndex < sectionEnd) {
+                                    sectionEnd = nextIndex;
+                                }
+                            }
+                            
+                            // Also check for conclusion markers
+                            const conclusionMarkers = [
+                                "Concluding Action Prompt:", 
+                                "Do you feel ready", 
+                                "Would you like to practice again"
+                            ];
+                            
+                            for (const marker of conclusionMarkers) {
+                                const markerIndex = restOfContent.indexOf(marker, sectionStart);
+                                if (markerIndex !== -1 && markerIndex < sectionEnd) {
+                                    sectionEnd = markerIndex;
+                                    }
+                                }
+                                
+                            // Extract the section content
+                            sectionContent = restOfContent.substring(sectionStart, sectionEnd).trim();
+
+                            // Clean up the section content right when it's extracted
+                            sectionContent = sectionContent
+                              // Remove initial asterisks that often appear in the content
+                              .replace(/^\*+\s*/m, '')
+                              // Clean up any stray/standalone asterisks
+                              .replace(/\s\*\s/g, ' ')
+                              .replace(/^\*\s/gm, '')
+                              .replace(/\*$/gm, '')
+                              .trim();
+
+                            break;
+                        }
+                    }
+                    
+                    // Add section with content or placeholder
+                            parsedDetailedFeedbackSections.push({
+                                title: `${sectionDef.emoji} ${sectionDef.heading}`,
+                                originalHeading: sectionDef.heading,
+                        // Just store the raw cleaned content - formatting will happen at render time
+                        content: sectionContent || `No specific information available for ${sectionDef.heading}.`,
+                                key: sectionDef.key,
+                                emoji: sectionDef.emoji
+                            });
+                        }
+                
+                // Make sure we have all required sections
+                if (parsedDetailedFeedbackSections.length === 0) {
+                    // Fallback: create basic sections if none were found
+                    sectionDefinitions.forEach(def => {
+                             parsedDetailedFeedbackSections.push({
+                            title: `${def.emoji} ${def.heading}`,
+                            originalHeading: def.heading,
+                            content: `Section content could not be extracted.`,
+                            key: def.key,
+                            emoji: def.emoji
+                            });
+                        });
+                    }
+                
+                // Sort sections in the correct order
+                     parsedDetailedFeedbackSections.sort((a, b) => 
+                        sectionDefinitions.findIndex(s => s.key === a.key) - 
+                        sectionDefinitions.findIndex(s => s.key === b.key)
+                    );
+
+                // Log successful parsing
+                console.log("[renderMessage] Successfully parsed feedback with sections:", 
+                    parsedDetailedFeedbackSections.map(s => s.key));
+                
+            } catch (parseError) {
+                console.error("[renderMessage] Error parsing feedback content:", parseError);
+                // On error, fallback to rendering as normal message but flag as feedback for button display
+                displayContent = rawContent;
+                
+                // Create basic sections since parsing failed
+                const basicSections = [
+                    { heading: "Strengths", key: "strengths", emoji: "💪" },
+                    { heading: "Areas for Improvement", key: "improvement", emoji: "📈" },
+                    { heading: "Reasoning Process", key: "reasoning", emoji: "🧠" },
+                    { heading: "Practical Advice", key: "advice", emoji: "🛠️" }
+                ];
+                
+                // Still create sections for UI, with generic content
+                parsedDetailedFeedbackSections = basicSections.map(section => ({
+                    title: `${section.emoji} ${section.heading}`,
+                    originalHeading: section.heading,
+                    content: `Unable to extract detailed content for this section.`,
+                    key: section.key,
+                    emoji: section.emoji
+                }));
+            }
+        } else { 
+            // Not practice feedback, or failed initial detection
+            const lowerContent = rawContent.toLowerCase();
+            isEmailDraft = 
+                (lowerContent.includes('subject:') && lowerContent.includes('dear')) ||
+                lowerContent.includes('draft email:') ||
+                lowerContent.includes('here\'s a draft') ||
+                (displayContent.split('\n\n').length > 2 && lowerContent.includes('sincerely'));
+            extractedOptions = []; 
+            if (!isEmailDraft) {
+                const matches = [...rawContent.matchAll(optionRegex)];
+                if (matches.length > 0) {
+                    extractedOptions = matches.map(match => match[1].trim());
+                    displayContent = rawContent.replace(optionRegex, '').replace(/\s*$/, '').trim(); 
+                }
+            }
+            
+            // For email drafts, format the content with better styling 
+            if (isEmailDraft) {
+                try {
+                    // Try to extract subject line
+                    const subjectMatch = rawContent.match(/Subject:([^\n]*)/i);
+                    const subjectLine = subjectMatch ? subjectMatch[1].trim() : "Draft Email";
+                    
+                    // Format the display content with better styling
+                    displayContent = rawContent;
+                } catch (e) {
+                    console.error("Error formatting email draft:", e);
+                    displayContent = rawContent; // Fallback to original content
+                 }
+            }
+        }
+      }
+    } else {
+      displayContent = String(message.content || 'No response content');
+      rawContentForActions = displayContent; 
+    }
+    
+    // Check if this message contains a simulated reply
+    const isSimulatedEmailReply = rawContentForActions.includes("simulated") && 
+      (rawContentForActions.includes("reply your boss might send:") || 
+       rawContentForActions.toLowerCase().includes("here's a simulated"));
+
+    // Update the email draft condition
+    isEmailDraft = isAssistant && (rawContentForActions.includes('Subject:') && (rawContentForActions.includes('Dear') || rawContentForActions.includes('[Your Name]')));
+    
+    const showDraftEmailPromptButtons = isAssistant && isPracticeFeedback && !isSimulatedEmailReply;
+    // Only show email draft action buttons for regular drafts, not simulated replies
+    const showEmailDraftActionButtons = isAssistant && isEmailDraft && !isSimulatedEmailReply;
+
+    const showGenericOptionButtons = isAssistant && !isPracticeFeedback && !isEmailDraft && !isSimulatedEmailReply && extractedOptions.length > 0;
+    
+    // Email Assistant specific conditions
+    const isEmailAssistantMessage = message.isEmailAssistant === true;
+    const isEmailQuestionMessage = isEmailAssistantMessage && typeof message.emailQuestionIndex === 'number';
+    const isEmailSummaryMessage = message.isEmailSummary === true;
+    const isEmailFollowUpMessage = message.isFollowUp === true;
+
+    const markdownComponents: ReactMarkdownOptions['components'] = {
+        code({ node, inline, className, children, ...props }: any) { 
+            const match = /language-(\w+)/.exec(className || '');
+            return !inline && match ? (
+                <SyntaxHighlighter
+                    style={vscDarkPlus}
+                    language={match[1]}
+                    PreTag="div"
+                    {...props}
+                >
+                    {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+            ) : (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            );
+        },
+        a({ node, href, children, ...props }: any) {
+            // Handle post-survey link
+            if (href === '#post-survey') {
+                return (
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            console.log('Post-survey link clicked, dispatching event...');
+                            window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
+                        }}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        {...props}
+                    >
+                        {children}
+                    </button>
+                );
+            }
+            // Regular links
+            return (
+                <a 
+                    href={href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    {...props}
+                >
+                    {children}
+                </a>
+            );
+        },
+    };
+    
+    return (
+      <div key={message.id || index} className="mb-4">
+        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} items-start`}>
+          {!isUser && !isSystemMessage && (
+            <div className="h-14 w-14 rounded-full border border-black dark:border-white flex items-center justify-center mr-2">
+              <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-13 h-13" />
+            </div>
+          )}
+          <div 
+            className={`${
+              isUser 
+                ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100' 
+                : isSystemMessage 
+                  ? 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 italic' 
+                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+            } rounded-lg p-3 text-sm ${
+              isLoading ? 'min-w-[45px]' : isUser ? 'max-w-[70%]' : 'max-w-[75%]'
+            } ${animationClass}`}
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+            ) : isPracticeFeedback ? (
+              // --- Feedback Display Structure ---
+              <div className="practice-feedback-container">
+                {/* Introductory Paragraph in a styled container */}
+                {introductoryText && (
+                  <div className={`prose prose-sm dark:prose-invert max-w-none mb-3 p-3 bg-gray-50/10 dark:bg-gray-800/30 rounded-md border border-gray-200/30 dark:border-gray-700/50 ${darkMode ? 'dark' : 'light'}`}>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: formatMessageContent(introductoryText)
+                      }}
+                      className="feedback-content introduction-text"
+                    />
+          </div>
+            )}
+
+                {/* Summary of Feedback section */}
+                {overallSummaryTitle && (
+                  <div className="mb-4">
+                    <h3 className="font-medium text-base mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                      <span className="mr-2 text-sm">📋</span>{overallSummaryTitle}
+                    </h3>
+                    <div className={`prose prose-sm dark:prose-invert max-w-none p-3 bg-blue-50/10 dark:bg-blue-900/10 border border-blue-100/30 dark:border-blue-800/30 rounded-md ${darkMode ? 'dark' : 'light'}`}>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: formatMessageContent(overallSummaryContent)
+                        }}
+                        className="feedback-content summary-content"
+                      />
+        </div>
+                  </div>
+                )}
+
+                {/* Detailed Feedback Section with Expandable Areas */}
+                {parsedDetailedFeedbackSections.length > 0 && (
+                  <div className="my-3">
+                    <h3 className="font-medium text-base mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                      <span className="mr-2 text-sm">🔍</span>{detailedFeedbackMainTitle}
+                    </h3>
+
+                    {/* Use the renderSections helper to display unique sections */}
+                    {renderSections(parsedDetailedFeedbackSections, message.id, currentMessageActiveSectionKey)}
+                      </div>
+                    )}
+                  </div>
+              // --- End Feedback Display Structure ---
+
+            ) : (
+              // Regular message display (non-feedback)
+              <div className={`message-content prose prose-sm dark:prose-invert max-w-none`}>
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[]}>{displayContent}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+          {isUser && (
+            <div className="flex-shrink-0 ml-2 bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center">
+              <span className="text-s">
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'} 
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {/* --- Buttons Area --- */}
+        {/* Practice Feedback Action Buttons - Now moved outside the message */}
+        {isPracticeFeedback && !isSimulatedEmailReply && (
+          <div className="mt-1 ml-10 py-2">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                    Do you feel ready to discuss this with your manager?
+                  </p>
+            <div className="flex flex-wrap gap-1.5">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={(e) => {
+                        // Pass the event to prevent propagation
+                        handleOptionClick("Yes, help draft email", e);
+                      }} 
+                      disabled={isDraftingEmail || loading}
+                      className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    >
+                <span className="mr-1 text-xs">📝</span> Help draft email
+                    </Button>
+                  </div>
+              </div>
+            )}
+
+        {showGenericOptionButtons && !isSimulatedEmailReply && (
+          <div className="mt-2 flex flex-wrap gap-1.5 ml-7"> 
+            {extractedOptions.map((option, idx) => (
+                <Button key={idx} variant="outline" size="sm" onClick={() => handleOptionClick(option)} className="text-xs h-auto py-1.5 px-2.5">{option}</Button>
+            ))}
+          </div>
+        )}
+  
+        {/* Conditional Rendering: ONLY show these if NOT practice feedback */}
+        {!isPracticeFeedback && showDraftEmailPromptButtons && !isSimulatedEmailReply && (
+          <div className="mt-3 flex flex-wrap gap-2 ml-7 items-center">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mr-2 mb-1 sm:mb-0">Would you like to take action now?</p>
+            <Button variant="default" size="sm" onClick={() => handleOptionClick("Yes, create a draft email to my boss")} className="text-xs h-auto py-1.5 px-2.5 bg-green-600 hover:bg-green-700 transition-colors duration-200">
+              <span className="mr-1">📝</span> Yes, create draft...
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleOptionClick("Not now")} className="text-xs h-auto py-1.5 px-2.5 transition-colors duration-200">
+              <span className="mr-1">⏱️</span> Not now
+            </Button>
+            </div>
+        )}
+
+        {showEmailDraftActionButtons && (
+          <div className="mt-3 ml-7">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {(() => {
+                const isEmailCopied = message.id && copiedEmails.has(message.id);
+                return (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => !isEmailCopied && handleCopyToClipboard(rawContentForActions, message.id)}
+                    disabled={isEmailCopied}
+                    className={`text-xs h-auto py-1.5 px-2.5 transition-colors duration-200 ${
+                      isEmailCopied 
+                        ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    <span className="mr-1">{isEmailCopied ? '✅' : '📋'}</span> 
+                    {isEmailCopied ? 'Copied!' : 'Copy Email'}
+              </Button>
+                );
+              })()}
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic">You can copy this draft to use it directly.</p>
+          </div>
+        )}
+
+        {/* Email Assistant Question Buttons */}
+        {isEmailQuestionMessage && !isEmailFollowUpMessage && (
+          <div className="mt-3 ml-7">
+            {(() => {
+              const currentQ = emailQuestions[message.emailQuestionIndex!];
+              const questionIndex = message.emailQuestionIndex!;
+              const selectedChoice = selectedChoices[questionIndex];
+              const isQuestionAnswered = selectedChoice !== undefined;
+              
+              if (currentQ?.type === 'text' || currentQ?.type === 'conditional') {
+                // Text input for the last question or conditional input
+                return (
+                  <div className="mb-2">
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder={currentQ.placeholder || "Type your response..."}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const input = e.target as HTMLInputElement;
+                            handleEmailQuestionResponse(input.value.trim(), true);
+                            input.value = '';
+                          }
+                        }}
+                      />
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        onClick={(e) => {
+                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                          handleEmailQuestionResponse(input.value.trim(), true);
+                          input.value = '';
+                        }}
+                        className="text-xs h-auto py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 mb-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEmailQuestionResponse("", true)}
+                        className="text-xs h-auto py-2 px-3"
+                      >
+                        Skip
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {currentQ.id === 'managerName' ? 
+                        "Enter manager's name or skip to use a placeholder" : 
+                        "You can leave this empty if you have no specific preferences"}
+                    </div>
+                  </div>
+                );
+              } else {
+                // Choice buttons
+                return (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {currentQ?.choices?.map((choice, idx) => {
+                      const isSelected = selectedChoice === choice;
+                      return (
+                        <Button 
+                          key={idx} 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => !isQuestionAnswered && handleEmailQuestionResponse(choice)} 
+                          disabled={isQuestionAnswered}
+                          className={`text-xs h-auto py-2 px-3 transition-colors duration-200 ${
+                            isSelected 
+                              ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200'
+                              : isQuestionAnswered 
+                              ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                              : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 cursor-pointer'
+                          }`}
+                        >
+                          {choice}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                );
+              }
+            })()}
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div 
+                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${((message.emailQuestionIndex! + 1) / emailQuestions.length) * 100}%` }}
+                ></div>
+              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {message.emailQuestionIndex! + 1} of {emailQuestions.length}
+              </span>
+            </div>
+          </div>
+        )}
+
+
+
+        {/* Email Assistant Summary and Generate Button */}
+        {/* Email Assistant Summary and Generate Button */}
+        {isEmailSummaryMessage && (
+          <div className="mt-3 ml-7">
+            <div className="flex gap-2 mb-3">
+              <Button 
+                variant={isDraftingEmail ? "secondary" : "default"}
+                size="sm" 
+                onClick={generateEmailWithData}
+                disabled={isDraftingEmail}
+                className="text-xs h-auto py-2 px-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+              >
+                {isDraftingEmail ? (
+                  <>
+                    <div className="w-3 h-3 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>📧 Generate Email</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Scenario Completion Button - Show after congratulations message */}
+        {message.isScenarioCompletionMessage && (() => {
+          const bothScenariosCompleted = user?.accessibilityScenariosCompleted && user?.privacyScenariosCompleted;
+          
+          return (
+            <div className="mt-3 ml-7">
+              <div className="flex gap-2">
+                {bothScenariosCompleted ? (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => {
+                      console.log('Post-survey button clicked, dispatching event...');
+                      window.dispatchEvent(new CustomEvent('show-post-survey-modal'));
+                    }}
+                    className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <span className="mr-1">📋</span> Complete Post-Survey
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => {
+                      // Store the current conversation ID in localStorage to ensure we continue using it
+                      if (currentConversation && currentConversation.conversationId && !currentConversation.conversationId.startsWith('draft-')) {
+                        localStorage.setItem('originalConversationId', currentConversation.conversationId);
+                        console.log('📝 Storing current conversation ID for scenario continuation:', currentConversation.conversationId);
+                      }
+                      setShowScenarioModal(true);
+                    }}
+                    className="text-xs h-auto py-2 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <span className="mr-1">🎯</span> Continue to Other Scenarios
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
+                {bothScenariosCompleted 
+                  ? "Share your experience with EVA and how it has influenced your ethical decision-making approach"
+                  : "Practice more scenarios to further develop your ethical decision-making skills"
+                }
+              </p>
+            </div>
+          );
+        })()}
+      </div>
+    );
+  }, [darkMode, user, handleOptionClick, handleCopyToClipboard, handleEditDraft, handleDiscardDraft, activeMessageFeedbackSection, toggleMessageSection]); // Removed expandedMessageSections and handleMessageAccordionValueChange, added activeMessageFeedbackSection and toggleMessageSection
+
+  // Update the handlePracticeResponse function
+  const handlePracticeResponse = (response: 'yes' | 'no') => {
+    if (response === 'yes') {
+      // Get the most recent user message and agent response
+      const recentUserMessage = storeMessages.find(m => m.role === 'user');
+      const recentAgentMessage = storeMessages.find(m => m.role === 'assistant');
+      
+      if (recentUserMessage && recentAgentMessage) {
+        console.log('Setting up practice mode with:', recentUserMessage.content);
+        
+        // Save the current conversation ID as the original - this is crucial for returning to the same conversation
+        if (currentConversation && currentConversation.conversationId) {
+          console.log('Saving original conversation ID:', currentConversation.conversationId);
+          localStorage.setItem('originalConversationId', currentConversation.conversationId);
+        }
+        
+        // Store the query and response in localStorage for the practice module to use
+        localStorage.setItem('practice_user_query', recentUserMessage.content);
+        localStorage.setItem('practice_agent_response', recentAgentMessage.content);
+        
+        // Set active manager type based on conversation
+        const activeManagerType = currentConversation?.managerType || 'CAPITALIST';
+        localStorage.setItem('practice_manager_type', activeManagerType);
+        setActiveManagerType(activeManagerType);
+        
+        // Enter practice mode
+        setPracticeMode(true);
+      } else {
+        // Handle edge case - no prior messages found
+        console.error('No recent messages found for practice mode');
+        setError('Could not find conversation content for practice. Please try sending a message first.');
+      }
+    } else {
+      // User chose not to practice - just hide the practice buttons by updating the message content
+      // Instead of adding a new message, just update the current state to rerender without buttons
+      // Force a rerender by making a shallow copy of the messages array
+      setStoreMessages([...storeMessages]);
+      
+      // Trigger a sidebar refresh to update the conversation list
+      triggerSidebarRefresh();
+    }
+  };
+
+  // Add a handler for exiting practice mode
+  const handleExitPracticeMode = () => {
+    setPracticeMode(false);
+    setActiveManagerType(undefined);
+    
+    // Set the flag that we're returning from practice
+    localStorage.setItem('returning_from_practice', 'true');
+    
+    // Get the original conversation ID if it exists
+    const originalConversationId = localStorage.getItem('originalConversationId');
+    console.log('Exiting practice mode, original conversation ID:', originalConversationId);
+    
+    if (originalConversationId) {
+      // Check if we already have this conversation
+      if (currentConversation?.conversationId !== originalConversationId) {
+        // Set the conversation to the original one
+        setCurrentConversation({
+          conversationId: originalConversationId,
+          title: currentConversation?.title || 'Conversation',
+          managerType: currentConversation?.managerType || getManagerType() as ManagerType,
+          createdAt: currentConversation?.createdAt || new Date().toISOString()
+        });
+      }
+    }
+  };
+
+  // Helper function to render feedback sections while avoiding duplicates
+  const renderSections = (sections: any[], messageId: string | undefined, currentActiveSectionKey: string | null) => {
+    // Create a map to track which section keys we've already seen
+    const seenKeys = new Map();
+    
+    // Filter out duplicate sections based on key
+    const uniqueSections = sections.filter(section => {
+      if (seenKeys.has(section.key)) {
+        return false;
+      }
+      seenKeys.set(section.key, true);
+      return true;
+    });
+
+    return (
+      <>
+        {/* Buttons row */}
+        <div className="grid grid-cols-2 gap-1.5 mb-3">
+          {uniqueSections.map((section) => (
+            <Button
+              key={section.key}
+              variant={currentActiveSectionKey === section.key ? "default" : "outline"}
+              size="sm"
+              onClick={() => messageId && toggleMessageSection(messageId, section.key)}
+              className={`text-xs h-auto py-2 px-3 w-full text-left justify-start font-medium transition-all duration-200 
+                ${currentActiveSectionKey === section.key 
+                  ? 'bg-blue-500/80 dark:bg-blue-600/80 text-white dark:text-white border-blue-400 dark:border-blue-500' 
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 border-gray-300/50 dark:border-gray-700/50'}`}
+            >
+              <span className="mr-1.5 text-sm">{section.emoji}</span> {section.originalHeading || section.title}
+            </Button>
+          ))}
+        </div>
+
+        {/* Expanded content area */}
+        {currentActiveSectionKey && (
+          <div className="mt-2 mb-3 w-full border border-gray-200/50 dark:border-gray-700/50 rounded-md overflow-hidden bg-gray-50/10 dark:bg-gray-800/20 col-span-2 animate-fadeIn">
+            <div className="p-3">
+              <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+                <span className="mr-1.5 text-base">{uniqueSections.find(s => s.key === currentActiveSectionKey)?.emoji}</span> 
+                <span>{uniqueSections.find(s => s.key === currentActiveSectionKey)?.originalHeading}</span>
+              </h4>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                <div 
+                  dangerouslySetInnerHTML={{
+                    __html: formatMessageContent(uniqueSections.find(s => s.key === currentActiveSectionKey)?.content || '')
+                  }}
+                  className={`feedback-content ${darkMode ? 'dark' : 'light'}`}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // Show scenario selection modal when a new conversation is created
+  useEffect(() => {
+    // Show the modal when we have a new conversation or a draft conversation with no messages
+    if (
+      currentConversation && 
+      ((currentConversation.isNew === true) || 
+       (currentConversation.conversationId?.startsWith('draft-') && storeMessages.length === 0))
+    ) {
+      // Wait a moment to ensure everything is initialized
+      setTimeout(() => {
+        setShowScenarioModal(true);
+      }, 300);
+    }
+  }, [currentConversation, storeMessages.length]);
+
+
+
+  // Render practice module or chat interface based on practice mode state
+  return (
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+      {practiceMode && activeManagerType ? (
+        <div className="flex-1 overflow-y-auto">
+          <PracticeModule 
+            onExit={handleExitPracticeMode}
+            managerType={activeManagerType}
+            concern={concern}
+            difficulty={difficulty}
+            userQuery={localStorage.getItem('practice_user_query') || undefined}
+          />
+        </div>
+      ) : (
+        <>
+          <div 
+            className="flex-1 overflow-y-auto overflow-x-hidden px-4 w-full custom-scrollbar"
+            ref={messagesContainerRef}
+          >
+            <div className="w-full max-w-5xl mx-auto pt-6 pb-4">
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 flex items-center justify-between">
+                  <div>{error}</div>
+                  <div className="flex items-center">
+                    {/* @ts-ignore - we know this exists when needed */}
+                    {window.retryButton && window.retryButton}
+                  {!currentConversation?.conversationId.startsWith('draft-') && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={fetchMessages}
+                      className="ml-2 text-xs h-auto py-1.5 px-2.5"
+                    >
+                      Refresh
+                    </Button>
+                  )}
+                  </div>
+                </div>
+              )}
+              {storeMessages.map((message, index) => renderMessage(message, index))}
+              
+              {loading && !storeMessages.some(msg => msg.isLoading) && (
+                <div className="flex justify-start mb-4">
+                  <div className="h-14 w-14 rounded-full border border-black dark:border-white flex items-center justify-center mr-2">
+                    <img src={darkMode ? logoDark : logoLight} alt="EVA" className="w-13 h-13" />
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-auto">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="h-4"></div>
+              <div ref={messagesEndRef} className="pt-2"></div>
+            </div>
+          </div>
+          
+          <ChatInput 
+            onSendMessage={handleSendMessage}
+            isLoading={loading}
+            disabled={loading}
+            showKnowledgePanel={showKnowledgePanel}
+          />
+        </>
+      )}
+
+      <EditDraftModal 
+        isOpen={isEditModalOpen}
+        initialContent={draftToEdit}
+        onSave={handleSaveEditedDraft}
+        onClose={handleCloseEditModal}
+      />
+
+    {/* Add our Scenario Selection Modal */}
+    <ScenarioSelectionModal
+  isOpen={showScenarioModal}
+  onClose={() => setShowScenarioModal(false)}
+  onSelectScenario={async ({ concern, managerType, difficulty }) => {
+    // inside onSelectScenario
+    setConcern(concern);
+    setActiveManagerType(managerType);
+    setDifficulty(difficulty);
+    setPracticeMode(true);
+
+  }}
+/>
+
+
+
+
+      {/* Add Simplified Tactics Modal */}
+      <SimplifiedTacticsModal
+        isOpen={showTacticsModal}
+        onClose={() => setShowTacticsModal(false)}
+      />
+
+      {/* Scenario Transition Overlay - REMOVED: No longer using automatic popup */}
+      {/* {showScenarioTransition && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700 shadow-2xl">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-2xl">✅</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Scenario Completed!
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                You're being transferred to select your next practice scenario...
+              </p>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
+    </div>
+  );
+};

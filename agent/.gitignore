@@ -1,0 +1,62 @@
+# Environment and secrets
+.env
+*.env
+.secrets
+export_env.sh
+
+# Cache and model files
+cache/
+**/cache/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.npy
+*.faiss
+*.bin
+*.pt
+*.safetensors
+*.onnx
+*.xml
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Data files
+*.db
+*.sqlite3
+*.faiss
+*.bin
+*.pt
+*.safetensors
+data/processed/
+processed/
+**/processed/
+embeddings.npy
+documents.json
+
+# Logs
+logs/
+*.log
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Training outputs
+fine_tuning/outputs/
+evaluation/results/ 

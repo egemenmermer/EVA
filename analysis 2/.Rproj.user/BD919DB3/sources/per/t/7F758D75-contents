@@ -1,0 +1,587 @@
+#############################################
+# EVA Study – Analysis Script (R / tidyverse)
+# What it does:
+# (1) Tests if participants' scores increased between sessions
+# (2) Correlates performance with pre-survey confidence
+# (3) Checks whether users tend to pick the same tactic
+# (4) Tests relationship between manager type and tactics chosen
+# (5) Compares score and tactics between people who liked vs. didn’t like the tool
+#############################################
+
+# --- Setup ----
+# install.packages(c("tidyverse","janitor","lubridate","stringr","forcats","rstatix","broom","readr", "jsonlite"))
+library(tidyverse)
+library(readr)
+library(janitor)
+library(lubridate)
+library(stringr)
+library(forcats)
+library(rstatix)
+library(broom)
+library(readr)
+
+library(jsonlite)
+
+
+
+# ---- File paths (EDIT THESE) ----
+survey_csv      <- "survey.csv"      # the wide survey file (with Manager_Type, Likert items, NPS, demographics)
+choices_csv     <- "choices.csv"     # the long interaction log (ID, Scenario, Session, Choice, Tactic, Score, Score_Total)
+
+# ---- Helpers ----
+lk_map <- function(x){
+  x <- str_squish(str_to_lower(as.character(x)))
+  dplyr::recode(x,
+                "strongly disagree" = 1L,
+                "disagree" = 2L,
+                "neither agree nor disagree" = 3L,
+                "neutral" = 3L,
+                "agree" = 4L,
+                "strongly agree" = 5L,
+                .default = NA_integer_
+  )
+}
+
+freq_map <- function(x){
+  x <- str_squish(str_to_lower(as.character(x)))
+  dplyr::recode(x,
+                "never" = 1L,
+                "rarely" = 2L,
+                "sometimes" = 3L,
+                "often" = 4L,
+                "always" = 5L,
+                .default = NA_integer_
+  )
+}
+
+to_int_safely <- function(x){
+  suppressWarnings(as.integer(readr::parse_number(as.character(x))))
+}
+
+# ---- Load & clean survey ----
+survey_raw <- read_csv2(
+  file = survey_csv,              # your survey path
+  show_col_types = FALSE
+)
+
+survey <- survey_raw %>% janitor::clean_names()
+
+
+survey <- survey %>%
+  rename(
+    participant_number = matches("participant_id"),
+    manager_type       = matches("^manager_type$"),
+    nps_recommend      = matches("how_likely_are_you_to_recommend_eva_to_a_friend_or_colleague")
+  ) %>%
+  mutate(
+    participant_id = to_int_safely(participant_number),
+    
+    conf_speaking = {
+      col <- names(.)[str_detect(names(.), "i_feel_confident_speaking_up_about_ethical_concerns_during_development")][1]
+      if (!is.na(col) && col %in% names(.)) lk_map(.[[col]]) else NA_integer_
+    },
+    conf_empowered = {
+      col <- names(.)[str_detect(names(.), "i_feel_empowered_to_challenge_ethically_questionable_decisions_in_my_organization")][1]
+      if (!is.na(col) && col %in% names(.)) lk_map(.[[col]]) else NA_integer_
+    },
+    conf_advocate = {
+      col <- names(.)[str_detect(names(.), "i_advocate_for_ethical_design_decisions_during_team_discussions")][1]
+      if (!is.na(col) && col %in% names(.)) lk_map(.[[col]]) else NA_integer_
+    },
+    
+    nps_recommend = suppressWarnings(as.integer(nps_recommend)),
+    
+    liked_tool = case_when(
+      !is.na(nps_recommend) & nps_recommend >= 7 ~ "Liked",
+      !is.na(nps_recommend) ~ "Not liked",
+      TRUE ~ NA_character_
+    )
+  )
+
+# ---- Load & clean choices ----
+choices_raw <- read_csv2(
+  file = choices_csv,              # your survey path
+  show_col_types = FALSE
+)
+
+choices <- choices_raw %>% janitor::clean_names()
+
+choices <- choices %>%
+  rename(
+    participant_id = id,
+    session        = session,
+    scenario       = scenario,
+    choice_idx     = choice,
+    tactic         = tactic,
+    score          = score,
+    score_total    = score_total
+  ) %>%
+  mutate(
+    participant_id = to_int_safely(participant_id),
+    session        = to_int_safely(session),
+    choice_idx     = to_int_safely(choice_idx),
+    score          = suppressWarnings(as.numeric(score)),
+    score_total    = suppressWarnings(as.numeric(score_total)),
+    tactic         = str_squish(tactic)
+  )
+
+# ---- Join survey attributes onto choices ----
+data_long <- choices %>%
+  select(-manager_type) %>%   # drop scenario manager_type entirely
+  left_join(
+    survey %>% select(participant_id, manager_type, liked_tool, conf_speaking, conf_empowered, conf_advocate, nps_recommend, manager_type),
+    by = "participant_id"
+  )
+
+# ---- Derive per-session and per-participant scores ----
+scores_by_sess <- data_long %>%
+  group_by(participant_id, session) %>%
+  summarise(
+    total_score = sum(score, na.rm = TRUE),
+    n_choices   = n(),
+    .groups = "drop"
+  )
+
+scores_wide <- scores_by_sess %>%
+  pivot_wider(
+    names_from = session,
+    values_from = c(total_score, n_choices),
+    names_prefix = "sess_"
+  )
+
+overall_scores <- scores_by_sess %>%
+  group_by(participant_id) %>%
+  summarise(
+    overall_total = sum(total_score, na.rm = TRUE),
+    mean_per_session = mean(total_score, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# ##########################################
+# (1) Did scores increase between sessions?
+# ##########################################
+# Paired test Session 1 vs Session 2 (if both exist)
+inc_df <- scores_wide %>%
+  filter(!is.na(total_score_sess_1) & !is.na(total_score_sess_2)) %>%
+  transmute(
+    participant_id,
+    sess1 = total_score_sess_1,
+    sess2 = total_score_sess_2,
+    diff  = sess2 - sess1
+  )
+
+inc_summary <- inc_df %>%
+  summarise(
+    n = n(),
+    mean_sess1 = mean(sess1, na.rm = TRUE),
+    mean_sess2 = mean(sess2, na.rm = TRUE),
+    mean_diff  = mean(diff, na.rm = TRUE),
+    median_diff = median(diff, na.rm = TRUE)
+  )
+
+cat("\n--- (1) Score increase between sessions ---\n")
+print(inc_summary)
+
+if(nrow(inc_df) > 1){
+  wt <- wilcox.test(inc_df$sess2, inc_df$sess1, paired = TRUE)
+  eff_size <- (wt$statistic - (length(inc_df$sess1) * (length(inc_df$sess1) + 1)) / 4) /
+    sqrt((length(inc_df$sess1)^3 - length(inc_df$sess1)) / 24)
+  
+  cat("\nWilcoxon signed-rank test (sess2 vs sess1):\n")
+  print(wt)
+  
+  cat("\nEffect size r:\n")
+  print(round(eff_size, 3))
+  
+}
+
+# -------------------------------------------------------------
+# (1b) Do low-performing participants improve more?
+# Define low scorers as those below the median of session 1
+# -------------------------------------------------------------
+low_threshold <- median(inc_df$sess1, na.rm = TRUE)
+
+score_increase_low <- inc_df %>%
+  mutate(
+    low_initial = ifelse(sess1 <= low_threshold, "Low scorers", "High scorers"),
+    gain = sess2 - sess1
+  )
+
+cat("\n--- (1b) Score increase for low vs high initial scorers ---\n")
+print(score_increase_low %>%
+        group_by(low_initial) %>%
+        summarise(
+          n = n(),
+          mean_gain = mean(gain, na.rm = TRUE),
+          sd_gain   = sd(gain, na.rm = TRUE),
+          median_gain = median(gain, na.rm = TRUE),
+          .groups = "drop"
+        ))
+
+# Non-parametric test: do low scorers gain more?
+if(n_distinct(score_increase_low$low_initial) == 2){
+  gain_test <- wilcox_test(score_increase_low, gain ~ low_initial)
+  gain_eff  <- wilcox_effsize(score_increase_low, gain ~ low_initial)
+  
+  cat("\nWilcoxon test (gain ~ initial score group):\n"); print(gain_test)
+  cat("\nEffect size:\n"); print(gain_eff)
+}
+
+# Filter for low scorers only (those who improved on average)
+low_scorers_only <- inc_df %>%
+  semi_join(score_increase_low %>% filter(low_initial == "Low scorers"), by = "participant_id")
+
+if (nrow(low_scorers_only) >= 3) {  # at least 3 pairs needed
+  wt_low <- wilcox.test(low_scorers_only$sess2, low_scorers_only$sess1, paired = TRUE)
+  eff_low <- (wt_low$statistic - (length(low_scorers_only$sess1) * (length(low_scorers_only$sess1) + 1)) / 4) /
+    sqrt((length(low_scorers_only$sess1)^3 - length(low_scorers_only$sess1)) / 24)
+  
+  cat("\n🔍 Wilcoxon signed-rank test for low scorers (sess2 vs sess1):\n")
+  print(wt_low)
+  
+  cat("\n📐 Effect size r (low scorers only):\n")
+  print(round(eff_low, 3))
+} else {
+  cat("Not enough low scorers to test score increase.\n")
+}
+
+
+# ########################################################
+# (2) Connection between performance and pre confidence
+# ########################################################
+confidence_index <- survey %>%
+  transmute(
+    participant_id,
+    confidence_pre = rowMeans(cbind(conf_speaking, conf_empowered, conf_advocate), na.rm = TRUE)
+  )
+
+perf_vs_conf <- overall_scores %>%
+  left_join(confidence_index, by = "participant_id")
+
+cat("\n--- (2) Performance vs. pre confidence (Spearman) ---\n")
+pv <- perf_vs_conf %>%
+  filter(!is.na(confidence_pre)) %>%
+  summarise(
+    cor_overall = cor(overall_total, confidence_pre, method = "spearman", use = "complete.obs"),
+    cor_meanps  = cor(mean_per_session, confidence_pre, method = "spearman", use = "complete.obs")
+  )
+print(pv)
+
+# Optional tests with p-values
+if(sum(complete.cases(perf_vs_conf$overall_total, perf_vs_conf$confidence_pre)) >= 3){
+  cor_test_overall <- cor_test(perf_vs_conf, overall_total, confidence_pre, method = "spearman")
+  cat("\nSpearman test (overall_total ~ confidence_pre):\n"); print(cor_test_overall)
+}
+if(sum(complete.cases(perf_vs_conf$mean_per_session, perf_vs_conf$confidence_pre)) >= 3){
+  cor_test_mean <- cor_test(perf_vs_conf, mean_per_session, confidence_pre, method = "spearman")
+  cat("\nSpearman test (mean_per_session ~ confidence_pre):\n"); print(cor_test_mean)
+}
+
+# ########################################################
+# (3) Do users tend to pick the same tactic?
+#   - mode proportion and (optionally) normalized entropy
+# ########################################################
+tactic_pref <- data_long %>%
+  filter(!is.na(tactic)) %>%
+  group_by(participant_id) %>%
+  summarise(
+    n_choices = n(),
+    n_unique  = n_distinct(tactic),
+    mode_prop = max(table(tactic)) / n_choices,
+    entropy   = {
+      p <- as.numeric(table(tactic)) / n_choices
+      # normalized Shannon entropy (0 = one tactic only; 1 = uniform use)
+      if(length(p) > 1) -sum(p * log(p)) / log(length(p)) else 0
+    },
+    .groups = "drop"
+  )
+
+cat("\n--- (3) Tactic repetition summary ---\n")
+print(tactic_pref %>%
+        summarise(
+          participants = n(),
+          median_mode_prop = median(mode_prop, na.rm = TRUE),
+          mean_mode_prop   = mean(mode_prop, na.rm = TRUE),
+          median_entropy   = median(entropy, na.rm = TRUE),
+          mean_entropy     = mean(entropy, na.rm = TRUE)
+        ))
+
+# ########################################################
+# (4) Relationship: manager type × tactics chosen (χ²)
+# ########################################################
+mgr_tactic <- data_long %>%
+  filter(!is.na(manager_type), !is.na(tactic)) %>%
+  mutate(
+    manager_type = fct_lump_n(as.factor(str_trim(manager_type)), n = 6),
+    tactic       = fct_lump_min(as.factor(str_trim(tactic)), min = 3)
+  )
+
+cat("\n--- (4) Manager type vs. tactic (contingency) ---\n")
+tbl_mt <- mgr_tactic %>%
+  count(manager_type, tactic) %>%
+  pivot_wider(names_from = tactic, values_from = n, values_fill = 0) %>%
+  column_to_rownames("manager_type") %>%
+  as.matrix()
+
+print(addmargins(tbl_mt))
+
+if(all(dim(tbl_mt) >= 2)){
+  suppressWarnings({
+    chi_res <- try(chisq.test(tbl_mt), silent = TRUE)
+  })
+  if(inherits(chi_res, "htest")){
+    cat("\nChi-squared test:\n"); print(chi_res)
+  } else {
+    cat("\nCounts too sparse for chi-squared; running Fisher's exact (may be slow)...\n")
+    print(fisher.test(tbl_mt))
+  }
+} else {
+  cat("Not enough categories to test.\n")
+}
+
+# ####################################################################
+# (5) Differences in score/tactics by liking the tool (NPS >= 7)
+# ####################################################################
+# Merge liked_tool onto per-session scores
+scores_by_sess_liked <- scores_by_sess %>%
+  left_join(survey %>% select(participant_id, liked_tool), by = "participant_id") %>%
+  filter(!is.na(liked_tool))
+
+cat("\n--- (5a) Score differences by liked_tool (per session) ---\n")
+print(scores_by_sess_liked %>%
+        group_by(liked_tool, session) %>%
+        summarise(n = n(), mean = mean(total_score), sd = sd(total_score), .groups = "drop"))
+
+# Non-parametric test per session (if both groups present)
+for(s in sort(unique(scores_by_sess_liked$session))){
+  sub <- filter(scores_by_sess_liked, session == s)
+  if(n_distinct(sub$liked_tool) == 2){
+    cat(paste0("\nSession ", s, " – Wilcoxon (Liked vs Not liked):\n"))
+    print(wilcox_test(sub, total_score ~ liked_tool))
+    print(wilcox_effsize(sub, total_score ~ liked_tool))
+  }
+}
+
+# Tactic distributions by liked_tool
+cat("\n--- (5b) Tactic distributions by liked_tool ---\n")
+tactic_by_like <- data_long %>%
+  filter(!is.na(liked_tool), !is.na(tactic)) %>%
+  mutate(tactic = fct_lump_min(as.factor(str_trim(tactic)), min = 3)) %>%
+  count(liked_tool, tactic) %>%
+  group_by(liked_tool) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+print(tactic_by_like)
+
+tab_like <- tactic_by_like %>%
+  select(-prop) %>%
+  pivot_wider(names_from = tactic, values_from = n, values_fill = 0) %>%
+  column_to_rownames("liked_tool") %>%
+  as.matrix()
+
+if(all(dim(tab_like) >= 2)){
+  suppressWarnings({
+    chi_like <- try(chisq.test(tab_like), silent = TRUE)
+  })
+  if(inherits(chi_like, "htest")){
+    cat("\nChi-squared test (liked_tool × tactic):\n"); print(chi_like)
+  } else {
+    cat("\nCounts too sparse for chi-squared; running Fisher's exact...\n")
+    print(fisher.test(tab_like))
+  }
+} else {
+  cat("Not enough groups to compare tactic distributions by liked_tool.\n")
+}
+
+
+# tactics versus ethical confidence
+# Join tactic-level data to participant-level survey data
+tactic_conf <- data_long %>%
+  filter(!is.na(tactic), !is.na(conf_speaking)) %>%
+  mutate(conf_level = case_when(
+    conf_speaking <= 3 ~ "Low",
+    conf_speaking == 4 ~ "Medium",
+    conf_speaking >= 5 ~ "High",
+    TRUE ~ NA_character_
+  ))
+
+# Count tactic usage per confidence group
+tactic_by_conf <- tactic_conf %>%
+  group_by(conf_level, tactic) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(conf_level) %>%
+  mutate(prop = count / sum(count))
+
+# Plot tactic usage by confidence level
+library(ggplot2)
+
+ggplot(tactic_by_conf, aes(x = reorder(tactic, -prop), y = prop, fill = conf_level)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(title = "Tactic Usage by Confidence Level",
+       x = "Tactic", y = "Proportion") +
+  theme_minimal()
+
+# Chi-squared test for tactic vs. confidence level
+tbl_tactic_conf <- tactic_conf %>%
+  count(conf_level, tactic) %>%
+  tidyr::pivot_wider(names_from = tactic, values_from = n, values_fill = 0) %>%
+  column_to_rownames("conf_level")
+
+print(chisq.test(tbl_tactic_conf))
+
+# Entropy = diversity of tactic use per participant
+tactic_entropy <- tactic_conf %>%
+  group_by(participant_id) %>%
+  summarise(entropy = {
+    p <- table(tactic) / sum(table(tactic))
+    if(length(p) > 1) -sum(p * log(p)) / log(length(p)) else 0
+  }, .groups = "drop") %>%
+  left_join(survey %>% select(participant_id, conf_speaking), by = "participant_id")
+
+print(cor.test(tactic_entropy$entropy, tactic_entropy$conf_speaking, method = "spearman"))
+
+
+label_to_tactic <- list(
+  logical_fallacy = c(
+    "Appeal to Ignorance",
+    "Red Herring",
+    "Appeal to Popularity",
+    "Hasty Generalization",
+    "Strawman",
+    "Slippery Slope",
+    "False Dilemma",
+    "Appeal to Authority",
+    "Circular Reasoning"
+  ),
+  
+  rhetorical_tactics = c(
+    "Models that synthesize",
+    "Usability studies",
+    "Embodied knowledge of users",
+    "Fidelity as a rhetorical strategy",
+    "Envisioning",
+    "Heuristics",
+    "Credibility and expertise",
+    "Organizational memory"
+  ),
+  
+  soft_resistance = c(
+    'Broadening Who the "User" is in User Research',
+    "Designing Affordances Subversively",
+    "Making Values Visible Rhetorically to Other Stakeholders",
+    "Expanding/Subverting Design Resources",
+    "Making Values Visible and Legible Through Organizational Metrics",
+    "Using Organizational Values to Create Spaces for New Forms of Values Work",
+    "Guerrilla methods",
+    "Usable enough",
+    "Distract and pacify",
+    "Acquiesce",
+    "Negotiation and Cooperation",
+    "Being the user"
+  ),
+  compliance = c("Compliance")
+)
+
+
+# --- 1. List JSON files in each round's folder ---
+json_files_round1 <- list.files("../backend/src/main/resources/scenarios/with fallacy",
+                                pattern = "\\.json$", full.names = TRUE)
+
+json_files_round2 <- list.files("../backend/src/main/resources/scenarios",
+                                pattern = "\\.json$", full.names = TRUE,
+                                recursive = FALSE) %>%
+  
+  setdiff(json_files_round1)  # avoid duplicating round1 files
+
+# --- 2. Function to process each file and assign round ---
+extract_choices <- function(file_path, round) {
+  json_data <- fromJSON(file_path, simplifyVector = FALSE)
+  
+  scenario_id <- json_data$id
+  manager_type <- json_data$manager_type
+  issue <- json_data$issue
+  
+  steps <- json_data$statements
+  
+  step_dfs <- map_dfr(names(steps), function(step_id) {
+    step_data <- steps[[step_id]]
+    if (!is.null(step_data$user_choices)) {
+      map_dfr(step_data$user_choices, function(choice) {
+        tibble(
+          scenario_id = scenario_id,
+          manager_type = manager_type,
+          issue = issue,
+          step_id = step_id,
+          choice_text = choice$choice,
+          tactic = choice$tactic,
+          tactic_type = choice$tactic_type,
+          evs_score = choice$evs_score,
+          leads_to = choice$leads_to,
+          session = round
+        )
+      })
+    } else {
+      tibble()
+    }
+  })
+  
+  return(step_dfs)
+}
+
+# --- 3. Load all scenario choices and tag with round ---
+choices_round1 <- map_dfr(json_files_round1, ~extract_choices(.x, session = 1))
+choices_round2 <- map_dfr(json_files_round2, ~extract_choices(.x, session = 2))
+
+all_choices <- bind_rows(choices_round1, choices_round2)
+
+tactic_type_counts_prejoin <- all_choices %>%
+  filter(!is.na(tactic_type)) %>%
+  group_by(round, tactic_type) %>%
+  summarise(count = n(), .groups = "drop")
+
+print(tactic_type_counts_prejoin)
+
+
+# --- 4. Total counts per tactic_type per scenario and round ---
+# Join by scenario_id, choice_text (if needed)
+joined_choices <- choices %>%
+  left_join(
+    all_choices %>% select(issue, choice_text, tactic, tactic_type, round),
+    by = c("scenario" = "issue", "tactic" = "tactic","choice_text"="choice_text", "session"="session")
+  )
+
+ # --- Count total tactic types used per session ---
+tactic_type_counts_by_session <- joined_choices %>%
+  filter(!is.na(tactic_type)) %>%
+  group_by(session, tactic_type) %>%
+  summarise(count = n(), .groups = "drop")
+
+print(tactic_type_counts_by_session)
+
+# --- Count individual tactics per session ---
+tactic_counts_by_session <- joined_choices %>%
+  filter(!is.na(tactic)) %>%
+  group_by(session, tactic) %>%
+  summarise(count = n(), .groups = "drop")
+
+print(tactic_counts_by_session)
+
+# --- Count how often "Compliance" appears per session ---
+compliance_counts <- joined_choices %>%
+  filter(tactic == "Compliance") %>%
+  group_by(session) %>%
+  summarise(count = n(), .groups = "drop")
+
+print(compliance_counts)
+
+
+
+# ------------- Optional: save key outputs -------------
+# write_csv(inc_df, "out_score_increase_pairs.csv")
+# write_csv(tactic_pref, "out_tactic_repetition.csv")
+# write_csv(tactic_by_like, "out_tactic_by_like.csv")
+
+
+

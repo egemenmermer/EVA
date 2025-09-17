@@ -1,0 +1,112 @@
+.knowledge-panel-toggle {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  height: 100px;
+  width: 36px;
+  background-color: rgba(229, 231, 235, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.dark .knowledge-panel-toggle {
+  background-color: rgba(55, 65, 81, 0.95);
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.knowledge-panel-toggle:hover {
+  width: 42px;
+  background-color: rgba(209, 213, 219, 1);
+}
+
+.dark .knowledge-panel-toggle:hover {
+  background-color: rgba(75, 85, 99, 1);
+}
+
+.knowledge-panel-toggle svg {
+  width: 22px;
+  height: 22px;
+  color: rgba(55, 65, 81, 0.9);
+  transition: transform 0.2s ease;
+}
+
+.dark .knowledge-panel-toggle svg {
+  color: rgba(229, 231, 235, 0.9);
+}
+
+.knowledge-panel-toggle:hover svg {
+  transform: scale(1.2);
+}
+
+/* Pulsing effect for the toggle when closed */
+@keyframes pulse {
+  0% { opacity: 0.7; background-color: rgba(219, 234, 254, 0.95); } /* Light blue pulse in light mode */
+  50% { opacity: 1; background-color: rgba(191, 219, 254, 0.95); }
+  100% { opacity: 0.7; background-color: rgba(219, 234, 254, 0.95); }
+}
+
+@keyframes pulse-dark {
+  0% { opacity: 0.7; background-color: rgba(30, 58, 138, 0.95); } /* Blue pulse in dark mode */
+  50% { opacity: 1; background-color: rgba(37, 99, 235, 0.95); }
+  100% { opacity: 0.7; background-color: rgba(30, 58, 138, 0.95); }
+}
+
+.knowledge-panel-toggle.has-new-content {
+  animation: pulse 2s infinite;
+}
+
+.dark .knowledge-panel-toggle.has-new-content {
+  animation: pulse-dark 2s infinite;
+}
+
+/* Label for the toggle */
+.knowledge-panel-toggle::before {
+  content: 'Knowledge';
+  position: absolute;
+  right: 36px;
+  background-color: rgba(17, 24, 39, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.knowledge-panel-toggle:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Transition for the panel */
+.knowledge-panel {
+  transition: transform 0.3s ease-in-out;
+}
+
+.knowledge-panel-enter {
+  transform: translateX(100%);
+}
+
+.knowledge-panel-enter-active {
+  transform: translateX(0);
+}
+
+.knowledge-panel-exit {
+  transform: translateX(0);
+}
+
+.knowledge-panel-exit-active {
+  transform: translateX(100%);
+} 

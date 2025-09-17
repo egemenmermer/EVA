@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+/*loader design*/
+/* custom polygon loader */
+/* HTML: <div class="loader"></div> */
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  color: #000;
+  background:
+    linear-gradient(90deg,currentColor 2px,#0000 0 calc(100% - 2px),currentColor 0) center/100% 14px,
+    linear-gradient(0deg, currentColor 2px,#0000 0 calc(100% - 2px),currentColor 0) center/14px 100%,
+    linear-gradient(currentColor 0 0) center/100% 2px,
+    linear-gradient(currentColor 0 0) center/2px 100%;
+  background-repeat: no-repeat;
+  animation: l6 4s infinite linear;
+}
+.loader::before,
+.loader::after {
+  content: "";
+  grid-area: 1/1;
+  background: inherit;
+  transform-origin: inherit;
+  animation: inherit;
+}
+.loader::after {
+  animation-duration: 2s;
+}
+@keyframes l6{
+  100% {transform:rotate(1turn)}
+}
+
+
+  .dark {
+    --foreground: 210 40% 98%;
+    --card-foreground: 210 40% 98%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+/* Enhanced markdown styling for dark mode */
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+.dark .prose p,
+.dark .prose ul,
+.dark .prose ol,
+.dark .prose li {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose a {
+  color: #3b82f6 !important; /* text-blue-500 */
+  text-decoration: underline;
+}
+
+.dark .prose code {
+  background-color: rgba(31, 41, 55, 0.5) !important; /* bg-gray-800 with opacity */
+  color: #e5e7eb !important; /* text-gray-200 */
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.dark .prose pre {
+  background-color: #1f2937 !important; /* bg-gray-800 */
+  border: 1px solid #374151 !important; /* border-gray-700 */
+}
+
+.dark .prose pre code {
+  background-color: transparent !important;
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+.dark .prose blockquote {
+  border-left-color: #4b5563 !important; /* border-gray-600 */
+  color: #9ca3af !important; /* text-gray-400 */
+}
+
+.dark .prose strong {
+  color: #f3f4f6 !important; /* text-gray-100 */
+}
+
+/* Specific styling for dashboard page only */
+body.dashboard-active .dark.keep-bg-light {
+  --background: 0 0% 100% !important; /* White */
+}
+
+/* Scope overrides to prevent affecting landing page */
+body.dashboard-active .dark.keep-bg-light body,
+body.dashboard-active .dark.keep-bg-light .bg-gray-900 {
+  background-color: #ffffff !important;
+}
+
+body.dashboard-active .dark.keep-bg-light .bg-gray-800 {
+  background-color: #f3f4f6 !important;
+}
+
+body.dashboard-active .dark.keep-bg-light .bg-gray-700 {
+  background-color: #e5e7eb !important;
+}
+
+/* Keep text colors for better readability in dark mode, but only in dashboard */
+body.dashboard-active .dark.keep-bg-light .text-gray-100,
+body.dashboard-active .dark.keep-bg-light .text-white:not(.user-message-bubble *) {
+  color: #111827 !important; /* Dark text for better contrast on light bg */
+}
+
+/* Ensure user message bubble text remains white */
+.dark.keep-bg-light .bg-blue-600 {
+  background-color: #2563eb !important; /* Keep blue background */
+}
+
+.dark.keep-bg-light .user-message-bubble,
+.dark.keep-bg-light .bg-blue-600.text-white,
+.dark.keep-bg-light .bg-blue-600 .text-white {
+  color: white !important; /* Always white text in blue bubbles */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.3s ease-in-out;
+}
+
+.slide-in-from-bottom-4 {
+  --tw-enter-translate-y: 1rem;
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--tw-enter-translate-y, 0));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Specific styling for user messages to override dark mode */
+.user-message-bubble {
+  background-color: #2563eb !important; /* Blue 600 */
+  color: white !important;
+}
+
+.dark .user-message-bubble,
+.dark.keep-bg-light .user-message-bubble {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+/* Improve the practice feedback styling */
+.practice-feedback {
+  max-width: 90% !important;
+  line-height: 1.5;
+}
+
+.feedback-markdown h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3b82f6; /* Blue color for headers */
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feedback-markdown strong {
+  font-weight: 600;
+  color: #4b5563; /* Gray for strong text */
+}
+
+.feedback-markdown p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.dark .feedback-markdown h3 {
+  color: #60a5fa; /* Lighter blue for dark mode */
+  border-bottom-color: #374151;
+}
+
+.dark .feedback-markdown strong {
+  color: #e5e7eb; /* Lighter gray for dark mode */
+}
+
+/* Styled buttons that appear below messages */
+.mt-3.flex.gap-2.ml-8 button,
+.mt-3.flex.justify-end button {
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+.mt-3.flex.gap-2.ml-8 button:hover,
+.mt-3.flex.justify-end button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the practice buttons container */
+.mt-3.flex.gap-2.ml-8 {
+  margin-top: 0.75rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #e5e7eb;
+}
+
+.dark .mt-3.flex.gap-2.ml-8 {
+  border-left-color: #374151;
+} 
