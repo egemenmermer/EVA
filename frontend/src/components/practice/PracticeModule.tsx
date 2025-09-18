@@ -1812,7 +1812,37 @@ let content;
           <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>
       </div>
     
+          {showScore && (
+            <div className="absolute top-20 right-4 z-30">
+              {(() => {
+                console.log('Calculating score display:', currentScenario.sessionSummary);
+                const evsHistory = currentScenario?.sessionSummary?.evsHistory || [];
+                const rawScore = evsHistory.reduce((sum: number, evs: number) => sum + evs, 0);
+                const totalChoices = evsHistory.length || 0;
 
+
+                return (
+                  <div
+                  className="
+                  flex items-center justify-center 
+                  rounded-full aspect-square
+                  bg-green-500 text-white
+                  shadow-inner shadow-black/30
+                  sm:w-8 sm:h-8 md:w-12 md:h-12 lg:w-16 lg:h-16
+                  "
+                > 
+              <div className="text-center leading-tight">
+                <div className="text-lg sm:text-l md:text-xl lg:text-2xl font-bold">
+                  {rawScore}
+                </div>
+                <div className="text-[0.6rem] sm:text-xs md:text-sm">of {totalChoices}</div>
+              </div>
+            </div>
+                );
+              })()}
+            </div>
+          )}
+      
        
 
       {loading ? (
@@ -1829,58 +1859,22 @@ let content;
       ) : (
         <div className="flex-1 overflow-hidden flex flex-col">
           <div className="flex-1 overflow-y-auto p-4 pb-4" id="message-container">
-          {currentScenario?.scenario && (
-            <div className="
-              sticky top-0 z-30
-              mb-4 bg-gray-50/90 dark:bg-gray-800/50
-              border border-gray-200/80 dark:border-gray-700/30
-              p-6 rounded-lg shadow-md
-            ">
-              <p className="text-base md:text-lg">
-                <strong>Issue:</strong> {currentScenario.scenario.issue || 'Unknown'}
-              </p>
-              <p className="text-base md:text-lg">
-                <strong>Manager Type:</strong> {currentScenario.scenario.managerType || 'Unknown'}
-              </p>
-              <p className="text-base md:text-lg">
-                <strong>Difficulty Level:</strong> {difficultyLabel(currentScenario.scenario.difficulty) || 'Unknown'}
-              </p>
-              <p className="text-sm md:text-base italic mt-2 text-gray-600 dark:text-gray-400">
-                {getManagerDescription(currentScenario.scenario.managerType)}
-              </p>
-
-              {showScore && (() => {
-                const evsHistory = currentScenario?.sessionSummary?.evsHistory || [];
-                const rawScore = evsHistory.reduce((sum: number, evs: number) => sum + evs, 0);
-                const totalChoices = evsHistory.length || 0;
-
-                return (
-                  <div className="mt-4 flex items-center">
-                    <div
-                      className="
-                        flex items-center justify-center 
-                        rounded-full aspect-square
-                        bg-green-500 text-white
-                        shadow-inner shadow-black/30
-                        w-16 h-16 md:w-20 md:h-20
-                      "
-                    >
-                      <div className="text-center leading-tight">
-                        <div className="text-xl md:text-2xl font-bold">
-                          {rawScore}
-                        </div>
-                        <div className="text-xs md:text-sm">of {totalChoices}</div>
-                      </div>
-                    </div>
-                    <span className="ml-3 text-base md:text-lg font-medium text-gray-700 dark:text-gray-300">
-                      Your Score
-                    </span>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
+            {currentScenario?.scenario && (
+              <div className="mb-4 bg-gray-50/70 dark:bg-gray-800/30 border border-gray-200/80 dark:border-gray-700/30 p-4 rounded-lg">
+                <p className="text-sm">
+                    <strong>Issue:</strong> {currentScenario.scenario.issue || 'Unknown'}
+                </p>
+                <p className="text-sm">
+                    <strong>Manager Type:</strong> {currentScenario.scenario.managerType || 'Unknown'}
+                </p>
+                <p className="text-sm">
+                    <strong>Difficulty Level:</strong> {difficultyLabel(currentScenario.scenario.difficulty) || 'Unknown'}
+                </p>
+                <p className="text-sm italic mt-2 text-gray-600 dark:text-gray-400">
+                    {getManagerDescription(currentScenario.scenario.managerType)}
+                </p>
+              </div>
+            )}
 
               {currentScenario?.conversation && Array.isArray(currentScenario.conversation) && currentScenario.conversation.length > 0 ? (
               <div className="space-y-2 mb-2">
