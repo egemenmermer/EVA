@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+// SVG fallbacks if needed
+
+import capitalistLightSvg from '@/assets/manager-icons/capitalist-manager-light.svg';
+import capitalistDarkSvg from '@/assets/manager-icons/capitalist-manager-dark.svg';
+import diluterLightSvg from '@/assets/manager-icons/diluter-manager-light.svg';
+import diluterDarkSvg from '@/assets/manager-icons/diluter-manager-dark.svg';
+import camouflagerLightSvg from '@/assets/manager-icons/camouflager-manager-light.svg';
+import camouflagerDarkSvg from '@/assets/manager-icons/camouflager-manager-dark.svg';
 
 interface ScenarioSelectionModalProps {
   isOpen: boolean;
@@ -18,9 +26,27 @@ const difficultyLabel = (d: number) => {
   }
 };
 
-const getManagerImage = (type: string, isDark: boolean) => {
-  return `/src/assets/manager-icons/${type.toLowerCase()}-manager-${isDark ? 'dark' : 'light'}.svg`;
+const managerIcons: Record<string, { light: string; dark: string }> = {
+  CAPITALIST: {
+    light: capitalistLightSvg,
+    dark: capitalistDarkSvg,
+  },
+  DILUTER: {
+    light: diluterLightSvg,
+    dark: diluterDarkSvg,
+  },
+  CAMOUFLAGER: {
+    light: camouflagerLightSvg,
+    dark: camouflagerDarkSvg,
+  },
 };
+
+const getManagerImage = (type: string, isDark: boolean): string => {
+  const icons = managerIcons[type.toUpperCase()];
+  if (!icons) return ''; // fallback if type not found
+  return isDark ? icons.dark : icons.light;
+};
+
 
 const MANAGER_TYPES: Record<string, { label: string; description: string }> = {
   CAPITALIST: {
