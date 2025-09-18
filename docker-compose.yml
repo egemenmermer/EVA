@@ -128,8 +128,8 @@ services:
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
     container_name: eva_frontend
-    expose:
-      - "80"
+    ports:
+      - "3000:80"
     #   - "443:443"
     # volumes:
     #   - /etc/letsencrypt:/etc/letsencrypt:ro
