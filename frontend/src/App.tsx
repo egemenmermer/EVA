@@ -6,7 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { LoginPage } from '@/pages/LoginPage';
-// import { RegisterPage } from '@/pages/RegisterPage'; // Registration disabled
+import { RegisterPage } from '@/pages/RegisterPage'; // Registration disabled
 import { LandingPage } from '@/pages/LandingPage';
 import { OAuthCallback } from '@/pages/OAuthCallback';
 import { ActivationPage } from '@/pages/ActivationPage';
@@ -286,13 +286,13 @@ export const App: React.FC = () => {
                 } 
               />
               {/* Registration temporarily disabled - manual user creation only */}
-              {/* <Route 
+              <Route 
                 path="/register" 
                 element={
                   // Only redirect if we have both a token and a user
                   user && hasToken ? <Navigate to="/dashboard" replace /> : <RegisterPage />
                 } 
-              /> */}
+              /> 
               {/* Redirect registration attempts to login page */}
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/activation" element={<ActivationPage />} />

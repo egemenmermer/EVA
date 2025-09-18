@@ -36,5 +36,6 @@ public class PracticeSessionChoice {
     @Column(name = "tactic", length = 100)
     private String tactic;
 
+    @Column(name = "tactic_type", length = 100)
     private String tacticType;
 } 

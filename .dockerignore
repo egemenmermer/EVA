@@ -1,0 +1,123 @@
+# --- Global ---
+.git
+.gitignore
+*.log
+*.tmp
+*.swp
+*.bak
+*.lock
+.DS_Store
+
+# --- Node/React (frontend) ---
+node_modules
+frontend/node_modules
+frontend/.next
+frontend/dist
+frontend/build
+frontend/.vite
+frontend/.cache
+
+# --- Python (agent) ---
+venv
+venv*/
+agent/venv
+agent/__pycache__/
+agent/*.pyc
+agent/.pytest_cache
+agent/.mypy_cache
+agent/.ruff_cache
+agent/.coverage
+agent/htmlcov
+
+# --- Java/Maven (backend) ---
+backend/target
+backend/.mvn
+backend/.idea
+backend/.classpath
+backend/.project
+backend/.settings
+backend/.factorypath
+.m2
+
+# --- Docker build junk ---
+**/__pycache__/
+**/*.pyc
+**/node_modules
+**/dist
+**/build
+
+# --- Local data ---
+logs
+*.iml
+*.db
+*.sqlite
+
+# --- Agent data/logs ---
+agent/data
+agent/data 2
+agent/logs
+agent/backup
+agent/tests/__pycache__/
+agent/test-results
+agent/.coverage
+agent/htmlcov
+
+# --- Backend junk ---
+backend/logs
+backend/.mvn
+backend/.gradle
+backend/*.iml
+backend/*.db
+
+# --- Frontend ---
+frontend/.vite
+frontend/.parcel-cache
+frontend/.cache
+frontend/out
+frontend/.eslintcache
+
+# --- IDEs & local junk ---
+.idea
+.vscode
+*.iml
+*.class
+*.db
+*.sqlite
+
+
+# --- Python virtual environments ---
+**/venv
+**/venv*/
+**/__pycache__/
+
+# --- Node.js ---
+**/node_modules
+**/dist
+**/build
+**/.vite
+**/.parcel-cache
+
+# --- Java/Maven ---
+**/target
+**/.mvn
+**/.gradle
+
+# --- Data and logs ---
+**/logs
+**/data
+**/backup
+
+# --- Stray large dirs ---
+agent/#
+agent/a
+agent/in
+agent/this
+agent/folder
+agent/create
+
+# --- IDE and system files ---
+.idea
+.vscode
+*.iml
+*.class
+.DS_Store

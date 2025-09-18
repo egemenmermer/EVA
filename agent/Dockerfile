@@ -19,6 +19,7 @@ COPY requirements.txt .
 
 # Install Python dependencies
 # Exclude comment lines and empty lines
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN grep -v "^#\|^$\\|numpy\|scipy\|pillow\|lxml\|regex" requirements.txt > filtered_requirements.txt && \
     pip install --no-cache-dir -r filtered_requirements.txt
 

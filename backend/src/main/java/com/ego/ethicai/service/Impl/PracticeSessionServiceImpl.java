@@ -97,6 +97,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                 .choiceText(choiceDTO.getChoiceText())
                                 .evsScore(choiceDTO.getEvsScore())
                                 .tactic(choiceDTO.getTactic())
+                                .tacticType(choiceDTO.getTacticType())
                                 .build();
                         choiceEntities.add(choice);
                     }
@@ -114,6 +115,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                 .choiceText(selectionData.getChoice())
                                 .evsScore(selectionData != null ? selectionData.getEvs() : null)
                                 .tactic(selectionData != null ? selectionData.getTactic() : "Unknown")
+                                .tacticType(selectionData != null ? selectionData.getTacticType() : "Unknown")
                                 .build();
                         choiceEntities.add(choice);
                     }
@@ -187,6 +189,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                     .choice(choice.getChoiceText())
                                     .evs(choice.getEvsScore())
                                     .tactic(choice.getTactic())
+                                    .tacticType(choice.getTacticType())
                                     .build();
                         })
                         .collect(Collectors.toList());
@@ -219,6 +222,7 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                             .choice("unknown")
                             .evs(null)
                             .tactic("Unknown")
+                            .tacticType("Unknown")
                             .build());
                 }
             }

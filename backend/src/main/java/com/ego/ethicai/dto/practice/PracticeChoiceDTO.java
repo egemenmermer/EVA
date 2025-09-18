@@ -14,4 +14,5 @@ public class PracticeChoiceDTO {
     private String choiceText;
     private Double evsScore;
     private String tactic;
+    private String tacticType;
 } 

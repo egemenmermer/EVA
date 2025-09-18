@@ -29,6 +29,7 @@ import { backendApi } from '../../services/axiosConfig';
 import { MessageRecovery } from '../../utils/messageRecovery';
 import { v4 as uuid } from 'uuid';
 import type { ScenarioSessionResponse, ScenarioState } from '@/types/scenario';
+import { getPracticeSessions } from '@/services/api';
 
 // Add custom styles for message formatting
 const styles = {
@@ -2502,6 +2503,42 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentScenario, setCurr
     return () => clearTimeout(timeoutId);
   }, [messages, currentConversation]);
 
+  const handleReviewConversation = async (
+    e: React.MouseEvent,
+    conversation: Conversation
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+  
+    try {
+      console.log('[handleReviewConversation] Conversation clicked:', conversation);
+  
+      // Fetch all practice sessions
+      const sessions = await getPracticeSessions();
+      console.log('[handleReviewConversation] Fetched sessions:', sessions);
+      // Try to match the clicked conversation to a session
+      const matchingSession = sessions.find(
+        (s: any) => s.conversationId === conversation.conversationId
+      );
+  
+      if (!matchingSession) {
+        console.warn('[handleReviewConversation] No session found for conversation:', conversation.conversationId);
+        setError('No session data available for this conversation.');
+        return;
+      }
+  
+      // Open review modal with the matched session
+      window.dispatchEvent(
+        new CustomEvent("conversation-review", { detail: { session: matchingSession } })
+      );
+      
+  
+    } catch (err: any) {
+      console.error('❌ Failed to fetch session details:', err);
+      setError('Failed to load session details');
+    }
+  };
+
   // Find and modify the handleOptionClick function
   const handleOptionClick = useCallback(async (optionText: string, event?: React.MouseEvent) => {
     // Prevent event propagation if event is provided
@@ -3725,15 +3762,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentScenario, setCurr
                       }}
                       className="feedback-content introduction-text"
                     />
+                                <button
+                                onClick={(e) => handleReviewConversation(e, currentConversation)}
+                                className="mt-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md shadow hover:bg-blue-700 transition"
+                              >
+                                <></>Review Conversation
+                              </button>
           </div>
             )}
 
                 {/* Summary of Feedback section */}
                 {overallSummaryTitle && (
                   <div className="mb-4">
+
                     <h3 className="font-medium text-base mb-2 text-gray-800 dark:text-gray-200 flex items-center">
                       <span className="mr-2 text-sm">📋</span>{overallSummaryTitle}
                     </h3>
+
                     <div className={`prose prose-sm dark:prose-invert max-w-none p-3 bg-blue-50/10 dark:bg-blue-900/10 border border-blue-100/30 dark:border-blue-800/30 rounded-md ${darkMode ? 'dark' : 'light'}`}>
                       <div
                         dangerouslySetInnerHTML={{
@@ -3741,10 +3786,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentScenario, setCurr
                         }}
                         className="feedback-content summary-content"
                       />
+
         </div>
+
                   </div>
                 )}
-
+            
                 {/* Detailed Feedback Section with Expandable Areas */}
                 {parsedDetailedFeedbackSections.length > 0 && (
                   <div className="my-3">

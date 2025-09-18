@@ -16,7 +16,7 @@ interface SelectionData {
   choice: string;
   evs?: number;
   tactic?: string;
-  tactic_type?: string;
+  tacticType?: string;
 }
 
 interface DecisionTreeData {
@@ -45,7 +45,7 @@ const ReviewSessionModal: React.FC<ReviewSessionModalProps> = ({ session, onClos
     if (isOpen && session?.id) {
       const fetchSelections = async () => {
         try {
-          const res = await backendApi.get(`/api/v1/sessions/${session.id}`);
+          const res = await backendApi.get(`/api/v1/practice/get-selections/${session.id}`);
           // Expecting something like [{ evs: 1, tactic: "Heuristics", tactic_type: "Argumentation" }, ...]
           setSelectionData(res.data);
         } catch (err) {
@@ -153,7 +153,7 @@ const ReviewSessionModal: React.FC<ReviewSessionModalProps> = ({ session, onClos
                                 Tactic: {choiceObj.tactic || 'Unknown'}
                               </span>
                               <span className="px-2 py-1 bg-purple-600 rounded-full text-white font-semibold">
-                                Tactic Type: {choiceObj.tactic_type || 'Unknown'}
+                                Tactic Type: {choiceObj.tacticType || 'Unknown'}
                                 </span>
                             </div>
                           </div>

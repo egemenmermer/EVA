@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Github, Chrome, AlertCircle } from 'lucide-react';
 
@@ -10,6 +10,33 @@ export const RegisterPage: React.FC = () => {
   const [validationError, setValidationError] = useState('');
   const [success, setSuccess] = useState(false);
   const { register, loading, error } = useAuth();
+
+  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const prolificId = params.get('PROLIFIC_PID');
+  // Auto-register if Prolific PID is in URL
+  useEffect(() => {
+    if (prolificId) {
+      console.log('🔑 Prolific ID found, auto-registering:', prolificId);
+      setEmail(`${prolificId}@prolific.local`);
+      setPassword(prolificId); 
+      setFullName(`ProlificUser-${prolificId}`);
+
+      // Fake values for required fields (backend must support "prolific only" auth)
+      const prolificEmail = `${prolificId}@prolific.local`;
+      const prolificName = `ProlificUser-${prolificId}`;
+
+      register(prolificEmail, prolificId, prolificName)
+        .then(() => {
+          setSuccess(true);
+          navigate('/app');
+        })
+        .catch((err) => {
+          console.error('Prolific auto-registration failed:', err);
+          setValidationError('Failed to auto-register with Prolific ID.');
+        });
+    }
+  }, [prolificId]);
 
   const validateForm = () => {
     if (password.length < 8) {

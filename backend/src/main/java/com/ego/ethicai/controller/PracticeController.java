@@ -176,10 +176,9 @@ public class PracticeController {
         }
     }
 
-    @GetMapping("/admin/get-selections/{sessionId}")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/get-selections/{sessionId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<SelectionDataDTO>> getUserSelections(@PathVariable UUID sessionId) {
-        log.info("=== ADMIN SELECTIONS ENDPOINT CALLED ===");
         log.info("SessionId: {}", sessionId);
         log.info("Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
         log.info("Principal: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());

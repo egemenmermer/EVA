@@ -170,7 +170,13 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
     { name: "Envisioning", description: "Future-oriented ethical framing." },
     { name: "Heuristics", description: "Appealing to established design norms." },
     { name: "Credibility and expertise", description: "Building authority and trust." },
-    { name: "Organizational memory", description: "Historical reasoning." }
+    { name: "Organizational memory", description: "Historical reasoning." },
+    { name: "Guerilla methods", description: "Informal methods to bypass organizational barriers." },
+    { name: "Usable enough", description: "Strategic concession." },
+    { name: "Distract and pacify", description: "Temporary, often cosmetic ethical fixes." },
+    { name: "Acquiesce", description: "Giving up smaller fights to win larger ones." },
+    { name: "Negotiation and cooperation", description: "Compromise as values advocacy." },
+    { name: "Being the user", description: "Adopting user identity to advocate values." }
   ];
 
   const softResistanceTactics = [
@@ -179,13 +185,7 @@ export const SimplifiedTacticsModal: React.FC<SimplifiedTacticsModalProps> = ({
     { name: "Making Values Visible Rhetorically to Other Stakeholders", description: "Rhetorical but framed as organizational strategy." },
     { name: "Expanding/Subverting Design Resources", description: "Adapting standard tools for values work." },
     { name: "Making Values Visible Through Metrics", description: "Surfacing ethics through system language." },
-    { name: "Using Organizational Values to Justify Values Work", description: "Strategically aligning with company values." },
-    { name: "Guerilla methods", description: "Informal methods to bypass organizational barriers." },
-    { name: "Usable enough", description: "Strategic concession." },
-    { name: "Distract and pacify", description: "Temporary, often cosmetic ethical fixes." },
-    { name: "Acquiesce", description: "Giving up smaller fights to win larger ones." },
-    { name: "Negotiation and cooperation", description: "Compromise as values advocacy." },
-    { name: "Being the user", description: "Adopting user identity to advocate values." }
+    { name: "Using Organizational Values to Justify Values Work", description: "Strategically aligning with company values." }
   ];
 
   const logicalFallacies = [

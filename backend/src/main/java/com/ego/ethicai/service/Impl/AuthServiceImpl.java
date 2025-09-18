@@ -4,6 +4,7 @@ import com.ego.ethicai.config.PasswordEncoder;
 import com.ego.ethicai.dto.*;
 import com.ego.ethicai.entity.ActivationToken;
 import com.ego.ethicai.entity.User;
+import com.ego.ethicai.enums.AccountTypes;
 import com.ego.ethicai.enums.AuthProvider;
 import com.ego.ethicai.exception.UserNotFoundException;
 import com.ego.ethicai.repository.ActivationTokenRepository;
@@ -14,6 +15,7 @@ import com.ego.ethicai.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private ActivationTokenRepository activationTokenRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -50,7 +52,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("User not found for email: " + email));
 
-        if (!passwordEncoder.passwordEncoderBean().matches(password, user.getPasswordHash())) {
+        logger.info("Attempting login for password hash in db: {} encoding: {}", user.getPasswordHash(), passwordEncoder.encode(password));
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -89,39 +92,54 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User register(RegisterRequestDTO registerRequestDTO) {
-        if (registerRequestDTO == null || 
-            registerRequestDTO.getEmail() == null || 
-            registerRequestDTO.getPassword() == null ||
-            registerRequestDTO.getFullName() == null) {
+    public User register(RegisterRequestDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("Registration data is required");
+        }
+    
+        String email = dto.getEmail() != null ? dto.getEmail().trim() : null;
+        String password = dto.getPassword();
+        String fullName = dto.getFullName() != null ? dto.getFullName().trim() : null;
+    
+        if (email == null || password == null || fullName == null) {
             throw new IllegalArgumentException("Email, password, and full name are required");
         }
-
-        String email = registerRequestDTO.getEmail().trim();
-        String password = registerRequestDTO.getPassword();
-        String fullName = registerRequestDTO.getFullName().trim();
-
-        if (password.length() < 8) {
-            throw new RuntimeException("Password must be at least 8 characters long");
-        }
-
+    
+        // Check if email is already registered
         if (userService.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-
-        User user = User.builder()
+    
+        boolean isProlificUser = email.endsWith("@prolific.local");
+    
+        // Only enforce strong password rules for non-Prolific users
+        if (!isProlificUser && password.length() < 8) {
+            throw new RuntimeException("Password must be at least 8 characters long");
+        }
+    
+        User.UserBuilder userBuilder = User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.passwordEncoderBean().encode(password))
                 .fullName(fullName)
                 .authProvider(AuthProvider.LOCAL)
-                .build();
+                .role(AccountTypes.USER)
+                .accessibilityScenariosCompleted(false)
+                .privacyScenariosCompleted(false)
+                .consentFormCompleted(false)
+                .preSurveyCompleted(false)
+                .postSurveyCompleted(false)
+                .hasCompletedPractice(false)
+                .passwordHash(passwordEncoder.encode(password));
 
-        user = userService.createUser(user);
+         if (isProlificUser) {
+            userBuilder.activatedAt(LocalDateTime.now());
+        } 
+    
+        User user = userService.createUser(userBuilder.build());
         logger.debug("Created new user: {} with ID: {}", email, user.getId());
-
+    
         return user;
     }
-
+    
     @Override
     @Transactional
     public ActivationResponseDTO activate(ActivationRequestDTO activationRequestDto) {

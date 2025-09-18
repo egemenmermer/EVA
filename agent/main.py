@@ -23,7 +23,7 @@ import redis
 from langchain.memory import ConversationBufferMemory
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", "backend", ".env"))
 
 # Configure logging
 logging.basicConfig(
