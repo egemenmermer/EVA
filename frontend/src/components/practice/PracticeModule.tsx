@@ -1171,7 +1171,6 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       const practiceData = {
         userId: user.id,
         managerType: currentScenario.scenario.managerType,
-        sessionId: currentScenario.sessionId,
         conversationId: currentConversation.conversationId,
         concern: currentScenario.scenario.concern,
         selectedChoices: conversationToUse
