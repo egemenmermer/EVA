@@ -38,4 +38,7 @@ public class PracticeSessionChoice {
 
     @Column(name = "tactic_type", length = 100)
     private String tacticType;
+
+    @Column(name = "visible_labels")
+    private Boolean visibleLabels;
 } 

@@ -64,7 +64,8 @@ public class ScenarioController {
                 requestDTO.getSessionId(),
                 requestDTO.getChoiceIndex(),
                 requestDTO.getCurrentStatementId(),
-                end
+                end,
+                requestDTO.isLabelsVisible()
             );
             return ResponseEntity.ok(response);
         } catch (Exception e) {

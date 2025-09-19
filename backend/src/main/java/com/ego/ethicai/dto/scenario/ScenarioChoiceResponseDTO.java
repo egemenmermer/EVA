@@ -26,6 +26,7 @@ public class ScenarioChoiceResponseDTO {
     private int evs;
     private String category;
     private String feedback;
+    private boolean labelsVisible;
     
     @JsonProperty("isComplete")
     private boolean isComplete;

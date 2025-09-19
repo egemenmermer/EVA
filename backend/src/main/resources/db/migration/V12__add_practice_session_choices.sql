@@ -1,7 +1,7 @@
 -- Ensure practice_sessions table exists
 CREATE TABLE IF NOT EXISTS practice_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id VARCHAR(100) UNIQUE NOT NULL,       -- external session identifier (matches frontend)
+    session_id VARCHAR(100) UNIQUE,       -- external session identifier (matches frontend)
     user_id UUID NOT NULL,
     manager_type VARCHAR(50) NOT NULL,
     concern TEXT NOT NULL,
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS practice_session_choices (
     step_number INTEGER,
     evs_score INTEGER,
     tactic VARCHAR(100),
+    visible_labels BOOLEAB DEFAULT FALSE,
     CONSTRAINT fk_practice_session FOREIGN KEY (practice_session_id)
         REFERENCES practice_sessions(id) ON DELETE CASCADE
 );

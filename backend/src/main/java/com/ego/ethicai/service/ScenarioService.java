@@ -49,7 +49,7 @@ public interface ScenarioService {
      * @param end 
      * @return The next scenario response containing the manager statement and user choices
      */
-    ScenarioChoiceResponseDTO processChoice(UUID userId, UUID sessionId,Integer choiceIndex, String unusedStatementId, int end);
+    ScenarioChoiceResponseDTO processChoice(UUID userId, UUID sessionId,Integer choiceIndex, String unusedStatementId, int end, boolean labelsVisible);
 
         /**
      * Process a user choice in the current scenario step and return the next manager statement + choices.

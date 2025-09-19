@@ -23,4 +23,7 @@ public class ScenarioChoiceRequestDTO {
     
     @NotBlank(message = "Current statement ID is required")
     private String currentStatementId;
+
+    @NotBlank(message = "labelsVisible is required")
+    private boolean labelsVisible;
 } 

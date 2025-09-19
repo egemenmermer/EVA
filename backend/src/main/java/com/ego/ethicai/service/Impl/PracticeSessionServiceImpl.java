@@ -262,7 +262,8 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                 choice.getChoiceText(),
                                 choice.getEvsScore(),
                                 choice.getTactic(),
-                                choice.getTacticType()
+                                choice.getTacticType(),
+                                choice.getVisibleLabels()
                         ))
                         .collect(Collectors.toList());
             } else {
@@ -476,7 +477,8 @@ public class PracticeSessionServiceImpl implements PracticeSessionService {
                                 choice.getChoiceText(),
                                 choice.getEvsScore(),
                                 choice.getTactic(),
-                                choice.getTacticType()
+                                choice.getTacticType(),
+                                choice.getVisibleLabels()
                         ))
                     .collect(Collectors.toList());
         } else if (entity.getSelectedChoices() != null) {

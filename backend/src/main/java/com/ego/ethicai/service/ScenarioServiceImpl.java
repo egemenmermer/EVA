@@ -96,7 +96,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         
     @Override
     public ScenarioChoiceResponseDTO processChoice(UUID userId, UUID sessionId,
-                                                    Integer choiceIndex, String unusedStatementId, int end) {
+                                                    Integer choiceIndex, String unusedStatementId, int end, boolean labelsVisible) {
         ScenarioSession session = activeSessions.get(sessionId);
         if (session == null) {
             throw new RuntimeException("Session not found: " + sessionId);
@@ -108,6 +108,7 @@ public class ScenarioServiceImpl implements ScenarioService {
             .scenarioId("dynamic")
             .currentStep(session.getCurrentStep())
             .isComplete(true) // no fixed endings
+            .labelsVisible(labelsVisible)
             .build(); 
         }
 

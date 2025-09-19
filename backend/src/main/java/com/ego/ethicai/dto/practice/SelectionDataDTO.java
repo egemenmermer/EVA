@@ -15,4 +15,5 @@ public class SelectionDataDTO {
     private Double evs;
     private String tactic;
     private String tacticType;
+    private boolean labelsVisible;
 } 

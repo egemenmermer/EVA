@@ -15,4 +15,5 @@ public class PracticeChoiceDTO {
     private Double evsScore;
     private String tactic;
     private String tacticType;
+    private boolean labelsVisible;
 } 

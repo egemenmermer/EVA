@@ -210,6 +210,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const [scenarioStarted, setScenarioStarted] = useState(false);
   const scenarioStartedRef = useRef(false);
   const [showTacticLabels, setShowTacticLabels] = useState(false);
+  const [labelsSeenThisChoice, setLabelsSeenThisChoice] = useState(false);
+
   const [showScore, setShowScore] = useState(true);
   const [isAtEnding, setIsAtEnding] = useState(false);
 
@@ -248,6 +250,18 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const toggleLabels = () => {
+    setShowTacticLabels((prev) => {
+      const newValue = !prev;
+      // If they turn labels on, mark that they were seen
+      if (newValue) {
+        setLabelsSeenThisChoice(true);
+      }
+      return newValue;
+    });
+  };
+
+  
   // Function to refresh user data from API
   const refreshUserData = async () => {
     try {
@@ -880,7 +894,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           {
             sessionId: currentScenario.sessionId,
             choiceIndex: 99, //abitrary index 
-            currentStatementId: currentScenario.currentStatementId
+            currentStatementId: currentScenario.currentStatementId,
+            labelsVisible: labelsSeenThisChoice
           }
         );
         
@@ -1055,7 +1070,8 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
           {
             sessionId: currentScenario.sessionId,
             choiceIndex: originalChoiceIndex,
-            currentStatementId: currentScenario.currentStatementId
+            currentStatementId: currentScenario.currentStatementId,
+            visibleLabels: labelsSeenThisChoice // Request choice labels for feedback
           }
         );
         
@@ -1129,6 +1145,7 @@ export const PracticeModule: React.FC<PracticeModuleProps> = ({
       setError('Failed to process your choice. Please try again.');
       setProcessingChoice(false);
     }
+    setLabelsSeenThisChoice(false);
   };
 
   // Save practice session data to database
