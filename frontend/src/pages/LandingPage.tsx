@@ -185,7 +185,7 @@ export const LandingPage: React.FC = () => {
         className="h-8 md:h-10 w-auto"
       />
       <h1 className="text-xl font-medium text-gray-900 dark:text-white hidden sm:block">
-        Ethical Virtual Assistant
+        Ethical Virtual Advocate
       </h1>
     </div>
   </div>

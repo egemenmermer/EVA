@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # Check if SSL certificates exist
-if [ -f "/etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/ethicalowl.xyz/privkey.pem" ]; then
+if [ -f "/etc/letsencrypt/live/evai.site/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/evai.site/privkey.pem" ]; then
     echo "SSL certificates found, configuring HTTPS..."
     
     # Create SSL configuration
     cat > /etc/nginx/conf.d/default.conf <<EOF
     server {
         listen 80;
-        server_name ethicalowl.xyz www.ethicalowl.xyz;
+        server_name evai.site www.evai.site;
         
         # Redirect all HTTP traffic to HTTPS
         return 301 https://\$host\$request_uri;
@@ -16,10 +16,10 @@ if [ -f "/etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem" ] && [ -f "/etc/let
 
     server {
         listen 443 ssl;
-        server_name ethicalowl.xyz www.ethicalowl.xyz;
+        server_name evai.site www.evai.site;
 
-        ssl_certificate /etc/letsencrypt/live/ethicalowl.xyz/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/ethicalowl.xyz/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/evai.site/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/evai.site/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_prefer_server_ciphers on;
         ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;

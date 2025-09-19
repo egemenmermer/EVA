@@ -1802,11 +1802,6 @@ let content;
   try {
   content = (
     <>
-      <PracticeIntroModal 
-        isOpen={showIntroModal} 
-        onClose={handleCloseIntroModal} 
-        
-      />
     <div className="h-full flex flex-col relative">
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-xl font-bold">Ethical Decision-Making Practice</h1>

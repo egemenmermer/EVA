@@ -217,7 +217,7 @@ export const LoginPage: React.FC = () => {
             >
               create a new account
             </Link> */}
-            Welcome to EVA - Ethical Virtual Assistant
+            Welcome to EVA - Ethical Virtual Advocate
           </p>
         </div>
         

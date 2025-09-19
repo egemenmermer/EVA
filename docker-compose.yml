@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     environment:
       AI_AGENT_URL: ${AI_AGENT_URL:-http://agent:8081}
-      FRONTEND_URL: ${FRONTEND_URL:-https://ethicalowl.xyz}
+      FRONTEND_URL: ${FRONTEND_URL:-https://evai.site}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eva}
       JWT_SECRET: ${JWT_SECRET:-devsecretkey}
@@ -129,7 +129,7 @@ services:
         VITE_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
     container_name: eva_frontend
     ports:
-      - "3000:80"
+      - "80:80"
     #   - "443:443"
     # volumes:
     #   - /etc/letsencrypt:/etc/letsencrypt:ro
