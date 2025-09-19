@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS practice_session_choices (
     step_number INTEGER,
     evs_score INTEGER,
     tactic VARCHAR(100),
-    visible_labels BOOLEAB DEFAULT FALSE,
+    visible_labels BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_practice_session FOREIGN KEY (practice_session_id)
         REFERENCES practice_sessions(id) ON DELETE CASCADE
 );
